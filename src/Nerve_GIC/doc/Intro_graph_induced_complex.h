@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Mathieu Carriere
  *
  *    Copyright (C) 2017 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef DOC_COVER_COMPLEX_INTRO_COVER_COMPLEX_H_
@@ -37,8 +25,7 @@ namespace cover_complex {
  * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
  * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
  * <a target="_blank" href="https://github.com/MLWave/kepler-mapper">KeplerMapper</a>.
- * Input point clouds are assumed to be
- * <a target="_blank" href="http://www.geomview.org/docs/html/OFF.html">OFF files</a>.
+ * Input point clouds are assumed to be \ref FileFormatsOFF "OFF files"
  *
  * \section covers Covers
  *

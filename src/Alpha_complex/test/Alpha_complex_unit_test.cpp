@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Vincent Rouvreau
  *
  *    Copyright (C) 2015 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #define BOOST_TEST_DYN_LINK
@@ -42,7 +30,7 @@
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
 // Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<2> > Kernel_s;
+typedef CGAL::Epick_d< CGAL::Dimension_tag<3> > Kernel_s;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
 typedef boost::mpl::list<Kernel_d, Kernel_s> list_of_kernel_variants;

@@ -1,11 +1,22 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Vincent Rouvreau
+ *
+ *    Copyright (C) 2014 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <algorithm>
-#include <utility> // std::pair, std::make_pair
-#include <cmath> // float comparison
+#include <utility>  // std::pair, std::make_pair
+#include <cmath>  // float comparison
 #include <limits>
-#include <functional> // greater
+#include <functional>  // greater
+#include <tuple>  // std::tie
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree"
@@ -920,4 +931,60 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   std::cout << st2 << std::endl;
 
   BOOST_CHECK(st1 == st2);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested_variants) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST INSERT DUPLICATED VERTICES" << std::endl;
+  typeST st;
+
+  typename typeST::Simplex_handle sh;
+  bool success = false;
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({1});
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "st.dimension(sh)= " << st.dimension(sh) << std::endl;
+  BOOST_CHECK(st.dimension(sh) == 0);
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({2, 2});
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "st.dimension(sh)= " << st.dimension(sh) << std::endl;
+  BOOST_CHECK(st.dimension(sh) == 0);
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({3, 3, 3});
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "st.dimension(sh)= " << st.dimension(sh) << std::endl;
+  BOOST_CHECK(st.dimension(sh) == 0);
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({4, 4, 4, 4});
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "st.dimension(sh)= " << st.dimension(sh) << std::endl;
+  BOOST_CHECK(st.dimension(sh) == 0);
+
+  std::cout << "dimension =" << st.dimension() << " - num_vertices = " << st.num_vertices()
+            << " - num_simplices = " << st.num_simplices() << std::endl;
+  BOOST_CHECK(st.dimension() == 0);
+  BOOST_CHECK(st.num_simplices() == st.num_vertices());
+
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({2, 1, 1, 2});
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  std::cout << "st.dimension(sh)= " << st.dimension(sh) << std::endl;
+  BOOST_CHECK(st.dimension(sh) == 1);
+
+  std::cout << "dimension =" << st.dimension() << " - num_vertices = " << st.num_vertices()
+            << " - num_simplices = " << st.num_simplices() << std::endl;
+  BOOST_CHECK(st.dimension() == 1);
+  BOOST_CHECK(st.num_simplices() == st.num_vertices() + 1);
+
+  // Already inserted
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({1, 2, 2, 1});
+  BOOST_CHECK(!success);
+  BOOST_CHECK(sh == st.null_simplex());
+
+  std::cout << "dimension =" << st.dimension() << " - num_vertices = " << st.num_vertices()
+            << " - num_simplices = " << st.num_simplices() << std::endl;
+  BOOST_CHECK(st.dimension() == 1);
+  BOOST_CHECK(st.num_simplices() == st.num_vertices() + 1);
+
 }

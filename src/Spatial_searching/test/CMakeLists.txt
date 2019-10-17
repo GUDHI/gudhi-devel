@@ -1,6 +1,6 @@
 project(Spatial_searching_tests)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.8.1)
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   include(GUDHI_test_coverage)
 
   add_executable( Spatial_searching_test_Kd_tree_search test_Kd_tree_search.cpp )

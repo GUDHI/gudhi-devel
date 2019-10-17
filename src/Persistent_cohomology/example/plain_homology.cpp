@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Marc Glisse
  *
  *    Copyright (C) 2015 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/Simplex_tree.h>
@@ -50,26 +38,34 @@ int main() {
   ST st;
 
   /* Complex to build. */
-  /*    1   3          */
-  /*    o---o          */
-  /*   /X\ /           */
+  /*    1   3   5      */
+  /*    o---o---o      */
+  /*   / \ /           */
   /*  o---o   o        */
   /*  2   0   4        */
 
-  const short triangle012[] = {0, 1, 2};
+  const short edge01[] = {0, 1};
+  const short edge02[] = {0, 2};
+  const short edge12[] = {1, 2};
   const short edge03[] = {0, 3};
   const short edge13[] = {1, 3};
+  const short edge35[] = {3, 5};
   const short vertex4[] = {4};
-  st.insert_simplex_and_subfaces(triangle012);
+  st.insert_simplex_and_subfaces(edge01);
+  st.insert_simplex_and_subfaces(edge02);
+  st.insert_simplex_and_subfaces(edge12);
   st.insert_simplex_and_subfaces(edge03);
   st.insert_simplex(edge13);
+  st.insert_simplex_and_subfaces(edge35);
   st.insert_simplex(vertex4);
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
 
   // Class for homology computation
-  Persistent_cohomology pcoh(st);
+  // By default, since the complex has dimension 1, only 0-dimensional homology would be computed.
+  // Here we also want persistent homology to be computed for the maximal dimension in the complex (persistence_dim_max = true)
+  Persistent_cohomology pcoh(st, true);
 
   // Initialize the coefficient field Z/2Z for homology
   pcoh.init_coefficients(2);
@@ -82,13 +78,14 @@ int main() {
   // 2  0 0 inf
   // 2  0 0 inf
   // 2  1 0 inf
-  // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=1.
+  // 2  1 0 inf
+  // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=2.
   pcoh.output_diagram();
 
-  // Print the Betti numbers are b0=2 and b1=1.
+  // Print the Betti numbers are b0=2 and b1=2.
   std::cout << std::endl;
   std::cout << "The Betti numbers are : ";
-  for (int i = 0; i < st.dimension(); i++)
+  for (int i = 0; i < 3; i++)
     std::cout << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
   std::cout << std::endl;
 }

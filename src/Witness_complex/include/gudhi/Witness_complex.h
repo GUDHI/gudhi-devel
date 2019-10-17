@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Siargey Kachanovich
  *
  *    Copyright (C) 2015 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef WITNESS_COMPLEX_H_
@@ -75,10 +63,13 @@ class Witness_complex {
   /**
    *  \brief Initializes member variables before constructing simplicial complex.
    *  \details Records nearest landmark table.
-   *  @param[in] nearest_landmark_table needs to be a range of a range of pairs of nearest landmarks and distances.
+   *  @param[in] nearest_landmark_table needs to be a range (one entry per witness)
+   *         of sorted ranges of pairs of nearest landmarks and distances.
    *         The class Nearest_landmark_table_::value_type must be a copiable range.
    *         The range of pairs must admit a member type 'iterator'. The dereference type 
-   *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'.
+   *         of the pair range iterator needs to be 'std::pair<std::size_t, double>'
+   *         where the first element is the index of the landmark, and the second its
+   *         (squared) distance to the witness.
    */
 
   Witness_complex(Nearest_landmark_table_ const & nearest_landmark_table)
@@ -108,8 +99,8 @@ class Witness_complex {
     }
     ActiveWitnessList active_witnesses;
     Landmark_id k = 0; /* current dimension in iterative construction */
-    for (auto w : nearest_landmark_table_)
-      active_witnesses.push_back(ActiveWitness(w));
+    for (auto&& w : nearest_landmark_table_)
+      active_witnesses.emplace_back(w);
     while (!active_witnesses.empty() && k <= limit_dimension) {
       typename ActiveWitnessList::iterator aw_it = active_witnesses.begin();
       std::vector<Landmark_id> simplex;

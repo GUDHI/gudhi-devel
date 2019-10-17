@@ -1,23 +1,12 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clement Jamin
  *
  *    Copyright (C) 2016 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL and Eigen3
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef KD_TREE_SEARCH_H_
@@ -29,12 +18,24 @@
 #include <CGAL/Search_traits_adapter.h>
 #include <CGAL/Fuzzy_sphere.h>
 #include <CGAL/property_map.h>
+#include <CGAL/version.h>  // for CGAL_VERSION_NR
+
+#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
 #include <boost/property_map/property_map.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
 #include <cstddef>
 #include <vector>
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if CGAL_VERSION_NR < 1041101000
+# error Alpha_complex_3d is only available for CGAL >= 4.11
+#endif
+
+#if !EIGEN_VERSION_AT_LEAST(3,1,0)
+# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
+#endif
 
 namespace Gudhi {
 namespace spatial_searching {

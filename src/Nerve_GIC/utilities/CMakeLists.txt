@@ -1,6 +1,6 @@
 project(Nerve_GIC_examples)
 
-if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
   add_executable ( Nerve Nerve.cpp )
   add_executable ( VoronoiGIC VoronoiGIC.cpp )
@@ -24,4 +24,4 @@ if (NOT CGAL_VERSION VERSION_LESS 4.8.1)
   install(TARGETS VoronoiGIC DESTINATION bin)
   install(FILES KeplerMapperVisuFromTxtFile.py km.py km.py.COPYRIGHT DESTINATION bin)
 
-endif (NOT CGAL_VERSION VERSION_LESS 4.8.1)
+endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)

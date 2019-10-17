@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clément Maria, Pawel Dlotko, Vincent Rouvreau
  *
  *    Copyright (C) 2016 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef DOC_RIPS_COMPLEX_INTRO_RIPS_COMPLEX_H_
@@ -92,21 +80,27 @@ namespace rips_complex {
  * The sparse Rips filtration was introduced by Don Sheehy
  * \cite sheehy13linear. We are using the version described in
  * \cite buchet16efficient (except that we multiply all filtration values
- * by 2, to match the usual Rips complex), which proves a
- * \f$\frac{1+\epsilon}{1-\epsilon}\f$-interleaving, although in practice the
+ * by 2, to match the usual Rips complex), for which \cite cavanna15geometric proves a
+ * \f$(1,\frac{1}{1-\epsilon})\f$-interleaving, although in practice the
  * error is usually smaller.
  * A more intuitive presentation of the idea is available in
  * \cite cavanna15geometric, and in a video \cite cavanna15visualizing.
  *
  * The interface of `Sparse_rips_complex` is similar to the one for the usual
- * `Rips_complex`, except that one has to specify the approximation factor, and
- * there is no option to limit the maximum filtration value (the way the
- * approximation is done means that larger filtration values are much cheaper
- * to handle than low filtration values, so the gain would be too small).
+ * `Rips_complex`, except that one has to specify the approximation factor.
+ * There is an option to limit the minimum and maximum filtration values, but
+ * they are not recommended: the way the approximation is done means that
+ * larger filtration values are much cheaper to handle than low filtration
+ * values, so the gain in ignoring the large ones is small, and
+ * `Gudhi::subsampling::sparsify_point_set()` is a more efficient way of
+ * ignoring small filtration values.
  *
  * Theoretical guarantees are only available for \f$\epsilon<1\f$. The
  * construction accepts larger values of &epsilon;, and the size of the complex
  * keeps decreasing, but there is no guarantee on the quality of the result.
+ * Note that while the number of edges decreases when &epsilon; increases, the
+ * number of higher-dimensional simplices may not be monotonous when
+ * \f$\frac12\leq\epsilon\leq 1\f$.
  *
  * \section ripspointsdistance Point cloud and distance function
  * 
@@ -119,8 +113,8 @@ namespace rips_complex {
  * 
  * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
  * 
- * When launching (Rips maximal distance between 2 points is 12.0, is expanded until dimension 1 - one skeleton graph
- * in other words):
+ * When launching (Rips maximal distance between 2 points is 12.0, is expanded
+ * until dimension 1 - one skeleton graph in other words):
  * 
  * \code $> ./Rips_complex_example_one_skeleton_from_points
  * \endcode

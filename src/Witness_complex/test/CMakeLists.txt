@@ -11,7 +11,7 @@ endif(TBB_FOUND)
 gudhi_add_coverage_test(Witness_complex_test_simple_witness_complex)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable ( Witness_complex_test_euclidean_simple_witness_complex test_euclidean_simple_witness_complex.cpp )
   target_link_libraries(Witness_complex_test_euclidean_simple_witness_complex ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
   if (TBB_FOUND)
@@ -19,4 +19,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
   endif(TBB_FOUND)
 
   gudhi_add_coverage_test(Witness_complex_test_euclidean_simple_witness_complex)
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.6.0)
+endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

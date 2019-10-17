@@ -5,47 +5,37 @@ sudo: required
 git: 
  depth: 3
 
+os: osx
+osx_image: xcode10.2
+compiler: clang
+
 matrix:
   include:
-    # A. Mac OSX
-    - os: osx
-      osx_image: xcode9.4
-      compiler: clang
-      env:
+    - env:
         # 1. Only examples and associated tests
         - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: osx
-      osx_image: xcode9.4
-      compiler: clang
-      env:
+    - env:
         # 2. Only unitary tests
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: osx
-      osx_image: xcode9.4
-      compiler: clang
-      env:
+    - env:
         # 3. Only utilities and associated tests
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - os: osx
-      osx_image: xcode9.4
-      compiler: clang
-      env:
+    - env:
         # 4. Only doxygen documentation
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
     # Issue with sphinx-build with sphinx 2.0.1
-    # - os: osx
-    #   osx_image: xcode9.4
-    #   compiler: clang
-    #   env:
+    # - env:
     #     # 5. Only Python, associated tests and sphinx documentation
     #     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
   directories:
     - $HOME/.cache/pip
+    - $HOME/Library/Caches/Homebrew
 
 addons:
   homebrew:
+    update: true
     packages:
       - cmake
       - graphviz 
@@ -57,6 +47,10 @@ addons:
       - tbb
       - cgal
       - python3
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+  - brew cleanup
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 

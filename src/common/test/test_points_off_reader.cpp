@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Vincent Rouvreau
  *
  *    Copyright (C) 2015 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/Points_off_io.h>
@@ -44,19 +32,19 @@ BOOST_AUTO_TEST_CASE( points_doc_test )
   BOOST_CHECK(point_cloud.size() == 7);
 
   std::vector<Point_d> expected_points;
-  std::vector<double> point = {1.0, 1.0};
+  std::vector<double> point = {1.0, 1.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {7.0, 0.0};
+  point = {7.0, 0.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {4.0, 6.0};
+  point = {4.0, 6.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {9.0, 6.0};
+  point = {9.0, 6.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {0.0, 14.0};
+  point = {0.0, 14.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {2.0, 19.0};
+  point = {2.0, 19.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
-  point = {9.0, 17.0};
+  point = {9.0, 17.0, 0.0};
   expected_points.push_back(Point_d(point.begin(), point.end()));
 
   BOOST_CHECK(point_cloud == expected_points);

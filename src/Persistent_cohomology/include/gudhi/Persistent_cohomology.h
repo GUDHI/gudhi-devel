@@ -1,23 +1,11 @@
-/*    This file is part of the Gudhi Library. The Gudhi library
- *    (Geometric Understanding in Higher Dimensions) is a generic C++
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clément Maria
  *
  *    Copyright (C) 2014 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef PERSISTENT_COHOMOLOGY_H_
@@ -63,12 +51,21 @@ namespace persistent_cohomology {
 template<class FilteredComplex, class CoefficientField>
 class Persistent_cohomology {
  public:
-  typedef FilteredComplex Complex_ds;
   // Data attached to each simplex to interface with a Property Map.
-  typedef typename Complex_ds::Simplex_key Simplex_key;
-  typedef typename Complex_ds::Simplex_handle Simplex_handle;
-  typedef typename Complex_ds::Filtration_value Filtration_value;
+
+  /** \brief Data stored for each simplex. */
+  typedef typename FilteredComplex::Simplex_key Simplex_key;
+  /** \brief Handle to specify a simplex. */
+  typedef typename FilteredComplex::Simplex_handle Simplex_handle;
+  /** \brief Type for the value of the filtration function. */
+  typedef typename FilteredComplex::Filtration_value Filtration_value;
+  /** \brief Type of element of the field. */
   typedef typename CoefficientField::Element Arith_element;
+  /** \brief Type for birth and death FilteredComplex::Simplex_handle.
+   * The Arith_element field is used for the multi-field framework. */
+  typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
+
+ private:
   // Compressed Annotation Matrix types:
   // Column type
   typedef Persistent_cohomology_column<Simplex_key, Arith_element> Column;  // contains 1 set_hook
@@ -83,16 +80,19 @@ class Persistent_cohomology {
       boost::intrusive::constant_time_size<false> > Cam;
   // Sparse column type for the annotation of the boundary of an element.
   typedef std::vector<std::pair<Simplex_key, Arith_element> > A_ds_type;
-  // Persistent interval type. The Arith_element field is used for the multi-field framework.
-  typedef std::tuple<Simplex_handle, Simplex_handle, Arith_element> Persistent_interval;
 
+ public:
   /** \brief Initializes the Persistent_cohomology class.
    *
    * @param[in] cpx Complex for which the persistent homology is computed.
    * cpx is a model of FilteredComplex
+   *
+   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
+   *                                complex is computed. If false, it is ignored. Default is false.
+   *
    * @exception std::out_of_range In case the number of simplices is more than Simplex_key type numeric limit.
    */
-  explicit Persistent_cohomology(Complex_ds& cpx)
+  explicit Persistent_cohomology(FilteredComplex& cpx, bool persistence_dim_max = false)
       : cpx_(&cpx),
         dim_max_(cpx.dimension()),                       // upper bound on the dimension of the simplices
         coeff_field_(),                                  // initialize the field coefficient structure.
@@ -118,18 +118,6 @@ class Persistent_cohomology {
       ++idx_fil;
       dsets_.make_set(cpx_->key(sh));
     }
-  }
-
-  /** \brief Initializes the Persistent_cohomology class.
-   *
-   * @param[in] cpx Complex for which the persistent homology is compiuted.
-   * cpx is a model of FilteredComplex
-   *
-   * @param[in] persistence_dim_max if true, the persistent homology for the maximal dimension in the
-   *                                complex is computed. If false, it is ignored. Default is false.
-   */
-  Persistent_cohomology(Complex_ds& cpx, bool persistence_dim_max)
-      : Persistent_cohomology(cpx) {
     if (persistence_dim_max) {
       ++dim_max_;
     }
@@ -146,7 +134,7 @@ class Persistent_cohomology {
 
  private:
   struct length_interval {
-    length_interval(Complex_ds * cpx, Filtration_value min_length)
+    length_interval(FilteredComplex * cpx, Filtration_value min_length)
         : cpx_(cpx),
           min_length_(min_length) {
     }
@@ -159,7 +147,7 @@ class Persistent_cohomology {
       min_length_ = new_length;
     }
 
-    Complex_ds * cpx_;
+    FilteredComplex * cpx_;
     Filtration_value min_length_;
   };
 
@@ -552,14 +540,14 @@ class Persistent_cohomology {
    * Compare two intervals by length.
    */
   struct cmp_intervals_by_length {
-    explicit cmp_intervals_by_length(Complex_ds * sc)
+    explicit cmp_intervals_by_length(FilteredComplex * sc)
         : sc_(sc) {
     }
     bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
       return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
           > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
     }
-    Complex_ds * sc_;
+    FilteredComplex * sc_;
   };
 
  public:
@@ -690,9 +678,8 @@ class Persistent_cohomology {
     return betti_number;
   }
 
-  /** @brief Returns the persistent pairs.
-   * @return Persistent pairs
-   *
+  /** @brief Returns a list of persistence birth and death FilteredComplex::Simplex_handle pairs.
+   * @return A list of Persistent_cohomology::Persistent_interval
    */
   const std::vector<Persistent_interval>& get_persistent_pairs() const {
     return persistent_pairs_;
@@ -733,7 +720,7 @@ class Persistent_cohomology {
   };
 
  public:
-  Complex_ds * cpx_;
+  FilteredComplex * cpx_;
   int dim_max_;
   CoefficientField coeff_field_;
   size_t num_simplices_;

@@ -1,24 +1,13 @@
-/* This file is part of the Gudhi Library. The Gudhi library 
- *    (Geometric Understanding in Higher Dimensions) is a generic C++ 
- *    library for computational topology.
- *
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       David Salinas
  *
  *    Copyright (C) 2014 Inria
  *
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ *      - 2019/07 Vincent Rouvreau: homsimpl (from CHOMP) is no more delivered.
+ *                                  Error message when not previously installed.
  */
 
 #ifndef MODEL_MODEL_H_
@@ -321,8 +310,11 @@ class Model {
   void run_chomp() {
     save_complex_in_file_for_chomp();
     std::cout << "Call CHOMP library\n";
-    int returnValue = system("utils/homsimpl chomp.sim");
-    std::cout << "CHOMP returns" << returnValue << std::endl;
+    int returnValue = system("homsimpl chomp.sim");
+    if (returnValue != 0) {
+        std::cout << "homsimpl (from CHOMP) failed. Please check it is installed or available in the PATH."
+                  << std::endl;
+    }
   }
 
   void save_complex_in_file_for_chomp() {
