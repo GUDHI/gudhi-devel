@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(freudenthal_triangulation) {
       barycenter_cart(i) += v[i];
   barycenter_cart /= 4.; // simplex is three-dimensional
   Eigen::Vector3d barycenter = tr.barycenter(s);
-  for (std::size_t i = 0; i < barycenter.size(); i++)
+  for (std::size_t i = 0; (long int)i < barycenter.size(); i++)
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(barycenter(i), barycenter_cart(i), 1e-7);
 
   // Barycenter check for twice the scale
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(freudenthal_triangulation) {
   barycenter_cart /= 3.; // simplex is now a two-dimensional face
   barycenter_cart /= 2.; // scale
   barycenter = tr.barycenter(s, 2);
-  for (std::size_t i = 0; i < barycenter.size(); i++)
+  for (std::size_t i = 0; (long int)i < barycenter.size(); i++)
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(barycenter(i), barycenter_cart(i), 1e-7);
   
   // Matrix and offset change check

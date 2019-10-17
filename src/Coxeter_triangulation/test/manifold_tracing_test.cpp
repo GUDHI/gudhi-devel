@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
 
   for (auto si_pair: out_simplex_map) {
     BOOST_CHECK ( si_pair.first.dimension() == oracle.function().cod_d() );
-    BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
+    BOOST_CHECK ( si_pair.second.size() == (long int)oracle.function().amb_d() );
   }
   BOOST_CHECK ( out_simplex_map.size() == 1054 );
 
@@ -50,12 +50,12 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
   manifold_tracing_algorithm(seed_points, cox_tr, oracle_with_boundary, interior_simplex_map, boundary_simplex_map);
   for (auto si_pair: interior_simplex_map) {
     BOOST_CHECK ( si_pair.first.dimension() == oracle.function().cod_d() );
-    BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
+    BOOST_CHECK ( si_pair.second.size() == (long int)oracle.function().amb_d() );
   }
   BOOST_CHECK ( interior_simplex_map.size() == 89 );
   for (auto si_pair: boundary_simplex_map) {
     BOOST_CHECK ( si_pair.first.dimension() == oracle.function().cod_d()+1 );
-    BOOST_CHECK ( si_pair.second.size() == oracle.function().amb_d() );
+    BOOST_CHECK ( si_pair.second.size() == (long int)oracle.function().amb_d() );
   }
   BOOST_CHECK ( boundary_simplex_map.size() == 54 );
   

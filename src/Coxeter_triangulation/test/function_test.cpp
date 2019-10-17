@@ -50,8 +50,8 @@ template <class Function>
 void test_function(const Function& fun) {
   Eigen::VectorXd seed = fun.seed();
   Eigen::VectorXd res_seed = fun(fun.seed());
-  BOOST_CHECK( seed.size() == fun.amb_d() );
-  BOOST_CHECK( res_seed.size() == fun.cod_d() );
+  BOOST_CHECK( seed.size() == (long int)fun.amb_d() );
+  BOOST_CHECK( res_seed.size() == (long int)fun.cod_d() );
   for (std::size_t i = 0; i < fun.cod_d(); i++)
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(res_seed(i), 0., 1e-10);
 }
@@ -161,17 +161,17 @@ BOOST_AUTO_TEST_CASE(function) {
     Eigen::VectorXd x0 = cox_tr.cartesian_coordinates(v0);
     Eigen::VectorXd value0 = fun_prod(x0);
     Eigen::VectorXd pl_value0 = fun_pl(x0);
-    for (int i = 0; i < fun_pl.cod_d(); i++)
+    for (std::size_t i = 0; i < fun_pl.cod_d(); i++)
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(value0(i), pl_value0(i), 1e-10);
     Vertex_handle v1 = v0;
     v1[0] += 1;
     Eigen::VectorXd x1 = cox_tr.cartesian_coordinates(v1);
     Eigen::VectorXd value1 = fun_prod(x1);
     Eigen::VectorXd pl_value1 = fun_pl(x1);
-    for (int i = 0; i < fun_pl.cod_d(); i++)
+    for (std::size_t i = 0; i < fun_pl.cod_d(); i++)
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(value1(i), pl_value1(i), 1e-10);
     Eigen::VectorXd pl_value_mid = fun_pl(0.5*x0 + 0.5*x1);
-    for (int i = 0; i < fun_pl.cod_d(); i++)
+    for (std::size_t i = 0; i < fun_pl.cod_d(); i++)
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(0.5*value0(i) + 0.5*value1(i), pl_value_mid(i), 1e-10);
   }
 }

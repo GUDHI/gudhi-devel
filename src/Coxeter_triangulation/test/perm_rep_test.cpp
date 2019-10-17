@@ -15,7 +15,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <gudhi/Permutahedral_representation.h>
-#include <gudhi/Permutahedral_representation/join.h>
 
 BOOST_AUTO_TEST_CASE(permutahedral_representation) {
   typedef std::vector<int> Vertex;
