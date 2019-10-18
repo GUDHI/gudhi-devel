@@ -69,7 +69,7 @@ def wasserstein_distance(X, Y, p=2., q=2.):
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param q: Ground metric on the (upper-half) plane (i.e. norm l_q in R^2); Default value is 2 (euclidean norm).
     :param p: exponent for Wasserstein; Default value is 2.
-    :returns: the p-Wasserstein distance (1 <= p < infty) with respect to the q-norm as ground metric.
+    :returns: the p-Wasserstein distance (1 <= p < infinity) with respect to the q-norm as ground metric.
     :rtype: float
     '''
     n = len(X)
