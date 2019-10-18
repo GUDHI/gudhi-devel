@@ -4,22 +4,30 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 def _proj_on_diag(x):
+    """
+    :param x: numpy.array of length 2, encoding a point on the upper half plane.
+    :returns: numpy.array of length 2, orthogonal projection of the point onto
+    the diagonal.
+    """
     return np.array([(x[0] + x[1]) / 2, (x[0] + x[1]) / 2])
 
 
 def _norm2(x, y):
+    """
+    :param x: numpy.array of length 2, encoding a point on the upper half plane.
+    :param y: numpy.array of length 2, encoding a point on the upper half plane.
+    :returns: distance between the two points for the euclidean norm.
+    """
     return (y[0] - x[0])**2 + (y[1] - x[1])**2
-
-
-def _norm_inf(x, y):
-    return np.max(np.abs(y[0] - x[0]), np.abs(y[1] - x[1]))
 
 
 def _cost_matrix(X, Y):
     """
     :param X: (n x 2) numpy.array encoding the first diagram
     :param Y: (m x 2) numpy.array encoding the second diagram
-    :return: The cost matrix with size (k x k) where k = |d_1| + |d_2| in order to encode matching to diagonal
+    :return: numpy.array with size (k x k) where k = |X| + |Y|, encoding the
+                cost matrix between points (including the diagonal, with repetition to
+                ensure one-to-one matchings.
     """
     n, m = len(X), len(Y)
     k = n + m
@@ -42,8 +50,15 @@ def _cost_matrix(X, Y):
 
 
 def _optimal_matching(M):
+    """
+    :param M: numpy.array of size (k x k), encoding the cost matrix between the
+                points of two diagrams.
+    :returns: list of length (k) such that L[i] = j if and only if P[i,j]=1
+                where P is a bi-stochastic matrix that minimize <P, M>. 
+    """
     n = len(M)
-    # if input weights are empty lists, pot treat the uniform assignement problem and returns a bistochastic matrix (up to *n).
+    # if input weights are empty lists, pot treats the uniform assignement
+    # problem and returns a bistochastic matrix (up to *n).
     P = ot.emd(a=[], b=[], M=M) * n
     # return the list of indices j such that L[i] = j iff P[i,j] = 1
     return np.nonzero(P)[1]
@@ -53,7 +68,8 @@ def _mean(x, m):
     """
     :param x: a list of 2D-points, of diagonal, x_0... x_{k-1}
     :param m: total amount of points taken into account, that is we have (m-k) copies of diagonal
-    :returns: the weighted mean of x with (m-k) copies of Delta taken into account (defined by mukherjee etc.)
+    :returns: the weighted mean of x with (m-k) copies of Delta taken into
+                account.
     """
     k = len(x)
     if k > 0:
@@ -66,14 +82,23 @@ def _mean(x, m):
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     """
-        Compute the estimated barycenter computed with the Hungarian algorithm provided by Mukherjee et al
-                    It is a local minima of the corresponding Frechet function.
-                    It exactly belongs to the persistence diagram space (because all computations are made on it).
-        :param pdiagset: a list of size N containing numpy.array of shape (n x
-                            2) (n can variate), encoding a set of persistence diagrams with only finite
-                            coordinates. 
-        :param init: The initial value for barycenter estimate. If None, init is made on a random diagram from the dataset. Otherwise, it must be a (n x 2) numpy.array enconding a persistence diagram with n points.
-        :returns: If not verbose (default), the barycenter estimate (local minima of the energy function). If verbose, returns a triplet (Y, a, e) where Y is the barycenter estimate, a is the assignments between the points of Y and thoses of the diagrams, and e is the energy value reached by the estimate.
+        Compute the estimated barycenter computed with the algorithm provided
+        by Turner et al (2014).
+        It is a local minima of the corresponding Frechet function.
+    :param pdiagset: a list of size N containing numpy.array of shape (n x 2) 
+                        (n can variate), encoding a set of 
+                        persistence diagrams with only finite coordinates. 
+        :param init: The initial value for barycenter estimate. 
+                        If None, init is made on a random diagram from the dataset. 
+                        Otherwise, it must be a (n x 2) numpy.array enconding a persistence diagram with n points.
+        :param verbose: if True, returns additional information about the
+                            barycenters (assignment and energy).
+        :returns: If not verbose (default), a numpy.array encoding
+                    the barycenter estimate (local minima of the energy function). 
+                    If verbose, returns a triplet (Y, a, e)
+                    where Y is the barycenter estimate, a is the assignments between the
+                    points of Y and thoses of the diagrams, 
+                    and e is the energy value reached by the estimate.
     """
     m = len(pdiagset)  # number of diagrams we are averaging
     X = pdiagset  # to shorten notations
@@ -90,7 +115,10 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     while not_converged:
         K = len(Y)  # current nb of points in Y (some might be on diagonal)
         G = np.zeros((K, m))  # will store for each j, the (index) point matched in each other diagram (might be the diagonal). 
-        updated_points = np.zeros((K, 2))  # will store the new positions of the points of Y
+        updated_points = np.zeros((K, 2))  # will store the new positions of
+                                           # the points of Y.
+                                           # If points disappear, there thrown
+                                           # on [0,0] by default.
         new_created_points = []  # will store eventual new points.
 
         # Step 1 : compute optimal matching (Y, X_i) for each X_i
@@ -130,16 +158,22 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
             M = _cost_matrix(Y, X[i])
             edges = _optimal_matching(M)
             matchings.append([x_i_j for (y_j, x_i_j) in enumerate(edges) if y_j < n_y])
-            #energy += total_cost
+            energy += sum([M[i,j] for i,j in enumerate(edges)])
 
-        #energy /= m
-        _plot_barycenter(X, Y, matchings)
-        plt.show()
+        energy = energy/m
         return Y, matchings, energy
     else:
         return Y
 
 def _plot_barycenter(X, Y, matchings):
+    """
+    :param X: list of persistence diagrams.
+    :param Y: numpy.array of (n x 2). Aims to be an estimate of the barycenter
+        returned by lagrangian_barycenter(X, verbose=True).
+    :param matchings: list of lists, such that L[k][i] = j if and only if
+        the i-th point of the barycenter is grouped with the j-th point of the k-th
+        diagram.
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -176,7 +210,7 @@ def _plot_barycenter(X, Y, matchings):
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_aspect('equal', adjustable='box')
-    ax.set_title("example of (estimated) barycenter")
+    ax.set_title("Estimated barycenter")
 
 
 if __name__=="__main__":
@@ -185,3 +219,5 @@ if __name__=="__main__":
     dg3 = np.array([[0.1, 0.15], [0.1, 0.7], [0.2, 0.22], [0.55, 0.84], [0.11, 0.91], [0.61, 0.75], [0.33, 0.46], [0.12, 0.41], [0.32, 0.48]])
     X = [dg1, dg2, dg3]
     Y, a, e = lagrangian_barycenter(X, verbose=True)
+    _plot_barycenter(X, Y, a)
+    plt.show()
