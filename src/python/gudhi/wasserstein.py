@@ -18,7 +18,7 @@ except ImportError:
 def _proj_on_diag(X):
     '''
     :param X: (n x 2) array encoding the points of a persistent diagram.
-    :returns: (n x 2) arary encoding the (respective orthogonal) projections of the points onto the diagonal
+    :returns: (n x 2) array encoding the (respective orthogonal) projections of the points onto the diagonal
     '''
     Z = (X[:,0] + X[:,1]) / 2.
     return np.array([Z , Z]).T
