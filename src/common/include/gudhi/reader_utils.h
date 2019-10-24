@@ -305,8 +305,12 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
     std::string line;
     getline(in, line);
     if (line.length() != 0 && line[0] != '#') {
-      double numbers[4];
+      double numbers[4] = {0.};
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+#ifdef DEBUG_TRACES
+      std::cout << "[" << n << "] = " << numbers[0] << "," << numbers[1]
+                << "," << numbers[2] << "," << numbers[3] << std::endl;
+#endif  // DEBUG_TRACES
       if (n >= 2) {
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
         *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
