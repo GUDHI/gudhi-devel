@@ -225,9 +225,10 @@ several solvers for optimization problems related to Optimal Transport.
 SciPy
 =====
 
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `SciPy <http://scipy.org>`_, a Python-based ecosystem of
-open-source software for mathematics, science, and engineering.
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
+:doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
+<http://scipy.org>`_, a Python-based ecosystem of open-source software for
+mathematics, science, and engineering.
 
 Threading Building Blocks
 =========================
