@@ -92,7 +92,8 @@ def wasserstein_distance(X, Y, p=2., q=2.):
 
     # Comptuation of the otcost using the ot.emd2 library.
     # Note: it is the squared Wasserstein distance.
-    ot_cost = (n+m) * ot.emd2(a, b, M)
+    # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value?
+    ot_cost = (n+m) * ot.emd2(a, b, M, numItermax=2000000)
 
     return ot_cost ** (1./p)
 
