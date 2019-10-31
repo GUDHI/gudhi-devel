@@ -8,7 +8,7 @@ Installation
 Conda
 *****
 The easiest way to install the Python version of GUDHI is using
-`conda <https://gudhi.inria.fr/licensing/>`_.
+`conda <https://gudhi.inria.fr/conda/>`_.
 
 Compiling
 *********
