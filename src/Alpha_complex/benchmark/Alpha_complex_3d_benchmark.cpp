@@ -71,10 +71,10 @@ void benchmark_points_on_torus_3D(const std::string& msg) {
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
     std::cout << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
-    std::vector<typename Alpha_complex_3d::Point_3> points;
+    std::vector<typename Alpha_complex_3d::Bare_point_3> points;
 
     for (auto p : points_on_torus) {
-      points.push_back(typename Alpha_complex_3d::Point_3(p[0], p[1], p[2]));
+      points.push_back(typename Alpha_complex_3d::Bare_point_3(p[0], p[1], p[2]));
     }
 
     Gudhi::Clock ac_create_clock("    benchmark_points_on_torus_3D - Alpha complex 3d creation");
@@ -115,7 +115,7 @@ void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
     std::cout << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
 
-    using Point = typename Weighted_alpha_complex_3d::Point_3;
+    using Point = typename Weighted_alpha_complex_3d::Bare_point_3;
     using Weighted_point = typename Weighted_alpha_complex_3d::Weighted_point_3;
 
     std::vector<Weighted_point> points;
@@ -158,7 +158,7 @@ void benchmark_periodic_points(const std::string& msg) {
 
   for (double nb_points = 10.; nb_points <= 40.; nb_points += 10.) {
     std::cout << "  Periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points." << std::endl;
-    using Point = typename Periodic_alpha_complex_3d::Point_3;
+    using Point = typename Periodic_alpha_complex_3d::Bare_point_3;
     std::vector<Point> points;
 
     for (double i = 0; i < nb_points; i++) {
@@ -206,7 +206,7 @@ void benchmark_weighted_periodic_points(const std::string& msg) {
     std::cout << "  Weighted periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points."
               << std::endl;
 
-    using Point = typename Weighted_periodic_alpha_complex_3d::Point_3;
+    using Point = typename Weighted_periodic_alpha_complex_3d::Bare_point_3;
     using Weighted_point = typename Weighted_periodic_alpha_complex_3d::Weighted_point_3;
     std::vector<Weighted_point> points;
 

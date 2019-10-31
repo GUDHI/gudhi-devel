@@ -8,7 +8,7 @@
 #include <limits>  // for numeric limits
 
 using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, false, false>;
-using Point = Alpha_complex_3d::Point_3;
+using Point = Alpha_complex_3d::Bare_point_3;
 using Vector_of_points = std::vector<Point>;
 
 int main(int argc, char **argv) {

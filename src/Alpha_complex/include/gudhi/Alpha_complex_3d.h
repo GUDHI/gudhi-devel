@@ -43,7 +43,7 @@
 #include <vector>
 #include <unordered_map>
 #include <stdexcept>
-#include <cstddef>
+#include <cstddef>  // for std::size_t
 #include <memory>       // for std::unique_ptr
 #include <type_traits>  // for std::conditional and std::enable_if
 #include <limits>  // for numeric_limits<>
@@ -225,29 +225,34 @@ class Alpha_complex_3d {
    * Must be compatible with double. */
   using FT = typename Alpha_shape_3::FT;
 
-  /** \brief Gives public access to the Point_3 type. Here is a Point_3 constructor example:
+  /** \brief Gives public access to the Bare_point_3 (bare aka. unweighed) type.
+   * Here is a Bare_point_3 constructor example:
 \code{.cpp}
 using Alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, false, false>;
 
 // x0 = 1., y0 = -1.1, z0 = -1..
-Alpha_complex_3d::Point_3 p0(1., -1.1, -1.);
+Alpha_complex_3d::Bare_point_3 p0(1., -1.1, -1.);
 \endcode
    * */
-  using Point_3 = typename Kernel::Point_3;
+  using Bare_point_3 = typename Kernel::Point_3;
 
   /** \brief Gives public access to the Weighted_point_3 type. A Weighted point can be constructed as follows:
 \code{.cpp}
-using Weighted_alpha_complex_3d =
-  Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
+using Weighted_alpha_complex_3d = Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
 
 // x0 = 1., y0 = -1.1, z0 = -1., weight = 4.
-Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point_3(1., -1.1, -1.), 4.);
+Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_point_3(1., -1.1, -1.), 4.);
 \endcode
  *
  * Note: This type is defined to void if Alpha complex is not weighted.
  *
  * */
   using Weighted_point_3 = typename Triangulation_3<Kernel, Tds, Weighted, Periodic>::Weighted_point_3;
+
+  /** \brief `Alpha_complex_3d::Point_3` type is either a `Alpha_complex_3d::Bare_point_3` (Weighted = false) or a
+   * `Alpha_complex_3d::Weighted_point_3` (Weighted = true).
+   */
+  using Point_3 = typename std::conditional<Weighted, Weighted_point_3, Bare_point_3>::type;
 
  private:
   using Dispatch =
@@ -264,13 +269,13 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
  public:
   /** \brief Alpha_complex constructor from a list of points.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3` or
    * `Alpha_complex_3d::Weighted_point_3`.
    *
    * @pre Available if Alpha_complex_3d is not Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Weighted_point_3`.
+   * `Alpha_complex_3d::Bare_point_3` or a `Alpha_complex_3d::Weighted_point_3`.
    */
   template <typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points) {
@@ -284,13 +289,13 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
    *
    * @exception std::invalid_argument In debug mode, if points and weights do not have the same size.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3`.
    * @param[in] weights Range of weights on points. Weights shall be in double.
    *
    * @pre Available if Alpha_complex_3d is Weighted and not Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and
-   * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
+   * std::end return input iterators on a `Alpha_complex_3d::Bare_point_3`.
    * The type WeightRange must be a range for which std::begin and
    * std::end return an input iterator on a double.
    */
@@ -318,7 +323,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
    *
    * @exception std::invalid_argument In debug mode, if the size of the cuboid in every directions is not the same.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3` or
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3` or
    * `Alpha_complex_3d::Weighted_point_3`.
    * @param[in] x_min Iso-oriented cuboid x_min.
    * @param[in] y_min Iso-oriented cuboid y_min.
@@ -330,7 +335,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
    * @pre Available if Alpha_complex_3d is Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Point_3` or a `Alpha_complex_3d::Weighted_point_3`.
+   * `Alpha_complex_3d::Bare_point_3` or a `Alpha_complex_3d::Weighted_point_3`.
    *
    * @note In weighted version, please check weights are greater than zero, and lower than 1/64*cuboid length
    * squared.
@@ -366,7 +371,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
    * @exception std::invalid_argument In debug mode, if a weight is negative, zero, or greater than 1/64*cuboid length
    * squared.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3`.
    * @param[in] weights Range of weights on points. Weights shall be in double.
    * @param[in] x_min Iso-oriented cuboid x_min.
    * @param[in] y_min Iso-oriented cuboid y_min.
@@ -378,7 +383,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
    * @pre Available if Alpha_complex_3d is Weighted and Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and
-   * std::end return input iterators on a `Alpha_complex_3d::Point_3`.
+   * std::end return input iterators on a `Alpha_complex_3d::Bare_point_3`.
    * The type WeightRange must be a range for which std::begin and
    * std::end return an input iterator on a double.
    * The type of x_min, y_min, z_min, x_max, y_max and z_max must be a double.
@@ -452,9 +457,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
       return false;  // ----- >>
     }
 
-    // using Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value;
     using Complex_vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
-    using Alpha_shape_simplex_tree_map = std::unordered_map<Alpha_vertex_handle, Complex_vertex_handle>;
     using Simplex_tree_vector_vertex = std::vector<Complex_vertex_handle>;
 
 #ifdef DEBUG_TRACES
@@ -474,7 +477,6 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
     std::cout << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
-    Alpha_shape_simplex_tree_map map_cgal_simplex_tree;
     using Alpha_value_iterator = typename std::vector<FT>::const_iterator;
     Alpha_value_iterator alpha_value_iterator = alpha_values.begin();
     for (auto object_iterator : objects) {
@@ -484,7 +486,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
       if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
         for (auto i = 0; i < 4; i++) {
 #ifdef DEBUG_TRACES
-          std::cout << "from cell[" << i << "]=" << (*cell)->vertex(i)->point() << std::endl;
+          std::cout << "from cell[" << i << "] - Point coordinates (" << (*cell)->vertex(i)->point() << ")"
+                    << std::endl;
 #endif  // DEBUG_TRACES
           vertex_list.push_back((*cell)->vertex(i));
         }
@@ -495,7 +498,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
         for (auto i = 0; i < 4; i++) {
           if ((*facet).second != i) {
 #ifdef DEBUG_TRACES
-            std::cout << "from facet=[" << i << "]" << (*facet).first->vertex(i)->point() << std::endl;
+            std::cout << "from facet=[" << i << "] - Point coordinates (" << (*facet).first->vertex(i)->point() << ")"
+                      << std::endl;
 #endif  // DEBUG_TRACES
             vertex_list.push_back((*facet).first->vertex(i));
           }
@@ -506,7 +510,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
       } else if (const Edge* edge = CGAL::object_cast<Edge>(&object_iterator)) {
         for (auto i : {(*edge).second, (*edge).third}) {
 #ifdef DEBUG_TRACES
-          std::cout << "from edge[" << i << "]=" << (*edge).first->vertex(i)->point() << std::endl;
+          std::cout << "from edge[" << i << "] - Point coordinates (" << (*edge).first->vertex(i)->point() << ")"
+                    << std::endl;
 #endif  // DEBUG_TRACES
           vertex_list.push_back((*edge).first->vertex(i));
         }
@@ -516,7 +521,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
       } else if (const Alpha_vertex_handle* vertex = CGAL::object_cast<Alpha_vertex_handle>(&object_iterator)) {
 #ifdef DEBUG_TRACES
         count_vertices++;
-        std::cout << "from vertex=" << (*vertex)->point() << std::endl;
+        std::cout << "from vertex - Point coordinates (" << (*vertex)->point() << ")" << std::endl;
 #endif  // DEBUG_TRACES
         vertex_list.push_back((*vertex));
       }
@@ -528,7 +533,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
           // alpha shape not found
           Complex_vertex_handle vertex = map_cgal_simplex_tree.size();
 #ifdef DEBUG_TRACES
-          std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert " << vertex << std::endl;
+          std::cout << "Point (" << the_alpha_shape_vertex->point() << ") not found - insert new vertex id " << vertex
+                    << std::endl;
 #endif  // DEBUG_TRACES
           the_simplex.push_back(vertex);
           map_cgal_simplex_tree.emplace(the_alpha_shape_vertex, vertex);
@@ -536,7 +542,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
           // alpha shape found
           Complex_vertex_handle vertex = the_map_iterator->second;
 #ifdef DEBUG_TRACES
-          std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
+          std::cout << "Point (" << the_alpha_shape_vertex->point() << ") found as vertex id " << vertex << std::endl;
 #endif  // DEBUG_TRACES
           the_simplex.push_back(vertex);
         }
@@ -567,9 +573,32 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Point
     return true;
   }
 
+  /** \brief get_point returns the point corresponding to the vertex given as parameter.
+   *
+   * @param[in] vertex Vertex handle of the point to retrieve.
+   * @return The point found.
+   * @exception std::out_of_range In case vertex is not found (cf. std::vector::at).
+   */
+  const Point_3& get_point(std::size_t vertex) {
+    if (map_cgal_simplex_tree.size() != cgal_vertex_iterator_vector.size()) {
+      cgal_vertex_iterator_vector.resize(map_cgal_simplex_tree.size());
+      for (auto map_iterator = map_cgal_simplex_tree.begin(); map_iterator != map_cgal_simplex_tree.end(); map_iterator++) {
+        cgal_vertex_iterator_vector[map_iterator->second] = map_iterator->first;
+      }
+
+    }
+    auto cgal_vertex_iterator = cgal_vertex_iterator_vector.at(vertex);
+    return cgal_vertex_iterator->point();
+  }
+
  private:
   // use of a unique_ptr on cgal Alpha_shape_3, as copy and default constructor is not available - no need to be freed
   std::unique_ptr<Alpha_shape_3> alpha_shape_3_ptr_;
+
+  // Map type to switch from CGAL vertex iterator to simplex tree vertex handle.
+  std::unordered_map<Alpha_vertex_handle, std::size_t> map_cgal_simplex_tree;
+  // Vector type to switch from simplex tree vertex handle to CGAL vertex iterator.
+  std::vector<Alpha_vertex_handle> cgal_vertex_iterator_vector;
 };
 
 }  // namespace alpha_complex
