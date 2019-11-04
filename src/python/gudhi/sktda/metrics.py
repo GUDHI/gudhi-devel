@@ -26,7 +26,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         Constructor for the SlicedWassersteinDistance class.
 
         Attributes:
-            num_directions (int): number of lines to sample uniformly from [-pi,pi] in order to approximate and speed up the distance computation (default 10). 
+            num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10). 
         """
         self.num_directions = num_directions
         thetas = np.linspace(-np.pi/2, np.pi/2, num=self.num_directions+1)[np.newaxis,:-1]

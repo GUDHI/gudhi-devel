@@ -47,7 +47,7 @@ plt.plot(bc[0])
 plt.title("Betti Curve")
 plt.show()
 
-CP = ComplexPolynomial(threshold=-1, F="T")
+CP = ComplexPolynomial(threshold=-1, polynomial_type="T")
 cp = CP.fit_transform(diags)
 print("Complex polynomial is " + str(cp[0,:]))
 
