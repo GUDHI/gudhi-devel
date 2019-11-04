@@ -376,7 +376,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         Constructor for the TopologicalVector class.
 
         Attributes:
-            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If , this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
+            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
         """
         self.threshold = threshold
 
