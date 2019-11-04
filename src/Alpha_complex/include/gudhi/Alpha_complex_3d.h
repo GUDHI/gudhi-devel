@@ -580,8 +580,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
   const Point_3& get_point(std::size_t vertex) {
     if (map_cgal_simplex_tree.size() != cgal_vertex_iterator_vector.size()) {
       cgal_vertex_iterator_vector.resize(map_cgal_simplex_tree.size());
-      for (auto map_iterator = map_cgal_simplex_tree.begin(); map_iterator != map_cgal_simplex_tree.end(); map_iterator++) {
-        cgal_vertex_iterator_vector[map_iterator->second] = map_iterator->first;
+      for (auto map_iterator : map_cgal_simplex_tree) {
+        cgal_vertex_iterator_vector[map_iterator.second] = map_iterator.first;
       }
 
     }
