@@ -69,7 +69,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
             x_values, y_values = np.linspace(self.im_range[0], self.im_range[1], self.resolution[0]), np.linspace(self.im_range[2], self.im_range[3], self.resolution[1])
             Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
-            image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(self.bandwidth*np.sqrt(2*np.pi)), 1)
+            image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
 
             Xfit.append(image.flatten()[np.newaxis,:])
 
@@ -299,7 +299,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
 class Entropy(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details.
+    This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details. Note that a previous implementation was contributed by Manuel Soriano-Trigueros.
     """
     def __init__(self, mode="scalar", normalized=True, resolution=100, sample_range=[np.nan, np.nan]):
         """
@@ -376,7 +376,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         Constructor for the TopologicalVector class.
 
         Attributes:
-            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
+            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If , this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
         """
         self.threshold = threshold
 
@@ -430,7 +430,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
 
         Attributes:
            F (char): either "R", "S" or "T" (default "R"). Type of complex polynomial that is going to be computed (explained in https://link.springer.com/chapter/10.1007%2F978-3-319-23231-7_27).
-           threshold (int): number of coefficients (default 10). This is the dimension of the complex vector of coefficients. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding complex vector of coefficients as threshold. 
+           threshold (int): number of coefficients (default 10). This is the dimension of the complex vector of coefficients, i.e. the number of coefficients corresponding to the largest degree terms of the polynomial. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding complex vector of coefficients as threshold. 
         """
         self.threshold, self.F = threshold, F
 

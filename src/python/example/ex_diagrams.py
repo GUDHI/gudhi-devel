@@ -3,25 +3,33 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.kernel_approximation import RBFSampler
+from sklearn.preprocessing import MinMaxScaler
 
-from gudhi.sktda import Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
+from gudhi.sktda import DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
   TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
-  PersistenceImage, PersistenceWeightedGaussianKernel,\
+  PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
   SlicedWassersteinKernel, BottleneckDistance, PersistenceFisherKernel
 
-D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])
-plt.scatter(D[:,0],D[:,1])
-plt.plot([0.,10.],[0.,10.])
-plt.show()
-
+D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.], [0., np.inf], [5., np.inf]])
 diags = [D]
 
-LS = Landscape(resolution = 1000)
+diags = DiagramSelector(use=True, point_type="finite").fit_transform(diags)
+diags = DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]).fit_transform(diags)
+diags = DiagramScaler(use=True, scalers=[([1], Clamping(limit=.9))]).fit_transform(diags)
+
+D = diags[0]
+plt.scatter(D[:,0],D[:,1])
+plt.plot([0.,1.],[0.,1.])
+plt.title("Test Persistence Diagram for vector methods")
+plt.show()
+
+LS = Landscape(resolution=1000)
 L = LS.fit_transform(diags)
 plt.plot(L[0][:1000])
 plt.plot(L[0][1000:2000])
 plt.plot(L[0][2000:3000])
+plt.title("Landscape")
 plt.show()
 
 def pow(n):
@@ -30,11 +38,13 @@ def pow(n):
 SH = Silhouette(resolution=1000, weight=pow(2))
 sh = SH.fit_transform(diags)
 plt.plot(sh[0])
+plt.title("Silhouette")
 plt.show()
 
 BC = BettiCurve(resolution=1000)
 bc = BC.fit_transform(diags)
 plt.plot(bc[0])
+plt.title("Betti Curve")
 plt.show()
 
 CP = ComplexPolynomial(threshold=-1, F="T")
@@ -45,19 +55,34 @@ TV = TopologicalVector(threshold=-1)
 tv = TV.fit_transform(diags)
 print("Topological vector is " + str(tv[0,:]))
 
-#diagsT = DiagramPreprocessor(use=True, scalers=[([0,1], BirthPersistenceTransform())]).fit_transform(diags)
-#PI = PersistenceImage(bandwidth=1., weight=lambda x: x[1], im_range=[0,10,0,10], resolution=[100,100])
-#pi = PI.fit_transform(diagsT)
-#plt.imshow(np.flip(np.reshape(pi[0], [100,100]), 0))
-#plt.show()
-
-plt.scatter(D[:,0],D[:,1])
-D = np.array([[1.,5.],[3.,6.],[2.,7.]])
-plt.scatter(D[:,0],D[:,1])
-plt.plot([0.,10.],[0.,10.])
+PI = PersistenceImage(bandwidth=.1, weight=lambda x: x[1], im_range=[0,1,0,1], resolution=[100,100])
+pi = PI.fit_transform(diags)
+plt.imshow(np.flip(np.reshape(pi[0], [100,100]), 0))
+plt.title("Persistence Image")
 plt.show()
 
+ET = Entropy(mode="scalar")
+et = ET.fit_transform(diags)
+print("Entropy statistic is " + str(et[0,:]))
+
+ET = Entropy(mode="vector", normalized=False)
+et = ET.fit_transform(diags)
+plt.plot(et[0])
+plt.title("Entropy function")
+plt.show()
+
+D = np.array([[1.,5.],[3.,6.],[2.,7.]])
 diags2 = [D]
+
+diags2 = DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]).fit_transform(diags2)
+
+D = diags[0]
+plt.scatter(D[:,0],D[:,1])
+D = diags2[0]
+plt.scatter(D[:,0],D[:,1])
+plt.plot([0.,1.],[0.,1.])
+plt.title("Test Persistence Diagrams for kernel methods")
+plt.show()
 
 def arctan(C,p):
   return lambda x: C*np.arctan(np.power(x[1], p))

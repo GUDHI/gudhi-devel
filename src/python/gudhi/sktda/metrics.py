@@ -34,7 +34,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         """
-        Fit the SlicedWassersteinDistance class on a list of persistence diagrams: persistence diagrams are projected onto the different lines. The diagrams themselves and their projections are then stored in a numpy array called **diagrams**.
+        Fit the SlicedWassersteinDistance class on a list of persistence diagrams: persistence diagrams are projected onto the different lines. The diagrams themselves and their projections are then stored in numpy arrays, called **diagrams_** and **approx_diag_**.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.

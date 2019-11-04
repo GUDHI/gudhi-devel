@@ -18,11 +18,11 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
     """
     def __init__(self, num_directions=10, bandwidth=1.0):
         """
-        Constructor for the SlicedWassersteinDistance class.
+        Constructor for the SlicedWassersteinKernel class.
 
         Attributes:
             bandwidth (double): bandwidth of the Gaussian kernel applied to the sliced Wasserstein distance (default 1.).
-            num_directions (int): number of lines to sample uniformly from [-pi,pi] in order to approximate and speed up the kernel computation (default 10). If -1, the exact kernel is computed.
+            num_directions (int): number of lines evenly sampled on [-pi,pi] in order to approximate and speed up the kernel computation (default 10). If -1, the exact kernel is computed.
         """
         self.bandwidth = bandwidth
         self.sw_ = SlicedWassersteinDistance(num_directions=num_directions)
@@ -82,7 +82,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
-        Compute all sliced Wasserstein kernel values between the persistence diagrams that were stored after calling the fit() method, and a given list of (possibly different) persistence diagrams.
+        Compute all persistence weighted Gaussian kernel values between the persistence diagrams that were stored after calling the fit() method, and a given list of (possibly different) persistence diagrams.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
@@ -118,7 +118,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
 
 class PersistenceScaleSpaceKernel(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the persistence scale space kernel matrix from a list of persistence diagrams. The persistence scale space kernel is computed by adding the symmetric to the diagonal of each point in each persistence diagram, and then convolving the points with a Gaussian kernel. See https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Reininghaus_A_Stable_Multi-Scale_2015_CVPR_paper.pdf for more details. 
+    This is a class for computing the persistence scale space kernel matrix from a list of persistence diagrams. The persistence scale space kernel is computed by adding the symmetric to the diagonal of each point in each persistence diagram, with negative weight, and then convolving the points with a Gaussian kernel. See https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Reininghaus_A_Stable_Multi-Scale_2015_CVPR_paper.pdf for more details. 
     """
     def __init__(self, bandwidth=1., kernel_approx=None):
         """
