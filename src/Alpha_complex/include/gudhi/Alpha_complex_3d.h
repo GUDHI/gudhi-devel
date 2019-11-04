@@ -269,13 +269,12 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
  public:
   /** \brief Alpha_complex constructor from a list of points.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3` or
-   * `Alpha_complex_3d::Weighted_point_3`.
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
    *
    * @pre Available if Alpha_complex_3d is not Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Bare_point_3` or a `Alpha_complex_3d::Weighted_point_3`.
+   * `Alpha_complex_3d::Point_3`.
    */
   template <typename InputPointRange>
   Alpha_complex_3d(const InputPointRange& points) {
@@ -323,8 +322,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
    *
    * @exception std::invalid_argument In debug mode, if the size of the cuboid in every directions is not the same.
    *
-   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Bare_point_3` or
-   * `Alpha_complex_3d::Weighted_point_3`.
+   * @param[in] points Range of points to triangulate. Points must be in `Alpha_complex_3d::Point_3`.
    * @param[in] x_min Iso-oriented cuboid x_min.
    * @param[in] y_min Iso-oriented cuboid y_min.
    * @param[in] z_min Iso-oriented cuboid z_min.
@@ -335,7 +333,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
    * @pre Available if Alpha_complex_3d is Periodic.
    *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
-   * `Alpha_complex_3d::Bare_point_3` or a `Alpha_complex_3d::Weighted_point_3`.
+   * `Alpha_complex_3d::Point_3`.
    *
    * @note In weighted version, please check weights are greater than zero, and lower than 1/64*cuboid length
    * squared.
