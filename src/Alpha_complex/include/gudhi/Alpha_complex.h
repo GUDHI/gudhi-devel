@@ -20,7 +20,8 @@
 #include <math.h>  // isnan, fmax
 
 #include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
+#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+#include <CGAL/Epick_d.h>  // For FAST version
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
 #include <CGAL/property_map.h>  // for CGAL::Identity_property_map
 #include <CGAL/NT_converter.h>
@@ -39,16 +40,19 @@
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
-# error Alpha_complex_3d is only available for CGAL >= 4.11
+# error Alpha_complex is only available for CGAL >= 4.11
 #endif
 
 #if !EIGEN_VERSION_AT_LEAST(3,1,0)
-# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
+# error Alpha_complex is only available for Eigen3 >= 3.1.0 installed with CGAL
 #endif
 
 namespace Gudhi {
 
 namespace alpha_complex {
+
+template<typename D> struct Is_Epick_D { static const bool value = false; };
+template<typename D> struct Is_Epick_D<CGAL::Epick_d<D>> { static const bool value = true; };
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -63,17 +67,20 @@ namespace alpha_complex {
  * 
  * Please refer to \ref alpha_complex for examples.
  *
- * The complex is a template class requiring an Epick_d <a target="_blank"
+ * The complex is a template class requiring an <a target="_blank"
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>,
+ * or an <a target="_blank"
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-15b from CGAL as template, default value is <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a>
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>
  * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
  * CGAL::Dynamic_dimension_tag </a> >
  * 
  * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
  * 
  */
-template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
+template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex {
  public:
   // Add an int in TDS to save point index in the structure
@@ -184,6 +191,12 @@ class Alpha_complex {
  private:
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
+    #if CGAL_VERSION_NR < 1050000000
+    if (Is_Epick_D<Kernel>::value)
+      std::cerr << "It is strongly advised to use a CGAL version from 5.0 for performance reasons."
+                << "Your CGAL version is " << CGAL_VERSION << std::endl;
+    #endif
+
     auto first = std::begin(points);
     auto last = std::end(points);
 
