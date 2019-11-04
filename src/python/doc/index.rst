@@ -73,6 +73,11 @@ Bottleneck distance
 
 .. include:: bottleneck_distance_sum.inc
 
+Wasserstein distance
+===================
+
+.. include:: wasserstein_distance_sum.inc
+
 Persistence graphical tools
 ===========================
 
