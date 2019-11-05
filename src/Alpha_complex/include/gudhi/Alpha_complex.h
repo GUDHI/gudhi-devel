@@ -24,7 +24,6 @@
 #include <CGAL/Epick_d.h>  // For FAST version
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
 #include <CGAL/property_map.h>  // for CGAL::Identity_property_map
-#include <CGAL/NT_converter.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
@@ -249,6 +248,8 @@ class Alpha_complex {
    * @param[in] complex SimplicialComplexForAlpha to be created.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time.
+   * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
+   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
    * 
    * @return true if creation succeeds, false otherwise.
    * 
@@ -260,7 +261,8 @@ class Alpha_complex {
   template <typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
-                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
+                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
+                      bool exact = false) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -336,9 +338,12 @@ class Alpha_complex {
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
-
-              alpha_complex_filtration = cv(squared_radius(pointVector.begin(), pointVector.end()));
+              
+              if (exact) {
+                alpha_complex_filtration = CGAL::to_double(CGAL::exact(squared_radius(pointVector.begin(), pointVector.end())));
+              } else {
+                alpha_complex_filtration = CGAL::to_double(squared_radius(pointVector.begin(), pointVector.end()));
+              }
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
