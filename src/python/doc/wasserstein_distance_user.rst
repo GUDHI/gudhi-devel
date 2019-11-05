@@ -3,7 +3,7 @@
 .. To get rid of WARNING: document isn't included in any toctree
 
 Wasserstein distance user manual
-===============================
+================================
 Definition
 ----------
 
