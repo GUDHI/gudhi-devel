@@ -24,63 +24,84 @@
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 
-void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
-                     Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
-                     Filtration_value &min_persistence);
+void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
+                     std::string &output_file_diag, Filtration_value &alpha_square_max_value,
+                     int &coeff_field_characteristic, Filtration_value &min_persistence);
 
 int main(int argc, char **argv) {
   std::string off_file_points;
   std::string output_file_diag;
+  bool exact_version = false;
+  bool fast_version = false;
   Filtration_value alpha_square_max_value;
   int coeff_field_characteristic;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, output_file_diag, alpha_square_max_value, coeff_field_characteristic,
-                  min_persistence);
+  program_options(argc, argv, off_file_points, exact_version, fast_version, output_file_diag, alpha_square_max_value,
+                  coeff_field_characteristic, min_persistence);
 
-  // ----------------------------------------------------------------------------
-  // Init of an alpha complex from an OFF file
-  // ----------------------------------------------------------------------------
-  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-  Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points);
-
-  Simplex_tree simplex;
-  if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
-    // ----------------------------------------------------------------------------
-    // Display information about the alpha complex
-    // ----------------------------------------------------------------------------
-    std::cout << "Simplicial complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
-              << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
-
-    // Sort the simplices in the order of the filtration
-    simplex.initialize_filtration();
-
-    std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
-    // Compute the persistence diagram of the complex
-    Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(
-        simplex);
-    // initializes the coefficient field for homology
-    pcoh.init_coefficients(coeff_field_characteristic);
-
-    pcoh.compute_persistent_cohomology(min_persistence);
-
-    // Output the diagram in filediag
-    if (output_file_diag.empty()) {
-      pcoh.output_diagram();
-    } else {
-      std::cout << "Result in file: " << output_file_diag << std::endl;
-      std::ofstream out(output_file_diag);
-      pcoh.output_diagram(out);
-      out.close();
-    }
+  if ((exact_version) && (fast_version)) {
+    std::cerr << "You cannot set the exact and the fast version." << std::endl;
+    exit(-1);
   }
 
+  Simplex_tree simplex;
+  if (fast_version) {
+    // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
+    // (i.e. when the points are on a grid)
+    using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+
+    // Init of an alpha complex from an OFF file
+    Gudhi::alpha_complex::Alpha_complex<Fast_kernel> alpha_complex_from_file(off_file_points);
+
+    if (!alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
+      std::cerr << "Fast Alpha complex simplicial complex creation failed." << std::endl;
+      exit(-1);
+    }
+  } else {
+    using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+
+    // Init of an alpha complex from an OFF file
+    Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(off_file_points);
+
+    if (!alpha_complex_from_file.create_complex(simplex, alpha_square_max_value, exact_version)) {
+      std::cerr << "Alpha complex simplicial complex creation failed." << std::endl;
+      exit(-1);
+    }
+  }
+  // ----------------------------------------------------------------------------
+  // Display information about the alpha complex
+  // ----------------------------------------------------------------------------
+  std::cout << "Simplicial complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+            << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
+
+  // Sort the simplices in the order of the filtration
+  simplex.initialize_filtration();
+
+  std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
+  // Compute the persistence diagram of the complex
+  Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(
+      simplex);
+  // initializes the coefficient field for homology
+  pcoh.init_coefficients(coeff_field_characteristic);
+
+  pcoh.compute_persistent_cohomology(min_persistence);
+
+  // Output the diagram in filediag
+  if (output_file_diag.empty()) {
+    pcoh.output_diagram();
+  } else {
+    std::cout << "Result in file: " << output_file_diag << std::endl;
+    std::ofstream out(output_file_diag);
+    pcoh.output_diagram(out);
+    out.close();
+  }
   return 0;
 }
 
-void program_options(int argc, char *argv[], std::string &off_file_points, std::string &output_file_diag,
-                     Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
-                     Filtration_value &min_persistence) {
+void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
+                     std::string &output_file_diag, Filtration_value &alpha_square_max_value,
+                     int &coeff_field_characteristic, Filtration_value &min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -88,6 +109,10 @@ void program_options(int argc, char *argv[], std::string &off_file_points, std::
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
+      "exact,e", po::bool_switch(&exact),
+      "To activate exact version of Alpha complex (default is false, not available if fast is set)")(
+      "fast,f", po::bool_switch(&fast),
+      "To activate fast version of Alpha complex (default is false, not available if exact is set)")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
       "max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)
