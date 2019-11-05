@@ -21,13 +21,13 @@ __debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
 from sys import exc_info
 from importlib import import_module
 
-__all__ = [@GUDHI_PYTHON_MODULES@]
+__all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
 
 __available_modules = ''
 __missing_modules = ''
 
 # try to import * from gudhi.__module_name
-for __module_name in __all__:
+for __module_name in [@GUDHI_PYTHON_MODULES@]:
     try:
         __module = import_module('gudhi.' + __module_name)
         try:
