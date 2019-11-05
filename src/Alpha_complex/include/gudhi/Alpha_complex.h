@@ -338,12 +338,18 @@ class Alpha_complex {
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-              
+
+#if CGAL_VERSION_NR < 1050000000
+              // With CGAL >= 4.11 and < 5.X, CGAL::exact do not work as it is always exact values
+              // This is why it is slow and 5.X is advised
+              alpha_complex_filtration = CGAL::to_double(squared_radius(pointVector.begin(), pointVector.end()));
+#else  // CGAL_VERSION_NR < 1050000000
               if (exact) {
                 alpha_complex_filtration = CGAL::to_double(CGAL::exact(squared_radius(pointVector.begin(), pointVector.end())));
               } else {
                 alpha_complex_filtration = CGAL::to_double(squared_radius(pointVector.begin(), pointVector.end()));
               }
+#endif  //CGAL_VERSION_NR < 1050000000
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
