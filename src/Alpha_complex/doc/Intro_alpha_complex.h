@@ -51,6 +51,7 @@ namespace alpha_complex {
  * - For people only interested in the topology of the \ref alpha_complex (for instance persistence),
  * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
  * \ref cech_complex can still make sense in higher dimension precisely because you can bound the radii.
+ * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
  *
  * \section pointsexample Example from points
  *
