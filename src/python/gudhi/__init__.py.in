@@ -26,7 +26,10 @@ __all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
 __available_modules = ''
 __missing_modules = ''
 
-# try to import * from gudhi.__module_name
+# Try to import * from gudhi.__module_name for default modules.
+# Extra modules require an explicit import by the user (mostly because of
+# unusual dependencies, but also to avoid cluttering namespace gudhi and
+# speed up the basic import)
 for __module_name in [@GUDHI_PYTHON_MODULES@]:
     try:
         __module = import_module('gudhi.' + __module_name)
