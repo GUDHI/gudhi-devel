@@ -13,7 +13,7 @@ This implementation is based on ideas from "Large Scale Computation of Means and
 
 Function
 --------
-.. autofunction:: gudhi.wasserstein_distance
+.. autofunction:: gudhi.wasserstein.wasserstein_distance
 
 
 Basic example
@@ -24,13 +24,13 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays and mus
 
 .. testcode::
 
-    import gudhi
+    import gudhi.wasserstein
     import numpy as np
 
     diag1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
     diag2 = np.array([[2.8, 4.45],[9.5, 14.1]])
 
-    message = "Wasserstein distance value = " + '%.2f' % gudhi.wasserstein_distance(diag1, diag2, q=2., p=1.)
+    message = "Wasserstein distance value = " + '%.2f' % gudhi.wasserstein.wasserstein_distance(diag1, diag2, q=2., p=1.)
     print(message)
 
 The output is:
