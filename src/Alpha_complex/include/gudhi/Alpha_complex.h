@@ -25,6 +25,7 @@
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
 #include <CGAL/property_map.h>  // for CGAL::Identity_property_map
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
+#include <CGAL/NT_converter.h>
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
@@ -340,17 +341,12 @@ class Alpha_complex {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
 
-#if CGAL_VERSION_NR < 1050000000
-              // With CGAL >= 4.11 and < 5.X, CGAL::exact do not work as it is always exact values
-              // This is why it is slow and 5.X is advised
-              alpha_complex_filtration = CGAL::to_double(squared_radius(pointVector.begin(), pointVector.end()));
-#else  // CGAL_VERSION_NR < 1050000000
-              if (exact) {
-                alpha_complex_filtration = CGAL::to_double(CGAL::exact(squared_radius(pointVector.begin(), pointVector.end())));
-              } else {
-                alpha_complex_filtration = CGAL::to_double(squared_radius(pointVector.begin(), pointVector.end()));
-              }
-#endif  //CGAL_VERSION_NR < 1050000000
+              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
+              auto sqrad = squared_radius(pointVector.begin(), pointVector.end());
+#if CGAL_VERSION_NR >= 1050000000
+              if(exact) CGAL::exact(sqrad);
+#endif
+              alpha_complex_filtration = cv(sqrad);
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
