@@ -23,19 +23,19 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
   Gudhi::alpha_complex::Alpha_complex<> alpha_complex_from_file(off_file_name);
 
-  std::streambuf* streambufffer;
+  std::streambuf* streambuffer;
   std::ofstream ouput_file_stream;
 
   if (argc == 4) {
     ouput_file_stream.open(std::string(argv[3]));
-    streambufffer = ouput_file_stream.rdbuf();
+    streambuffer = ouput_file_stream.rdbuf();
   } else {
-    streambufffer = std::cout.rdbuf();
+    streambuffer = std::cout.rdbuf();
   }
 
   Gudhi::Simplex_tree<> simplex;
   if (alpha_complex_from_file.create_complex(simplex, alpha_square_max_value)) {
-    std::ostream output_stream(streambufffer);
+    std::ostream output_stream(streambuffer);
 
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
