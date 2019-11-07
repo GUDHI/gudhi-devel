@@ -97,7 +97,7 @@ struct Value_from_iterator<complexity::EXACT> {
  * \details
  * The data structure is constructing a <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html">CGAL 3D Alpha
  * Shapes</a> from a range of points (can be read from an OFF file, cf. Points_off_reader).
- * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+ * Duplicate points are inserted once in the Alpha_complex.
  *
  * \tparam Complexity shall be `Gudhi::alpha_complex::complexity` type. Default value is
  * `Gudhi::alpha_complex::complexity::SAFE`.
