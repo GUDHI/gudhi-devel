@@ -50,8 +50,8 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-template<typename D> struct Is_Epick_D { static const bool value = false; };
-template<typename D> struct Is_Epick_D<CGAL::Epick_d<D>> { static const bool value = true; };
+template<typename D> struct Is_Epeck_D { static const bool value = false; };
+template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool value = true; };
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -191,8 +191,9 @@ class Alpha_complex {
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
     #if CGAL_VERSION_NR < 1050000000
-    if (Is_Epick_D<Kernel>::value)
-      std::cerr << "It is strongly advised to use a CGAL version from 5.0 for performance reasons." << std::endl;
+    if (Is_Epeck_D<Kernel>::value)
+      std::cerr << "It is strongly advised to use a CGAL version >= 5.0 with Epeck_d Kernel for performance reasons."
+                << std::endl;
     #endif
 
     auto first = std::begin(points);
