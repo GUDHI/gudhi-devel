@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <limits>  // for std::numeric_limits<>
+#include <cmath> // for std::fabs
 
 template<typename FloatingType >
 void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
