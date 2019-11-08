@@ -5,37 +5,47 @@ sudo: required
 git: 
  depth: 3
 
-os: osx
-osx_image: xcode10.2
-compiler: clang
-
 matrix:
   include:
-    - env:
-        # 1. Only examples and associated tests
-        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - env:
+    # A. Mac OSX
+    #- os: osx
+    #  osx_image: xcode9.4
+    #  compiler: clang
+    #  env:
+    #    # 1. Only examples and associated tests
+    #    - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    - os: osx
+      osx_image: xcode9.4
+      compiler: clang
+      env:
         # 2. Only unitary tests
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - env:
-        # 3. Only utilities and associated tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
-    - env:
-        # 4. Only doxygen documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
+    #- os: osx
+    #  osx_image: xcode9.4
+    #  compiler: clang
+    #  env:
+    #    # 3. Only utilities and associated tests
+    #    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+    #- os: osx
+    #  osx_image: xcode9.4
+    #  compiler: clang
+    #  env:
+    #    # 4. Only doxygen documentation
+    #    - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
     # Issue with sphinx-build with sphinx 2.0.1
-    # - env:
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   compiler: clang
+    #   env:
     #     # 5. Only Python, associated tests and sphinx documentation
     #     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
 
 cache:
   directories:
     - $HOME/.cache/pip
-    - $HOME/Library/Caches/Homebrew
 
 addons:
   homebrew:
-    update: true
     packages:
       - cmake
       - graphviz 
@@ -48,10 +58,6 @@ addons:
       - cgal
       - python3
 
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
-  - brew cleanup
-
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
@@ -62,6 +68,7 @@ script:
   - mkdir -p build 
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
+  - ctest -R Coxeter_triangulation_manifold_tracing_test -V
   - make all ${MAKE_TARGET}
   - cd ..
 
