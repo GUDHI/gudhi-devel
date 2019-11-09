@@ -71,7 +71,7 @@ cdef class EuclideanStrongWitnessComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        if limit_dimension is not -1:
+        if limit_dimension != -1:
             self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
                 max_alpha_square, limit_dimension)
         else:

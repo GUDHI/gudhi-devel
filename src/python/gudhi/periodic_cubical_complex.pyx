@@ -68,9 +68,9 @@ cdef class PeriodicCubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   periodic_dimensions=None, perseus_file=''):
-        if (dimensions is not None) and (top_dimensional_cells is not None) and (periodic_dimensions is not None) and (perseus_file is ''):
+        if (dimensions is not None) and (top_dimensional_cells is not None) and (periodic_dimensions is not None) and (perseus_file == ''):
             self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
-        elif (dimensions is None) and (top_dimensional_cells is None) and (periodic_dimensions is None) and (perseus_file is not ''):
+        elif (dimensions is None) and (top_dimensional_cells is None) and (periodic_dimensions is None) and (perseus_file != ''):
             if os.path.isfile(perseus_file):
                 self.thisptr = new Periodic_cubical_complex_base_interface(str.encode(perseus_file))
             else:

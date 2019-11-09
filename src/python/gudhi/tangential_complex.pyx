@@ -65,7 +65,7 @@ cdef class TangentialComplex:
 
     # The real cython constructor
     def __cinit__(self, intrisic_dim, points=None, off_file=''):
-        if off_file is not '':
+        if off_file:
             if os.path.isfile(off_file):
                 self.thisptr = new Tangential_complex_interface(intrisic_dim, str.encode(off_file), True)
             else:

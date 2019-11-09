@@ -29,7 +29,7 @@ def read_off(off_file=''):
     :returns:  The point set.
     :rtype: vector[vector[double]]
     """
-    if off_file is not '':
+    if off_file:
         if os.path.isfile(off_file):
             return read_points_from_OFF_file(str.encode(off_file))
         else:
