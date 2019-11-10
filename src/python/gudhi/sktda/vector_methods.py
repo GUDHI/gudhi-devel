@@ -1,6 +1,11 @@
-"""
-@author: Mathieu Carriere
-All rights reserved
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       Mathieu Carrière
+
+    Copyright (C) 2018-2019 Inria
+
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
 """
 
 import numpy as np
