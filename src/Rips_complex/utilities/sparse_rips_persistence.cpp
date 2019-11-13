@@ -28,21 +28,24 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
 using Point = std::vector<double>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 
-void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag, double& epsilon,
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, double& epsilon,
                      int& dim_max, int& p, Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
   std::string off_file_points;
   std::string filediag;
+  Filtration_value threshold;
   double epsilon;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, filediag, epsilon, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, filediag, threshold, epsilon, dim_max, p, min_persistence);
 
   Points_off_reader off_reader(off_file_points);
-  Sparse_rips sparse_rips(off_reader.get_point_cloud(), Gudhi::Euclidean_distance(), epsilon);
+  Sparse_rips sparse_rips(off_reader.get_point_cloud(), Gudhi::Euclidean_distance(), epsilon,
+                          -std::numeric_limits<Filtration_value>::infinity(), threshold);
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree simplex_tree;
@@ -73,7 +76,8 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag, double& epsilon,
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, double& epsilon,
                      int& dim_max, int& p, Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
@@ -84,6 +88,9 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   visible.add_options()("help,h", "produce help message")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-edge-length,r",
+      po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal length of an edge for the Rips complex construction.")(
       "approximation,e", po::value<double>(&epsilon)->default_value(.5),
       "Epsilon, where the sparse Rips complex is a (1+epsilon)-approximation of the Rips complex.")(
       "cpx-dimension,d", po::value<int>(&dim_max)->default_value(std::numeric_limits<int>::max()),

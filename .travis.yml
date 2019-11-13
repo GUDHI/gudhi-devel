@@ -62,6 +62,7 @@ addons:
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
   - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex matplotlib numpy scipy
+  - python3 -m pip install --user POT
 
 script: 
   - rm -rf build

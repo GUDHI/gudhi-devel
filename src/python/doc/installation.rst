@@ -8,7 +8,7 @@ Installation
 Conda
 *****
 The easiest way to install the Python version of GUDHI is using
-`conda <https://gudhi.inria.fr/licensing/>`_.
+`conda <https://gudhi.inria.fr/conda/>`_.
 
 Compiling
 *********
@@ -215,12 +215,20 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+Python Optimal Transport
+========================
+
+The :doc:`Wasserstein distance </wasserstein_distance_user>`
+module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
+several solvers for optimization problems related to Optimal Transport.
+
 SciPy
 =====
 
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `SciPy <http://scipy.org>`_, a Python-based ecosystem of
-open-source software for mathematics, science, and engineering.
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
+:doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
+<http://scipy.org>`_, a Python-based ecosystem of open-source software for
+mathematics, science, and engineering.
 
 Threading Building Blocks
 =========================

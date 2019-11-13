@@ -23,7 +23,7 @@ Alpha complex
 .. include:: alpha_complex_sum.inc
 
 Rips complex
--------------
+------------
 
 .. include:: rips_complex_sum.inc
 
@@ -72,6 +72,11 @@ Bottleneck distance
 ===================
 
 .. include:: bottleneck_distance_sum.inc
+
+Wasserstein distance
+====================
+
+.. include:: wasserstein_distance_sum.inc
 
 Persistence graphical tools
 ===========================
