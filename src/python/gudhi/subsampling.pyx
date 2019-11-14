@@ -4,15 +4,14 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import os
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Vincent Rouvreau
-
-    Copyright (C) 2016 Inria
-
-    Modification(s):
-      - YYYY/MM Author: Description of the modification
-"""
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"

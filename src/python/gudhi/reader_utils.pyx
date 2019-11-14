@@ -7,15 +7,14 @@ from libcpp.pair cimport pair
 from os import path
 from numpy import array as np_array
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Vincent Rouvreau
-
-    Copyright (C) 2017 Inria
-
-    Modification(s):
-      - YYYY/MM Author: Description of the modification
-"""
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2017 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2017 Inria"
