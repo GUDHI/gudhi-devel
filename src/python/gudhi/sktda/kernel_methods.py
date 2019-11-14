@@ -26,7 +26,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
 
         Attributes:
             bandwidth (double): bandwidth of the Gaussian kernel applied to the sliced Wasserstein distance (default 1.).
-            num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the kernel computation (default 10). If -1, the exact kernel is computed.
+            num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the kernel computation (default 10).
         """
         self.bandwidth = bandwidth
         self.sw_ = SlicedWassersteinDistance(num_directions=num_directions)

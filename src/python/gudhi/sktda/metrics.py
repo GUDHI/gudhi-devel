@@ -15,7 +15,7 @@ try:
     USE_GUDHI = True
 except ImportError:
     USE_GUDHI = False
-    print("Gudhi not found: BottleneckDistance will return null matrix, and exact SlicedWassersteinDistance not available")
+    print("Gudhi built without CGAL: BottleneckDistance will return a null matrix")
 
 #############################################
 # Metrics ###################################
