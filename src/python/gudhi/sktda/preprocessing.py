@@ -62,7 +62,7 @@ class Clamping(BaseEstimator, TransformerMixin):
         """
         Constructor for the Clamping class.
 
-        Attributes:
+        Parameters:
             limit (double): clamping value (default np.inf).
         """
         self.limit = limit
@@ -99,7 +99,7 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
         """
         Constructor for the DiagramScaler class.
 
-        Attributes:
+        Parameters:
             use (bool): whether to use the class or not (default False).
             scalers (list of classes): list of scalers to be fit on the persistence diagrams (default []). Each element of the list is a tuple with two elements: the first one is a list of coordinates, and the second one is a scaler (i.e. a class with fit() and transform() methods) that is going to be applied to these coordinates. Common scalers can be found in the scikit-learn library (such as MinMaxScaler for instance).
         """
@@ -150,7 +150,7 @@ class Padding(BaseEstimator, TransformerMixin):
         """
         Constructor for the Padding class.
 
-        Attributes:
+        Parameters:
             use (bool): whether to use the class or not (default False).
         """
         self.use = use
@@ -194,7 +194,7 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
         """
         Constructor for the ProminentPoints class.
      
-        Attributes:
+        Parameters:
             use (bool): whether to use the class or not (default False).
             location (string): either "upper" or "lower" (default "upper"). Whether to keep the points that are far away ("upper") or close ("lower") to the diagonal.
             num_pts (int): cardinality threshold (default 10). If location == "upper", keep the top **num_pts** points that are the farthest away from the diagonal. If location == "lower", keep the top **num_pts** points that are the closest to the diagonal. 
@@ -267,7 +267,7 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
         """
         Constructor for the DiagramSelector class.
 
-        Attributes:
+        Parameters:
             use (bool): whether to use the class or not (default False).
             limit (double): second coordinate value that is the criterion for being an essential point (default numpy.inf).
             point_type (string): either "finite" or "essential". The type of the points that are going to be extracted.

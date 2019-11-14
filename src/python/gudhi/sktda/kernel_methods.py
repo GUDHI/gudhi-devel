@@ -24,7 +24,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
         """
         Constructor for the SlicedWassersteinKernel class.
 
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel applied to the sliced Wasserstein distance (default 1.).
             num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the kernel computation (default 10).
         """
@@ -62,7 +62,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
         """
         Constructor for the PersistenceWeightedGaussianKernel class.
   
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel with which persistence diagrams will be convolved (default 1.)
             weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
             kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
@@ -128,7 +128,7 @@ class PersistenceScaleSpaceKernel(BaseEstimator, TransformerMixin):
         """
         Constructor for the PersistenceScaleSpaceKernel class.
   
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel with which persistence diagrams will be convolved (default 1.)
             kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
         """
@@ -173,7 +173,7 @@ class PersistenceFisherKernel(BaseEstimator, TransformerMixin):
         """
         Constructor for the PersistenceFisherKernel class.
 
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel applied to the persistence Fisher distance (default 1.).
             bandwidth_fisher (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions by PersistenceFisherDistance class (default 1.).
             kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).

@@ -26,7 +26,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         """
         Constructor for the PersistenceImage class.
 
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel (default 1.).
             weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
             resolution ([int,int]): size (in pixels) of the persistence image (default [20,20]).
@@ -89,7 +89,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         """
         Constructor for the Landscape class.
 
-        Attributes:
+        Parameters:
             num_landscapes (int): number of piecewise-linear functions to output (default 5).
             resolution (int): number of sample for all piecewise-linear functions (default 100).
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
@@ -171,7 +171,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
         """
         Constructor for the Silhouette class.
 
-        Attributes:
+        Parameters:
             weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie on lists or numpy arrays of the form [p_x,p_y].
             resolution (int): number of samples for the weighted average (default 100).
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
@@ -249,7 +249,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
         Constructor for the BettiCurve class.
 
-        Attributes:
+        Parameters:
             resolution (int): number of sample for the piecewise-constant function (default 100).
             sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
@@ -309,7 +309,7 @@ class Entropy(BaseEstimator, TransformerMixin):
         """
         Constructor for the Entropy class.
 
-        Attributes:
+        Parameters:
             mode (string): what entropy to compute: either "scalar" for computing the entropy statistics, or "vector" for computing the entropy summary functions (default "scalar").
             normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
@@ -379,7 +379,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         """
         Constructor for the TopologicalVector class.
 
-        Attributes:
+        Parameters:
             threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
         """
         self.threshold = threshold
@@ -432,7 +432,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         """
         Constructor for the ComplexPolynomial class.
 
-        Attributes:
+        Parameters:
            polynomial_type (char): either "R", "S" or "T" (default "R"). Type of complex polynomial that is going to be computed (explained in https://link.springer.com/chapter/10.1007%2F978-3-319-23231-7_27).
            threshold (int): number of coefficients (default 10). This is the dimension of the complex vector of coefficients, i.e. the number of coefficients corresponding to the largest degree terms of the polynomial. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding complex vector of coefficients as threshold. 
         """

@@ -29,7 +29,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         """
         Constructor for the SlicedWassersteinDistance class.
 
-        Attributes:
+        Parameters:
             num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10). 
         """
         self.num_directions = num_directions
@@ -90,7 +90,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         """
         Constructor for the BottleneckDistance class.
 
-        Attributes:
+        Parameters:
             epsilon (double): approximation quality (default 1e-4).
         """
         self.epsilon = epsilon
@@ -152,7 +152,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
         """
         Constructor for the PersistenceFisherDistance class.
 
-        Attributes:
+        Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions (default 1.).
             kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
         """
