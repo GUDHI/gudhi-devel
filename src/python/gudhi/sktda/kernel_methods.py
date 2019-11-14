@@ -50,7 +50,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X)): matrix of pairwise sliced Wasserstein kernel values.
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise sliced Wasserstein kernel values.
         """
         return np.exp(-self.sw_.transform(X)/self.bandwidth)
 
@@ -92,7 +92,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X)): matrix of pairwise persistence weighted Gaussian kernel values.
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence weighted Gaussian kernel values.
         """
         Xp = list(X)
         Xfit = np.zeros((len(Xp), len(self.diagrams_)))
@@ -157,7 +157,7 @@ class PersistenceScaleSpaceKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X)): matrix of pairwise persistence scale space kernel values.
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence scale space kernel values.
         """
         Xp = list(X)
         for i in range(len(Xp)):
@@ -200,7 +200,7 @@ class PersistenceFisherKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X)): matrix of pairwise persistence Fisher kernel values.
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher kernel values.
         """
         return np.exp(-self.pf_.transform(X)/self.bandwidth)
 

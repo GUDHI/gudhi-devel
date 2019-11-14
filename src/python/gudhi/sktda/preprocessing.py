@@ -43,7 +43,7 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy array): input persistence diagrams.
 
         Returns:
-            Xfit (list of n x 2 numpy array): transformed persistence diagrams.
+            list of n x 2 numpy array: transformed persistence diagrams.
         """
         Xfit = []
         for diag in X:
@@ -85,7 +85,7 @@ class Clamping(BaseEstimator, TransformerMixin):
             X (numpy array of size n): input list of values.
 
         Returns:
-            Xfit (numpy array of size n): output list of values.
+            numpy array of size n: output list of values.
         """
         Xfit = np.minimum(X, self.limit)
         #Xfit = np.where(X >= self.limit, self.limit * np.ones(X.shape), X)
@@ -131,7 +131,7 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (list of n x 2 or n x 1 numpy arrays): transformed persistence diagrams.
+            list of n x 2 or n x 1 numpy arrays: transformed persistence diagrams.
         """
         Xfit = [np.copy(d) for d in X]
         if self.use:
@@ -174,7 +174,7 @@ class Padding(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (list of n x 3 or n x 2 numpy arrays): padded persistence diagrams.
+            list of n x 3 or n x 2 numpy arrays: padded persistence diagrams.
         """
         if self.use:
             Xfit, num_diag = [], len(X)
@@ -223,7 +223,7 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (list of n x 2 or n x 1 numpy arrays): thresholded persistence diagrams.
+            list of n x 2 or n x 1 numpy arrays: thresholded persistence diagrams.
         """
         if self.use:
             Xfit, num_diag = [], len(X)
@@ -292,7 +292,7 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
 
         Returns:
-            Xfit (list of n x 2 or n x 1 numpy arrays): extracted persistence diagrams.
+            list of n x 2 or n x 1 numpy arrays: extracted persistence diagrams.
         """
         if self.use:
             Xfit, num_diag = [], len(X)

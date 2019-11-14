@@ -58,7 +58,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**)): output persistence images.
+            numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**): output persistence images.
         """
         num_diag, Xfit = len(X), []
         new_X = BirthPersistenceTransform().fit_transform(X)
@@ -118,7 +118,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**)): output persistence landscapes.
+            numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**): output persistence landscapes.
         """
         num_diag, Xfit = len(X), []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
@@ -200,7 +200,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (**resolution**): output persistence silhouettes.
+            numpy array with shape (number of diagrams) x (**resolution**): output persistence silhouettes.
         """
         num_diag, Xfit = len(X), []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
@@ -277,7 +277,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
+            numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
         """
         num_diag, Xfit = len(X), []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
@@ -339,7 +339,7 @@ class Entropy(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**)): output entropy.
+            numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**): output entropy.
         """
         num_diag, Xfit = len(X), []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
@@ -402,7 +402,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (**threshold**): output topological vectors.
+            numpy array with shape (number of diagrams) x (**threshold**): output topological vectors.
         """
         if self.threshold == -1:
             thresh = np.array([X[i].shape[0] for i in range(len(X))]).max()
@@ -456,7 +456,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
     
         Returns:
-            Xfit (numpy array with shape (number of diagrams) x (**threshold**): output complex vectors of coefficients.
+            numpy array with shape (number of diagrams) x (**threshold**): output complex vectors of coefficients.
         """
         if self.threshold == -1:
             thresh = np.array([X[i].shape[0] for i in range(len(X))]).max()
