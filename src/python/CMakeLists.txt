@@ -387,6 +387,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_wasserstein_distance)
     endif(OT_FOUND)
 
+    # Representations
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_representations)
+    endif(SKLEARN_FOUND)
+
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
       if(MATPLOTLIB_FOUND)
