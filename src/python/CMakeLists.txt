@@ -388,9 +388,9 @@ if(PYTHONINTERP_FOUND)
     endif(OT_FOUND)
 
     # Representations
-    if(SKLEARN_FOUND)
+    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
       add_gudhi_py_test(test_representations)
-    endif(SKLEARN_FOUND)
+    endif()
 
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
