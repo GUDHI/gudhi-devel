@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.preprocessing import MinMaxScaler
 
-from gudhi.sktda import DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
+from gudhi.representations import DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
   TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
   PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\

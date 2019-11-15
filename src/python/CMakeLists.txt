@@ -50,7 +50,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
     # Modules that should not be auto-imported in __init__.py
-    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'sktda', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
@@ -208,7 +208,7 @@ if(PYTHONINTERP_FOUND)
 
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-    file(COPY "gudhi/sktda" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
+    file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
     file(COPY "gudhi/wasserstein.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(

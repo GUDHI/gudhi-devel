@@ -81,7 +81,7 @@ Wasserstein distance
 Persistence representations
 ===========================
 
-.. include:: sktda_sum.inc
+.. include:: representations_sum.inc
 
 Persistence graphical tools
 ===========================
