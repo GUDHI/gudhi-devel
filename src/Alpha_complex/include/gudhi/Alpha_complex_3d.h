@@ -252,7 +252,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
   /** \brief `Alpha_complex_3d::Point_3` type is either a `Alpha_complex_3d::Bare_point_3` (Weighted = false) or a
    * `Alpha_complex_3d::Weighted_point_3` (Weighted = true).
    */
-  using Point_3 = typename std::conditional<Weighted, Weighted_point_3, Bare_point_3>::type;
+  using Point_3 = typename Alpha_shape_3::Point;
 
  private:
   using Dispatch =
