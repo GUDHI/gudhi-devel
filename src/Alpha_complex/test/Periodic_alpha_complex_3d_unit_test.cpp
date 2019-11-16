@@ -44,11 +44,11 @@ typedef boost::mpl::list<Fast_periodic_alpha_complex_3d, Safe_periodic_alpha_com
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_periodic_throw, Periodic_alpha_complex_3d, periodic_variants_type_list) {
   std::cout << "Periodic alpha complex 3d exception throw" << std::endl;
-  using Point_3 = typename Periodic_alpha_complex_3d::Point_3;
-  std::vector<Point_3> p_points;
+  using Bare_point_3 = typename Periodic_alpha_complex_3d::Bare_point_3;
+  std::vector<Bare_point_3> p_points;
 
   // Not important, this is not what we want to check
-  p_points.push_back(Point_3(0.0, 0.0, 0.0));
+  p_points.push_back(Bare_point_3(0.0, 0.0, 0.0));
 
   std::cout << "Check exception throw in debug mode" << std::endl;
   // Check it throws an exception when the cuboid is not iso
@@ -73,13 +73,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ---------------------
   std::cout << "Fast periodic alpha complex 3d" << std::endl;
 
-  using Creator = CGAL::Creator_uniform_3<double, Fast_periodic_alpha_complex_3d::Point_3>;
+  using Creator = CGAL::Creator_uniform_3<double, Fast_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
-  CGAL::Random_points_in_cube_3<Fast_periodic_alpha_complex_3d::Point_3, Creator> in_cube(1, random);
-  std::vector<Fast_periodic_alpha_complex_3d::Point_3> p_points;
+  CGAL::Random_points_in_cube_3<Fast_periodic_alpha_complex_3d::Bare_point_3, Creator> in_cube(1, random);
+  std::vector<Fast_periodic_alpha_complex_3d::Bare_point_3> p_points;
 
   for (int i = 0; i < 50; i++) {
-    Fast_periodic_alpha_complex_3d::Point_3 p = *in_cube++;
+    Fast_periodic_alpha_complex_3d::Bare_point_3 p = *in_cube++;
     p_points.push_back(p);
   }
 
@@ -88,15 +88,30 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   Gudhi::Simplex_tree<> stree;
   periodic_alpha_complex.create_complex(stree);
 
+  for (std::size_t index = 0; index < p_points.size(); index++) {
+    bool found = false;
+    Fast_periodic_alpha_complex_3d::Bare_point_3 ap = periodic_alpha_complex.get_point(index);
+    for (auto point : p_points) {
+      if ((point.x() == ap.x()) && (point.y() == ap.y()) && (point.z() == ap.z())) {
+        found = true;
+        break;
+      }
+    }
+    // Check all points from alpha complex are found in the input point cloud
+    BOOST_CHECK(found);
+  }
+  // Exception if we go out of range
+  BOOST_CHECK_THROW(periodic_alpha_complex.get_point(p_points.size()), std::out_of_range);
+
   // ----------------------
   // Exact periodic version
   // ----------------------
   std::cout << "Exact periodic alpha complex 3d" << std::endl;
 
-  std::vector<Exact_periodic_alpha_complex_3d::Point_3> e_p_points;
+  std::vector<Exact_periodic_alpha_complex_3d::Bare_point_3> e_p_points;
 
   for (auto p : p_points) {
-    e_p_points.push_back(Exact_periodic_alpha_complex_3d::Point_3(p[0], p[1], p[2]));
+    e_p_points.push_back(Exact_periodic_alpha_complex_3d::Bare_point_3(p[0], p[1], p[2]));
   }
 
   Exact_periodic_alpha_complex_3d exact_alpha_complex(e_p_points, -1., -1., -1., 1., 1., 1.);
@@ -142,10 +157,10 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ----------------------
   std::cout << "Safe periodic alpha complex 3d" << std::endl;
 
-  std::vector<Safe_periodic_alpha_complex_3d::Point_3> s_p_points;
+  std::vector<Safe_periodic_alpha_complex_3d::Bare_point_3> s_p_points;
 
   for (auto p : p_points) {
-    s_p_points.push_back(Safe_periodic_alpha_complex_3d::Point_3(p[0], p[1], p[2]));
+    s_p_points.push_back(Safe_periodic_alpha_complex_3d::Bare_point_3(p[0], p[1], p[2]));
   }
 
   Safe_periodic_alpha_complex_3d safe_alpha_complex(s_p_points, -1., -1., -1., 1., 1., 1.);
