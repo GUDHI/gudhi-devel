@@ -68,7 +68,7 @@ cdef class AlphaComplex:
 
     # The real cython constructor
     def __cinit__(self, points=None, off_file=''):
-        if off_file is not '':
+        if off_file:
             if os.path.isfile(off_file):
                 self.thisptr = new Alpha_complex_interface(str.encode(off_file), True)
             else:

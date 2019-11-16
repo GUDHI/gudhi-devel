@@ -66,9 +66,9 @@ cdef class CubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
-        if (dimensions is not None) and (top_dimensional_cells is not None) and (perseus_file is ''):
+        if (dimensions is not None) and (top_dimensional_cells is not None) and (perseus_file == ''):
             self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
-        elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file is not ''):
+        elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file != ''):
             if os.path.isfile(perseus_file):
                 self.thisptr = new Bitmap_cubical_complex_base_interface(str.encode(perseus_file))
             else:
