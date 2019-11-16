@@ -47,13 +47,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
                               wp_variants_type_list) {
   std::cout << "Weighted periodic alpha complex 3d exception throw" << std::endl;
 
-  using Creator = CGAL::Creator_uniform_3<double, typename Weighted_periodic_alpha_complex_3d::Point_3>;
+  using Creator = CGAL::Creator_uniform_3<double, typename Weighted_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
-  CGAL::Random_points_in_cube_3<typename Weighted_periodic_alpha_complex_3d::Point_3, Creator> in_cube(1, random);
-  std::vector<typename Weighted_periodic_alpha_complex_3d::Point_3> wp_points;
+  CGAL::Random_points_in_cube_3<typename Weighted_periodic_alpha_complex_3d::Bare_point_3, Creator> in_cube(1, random);
+  std::vector<typename Weighted_periodic_alpha_complex_3d::Bare_point_3> wp_points;
 
   for (int i = 0; i < 50; i++) {
-    typename Weighted_periodic_alpha_complex_3d::Point_3 p = *in_cube++;
+    typename Weighted_periodic_alpha_complex_3d::Bare_point_3 p = *in_cube++;
     wp_points.push_back(p);
   }
   std::vector<double> p_weights;
@@ -117,13 +117,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ---------------------
   std::cout << "Fast weighted periodic alpha complex 3d" << std::endl;
 
-  using Creator = CGAL::Creator_uniform_3<double, Fast_weighted_periodic_alpha_complex_3d::Point_3>;
+  using Creator = CGAL::Creator_uniform_3<double, Fast_weighted_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
-  CGAL::Random_points_in_cube_3<Fast_weighted_periodic_alpha_complex_3d::Point_3, Creator> in_cube(1, random);
-  std::vector<Fast_weighted_periodic_alpha_complex_3d::Point_3> p_points;
+  CGAL::Random_points_in_cube_3<Fast_weighted_periodic_alpha_complex_3d::Bare_point_3, Creator> in_cube(1, random);
+  std::vector<Fast_weighted_periodic_alpha_complex_3d::Bare_point_3> p_points;
 
   for (int i = 0; i < 50; i++) {
-    Fast_weighted_periodic_alpha_complex_3d::Point_3 p = *in_cube++;
+    Fast_weighted_periodic_alpha_complex_3d::Bare_point_3 p = *in_cube++;
     p_points.push_back(p);
   }
   std::vector<double> p_weights;
@@ -142,10 +142,10 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ----------------------
   std::cout << "Exact weighted periodic alpha complex 3d" << std::endl;
 
-  std::vector<Exact_weighted_periodic_alpha_complex_3d::Point_3> e_p_points;
+  std::vector<Exact_weighted_periodic_alpha_complex_3d::Bare_point_3> e_p_points;
 
   for (auto p : p_points) {
-    e_p_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Point_3(p[0], p[1], p[2]));
+    e_p_points.push_back(Exact_weighted_periodic_alpha_complex_3d::Bare_point_3(p[0], p[1], p[2]));
   }
 
   Exact_weighted_periodic_alpha_complex_3d exact_alpha_complex(e_p_points, p_weights, -1., -1., -1., 1., 1., 1.);
@@ -191,10 +191,10 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ----------------------
   std::cout << "Safe weighted periodic alpha complex 3d" << std::endl;
 
-  std::vector<Safe_weighted_periodic_alpha_complex_3d::Point_3> s_p_points;
+  std::vector<Safe_weighted_periodic_alpha_complex_3d::Bare_point_3> s_p_points;
 
   for (auto p : p_points) {
-    s_p_points.push_back(Safe_weighted_periodic_alpha_complex_3d::Point_3(p[0], p[1], p[2]));
+    s_p_points.push_back(Safe_weighted_periodic_alpha_complex_3d::Bare_point_3(p[0], p[1], p[2]));
   }
 
   Safe_weighted_periodic_alpha_complex_3d safe_alpha_complex(s_p_points, p_weights, -1., -1., -1., 1., 1., 1.);

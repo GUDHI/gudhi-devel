@@ -362,7 +362,7 @@ cdef class SimplexTree:
         value than its faces by increasing the filtration values.
 
         :returns: True if any filtration value was modified,
-        False if the filtration was already non-decreasing.
+            False if the filtration was already non-decreasing.
         :rtype: bool
 
 
