@@ -31,4 +31,7 @@ ax = fig.gca(projection='3d')
 ax.plot_trisurf(points[:,0], points[:,1], points[:,2], triangles=triangles)
 plt.show()
 
-# Third possibility: mayavi.mlab.triangular_mesh
+# Third possibility: mayavi
+from mayavi import mlab
+mlab.triangular_mesh(points[:,0], points[:,1], points[:,2], triangles);
+mlab.show()
