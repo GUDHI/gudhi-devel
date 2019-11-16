@@ -16,6 +16,9 @@ Examples
     * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
     * :download:`bottleneck_basic_example.py <../example/bottleneck_basic_example.py>`
     * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
+    * :download:`plot_simplex_tree_dim012.py <../example/plot_simplex_tree_dim012.py>`
+    * :download:`plot_rips_complex.py <../example/plot_rips_complex.py>`
+    * :download:`plot_alpha_complex.py <../example/plot_alpha_complex.py>`
     * :download:`witness_complex_from_nearest_landmark_table.py <../example/witness_complex_from_nearest_landmark_table.py>`
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
