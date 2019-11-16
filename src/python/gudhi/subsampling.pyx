@@ -44,15 +44,15 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
     :param starting_point: The iteration starts with the landmark `starting \
-    point`,which is the index of the poit to start with. If not set, this \
-    index is choosen randomly.
+    point`,which is the index of the point to start with. If not set, this \
+    index is chosen randomly.
     :type starting_point: unsigned.
     :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """
-    if off_file is not '':
+    if off_file:
         if os.path.isfile(off_file):
-            if starting_point is '':
+            if starting_point == '':
                 return subsampling_n_farthest_points_from_file(str.encode(off_file),
                                                                nb_points)
             else:
@@ -65,7 +65,7 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
         if points is None:
             # Empty points
             points=[]
-        if starting_point is '':
+        if starting_point == '':
             return subsampling_n_farthest_points(points, nb_points)
         else:
             return subsampling_n_farthest_points(points, nb_points,
@@ -87,7 +87,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """
-    if off_file is not '':
+    if off_file:
         if os.path.isfile(off_file):
             return subsampling_n_random_points_from_file(str.encode(off_file),
                 nb_points)
@@ -117,7 +117,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     :returns:  The subsample point set.
     :rtype: vector[vector[double]]
     """
-    if off_file is not '':
+    if off_file:
         if os.path.isfile(off_file):
             return subsampling_sparsify_points_from_file(str.encode(off_file),
                                                          min_squared_dist)

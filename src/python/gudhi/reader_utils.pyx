@@ -37,7 +37,7 @@ def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
     :returns:  The lower triangular matrix.
     :rtype: vector[vector[double]]
     """
-    if csv_file is not '':
+    if csv_file:
         if path.isfile(csv_file):
             return read_matrix_from_csv_file(str.encode(csv_file), ord(separator[0]))
     print("file " + csv_file + " not set or not found.")
@@ -56,7 +56,7 @@ def read_persistence_intervals_grouped_by_dimension(persistence_file=''):
     :returns:  The persistence pairs grouped by dimension.
     :rtype: map[int, vector[pair[double, double]]]
     """
-    if persistence_file is not '':
+    if persistence_file:
         if path.isfile(persistence_file):
             return read_pers_intervals_grouped_by_dimension(str.encode(persistence_file))
     print("file " + persistence_file + " not set or not found.")
@@ -79,7 +79,7 @@ def read_persistence_intervals_in_dimension(persistence_file='', only_this_dim=-
     :returns:  The persistence intervals.
     :rtype: numpy array of dimension 2
     """
-    if persistence_file is not '':
+    if persistence_file:
         if path.isfile(persistence_file):
             return np_array(read_pers_intervals_in_dimension(str.encode(
                 persistence_file), only_this_dim))
