@@ -125,6 +125,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("numpy")
   find_python_module("scipy")
   find_python_module("sphinx")
+  find_python_module("sklearn")
   find_python_module("ot")
 endif()
 
