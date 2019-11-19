@@ -34,19 +34,19 @@ int main(int argc, char **argv) {
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
   Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
 
-  std::streambuf* streambufffer;
+  std::streambuf* streambuffer;
   std::ofstream ouput_file_stream;
 
   if (argc == 5) {
     ouput_file_stream.open(std::string(argv[4]));
-    streambufffer = ouput_file_stream.rdbuf();
+    streambuffer = ouput_file_stream.rdbuf();
   } else {
-    streambufffer = std::cout.rdbuf();
+    streambuffer = std::cout.rdbuf();
   }
 
   Simplex_tree stree;
   rips_complex_from_file.create_complex(stree, dim_max);
-  std::ostream output_stream(streambufffer);
+  std::ostream output_stream(streambuffer);
 
   // ----------------------------------------------------------------------------
   // Display information about the Rips complex

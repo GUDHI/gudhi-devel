@@ -35,19 +35,19 @@ int main(int argc, char **argv) {
   Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
   Rips_complex rips_complex_from_file(distances, threshold);
 
-  std::streambuf* streambufffer;
+  std::streambuf* streambuffer;
   std::ofstream ouput_file_stream;
 
   if (argc == 5) {
     ouput_file_stream.open(std::string(argv[4]));
-    streambufffer = ouput_file_stream.rdbuf();
+    streambuffer = ouput_file_stream.rdbuf();
   } else {
-    streambufffer = std::cout.rdbuf();
+    streambuffer = std::cout.rdbuf();
   }
 
   Simplex_tree stree;
   rips_complex_from_file.create_complex(stree, dim_max);
-  std::ostream output_stream(streambufffer);
+  std::ostream output_stream(streambuffer);
 
   // ----------------------------------------------------------------------------
   // Display information about the Rips complex
