@@ -74,13 +74,22 @@ cdef class SimplexTree:
         return self.get_ptr().simplex_filtration(simplex)
 
     def assign_filtration(self, simplex, filtration):
-        """This function assigns the simplicial complex filtration value for a
+        """This function assigns a new filtration value to a
         given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
-        :param filtration:  The simplicial complex filtration value.
+        :param filtration:  The new filtration value.
         :type filtration:  float
+
+        .. note::
+            Beware that after this operation, the structure may not be a valid
+            filtration anymore, a simplex could have a lower filtration value
+            than one of its faces. Callers are responsible for fixing this
+            (with more :meth:`assign_filtration` or
+            :meth:`make_filtration_non_decreasing` for instance) before calling
+            any function that relies on the filtration property, like
+            :meth:`initialize_filtration`.
         """
         self.get_ptr().assign_simplex_filtration(simplex, filtration)
 
