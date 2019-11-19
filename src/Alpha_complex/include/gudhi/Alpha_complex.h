@@ -77,8 +77,19 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
  * CGAL::Dynamic_dimension_tag </a> >
  * 
- * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
- * 
+ * \remark
+ * - When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+ * - Using the default `CGAL::Epeck_d` makes the construction safe. If you pass exact=true to create_complex, the
+ * filtration values are the exact ones converted to the filtration value type of the simplicial complex. This can be
+ * very slow. If you pass exact=false (the default), the filtration values are only guaranteed to have a small
+ * multiplicative error compared to the exact value, see <code><a class="el" target="_blank"
+ * href="https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html">
+ * CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double</a></code> for details. A drawback, when computing
+ * persistence, is that an empty exact interval [10^12,10^12] may become a non-empty approximate interval
+ * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
+ * exact, but the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still
+ * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
+ * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
  */
 template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex {
