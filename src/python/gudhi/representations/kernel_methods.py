@@ -161,7 +161,7 @@ class PersistenceScaleSpaceKernel(BaseEstimator, TransformerMixin):
         """
         Xp = list(X)
         for i in range(len(Xp)):
-            op_X = np.matmul(Xp[i], np.array([[0.,1.], [1.,0.]]))
+            op_X = Xp[i][:,[1,0]]
             Xp[i] = np.concatenate([Xp[i], op_X], axis=0)
         return self.pwg_.transform(Xp)
 

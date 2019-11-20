@@ -30,7 +30,7 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Fit the BirthPersistenceTransform class on a list of persistence diagrams (this function actually does nothing but is useful when BirthPersistenceTransform is included in a scikit-learn Pipeline).
 
         Parameters:
-            X (n x 2 numpy array): input persistence diagrams.
+            X (list of n x 2 numpy array): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
         return self
