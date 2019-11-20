@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import gudhi
 import argparse
+import matplotlib.pyplot as plot
+import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -59,5 +60,5 @@ print("betti_numbers()=")
 print(simplex_tree.betti_numbers())
 
 if args.no_diagram == False:
-    pplot = gudhi.plot_persistence_diagram(diag, band=args.band)
-    pplot.show()
+    gudhi.plot_persistence_diagram(diag, band=args.band)
+    plot.show()
