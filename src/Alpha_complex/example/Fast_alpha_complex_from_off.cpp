@@ -2,6 +2,8 @@
 // to construct a simplex_tree from alpha complex
 #include <gudhi/Simplex_tree.h>
 
+#include <CGAL/Epick_d.h>
+
 #include <iostream>
 #include <string>
 
@@ -18,10 +20,13 @@ int main(int argc, char **argv) {
   std::string off_file_name {argv[1]};
   double alpha_square_max_value {atof(argv[2])};
 
+  // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
+  // (i.e. when the points are on a grid)
+  using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from an OFF file
   // ----------------------------------------------------------------------------
-  Gudhi::alpha_complex::Alpha_complex<> alpha_complex_from_file(off_file_name);
+  Gudhi::alpha_complex::Alpha_complex<Fast_kernel> alpha_complex_from_file(off_file_name);
 
   std::streambuf* streambuffer;
   std::ofstream ouput_file_stream;

@@ -45,6 +45,7 @@
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.<br>
+    For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
     </td>
     <td width="15%">
       <b>Author:</b> Vincent Rouvreau<br>

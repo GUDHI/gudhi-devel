@@ -52,6 +52,7 @@ RUN pip3 install \
     scipy \
     Cython \
     POT \
+    scikit-learn \
     sphinx \
     sphinxcontrib-bibtex
 

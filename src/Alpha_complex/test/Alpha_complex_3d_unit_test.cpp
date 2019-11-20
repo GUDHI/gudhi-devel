@@ -56,20 +56,51 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   std::cout << "Fast alpha complex 3d" << std::endl;
 
-  Fast_alpha_complex_3d alpha_complex(get_points<Fast_alpha_complex_3d::Point_3>());
+  std::vector<Fast_alpha_complex_3d::Bare_point_3> points = get_points<Fast_alpha_complex_3d::Bare_point_3>();
+  Fast_alpha_complex_3d alpha_complex(points);
 
   Gudhi::Simplex_tree<> stree;
   alpha_complex.create_complex(stree);
+
+  for (std::size_t index = 0; index < points.size(); index++) {
+    bool found = false;
+    for (auto point : points) {
+      if (point == alpha_complex.get_point(index)) {
+        found = true;
+        break;
+      }
+    }
+    // Check all points from alpha complex are found in the input point cloud
+    BOOST_CHECK(found);
+  }
+  // Exception if we go out of range
+  BOOST_CHECK_THROW(alpha_complex.get_point(points.size()), std::out_of_range);
 
   // -----------------
   // Exact version
   // -----------------
   std::cout << "Exact alpha complex 3d" << std::endl;
 
-  Exact_alpha_complex_3d exact_alpha_complex(get_points<Exact_alpha_complex_3d::Point_3>());
+  std::vector<Exact_alpha_complex_3d::Bare_point_3> exact_points = get_points<Exact_alpha_complex_3d::Bare_point_3>();
+  Exact_alpha_complex_3d exact_alpha_complex(exact_points);
 
   Gudhi::Simplex_tree<> exact_stree;
   exact_alpha_complex.create_complex(exact_stree);
+
+  for (std::size_t index = 0; index < exact_points.size(); index++) {
+    bool found = false;
+    Exact_alpha_complex_3d::Bare_point_3 ap = exact_alpha_complex.get_point(index);
+    for (auto point : points) {
+      if ((point.x() == ap.x()) && (point.y() == ap.y()) && (point.z() == ap.z())) {
+        found = true;
+        break;
+      }
+    }
+    // Check all points from alpha complex are found in the input point cloud
+    BOOST_CHECK(found);
+  }
+  // Exception if we go out of range
+  BOOST_CHECK_THROW(exact_alpha_complex.get_point(exact_points.size()), std::out_of_range);
 
   // ---------------------
   // Compare both versions
@@ -110,10 +141,26 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   std::cout << "Safe alpha complex 3d" << std::endl;
 
-  Safe_alpha_complex_3d safe_alpha_complex(get_points<Safe_alpha_complex_3d::Point_3>());
+  std::vector<Safe_alpha_complex_3d::Bare_point_3> safe_points = get_points<Safe_alpha_complex_3d::Bare_point_3>();
+  Safe_alpha_complex_3d safe_alpha_complex(safe_points);
 
   Gudhi::Simplex_tree<> safe_stree;
   safe_alpha_complex.create_complex(safe_stree);
+
+  for (std::size_t index = 0; index < safe_points.size(); index++) {
+    bool found = false;
+    Safe_alpha_complex_3d::Bare_point_3 ap = safe_alpha_complex.get_point(index);
+    for (auto point : points) {
+      if ((point.x() == ap.x()) && (point.y() == ap.y()) && (point.z() == ap.z())) {
+        found = true;
+        break;
+      }
+    }
+    // Check all points from alpha complex are found in the input point cloud
+    BOOST_CHECK(found);
+  }
+  // Exception if we go out of range
+  BOOST_CHECK_THROW(safe_alpha_complex.get_point(safe_points.size()), std::out_of_range);
 
   // ---------------------
   // Compare both versions

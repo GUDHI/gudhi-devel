@@ -10,7 +10,7 @@
 // Complexity = FAST, weighted = true, periodic = false
 using Weighted_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
-using Point = Weighted_alpha_complex_3d::Point_3;
+using Bare_point = Weighted_alpha_complex_3d::Bare_point_3;
 using Weighted_point = Weighted_alpha_complex_3d::Weighted_point_3;
 
 int main(int argc, char **argv) {
@@ -18,11 +18,11 @@ int main(int argc, char **argv) {
   // Init of a list of points and weights from a small molecule
   // ----------------------------------------------------------------------------
   std::vector<Weighted_point> weighted_points;
-  weighted_points.push_back(Weighted_point(Point(1, -1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Point(-1, 1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Point(-1, -1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Point(1, 1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Point(2, 2, 2), 1.));
+  weighted_points.push_back(Weighted_point(Bare_point(1, -1, -1), 4.));
+  weighted_points.push_back(Weighted_point(Bare_point(-1, 1, -1), 4.));
+  weighted_points.push_back(Weighted_point(Bare_point(-1, -1, 1), 4.));
+  weighted_points.push_back(Weighted_point(Bare_point(1, 1, 1), 4.));
+  weighted_points.push_back(Weighted_point(Bare_point(2, 2, 2), 1.));
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points

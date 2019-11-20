@@ -15,6 +15,7 @@
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
+#include <CGAL/Epeck_d.h>
 
 #include <cmath>  // float comparison
 #include <limits>
@@ -28,12 +29,16 @@
 #include <gudhi/Unitary_tests_utils.h>
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kernel_d;
+typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
 // Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<3> > Kernel_s;
+typedef CGAL::Epeck_d< CGAL::Dimension_tag<3> > Exact_kernel_s;
+// Use dynamic_dimension_tag for the user to be able to set dimension
+typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
+// Use static dimension_tag for the user not to be able to set dimension
+typedef CGAL::Epick_d< CGAL::Dimension_tag<3> > Inexact_kernel_s;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
-typedef boost::mpl::list<Kernel_d, Kernel_s> list_of_kernel_variants;
+typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of_kernel_variants) {
   // ----------------------------------------------------------------------------
@@ -86,7 +91,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
 }
 
 // Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Kernel_4;
+typedef CGAL::Epeck_d< CGAL::Dimension_tag<4> > Kernel_4;
 typedef Kernel_4::Point_d Point_4;
 typedef std::vector<Point_4> Vector_4_Points;
 

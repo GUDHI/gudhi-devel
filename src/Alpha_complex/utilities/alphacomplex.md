@@ -46,6 +46,8 @@ for the Alpha complex construction.
 coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
 to be recorded. Enter a negative value to see zero length intervals.
+* `-e [ --exact ]` for the exact computation version.
+* `-f [ --fast ]` for the fast computation version.
 
 **Example**
 

@@ -15,6 +15,8 @@
 #include <gudhi/Alpha_complex.h>
 #include <CGAL/Epick_d.h>
 
+#include <boost/range/adaptor/transformed.hpp>
+
 #include "Simplex_tree_interface.h"
 
 #include <iostream>
@@ -31,7 +33,10 @@ class Alpha_complex_interface {
 
  public:
   Alpha_complex_interface(const std::vector<std::vector<double>>& points) {
-    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(points);
+    auto mkpt = [](std::vector<double> const& vec){
+      return Point_d(vec.size(), vec.begin(), vec.end());
+    };
+    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(boost::adaptors::transform(points, mkpt));
   }
 
   Alpha_complex_interface(const std::string& off_file_name, bool from_file = true) {
@@ -45,9 +50,9 @@ class Alpha_complex_interface {
   std::vector<double> get_point(int vh) {
     std::vector<double> vd;
     try {
-      Point_d ph = alpha_complex_->get_point(vh);
+      Point_d const& ph = alpha_complex_->get_point(vh);
       for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
-        vd.push_back(*coord);
+        vd.push_back(CGAL::to_double(*coord));
     } catch (std::out_of_range const&) {
       // std::out_of_range is thrown in case not found. Other exceptions must be re-thrown
     }
