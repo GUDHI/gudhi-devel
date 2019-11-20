@@ -305,7 +305,7 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
     std::string line;
     getline(in, line);
     if (line.length() != 0 && line[0] != '#') {
-      double numbers[4] = {0.};
+      double numbers[4];
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
 #ifdef DEBUG_TRACES
       std::cout << "[" << n << "] = " << numbers[0] << "," << numbers[1]
