@@ -6,7 +6,7 @@
  * 
  * \section compiling Compiling
  * The library uses c++14 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.56.0
- * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
+ * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.12.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
  * \subsection utilities Utilities and examples
