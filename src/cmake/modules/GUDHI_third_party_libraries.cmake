@@ -90,14 +90,14 @@ message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 # Find the correct Python interpreter.
 # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
-find_package( PythonInterp )
+find_package( Python )
 
 # find_python_module tries to import module in Python interpreter and to retrieve its version number
 # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
 function( find_python_module PYTHON_MODULE_NAME )
   string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
   execute_process(
-          COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
+          COMMAND ${Python_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
           RESULT_VARIABLE PYTHON_MODULE_RESULT
           OUTPUT_VARIABLE PYTHON_MODULE_VERSION
           ERROR_VARIABLE PYTHON_MODULE_ERROR)
@@ -118,7 +118,7 @@ function( find_python_module PYTHON_MODULE_NAME )
   endif()
 endfunction( find_python_module )
 
-if( PYTHONINTERP_FOUND )
+if( Python_Interpreter_FOUND )
   find_python_module("cython")
   find_python_module("pytest")
   find_python_module("matplotlib")
@@ -133,19 +133,19 @@ if(NOT GUDHI_PYTHON_PATH)
   message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
 endif(NOT GUDHI_PYTHON_PATH)
 
-option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
 
-if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
+if(Python_Interpreter_FOUND AND CYTHON_FOUND)
   if(SPHINX_FOUND)
     # Documentation generation is available through sphinx
     find_program( SPHINX_PATH sphinx-build )
 
     if(NOT SPHINX_PATH)
-      if(PYTHON_VERSION_MAJOR EQUAL 3)
+      if(Python_VERSION_MAJOR EQUAL 3)
         # In Python3, just hack sphinx-build if it does not exist
-        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/doc/python3-sphinx-build.py")
-      endif(PYTHON_VERSION_MAJOR EQUAL 3)
+        set(SPHINX_PATH "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/doc/python3-sphinx-build.py")
+      endif(Python_VERSION_MAJOR EQUAL 3)
     endif(NOT SPHINX_PATH)
   endif(SPHINX_FOUND)
-endif(PYTHONINTERP_FOUND AND CYTHON_FOUND)
+endif(Python_Interpreter_FOUND AND CYTHON_FOUND)
 

@@ -17,11 +17,11 @@ endfunction( add_GUDHI_PYTHON_lib )
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
   if(PYTEST_FOUND)
-    # use ${PYTHON_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
+    # use ${Python_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
     # use py.test no cache provider, otherwise a .cache file is created in sources by py.test
     add_test(NAME ${THE_TEST}_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${PYTHON_EXECUTABLE} -B -m pytest -p no:cacheprovider ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
+             COMMAND ${Python_EXECUTABLE} -B -m pytest -p no:cacheprovider ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
   endif()
 endfunction( add_gudhi_py_test )
 
@@ -31,7 +31,7 @@ function( add_gudhi_debug_info DEBUG_INFO )
   set(GUDHI_PYTHON_DEBUG_INFO "${GUDHI_PYTHON_DEBUG_INFO}    \"${DEBUG_INFO}\\n\" \\\n" PARENT_SCOPE)
 endfunction( add_gudhi_debug_info )
 
-if(PYTHONINTERP_FOUND)
+if(Python_Interpreter_FOUND)
   if(CYTHON_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_reader', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
@@ -53,7 +53,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
 
-    add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
+    add_gudhi_debug_info("Python version ${Python_VERSION}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
     if(PYTEST_FOUND)
       add_gudhi_debug_info("Pytest version ${PYTEST_VERSION}")
@@ -214,12 +214,12 @@ if(PYTHONINTERP_FOUND)
     add_custom_command(
         OUTPUT gudhi.so
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
+        COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
 
     add_custom_target(python ALL DEPENDS gudhi.so
                       COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
-    install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
+    install(CODE "execute_process(COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
 
     # Test examples
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
@@ -227,7 +227,7 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
                -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
 
       if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
@@ -235,7 +235,7 @@ if(PYTHONINTERP_FOUND)
         add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
+                 ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/tangential_complex_plain_homology_from_off_file_example.py"
                  --no-diagram -i 2 -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
 
         add_gudhi_py_test(test_tangential_complex)
@@ -244,13 +244,13 @@ if(PYTHONINTERP_FOUND)
         add_test(NAME euclidean_strong_witness_complex_diagram_persistence_from_off_file_example_py_test
                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
+                 ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py"
                  --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
 
         add_test(NAME euclidean_witness_complex_diagram_persistence_from_off_file_example_py_test
                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
+                 ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
                  --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
       endif()
 
@@ -263,7 +263,7 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME bottleneck_basic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
       add_gudhi_py_test(test_bottleneck_distance)
 
@@ -274,26 +274,26 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME cover_complex_nerve_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
                -f human.off -c 2 -r 10 -g 0.3)
 
       add_test(NAME cover_complex_coordinate_gic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
                -f human.off -c 0 -v)
 
       add_test(NAME cover_complex_functional_gic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
                -o lucky_cat.off
                -f lucky_cat_PCA1 -v)
 
       add_test(NAME cover_complex_voronoi_gic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
                -f human.off -n 700 -v)
 
       add_gudhi_py_test(test_cover_complex)
@@ -304,13 +304,13 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
 
       if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
         add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
       endif()
 
@@ -328,14 +328,14 @@ if(PYTHONINTERP_FOUND)
     add_test(NAME periodic_cubical_complex_barcode_persistence_from_perseus_file_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
+             ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py"
              --no-barcode -f ${CMAKE_SOURCE_DIR}/data/bitmap/CubicalTwoSphere.txt)
 
     if(NUMPY_FOUND)
       add_test(NAME random_cubical_complex_persistence_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/random_cubical_complex_persistence_example.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/random_cubical_complex_persistence_example.py"
                10 10 10)
     endif()
 
@@ -346,20 +346,20 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py"
+               ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py"
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/distance_matrix/lower_triangular_distance_matrix.csv -e 12.0 -d 3)
 
       add_test(NAME rips_complex_diagram_persistence_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-               ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_off_file_example.py
+               ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_diagram_persistence_from_off_file_example.py
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off  -e 0.25 -d 3)
     endif()
 
     add_test(NAME rips_complex_from_points_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
+             ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
 
     add_gudhi_py_test(test_rips_complex)
 
@@ -367,7 +367,7 @@ if(PYTHONINTERP_FOUND)
     add_test(NAME simplex_tree_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/simplex_tree_example.py)
+             ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/simplex_tree_example.py)
 
     add_gudhi_py_test(test_simplex_tree)
 
@@ -375,7 +375,7 @@ if(PYTHONINTERP_FOUND)
     add_test(NAME witness_complex_from_nearest_landmark_table_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-             ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/witness_complex_from_nearest_landmark_table.py)
+             ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/witness_complex_from_nearest_landmark_table.py)
 
     add_gudhi_py_test(test_witness_complex)
 
@@ -457,7 +457,7 @@ if(PYTHONINTERP_FOUND)
     message("++ Python module will not be compiled because cython was not found")
     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   endif(CYTHON_FOUND)
-else(PYTHONINTERP_FOUND)
+else(Python_Interpreter_FOUND)
   message("++ Python module will not be compiled because no Python interpreter was found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-endif(PYTHONINTERP_FOUND)
+endif(Python_Interpreter_FOUND)
