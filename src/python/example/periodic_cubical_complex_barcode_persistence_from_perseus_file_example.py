@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import gudhi
 import argparse
+import matplotlib.pyplot as plot
+import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -70,5 +71,6 @@ if is_file_perseus(args.file):
     print(periodic_cubical_complex.betti_numbers())
     if args.no_barcode == False:
         gudhi.plot_persistence_barcode(diag)
+        plot.show()
 else:
     print(args.file, "is not a valid perseus style file")

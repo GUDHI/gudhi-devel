@@ -20,6 +20,7 @@ This function can display the persistence result as a barcode:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
 
     off_file = gudhi.__root_source_dir__ + '/data/points/tore3D_300.off'
@@ -29,7 +30,7 @@ This function can display the persistence result as a barcode:
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence(min_persistence=0.4)
 
-    plot = gudhi.plot_persistence_barcode(diag)
+    gudhi.plot_persistence_barcode(diag)
     plot.show()
 
 Show persistence as a diagram
@@ -43,14 +44,15 @@ This function can display the persistence result as a diagram:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
 
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    plt = gudhi.plot_persistence_diagram(persistence_file=persistence_file,
+    gudhi.plot_persistence_diagram(persistence_file=persistence_file,
         legend=True)
-    plt.show()
+    plot.show()
 
 Persistence density
 -------------------
@@ -63,11 +65,12 @@ If you want more information on a specific dimension, for instance:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
 
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    plt = gudhi.plot_persistence_density(persistence_file=persistence_file,
+    gudhi.plot_persistence_density(persistence_file=persistence_file,
         max_intervals=0, dimension=1, legend=True)
-    plt.show()
+    plot.show()

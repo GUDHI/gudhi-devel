@@ -293,6 +293,9 @@ Note: the function does not check that birth <= death.
 **/
 template <typename OutputIterator>
 void read_persistence_intervals_and_dimension(std::string const& filename, OutputIterator out) {
+#ifdef DEBUG_TRACES
+  std::cout << "read_persistence_intervals_and_dimension - " << filename << std::endl;
+#endif  // DEBUG_TRACES
   std::ifstream in(filename);
   if (!in.is_open()) {
     std::string error_str("read_persistence_intervals_and_dimension - Unable to open file ");
@@ -307,6 +310,13 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
     if (line.length() != 0 && line[0] != '#') {
       double numbers[4];
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
+#ifdef DEBUG_TRACES
+      std::cout << "[" << n << "] = ";
+      for (int i = 0; i < n; i++) {
+        std::cout << numbers[i] << ",";
+      }
+      std::cout << std::endl;
+#endif  // DEBUG_TRACES
       if (n >= 2) {
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);
         *out++ = std::make_tuple(dim, numbers[n - 2], numbers[n - 1]);
