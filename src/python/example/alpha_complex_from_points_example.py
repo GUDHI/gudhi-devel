@@ -52,4 +52,9 @@ print("star([0])=", simplex_tree.get_star([0]))
 print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))
 
 print("point[0]=", alpha_complex.get_point(0))
-print("point[5]=", alpha_complex.get_point(5))
+try:
+    print("point[5]=", alpha_complex.get_point(5))
+except IndexError:
+    pass
+else:
+    assert False
