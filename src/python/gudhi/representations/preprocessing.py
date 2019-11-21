@@ -58,14 +58,15 @@ class Clamping(BaseEstimator, TransformerMixin):
     """
     This is a class for clamping values. It can be used as a parameter for the DiagramScaler class, for instance if you want to clamp abscissae or ordinates of persistence diagrams.
     """
-    def __init__(self, limit=np.inf):
+    def __init__(self, minimum=-np.inf, maximum=np.inf):
         """
         Constructor for the Clamping class.
 
         Parameters:
             limit (double): clamping value (default np.inf).
         """
-        self.limit = limit
+        self.minimum = minimum
+        self.maximum = maximum
 
     def fit(self, X, y=None):
         """
@@ -87,8 +88,7 @@ class Clamping(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of size n: output list of values.
         """
-        Xfit = np.minimum(X, self.limit)
-        #Xfit = np.where(X >= self.limit, self.limit * np.ones(X.shape), X)
+        Xfit = np.clip(X, self.minimum, self.maximum)
         return Xfit
 
 class DiagramScaler(BaseEstimator, TransformerMixin):
