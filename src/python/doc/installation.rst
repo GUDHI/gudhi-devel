@@ -40,6 +40,20 @@ To build the GUDHI Python module, run the following commands in a terminal:
     cd python
     make
 
+.. note::
+
+    :code:`make python` (or :code:`make` in python directory) is only a
+    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
+    to shortcut :code:`python setup.py build_ext --inplace` command.
+    No specific other options  (:code:`-j8` for parallel, or even :code:`make clean`, ...) are
+    available.
+    But one can use :code:`python setup.py ...` specific options in the python directory:
+
+.. code-block:: bash
+
+    python setup.py clean --all               # Clean former compilation
+    python setup.py build_ext -j 8 --inplace  # Build in parallel
+
 GUDHI Python module installation
 ================================
 
@@ -59,6 +73,17 @@ Or install it definitely in your Python packages folder:
     # May require sudo or administrator privileges
     make install
 
+.. note::
+
+    :code:`make install` is only a
+    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
+    to shortcut :code:`python setup.py install` command.
+    It does not take into account :code:`CMAKE_INSTALL_PREFIX`.
+    But one can use :code:`python setup.py install ...` specific options in the python directory:
+
+.. code-block:: bash
+
+    python setup.py  install --prefix /home/gudhi  # Install in /home/gudhi directory
 
 Test suites
 ===========

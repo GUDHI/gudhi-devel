@@ -1,5 +1,5 @@
-GUDHI Python module documentation
-#################################
+GUDHI Python modules documentation
+##################################
 
 .. figure::
      ../../doc/common/Gudhi_banner.png
