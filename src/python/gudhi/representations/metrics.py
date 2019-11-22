@@ -91,7 +91,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`bottleneck_distance`.
+            epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
         """
         self.epsilon = epsilon
 
