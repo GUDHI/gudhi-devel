@@ -26,7 +26,7 @@
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
-# error Alpha_complex_3d is only available for CGAL >= 4.11
+# error bottleneck_distance is only available for CGAL >= 4.11
 #endif
 
 namespace Gudhi {
