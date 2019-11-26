@@ -83,7 +83,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
 class Landscape(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled uniformly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
+    This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
     """
     def __init__(self, num_landscapes=5, resolution=100, sample_range=[np.nan, np.nan]):
         """
@@ -92,7 +92,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         Parameters:
             num_landscapes (int): number of piecewise-linear functions to output (default 5).
             resolution (int): number of sample for all piecewise-linear functions (default 100).
-            sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
 
@@ -136,9 +136,9 @@ class Landscape(BaseEstimator, TransformerMixin):
 
             for j in range(num_pts_in_diag):
                 [px,py] = diagram[j,:2]
-                min_idx = np.minimum(np.maximum(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
 
                 if min_idx < self.resolution and max_idx > 0:
 
@@ -165,7 +165,7 @@ class Landscape(BaseEstimator, TransformerMixin):
 
 class Silhouette(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence silhouettes from a list of persistence diagrams. A persistence silhouette is computed by taking a weighted average of the collection of 1D piecewise-linear functions given by the persistence landscapes, and then by uniformly sampling this average on a given range. Finally, the corresponding vector of samples is returned. See https://arxiv.org/abs/1312.0308 for more details.
+    This is a class for computing persistence silhouettes from a list of persistence diagrams. A persistence silhouette is computed by taking a weighted average of the collection of 1D piecewise-linear functions given by the persistence landscapes, and then by evenly sampling this average on a given range. Finally, the corresponding vector of samples is returned. See https://arxiv.org/abs/1312.0308 for more details.
     """
     def __init__(self, weight=lambda x: 1, resolution=100, sample_range=[np.nan, np.nan]):
         """
@@ -174,7 +174,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
         Parameters:
             weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie on lists or numpy arrays of the form [p_x,p_y].
             resolution (int): number of samples for the weighted average (default 100).
-            sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
 
@@ -219,9 +219,9 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
                 [px,py] = diagram[j,:2]
                 weight  = weights[j] / total_weight
-                min_idx = np.minimum(np.maximum(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                mid_idx = np.minimum(np.maximum(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
 
                 if min_idx < self.resolution and max_idx > 0:
 
@@ -243,7 +243,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
 class BettiCurve(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing Betti curves from a list of persistence diagrams. A Betti curve is a 1D piecewise-constant function obtained from the rank function. It is sampled uniformly on a given range and the vector of samples is returned. See https://www.researchgate.net/publication/316604237_Time_Series_Classification_via_Topological_Data_Analysis for more details.
+    This is a class for computing Betti curves from a list of persistence diagrams. A Betti curve is a 1D piecewise-constant function obtained from the rank function. It is sampled evenly on a given range and the vector of samples is returned. See https://www.researchgate.net/publication/316604237_Time_Series_Classification_via_Topological_Data_Analysis for more details.
     """
     def __init__(self, resolution=100, sample_range=[np.nan, np.nan]):
         """
@@ -251,7 +251,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         Parameters:
             resolution (int): number of sample for the piecewise-constant function (default 100).
-            sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.resolution, self.sample_range = resolution, sample_range
 
@@ -290,8 +290,8 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             bc =  np.zeros(self.resolution)
             for j in range(num_pts_in_diag):
                 [px,py] = diagram[j,:2]
-                min_idx = np.minimum(np.maximum(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                max_idx = np.minimum(np.maximum(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                 for k in range(min_idx, max_idx):
                     bc[k] += 1
 
@@ -313,7 +313,7 @@ class Entropy(BaseEstimator, TransformerMixin):
             mode (string): what entropy to compute: either "scalar" for computing the entropy statistics, or "vector" for computing the entropy summary functions (default "scalar").
             normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
-            sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn uniformly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
+            sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
         """
         self.mode, self.normalized, self.resolution, self.sample_range = mode, normalized, resolution, sample_range
 
@@ -359,8 +359,8 @@ class Entropy(BaseEstimator, TransformerMixin):
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
                     [px,py] = orig_diagram[j,:2]
-                    min_idx = np.minimum(np.maximum(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
-                    max_idx = np.minimum(np.maximum(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0), self.resolution)
+                    min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                    max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                     for k in range(min_idx, max_idx):
                         ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
                     if self.normalized:

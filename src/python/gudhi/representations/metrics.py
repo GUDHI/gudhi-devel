@@ -86,12 +86,12 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams. 
     """
-    def __init__(self, epsilon=1e-3):
+    def __init__(self, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            epsilon (double): approximation quality (default 1e-4).
+            epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
         """
         self.epsilon = epsilon
 
@@ -118,7 +118,8 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         """
         num_diag1 = len(X)
 
-        if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
+        #if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
+        if X is self.diagrams_:
             matrix = np.zeros((num_diag1, num_diag1))
 
             if USE_GUDHI:
@@ -127,7 +128,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
                         matrix[i,j] = bottleneck_distance(X[i], X[j], self.epsilon)
                         matrix[j,i] = matrix[i,j]
             else:
-                print("Gudhi required---returning null matrix")
+                print("Gudhi built without CGAL: returning a null matrix")
 
         else:
             num_diag2 = len(self.diagrams_)
@@ -138,7 +139,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
                     for j in range(num_diag2):
                         matrix[i,j] = bottleneck_distance(X[i], self.diagrams_[j], self.epsilon)
             else:
-                print("Gudhi required---returning null matrix")
+                print("Gudhi built without CGAL: returning a null matrix")
 
         Xfit = matrix
 
