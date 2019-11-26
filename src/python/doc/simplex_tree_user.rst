@@ -23,13 +23,9 @@ scheme.
 Implementation
 --------------
 
-There are two implementation of complexes. The first on is the Simplex_tree data structure.
-The simplex tree is an efficient and flexible data structure for representing general (filtered) simplicial complexes.
-The data structure is described in :cite`boissonnatmariasimplextreealgorithmica`.
-
-The second one is the Hasse_complex. The Hasse complex is a data structure representing explicitly all co-dimension 1
-incidence relations in a complex. It is consequently faster when accessing the boundary of a simplex, but is less
-compact and harder to construct from scratch.
+The :class:`simplex tree<gudhi.SimplexTree>` is an efficient and flexible data structure for representing general
+(filtered) simplicial complexes.
+The data structure is described in :cite:`boissonnatmariasimplextreealgorithmica`.
 
 Example
 -------

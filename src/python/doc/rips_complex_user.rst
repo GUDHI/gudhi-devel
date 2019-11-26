@@ -40,12 +40,12 @@ A vertex name corresponds to the index of the point in the given range (aka. the
 On this example, as edges (4,5), (4,6) and (5,6) are in the complex, simplex (4,5,6) is added with the filtration value
 set with :math:`max(filtration(4,5), filtration(4,6), filtration(5,6))`. And so on for simplex (0,1,2,3).
 
-If the `RipsComplex` interfaces are not detailed enough for your need, please refer to rips_persistence_step_by_step.cpp
-C++ example, where the graph construction over the Simplex_tree is more detailed.
+If the :doc:`RipsComplex <rips_complex_ref>` interfaces are not detailed enough for your need, please refer to
+rips_persistence_step_by_step.cpp C++ example, where the graph construction over the Simplex_tree is more detailed.
 
 A Rips complex can easily become huge, even if we limit the length of the edges
 and the dimension of the simplices. One easy trick, before building a Rips
-complex on a point cloud, is to call `sparsify_point_set` which removes points
+complex on a point cloud, is to call :func:`~gudhi.sparsify_point_set` which removes points
 that are too close to each other. This does not change its persistence diagram
 by more than the length used to define "too close".
 
@@ -57,7 +57,7 @@ a :math:`\frac{1}{1-\varepsilon}`-interleaving, although in practice the
 error is usually smaller.  A more intuitive presentation of the idea is
 available in :cite:`cavanna15geometric`, and in a video
 :cite:`cavanna15visualizing`. Passing an extra argument `sparse=0.3` at the
-construction of a `RipsComplex` object asks it to build a sparse Rips with
+construction of a :class:`~gudhi.RipsComplex` object asks it to build a sparse Rips with
 parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
 regular Rips complex.
 
@@ -69,7 +69,7 @@ Example from a point cloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This example builds the neighborhood graph from the given points, up to max_edge_length.
-Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
+Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the simplicial complex.
 
@@ -128,7 +128,7 @@ Example from OFF file
 
 This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
 points in an OFF file, and max_edge_length value.
-Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
+Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the Rips complex.
 
@@ -178,7 +178,7 @@ Example from a distance matrix
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This example builds the one skeleton graph from the given distance matrix, and max_edge_length value.
-Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
+Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the simplicial complex.
 
@@ -233,7 +233,7 @@ Example from csv file
 
 This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
 distance matrix in a csv file, and max_edge_length value.
-Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
+Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the Rips complex.
 
@@ -286,7 +286,7 @@ Example from  a correlation matrix
 Analogously to the case of distance matrix, Rips complexes can be also constructed based on correlation matrix.
 Given a correlation matrix M, comportment-wise 1-M is a distance matrix.
 This example builds the one skeleton graph from the given corelation matrix and threshold value.
-Then it creates a :doc:`Simplex_tree <simplex_tree_ref>` with it.
+Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
 
 Finally, it is asked to display information about the simplicial complex.
 
@@ -307,7 +307,7 @@ Finally, it is asked to display information about the simplicial complex.
                                 [0.01, 0.01, 0.72, 1., 0.7],
                                 [0.89, 0.61, 0.03, 0.7, 1.]], float)
 
-    distance_matrix = np.ones((correlation_matrix.shape),float) - correlation_matrix
+    distance_matrix = 1 - correlation_matrix
     rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix, max_edge_length=1.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
@@ -342,6 +342,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [1, 3] -> 0.99
 
 .. note::
-    As persistence diagrams points will be under the diagonal,
+    If you compute the persistence diagram and convert distances back to correlation values,
+    points in the persistence diagram will be under the diagonal, and
     bottleneck distance and persistence graphical tool will not work properly,
     this is a known issue.
