@@ -41,6 +41,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinxcontrib.bibtex',
+    'sphinx_paramlinks',
 ]
 
 todo_include_todos = True

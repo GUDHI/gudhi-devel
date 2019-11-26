@@ -10,7 +10,7 @@ Representations manual
 
 This module, originally named sklearn_tda, aims at bridging the gap between persistence diagrams and machine learning tools, in particular scikit-learn. It provides tools, using the scikit-learn standard interface, to compute distances and kernels on diagrams, and to convert diagrams into vectors.
 
-A diagram is represented as a numpy array of shape (n,2), as can be obtained from :func:`gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time.
+A diagram is represented as a numpy array of shape (n,2), as can be obtained from :func:`~gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time.
 
 A small example is provided
 
