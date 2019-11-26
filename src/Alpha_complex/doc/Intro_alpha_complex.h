@@ -38,12 +38,12 @@ namespace alpha_complex {
  *
  * Alpha_complex is constructing a <a target="_blank"
  * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
- * \cite cgal:hdj-t-15b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
- * Algorithms Library \cite cgal:eb-15b) and is able to create a `SimplicialComplexForAlpha`.
+ * \cite cgal:hdj-t-19b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
+ * Algorithms Library \cite cgal:eb-19b) and is able to create a `SimplicialComplexForAlpha`.
  *
  * The complex is a template class requiring an Epick_d <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
- * \cite cgal:s-gkd-15b from CGAL as template parameter.
+ * \cite cgal:s-gkd-19b from CGAL as template parameter.
  *
  * \remark
  * - When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
