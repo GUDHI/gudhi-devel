@@ -73,7 +73,7 @@ If you want more information on a specific dimension, for instance:
     birth_death = gudhi.read_persistence_intervals_in_dimension(
         persistence_file=persistence_file,
         only_this_dim=1)
-    pers_diag = [(1, (elt[0], elt[1])) for elt in birth_death]
+    pers_diag = [(1, elt) for elt in birth_death]
     # Use subplots to display diagram and density side by side
     fig, axes = plot.subplots(nrows=1, ncols=2, figsize=(12, 5))
     gudhi.plot_persistence_diagram(persistence=pers_diag,
