@@ -67,10 +67,17 @@ If you want more information on a specific dimension, for instance:
 
     import matplotlib.pyplot as plot
     import gudhi
-
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    gudhi.plot_persistence_density(persistence_file=persistence_file,
-        max_intervals=0, dimension=1, legend=True)
+    birth_death = gudhi.read_persistence_intervals_in_dimension(
+        persistence_file=persistence_file,
+        only_this_dim=1)
+    pers_diag = [(1, elt) for elt in birth_death]
+    # Use subplots to display diagram and density side by side
+    fig, axes = plot.subplots(nrows=1, ncols=2, figsize=(12, 5))
+    gudhi.plot_persistence_diagram(persistence=pers_diag,
+        axes=axes[0])
+    gudhi.plot_persistence_density(persistence=pers_diag,
+        dimension=1, legend=True, axes=axes[1])
     plot.show()
