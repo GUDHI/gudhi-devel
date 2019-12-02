@@ -9,19 +9,19 @@ Definition
 
 .. include:: alpha_complex_sum.inc
 
-Alpha_complex is constructing a :doc:`Simplex_tree <simplex_tree_ref>` using
+`AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_ 
 :cite:`cgal:hdj-t-15b` from `CGAL <http://www.cgal.org/>`_ (the Computational Geometry Algorithms Library
 :cite:`cgal:eb-15b`).
 
 Remarks
 ^^^^^^^
-When Alpha_complex is constructed with an infinite value of :math:`\alpha`, the complex is a Delaunay complex.
+When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha`, the complex is a Delaunay complex (with special filtration values).
 
 Example from points
 -------------------
 
-This example builds the Delaunay triangulation from the given points, and initializes the alpha complex with it:
+This example builds the alpha-complex from the given points:
 
 .. testcode::
 
@@ -139,15 +139,16 @@ Non decreasing filtration values
 
 As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not
 quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
-We fix that up by calling `Simplex_tree::make_filtration_non_decreasing()` (cf.
+We fix that up by calling :func:`~gudhi.SimplexTree.make_filtration_non_decreasing` (cf.
 `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
 
 Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The simplex tree is pruned from the given maximum alpha squared value (cf. `Simplex_tree::prune_above_filtration()`
-in the `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_). Note that this does not provide any kind
-of speed-up, since we always first build the full filtered complex, so it is recommended not to use `max_alpha_square`.
+The simplex tree is pruned from the given maximum alpha squared value (cf.
+:func:`~gudhi.SimplexTree.prune_above_filtration`). Note that this does not provide any kind
+of speed-up, since we always first build the full filtered complex, so it is recommended not to use
+:paramref:`~gudhi.AlphaComplex.create_simplex_tree.max_alpha_square`.
 In the following example, a threshold of 59 is used.
 
 

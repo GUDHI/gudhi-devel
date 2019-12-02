@@ -47,7 +47,7 @@ which leads to definitions of **weak relaxed witness complex** (or just relaxed 
 In particular case of 0-relaxation, weak complex corresponds to **witness complex** introduced in
 :cite:`de2004topological`, whereas 0-relaxed strong witness complex consists of just vertices and is not very
 interesting. Hence for small relaxation weak version is preferable.
-However, to capture the homotopy type (for example using Gudhi::persistent_cohomology::Persistent_cohomology) it is
+However, to capture the homotopy type (for example using :func:`gudhi.SimplexTree.persistence`) it is
 often necessary to work with higher filtration values. In this case strong relaxed witness complex is faster to compute
 and offers similar results.
 
@@ -69,7 +69,7 @@ The construction of the Euclidean versions of complexes follow the same scheme:
 
 In the non-Euclidean classes, the lists of nearest landmarks are supposed to be given as input.
 
-The constructors take on the steps 1 and 2, while the function 'create_complex' executes the step 3.
+The constructors take on the steps 1 and 2, while the function :func:`!create_complex` executes the step 3.
 
 Constructing weak relaxed witness complex from an off file
 ----------------------------------------------------------

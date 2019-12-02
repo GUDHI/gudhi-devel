@@ -91,7 +91,7 @@ cdef class TangentialComplex:
         Raises:
             ValueError: In debug mode, if the computed star dimension is too
                 low. Try to set a bigger maximal edge length value with
-                :func:`~gudhi.Tangential_complex.set_max_squared_edge_length`
+                :meth:`set_max_squared_edge_length`
                 if this happens.
         """
         self.thisptr.compute_tangential_complex()
@@ -166,7 +166,7 @@ cdef class TangentialComplex:
         :type max_squared_edge_length: double
 
         If the maximal edge length value is too low
-        :func:`~gudhi.Tangential_complex.compute_tangential_complex`
+        :meth:`compute_tangential_complex`
         will throw an exception in debug mode.
         """
         self.thisptr.set_max_squared_edge_length(max_squared_edge_length)

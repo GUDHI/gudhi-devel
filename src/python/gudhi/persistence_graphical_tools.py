@@ -369,7 +369,6 @@ def plot_persistence_density(
                 persistence_dim = read_persistence_intervals_in_dimension(
                     persistence_file=persistence_file, only_this_dim=dimension
                 )
-                print(persistence_dim)
             else:
                 print("file " + persistence_file + " not found.")
                 return None
@@ -417,10 +416,10 @@ def plot_persistence_density(
         zi = k(np.vstack([xi.flatten(), yi.flatten()]))
 
         # Make the plot
-        axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap)
+        img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap)
 
         if legend:
-            axes.colorbar()
+            plt.colorbar(img, ax=axes)
 
         axes.set_xlabel("Birth")
         axes.set_ylabel("Death")
