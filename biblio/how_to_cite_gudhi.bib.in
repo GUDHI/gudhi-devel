@@ -3,7 +3,7 @@
 , author      = "{The GUDHI Project}"
 , publisher     = "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
-, year         = 2019
+, year         = @GUDHI_VERSION_YEAR@
 , url =    "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/"
 }
 
@@ -14,7 +14,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__simplex__tree.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:PersistentCohomology
@@ -24,7 +24,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__persistent__cohomology.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:Contraction
@@ -34,7 +34,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__contr.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:SkeletonBlocker
@@ -44,7 +44,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__skbl.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:AlphaComplex
@@ -54,7 +54,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__alpha__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:CubicalComplex
@@ -64,7 +64,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cubical__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:WitnessComplex
@@ -74,7 +74,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__witness__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:SubSampling
@@ -84,7 +84,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__subsampling.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:SpatialSearching
@@ -94,7 +94,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__spatial__searching.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:TangentialComplex
@@ -104,7 +104,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__tangential__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:RipsComplex
@@ -114,7 +114,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__rips__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:BottleneckDistance
@@ -124,7 +124,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__bottleneck__distance.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:cython
@@ -134,7 +134,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:CoverComplex
@@ -144,7 +144,7 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cover__complex.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }
 
 @incollection{gudhi:PersistenceRepresentations
@@ -154,5 +154,5 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group___persistence__representations.html"
-, year =        2019
+, year =        @GUDHI_VERSION_YEAR@
 }

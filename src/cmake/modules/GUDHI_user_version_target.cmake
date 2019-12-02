@@ -24,6 +24,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
         copy ${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile ${GUDHI_USER_VERSION_DIR}/Doxyfile)
 
 # Generate bib files for Doxygen - cf. root CMakeLists.txt for explanation
+string(TIMESTAMP GUDHI_VERSION_YEAR "%Y")
 configure_file(${CMAKE_SOURCE_DIR}/biblio/how_to_cite_gudhi.bib.in "${CMAKE_CURRENT_BINARY_DIR}/biblio/how_to_cite_gudhi.bib" @ONLY)
 file(COPY "${CMAKE_SOURCE_DIR}/biblio/how_to_cite_cgal.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
 file(COPY "${CMAKE_SOURCE_DIR}/biblio/bibliography.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
