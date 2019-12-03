@@ -18,11 +18,19 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
   set(GUDHI_DOXYGEN_IMAGE_PATH "${GUDHI_DOXYGEN_IMAGE_PATH}    doc/${GUDHI_MODULE}/ \\  \n")
 endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
 
-# Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+# Generate Doxyfile for Doxygen - cf. root CMakeLists.txt for explanation
 configure_file(${CMAKE_SOURCE_DIR}/src/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile" @ONLY)
-
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
         copy ${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile ${GUDHI_USER_VERSION_DIR}/Doxyfile)
+
+# Generate bib files for Doxygen - cf. root CMakeLists.txt for explanation
+string(TIMESTAMP GUDHI_VERSION_YEAR "%Y")
+configure_file(${CMAKE_SOURCE_DIR}/biblio/how_to_cite_gudhi.bib.in "${CMAKE_CURRENT_BINARY_DIR}/biblio/how_to_cite_gudhi.bib" @ONLY)
+file(COPY "${CMAKE_SOURCE_DIR}/biblio/how_to_cite_cgal.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
+file(COPY "${CMAKE_SOURCE_DIR}/biblio/bibliography.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
+# Copy biblio directory for user version
+add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                   copy_directory ${CMAKE_CURRENT_BINARY_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
 
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/Conventions.txt ${GUDHI_USER_VERSION_DIR}/Conventions.txt)
@@ -39,8 +47,6 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/CMakeGUDHIVersion.txt ${GUDHI_USER_VERSION_DIR}/CMakeGUDHIVersion.txt)
 
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH} ${GUDHI_USER_VERSION_DIR}/python)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
