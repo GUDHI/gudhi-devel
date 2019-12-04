@@ -47,15 +47,16 @@ namespace alpha_complex {
  *
  * \remark
  * - When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
- * complex.
+ * complex with filtration values. The Delaunay complex without filtartion values is also available by passing
+ * `default_filtration_value=true` to `Alpha_complex::create_complex`.
  * - For people only interested in the topology of the \ref alpha_complex (for instance persistence),
  * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
  * \ref cech_complex can still make sense in higher dimension precisely because you can bound the radii.
- * - Using the default `CGAL::Epeck_d` makes the construction safe. If you pass exact=true to create_complex, the
- * filtration values are the exact ones converted to the filtration value type of the simplicial complex. This can be
- * very slow. If you pass exact=false (the default), the filtration values are only guaranteed to have a small
- * multiplicative error compared to the exact value, see <code><a class="el" target="_blank"
- * href="https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html">
+ * - Using the default `CGAL::Epeck_d` makes the construction safe. If you pass `exact=true` to
+ * `Alpha_complex::create_complex`, the filtration values are the exact ones converted to the filtration value type of
+ * the simplicial complex. This can be very slow. If you pass `exact=false` (the default), the filtration values are
+ * only guaranteed to have a small multiplicative error compared to the exact value, see <code>
+ * <a class="el" target="_blank" href="https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html">
  * CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double</a></code> for details. A drawback, when computing
  * persistence, is that an empty exact interval [10^12,10^12] may become a non-empty approximate interval
  * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
