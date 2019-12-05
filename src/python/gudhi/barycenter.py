@@ -293,13 +293,12 @@ def _test_perf():
 
 
 def _sanity_check(verbose):
-    #dg1 = np.array([[0.2, 0.5]])
-    #dg2 = np.array([[0.2, 0.7]])
-    #dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
-    #dg4 = np.array([[0.72, 0.82]])
-    #X = [dg1, dg2, dg3, dg4]
-    #Y, a = lagrangian_barycenter(X, verbose=verbose)
-    #_plot_barycenter(X, Y, a)
+    dg1 = np.array([[0.2, 0.5]])
+    dg2 = np.array([[0.2, 0.7], [0.73, 0.88]])
+    dg3 = np.array([[0.3, 0.6], [0.7, 0.85], [0.2, 0.3]])
+    X = [dg1, dg2, dg3]
+    Y, a = lagrangian_barycenter(X, verbose=verbose)
+    _plot_barycenter(X, Y, a)
 
     #dg1 = np.array([[0.2, 0.5]])
     #dg2 = np.array([]) # The empty diagram
@@ -323,16 +322,16 @@ def _sanity_check(verbose):
     #_plot_barycenter(X, Y, a)
  
     
-    dg1 = np.array([[0.2, 0.5]])
-    dg2 = np.array([[0.2, 0.7]])
-    dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
-    dg4 = np.array([])
-    
-    bary = lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3)
-
-    message = "Wasserstein barycenter estimated:"    
-    print(message)
-    print(bary)
+    #dg1 = np.array([[0.2, 0.5]])
+    #dg2 = np.array([[0.2, 0.7]])
+    #dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
+    #dg4 = np.array([])
+    #
+    #bary, a = lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3, verbose=True)
+    #_plot_barycenter([dg1, dg2, dg3, dg4], bary, a)
+    #message = "Wasserstein barycenter estimated:"    
+    #print(message)
+    #print(bary)
 
 if __name__=="__main__":
     _sanity_check(verbose = True)
