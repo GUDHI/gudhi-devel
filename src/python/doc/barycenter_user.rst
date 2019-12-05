@@ -9,7 +9,7 @@ Definition
 
 .. include:: wasserstein_distance_sum.inc
 
-This implementation is based on ideas from "Large Scale Computation of Means and Cluster for Persistence Diagrams via Optimal Transport".
+This implementation is based on ideas from "Frechet means for distribution of persistence diagrams", Turner et al. 2014.
 
 Function
 --------
