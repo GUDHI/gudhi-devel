@@ -28,7 +28,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_interface(string off_file, bool from_file)
         vector[double] get_point(int vertex)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version)
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -66,7 +66,7 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, off_file=''):
+    def __cinit__(self, points = None, off_file = ''):
         if off_file:
             if os.path.isfile(off_file):
                 self.thisptr = new Alpha_complex_interface(str.encode(off_file), True)
@@ -99,17 +99,22 @@ cdef class AlphaComplex:
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
 
-    def create_simplex_tree(self, max_alpha_square=float('inf')):
+    def create_simplex_tree(self, max_alpha_square = float('inf'),
+                            exact_version = False):
         """
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity, and
             there is very little point using anything else since it does
             not save time.
         :type max_alpha_square: float
+        :param exact_version: Exact computation version. Default is false
+            which means Safe version is used.
+        :type exact_version: bool
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, max_alpha_square)
+        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                                         max_alpha_square, exact_version)
         return stree

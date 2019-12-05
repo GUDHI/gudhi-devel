@@ -13,6 +13,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Alpha_complex.h>
+#include <CGAL/Epeck_d.h>
 #include <CGAL/Epick_d.h>
 
 #include <boost/range/adaptor/transformed.hpp>
@@ -28,7 +29,7 @@ namespace Gudhi {
 namespace alpha_complex {
 
 class Alpha_complex_interface {
-  using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+  using Dynamic_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
 
  public:
@@ -51,7 +52,7 @@ class Alpha_complex_interface {
     std::vector<double> vd;
     try {
       Point_d const& ph = alpha_complex_->get_point(vh);
-      for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); coord++)
+      for (auto coord = ph.cartesian_begin(); coord != ph.cartesian_end(); coord++)
         vd.push_back(CGAL::to_double(*coord));
     } catch (std::out_of_range const&) {
       // std::out_of_range is thrown in case not found. Other exceptions must be re-thrown
@@ -59,8 +60,8 @@ class Alpha_complex_interface {
     return vd;
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square) {
-    alpha_complex_->create_complex(*simplex_tree, max_alpha_square);
+  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square, bool exact_version) {
+    alpha_complex_->create_complex(*simplex_tree, max_alpha_square, exact_version);
     simplex_tree->initialize_filtration();
   }
 
