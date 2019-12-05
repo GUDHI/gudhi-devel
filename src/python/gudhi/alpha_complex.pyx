@@ -107,8 +107,8 @@ cdef class AlphaComplex:
             there is very little point using anything else since it does
             not save time.
         :type max_alpha_square: float
-        :param exact_version: Exact computation version. Default is false
-            which means Safe version is used.
+        :param exact_version: :code:`EXACT` computation version if set.
+            Default is false which means :code:`SAFE` version is used.
         :type exact_version: bool
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
