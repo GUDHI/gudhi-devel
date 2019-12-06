@@ -73,3 +73,5 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
   message("++ Release compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
+
+option(WITH_GUDHI_BOOST_TEST_COVERAGE "Report xml coverage files on boost tests" OFF)
