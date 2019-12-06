@@ -1,6 +1,7 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
+import sys
 
 """This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -47,7 +48,8 @@ setup(
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(ext_modules),
+    ext_modules = cythonize(ext_modules,
+                            compiler_directives={'language_level' : sys.version_info[0]}),
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
 )
