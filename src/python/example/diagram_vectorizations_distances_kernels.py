@@ -26,9 +26,9 @@ plt.show()
 
 LS = Landscape(resolution=1000)
 L = LS.fit_transform(diags)
-plt.plot(L[0][:1000])
-plt.plot(L[0][1000:2000])
-plt.plot(L[0][2000:3000])
+plt.plot(L[0][:999])
+plt.plot(L[0][999:2*999])
+plt.plot(L[0][2*999:3*999])
 plt.title("Landscape")
 plt.show()
 
