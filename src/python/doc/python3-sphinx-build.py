@@ -4,8 +4,7 @@
 Emulate sphinx-build for python3
 """
 
-from sys import exit, argv, executable
-print(executable)
+from sys import exit, argv
 import sphinx
 from sphinx import main
 
