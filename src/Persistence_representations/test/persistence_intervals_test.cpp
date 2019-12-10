@@ -85,8 +85,7 @@ BOOST_AUTO_TEST_CASE(check_histogram_of_lengths) {
   template_histogram.push_back(6);
   template_histogram.push_back(1);
   template_histogram.push_back(7);
-  template_histogram.push_back(1);
-  template_histogram.push_back(1);
+  template_histogram.push_back(2);
   for (size_t i = 0; i != histogram.size(); ++i) {
     BOOST_CHECK(histogram[i] == template_histogram[i]);
   }
@@ -105,7 +104,6 @@ BOOST_AUTO_TEST_CASE(check_cumulative_histograms_of_lengths) {
   template_cumulative_histogram.push_back(35);
   template_cumulative_histogram.push_back(36);
   template_cumulative_histogram.push_back(43);
-  template_cumulative_histogram.push_back(44);
   template_cumulative_histogram.push_back(45);
 
   for (size_t i = 0; i != cumulative_histogram.size(); ++i) {
