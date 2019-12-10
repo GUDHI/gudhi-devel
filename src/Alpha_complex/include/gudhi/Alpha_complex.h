@@ -191,14 +191,6 @@ class Alpha_complex {
     return vertex_handle_to_iterator_.at(vertex)->point();
   }
 
-  /** \brief number_of_vertices returns the number of vertices (same as the number of points).
-   *
-   * @return The number of vertices.
-   */
-  std::size_t number_of_vertices() const {
-    return vertex_handle_to_iterator_.size();
-  }
-
  private:
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
