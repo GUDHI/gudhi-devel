@@ -10,7 +10,7 @@ Representations manual
 
 This module, originally available at https://github.com/MathieuCarriere/sklearn-tda and named sklearn_tda, aims at bridging the gap between persistence diagrams and machine learning, by providing implementations of most of the vector representations for persistence diagrams in the literature, in a scikit-learn format. More specifically, it provides tools, using the scikit-learn standard interface, to compute distances and kernels on persistence diagrams, and to convert these diagrams into vectors in Euclidean space.
 
-A diagram is represented as a numpy array of shape (n,2), as can be obtained from `SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time.
+A diagram is represented as a numpy array of shape (n,2), as can be obtained from :func:`~gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time.
 
 A small example is provided
 
@@ -66,4 +66,4 @@ The output is:
 
 .. testoutput::
 
-    [[0.         1.25707872 2.51415744 1.88561808 0.7856742  2.04275292 3.29983165 2.51415744 1.25707872 0.         0.         0.         0.31426968 0.         0.62853936 0.         0.         0.31426968 1.25707872 0.        ]] 
+    [[1.02851895 2.05703791 2.57129739 1.54277843 0.89995409 1.92847304 2.95699199 3.08555686 0.         0.64282435 0.         0.         0.51425948 0.         0.         0.        ]]
