@@ -230,14 +230,12 @@ endif(CGAL_FOUND)
 
     # Test examples
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      if (MPFR_FOUND)
-        # Bottleneck and Alpha
-        add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                 COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
-                 -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-      endif(MPFR_FOUND)
+      # Bottleneck and Alpha
+      add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+               COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
+               -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
       if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
         # Tangential
         add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
@@ -308,23 +306,19 @@ endif(CGAL_FOUND)
     endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      if (MPFR_FOUND)
-        # Alpha
-        add_test(NAME alpha_complex_from_points_example_py_test
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                 COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
-  
-        if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
-          add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
-                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                 COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
-                 --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
-        endif()
-  
-        add_gudhi_py_test(test_alpha_complex)
-      endif(MPFR_FOUND)
+      # Alpha
+      add_test(NAME alpha_complex_from_points_example_py_test
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+               COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_from_points_example.py")
+      if(MATPLOTLIB_FOUND AND NUMPY_FOUND)
+        add_test(NAME alpha_complex_diagram_persistence_from_off_file_example_py_test
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+               COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
+               --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 0.6)
+      endif()
+      add_gudhi_py_test(test_alpha_complex)
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

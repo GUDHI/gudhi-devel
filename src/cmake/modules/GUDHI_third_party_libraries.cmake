@@ -6,8 +6,6 @@ if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_FOUND)
 
-find_package(MPFR)
-
 find_package(GMP)
 if(GMP_FOUND)
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
