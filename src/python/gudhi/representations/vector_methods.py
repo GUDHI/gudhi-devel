@@ -129,19 +129,19 @@ class Landscape(BaseEstimator, TransformerMixin):
 
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
 
-            ls = np.zeros([self.num_landscapes, self.resolution])
+            ls = np.zeros([self.num_landscapes, self.resolution + self.nan_in_range.sum()])
 
             events = []
-            for j in range(self.resolution):
+            for j in range(self.resolution + self.nan_in_range.sum()):
                 events.append([])
 
             for j in range(num_pts_in_diag):
                 [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
+                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
+                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
 
-                if min_idx < self.resolution and max_idx > 0:
+                if min_idx < self.resolution + self.nan_in_range.sum() and max_idx > 0:
 
                     landscape_value = self.sample_range[0] + min_idx * step_x - px
                     for k in range(min_idx, mid_idx):
@@ -153,7 +153,7 @@ class Landscape(BaseEstimator, TransformerMixin):
                         events[k].append(landscape_value)
                         landscape_value -= step_x
 
-            for j in range(self.resolution):
+            for j in range(self.resolution + self.nan_in_range.sum()):
                 events[j].sort(reverse=True)
                 for k in range( min(self.num_landscapes, len(events[j])) ):
                     ls[k,j] = events[j][k]
