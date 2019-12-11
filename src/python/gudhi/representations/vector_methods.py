@@ -95,6 +95,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
+        self.nan_in_range = np.isnan(np.array(self.sample_range))
 
     def fit(self, X, y=None):
         """
@@ -104,8 +105,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.nan_in_range = np.isnan(np.array(self.sample_range))
-        if np.isnan(np.array(self.sample_range)).any():
+        if self.nan_in_range.any():
             pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
             [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
             self.sample_range = np.where(self.nan_in_range, np.array([mx, My]), np.array(self.sample_range))
