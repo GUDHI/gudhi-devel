@@ -96,6 +96,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         """
         self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
         self.nan_in_range = np.isnan(np.array(self.sample_range))
+        self.new_resolution = self.resolution + self.nan_in_range.sum()
 
     def fit(self, X, y=None):
         """
@@ -122,26 +123,26 @@ class Landscape(BaseEstimator, TransformerMixin):
             numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**): output persistence landscapes.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution + self.nan_in_range.sum())
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
         step_x = x_values[1] - x_values[0]
 
         for i in range(num_diag):
 
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
 
-            ls = np.zeros([self.num_landscapes, self.resolution + self.nan_in_range.sum()])
+            ls = np.zeros([self.num_landscapes, self.new_resolution])
 
             events = []
-            for j in range(self.resolution + self.nan_in_range.sum()):
+            for j in range(self.new_resolution):
                 events.append([])
 
             for j in range(num_pts_in_diag):
                 [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
-                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
-                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution + self.nan_in_range.sum())
+                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
+                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
+                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
 
-                if min_idx < self.resolution + self.nan_in_range.sum() and max_idx > 0:
+                if min_idx < self.new_resolution and max_idx > 0:
 
                     landscape_value = self.sample_range[0] + min_idx * step_x - px
                     for k in range(min_idx, mid_idx):
@@ -153,7 +154,7 @@ class Landscape(BaseEstimator, TransformerMixin):
                         events[k].append(landscape_value)
                         landscape_value -= step_x
 
-            for j in range(self.resolution + self.nan_in_range.sum()):
+            for j in range(self.new_resolution):
                 events[j].sort(reverse=True)
                 for k in range( min(self.num_landscapes, len(events[j])) ):
                     ls[k,j] = events[j][k]
