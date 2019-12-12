@@ -99,16 +99,9 @@ following `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
     ctest
 
-<<<<<<< HEAD
 .. note::
 
     One can use :code:`ctest` specific options in the python directory:
-=======
-`make test` is using
-`Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_ (CMake test
-driver program). If some of the tests are failing, please send us the result of
-the following command:
->>>>>>> a1b6e5a034bc698b02d3c93e1707cab5622eaea6
 
 .. code-block:: bash
 
