@@ -83,32 +83,30 @@ Or install it definitely in your Python packages folder:
 
 .. code-block:: bash
 
-    python setup.py  install --prefix /home/gudhi  # Install in /home/gudhi directory
+    python setup.py install --prefix /home/gudhi  # Install in /home/gudhi directory
 
 Test suites
 ===========
 
-To test your build, `py.test <http://doc.pytest.org>`_ is optional. Run the
-following command in a terminal:
+To test your build, `py.test <http://doc.pytest.org>`_ is required. Run the
+following `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_
+(CMake test driver program) command in a terminal:
 
 .. code-block:: bash
 
     cd /path-to-gudhi/build/python
     # For windows, you have to set PYTHONPATH environment variable
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
-    make test
+    ctest
 
-`make test` is using
-`Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_ (CMake test
-driver program). If some of the tests are failing, plend send us the result of
-the following command:
+.. note::
+
+    One can use :code:`ctest` specific options in the python directory:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/python
-    # For windows, you have to set PYTHONPATH environment variable
-    export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
-    ctest --output-on-failure
+    # Launch tests in parallel on 8 cores and set failing tests in verbose mode
+    ctest -j 8 --output-on-failure
 
 Debugging issues
 ================
