@@ -100,7 +100,7 @@ following command in a terminal:
 
 `make test` is using
 `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_ (CMake test
-driver program). If some of the tests are failing, plend send us the result of
+driver program). If some of the tests are failing, please send us the result of
 the following command:
 
 .. code-block:: bash
