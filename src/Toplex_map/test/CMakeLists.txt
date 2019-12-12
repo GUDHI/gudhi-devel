@@ -1,11 +1,9 @@
 project(Toplex_map_tests)
 
-include(GUDHI_test_coverage)
+include(GUDHI_boost_test)
 
 add_executable( Toplex_map_unit_test toplex_map_unit_test.cpp )
-target_link_libraries(Toplex_map_unit_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-gudhi_add_coverage_test(Toplex_map_unit_test)
+gudhi_add_boost_test(Toplex_map_unit_test)
 
 add_executable( Lazy_toplex_map_unit_test lazy_toplex_map_unit_test.cpp )
-target_link_libraries(Lazy_toplex_map_unit_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-gudhi_add_coverage_test(Lazy_toplex_map_unit_test)
+gudhi_add_boost_test(Lazy_toplex_map_unit_test)
