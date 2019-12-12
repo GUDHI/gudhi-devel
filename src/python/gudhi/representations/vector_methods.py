@@ -95,6 +95,8 @@ class Landscape(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
+        self.nan_in_range = np.isnan(np.array(self.sample_range))
+        self.new_resolution = self.resolution + self.nan_in_range.sum()
 
     def fit(self, X, y=None):
         """
@@ -104,10 +106,10 @@ class Landscape(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.sample_range)).any():
+        if self.nan_in_range.any():
             pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
             [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
+            self.sample_range = np.where(self.nan_in_range, np.array([mx, My]), np.array(self.sample_range))
         return self
 
     def transform(self, X):
@@ -121,26 +123,26 @@ class Landscape(BaseEstimator, TransformerMixin):
             numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**): output persistence landscapes.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
+        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
         step_x = x_values[1] - x_values[0]
 
         for i in range(num_diag):
 
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
 
-            ls = np.zeros([self.num_landscapes, self.resolution])
+            ls = np.zeros([self.num_landscapes, self.new_resolution])
 
             events = []
-            for j in range(self.resolution):
+            for j in range(self.new_resolution):
                 events.append([])
 
             for j in range(num_pts_in_diag):
                 [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
+                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
+                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
 
-                if min_idx < self.resolution and max_idx > 0:
+                if min_idx < self.new_resolution and max_idx > 0:
 
                     landscape_value = self.sample_range[0] + min_idx * step_x - px
                     for k in range(min_idx, mid_idx):
@@ -152,12 +154,17 @@ class Landscape(BaseEstimator, TransformerMixin):
                         events[k].append(landscape_value)
                         landscape_value -= step_x
 
-            for j in range(self.resolution):
+            for j in range(self.new_resolution):
                 events[j].sort(reverse=True)
                 for k in range( min(self.num_landscapes, len(events[j])) ):
                     ls[k,j] = events[j][k]
 
-            Xfit.append(np.sqrt(2)*np.reshape(ls,[1,-1]))
+            if self.nan_in_range[0]:
+                ls = ls[:,1:]
+            if self.nan_in_range[1]:
+                ls = ls[:,:-1]
+            ls = np.sqrt(2)*np.reshape(ls,[1,-1])
+            Xfit.append(ls)
 
         Xfit = np.concatenate(Xfit,0)
 
