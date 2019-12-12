@@ -13,20 +13,23 @@ matrix:
   include:
     - env:
         # 1. Only examples and associated tests
-        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
     - env:
         # 2. Only unitary tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
     - env:
         # 3. Only utilities and associated tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='test'
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
     - env:
         # 4. Only doxygen documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen'
-    # Issue with sphinx-build with sphinx 2.0.1
-    # - env:
-    #     # 5. Only Python, associated tests and sphinx documentation
-    #     - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='test sphinx'
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen' CTEST_COMMAND='echo No tests for doxygen target'
+    - env:
+        # 5. Only Python, associated tests and sphinx documentation
+        # $ which python3   => /usr/local/bin/python3
+        # cmake             => -- Found PythonInterp: /usr/local/bin/python3 (found version "3.7.5")
+        # In python3-sphinx-build.py, print(sys.executable)   => /usr/local/opt/python/bin/python3.7   ???
+        # should be : MAKE_TARGET='all sphinx' CTEST_COMMAND='ctest --output-on-failure'
+        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure -E sphinx'
 
 cache:
   directories:
@@ -63,7 +66,8 @@ script:
   - mkdir -p build 
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
-  - make all ${MAKE_TARGET}
+  - make ${MAKE_TARGET}
+  - ${CTEST_COMMAND}
   - cd ..
 
 notifications:
