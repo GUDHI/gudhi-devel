@@ -34,7 +34,7 @@ make \endverbatim
  * To test your build, run the following command in a terminal:
  * \verbatim make test \endverbatim
  * `make test` is using <a href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">Ctest<\a> (CMake test driver
- * program). If some of the tests are failing, plend send us the result of the following command:
+ * program). If some of the tests are failing, please send us the result of the following command:
  * \verbatim ctest --output-on-failure \endverbatim
  * 
  * \subsection documentationgeneration Documentation
