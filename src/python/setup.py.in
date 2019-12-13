@@ -1,6 +1,7 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
+import sys
 
 """This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -23,8 +24,7 @@ extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
 extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
 libraries=[@GUDHI_PYTHON_LIBRARIES@]
 library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
-include_path = ['@CMAKE_CURRENT_SOURCE_DIR@/gudhi/']
-include_dirs = [numpy_get_include(), @GUDHI_PYTHON_INCLUDE_DIRS@]
+include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', @GUDHI_PYTHON_INCLUDE_DIRS@]
 runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
@@ -38,19 +38,19 @@ for module in modules:
         extra_link_args=extra_link_args,
         libraries=libraries,
         library_dirs=library_dirs,
-        include_path=include_path,
         include_dirs=include_dirs,
         runtime_library_dirs=runtime_library_dirs,))
 
 setup(
     name = 'gudhi',
-    packages=["gudhi",],
+    packages=['gudhi'],
+    package_data={'gudhi': ['*.pxd']},
     author='GUDHI Editorial Board',
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(ext_modules,
-                            compiler_directives={'language_level' : "@PYTHON_VERSION_MAJOR@"}),
+                            compiler_directives={'language_level' : sys.version_info[0]}),
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
 )
