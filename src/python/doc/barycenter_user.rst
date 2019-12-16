@@ -2,12 +2,12 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-Wasserstein distance user manual
+Barycenter user manual
 ================================
 Definition
 ----------
 
-.. include:: wasserstein_distance_sum.inc
+.. include:: barycenter_sum.inc
 
 This implementation is based on ideas from "Frechet means for distribution of persistence diagrams", Turner et al. 2014.
 
