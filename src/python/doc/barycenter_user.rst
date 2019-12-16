@@ -33,7 +33,7 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays and mus
     dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
     dg4 = np.array([])
     
-    bary = gudhi.barycenter.lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3))
+    bary = gudhi.barycenter.lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3)
 
     message = "Wasserstein barycenter estimated:"    
     print(message)
