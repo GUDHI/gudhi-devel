@@ -20,11 +20,12 @@
 #include <math.h>  // isnan, fmax
 
 #include <CGAL/Delaunay_triangulation.h>
-#include <CGAL/Epick_d.h>
+#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+#include <CGAL/Epick_d.h>  // For FAST version
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
 #include <CGAL/property_map.h>  // for CGAL::Identity_property_map
-#include <CGAL/NT_converter.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
+#include <CGAL/NT_converter.h>
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
@@ -39,16 +40,19 @@
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
-# error Alpha_complex_3d is only available for CGAL >= 4.11
+# error Alpha_complex is only available for CGAL >= 4.11
 #endif
 
 #if !EIGEN_VERSION_AT_LEAST(3,1,0)
-# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
+# error Alpha_complex is only available for Eigen3 >= 3.1.0 installed with CGAL
 #endif
 
 namespace Gudhi {
 
 namespace alpha_complex {
+
+template<typename D> struct Is_Epeck_D { static const bool value = false; };
+template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool value = true; };
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -63,17 +67,31 @@ namespace alpha_complex {
  * 
  * Please refer to \ref alpha_complex for examples.
  *
- * The complex is a template class requiring an Epick_d <a target="_blank"
+ * The complex is a template class requiring an <a target="_blank"
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>,
+ * or an <a target="_blank"
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> <a target="_blank"
  * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
- * \cite cgal:s-gkd-15b from CGAL as template, default value is <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a>
+ * \cite cgal:s-gkd-19b from CGAL as template, default value is <a target="_blank"
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>
  * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
  * CGAL::Dynamic_dimension_tag </a> >
  * 
- * \remark When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
- * 
+ * \remark
+ * - When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+ * - Using the default `CGAL::Epeck_d` makes the construction safe. If you pass exact=true to create_complex, the
+ * filtration values are the exact ones converted to the filtration value type of the simplicial complex. This can be
+ * very slow. If you pass exact=false (the default), the filtration values are only guaranteed to have a small
+ * multiplicative error compared to the exact value, see <code><a class="el" target="_blank"
+ * href="https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html">
+ * CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double</a></code> for details. A drawback, when computing
+ * persistence, is that an empty exact interval [10^12,10^12] may become a non-empty approximate interval
+ * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
+ * exact, but the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still
+ * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
+ * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
  */
-template<class Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>
+template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>
 class Alpha_complex {
  public:
   // Add an int in TDS to save point index in the structure
@@ -184,6 +202,12 @@ class Alpha_complex {
  private:
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
+    #if CGAL_VERSION_NR < 1050000000
+    if (Is_Epeck_D<Kernel>::value)
+      std::cerr << "It is strongly advised to use a CGAL version >= 5.0 with Epeck_d Kernel for performance reasons."
+                << std::endl;
+    #endif
+
     auto first = std::begin(points);
     auto last = std::end(points);
 
@@ -237,6 +261,8 @@ class Alpha_complex {
    * @param[in] complex SimplicialComplexForAlpha to be created.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time.
+   * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
+   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
    * 
    * @return true if creation succeeds, false otherwise.
    * 
@@ -248,7 +274,8 @@ class Alpha_complex {
   template <typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
-                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
+                      Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
+                      bool exact = false) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -324,9 +351,13 @@ class Alpha_complex {
             if (f_simplex_dim > 0) {
               // squared_radius function initialization
               Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
 
-              alpha_complex_filtration = cv(squared_radius(pointVector.begin(), pointVector.end()));
+              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
+              auto sqrad = squared_radius(pointVector.begin(), pointVector.end());
+#if CGAL_VERSION_NR >= 1050000000
+              if(exact) CGAL::exact(sqrad);
+#endif
+              alpha_complex_filtration = cv(sqrad);
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES

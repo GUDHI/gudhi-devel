@@ -24,7 +24,7 @@ namespace cech_complex {
  * \section cechdefinition Čech complex definition
  * 
  * Čech complex
- * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_cohomology">(Wikipedia)</a> is a
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_complex">(Wikipedia)</a> is a
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a> constructed
  *  from a proximity graph. The set of all simplices is filtered by the radius of their minimal enclosing ball.
  *

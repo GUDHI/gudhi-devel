@@ -107,12 +107,12 @@ inconsistencies, but is not guaranteed to succeed.
 
 Output
 ^^^^^^
-The result of the computation is exported as a Simplex_tree. It is the union of
+The result of the computation is exported as a :class:`~gudhi.SimplexTree`. It is the union of
 the stars of all the input points. A vertex in the Simplex Tree is the index of
 the point in the range provided by the user. The point corresponding to a
-vertex can also be obtained through the Tangential_complex::get_point function.
+vertex can also be obtained through the :func:`gudhi.TangentialComplex.get_point` function.
 Note that even if the positions of the points are perturbed, their original
-positions are kept (e.g. Tangential_complex::get_point returns the original
+positions are kept (e.g. :func:`~gudhi.TangentialComplex.get_point` returns the original
 position of the point).
 
 The result can be obtained after the computation of the Tangential complex

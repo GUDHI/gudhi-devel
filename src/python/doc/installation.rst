@@ -8,11 +8,11 @@ Installation
 Conda
 *****
 The easiest way to install the Python version of GUDHI is using
-`conda <https://gudhi.inria.fr/licensing/>`_.
+`conda <https://gudhi.inria.fr/conda/>`_.
 
 Compiling
 *********
-The library uses c++11 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
+The library uses c++14 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
 `CMake <https://www.cmake.org/>`_ ≥ 3.1  to generate makefiles,
 `NumPy <http://numpy.org>`_ and `Cython <https://www.cython.org/>`_ to compile
 the GUDHI Python module.
@@ -40,6 +40,20 @@ To build the GUDHI Python module, run the following commands in a terminal:
     cd python
     make
 
+.. note::
+
+    :code:`make python` (or :code:`make` in python directory) is only a
+    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
+    to shortcut :code:`python setup.py build_ext --inplace` command.
+    No specific other options  (:code:`-j8` for parallel, or even :code:`make clean`, ...) are
+    available.
+    But one can use :code:`python setup.py ...` specific options in the python directory:
+
+.. code-block:: bash
+
+    python setup.py clean --all               # Clean former compilation
+    python setup.py build_ext -j 8 --inplace  # Build in parallel
+
 GUDHI Python module installation
 ================================
 
@@ -59,19 +73,40 @@ Or install it definitely in your Python packages folder:
     # May require sudo or administrator privileges
     make install
 
+.. note::
+
+    :code:`make install` is only a
+    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
+    to shortcut :code:`python setup.py install` command.
+    It does not take into account :code:`CMAKE_INSTALL_PREFIX`.
+    But one can use :code:`python setup.py install ...` specific options in the python directory:
+
+.. code-block:: bash
+
+    python setup.py install --prefix /home/gudhi  # Install in /home/gudhi directory
 
 Test suites
 ===========
 
-To test your build, `py.test <http://doc.pytest.org>`_ is optional. Run the
-following command in a terminal:
+To test your build, `py.test <http://doc.pytest.org>`_ is required. Run the
+following `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_
+(CMake test driver program) command in a terminal:
 
 .. code-block:: bash
 
     cd /path-to-gudhi/build/python
     # For windows, you have to set PYTHONPATH environment variable
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
-    make test
+    ctest
+
+.. note::
+
+    One can use :code:`ctest` specific options in the python directory:
+
+.. code-block:: bash
+
+    # Launch tests in parallel on 8 cores and set failing tests in verbose mode
+    ctest -j 8 --output-on-failure
 
 Debugging issues
 ================
@@ -215,12 +250,20 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+Python Optimal Transport
+========================
+
+The :doc:`Wasserstein distance </wasserstein_distance_user>`
+module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
+several solvers for optimization problems related to Optimal Transport.
+
 SciPy
 =====
 
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `SciPy <http://scipy.org>`_, a Python-based ecosystem of
-open-source software for mathematics, science, and engineering.
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
+:doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
+<http://scipy.org>`_, a Python-based ecosystem of open-source software for
+mathematics, science, and engineering.
 
 Threading Building Blocks
 =========================

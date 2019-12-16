@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import matplotlib.pyplot as plot
 import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
@@ -29,15 +30,24 @@ persistence = [
     (0, (0.0, 1.0)),
 ]
 gudhi.plot_persistence_barcode(persistence)
+plot.show()
 
 print("#####################################################################")
 print("Show diagram persistence example")
 
-pplot = gudhi.plot_persistence_diagram(persistence)
-pplot.show()
+gudhi.plot_persistence_diagram(persistence)
+plot.show()
 
 print("#####################################################################")
 print("Show diagram persistence example with a confidence band")
 
-pplot = gudhi.plot_persistence_diagram(persistence, band=0.2)
-pplot.show()
+gudhi.plot_persistence_diagram(persistence, band=0.2)
+plot.show()
+
+print("#####################################################################")
+print("Show barcode and diagram persistence side by side example")
+fig, axes = plot.subplots(nrows=1, ncols=2)
+gudhi.plot_persistence_barcode(persistence, axes = axes[0])
+gudhi.plot_persistence_diagram(persistence, axes = axes[1])
+fig.suptitle("barcode versus diagram")
+plot.show()

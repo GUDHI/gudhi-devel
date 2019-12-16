@@ -62,9 +62,9 @@ bool read_cuboid_file(const std::string &cuboid_file, double &x_min, double &y_m
 }
 
 template <typename AlphaComplex3d>
-std::vector<typename AlphaComplex3d::Point_3> read_off(const std::string &off_file_points) {
+std::vector<typename AlphaComplex3d::Bare_point_3> read_off(const std::string &off_file_points) {
   // Read the OFF file (input file name given as parameter) and triangulate points
-  Gudhi::Points_3D_off_reader<typename AlphaComplex3d::Point_3> off_reader(off_file_points);
+  Gudhi::Points_3D_off_reader<typename AlphaComplex3d::Bare_point_3> off_reader(off_file_points);
   // Check the read operation was correct
   if (!off_reader.is_valid()) {
     std::cerr << "Unable to read OFF file " << off_file_points << std::endl;

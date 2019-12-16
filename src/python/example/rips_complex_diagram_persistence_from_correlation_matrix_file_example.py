@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import gudhi
 import sys
 import argparse
+import matplotlib.pyplot as plot
+import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -83,5 +84,5 @@ invert_diag = [
 ]
 
 if args.no_diagram == False:
-    pplot = gudhi.plot_persistence_diagram(invert_diag, band=args.band)
-    pplot.show()
+    gudhi.plot_persistence_diagram(invert_diag, band=args.band)
+    plot.show()

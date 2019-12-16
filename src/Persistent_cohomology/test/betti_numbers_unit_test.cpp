@@ -284,4 +284,13 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   auto intervals_in_dimension_2 = pcoh.intervals_in_dimension(2);
   std::cout << "intervals_in_dimension_2.size() = " << intervals_in_dimension_2.size() << std::endl;
   BOOST_CHECK(intervals_in_dimension_2.size() == 0);
+
+  std::cout << "EMPTY COMPLEX" << std::endl;
+  Simplex_tree empty;
+  empty.initialize_filtration();
+  St_persistence pcoh_empty(empty, false);
+  pcoh_empty.init_coefficients(2);
+  pcoh_empty.compute_persistent_cohomology();
+  BOOST_CHECK(pcoh_empty.betti_numbers().size() == 0);
+  BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0,1).size() == 0);
 }

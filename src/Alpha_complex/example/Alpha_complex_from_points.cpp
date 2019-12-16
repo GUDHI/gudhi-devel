@@ -2,12 +2,13 @@
 // to construct a simplex_tree from alpha complex
 #include <gudhi/Simplex_tree.h>
 
-#include <CGAL/Epick_d.h>
+#include <CGAL/Epeck_d.h>
 
 #include <iostream>
 #include <vector>
 
-using Kernel = CGAL::Epick_d< CGAL::Dimension_tag<2> >;
+// Explicit dimension 2 Epeck_d kernel
+using Kernel = CGAL::Epeck_d< CGAL::Dimension_tag<2> >;
 using Point = Kernel::Point_d;
 using Vector_of_points = std::vector<Point>;
 

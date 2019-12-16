@@ -43,14 +43,14 @@ typedef boost::mpl::list<Fast_weighted_alpha_complex_3d, Safe_weighted_alpha_com
 
 #ifdef GUDHI_DEBUG
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_throw, Weighted_alpha_complex_3d, weighted_variants_type_list) {
-  using Point_3 = typename Weighted_alpha_complex_3d::Point_3;
-  std::vector<Point_3> w_points;
-  w_points.push_back(Point_3(0.0, 0.0, 0.0));
-  w_points.push_back(Point_3(0.0, 0.0, 0.2));
-  w_points.push_back(Point_3(0.2, 0.0, 0.2));
-  // w_points.push_back(Point_3(0.6, 0.6, 0.0));
-  // w_points.push_back(Point_3(0.8, 0.8, 0.2));
-  // w_points.push_back(Point_3(0.2, 0.8, 0.6));
+  using Bare_point_3 = typename Weighted_alpha_complex_3d::Bare_point_3;
+  std::vector<Bare_point_3> w_points;
+  w_points.push_back(Bare_point_3(0.0, 0.0, 0.0));
+  w_points.push_back(Bare_point_3(0.0, 0.0, 0.2));
+  w_points.push_back(Bare_point_3(0.2, 0.0, 0.2));
+  // w_points.push_back(Bare_point_3(0.6, 0.6, 0.0));
+  // w_points.push_back(Bare_point_3(0.8, 0.8, 0.2));
+  // w_points.push_back(Bare_point_3(0.2, 0.8, 0.6));
 
   // weights size is different from w_points size to make weighted Alpha_complex_3d throw in debug mode
   std::vector<double> weights = {0.01, 0.005, 0.006, 0.01, 0.009, 0.001};
@@ -62,14 +62,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_throw, Weighted_alpha_compl
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d, weighted_variants_type_list) {
   std::cout << "Weighted alpha complex 3d from points and weights" << std::endl;
-  using Point_3 = typename Weighted_alpha_complex_3d::Point_3;
-  std::vector<Point_3> w_points;
-  w_points.push_back(Point_3(0.0, 0.0, 0.0));
-  w_points.push_back(Point_3(0.0, 0.0, 0.2));
-  w_points.push_back(Point_3(0.2, 0.0, 0.2));
-  w_points.push_back(Point_3(0.6, 0.6, 0.0));
-  w_points.push_back(Point_3(0.8, 0.8, 0.2));
-  w_points.push_back(Point_3(0.2, 0.8, 0.6));
+  using Bare_point_3 = typename Weighted_alpha_complex_3d::Bare_point_3;
+  std::vector<Bare_point_3> w_points;
+  w_points.push_back(Bare_point_3(0.0, 0.0, 0.0));
+  w_points.push_back(Bare_point_3(0.0, 0.0, 0.2));
+  w_points.push_back(Bare_point_3(0.2, 0.0, 0.2));
+  w_points.push_back(Bare_point_3(0.6, 0.6, 0.0));
+  w_points.push_back(Bare_point_3(0.8, 0.8, 0.2));
+  w_points.push_back(Bare_point_3(0.2, 0.8, 0.6));
 
   // weights size is different from w_points size to make weighted Alpha_complex_3d throw in debug mode
   std::vector<double> weights = {0.01, 0.005, 0.006, 0.01, 0.009, 0.001};
@@ -90,6 +90,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d,
 
   Gudhi::Simplex_tree<> stree_bis;
   alpha_complex_w_p.create_complex(stree_bis);
+
+  for (std::size_t index = 0; index < weighted_points.size(); index++) {
+    bool found = false;
+    Weighted_point_3 awp = alpha_complex_w_p.get_point(index);
+    for (auto weighted_point : weighted_points) {
+      if ((weighted_point.weight() == awp.weight()) &&
+          (weighted_point.x() == awp.x()) &&
+          (weighted_point.y() == awp.y()) &&
+          (weighted_point.z() == awp.z())) {
+        found = true;
+        break;
+      }
+    }
+    // Check all points from alpha complex are found in the input point cloud
+    BOOST_CHECK(found);
+  }
+  // Exception if we go out of range
+  BOOST_CHECK_THROW(alpha_complex_w_p.get_point(weighted_points.size()), std::out_of_range);
 
   // ---------------------
   // Compare both versions

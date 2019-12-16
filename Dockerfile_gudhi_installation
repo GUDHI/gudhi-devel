@@ -31,7 +31,6 @@ RUN apt-get install -y make \
     perl \
     texlive-bibtex-extra \
     biber \
-    doxygen \
     libboost-all-dev \
     libeigen3-dev \
     libgmp3-dev \
@@ -44,15 +43,23 @@ RUN apt-get install -y make \
     python3-pytest \
     python3-tk \
     libfreetype6-dev \
-    pkg-config
+    pkg-config \
+    curl
 
 RUN pip3 install \
     numpy \
     matplotlib \
     scipy \
-    Cython \
-    sphinx \
-    sphinxcontrib-bibtex
+    Cython
 
 # apt clean up
 RUN apt autoremove && rm -rf /var/lib/apt/lists/*
+
+RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-3.0.0/gudhi.3.0.0.tar.gz" \
+&& tar xf gudhi.3.0.0.tar.gz \
+&& cd gudhi.3.0.0 \
+&& mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..  \
+&& make all test install \
+&& cmake -DWITH_GUDHI_PYTHON=ON . \
+&& cd python \
+&& python3 setup.py install

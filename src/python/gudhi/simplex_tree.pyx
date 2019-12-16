@@ -2,15 +2,14 @@ from libc.stdint cimport intptr_t
 from numpy import array as np_array
 cimport simplex_tree
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Vincent Rouvreau
-
-    Copyright (C) 2016 Inria
-
-    Modification(s):
-      - YYYY/MM Author: Description of the modification
-"""
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -75,13 +74,22 @@ cdef class SimplexTree:
         return self.get_ptr().simplex_filtration(simplex)
 
     def assign_filtration(self, simplex, filtration):
-        """This function assigns the simplicial complex filtration value for a
+        """This function assigns a new filtration value to a
         given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
-        :param filtration:  The simplicial complex filtration value.
+        :param filtration:  The new filtration value.
         :type filtration:  float
+
+        .. note::
+            Beware that after this operation, the structure may not be a valid
+            filtration anymore, a simplex could have a lower filtration value
+            than one of its faces. Callers are responsible for fixing this
+            (with more :meth:`assign_filtration` or
+            :meth:`make_filtration_non_decreasing` for instance) before calling
+            any function that relies on the filtration property, like
+            :meth:`initialize_filtration`.
         """
         self.get_ptr().assign_simplex_filtration(simplex, filtration)
 
@@ -362,7 +370,7 @@ cdef class SimplexTree:
         value than its faces by increasing the filtration values.
 
         :returns: True if any filtration value was modified,
-        False if the filtration was already non-decreasing.
+            False if the filtration was already non-decreasing.
         :rtype: bool
 
 

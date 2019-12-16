@@ -20,6 +20,7 @@ This function can display the persistence result as a barcode:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
 
     off_file = gudhi.__root_source_dir__ + '/data/points/tore3D_300.off'
@@ -29,7 +30,7 @@ This function can display the persistence result as a barcode:
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence(min_persistence=0.4)
 
-    plot = gudhi.plot_persistence_barcode(diag)
+    gudhi.plot_persistence_barcode(diag)
     plot.show()
 
 Show persistence as a diagram
@@ -43,14 +44,15 @@ This function can display the persistence result as a diagram:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
 
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    plt = gudhi.plot_persistence_diagram(persistence_file=persistence_file,
+    gudhi.plot_persistence_diagram(persistence_file=persistence_file,
         legend=True)
-    plt.show()
+    plot.show()
 
 Persistence density
 -------------------
@@ -63,11 +65,19 @@ If you want more information on a specific dimension, for instance:
 .. plot::
    :include-source:
 
+    import matplotlib.pyplot as plot
     import gudhi
-
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    plt = gudhi.plot_persistence_density(persistence_file=persistence_file,
-        max_intervals=0, dimension=1, legend=True)
-    plt.show()
+    birth_death = gudhi.read_persistence_intervals_in_dimension(
+        persistence_file=persistence_file,
+        only_this_dim=1)
+    pers_diag = [(1, elt) for elt in birth_death]
+    # Use subplots to display diagram and density side by side
+    fig, axes = plot.subplots(nrows=1, ncols=2, figsize=(12, 5))
+    gudhi.plot_persistence_diagram(persistence=pers_diag,
+        axes=axes[0])
+    gudhi.plot_persistence_density(persistence=pers_diag,
+        dimension=1, legend=True, axes=axes[1])
+    plot.show()

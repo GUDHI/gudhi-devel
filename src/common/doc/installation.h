@@ -5,7 +5,7 @@
  * Examples of GUDHI headers inclusion can be found in \ref utilities.
  * 
  * \section compiling Compiling
- * The library uses c++11 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.56.0
+ * The library uses c++14 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.56.0
  * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
@@ -32,7 +32,10 @@ make \endverbatim
  *
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:
- * \verbatim  make test \endverbatim
+ * \verbatim make test \endverbatim
+ * `make test` is using <a href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">Ctest<\a> (CMake test driver
+ * program). If some of the tests are failing, please send us the result of the following command:
+ * \verbatim ctest --output-on-failure \endverbatim
  * 
  * \subsection documentationgeneration Documentation
  * To generate the documentation, <a target="_blank" href="http://www.doxygen.org/">Doxygen</a> is required.
@@ -71,7 +74,7 @@ make doxygen
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL \cite cgal:eb-15b) and will not be built if CGAL version 4.11.0 or higher is not installed:
+ * Library</a> (CGAL \cite cgal:eb-19b) and will not be built if CGAL version 4.11.0 or higher is not installed:
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
  * \li <a href="_witness_complex_2strong_witness_persistence_8cpp-example.html">
