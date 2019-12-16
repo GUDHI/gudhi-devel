@@ -50,7 +50,7 @@ setup(
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(ext_modules,
-                            compiler_directives={'language_level' : sys.version_info[0]}),
+        compiler_directives={'language_level' : sys.version_info[0]}),
     zip_safe=False,  # zipped egg creation prevent as it will not work with cimport for pxd files 
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
