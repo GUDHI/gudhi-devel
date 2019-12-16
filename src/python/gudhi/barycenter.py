@@ -293,12 +293,12 @@ def _test_perf():
 
 
 def _sanity_check(verbose):
-    dg1 = np.array([[0.2, 0.5]])
-    dg2 = np.array([[0.2, 0.7], [0.73, 0.88]])
-    dg3 = np.array([[0.3, 0.6], [0.7, 0.85], [0.2, 0.3]])
-    X = [dg1, dg2, dg3]
-    Y, a = lagrangian_barycenter(X, verbose=verbose)
-    _plot_barycenter(X, Y, a)
+    #dg1 = np.array([[0.2, 0.5]])
+    #dg2 = np.array([[0.2, 0.7], [0.73, 0.88]])
+    #dg3 = np.array([[0.3, 0.6], [0.7, 0.85], [0.2, 0.3]])
+    #X = [dg1, dg2, dg3]
+    #Y, a = lagrangian_barycenter(X, verbose=verbose)
+    #_plot_barycenter(X, Y, a)
 
     #dg1 = np.array([[0.2, 0.5]])
     #dg2 = np.array([]) # The empty diagram
@@ -313,13 +313,15 @@ def _sanity_check(verbose):
     #X = [dg1, dg2, dg3]
     #Y, a = lagrangian_barycenter(X, verbose=verbose)
     #_plot_barycenter(X, Y, a)
+    #print(Y)
  
-    #dg1 = np.array([[0.1, 0.12], [0.21, 0.7], [0.4, 0.5], [0.3, 0.4], [0.35, 0.7], [0.5, 0.55], [0.32, 0.42], [0.1, 0.4], [0.2, 0.4]])
-    #dg2 = np.array([[0.09, 0.11], [0.3, 0.43], [0.5, 0.61], [0.3, 0.7], [0.42, 0.5], [0.35, 0.41], [0.74, 0.9], [0.5, 0.95], [0.35, 0.45], [0.13, 0.48], [0.32, 0.45]])
-    #dg3 = np.array([[0.1, 0.15], [0.1, 0.7], [0.2, 0.22], [0.55, 0.84], [0.11, 0.91], [0.61, 0.75], [0.33, 0.46], [0.12, 0.41], [0.32, 0.48]])
-    #X = [dg1, dg2, dg3]
-    #Y, a = lagrangian_barycenter(X, init=1, verbose=verbose)
-    #_plot_barycenter(X, Y, a)
+    dg1 = np.array([[0.1, 0.12], [0.21, 0.7], [0.4, 0.5], [0.3, 0.4], [0.35, 0.7], [0.5, 0.55], [0.32, 0.42], [0.1, 0.4], [0.2, 0.4]])
+    dg2 = np.array([[0.09, 0.11], [0.3, 0.43], [0.5, 0.61], [0.3, 0.7], [0.42, 0.5], [0.35, 0.41], [0.74, 0.9], [0.5, 0.95], [0.35, 0.45], [0.13, 0.48], [0.32, 0.45]])
+    dg3 = np.array([[0.1, 0.15], [0.1, 0.7], [0.2, 0.22], [0.55, 0.84], [0.11, 0.91], [0.61, 0.75], [0.33, 0.46], [0.12, 0.41], [0.32, 0.48]])
+    X = [dg3]
+    Y, a = lagrangian_barycenter(X, verbose=verbose)
+    _plot_barycenter(X, Y, a)
+    print(Y)
  
     
     #dg1 = np.array([[0.2, 0.5]])
