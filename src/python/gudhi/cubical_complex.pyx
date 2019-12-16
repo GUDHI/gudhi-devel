@@ -5,7 +5,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import os
 
-from numpy import array as np_array
+import numpy as np
 
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -47,7 +47,7 @@ cdef class CubicalComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
-                  perseus_file=''):
+                 numpy_array=None, perseus_file=''):
         """CubicalComplex constructor from dimensions and
         top_dimensional_cells or from a Perseus-style file name.
 
@@ -58,16 +58,31 @@ cdef class CubicalComplex:
 
         Or
 
+        :param numpy_array: Filtration values in a d-array.
+        :type numpy_array: numpy ndarray
+
+        Or
+
         :param perseus_file: A Perseus-style file name.
         :type perseus_file: string
         """
 
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
-                  perseus_file=''):
-        if (dimensions is not None) and (top_dimensional_cells is not None) and (perseus_file == ''):
+                  numpy_array=None, perseus_file=''):
+        if ((dimensions is not None) and (top_dimensional_cells is not None)
+            and (numpy_array is None) and (perseus_file == '')):
             self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
-        elif (dimensions is None) and (top_dimensional_cells is None) and (perseus_file != ''):
+        elif ((dimensions is None) and (top_dimensional_cells is None)
+            and (numpy_array is not None) and (perseus_file == '')):
+            if isinstance(numpy_array, np.ndarray):
+                dimensions = list(numpy_array.shape)
+                top_dimensional_cells = numpy_array.flatten().tolist()
+                self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+            else:
+                print("numpy_array is not an instance of ndarray. It is a " + type(numpy_array))
+        elif ((dimensions is None) and (top_dimensional_cells is None)
+            and (numpy_array is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
                 self.thisptr = new Bitmap_cubical_complex_base_interface(str.encode(perseus_file))
             else:
@@ -184,4 +199,4 @@ cdef class CubicalComplex:
         else:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
-        return np_array(intervals_result)
+        return np.array(intervals_result)
