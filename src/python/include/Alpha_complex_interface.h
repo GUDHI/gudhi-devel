@@ -60,8 +60,8 @@ class Alpha_complex_interface {
     return vd;
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square, bool exact_version) {
-    alpha_complex_->create_complex(*simplex_tree, max_alpha_square, exact_version);
+  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square) {
+    alpha_complex_->create_complex(*simplex_tree, max_alpha_square);
     simplex_tree->initialize_filtration();
   }
 
