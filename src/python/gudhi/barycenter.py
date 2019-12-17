@@ -114,7 +114,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     """
         Compute the estimated barycenter computed with the algorithm provided
         by Turner et al (2014).
-        It is a local minima of the corresponding Frechet function.
+        It is a local minimum of the corresponding Frechet function.
     :param pdiagset: a list of size N containing numpy.array of shape (n x 2) 
                         (n can variate), encoding a set of 
                         persistence diagrams with only finite coordinates. 
