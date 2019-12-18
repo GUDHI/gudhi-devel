@@ -83,8 +83,8 @@ cdef class PeriodicCubicalComplex:
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
             if isinstance(top_dimensional_cells, np.ndarray):
-                dimensions = list(top_dimensional_cells.shape)
-                top_dimensional_cells = top_dimensional_cells.flatten().tolist()
+                dimensions = top_dimensional_cells.shape
+                top_dimensional_cells = top_dimensional_cells.ravel(order='C')
                 self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
                                                                            top_dimensional_cells,
                                                                            periodic_dimensions)
