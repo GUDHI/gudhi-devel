@@ -47,7 +47,7 @@ cdef class PeriodicCubicalComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
-                 numpy_array=None, periodic_dimensions=None, perseus_file=''):
+                 periodic_dimensions=None, perseus_file=''):
         """PeriodicCubicalComplex constructor from dimensions and
         top_dimensional_cells or from a Perseus-style file name.
 
@@ -60,8 +60,9 @@ cdef class PeriodicCubicalComplex:
 
         Or
 
-        :param numpy_array: Filtration values in a d-array.
-        :type numpy_array: numpy ndarray
+        :param top_dimensional_cells: A multidimensional array of cells
+            filtration values.
+        :type top_dimensional_cells: numpy ndarray
         :param periodic_dimensions: A list of top dimensional cells periodicity value.
         :type periodic_dimensions: list of boolean
 
@@ -73,35 +74,33 @@ cdef class PeriodicCubicalComplex:
 
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
-                  numpy_array=None, periodic_dimensions=None,
-                  perseus_file=''):
+                  periodic_dimensions=None, perseus_file=''):
         if ((dimensions is not None) and (top_dimensional_cells is not None)
-            and (numpy_array is None) and (periodic_dimensions is not None)
-            and (perseus_file == '')):
+            and (periodic_dimensions is not None) and (perseus_file == '')):
             self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
                                                                        top_dimensional_cells,
                                                                        periodic_dimensions)
-        elif ((dimensions is None) and (top_dimensional_cells is None)
-            and (numpy_array is not None) and (periodic_dimensions is not None)
-            and (perseus_file == '')):
-            if isinstance(numpy_array, np.ndarray):
-                dimensions = list(numpy_array.shape)
-                top_dimensional_cells = numpy_array.flatten().tolist()
+        elif ((dimensions is None) and (top_dimensional_cells is not None)
+            and (periodic_dimensions is not None) and (perseus_file == '')):
+            if isinstance(top_dimensional_cells, np.ndarray):
+                dimensions = list(top_dimensional_cells.shape)
+                top_dimensional_cells = top_dimensional_cells.flatten().tolist()
                 self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
                                                                            top_dimensional_cells,
                                                                            periodic_dimensions)
             else:
-                print("numpy_array is not an instance of ndarray. It is a " + type(numpy_array))
+                print("top_dimensional_cells is not an instance of ndarray. It is a " + type(top_dimensional_cells))
         elif ((dimensions is None) and (top_dimensional_cells is None)
-            and (numpy_array is None) and (periodic_dimensions is None)
-            and (perseus_file != '')):
+            and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
                 self.thisptr = new Periodic_cubical_complex_base_interface(str.encode(perseus_file))
             else:
                 print("file " + perseus_file + " not found.")
         else:
-            print("CubicalComplex can be constructed from dimensions and "
-              "top_dimensional_cells or from a Perseus-style file name.")
+            print("CubicalComplex can be constructed from dimensions, "
+              "top_dimensional_cells and periodic_dimensions, or from "
+              "top_dimensional_cells and periodic_dimensions or from "
+              "a Perseus-style file name.")
 
     def __dealloc__(self):
         if self.thisptr != NULL:

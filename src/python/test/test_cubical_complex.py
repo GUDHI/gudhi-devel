@@ -77,9 +77,9 @@ def test_simple_constructor_from_top_cells():
 
 def test_simple_constructor_from_numpy_array():
     cub = CubicalComplex(
-        numpy_array=np.array([[1, 2, 3],
-                              [4, 5, 6],
-                              [7, 8, 9]])
+        top_dimensional_cells=np.array([[1, 2, 3],
+                                        [4, 5, 6],
+                                        [7, 8, 9]])
     )
     simple_constructor(cub)
 
@@ -103,9 +103,9 @@ def test_user_case_simple_constructor_from_top_cells():
 
 def test_user_case_simple_constructor_from_numpy_array():
     cub = CubicalComplex(
-        numpy_array=np.array([[float("inf"), 0.0, 0.0],
-                              [0.0, 1.0, 0.0],
-                              [0.0, 0.0, 0.0]])
+        top_dimensional_cells=np.array([[float("inf"), 0.0, 0.0],
+                                        [0.0, 1.0, 0.0],
+                                        [0.0, 0.0, 0.0]])
     )
     user_case_simple_constructor(cub)
 

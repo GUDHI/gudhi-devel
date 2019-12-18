@@ -143,7 +143,7 @@ Or it can be defined as follows:
 
     from gudhi import PeriodicCubicalComplex as pcc
     from numpy import array as np_array
-    periodic_cc = pcc(numpy_array = np_array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]),
+    periodic_cc = pcc(top_dimensional_cells = np_array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]),
          periodic_dimensions=[True, False])
     result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
         repr(periodic_cc.num_simplices()) + ' simplices.'
