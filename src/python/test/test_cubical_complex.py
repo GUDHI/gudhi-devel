@@ -1,4 +1,4 @@
-from gudhi import CubicalComplex
+from gudhi import CubicalComplex, PeriodicCubicalComplex
 import numpy as np
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
@@ -121,3 +121,29 @@ def test_dimension_file_constructor():
     assert cub.__is_persistence_defined() == True
     assert cub.betti_numbers() == [1, 0, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [1, 0, 0]
+
+def test_connected_sublevel_sets():
+    array_cells = np.array([[3, 3], [2, 2], [4, 4]])
+    linear_cells = [3, 3, 2, 2, 4, 4]
+    dimensions = [2, 3]
+    periodic_dimensions = [False, False]
+    # with a numpy array version
+    cub = CubicalComplex(top_dimensional_cells = array_cells)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # with vector of dimensions
+    cub = CubicalComplex(dimensions = dimensions,
+                         top_dimensional_cells = linear_cells)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # periodic with a numpy array version
+    cub = PeriodicCubicalComplex(top_dimensional_cells = array_cells,
+                                periodic_dimensions = periodic_dimensions)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # periodic with vector of dimensions
+    cub = PeriodicCubicalComplex(dimensions = dimensions,
+                                 top_dimensional_cells = linear_cells,
+                                 periodic_dimensions = periodic_dimensions)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]

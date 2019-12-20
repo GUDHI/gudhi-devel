@@ -78,7 +78,7 @@ cdef class CubicalComplex:
             and (perseus_file == '')):
             if isinstance(top_dimensional_cells, np.ndarray):
                 dimensions = top_dimensional_cells.shape
-                top_dimensional_cells = top_dimensional_cells.ravel(order='C')
+                top_dimensional_cells = top_dimensional_cells.ravel(order='F')
                 self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
             else:
                 print("top_dimensional_cells is not an instance of ndarray. It is a " + type(top_dimensional_cells))
