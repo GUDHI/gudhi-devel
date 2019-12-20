@@ -66,7 +66,7 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, off_file=''):
+    def __cinit__(self, points = None, off_file = ''):
         if off_file:
             if os.path.isfile(off_file):
                 self.thisptr = new Alpha_complex_interface(str.encode(off_file), True)
@@ -99,7 +99,7 @@ cdef class AlphaComplex:
         cdef vector[double] point = self.thisptr.get_point(vertex)
         return point
 
-    def create_simplex_tree(self, max_alpha_square=float('inf')):
+    def create_simplex_tree(self, max_alpha_square = float('inf')):
         """
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity, and

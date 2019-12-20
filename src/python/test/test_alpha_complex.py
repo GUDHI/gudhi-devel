@@ -1,4 +1,8 @@
 from gudhi import AlphaComplex, SimplexTree
+import math
+import numpy as np
+import itertools
+import pytest
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -88,3 +92,28 @@ def test_filtered_alpha():
     ]
     assert simplex_tree.get_star([0]) == [([0], 0.0), ([0, 1], 0.25), ([0, 2], 0.25)]
     assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.25), ([0, 2], 0.25)]
+
+def test_safe_alpha_persistence_comparison():
+    #generate periodic signal
+    time = np.arange(0, 10, 1)
+    signal = [math.sin(x) for x in time]
+    delta = math.pi
+    delayed = [math.sin(x + delta) for x in time]
+    
+    #construct embedding
+    embedding1 = [[signal[i], -signal[i]] for i in range(len(time))]
+    embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
+    
+    #build alpha complex and simplex tree
+    alpha_complex1 = AlphaComplex(points=embedding1)
+    simplex_tree1 = alpha_complex1.create_simplex_tree()
+    
+    alpha_complex2 = AlphaComplex(points=embedding2)
+    simplex_tree2 = alpha_complex2.create_simplex_tree()
+    
+    diag1 = simplex_tree1.persistence()
+    diag2 = simplex_tree2.persistence()
+
+    for (first_p, second_p) in itertools.zip_longest(diag1, diag2):
+        assert first_p[0] == pytest.approx(second_p[0])
+        assert first_p[1] == pytest.approx(second_p[1])
