@@ -17,8 +17,8 @@ and Cluster for Persistence Diagrams via Optimal Transport".
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
 
 This other implementation comes from `Hera
-<https://bitbucket.org/grey_narn/hera/src/master/>`_ and is based on `"Geometry
-Helps to Compare Persistence Diagrams."
+<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) and is
+based on `"Geometry Helps to Compare Persistence Diagrams."
 <http://dx.doi.org/10.1137/1.9781611974317.9>`_ by Michael Kerber, Dmitriy
 Morozov, and Arnur Nigmetov, at ALENEX 2016.
 
