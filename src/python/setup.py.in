@@ -26,6 +26,19 @@ library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
 include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', @GUDHI_PYTHON_INCLUDE_DIRS@]
 runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
+class get_pybind_include(object):
+    """Helper class to determine the pybind11 include path
+    The purpose of this class is to postpone importing pybind11
+    until it is actually installed, so that the ``get_include()``
+    method can be invoked. """
+
+    def __init__(self, user=False):
+        self.user = user
+
+    def __str__(self):
+        import pybind11
+        return pybind11.get_include(self.user)
+
 # Create ext_modules list from module list
 ext_modules = []
 for module in modules:
@@ -39,6 +52,15 @@ for module in modules:
         library_dirs=library_dirs,
         include_dirs=include_dirs,
         runtime_library_dirs=runtime_library_dirs,))
+ext_modules.append(Extension(
+    'gudhi.hera',
+    sources = [source_dir + 'hera.cc'],
+    language = 'c++',
+    extra_compile_args=extra_compile_args + ['-fvisibility=hidden'], # FIXME
+    include_dirs = include_dirs +
+        ['@CMAKE_SOURCE_DIR@/ext/hera/geom_matching/wasserstein/include',
+        get_pybind_include(False), get_pybind_include(True)]
+    ))
 
 setup(
     name = 'gudhi',
@@ -48,6 +70,6 @@ setup(
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
     ext_modules = cythonize(ext_modules),
-    install_requires = ['cython','numpy >= 1.9',],
-    setup_requires = ['numpy >= 1.9',],
+    install_requires = ['cython','numpy >= 1.9','pybind11',],
+    setup_requires = ['numpy >= 1.9','pybind11',],
 )
