@@ -42,7 +42,13 @@ double wasserstein_distance(
 }
 
 PYBIND11_MODULE(hera, m) {
-      m.def("wasserstein_distance", &wasserstein_distance, R"pbdoc(
+      m.def("wasserstein_distance", &wasserstein_distance,
+          py::arg("X"), py::arg("Y"),
+          R"pbdoc(
         Compute the Wasserstein distance between two diagrams
+
+        Parameters:
+            X (n x 2 numpy array): First diagram
+            Y (n x 2 numpy array): Second diagram
     )pbdoc");
 }

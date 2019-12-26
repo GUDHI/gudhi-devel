@@ -9,12 +9,20 @@ Definition
 
 .. include:: wasserstein_distance_sum.inc
 
-This implementation is based on ideas from "Large Scale Computation of Means and Cluster for Persistence Diagrams via Optimal Transport".
+Functions
+---------
+This implementation is based on ideas from "Large Scale Computation of Means
+and Cluster for Persistence Diagrams via Optimal Transport".
 
-Function
---------
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
 
+This other implementation comes from `Hera
+<https://bitbucket.org/grey_narn/hera/src/master/>`_ and is based on `"Geometry
+Helps to Compare Persistence Diagrams."
+<http://dx.doi.org/10.1137/1.9781611974317.9>`_ by Michael Kerber, Dmitriy
+Morozov, and Arnur Nigmetov, at ALENEX 2016.
+
+.. autofunction:: gudhi.hera.wasserstein_distance
 
 Basic example
 -------------
