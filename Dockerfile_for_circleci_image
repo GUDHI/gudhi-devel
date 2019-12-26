@@ -25,6 +25,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Required for Gudhi compilation
 RUN apt-get install -y make \
+    git \
     g++ \
     cmake \
     graphviz \
