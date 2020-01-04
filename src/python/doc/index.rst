@@ -6,8 +6,8 @@ GUDHI Python modules documentation
      :alt: Gudhi banner
      :figclass: align-center
 
-Complexes
-*********
+Data structures for cell complexes
+**********************************
 
 Cubical complexes
 =================
@@ -17,18 +17,26 @@ Cubical complexes
 Simplicial complexes
 ====================
 
+Simplex tree
+------------
+
+.. include:: simplex_tree_sum.inc
+
+Filtrations and reconstructions
+*******************************
+
 Alpha complex
--------------
+=============
 
 .. include:: alpha_complex_sum.inc
 
 Rips complex
-------------
+============
 
 .. include:: rips_complex_sum.inc
 
 Witness complex
----------------
+===============
 
 .. include:: witness_complex_sum.inc
 
@@ -37,16 +45,10 @@ Cover complexes
 
 .. include:: nerve_gic_complex_sum.inc
 
-Data structures and basic operations
-************************************
+Tangential complex
+==================
 
-Data structures
-===============
-
-Simplex tree
-------------
-
-.. include:: simplex_tree_sum.inc
+.. include:: tangential_complex_sum.inc
 
 Topological descriptors computation
 ***********************************
@@ -56,14 +58,10 @@ Persistence cohomology
 
 .. include:: persistent_cohomology_sum.inc
 
-Manifold reconstruction
-***********************
+Point cloud utilities
+*********************
 
-Tangential complex
-==================
-
-.. include:: tangential_complex_sum.inc
-
+.. include:: point_cloud_sum.inc
 
 Topological descriptors tools
 *****************************
