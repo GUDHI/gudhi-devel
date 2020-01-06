@@ -40,6 +40,7 @@ addons:
   homebrew:
     update: true
     packages:
+      - python3
       - cmake
       - graphviz 
       - doxygen
@@ -49,7 +50,6 @@ addons:
       - mpfr
       - tbb
       - cgal
-#      - python3
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
