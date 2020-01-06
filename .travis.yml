@@ -7,7 +7,6 @@ git:
 
 os: osx
 osx_image: xcode11.3
-compiler: clang
 
 matrix:
   include:
@@ -31,10 +30,10 @@ matrix:
         # should be : MAKE_TARGET='all sphinx' CTEST_COMMAND='ctest --output-on-failure'
         - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure -E sphinx'
 
-cache:
-  directories:
-    - $HOME/.cache/pip
-    - $HOME/Library/Caches/Homebrew
+#cache:
+#  directories:
+#    - $HOME/.cache/pip
+#    - $HOME/Library/Caches/Homebrew
 
 addons:
   homebrew:
@@ -50,9 +49,9 @@ addons:
       - tbb
       - cgal
 
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
-  - brew cleanup
+#before_cache:
+#  - rm -f $HOME/.cache/pip/log/debug.log
+#  - brew cleanup
 
 before_install:
   - which python
