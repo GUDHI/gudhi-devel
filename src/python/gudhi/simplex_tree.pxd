@@ -35,6 +35,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool find_simplex(vector[int] simplex)
         bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
+        pair[vector[int], double] get_next_in_filtration()
         vector[pair[vector[int], double]] get_filtration()
         vector[pair[vector[int], double]] get_skeleton(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)

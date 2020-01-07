@@ -18,22 +18,14 @@ __license__ = "MIT"
 class SimplexTreeIterator:
     """Iterator class for SimplexTree"""
     def __init__(self, st):
-        # Filtration list object reference
-        self._filtration = st.get_unprocessed_filtration()
-        # member variable to keep track of current index
-        self._index = 0
+        self._st = st
 
     def __next__(self):
         """Returns the next simplex with its filtration value"""
-        if self._index < len(self._filtration):
-            filtered_complex = self._filtration[self._index]
-            v = []
-            for vertex in filtered_complex[0]:
-                v.append(vertex)
-            self._index +=1
-            return (v, filtered_complex[1])
-        # End of Iteration
-        raise StopIteration
+        simplex = self._st.get_next_in_filtration();
+        if simplex is None:
+            raise StopIteration
+        return simplex
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -227,6 +219,16 @@ cdef class SimplexTree:
         return self.get_ptr().insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
+    def __iter__(self):
+        """Returns an Iterator object for this instance"""
+        return SimplexTreeIterator(self)
+
+    def get_next_in_filtration(self):
+        """TODO"""
+        cdef pair[vector[int], double] simplex \
+            = self.get_ptr().get_next_in_filtration();
+        return simplex
+
     def get_filtration(self):
         """This function returns a list of all simplices with their given
         filtration values.
@@ -236,33 +238,7 @@ cdef class SimplexTree:
         """
         cdef vector[pair[vector[int], double]] filtration \
             = self.get_ptr().get_filtration()
-        ct = []
-        for filtered_complex in filtration:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
-
-    # NOTE: getting rid of this iintrnal function by calling get_ptr() or
-    # trying to cast the pointer outside the class fails.
-    # TODO: the returned object is identical to the one returned by
-    # get_filtration(() above: replace the function?
-    def get_unprocessed_filtration(self):
-        """This function returns the filtration object as computed in
-        get_filtration() above, but does not post-process the result,
-        for iteration purpose.
-
-        :returns:  The simplices sorted by increasing filtration values.
-        :rtype:  list of tuples(simplex, filtration)
-        """
-        cdef vector[pair[vector[int], double]] filtration \
-            = self.get_ptr().get_filtration()
         return filtration
-
-    def __iter__(self):
-        """Returns an Iterator object for this instance"""
-        return SimplexTreeIterator(self)
 
     def get_skeleton(self, dimension):
         """This function returns the (simplices of the) skeleton of a maximum
