@@ -62,7 +62,7 @@ cdef class PeriodicCubicalComplex:
 
         :param top_dimensional_cells: A multidimensional array of cells
             filtration values.
-        :type top_dimensional_cells: numpy ndarray or list of list of double
+        :type top_dimensional_cells: anything convertible to a numpy ndarray
         :param periodic_dimensions: A list of top dimensional cells periodicity value.
         :type periodic_dimensions: list of boolean
 

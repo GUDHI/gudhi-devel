@@ -60,7 +60,7 @@ cdef class CubicalComplex:
 
         :param top_dimensional_cells: A multidimensional array of cells
             filtration values.
-        :type top_dimensional_cells: numpy ndarray or list of list of double
+        :type top_dimensional_cells: anything convertible to a numpy ndarray
 
         Or
 
