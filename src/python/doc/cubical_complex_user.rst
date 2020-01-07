@@ -142,7 +142,8 @@ Or it can be defined as follows:
 .. testcode::
 
     from gudhi import PeriodicCubicalComplex as pcc
-    periodic_cc = pcc(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]]
+    periodic_cc = pcc(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+         periodic_dimensions=[True, False])
     result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
         repr(periodic_cc.num_simplices()) + ' simplices.'
     print(result_str)
