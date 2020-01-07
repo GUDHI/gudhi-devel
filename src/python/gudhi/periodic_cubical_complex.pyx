@@ -62,7 +62,7 @@ cdef class PeriodicCubicalComplex:
 
         :param top_dimensional_cells: A multidimensional array of cells
             filtration values.
-        :type top_dimensional_cells: numpy ndarray
+        :type top_dimensional_cells: numpy ndarray or list of list of double
         :param periodic_dimensions: A list of top dimensional cells periodicity value.
         :type periodic_dimensions: list of boolean
 
@@ -82,14 +82,14 @@ cdef class PeriodicCubicalComplex:
                                                                        periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
-            if isinstance(top_dimensional_cells, np.ndarray):
-                dimensions = top_dimensional_cells.shape
-                top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-                self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
-                                                                           top_dimensional_cells,
-                                                                           periodic_dimensions)
-            else:
-                print("top_dimensional_cells is not an instance of ndarray. It is a " + type(top_dimensional_cells))
+            top_dimensional_cells = np.array(top_dimensional_cells,
+                                             copy = False,
+                                             order = 'F')
+            dimensions = top_dimensional_cells.shape
+            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
+                                                                       top_dimensional_cells,
+                                                                       periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
