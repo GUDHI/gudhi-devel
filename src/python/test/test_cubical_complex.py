@@ -1,4 +1,5 @@
-from gudhi import CubicalComplex
+from gudhi import CubicalComplex, PeriodicCubicalComplex
+import numpy as np
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -56,7 +57,7 @@ def test_dimension_or_perseus_file_constructor():
     assert cub.__is_persistence_defined() == False
 
 
-def test_dimension_simple_constructor():
+def simple_constructor(cub):
     cub = CubicalComplex(
         dimensions=[3, 3], top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9]
     )
@@ -67,12 +68,22 @@ def test_dimension_simple_constructor():
     assert cub.betti_numbers() == [1, 0, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [0, 0, 0]
 
-
-def test_user_case_simple_constructor():
+def test_simple_constructor_from_top_cells():
     cub = CubicalComplex(
         dimensions=[3, 3],
-        top_dimensional_cells=[float("inf"), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
+    simple_constructor(cub)
+
+def test_simple_constructor_from_numpy_array():
+    cub = CubicalComplex(
+        top_dimensional_cells=np.array([[1, 2, 3],
+                                        [4, 5, 6],
+                                        [7, 8, 9]])
+    )
+    simple_constructor(cub)
+
+def user_case_simple_constructor(cub):
     assert cub.__is_defined() == True
     assert cub.__is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
@@ -83,6 +94,20 @@ def test_user_case_simple_constructor():
     )
     assert other_cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
 
+def test_user_case_simple_constructor_from_top_cells():
+    cub = CubicalComplex(
+        dimensions=[3, 3],
+        top_dimensional_cells=[float("inf"), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+    )
+    user_case_simple_constructor(cub)
+
+def test_user_case_simple_constructor_from_numpy_array():
+    cub = CubicalComplex(
+        top_dimensional_cells=np.array([[float("inf"), 0.0, 0.0],
+                                        [0.0, 1.0, 0.0],
+                                        [0.0, 0.0, 0.0]])
+    )
+    user_case_simple_constructor(cub)
 
 def test_dimension_file_constructor():
     # Create test file
@@ -96,3 +121,29 @@ def test_dimension_file_constructor():
     assert cub.__is_persistence_defined() == True
     assert cub.betti_numbers() == [1, 0, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [1, 0, 0]
+
+def test_connected_sublevel_sets():
+    array_cells = np.array([[3, 3], [2, 2], [4, 4]])
+    linear_cells = [3, 3, 2, 2, 4, 4]
+    dimensions = [2, 3]
+    periodic_dimensions = [False, False]
+    # with a numpy array version
+    cub = CubicalComplex(top_dimensional_cells = array_cells)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # with vector of dimensions
+    cub = CubicalComplex(dimensions = dimensions,
+                         top_dimensional_cells = linear_cells)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # periodic with a numpy array version
+    cub = PeriodicCubicalComplex(top_dimensional_cells = array_cells,
+                                periodic_dimensions = periodic_dimensions)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
+    # periodic with vector of dimensions
+    cub = PeriodicCubicalComplex(dimensions = dimensions,
+                                 top_dimensional_cells = linear_cells,
+                                 periodic_dimensions = periodic_dimensions)
+    assert cub.persistence() == [(0, (2.0, float("inf")))]
+    assert cub.betti_numbers() == [1, 0, 0]
