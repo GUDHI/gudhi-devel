@@ -84,16 +84,27 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   std::pair<std::vector<int>, double> get_next_in_filtration() {
     static Simplex_tree_complex_simplex_iterator<Base>* sti = nullptr;
-    if (sti == nullptr)
+    if (sti == nullptr) {
+      Base::initialize_filtration(); //TODO: this allocates the full simplex
       sti = new Simplex_tree_complex_simplex_iterator<Base>(this);
+    }
     auto res = (*sti)->get_ptr();
     (*sti)++;
-    if (*(*sti) == Base::null_simplex())
-      return nullptr; //TODO: return "None"
-    std::vector<int> v(5, 3);
-    return std::make_pair<Simplex, double>(std::move(v), res->first);
-    // TODO: process res->second to use next line
-    //return std::make_pair<Simplex, double>(res->second, res->first);
+    if (*(*sti) == Base::null_simplex()) {
+      delete sti;
+      sti = nullptr;
+      return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
+    }
+    auto key = res->second.key(); //TODO: seems to contain junk value
+    //return std::make_pair<Simplex, double>(std::vector<int>(5,3), res->first);
+    auto sh = this->simplex(key); //This probably causes a segfault
+    //std::cout << "DEBUG: " << key << std::endl;
+    Simplex simplex;
+    for (auto vertex : Base::simplex_vertex_range(sh)) {
+      //std::cout << vertex << std::endl;
+      simplex.insert(simplex.begin(), vertex);
+    }
+    return std::make_pair<Simplex, double>(std::move(simplex), res->first);
   }
 
   Filtered_simplices get_filtration() {

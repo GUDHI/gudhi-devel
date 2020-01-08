@@ -23,7 +23,7 @@ class SimplexTreeIterator:
     def __next__(self):
         """Returns the next simplex with its filtration value"""
         simplex = self._st.get_next_in_filtration();
-        if simplex is None:
+        if len(simplex[0]) == 0:
             raise StopIteration
         return simplex
 
@@ -224,7 +224,12 @@ cdef class SimplexTree:
         return SimplexTreeIterator(self)
 
     def get_next_in_filtration(self):
-        """TODO"""
+        """Returns the next simplex in the filtration, in an iteration
+        context.
+
+        :returns:  The current simplex (following iterator state).
+        :rtype:  tuple(simplex, filtration)
+        """
         cdef pair[vector[int], double] simplex \
             = self.get_ptr().get_next_in_filtration();
         return simplex
