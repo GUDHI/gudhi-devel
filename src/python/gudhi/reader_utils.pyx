@@ -34,7 +34,7 @@ def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
     :type separator: char
 
     :returns:  The lower triangular matrix.
-    :rtype: list(list(float))
+    :rtype: List[List[float]]
     """
     if csv_file:
         if path.isfile(csv_file):
@@ -46,14 +46,14 @@ def read_persistence_intervals_grouped_by_dimension(persistence_file=''):
     """Reads a file containing persistence intervals.
     Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
     The return value is a `dict(dim, list(tuple(birth, death)))`
-    where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+    where `dim` is an `int`, `birth` a `float`, and `death` a `float`.
     Note: the function does not check that birth <= death.
 
     :param persistence_file: A persistence file style name.
     :type persistence_file: string
 
     :returns:  The persistence pairs grouped by dimension.
-    :rtype: dict(int, list(tuple(float, float)))
+    :rtype: Dict[int, List[Tuple[float, float]]]
     """
     if persistence_file:
         if path.isfile(persistence_file):

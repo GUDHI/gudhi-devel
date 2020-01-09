@@ -26,7 +26,7 @@ def read_off(off_file=''):
     :type off_file: string
 
     :returns:  The point set.
-    :rtype: list(list(float))
+    :rtype: List[List[float]]
     """
     if off_file:
         if os.path.isfile(off_file):
