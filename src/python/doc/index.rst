@@ -58,11 +58,6 @@ Persistence cohomology
 
 .. include:: persistent_cohomology_sum.inc
 
-Point cloud utilities
-*********************
-
-.. include:: point_cloud_sum.inc
-
 Topological descriptors tools
 *****************************
 
@@ -85,6 +80,11 @@ Persistence graphical tools
 ===========================
 
 .. include:: persistence_graphical_tools_sum.inc
+
+Point cloud utilities
+*********************
+
+.. include:: point_cloud_sum.inc
 
 Bibliography
 ************
