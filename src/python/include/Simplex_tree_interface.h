@@ -88,23 +88,19 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       Base::initialize_filtration(); //TODO: this allocates the full simplex
       sti = new Simplex_tree_complex_simplex_iterator<Base>(this);
     }
-    auto res = (*sti)->get_ptr();
+    auto res = *(*sti);
     (*sti)++;
-    if (*(*sti) == Base::null_simplex()) {
-      delete sti;
-      sti = nullptr;
-      return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
-    }
-    auto key = res->second.key(); //TODO: seems to contain junk value
-    //return std::make_pair<Simplex, double>(std::vector<int>(5,3), res->first);
-    auto sh = this->simplex(key); //This probably causes a segfault
-    //std::cout << "DEBUG: " << key << std::endl;
     Simplex simplex;
-    for (auto vertex : Base::simplex_vertex_range(sh)) {
-      //std::cout << vertex << std::endl;
+    for (auto vertex : Base::simplex_vertex_range(res)) {
       simplex.insert(simplex.begin(), vertex);
     }
-    return std::make_pair<Simplex, double>(std::move(simplex), res->first);
+    // TODO: how to know if end() is reached?
+//    if (&res == sti->end()) {
+//      delete sti;
+//      sti = nullptr;
+//      return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
+//    }
+    return std::make_pair<Simplex, double>(std::move(simplex), res.get_ptr()->first);
   }
 
   Filtered_simplices get_filtration() {
