@@ -15,15 +15,18 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-class SimplexTreeIterator:
+cdef class SimplexTreeIterator:
+    cdef SimplexTree _st;
+
     """Iterator class for SimplexTree"""
     def __init__(self, st):
         self._st = st
 
     def __next__(self):
         """Returns the next simplex with its filtration value"""
-        simplex = self._st.get_next_in_filtration();
-        if len(simplex[0]) == 0:
+        cdef pair[vector[int], double] simplex \
+            = self._st.get_ptr().get_next_in_filtration();
+        if len(simplex.first) == 0:
             raise StopIteration
         return simplex
 
@@ -222,17 +225,6 @@ cdef class SimplexTree:
     def __iter__(self):
         """Returns an Iterator object for this instance"""
         return SimplexTreeIterator(self)
-
-    def get_next_in_filtration(self):
-        """Returns the next simplex in the filtration, in an iteration
-        context.
-
-        :returns:  The current simplex (following iterator state).
-        :rtype:  tuple(simplex, filtration)
-        """
-        cdef pair[vector[int], double] simplex \
-            = self.get_ptr().get_next_in_filtration();
-        return simplex
 
     def get_filtration(self):
         """This function returns a list of all simplices with their given
