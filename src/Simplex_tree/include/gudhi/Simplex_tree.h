@@ -1378,7 +1378,7 @@ class Simplex_tree {
  private:
   bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
     auto&& list = sib->members();
-    auto last = std::remove_if(list.begin(), list.end(), [=](Dit_value_t& simplex) {
+    auto last = std::remove_if(list.begin(), list.end(), [this,filt](Dit_value_t& simplex) {
         if (simplex.second.filtration() <= filt) return false;
         if (has_children(&simplex)) rec_delete(simplex.second.children());
         // dimension may need to be lowered
