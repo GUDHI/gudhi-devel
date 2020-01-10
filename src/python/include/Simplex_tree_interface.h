@@ -83,24 +83,43 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  intptr_t get_filtration_iterator() {
-    auto psti = new Simplex_tree_complex_simplex_iterator<Base>(this);
-    return reinterpret_cast<intptr_t>(psti);
+  // If called with key < 0: allocate a new key for current iteration.
+  // If called with key >= 0: remove the key from used set (iteration is over)
+  int init_or_stop_iteration(int key) {
+    static bool filtration_initialized = false;
+    if (key < 0 && !filtration_initialized)
+    {
+      Base::initialize_filtration();
+      filtration_initialized = true;
+    }
+    static std::set<int> used_keys;
+    if (key >= 0)
+      used_keys.erase(key);
+    else
+    {
+      // Search for smallest int available and use it:
+      key = 0;
+      while (used_keys.count(key))
+        key++;
+    }
+    return key;
   }
 
-  std::pair<std::vector<int>, double> get_next_in_filtration(intptr_t psti) {
-    auto sti = *(reinterpret_cast<Simplex_tree_complex_simplex_iterator<Base>*>(psti));
-    if (sti == Simplex_tree_complex_simplex_iterator<Base>())
+  std::pair<std::vector<int>, double> get_next_in_filtration(int key) {
+    static std::map<int, Simplex_tree_complex_simplex_iterator<Base>> iters;
+    if (!iters.count(key))
+      iters[key] = Simplex_tree_complex_simplex_iterator<Base>(this);
+    if (iters[key] == Simplex_tree_complex_simplex_iterator<Base>())
+    {
+      iters.erase(key); //iteration is over
+      init_or_stop_iteration(key); //"stop" because key >= 0
       return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
-    auto res = *(sti++);
+    }
+    auto res = *(iters[key]++);
     Simplex simplex;
     for (auto vertex : Base::simplex_vertex_range(res))
       simplex.insert(simplex.begin(), vertex);
     return std::make_pair<Simplex, double>(std::move(simplex), res.get_ptr()->first);
-  }
-
-  void end_filtration_iteration(intptr_t psti) {
-    delete (reinterpret_cast<Simplex_tree_complex_simplex_iterator<Base>*>(psti));
   }
 
   Filtered_simplices get_filtration() {
