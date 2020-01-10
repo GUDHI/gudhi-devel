@@ -101,6 +101,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       key = 0;
       while (used_keys.count(key))
         key++;
+      used_keys.insert(key);
     }
     return key;
   }
