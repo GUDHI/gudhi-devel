@@ -19,11 +19,14 @@ cdef class SimplexTreeIterator:
     cdef intptr_t _sti;
     cdef SimplexTree _st;
 
+    cdef do_init(self):
+        self._st.get_ptr().initialize_filtration()
+        self._sti = self._st.get_ptr().get_filtration_iterator()
+
     """Iterator class for SimplexTree"""
     def __init__(self, st):
         self._st = st
-        st.get_ptr().initialize_filtration()
-        self._sti = st.get_ptr().get_filtration_iterator()
+        self.do_init()
 
     def __next__(self):
         """Returns the next simplex with its filtration value"""
