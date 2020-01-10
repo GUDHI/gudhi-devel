@@ -15,6 +15,7 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
+#include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
 
 #include "Persistent_cohomology_interface.h"
 
@@ -82,9 +83,13 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  std::pair<std::vector<int>, double> get_next_in_filtration(
-    Simplex_tree_complex_simplex_iterator<Base>& sti)
-  {
+  intptr_t get_filtration_iterator() {
+    auto psti = new Simplex_tree_complex_simplex_iterator<Base>(this);
+    return reinterpret_cast<intptr_t>(psti);
+  }
+
+  std::pair<std::vector<int>, double> get_next_in_filtration(intptr_t psti) {
+    auto sti = *(reinterpret_cast<Simplex_tree_complex_simplex_iterator<Base>*>(psti));
     if (sti == Simplex_tree_complex_simplex_iterator<Base>())
       return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
     auto res = *(sti++);
@@ -92,6 +97,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     for (auto vertex : Base::simplex_vertex_range(res))
       simplex.insert(simplex.begin(), vertex);
     return std::make_pair<Simplex, double>(std::move(simplex), res.get_ptr()->first);
+  }
+
+  void end_filtration_iteration(intptr_t psti) {
+    delete (reinterpret_cast<Simplex_tree_complex_simplex_iterator<Base>*>(psti));
   }
 
   Filtered_simplices get_filtration() {

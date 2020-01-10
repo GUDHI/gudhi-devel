@@ -18,8 +18,6 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-# TODO: add cdef for SimplexTreeIterator ...
-
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_options_full_featured:
         pass
@@ -37,7 +35,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool find_simplex(vector[int] simplex)
         bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
-        pair[vector[int], double] get_next_in_filtration()
+        long get_filtration_iterator()
+        pair[vector[int], double] get_next_in_filtration(long psti)
+        void end_filtration_iteration(long psti)
         vector[pair[vector[int], double]] get_filtration()
         vector[pair[vector[int], double]] get_skeleton(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
