@@ -16,16 +16,18 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 cdef class SimplexTreeIterator:
-    cdef SimplexTree _st;
+    cdef Simplex_tree_complex_simplex_iterator[Simplex_tree[Simplex_tree_options_full_featured]] _sti;
 
     """Iterator class for SimplexTree"""
     def __init__(self, st):
         self._st = st
+        self._sti = Simplex_tree_complex_simplex_iterator[Simplex_tree[Simplex_tree_options_full_featured]](st)
+        st.get_ptr().initialize_filtration()
 
     def __next__(self):
         """Returns the next simplex with its filtration value"""
         cdef pair[vector[int], double] simplex \
-            = self._st.get_ptr().get_next_in_filtration();
+            = self._st.get_ptr().get_next_in_filtration(self._sti)
         if len(simplex.first) == 0:
             raise StopIteration
         return simplex

@@ -82,23 +82,15 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  std::pair<std::vector<int>, double> get_next_in_filtration() {
-    static Simplex_tree_complex_simplex_iterator<Base>* sti = nullptr;
-    if (sti == nullptr) {
-      Base::initialize_filtration(); //TODO: this allocates the full simplex
-      sti = new Simplex_tree_complex_simplex_iterator<Base>(this);
-    }
-    if (*sti == Simplex_tree_complex_simplex_iterator<Base>()) {
-      delete sti;
-      sti = nullptr;
+  std::pair<std::vector<int>, double> get_next_in_filtration(
+    Simplex_tree_complex_simplex_iterator<Base>& sti)
+  {
+    if (sti == Simplex_tree_complex_simplex_iterator<Base>())
       return std::make_pair<Simplex, double>(std::vector<int>(), 0.0);
-    }
-    auto res = *(*sti);
-    (*sti)++;
+    auto res = *(sti++);
     Simplex simplex;
-    for (auto vertex : Base::simplex_vertex_range(res)) {
+    for (auto vertex : Base::simplex_vertex_range(res))
       simplex.insert(simplex.begin(), vertex);
-    }
     return std::make_pair<Simplex, double>(std::move(simplex), res.get_ptr()->first);
   }
 

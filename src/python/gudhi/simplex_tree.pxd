@@ -18,6 +18,8 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+# TODO: add cdef for SimplexTreeIterator ...
+
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_options_full_featured:
         pass
