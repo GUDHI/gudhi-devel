@@ -257,6 +257,13 @@ The :doc:`Wasserstein distance </wasserstein_distance_user>`
 module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
 
+Scikit-learn
+============
+
+The :doc:`persistence representations </representations>` module require
+`scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
+open-source software for machine learning.
+
 SciPy
 =====
 
