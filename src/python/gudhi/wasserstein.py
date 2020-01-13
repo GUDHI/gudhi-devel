@@ -27,7 +27,7 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
     '''
     :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
     :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param internal_p: Ground metric (i.e. norm l_q).
+    :param internal_p: Ground metric (i.e. norm l_p).
     :param order: exponent for the Wasserstein metric.
     :returns: (n+1) x (m+1) np.array encoding the cost matrix C. 
                 For 1 <= i <= n, 1 <= j <= m, C[i,j] encodes the distance between X[i] and Y[j], while C[i, m+1] (resp. C[n+1, j]) encodes the distance (to the p) between X[i] (resp Y[j]) and its orthogonal proj onto the diagonal.
@@ -95,4 +95,3 @@ def wasserstein_distance(X, Y, order=2., internal_p=2.):
     ot_cost = (n+m) * ot.emd2(a, b, M, numItermax=2000000)
 
     return ot_cost ** (1./order)
-
