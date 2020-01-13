@@ -19,7 +19,7 @@ __license__ = "MIT"
 cdef extern from "Off_reader_interface.h" namespace "Gudhi":
     vector[vector[double]] read_points_from_OFF_file(string off_file)
 
-def read_off(off_file=''):
+def read_points_from_off_file(off_file=''):
     """Read points from OFF file.
 
     :param off_file: An OFF file style name.

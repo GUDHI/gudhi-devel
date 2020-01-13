@@ -35,7 +35,7 @@ args = parser.parse_args()
 with open(args.file, "r") as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
-        point_cloud = gudhi.read_off(off_file=args.file)
+        point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
         print("#####################################################################")
         print("RipsComplex creation from points read in a OFF file")
 
