@@ -27,7 +27,7 @@
   #define GUDHI_CHECK_code(CODE)
 #endif
 
-#define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl
+#define PRINT(a) std::cout << #a << ": " << (a) << " (DISP)" << std::endl
 
 // #define DBG_VERBOSE
 #ifdef DBG_VERBOSE

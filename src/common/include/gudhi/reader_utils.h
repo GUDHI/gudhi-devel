@@ -272,12 +272,12 @@ std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv
   in.close();
 
 #ifdef DEBUG_TRACES
-  std::cerr << "Here is the matrix we read : \n";
+  std::cout << "Here is the matrix we read : \n";
   for (size_t i = 0; i != result.size(); ++i) {
     for (size_t j = 0; j != result[i].size(); ++j) {
-      std::cerr << result[i][j] << " ";
+      std::cout << result[i][j] << " ";
     }
-    std::cerr << std::endl;
+    std::cout << std::endl;
   }
 #endif  // DEBUG_TRACES
 

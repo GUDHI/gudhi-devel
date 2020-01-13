@@ -344,7 +344,7 @@ class Cover_complex {
     if (num_edges(one_skeleton_OFF))
       one_skeleton = one_skeleton_OFF;
     else
-      std::cout << "No triangulation read in OFF file!" << std::endl;
+      std::cerr << "No triangulation read in OFF file!" << std::endl;
   }
 
  public:  // Set graph from Rips complex.
@@ -530,7 +530,7 @@ class Cover_complex {
       cover_name = "coordinate " + std::to_string(k);
     }
     else{
-      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
@@ -563,11 +563,11 @@ class Cover_complex {
            */
   double set_automatic_resolution() {
     if (!functional_cover) {
-      std::cout << "Cover needs to come from the preimages of a function." << std::endl;
+      std::cerr << "Cover needs to come from the preimages of a function." << std::endl;
       return 0;
     }
     if (type != "Nerve" && type != "GIC") {
-      std::cout << "Type of complex needs to be specified." << std::endl;
+      std::cerr << "Type of complex needs to be specified." << std::endl;
       return 0;
     }
 
@@ -622,11 +622,11 @@ class Cover_complex {
            */
   void set_cover_from_function() {
     if (resolution_double == -1 && resolution_int == -1) {
-      std::cout << "Number and/or length of intervals not specified" << std::endl;
+      std::cerr << "Number and/or length of intervals not specified" << std::endl;
       return;
     }
     if (gain == -1) {
-      std::cout << "Gain not specified" << std::endl;
+      std::cerr << "Gain not specified" << std::endl;
       return;
     }
 
@@ -991,7 +991,7 @@ class Cover_complex {
       color_name.append(std::to_string(k));
     }
     else{
-      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
@@ -1213,9 +1213,7 @@ class Cover_complex {
    */
   void compute_distribution(unsigned int N = 100) {
     unsigned int sz = distribution.size();
-    if (sz >= N) {
-      std::cout << "Already done!" << std::endl;
-    } else {
+    if (sz < N) {
       for (unsigned int i = 0; i < N - sz; i++) {
         if (verbose)  std::cout << "Computing " << i << "th bootstrap, bottleneck distance = ";
 
@@ -1319,7 +1317,7 @@ class Cover_complex {
    */
   void find_simplices() {
     if (type != "Nerve" && type != "GIC") {
-      std::cout << "Type of complex needs to be specified." << std::endl;
+      std::cerr << "Type of complex needs to be specified." << std::endl;
       return;
     }
 

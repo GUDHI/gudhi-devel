@@ -360,9 +360,9 @@ template <typename F>
 void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap(size_t where_to_cut) {
   bool dbg = false;
   if (dbg) {
-    std::cerr << "Here are the intervals : \n";
+    std::cout << "Here are the intervals : \n";
     for (size_t i = 0; i != this->intervals.size(); ++i) {
-      std::cerr << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
+      std::cout << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
     }
   }
   where_to_cut = std::min(
@@ -385,14 +385,14 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
                                                    0.5 * (this->intervals[j].first + this->intervals[j].second)))));
 
       if (dbg) {
-        std::cerr << "Value : " << value << std::endl;
-        std::cerr << "heap.front() : " << heap.front() << std::endl;
+        std::cout << "Value : " << value << std::endl;
+        std::cout << "heap.front() : " << heap.front() << std::endl;
         getchar();
       }
 
       if (-value < heap.front()) {
         if (dbg) {
-          std::cerr << "Replacing : " << heap.front() << " with : " << -value << std::endl;
+          std::cout << "Replacing : " << heap.front() << " with : " << -value << std::endl;
           getchar();
         }
         // remove the first element from the heap
@@ -431,7 +431,7 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
   }
 
   if (dbg) {
-    std::cerr << "This is the heap after all the operations :\n";
+    std::cout << "This is the heap after all the operations :\n";
     for (size_t i = 0; i != heap.size(); ++i) {
       std::cout << heap[i] << " ";
     }
@@ -519,11 +519,11 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
   bool dbg = false;
 
   if (dbg) {
-    std::cerr << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* "
+    std::cout << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* "
                  "second , double power ) procedure \n";
-    std::cerr << "Power : " << power << std::endl;
-    std::cerr << "This : " << *this << std::endl;
-    std::cerr << "second : " << second_ << std::endl;
+    std::cout << "Power : " << power << std::endl;
+    std::cout << "This : " << *this << std::endl;
+    std::cout << "second : " << second_ << std::endl;
   }
 
   double result = 0;
@@ -531,7 +531,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
        ++i) {
     if (power == 1) {
       if (dbg) {
-        std::cerr << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i]
+        std::cout << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i]
                   << " |  : " << fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i])
                   << std::endl;
       }
@@ -545,7 +545,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
           result = fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i]);
       }
       if (dbg) {
-        std::cerr << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]
+        std::cout << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]
                   << " : " << fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i])
                   << std::endl;
       }

@@ -312,7 +312,7 @@ class Model {
     std::cout << "Call CHOMP library\n";
     int returnValue = system("homsimpl chomp.sim");
     if (returnValue != 0) {
-        std::cout << "homsimpl (from CHOMP) failed. Please check it is installed or available in the PATH."
+        std::cerr << "homsimpl (from CHOMP) failed. Please check it is installed or available in the PATH."
                   << std::endl;
     }
   }
