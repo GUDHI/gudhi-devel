@@ -55,7 +55,7 @@ def _perstot(X, order, internal_p):
     '''
     :param X: (n x 2) numpy.array (points of a given diagram).
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm l_p in R^2); Default value is 2 (Euclidean norm).
-    :param order: exponent for Wasserstein; Default value is 2.
+    :param order: exponent for Wasserstein. Default value is 2.
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).    
     '''
     Xdiag = _proj_on_diag(X)
@@ -68,7 +68,7 @@ def wasserstein_distance(X, Y, order=2., internal_p=2.):
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm l_p in R^2); Default value is 2 (euclidean norm).
     :param order: exponent for Wasserstein; Default value is 2.
-    :returns: the q-Wasserstein distance (1 <= q < infinity) with respect to the internal_p-norm as ground metric.
+    :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with respect to the internal_p-norm as ground metric.
     :rtype: float
     '''
     n = len(X)
