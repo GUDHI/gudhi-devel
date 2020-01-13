@@ -1,11 +1,3 @@
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.utility cimport pair
-from libc.stdint cimport intptr_t
-
-from gudhi.simplex_tree cimport *
-from gudhi.simplex_tree import SimplexTree
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -14,6 +6,14 @@ from gudhi.simplex_tree import SimplexTree
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libc.stdint cimport intptr_t
+
+from gudhi.simplex_tree cimport *
+from gudhi.simplex_tree import SimplexTree
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"

@@ -1,6 +1,3 @@
-from gudhi.wasserstein import wasserstein_distance
-import numpy as np
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Theo Lacombe
@@ -10,6 +7,9 @@ import numpy as np
     Modification(s):
       - YYYY/MM Author: Description of the modification
 """
+
+from gudhi.wasserstein import wasserstein_distance
+import numpy as np
 
 __author__ = "Theo Lacombe"
 __copyright__ = "Copyright (C) 2019 Inria"
