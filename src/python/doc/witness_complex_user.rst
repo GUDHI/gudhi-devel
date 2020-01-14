@@ -101,7 +101,7 @@ Let's start with a simple example, which reads an off point file and computes a 
             print("#####################################################################")
             print("EuclideanWitnessComplex creation from points read in a OFF file")
 
-            witnesses = gudhi.read_off(off_file=args.file)
+            witnesses = gudhi.read_points_from_off_file(off_file=args.file)
             landmarks = gudhi.pick_n_random_points(points=witnesses, nb_points=args.number_of_landmarks)
 
             message = "EuclideanWitnessComplex with max_edge_length=" + repr(args.max_alpha_square) + \

@@ -30,7 +30,7 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays and mus
     diag1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
     diag2 = np.array([[2.8, 4.45],[9.5, 14.1]])
 
-    message = "Wasserstein distance value = " + '%.2f' % gudhi.wasserstein.wasserstein_distance(diag1, diag2, q=2., p=1.)
+    message = "Wasserstein distance value = " + '%.2f' % gudhi.wasserstein.wasserstein_distance(diag1, diag2, order=1., internal_p=2.)
     print(message)
 
 The output is:

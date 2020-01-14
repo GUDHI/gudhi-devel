@@ -2,7 +2,7 @@
 
 import numpy as np
 import gudhi
-points = np.array(gudhi.read_off('../../data/points/Kl.off'))
+points = np.array(gudhi.read_points_from_off_file('../../data/points/Kl.off'))
 rc = gudhi.RipsComplex(points=points, max_edge_length=.2)
 st = rc.create_simplex_tree(max_dimension=2)
 # We are only going to plot the triangles

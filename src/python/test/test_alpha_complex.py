@@ -1,9 +1,3 @@
-from gudhi import AlphaComplex, SimplexTree
-import math
-import numpy as np
-import itertools
-import pytest
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,6 +7,12 @@ import pytest
     Modification(s):
       - YYYY/MM Author: Description of the modification
 """
+
+from gudhi import AlphaComplex, SimplexTree
+import math
+import numpy as np
+import itertools
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
