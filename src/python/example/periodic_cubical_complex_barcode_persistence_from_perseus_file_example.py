@@ -2,6 +2,7 @@
 
 import argparse
 import matplotlib.pyplot as plot
+import sys
 import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
@@ -73,4 +74,4 @@ if is_file_perseus(args.file):
         gudhi.plot_persistence_barcode(diag)
         plot.show()
 else:
-    print(args.file, "is not a valid perseus style file")
+    print(args.file, "is not a valid perseus style file", file=sys.stderr)

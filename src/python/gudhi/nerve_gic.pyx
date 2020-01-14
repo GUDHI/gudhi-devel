@@ -7,11 +7,13 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
+import sys
 import os
 from libc.stdint cimport intptr_t
 
@@ -182,7 +184,7 @@ cdef class CoverComplex:
         if os.path.isfile(off_file):
             return self.thisptr.read_point_cloud(str.encode(off_file))
         else:
-            print("file " + off_file + " not found.")
+            print("file " + off_file + " not found.", file=sys.stderr)
             return False
 
     def set_automatic_resolution(self):
@@ -214,7 +216,7 @@ cdef class CoverComplex:
         if os.path.isfile(color_file_name):
             self.thisptr.set_color_from_file(str.encode(color_file_name))
         else:
-            print("file " + color_file_name + " not found.")
+            print("file " + color_file_name + " not found.", file=sys.stderr)
 
     def set_color_from_range(self, color):
         """Computes the function used to color the nodes of the simplicial
@@ -235,7 +237,7 @@ cdef class CoverComplex:
         if os.path.isfile(cover_file_name):
             self.thisptr.set_cover_from_file(str.encode(cover_file_name))
         else:
-            print("file " + cover_file_name + " not found.")
+            print("file " + cover_file_name + " not found.", file=sys.stderr)
 
     def set_cover_from_function(self):
         """Creates a cover C from the preimages of the function f.
@@ -268,7 +270,7 @@ cdef class CoverComplex:
         if os.path.isfile(func_file_name):
             self.thisptr.set_function_from_file(str.encode(func_file_name))
         else:
-            print("file " + func_file_name + " not found.")
+            print("file " + func_file_name + " not found.", file=sys.stderr)
 
     def set_function_from_range(self, function):
         """Creates the function f from a vector stored in memory.
@@ -309,7 +311,7 @@ cdef class CoverComplex:
         if os.path.isfile(graph_file_name):
             self.thisptr.set_graph_from_file(str.encode(graph_file_name))
         else:
-            print("file " + graph_file_name + " not found.")
+            print("file " + graph_file_name + " not found.", file=sys.stderr)
 
     def set_graph_from_OFF(self):
         """Creates a graph G from the triangulation given by the input OFF

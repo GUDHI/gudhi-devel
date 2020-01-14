@@ -3,6 +3,7 @@
 import gudhi
 import argparse
 import math
+import sys
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
@@ -100,6 +101,6 @@ with open(args.file, "r") as f:
         print(message)
 
     else:
-        print(args.file, "is not a valid OFF file")
+        print(args.file, "is not a valid OFF file", file=sys.stderr)
 
     f.close()

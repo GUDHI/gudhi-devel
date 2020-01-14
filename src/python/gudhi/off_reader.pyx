@@ -7,9 +7,11 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+import sys
 import os
 
 __author__ = "Vincent Rouvreau"
@@ -32,6 +34,6 @@ def read_points_from_off_file(off_file=''):
         if os.path.isfile(off_file):
             return read_points_from_OFF_file(str.encode(off_file))
         else:
-            print("file " + off_file + " not found.")
+            print("file " + off_file + " not found.", file=sys.stderr)
             return []
 

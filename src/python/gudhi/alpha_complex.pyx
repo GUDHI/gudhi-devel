@@ -7,12 +7,14 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
+import sys
 import os
 
 from gudhi.simplex_tree cimport *
