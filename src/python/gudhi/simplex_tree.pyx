@@ -508,7 +508,7 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             if persistence_file != '':
-                self.pcohptr.write_output_diagram(str.encode(persistence_file))
+                self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
             else:
                 print("persistence_file must be specified")
         else:

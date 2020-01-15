@@ -69,7 +69,7 @@ cdef class AlphaComplex:
     def __cinit__(self, points = None, off_file = ''):
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(str.encode(off_file), True)
+                self.thisptr = new Alpha_complex_interface(off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:
