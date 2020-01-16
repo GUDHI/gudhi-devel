@@ -108,7 +108,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     std::vector<int> max_splx; for (auto splx : stptr_->filtration_simplex_range()){ if (stptr_->dimension(splx) == stptr_->dimension())  max_splx.push_back(splx); }
     // Sort these simplex handles and compute the ordering function
     // This function allows to go directly from the simplex handle to the position of the corresponding top-dimensional cell in the input data 
-    std::map<int, int> order; std::sort(max_splx.begin(), max_splx.end()); for (int i = 0; i < max_splx.size(); i++)  order.insert(std::make_pair(max_splx[i], i));
+    std::map<int, int> order; std::sort(max_splx.begin(), max_splx.end()); for (unsigned int i = 0; i < max_splx.size(); i++)  order.insert(std::make_pair(max_splx[i], i));
 
     persistent_cohomology::Persistent_cohomology<FilteredComplex,
       persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
@@ -128,7 +128,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
       // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
       std::vector<int> faces0; top_dimensional_cofaces(faces0, stptr_->key(get<0>(pair)));
       // Find the top-dimensional cell / coface with the same filtration value
-      int cf; for (int i = 0; i < faces0.size(); i++){ if (stptr_->filtration(faces0[i]) == f0){cf = i; break;}}
+      int cf; for (unsigned int i = 0; i < faces0.size(); i++){if (stptr_->filtration(faces0[i]) == f0){cf = i; break;}}
       // Retrieve the index of the corresponding top-dimensional cell in the input data
       int splx0 = order[faces0[cf]];
 
@@ -138,7 +138,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
       // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
       std::vector<int> faces1; top_dimensional_cofaces(faces1, stptr_->key(get<1>(pair)));
       // Find the top-dimensional cell / coface with the same filtration value
-      int cf; for (int i = 0; i < faces0.size(); i++){ if (stptr_->filtration(faces0[i]) == f0){cf = i; break;}}
+      int cf; for (unsigned int i = 0; i < faces1.size(); i++){if (stptr_->filtration(faces1[i]) == f1){cf = i; break;}}
       // Retrieve the index of the corresponding top-dimensional cell in the input data
       splx1 = order[faces1[cf]];
       }
