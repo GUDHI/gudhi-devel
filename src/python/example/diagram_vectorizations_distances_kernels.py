@@ -9,7 +9,7 @@ from gudhi.representations import DiagramSelector, Clamping, Landscape, Silhouet
   TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
   PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
-  SlicedWassersteinKernel, BottleneckDistance, PersistenceFisherKernel
+  SlicedWassersteinKernel, BottleneckDistance, WassersteinDistance, PersistenceFisherKernel
 
 D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.], [0., np.inf], [5., np.inf]])
 diags = [D]
@@ -116,6 +116,11 @@ SW = SlicedWassersteinKernel(num_directions=100, bandwidth=1.)
 X = SW.fit(diags)
 Y = SW.transform(diags2)
 print("SW kernel is " + str(Y[0][0]))
+
+W = WassersteinDistance(order=2, internal_p=2)
+X = W.fit(diags)
+Y = W.transform(diags2)
+print("Wasserstein distance is " + str(Y[0][0]))
 
 W = BottleneckDistance(epsilon=.001)
 X = W.fit(diags)
