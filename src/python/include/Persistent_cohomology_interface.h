@@ -124,16 +124,15 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     std::vector<std::pair<int, std::pair<std::pair<double, int>, std::pair<double, int>>>> persistence;
     for (auto pair : persistent_pairs) {
 
-      int splx0, splx1;
-
       double f0 = stptr_->filtration(get<0>(pair));
       // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
       std::vector<int> faces0; top_dimensional_cofaces(faces0, stptr_->key(get<0>(pair)));
       // Find the top-dimensional cell / coface with the same filtration value
       int cf; for (int i = 0; i < faces0.size(); i++){ if (stptr_->filtration(faces0[i]) == f0){cf = i; break;}}
       // Retrieve the index of the corresponding top-dimensional cell in the input data
-      splx0 = order[faces0[cf]];
+      int splx0 = order[faces0[cf]];
 
+      int splx1 = -1;
       if (isfinite(stptr_->filtration(get<1>(pair)))){
       double f1 = stptr_->filtration(get<1>(pair));
       // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
