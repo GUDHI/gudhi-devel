@@ -31,6 +31,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        vector[pair[int, pair[pair[double, int], pair[double, int]]]] get_persistence_cubical_generators(int homology_coeff_field, double min_persistence)
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
@@ -85,7 +86,7 @@ cdef class CubicalComplex:
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file.encode('utf-8'))
+                self.thisptr = new Bitmap_cubical_complex_base_interface(str.encode(perseus_file))
             else:
                 print("file " + perseus_file + " not found.")
         else:
@@ -143,6 +144,32 @@ cdef class CubicalComplex:
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
+        return persistence_result
+
+    def persistence_generators(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+        """This function returns the persistence of the simplicial complex.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
+        :returns: The persistence of the simplicial complex, together with the corresponding generators, i.e., the positive and negative top-dimensional cells.
+        :rtype:  list of pairs(dimension, pair(index of positive top-dimensional cell, index of negative top-dimensional cell))
+        """
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, True)
+        cdef vector[pair[int, pair[pair[double, int], pair[double, int]]]] persistence_result
+        if self.pcohptr != NULL:
+            persistence_result = self.pcohptr.get_persistence_cubical_generators(homology_coeff_field, min_persistence)
         return persistence_result
 
     def betti_numbers(self):

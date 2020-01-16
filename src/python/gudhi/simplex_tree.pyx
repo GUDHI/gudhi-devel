@@ -412,6 +412,32 @@ cdef class SimplexTree:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
         return persistence_result
 
+    def persistence_generators(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+        """This function returns the persistence of the simplicial complex.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
+        :returns: The persistence of the simplicial complex, together with the corresponding generators, i.e., the positive and negative simplices.
+        :rtype:  list of pairs(dimension, pair(positive_simplex, negative_simplex))
+        """
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
+        cdef vector[pair[int, pair[pair[double, vector[int]], pair[double, vector[int]]]]] persistence_result
+        if self.pcohptr != NULL:
+            persistence_result = self.pcohptr.get_persistence_generators(homology_coeff_field, min_persistence)
+        return persistence_result
+
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
 
@@ -508,7 +534,7 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             if persistence_file != '':
-                self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
+                self.pcohptr.write_output_diagram(str.encode(persistence_file))
             else:
                 print("persistence_file must be specified")
         else:
