@@ -180,7 +180,7 @@ cdef class CoverComplex:
         :returns: Read file status.
         """
         if os.path.isfile(off_file):
-            return self.thisptr.read_point_cloud(str.encode(off_file))
+            return self.thisptr.read_point_cloud(off_file.encode('utf-8'))
         else:
             print("file " + off_file + " not found.")
             return False
@@ -212,7 +212,7 @@ cdef class CoverComplex:
         :type color_file_name: string
         """
         if os.path.isfile(color_file_name):
-            self.thisptr.set_color_from_file(str.encode(color_file_name))
+            self.thisptr.set_color_from_file(color_file_name.encode('utf-8'))
         else:
             print("file " + color_file_name + " not found.")
 
@@ -233,7 +233,7 @@ cdef class CoverComplex:
         :type cover_file_name: string
         """
         if os.path.isfile(cover_file_name):
-            self.thisptr.set_cover_from_file(str.encode(cover_file_name))
+            self.thisptr.set_cover_from_file(cover_file_name.encode('utf-8'))
         else:
             print("file " + cover_file_name + " not found.")
 
@@ -266,7 +266,7 @@ cdef class CoverComplex:
         :type func_file_name: string
         """
         if os.path.isfile(func_file_name):
-            self.thisptr.set_function_from_file(str.encode(func_file_name))
+            self.thisptr.set_function_from_file(func_file_name.encode('utf-8'))
         else:
             print("file " + func_file_name + " not found.")
 
@@ -307,7 +307,7 @@ cdef class CoverComplex:
         :type graph_file_name: string
         """
         if os.path.isfile(graph_file_name):
-            self.thisptr.set_graph_from_file(str.encode(graph_file_name))
+            self.thisptr.set_graph_from_file(graph_file_name.encode('utf-8'))
         else:
             print("file " + graph_file_name + " not found.")
 
@@ -368,7 +368,7 @@ cdef class CoverComplex:
         :param type: either "GIC" or "Nerve".
         :type type: string
         """
-        self.thisptr.set_type(str.encode(type))
+        self.thisptr.set_type(type.encode('utf-8'))
 
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.

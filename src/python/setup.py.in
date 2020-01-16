@@ -11,6 +11,7 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
+import sys
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
@@ -38,7 +39,8 @@ for module in modules:
         libraries=libraries,
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        runtime_library_dirs=runtime_library_dirs,))
+        runtime_library_dirs=runtime_library_dirs,
+        cython_directives = {'language_level': str(sys.version_info[0])},))
 
 setup(
     name = 'gudhi',
