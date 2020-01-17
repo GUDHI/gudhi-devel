@@ -25,6 +25,7 @@ Below is a list of changes made since Gudhi 3.0.0:
 
 
 All modules are distributed under the terms of the MIT license.
+There are still GPL dependencies for many modules, and so for an end-user it doesn't necessarily change much. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details about this change.
 
 We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use of the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
 
