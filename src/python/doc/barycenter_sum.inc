@@ -7,11 +7,11 @@
    |      :figclass: align-center                                    | Given a set of persistence diagrams :math:`\mu_1 \dots \mu_n`, it is | :Introduced in: GUDHI 3.1.0                                      |
    |                                                                 | defined as a minimizer of the variance functional, that is of        |                                                                  |
    |      Illustration of Frechet mean between persistence           | :math:`\mu \mapsto \sum_{i=1}^n d_2(\mu,\mu_i)^2`.                   | :Copyright: MIT                                                  |
-   |      diagrams.                                                  | where :math:`d_2` denotes the Wasserstein-2 distance between persis- |                                                                  |
-   |                                                                 | tence diagrams.                                                      |                                                                  |
+   |      diagrams.                                                  | where :math:`d_2` denotes the Wasserstein-2 distance between         |                                                                  |
+   |                                                                 | persistence diagrams.                                                |                                                                  |
    |                                                                 | It is known to exist and is generically unique. However, an exact    |                                                                  |
-   |                                                                 | computation is in general untractable. Current implementation avai-  | :Requires: Python Optimal Transport (POT) :math:`\geq` 0.5.1     |
-   |                                                                 | -lable is based on [Turner et al, 2014], and uses an EM-scheme to    |                                                                  |
+   |                                                                 | computation is in general untractable. Current implementation        | :Requires: Python Optimal Transport (POT) :math:`\geq` 0.5.1     |
+   |                                                                 | available is based on [Turner et al, 2014], and uses an EM-scheme to |                                                                  |
    |                                                                 | provide a local minimum of the variance functional (somewhat similar |                                                                  |
    |                                                                 | to the Lloyd algorithm to estimate a solution to the k-means         |                                                                  |
    |                                                                 | problem). The local minimum returned depends on the initialization of|                                                                  |
