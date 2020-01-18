@@ -40,6 +40,8 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     :param off_file: An OFF file style name.
     :type off_file: string
 
+    And in both cases
+
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
     :param starting_point: The iteration starts with the landmark `starting \
@@ -81,6 +83,8 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     :param off_file: An OFF file style name.
     :type off_file: string
 
+    And in both cases
+
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
     :returns:  The subsample point set.
@@ -109,6 +113,8 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
 
     :param off_file: An OFF file style name.
     :type off_file: string
+
+    And in both cases
 
     :param min_squared_dist: Minimum squared distance separating the output \
     points.
