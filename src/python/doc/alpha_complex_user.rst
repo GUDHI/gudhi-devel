@@ -16,7 +16,8 @@ Definition
 
 Remarks
 ^^^^^^^
-When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha`, the complex is a Delaunay complex (with special filtration values).
+When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha^2`,
+the complex is a Delaunay complex (with special filtration values).
 
 Example from points
 -------------------
@@ -137,19 +138,20 @@ sets the filtration value (0 in case of a vertex - propagation will have no effe
 Non decreasing filtration values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not
-quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
+As the squared radii computed by CGAL are an approximation, it might happen that these
+:math:`\alpha^2` values do not quite define a proper filtration (i.e. non-decreasing with
+respect to inclusion).
 We fix that up by calling :func:`~gudhi.SimplexTree.make_filtration_non_decreasing` (cf.
 `C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
 
 Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The simplex tree is pruned from the given maximum alpha squared value (cf.
+The simplex tree is pruned from the given maximum :math:`\alpha^2` value (cf.
 :func:`~gudhi.SimplexTree.prune_above_filtration`). Note that this does not provide any kind
 of speed-up, since we always first build the full filtered complex, so it is recommended not to use
 :paramref:`~gudhi.AlphaComplex.create_simplex_tree.max_alpha_square`.
-In the following example, a threshold of 59 is used.
+In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 
 
 Example from OFF file
@@ -166,7 +168,7 @@ Then, it is asked to display information about the alpha complex:
     import gudhi
     alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
         '/data/points/alphacomplexdoc.off')
-    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=59.0)
+    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=32.0)
     result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
@@ -179,7 +181,7 @@ the program output is:
 
 .. testoutput::
 
-   Alpha complex is of dimension 2 - 23 simplices - 7 vertices.
+   Alpha complex is of dimension 2 - 20 simplices - 7 vertices.
    [0] -> 0.00
    [1] -> 0.00
    [2] -> 0.00
@@ -200,9 +202,6 @@ the program output is:
    [4, 6] -> 22.74
    [4, 5, 6] -> 22.74
    [3, 6] -> 30.25
-   [2, 6] -> 36.50
-   [2, 3, 6] -> 36.50
-   [2, 4, 6] -> 37.24
 
 CGAL citations
 ==============

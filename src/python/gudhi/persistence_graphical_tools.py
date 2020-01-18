@@ -1,10 +1,3 @@
-from os import path
-from math import isfinite
-import numpy as np
-
-from gudhi.reader_utils import read_persistence_intervals_in_dimension
-from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau, Bertrand Michel
@@ -13,6 +6,13 @@ from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+from os import path
+from math import isfinite
+import numpy as np
+
+from gudhi.reader_utils import read_persistence_intervals_in_dimension
+from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
 
 __author__ = "Vincent Rouvreau, Bertrand Michel"
 __copyright__ = "Copyright (C) 2016 Inria"

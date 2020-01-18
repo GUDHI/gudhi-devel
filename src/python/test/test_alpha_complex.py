@@ -1,9 +1,3 @@
-from gudhi import AlphaComplex, SimplexTree
-import math
-import numpy as np
-import itertools
-import pytest
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,6 +7,17 @@ import pytest
     Modification(s):
       - YYYY/MM Author: Description of the modification
 """
+
+from gudhi import AlphaComplex, SimplexTree
+import math
+import numpy as np
+import pytest
+try:
+    # python3
+    from itertools import zip_longest
+except ImportError:
+    # python2
+    from itertools import izip_longest as zip_longest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -114,6 +119,6 @@ def test_safe_alpha_persistence_comparison():
     diag1 = simplex_tree1.persistence()
     diag2 = simplex_tree2.persistence()
 
-    for (first_p, second_p) in itertools.zip_longest(diag1, diag2):
+    for (first_p, second_p) in zip_longest(diag1, diag2):
         assert first_p[0] == pytest.approx(second_p[0])
         assert first_p[1] == pytest.approx(second_p[1])

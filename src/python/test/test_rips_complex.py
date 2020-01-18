@@ -1,6 +1,3 @@
-from gudhi import RipsComplex
-from math import sqrt
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -10,6 +7,9 @@ from math import sqrt
     Modification(s):
       - YYYY/MM Author: Description of the modification
 """
+
+from gudhi import RipsComplex
+from math import sqrt
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"

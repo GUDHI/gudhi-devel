@@ -24,7 +24,7 @@ This function can display the persistence result as a barcode:
     import gudhi
 
     off_file = gudhi.__root_source_dir__ + '/data/points/tore3D_300.off'
-    point_cloud = gudhi.read_off(off_file=off_file)
+    point_cloud = gudhi.read_points_from_off_file(off_file=off_file)
 
     rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.7)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)

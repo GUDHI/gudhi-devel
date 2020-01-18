@@ -1,12 +1,3 @@
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.utility cimport pair
-from libcpp.string cimport string
-from libcpp cimport bool
-import os
-
-from numpy import array as np_array
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -15,6 +6,15 @@ from numpy import array as np_array
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libcpp.string cimport string
+from libcpp cimport bool
+import os
+
+import numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -47,7 +47,7 @@ cdef class PeriodicCubicalComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
-                  periodic_dimensions=None, perseus_file=''):
+                 periodic_dimensions=None, perseus_file=''):
         """PeriodicCubicalComplex constructor from dimensions and
         top_dimensional_cells or from a Perseus-style file name.
 
@@ -60,6 +60,14 @@ cdef class PeriodicCubicalComplex:
 
         Or
 
+        :param top_dimensional_cells: A multidimensional array of cells
+            filtration values.
+        :type top_dimensional_cells: anything convertible to a numpy ndarray
+        :param periodic_dimensions: A list of top dimensional cells periodicity value.
+        :type periodic_dimensions: list of boolean
+
+        Or
+
         :param perseus_file: A Perseus-style file name.
         :type perseus_file: string
         """
@@ -67,16 +75,32 @@ cdef class PeriodicCubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   periodic_dimensions=None, perseus_file=''):
-        if (dimensions is not None) and (top_dimensional_cells is not None) and (periodic_dimensions is not None) and (perseus_file == ''):
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
-        elif (dimensions is None) and (top_dimensional_cells is None) and (periodic_dimensions is None) and (perseus_file != ''):
+        if ((dimensions is not None) and (top_dimensional_cells is not None)
+            and (periodic_dimensions is not None) and (perseus_file == '')):
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
+                                                                       top_dimensional_cells,
+                                                                       periodic_dimensions)
+        elif ((dimensions is None) and (top_dimensional_cells is not None)
+            and (periodic_dimensions is not None) and (perseus_file == '')):
+            top_dimensional_cells = np.array(top_dimensional_cells,
+                                             copy = False,
+                                             order = 'F')
+            dimensions = top_dimensional_cells.shape
+            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
+                                                                       top_dimensional_cells,
+                                                                       periodic_dimensions)
+        elif ((dimensions is None) and (top_dimensional_cells is None)
+            and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Periodic_cubical_complex_base_interface(str.encode(perseus_file))
+                self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file.encode('utf-8'))
             else:
                 print("file " + perseus_file + " not found.")
         else:
-            print("CubicalComplex can be constructed from dimensions and "
-              "top_dimensional_cells or from a Perseus-style file name.")
+            print("CubicalComplex can be constructed from dimensions, "
+              "top_dimensional_cells and periodic_dimensions, or from "
+              "top_dimensional_cells and periodic_dimensions or from "
+              "a Perseus-style file name.")
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -186,4 +210,4 @@ cdef class PeriodicCubicalComplex:
         else:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
-        return np_array(intervals_result)
+        return np.array(intervals_result)

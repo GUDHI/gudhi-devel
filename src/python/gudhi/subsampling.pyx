@@ -1,9 +1,3 @@
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.string cimport string
-from libcpp cimport bool
-import os
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -12,6 +6,12 @@ import os
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.string cimport string
+from libcpp cimport bool
+import os
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -52,10 +52,10 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     if off_file:
         if os.path.isfile(off_file):
             if starting_point == '':
-                return subsampling_n_farthest_points_from_file(str.encode(off_file),
+                return subsampling_n_farthest_points_from_file(off_file.encode('utf-8'),
                                                                nb_points)
             else:
-                return subsampling_n_farthest_points_from_file(str.encode(off_file),
+                return subsampling_n_farthest_points_from_file(off_file.encode('utf-8'),
                                                                nb_points,
                                                                starting_point)
         else:
@@ -88,7 +88,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     """
     if off_file:
         if os.path.isfile(off_file):
-            return subsampling_n_random_points_from_file(str.encode(off_file),
+            return subsampling_n_random_points_from_file(off_file.encode('utf-8'),
                 nb_points)
         else:
             print("file " + off_file + " not found.")
@@ -118,7 +118,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     """
     if off_file:
         if os.path.isfile(off_file):
-            return subsampling_sparsify_points_from_file(str.encode(off_file),
+            return subsampling_sparsify_points_from_file(off_file.encode('utf-8'),
                                                          min_squared_dist)
         else:
             print("file " + off_file + " not found.")
