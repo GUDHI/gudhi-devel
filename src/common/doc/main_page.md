@@ -4,8 +4,8 @@
 \image html "Gudhi_banner.png"
 <br><br><br><br>
 
-## Complexes {#Complexes}
-### Cubical complex
+## Data structures for cell complexes {#Complexes}
+### Cubical complexes
  
 <table>
   <tr>
@@ -29,143 +29,7 @@
  </tr>
 </table>
 
-### Simplicial complex
-
-#### Alpha complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "alpha_complex_representation.png"
-    </td>
-    <td width="50%">
-    Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
-    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
-    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
-    values of the codimension 1 cofaces that make it not Gabriel otherwise.
-    All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
-    when creating the simplicial complex if it is specified.<br>
-    For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Vincent Rouvreau<br>
-      <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref alpha_complex
-    </td>
- </tr>
-</table>
-
-#### Čech complex
-
-<table>
- <tr>
-    <td width="35%" rowspan=2>
-      \image html "cech_complex_representation.png"
-    </td>
-    <td width="50%">
-    The Čech complex is a simplicial complex constructed from a proximity graph.
-    The set of all simplices is filtered by the radius of their minimal enclosing ball.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Vincent Rouvreau<br>
-      <b>Introduced in:</b> GUDHI 2.2.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Includes:</b> [Miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html)<br>
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref cech_complex
-    </td>
- </tr>
-</table>
-
-#### Rips complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "rips_complex_representation.png"
-    </td>
-    <td width="50%">
-    Rips complex is a simplicial complex constructed from a one skeleton graph.<br>
-    The filtration value of each edge is computed from a user-given distance function and is inserted until a
-    user-given threshold value.<br>
-    This complex can be built from a point cloud and a distance function, or from a distance matrix.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse<br>
-      <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT<br>
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref rips_complex
-    </td>
- </tr>
-</table>
-
-#### Witness complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "Witness_complex_representation.png"
-    </td>
-    <td width="50%">
-    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
-    The data structure is described in \cite boissonnatmariasimplextreealgorithmica .
-    </td>
-    <td width="15%">
-      <b>Author:</b> Siargey Kachanovich<br>
-      <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
-      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref witness_complex
-    </td>
- </tr>
-</table>
-
-### Cover Complexes
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "gicvisu.jpg"
-    </td>
-    <td width="50%">
-    Nerves and Graph Induced Complexes are cover complexes, i.e. simplicial complexes that provably contain
-    topological information about the input data. They can be computed with a cover of the
-    data, that comes i.e. from the preimage of a family of intervals covering the image
-    of a scalar-valued function defined on the data. <br>
-    </td>
-    <td width="15%">
-      <b>Author:</b> Mathieu Carri&egrave;re<br>
-      <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref cover_complex
-    </td>
- </tr>
-</table>
-
-## Data structures and basic operations {#DataStructuresAndBasicOperations}
-
-### Data structures
+### Simplicial complexes
 
 #### Simplex tree
 <table>
@@ -244,9 +108,7 @@
  </tr>
 </table>
 
-### Basic operations
-
-#### Contraction
+#### Basic operation: contraction
 
 <table>
   <tr>
@@ -269,6 +131,167 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref contr
+    </td>
+ </tr>
+</table>
+
+## Filtrations and reconstructions
+### Alpha complex
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "alpha_complex_representation.png"
+    </td>
+    <td width="50%">
+    Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
+    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
+    values of the codimension 1 cofaces that make it not Gabriel otherwise.
+    All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
+    when creating the simplicial complex if it is specified.<br>
+    For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref alpha_complex
+    </td>
+ </tr>
+</table>
+
+### Čech complex
+
+<table>
+ <tr>
+    <td width="35%" rowspan=2>
+      \image html "cech_complex_representation.png"
+    </td>
+    <td width="50%">
+    The Čech complex is a simplicial complex constructed from a proximity graph.
+    The set of all simplices is filtered by the radius of their minimal enclosing ball.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Introduced in:</b> GUDHI 2.2.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Includes:</b> [Miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html)<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref cech_complex
+    </td>
+ </tr>
+</table>
+
+### Rips complex
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "rips_complex_representation.png"
+    </td>
+    <td width="50%">
+    Rips complex is a simplicial complex constructed from a one skeleton graph.<br>
+    The filtration value of each edge is computed from a user-given distance function and is inserted until a
+    user-given threshold value.<br>
+    This complex can be built from a point cloud and a distance function, or from a distance matrix.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse<br>
+      <b>Introduced in:</b> GUDHI 2.0.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref rips_complex
+    </td>
+ </tr>
+</table>
+
+### Witness complex
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "Witness_complex_representation.png"
+    </td>
+    <td width="50%">
+    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
+    The data structure is described in \cite boissonnatmariasimplextreealgorithmica .
+    </td>
+    <td width="15%">
+      <b>Author:</b> Siargey Kachanovich<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
+      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref witness_complex
+    </td>
+ </tr>
+</table>
+
+### Cover Complexes
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "gicvisu.jpg"
+    </td>
+    <td width="50%">
+    Nerves and Graph Induced Complexes are cover complexes, i.e. simplicial complexes that provably contain
+    topological information about the input data. They can be computed with a cover of the
+    data, that comes i.e. from the preimage of a family of intervals covering the image
+    of a scalar-valued function defined on the data. <br>
+    </td>
+    <td width="15%">
+      <b>Author:</b> Mathieu Carri&egrave;re<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref cover_complex
+    </td>
+ </tr>
+</table>
+
+### Tangential complex
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "tc_examples.png"
+    </td>
+    <td width="50%">
+    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    The input is a point sample coming from an unknown manifold.
+    The running time depends only linearly on the extrinsic dimension \f$ d \f$
+    and exponentially on the intrinsic dimension \f$ k \f$.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Cl&eacute;ment Jamin<br>
+      <b>Introduced in:</b> GUDHI 2.0.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref tangential_complex
     </td>
  </tr>
 </table>
@@ -301,36 +324,6 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref persistent_cohomology
-    </td>
- </tr>
-</table>
-
-## Manifold reconstruction {#ManifoldReconstruction}
-
-### Tangential complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "tc_examples.png"
-    </td>
-    <td width="50%">
-    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
-    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
-    The input is a point sample coming from an unknown manifold.
-    The running time depends only linearly on the extrinsic dimension \f$ d \f$
-    and exponentially on the intrinsic dimension \f$ k \f$.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Cl&eacute;ment Jamin<br>
-      <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref tangential_complex
     </td>
  </tr>
 </table>
