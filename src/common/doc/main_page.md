@@ -383,3 +383,26 @@
     </td>
  </tr>
 </table>
+
+## Point cloud utilities {#PointCloudUtils}
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \f$(x_1,\ldots\x_d)\f$
+    </td>
+    <td width="50%">
+    This contains various tools to handle point clouds: spatial searching, subsampling, etc.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Clément Jamin<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>Manuals:</b> \ref spatial_searching, \ref subsampling
+    </td>
+ </tr>
+</table>
