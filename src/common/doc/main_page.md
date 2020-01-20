@@ -55,6 +55,31 @@
  </tr>
 </table>
 
+#### Toplex Map
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "map.png"
+    </td>
+    <td width="50%">
+    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
+    and secondly of a map which associate any vertex to a set of pointers toward all toplices
+    containing this vertex.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Fran&ccedil;ois Godi<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref toplex_map
+    </td>
+ </tr>
+</table>
+
 #### Skeleton blocker
 
 <table>
@@ -79,31 +104,6 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref skbl
-    </td>
- </tr>
-</table>
-
-#### Toplex Map
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "map.png"
-    </td>
-    <td width="50%">
-    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
-    and secondly of a map which associate any vertex to a set of pointers toward all toplices
-    containing this vertex.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Fran&ccedil;ois Godi<br>
-      <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT<br>
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref toplex_map
     </td>
  </tr>
 </table>
