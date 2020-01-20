@@ -20,12 +20,12 @@ Below is a list of changes made since Gudhi 3.0.0:
      - Use matplotlib default palette (can be user defined).
 
 - Miscellaneous
-     - Python `read_off` function has been renamed `read_points_from_off_file` as it only read points from OFF files.
+     - Python `read_off` function has been renamed `read_points_from_off_file` as it only reads points from OFF files.
      - See the list of [bug fixes](https://github.com/GUDHI/gudhi-devel/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A3.1.0+).
 
 
 All modules are distributed under the terms of the MIT license.
-There are still GPL dependencies for many modules, and so for an end-user it doesn't necessarily change much. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details about this change.
+However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
 
 We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use of the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
 
