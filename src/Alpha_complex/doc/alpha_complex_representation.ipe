@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
-<ipe version="70107" creator="Ipe 7.1.10">
-<info created="D:20150603143945" modified="D:20160404172133"/>
+<ipe version="70206" creator="Ipe 7.2.7">
+<info created="D:20150603143945" modified="D:20200110100102"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -305,7 +305,7 @@ h
 108.275 743.531 m
 166.45 743.531 l
 </path>
-<text matrix="1 0 0 1 142.618 -109.867" transformations="translations" pos="127.397 746.763" stroke="darkgray" type="label" width="6.41" height="4.289" depth="0" valign="baseline">$\alpha$</text>
+<text matrix="1 0 0 1 126.618 -109.867" transformations="translations" pos="127.397 746.763" stroke="darkgray" type="label" width="45.707" height="9.041" depth="1.32" valign="baseline" style="math">\alpha = \sqrt{32.0}</text>
 <use matrix="1 0 0 1 -209.478 12.0238" name="mark/fdisk(sfx)" pos="300 720" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -210.178 22.1775" name="mark/fdisk(sfx)" pos="280 660" size="normal" stroke="black" fill="white"/>
 <use matrix="1 0 0 1 -210.178 22.1775" name="mark/fdisk(sfx)" pos="370 690" size="normal" stroke="black" fill="white"/>

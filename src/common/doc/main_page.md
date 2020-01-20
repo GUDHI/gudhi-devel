@@ -43,8 +43,8 @@
     The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
     circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
-    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
-    the complex.<br>
+    All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
+    when creating the simplicial complex if it is specified.<br>
     For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
     </td>
     <td width="15%">

@@ -707,7 +707,7 @@ class Cover_complex {
     // Sort points according to function values
     std::vector<int> points(n);
     for (int i = 0; i < n; i++) points[i] = i;
-    std::sort(points.begin(), points.end(), [=](const int & p1, const int & p2){return (this->func[p1] < this->func[p2]);});
+    std::sort(points.begin(), points.end(), [this](int p1, int p2){return (this->func[p1] < this->func[p2]);});
 
     int id = 0;
     int pos = 0;
