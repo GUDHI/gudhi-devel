@@ -11,8 +11,9 @@ Definition
 
 Functions
 ---------
-This implementation is based on ideas from "Large Scale Computation of Means
-and Cluster for Persistence Diagrams via Optimal Transport".
+This implementation uses the Python Optimal Transport library and is based on
+ideas from "Large Scale Computation of Means and Cluster for Persistence
+Diagrams via Optimal Transport".
 
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
 

@@ -10,16 +10,6 @@
 namespace py = pybind11;
 typedef py::array_t<double, py::array::c_style | py::array::forcecast> Dgm;
 
-namespace hera {
-template <> struct DiagramTraits<Dgm>{
-  using PointType = std::array<double,2>;
-  using RealType  = double;
-
-  static RealType get_x(const PointType& p) { return std::get<0>(p); }
-  static RealType get_y(const PointType& p) { return std::get<1>(p); }
-};
-}
-
 double wasserstein_distance(
     Dgm d1, Dgm d2,
     double wasserstein_power, double internal_p,
@@ -32,7 +22,7 @@ double wasserstein_distance(
     throw std::runtime_error("Diagram 1 must be an array of size n x 2");
   if((buf2.ndim!=2 || buf2.shape[1]!=2) && (buf2.ndim!=1 || buf2.shape[0]!=0))
     throw std::runtime_error("Diagram 2 must be an array of size n x 2");
-  typedef hera::DiagramTraits<Dgm>::PointType Point;
+  typedef std::array<double, 2> Point;
   auto p1 = (Point*)buf1.ptr;
   auto p2 = (Point*)buf2.ptr;
   auto diag1 = boost::make_iterator_range(p1, p1+buf1.shape[0]);
@@ -52,16 +42,17 @@ PYBIND11_MODULE(hera, m) {
       m.def("wasserstein_distance", &wasserstein_distance,
           py::arg("X"), py::arg("Y"),
           // Should we name those q, p and d instead?
-          py::arg("wasserstein_power") = 1,
+          py::arg("order") = 1,
           py::arg("internal_p") = std::numeric_limits<double>::infinity(),
           py::arg("delta") = .01,
           R"pbdoc(
-        Compute the Wasserstein distance between two diagrams. Points at infinity are supported.
+        Compute the Wasserstein distance between two diagrams.
+        Points at infinity are supported.
 
         Parameters:
             X (n x 2 numpy array): First diagram
             Y (n x 2 numpy array): Second diagram
-            wasserstein_power (float): Wasserstein degree W_q
+            order (float): Wasserstein exponent W_q
             internal_p (float): Internal Minkowski norm L^p in R^2
             delta (float): Relative error 1+delta
 
