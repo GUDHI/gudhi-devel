@@ -135,7 +135,7 @@
  </tr>
 </table>
 
-## Filtrations and reconstructions
+## Filtrations and reconstructions {#FiltrationsReconstructions}
 ### Alpha complex
 
 <table>
