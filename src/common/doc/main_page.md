@@ -389,7 +389,7 @@
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \f$(x_1,\ldots\x_d)\f$
+      \f$(x_1,\ldots,x_d)\f$
     </td>
     <td width="50%">
     This contains various tools to handle point clouds: spatial searching, subsampling, etc.
