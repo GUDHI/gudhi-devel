@@ -19,7 +19,7 @@ else (WITH_GUDHI_BOOST_TEST_COVERAGE)
 endif(WITH_GUDHI_BOOST_TEST_COVERAGE)
 
 function(gudhi_add_boost_test unitary_test)
-  target_link_libraries(${unitary_test} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+  target_link_libraries(${unitary_test} Boost::unit_test_framework)
   add_test(NAME ${unitary_test} COMMAND $<TARGET_FILE:${unitary_test}>
       ${GUDHI_UT_LOG_FORMAT} ${GUDHI_UT_LOG_SINK}
       ${GUDHI_UT_LOG_LEVEL} ${GUDHI_UT_REPORT_LEVEL})

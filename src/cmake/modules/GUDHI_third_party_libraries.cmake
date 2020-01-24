@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.56.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
+find_package(Boost 1.56.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread timer)
 
 if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
@@ -82,8 +82,8 @@ add_definitions( -DBOOST_ALL_DYN_LINK )
 # problem on Mac with boost_system and boost_thread
 add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+#INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+#LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})

@@ -1,16 +1,16 @@
 project(Rips_complex_utilities)
 
 add_executable(rips_distance_matrix_persistence rips_distance_matrix_persistence.cpp)
-target_link_libraries(rips_distance_matrix_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_distance_matrix_persistence Boost::program_options)
 
 add_executable(rips_persistence rips_persistence.cpp)
-target_link_libraries(rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence Boost::program_options)
 
 add_executable(rips_correlation_matrix_persistence rips_correlation_matrix_persistence.cpp)
-target_link_libraries(rips_correlation_matrix_persistence ${Boost_SYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_correlation_matrix_persistence Boost::system Boost::program_options)
 
 add_executable(sparse_rips_persistence sparse_rips_persistence.cpp)
-target_link_libraries(sparse_rips_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(sparse_rips_persistence Boost::program_options)
 
 if (TBB_FOUND)
   target_link_libraries(rips_distance_matrix_persistence ${TBB_LIBRARIES})

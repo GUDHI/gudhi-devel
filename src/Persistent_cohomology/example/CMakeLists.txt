@@ -5,13 +5,13 @@ add_executable(plain_homology plain_homology.cpp)
 add_executable(persistence_from_simple_simplex_tree persistence_from_simple_simplex_tree.cpp)
 
 add_executable(rips_persistence_step_by_step rips_persistence_step_by_step.cpp)
-target_link_libraries(rips_persistence_step_by_step ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence_step_by_step Boost::program_options)
 
 add_executable(rips_persistence_via_boundary_matrix rips_persistence_via_boundary_matrix.cpp)
-target_link_libraries(rips_persistence_via_boundary_matrix ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(rips_persistence_via_boundary_matrix Boost::program_options)
 
 add_executable(persistence_from_file persistence_from_file.cpp)
-target_link_libraries(persistence_from_file ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(persistence_from_file Boost::program_options)
 
 if (TBB_FOUND)
   target_link_libraries(plain_homology ${TBB_LIBRARIES})
@@ -43,7 +43,7 @@ if(GMP_FOUND)
    if(GMPXX_FOUND)
       add_executable(rips_multifield_persistence rips_multifield_persistence.cpp )
       target_link_libraries(rips_multifield_persistence
-          ${Boost_PROGRAM_OPTIONS_LIBRARY} ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+          Boost::program_options ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
       if (TBB_FOUND)
         target_link_libraries(rips_multifield_persistence ${TBB_LIBRARIES})
       endif(TBB_FOUND)
