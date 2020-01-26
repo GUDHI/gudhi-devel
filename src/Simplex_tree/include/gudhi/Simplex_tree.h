@@ -125,6 +125,8 @@ class Simplex_tree {
  private:
   typedef typename Dictionary::iterator Dictionary_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
+  double minval_;
+  double maxval_;
 
   struct return_first {
     Vertex_handle operator()(const Dit_value_t& p_sh) const {
@@ -1464,6 +1466,75 @@ class Simplex_tree {
       dimension_to_be_lowered_ = true;
     }
   }
+
+  /** \brief Retrieve good values for extended persistence, and separate the diagrams into the ordinary, relative, extended+ and extended- subdiagrams. Need extend_filtration to be called first!
+   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration and this->get_persistence.
+   * @return A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+   */
+  std::vector<std::vector<std::pair<int, std::pair<double, double>>>> convert(const std::vector<std::pair<int, std::pair<double, double>>>& dgm){
+    std::vector<std::vector<std::pair<int, std::pair<double, double>>>> new_dgm(4); double x, y;
+    for(unsigned int i = 0; i < dgm.size(); i++){ int h = dgm[i].first; double px = dgm[i].second.first; double py = dgm[i].second.second;
+      if(std::isinf(py))  continue;
+      else{
+        if ((px <= -1) & (py <= -1)){x = minval_ + (maxval_-minval_)*(px + 2); y = minval_ + (maxval_-minval_)*(py + 2); new_dgm[0].push_back(std::make_pair(h, std::make_pair(x,y))); }
+        if ((px >=  1) & (py >=  1)){x = minval_ - (maxval_-minval_)*(px - 2); y = minval_ - (maxval_-minval_)*(py - 2); new_dgm[1].push_back(std::make_pair(h, std::make_pair(x,y))); }
+        if ((px <= -1) & (py >=  1)){x = minval_ + (maxval_-minval_)*(px + 2); y = minval_ - (maxval_-minval_)*(py - 2);
+          if (x <= y)  new_dgm[2].push_back(std::make_pair(h, std::make_pair(x,y)));
+          else  new_dgm[3].push_back(std::make_pair(h, std::make_pair(x,y)));
+        }
+      }
+    }
+    return new_dgm;
+  }
+
+  /** \brief Extend filtration for computing extended persistence.
+   */
+  void extend_filtration() {
+
+    // Compute maximum and minimum of filtration values
+    int maxvert = -std::numeric_limits<double>::infinity();
+    std::vector<double> filt;
+    for (auto sh : this->complex_simplex_range()) {if (this->dimension(sh) == 0){filt.push_back(this->filtration(sh)); maxvert = std::max(*this->simplex_vertex_range(sh).begin(), maxvert);}}
+    minval_ = *std::min_element(filt.begin(), filt.end());
+    maxval_ = *std::max_element(filt.begin(), filt.end());
+    maxvert += 1;
+
+    // Compute vectors of integers corresponding to the Simplex handles
+    std::vector<std::vector<int> > splxs;
+    for (auto sh : this->complex_simplex_range()) {
+      std::vector<int> vr; for (auto vh : this->simplex_vertex_range(sh)){vr.push_back(vh);}
+      splxs.push_back(vr);
+    }
+
+    // Add point for coning the simplicial complex
+    int count = this->num_simplices();
+    std::vector<int> cone; cone.push_back(maxvert); auto ins = this->insert_simplex(cone, -3); this->assign_key(ins.first, count); count++;
+
+    // For each simplex
+    for (auto vr : splxs){
+      // Create cone on simplex
+      auto sh = this->find(vr); vr.push_back(maxvert);
+      if (this->dimension(sh) == 0){
+        // Assign ascending value between -2 and -1 to vertex
+        double v = this->filtration(sh);
+        this->assign_filtration(sh, -2 + (v-minval_)/(maxval_-minval_));
+        // Assign descending value between 1 and 2 to cone on vertex
+        auto ins = this->insert_simplex(vr, 2 - (v-minval_)/(maxval_-minval_));
+        this->assign_key(ins.first, count);
+      }
+      else{
+        // Assign value -3 to simplex and cone on simplex
+        this->assign_filtration(sh, -3);
+        auto ins = this->insert_simplex(vr, -3);
+        this->assign_key(ins.first, count);
+      }
+      count++;
+    }
+
+    this->make_filtration_non_decreasing(); this->initialize_filtration();
+
+  }
+
 
  private:
   Vertex_handle null_vertex_;

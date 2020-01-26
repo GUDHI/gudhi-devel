@@ -386,6 +386,20 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
+    def extend_filtration(self):
+        """ This function extends filtration for computing extended persistence.
+        """
+        return self.get_ptr().extend_filtration()
+
+    def convert(self, dgm):
+        """This function retrieves good values for extended persistence, and separate the diagrams into the ordinary, relative, extended+ and extended- subdiagrams. Need extend_filtration to be called first!
+
+        :param dgm: Persistence diagram obtained after calling this->extend_filtration and this->get_persistence.
+        :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+        """
+        return self.get_ptr().convert(dgm)
+
+
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.
 
