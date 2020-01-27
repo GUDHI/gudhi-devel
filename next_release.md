@@ -1,6 +1,6 @@
 We are pleased to announce the release 3.X.X of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers 2 new Python modules: Persistence representations and Wasserstein distance.
+As a major new feature, the GUDHI library now offers ...
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
