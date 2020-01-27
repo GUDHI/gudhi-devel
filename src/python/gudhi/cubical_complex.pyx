@@ -87,7 +87,7 @@ cdef class CubicalComplex:
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Bitmap_cubical_complex_base_interface(str.encode(perseus_file))
+                self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file.encode('utf-8'))
             else:
                 print("file " + perseus_file + " not found.", file=sys.stderr)
         else:

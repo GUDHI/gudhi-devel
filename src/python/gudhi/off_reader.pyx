@@ -28,11 +28,11 @@ def read_points_from_off_file(off_file=''):
     :type off_file: string
 
     :returns:  The point set.
-    :rtype: vector[vector[double]]
+    :rtype: List[List[float]]
     """
     if off_file:
         if os.path.isfile(off_file):
-            return read_points_from_OFF_file(str.encode(off_file))
+            return read_points_from_OFF_file(off_file.encode('utf-8'))
         else:
             print("file " + off_file + " not found.", file=sys.stderr)
             return []

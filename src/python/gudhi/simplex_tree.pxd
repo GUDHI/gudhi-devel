@@ -39,7 +39,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
-        void expansion(int max_dim)
+        void expansion(int max_dim) except +
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()

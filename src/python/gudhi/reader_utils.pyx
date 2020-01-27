@@ -34,30 +34,30 @@ def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
     :type separator: char
 
     :returns:  The lower triangular matrix.
-    :rtype: vector[vector[double]]
+    :rtype: List[List[float]]
     """
     if csv_file:
         if path.isfile(csv_file):
-            return read_matrix_from_csv_file(str.encode(csv_file), ord(separator[0]))
+            return read_matrix_from_csv_file(csv_file.encode('utf-8'), ord(separator[0]))
     print("file " + csv_file + " not set or not found.")
     return []
 
 def read_persistence_intervals_grouped_by_dimension(persistence_file=''):
     """Reads a file containing persistence intervals.
     Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
-    The return value is an `map[dim, vector[pair[birth, death]]]`
-    where `dim` is an `int`, `birth` a `double`, and `death` a `double`.
+    The return value is a `dict(dim, list(tuple(birth, death)))`
+    where `dim` is an `int`, `birth` a `float`, and `death` a `float`.
     Note: the function does not check that birth <= death.
 
     :param persistence_file: A persistence file style name.
     :type persistence_file: string
 
     :returns:  The persistence pairs grouped by dimension.
-    :rtype: map[int, vector[pair[double, double]]]
+    :rtype: Dict[int, List[Tuple[float, float]]]
     """
     if persistence_file:
         if path.isfile(persistence_file):
-            return read_pers_intervals_grouped_by_dimension(str.encode(persistence_file))
+            return read_pers_intervals_grouped_by_dimension(persistence_file.encode('utf-8'))
     print("file " + persistence_file + " not set or not found.")
     return []
 
@@ -80,7 +80,7 @@ def read_persistence_intervals_in_dimension(persistence_file='', only_this_dim=-
     """
     if persistence_file:
         if path.isfile(persistence_file):
-            return np_array(read_pers_intervals_in_dimension(str.encode(
-                persistence_file), only_this_dim))
+            return np_array(read_pers_intervals_in_dimension(persistence_file.encode(
+                'utf-8'), only_this_dim))
     print("file " + persistence_file + " not set or not found.")
     return []

@@ -1,1 +1,0 @@
-Please refer to the Wiki: https://gforge.inria.fr/plugins/mediawiki/wiki/gudhi/index.php/Conventions
