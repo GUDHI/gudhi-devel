@@ -33,12 +33,14 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     The iteration starts with the landmark `starting point`.
 
     :param points: The input point set.
-    :type points: vector[vector[double]].
+    :type points: Iterable[Iterable[float]].
 
     Or
 
     :param off_file: An OFF file style name.
     :type off_file: string
+
+    And in both cases
 
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
@@ -47,7 +49,7 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     index is chosen randomly.
     :type starting_point: unsigned.
     :returns:  The subsample point set.
-    :rtype: vector[vector[double]]
+    :rtype: List[List[float]].
     """
     if off_file:
         if os.path.isfile(off_file):
@@ -74,17 +76,19 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     """Subsample a point set by picking random vertices.
 
     :param points: The input point set.
-    :type points: vector[vector[double]].
+    :type points: Iterable[Iterable[float]].
 
     Or
 
     :param off_file: An OFF file style name.
     :type off_file: string
 
+    And in both cases
+
     :param nb_points: Number of points of the subsample.
     :type nb_points: unsigned.
     :returns:  The subsample point set.
-    :rtype: vector[vector[double]]
+    :rtype: List[List[float]]
     """
     if off_file:
         if os.path.isfile(off_file):
@@ -103,18 +107,20 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     between any two points is greater than or equal to min_squared_dist.
 
     :param points: The input point set.
-    :type points: vector[vector[double]].
+    :type points: Iterable[Iterable[float]].
 
     Or
 
     :param off_file: An OFF file style name.
     :type off_file: string
 
+    And in both cases
+
     :param min_squared_dist: Minimum squared distance separating the output \
     points.
     :type min_squared_dist: float.
     :returns:  The subsample point set.
-    :rtype: vector[vector[double]]
+    :rtype: List[List[float]]
     """
     if off_file:
         if os.path.isfile(off_file):
