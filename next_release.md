@@ -1,27 +1,19 @@
-We are pleased to announce the release 3.1.0 of the GUDHI library.
+We are pleased to announce the release 3.X.X of the GUDHI library.
 
 As a major new feature, the GUDHI library now offers 2 new Python modules: Persistence representations and Wasserstein distance.
 
-We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.1.0.rc1.tar.gz).
+We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since Gudhi 3.0.0:
+Below is a list of changes made since Gudhi 3.1.0:
 
-- [Persistence representations](https://gudhi.inria.fr/python/3.1.0.rc1/representations.html) (new Python module)
-     - Vectorizations, distances and kernels that work on persistence diagrams, compatible with scikit-learn. This module was originally available at https://github.com/MathieuCarriere/sklearn-tda and named sklearn_tda.
+- [Module](link)
+     - ...
 
-- [Wasserstein distance](https://gudhi.inria.fr/python/3.1.0.rc1/wasserstein_distance_user.html) (new Python module)
-     - The q-Wasserstein distance measures the similarity between two persistence diagrams.
-
-- [Alpha complex](https://gudhi.inria.fr/doc/3.1.0.rc1/group__alpha__complex.html) (new C++ interface)
-     - Thanks to [CGAL 5.0 Epeck_d](https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html) kernel, an exact computation version of Alpha complex dD is available and the default one (even in Python).
-
-- [Persistence graphical tools](https://gudhi.inria.fr/python/3.1.0.rc1/persistence_graphical_tools_user.html) (new Python interface)
-     - Axes as a parameter allows the user to subplot graphics.
-     - Use matplotlib default palette (can be user defined).
+- [Module](link)
+     - ...
 
 - Miscellaneous
-     - Python `read_off` function has been renamed `read_points_from_off_file` as it only reads points from OFF files.
-     - See the list of [bug fixes](https://github.com/GUDHI/gudhi-devel/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A3.1.0+).
+     - See the list of [bug fixes](https://github.com/GUDHI/gudhi-devel/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A3.X.X+).
 
 
 All modules are distributed under the terms of the MIT license.
