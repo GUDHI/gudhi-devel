@@ -25,6 +25,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Required for Gudhi compilation
 RUN apt-get install -y make \
+    git \
     g++ \
     cmake \
     graphviz \
@@ -43,6 +44,7 @@ RUN apt-get install -y make \
     python3-pip \
     python3-pytest \
     python3-tk \
+    python3-pybind11 \
     libfreetype6-dev \
     pkg-config
 

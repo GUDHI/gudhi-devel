@@ -31,8 +31,8 @@ namespace alpha_complex {
  * circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
  * values of the codimension 1 cofaces that make it not Gabriel otherwise.
  *
- * All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
- * the complex.
+ * All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
+ * when creating the simplicial complex if it is specified.
  *
  * \image html "alpha_complex_representation.png" "Alpha-complex representation"
  *
@@ -46,8 +46,8 @@ namespace alpha_complex {
  * \cite cgal:s-gkd-19b from CGAL as template parameter.
  *
  * \remark
- * - When the simplicial complex is constructed with an infinite value of alpha, the complex is a Delaunay
- * complex with filtration values. The Delaunay complex without filtartion values is also available by passing
+ * - When the simplicial complex is constructed with an infinite value of \f$ \alpha^2 \f$, the complex is a Delaunay
+ * complex with special filtration values. The Delaunay complex without filtration values is also available by passing
  * `default_filtration_value=true` to `Alpha_complex::create_complex`.
  * - For people only interested in the topology of the \ref alpha_complex (for instance persistence),
  * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
@@ -136,13 +136,13 @@ namespace alpha_complex {
  *
  * \subsubsection nondecreasing Non decreasing filtration values
  *
- * As the squared radii computed by CGAL are an approximation, it might happen that these alpha squared values do not
- * quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
+ * As the squared radii computed by CGAL are an approximation, it might happen that these \f$ \alpha^2 \f$ values do
+ * not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
  * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  *
  * \subsubsection pruneabove Prune above given filtration value
  *
- * The simplex tree is pruned from the given maximum alpha squared value (cf.
+ * The simplex tree is pruned from the given maximum \f$ \alpha^2 \f$ value (cf.
  * `SimplicialComplexForAlpha::prune_above_filtration()`).
  * In the following example, the value is given by the user as argument of the program.
  *

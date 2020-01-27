@@ -46,7 +46,7 @@ with open(args.file, "r") as f:
         print("#####################################################################")
         print("EuclideanWitnessComplex creation from points read in a OFF file")
 
-        witnesses = gudhi.read_off(off_file=args.file)
+        witnesses = gudhi.read_points_from_off_file(off_file=args.file)
         landmarks = gudhi.pick_n_random_points(
             points=witnesses, nb_points=args.number_of_landmarks
         )

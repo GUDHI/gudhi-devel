@@ -26,4 +26,15 @@ void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
   BOOST_CHECK(std::fabs(a - b) <= epsilon);
 }
 
+// That's the usual x86 issue where a+b==a+b can return false (without any NaN) because one of them was stored in
+// memory (and thus rounded to 64 bits) while the other is still in a register (80 bits).
+template<typename FloatingType >
+FloatingType GUDHI_PROTECT_FLOAT(FloatingType value) {
+  volatile FloatingType protected_value = value;
+#ifdef DEBUG_TRACES
+  std::cout << "GUDHI_PROTECT_FLOAT - " << protected_value << std::endl;
+#endif
+  return protected_value;
+}
+
 #endif  // UNITARY_TESTS_UTILS_H_

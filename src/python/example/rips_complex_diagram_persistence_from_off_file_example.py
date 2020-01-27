@@ -48,7 +48,7 @@ with open(args.file, "r") as f:
         message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
 
-        point_cloud = gudhi.read_off(off_file=args.file)
+        point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
         rips_complex = gudhi.RipsComplex(
             points=point_cloud, max_edge_length=args.max_edge_length
         )

@@ -53,19 +53,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
 
   Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex_from_file(off_file_name);
 
-  std::cout << "alpha_complex_from_points.number_of_vertices()=" << alpha_complex_from_file.number_of_vertices()
-      << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.number_of_vertices() == 7);
-
   Gudhi::Simplex_tree<> simplex_tree_60;
   BOOST_CHECK(alpha_complex_from_file.create_complex(simplex_tree_60, max_alpha_square_value));
 
   std::cout << "simplex_tree_60.dimension()=" << simplex_tree_60.dimension() << std::endl;
   BOOST_CHECK(simplex_tree_60.dimension() == 2);
-
-  std::cout << "alpha_complex_from_points.number_of_vertices()=" << alpha_complex_from_file.number_of_vertices()
-      << std::endl;
-  BOOST_CHECK(alpha_complex_from_file.number_of_vertices() == 7);
 
   std::cout << "simplex_tree_60.num_vertices()=" << simplex_tree_60.num_vertices() << std::endl;
   BOOST_CHECK(simplex_tree_60.num_vertices() == 7);
@@ -128,10 +120,6 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   Gudhi::Simplex_tree<> simplex_tree;
   BOOST_CHECK(alpha_complex_from_points.create_complex(simplex_tree));
   
-  std::cout << "alpha_complex_from_points.number_of_vertices()=" << alpha_complex_from_points.number_of_vertices()
-      << std::endl;
-  BOOST_CHECK(alpha_complex_from_points.number_of_vertices() == points.size());
-
   // Another way to check num_simplices
   std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   int num_simplices = 0;
@@ -151,7 +139,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   std::cout << "simplex_tree.dimension()=" << simplex_tree.dimension() << std::endl;
   BOOST_CHECK(simplex_tree.dimension() == 3);
   std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices() << std::endl;
-  BOOST_CHECK(simplex_tree.num_vertices() == 4);
+  BOOST_CHECK(simplex_tree.num_vertices() == points.size());
 
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
     switch (simplex_tree.dimension(f_simplex)) {
@@ -261,10 +249,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_empty_points, TestedKernel, lis
   Gudhi::Simplex_tree<> simplex_tree;
   BOOST_CHECK(!alpha_complex_from_points.create_complex(simplex_tree));
   
-  std::cout << "alpha_complex_from_points.number_of_vertices()=" << alpha_complex_from_points.number_of_vertices()
-      << std::endl;
-  BOOST_CHECK(alpha_complex_from_points.number_of_vertices() == points.size());
-
   std::cout << "simplex_tree.num_simplices()=" << simplex_tree.num_simplices() << std::endl;
   BOOST_CHECK(simplex_tree.num_simplices() == 0);
 
@@ -272,5 +256,45 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_empty_points, TestedKernel, lis
   BOOST_CHECK(simplex_tree.dimension() == -1);
   
   std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices() << std::endl;
-  BOOST_CHECK(simplex_tree.num_vertices() == 0);
+  BOOST_CHECK(simplex_tree.num_vertices() == points.size());
+}
+
+using Inexact_kernel_2 = CGAL::Epick_d< CGAL::Dimension_tag<2> >;
+using Exact_kernel_2 = CGAL::Epeck_d< CGAL::Dimension_tag<2> >;
+using list_of_kernel_2_variants = boost::mpl::list<Inexact_kernel_2, Exact_kernel_2>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_with_duplicated_points, TestedKernel, list_of_kernel_2_variants) {
+  std::cout << "========== Alpha_complex_with_duplicated_points ==========" << std::endl;
+
+  using Point = typename TestedKernel::Point_d;
+  using Vector_of_points = std::vector<Point>;
+
+  // ----------------------------------------------------------------------------
+  // Init of a list of points
+  // ----------------------------------------------------------------------------
+  Vector_of_points points;
+  points.push_back(Point(1.0, 1.0));
+  points.push_back(Point(7.0, 0.0));
+  points.push_back(Point(4.0, 6.0));
+  points.push_back(Point(9.0, 6.0));
+  points.push_back(Point(0.0, 14.0));
+  points.push_back(Point(2.0, 19.0));
+  points.push_back(Point(9.0, 17.0));
+  // duplicated points
+  points.push_back(Point(1.0, 1.0));
+  points.push_back(Point(7.0, 0.0));
+
+  // ----------------------------------------------------------------------------
+  // Init of an alpha complex from the list of points
+  // ----------------------------------------------------------------------------
+  std::cout << "Init" << std::endl;
+  Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex_from_points(points);
+
+  Gudhi::Simplex_tree<> simplex_tree;
+  std::cout << "create_complex" << std::endl;
+  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex_tree));
+  
+  std::cout << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices()
+      << std::endl;
+  BOOST_CHECK(simplex_tree.num_vertices() < points.size());
 }

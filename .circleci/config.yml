@@ -11,7 +11,8 @@ jobs:
             mkdir build;
             cd build;
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
-            make all test;
+            make all;
+            ctest --output-on-failure;
 
   tests:
     docker:
@@ -24,7 +25,8 @@ jobs:
             mkdir build;
             cd build;
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
-            make all test;
+            make all;
+            ctest --output-on-failure;
 
   utils:
     docker:
@@ -37,7 +39,8 @@ jobs:
             mkdir build;
             cd build;
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..;
-            make all test;
+            make all;
+            ctest --output-on-failure;
 
   python:
     docker:
@@ -55,7 +58,9 @@ jobs:
             mkdir build;
             cd build;            
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..;
-            make all test sphinx;
+            make all;
+            ctest --output-on-failure;
+            make sphinx;
             cp -R python/sphinx /tmp/sphinx;
 
       - store_artifacts:

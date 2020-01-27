@@ -1,3 +1,12 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -7,15 +16,6 @@ from libc.stdint cimport intptr_t
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
-
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Vincent Rouvreau
-#
-# Copyright (C) 2016 Inria
-#
-# Modification(s):
-#   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -28,7 +28,7 @@ cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
         void init_matrix(vector[vector[double]] values, double threshold)
         void init_points_sparse(vector[vector[double]] values, double threshold, double sparse)
         void init_matrix_sparse(vector[vector[double]] values, double threshold, double sparse)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max) except +
 
 # RipsComplex python interface
 cdef class RipsComplex:

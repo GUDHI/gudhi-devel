@@ -121,8 +121,8 @@ class Alpha_complex {
   // size_type type from CGAL.
   typedef typename Delaunay_triangulation::size_type size_type;
 
-  // Map type to switch from simplex tree vertex handle to CGAL vertex iterator.
-  typedef typename std::map< std::size_t, CGAL_vertex_iterator > Vector_vertex_iterator;
+  // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
+  typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
 
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
@@ -191,14 +191,6 @@ class Alpha_complex {
     return vertex_handle_to_iterator_.at(vertex)->point();
   }
 
-  /** \brief number_of_vertices returns the number of vertices (same as the number of points).
-   *
-   * @return The number of vertices.
-   */
-  std::size_t number_of_vertices() const {
-    return vertex_handle_to_iterator_.size();
-  }
-
  private:
   template<typename InputPointRange >
   void init_from_range(const InputPointRange& points) {
@@ -238,14 +230,16 @@ class Alpha_complex {
         hint = pos->full_cell();
       }
       // --------------------------------------------------------------------------------------------
-      // double map to retrieve simplex tree vertex handles from CGAL vertex iterator and vice versa
+      // structure to retrieve CGAL points from vertex handle - one vertex handle per point.
+      // Needs to be constructed before as vertex handles arrives in no particular order.
+      vertex_handle_to_iterator_.resize(point_cloud.size());
       // Loop on triangulation vertices list
       for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
         if (!triangulation_->is_infinite(*vit)) {
 #ifdef DEBUG_TRACES
           std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
-          vertex_handle_to_iterator_.emplace(vit->data(), vit);
+          vertex_handle_to_iterator_[vit->data()] = vit;
         }
       }
       // --------------------------------------------------------------------------------------------

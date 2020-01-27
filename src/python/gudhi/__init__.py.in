@@ -1,5 +1,3 @@
-from importlib import import_module
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 #  See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 #  Author(s):       Vincent Rouvreau
@@ -9,6 +7,9 @@ from importlib import import_module
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from importlib import import_module
+from sys import exc_info
+
 __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "https://gudhi.inria.fr/licensing/"
@@ -16,9 +17,6 @@ __version__ = "@GUDHI_VERSION@"
 # This variable is used by doctest to find files
 __root_source_dir__ = "@CMAKE_SOURCE_DIR@"
 __debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
-
-from sys import exc_info
-from importlib import import_module
 
 __all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
 

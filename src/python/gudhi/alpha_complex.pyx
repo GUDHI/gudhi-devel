@@ -1,3 +1,12 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -9,26 +18,17 @@ import os
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
 
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Vincent Rouvreau
-#
-# Copyright (C) 2016 Inria
-#
-# Modification(s):
-#   - YYYY/MM Author: Description of the modification
-
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points)
+        Alpha_complex_interface(vector[vector[double]] points) except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool from_file)
-        vector[double] get_point(int vertex)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        Alpha_complex_interface(string off_file, bool from_file) except +
+        vector[double] get_point(int vertex) except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -66,10 +66,10 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, off_file=''):
+    def __cinit__(self, points = None, off_file = ''):
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(str.encode(off_file), True)
+                self.thisptr = new Alpha_complex_interface(off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:
@@ -96,10 +96,9 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        cdef vector[double] point = self.thisptr.get_point(vertex)
-        return point
+        return self.thisptr.get_point(vertex)
 
-    def create_simplex_tree(self, max_alpha_square=float('inf')):
+    def create_simplex_tree(self, max_alpha_square = float('inf')):
         """
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity, and
