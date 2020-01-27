@@ -31,72 +31,72 @@ int main(int argc, char* const argv[]) {
   /*  o---o        */
   /*  1   3        */
 
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+  std::clog << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
             << std::endl;
 
   // Browse maximal cofaces
   Simplex sigma3 = {2, 3};
-  std::cout << "Maximal cofaces of {2, 3} are :" << std::endl;
+  std::clog << "Maximal cofaces of {2, 3} are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_cofaces(sigma3, 2)) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   Simplex sigma4 = {1, 3};
   assert(tm.membership(sigma4));
 
   Gudhi::Toplex_map::Vertex v = tm.contraction(1, 3);
-  std::cout << "After contraction(1, 3) - " << v << std::endl;
+  std::clog << "After contraction(1, 3) - " << v << std::endl;
   /* Simplex is:   */
   /*    2   4      */
   /*    o---o      */
   /*     \5/       */
   /*      o        */
   /*      3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+  std::clog << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
             << std::endl;
 
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   Simplex sigma5 = {3, 4};
   assert(tm.membership(sigma5));
 
   v = tm.contraction(3, 4);
-  std::cout << "After contraction(3, 4) - " << v << std::endl;
+  std::clog << "After contraction(3, 4) - " << v << std::endl;
   /* Simplex is:   */
   /*    2   4      */
   /*    o---o      */
   /*     \X/       */
   /*      o        */
   /*      5        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+  std::clog << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
             << std::endl;
 
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   tm.insert_simplex(sigma1);
@@ -109,44 +109,44 @@ int main(int argc, char* const argv[]) {
   /*  1   3        */
   tm.remove_simplex(sigma1);
 
-  std::cout << "After remove_simplex(1, 2, 3)" << std::endl;
+  std::clog << "After remove_simplex(1, 2, 3)" << std::endl;
   /* Simplex is:   */
   /*    2   4      */
   /*    o---o      */
   /*   / \5/       */
   /*  o---o        */
   /*  1   3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+  std::clog << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
             << std::endl;
 
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   tm.remove_vertex(1);
 
-  std::cout << "After remove_vertex(1)" << std::endl;
+  std::clog << "After remove_vertex(1)" << std::endl;
   /* Simplex is:   */
   /*    2   4      */
   /*    o---o      */
   /*     \5/       */
   /*      o        */
   /*      3        */
-  std::cout << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
+  std::clog << "num max simplices = " << tm.num_maximal_simplices() << " - num vertices = " << tm.num_vertices()
             << std::endl;
 
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   return 0;

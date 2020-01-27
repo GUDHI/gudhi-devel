@@ -50,28 +50,28 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
   final_barcode.reserve(barcode_initial.size());
 
   if (dbg) {
-    std::cout << "Here are the intervals that we read from the file : \n";
+    std::clog << "Here are the intervals that we read from the file : \n";
     for (size_t i = 0; i != barcode_initial.size(); ++i) {
-      std::cout << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
+      std::clog << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
     }
     getchar();
   }
 
   for (size_t i = 0; i != barcode_initial.size(); ++i) {
     if (dbg) {
-      std::cout << "Considering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second
+      std::clog << "Considering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second
                 << std::endl;
     }
 
     if (barcode_initial[i].first > barcode_initial[i].second) {
       // note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
-      if (dbg) std::cout << "Swap and enter \n";
+      if (dbg) std::clog << "Swap and enter \n";
       // swap them to make sure that birth < death
       final_barcode.push_back(std::pair<double, double>(barcode_initial[i].second, barcode_initial[i].first));
       continue;
     } else {
       if (barcode_initial[i].second != std::numeric_limits<double>::infinity()) {
-        if (dbg) std::cout << "Simply enters\n";
+        if (dbg) std::clog << "Simply enters\n";
         // in this case, due to the previous conditions we know that barcode_initial[i].first <
         // barcode_initial[i].second, so we put them as they are
         final_barcode.push_back(std::pair<double, double>(barcode_initial[i].first, barcode_initial[i].second));
@@ -91,11 +91,11 @@ std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimens
   }
 
   if (dbg) {
-    std::cout << "Here are the final bars that we are sending further : \n";
+    std::clog << "Here are the final bars that we are sending further : \n";
     for (size_t i = 0; i != final_barcode.size(); ++i) {
-      std::cout << final_barcode[i].first << " " << final_barcode[i].second << std::endl;
+      std::clog << final_barcode[i].first << " " << final_barcode[i].second << std::endl;
     }
-    std::cout << "final_barcode.size() : " << final_barcode.size() << std::endl;
+    std::clog << "final_barcode.size() : " << final_barcode.size() << std::endl;
     getchar();
   }
 

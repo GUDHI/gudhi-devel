@@ -155,9 +155,9 @@ class Persistence_landscape_on_grid {
     double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
 
     if (dbg) {
-      std::cout << "this->grid_max : " << this->grid_max << std::endl;
-      std::cout << "this->grid_min : " << this->grid_min << std::endl;
-      std::cout << "this->values_of_landscapes.size() : " << this->values_of_landscapes.size() << std::endl;
+      std::clog << "this->grid_max : " << this->grid_max << std::endl;
+      std::clog << "this->grid_min : " << this->grid_min << std::endl;
+      std::clog << "this->values_of_landscapes.size() : " << this->values_of_landscapes.size() << std::endl;
       getchar();
     }
 
@@ -169,14 +169,14 @@ class Persistence_landscape_on_grid {
       if (this->values_of_landscapes[i].size() > level) current_y = this->values_of_landscapes[i][level];
 
       if (dbg) {
-        std::cout << "this->values_of_landscapes[i].size() : " << this->values_of_landscapes[i].size()
+        std::clog << "this->values_of_landscapes[i].size() : " << this->values_of_landscapes[i].size()
                   << " , level : " << level << std::endl;
         if (this->values_of_landscapes[i].size() > level)
-          std::cout << "this->values_of_landscapes[i][level] : " << this->values_of_landscapes[i][level] << std::endl;
-        std::cout << "previous_y : " << previous_y << std::endl;
-        std::cout << "current_y : " << current_y << std::endl;
-        std::cout << "dx : " << dx << std::endl;
-        std::cout << "0.5*dx*( previous_y + current_y ); " << 0.5 * dx * (previous_y + current_y) << std::endl;
+          std::clog << "this->values_of_landscapes[i][level] : " << this->values_of_landscapes[i][level] << std::endl;
+        std::clog << "previous_y : " << previous_y << std::endl;
+        std::clog << "current_y : " << current_y << std::endl;
+        std::clog << "dx : " << dx << std::endl;
+        std::clog << "0.5*dx*( previous_y + current_y ); " << 0.5 * dx * (previous_y + current_y) << std::endl;
       }
 
       result += 0.5 * dx * (previous_y + current_y);
@@ -213,10 +213,10 @@ class Persistence_landscape_on_grid {
     if (this->values_of_landscapes[0].size() > level) previous_y = this->values_of_landscapes[0][level];
 
     if (dbg) {
-      std::cout << "dx : " << dx << std::endl;
-      std::cout << "previous_x : " << previous_x << std::endl;
-      std::cout << "previous_y : " << previous_y << std::endl;
-      std::cout << "power : " << p << std::endl;
+      std::clog << "dx : " << dx << std::endl;
+      std::clog << "previous_x : " << previous_x << std::endl;
+      std::clog << "previous_y : " << previous_y << std::endl;
+      std::clog << "power : " << p << std::endl;
       getchar();
     }
 
@@ -225,7 +225,7 @@ class Persistence_landscape_on_grid {
       double current_y = 0;
       if (this->values_of_landscapes[i].size() > level) current_y = this->values_of_landscapes[i][level];
 
-      if (dbg) std::cout << "current_y : " << current_y << std::endl;
+      if (dbg) std::clog << "current_y : " << current_y << std::endl;
 
       if (current_y == previous_y) continue;
 
@@ -235,7 +235,7 @@ class Persistence_landscape_on_grid {
       double b = coef.second;
 
       if (dbg) {
-        std::cout << "A line passing through points : (" << previous_x << "," << previous_y << ") and (" << current_x
+        std::clog << "A line passing through points : (" << previous_x << "," << previous_y << ") and (" << current_x
                   << "," << current_y << ") is : " << a << "x+" << b << std::endl;
       }
 
@@ -249,14 +249,14 @@ class Persistence_landscape_on_grid {
       }
       result += value_to_add;
       if (dbg) {
-        std::cout << "Increasing result by : " << value_to_add << std::endl;
-        std::cout << "result : " << result << std::endl;
+        std::clog << "Increasing result by : " << value_to_add << std::endl;
+        std::clog << "result : " << result << std::endl;
         getchar();
       }
       previous_x = current_x;
       previous_y = current_y;
     }
-    if (dbg) std::cout << "The total result is : " << result << std::endl;
+    if (dbg) std::clog << "The total result is : " << result << std::endl;
     return result;
   }
 
@@ -297,10 +297,10 @@ class Persistence_landscape_on_grid {
     size_t position = size_t((x - this->grid_min) / dx);
 
     if (dbg) {
-      std::cout << "This is a procedure compute_value_at_a_given_point \n";
-      std::cout << "level : " << level << std::endl;
-      std::cout << "x : " << x << std::endl;
-      std::cout << "position : " << position << std::endl;
+      std::clog << "This is a procedure compute_value_at_a_given_point \n";
+      std::clog << "level : " << level << std::endl;
+      std::clog << "x : " << x << std::endl;
+      std::clog << "position : " << position << std::endl;
     }
     // check if we are not exactly in the grid point:
     if (almost_equal(position * dx + this->grid_min, x)) {
@@ -432,23 +432,23 @@ class Persistence_landscape_on_grid {
   bool operator==(const Persistence_landscape_on_grid& rhs) const {
     bool dbg = true;
     if (this->values_of_landscapes.size() != rhs.values_of_landscapes.size()) {
-      if (dbg) std::cout << "values_of_landscapes of incompatible sizes\n";
+      if (dbg) std::clog << "values_of_landscapes of incompatible sizes\n";
       return false;
     }
     if (!almost_equal(this->grid_min, rhs.grid_min)) {
-      if (dbg) std::cout << "grid_min not equal\n";
+      if (dbg) std::clog << "grid_min not equal\n";
       return false;
     }
     if (!almost_equal(this->grid_max, rhs.grid_max)) {
-      if (dbg) std::cout << "grid_max not equal\n";
+      if (dbg) std::clog << "grid_max not equal\n";
       return false;
     }
     for (size_t i = 0; i != this->values_of_landscapes.size(); ++i) {
       for (size_t aa = 0; aa != this->values_of_landscapes[i].size(); ++aa) {
         if (!almost_equal(this->values_of_landscapes[i][aa], rhs.values_of_landscapes[i][aa])) {
           if (dbg) {
-            std::cout << "Problem in the position : " << i << " of values_of_landscapes. \n";
-            std::cout << this->values_of_landscapes[i][aa] << " " << rhs.values_of_landscapes[i][aa] << std::endl;
+            std::clog << "Problem in the position : " << i << " of values_of_landscapes. \n";
+            std::clog << this->values_of_landscapes[i][aa] << " " << rhs.values_of_landscapes[i][aa] << std::endl;
           }
           return false;
         }
@@ -615,7 +615,7 @@ class Persistence_landscape_on_grid {
     double previous_y_l1 = 0;
     double previous_y_l2 = 0;
     for (size_t i = 0; i != l1.values_of_landscapes.size(); ++i) {
-      if (dbg) std::cout << "i : " << i << std::endl;
+      if (dbg) std::clog << "i : " << i << std::endl;
 
       double current_x = previous_x + dx;
       double current_y_l1 = 0;
@@ -625,11 +625,11 @@ class Persistence_landscape_on_grid {
       if (l2.values_of_landscapes[i].size() > level) current_y_l2 = l2.values_of_landscapes[i][level];
 
       if (dbg) {
-        std::cout << "previous_x  : " << previous_x << std::endl;
-        std::cout << "previous_y_l1 : " << previous_y_l1 << std::endl;
-        std::cout << "current_y_l1 : " << current_y_l1 << std::endl;
-        std::cout << "previous_y_l2 : " << previous_y_l2 << std::endl;
-        std::cout << "current_y_l2 : " << current_y_l2 << std::endl;
+        std::clog << "previous_x  : " << previous_x << std::endl;
+        std::clog << "previous_y_l1 : " << previous_y_l1 << std::endl;
+        std::clog << "current_y_l1 : " << current_y_l1 << std::endl;
+        std::clog << "previous_y_l2 : " << previous_y_l2 << std::endl;
+        std::clog << "current_y_l2 : " << current_y_l2 << std::endl;
       }
 
       std::pair<double, double> l1_coords = compute_parameters_of_a_line(std::make_pair(previous_x, previous_y_l1),
@@ -646,11 +646,11 @@ class Persistence_landscape_on_grid {
       double d = l2_coords.second;
 
       if (dbg) {
-        std::cout << "Here are the formulas for a line: \n";
-        std::cout << "a : " << a << std::endl;
-        std::cout << "b : " << b << std::endl;
-        std::cout << "c : " << c << std::endl;
-        std::cout << "d : " << d << std::endl;
+        std::clog << "Here are the formulas for a line: \n";
+        std::clog << "a : " << a << std::endl;
+        std::clog << "b : " << b << std::endl;
+        std::clog << "c : " << c << std::endl;
+        std::clog << "d : " << d << std::endl;
       }
 
       // now, to compute the inner product in this interval we need to compute the integral of (ax+b)(cx+d) = acx^2 +
@@ -663,11 +663,11 @@ class Persistence_landscape_on_grid {
                             (a * d + b * c) / 2 * previous_x * previous_x + b * d * previous_x);
 
       if (dbg) {
-        std::cout << "Value of the integral on the left end i.e. : " << previous_x << " is : "
+        std::clog << "Value of the integral on the left end i.e. : " << previous_x << " is : "
                   << a * c / 3 * previous_x * previous_x * previous_x + (a * d + b * c) / 2 * previous_x * previous_x +
                          b * d * previous_x
                   << std::endl;
-        std::cout << "Value of the integral on the right end i.e. : " << current_x << " is "
+        std::clog << "Value of the integral on the right end i.e. : " << current_x << " is "
                   << a * c / 3 * current_x * current_x * current_x + (a * d + b * c) / 2 * current_x * current_x +
                          b * d * current_x
                   << std::endl;
@@ -676,8 +676,8 @@ class Persistence_landscape_on_grid {
       result += added_value;
 
       if (dbg) {
-        std::cout << "added_value : " << added_value << std::endl;
-        std::cout << "result : " << result << std::endl;
+        std::clog << "added_value : " << added_value << std::endl;
+        std::clog << "result : " << result << std::endl;
         getchar();
       }
 
@@ -703,8 +703,8 @@ class Persistence_landscape_on_grid {
     // time:
 
     if (dbg) {
-      std::cout << "first : " << first << std::endl;
-      std::cout << "second : " << second << std::endl;
+      std::clog << "first : " << first << std::endl;
+      std::clog << "second : " << second << std::endl;
       getchar();
     }
 
@@ -712,14 +712,14 @@ class Persistence_landscape_on_grid {
     Persistence_landscape_on_grid lan = first - second;
 
     if (dbg) {
-      std::cout << "Difference : " << lan << std::endl;
+      std::clog << "Difference : " << lan << std::endl;
     }
 
     //| first-second |:
     lan.abs();
 
     if (dbg) {
-      std::cout << "Abs : " << lan << std::endl;
+      std::clog << "Abs : " << lan << std::endl;
     }
 
     if (p < std::numeric_limits<double>::max()) {
@@ -727,18 +727,18 @@ class Persistence_landscape_on_grid {
       double result;
       if (p != 1) {
         if (dbg) {
-          std::cout << "p : " << p << std::endl;
+          std::clog << "p : " << p << std::endl;
           getchar();
         }
         result = lan.compute_integral_of_landscape(p);
         if (dbg) {
-          std::cout << "integral : " << result << std::endl;
+          std::clog << "integral : " << result << std::endl;
           getchar();
         }
       } else {
         result = lan.compute_integral_of_landscape();
         if (dbg) {
-          std::cout << "integral, without power : " << result << std::endl;
+          std::clog << "integral, without power : " << result << std::endl;
           getchar();
         }
       }
@@ -820,7 +820,7 @@ class Persistence_landscape_on_grid {
     this->grid_max = (to_average[0])->grid_max;
 
     if (dbg) {
-      std::cout << "Computations of average. The data from the current landscape have been cleared. We are ready to do "
+      std::clog << "Computations of average. The data from the current landscape have been cleared. We are ready to do "
                    "the computations. \n";
     }
 
@@ -835,7 +835,7 @@ class Persistence_landscape_on_grid {
       this->values_of_landscapes[grid_point] = std::vector<double>(maximal_size_of_vector);
 
       if (dbg) {
-        std::cout << "We are considering the point : " << grid_point
+        std::clog << "We are considering the point : " << grid_point
                   << " of the grid. In this point, there are at most : " << maximal_size_of_vector
                   << " nonzero landscape functions \n";
       }
@@ -931,12 +931,12 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
                                                                 size_t number_of_points_, unsigned number_of_levels) {
   bool dbg = false;
   if (dbg) {
-    std::cout << "Here is the procedure : set_up_values_of_landscapes. The parameters are : grid_min_ : " << grid_min_
+    std::clog << "Here is the procedure : set_up_values_of_landscapes. The parameters are : grid_min_ : " << grid_min_
               << ", grid_max_ : " << grid_max_ << ", number_of_points_ : " << number_of_points_
               << ", number_of_levels: " << number_of_levels << std::endl;
-    std::cout << "Here are the intervals at our disposal : \n";
+    std::clog << "Here are the intervals at our disposal : \n";
     for (size_t i = 0; i != p.size(); ++i) {
-      std::cout << p[i].first << " , " << p[i].second << std::endl;
+      std::clog << p[i].first << " , " << p[i].second << std::endl;
     }
   }
 
@@ -976,17 +976,17 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
     size_t grid_interval_midpoint = (size_t)(0.5 * (grid_interval_begin + grid_interval_end));
 
     if (dbg) {
-      std::cout << "Considering an interval : " << p[int_no].first << "," << p[int_no].second << std::endl;
+      std::clog << "Considering an interval : " << p[int_no].first << "," << p[int_no].second << std::endl;
 
-      std::cout << "grid_interval_begin : " << grid_interval_begin << std::endl;
-      std::cout << "grid_interval_end : " << grid_interval_end << std::endl;
-      std::cout << "grid_interval_midpoint : " << grid_interval_midpoint << std::endl;
+      std::clog << "grid_interval_begin : " << grid_interval_begin << std::endl;
+      std::clog << "grid_interval_end : " << grid_interval_end << std::endl;
+      std::clog << "grid_interval_midpoint : " << grid_interval_midpoint << std::endl;
     }
 
     double landscape_value = dx;
     for (size_t i = grid_interval_begin + 1; i < grid_interval_midpoint; ++i) {
       if (dbg) {
-        std::cout << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value
+        std::clog << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value
                   << std::endl;
       }
       if (number_of_levels != std::numeric_limits<unsigned>::max()) {
@@ -1044,7 +1044,7 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
         }
 
         if (dbg) {
-          std::cout << "Adding landscape value (going down) for a point : " << i << " equal : " << landscape_value
+          std::clog << "Adding landscape value (going down) for a point : " << i << " equal : " << landscape_value
                     << std::endl;
         }
       }
@@ -1246,7 +1246,7 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
     }
     out << "EOF" << std::endl;
   }
-  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+  std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 

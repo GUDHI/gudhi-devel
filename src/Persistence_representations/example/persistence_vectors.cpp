@@ -41,19 +41,19 @@ int main(int argc, char** argv) {
   Vector_distances_in_diagram v2(persistence2, std::numeric_limits<size_t>::max());
 
   // writing to a stream:
-  std::cout << "v1 : " << v1 << std::endl;
-  std::cout << "v2 : " << v2 << std::endl;
+  std::clog << "v1 : " << v1 << std::endl;
+  std::clog << "v2 : " << v2 << std::endl;
 
   // averages:
   Vector_distances_in_diagram average;
   average.compute_average({&v1, &v2});
-  std::cout << "Average : " << average << std::endl;
+  std::clog << "Average : " << average << std::endl;
 
   // computations of distances:
-  std::cout << "l^1 distance : " << v1.distance(v2) << std::endl;
+  std::clog << "l^1 distance : " << v1.distance(v2) << std::endl;
 
   // computations of scalar product:
-  std::cout << "Scalar product of l1 and l2 : " << v1.compute_scalar_product(v2) << std::endl;
+  std::clog << "Scalar product of l1 and l2 : " << v1.compute_scalar_product(v2) << std::endl;
 
   // create a file with a gnuplot script:
   v1.plot("plot_of_vector_representation");

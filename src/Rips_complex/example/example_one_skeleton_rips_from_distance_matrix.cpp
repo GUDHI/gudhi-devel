@@ -39,19 +39,19 @@ int main() {
   // ----------------------------------------------------------------------------
   // Display information about the one skeleton Rips complex
   // ----------------------------------------------------------------------------
-  std::cout << "Rips complex is of dimension " << stree.dimension() <<
+  std::clog << "Rips complex is of dimension " << stree.dimension() <<
                " - " << stree.num_simplices() << " simplices - " <<
                stree.num_vertices() << " vertices." << std::endl;
 
-  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
+  std::clog << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" <<
                std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
-    std::cout << "   ( ";
+    std::clog << "   ( ";
     for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
+    std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
+    std::clog << std::endl;
   }
 
   return 0;

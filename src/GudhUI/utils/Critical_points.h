@@ -65,7 +65,7 @@ template<typename SkBlComplex> class Critical_points {
   void anti_collapse_edges(const std::deque<Edge>& edges) {
     unsigned pos = 0;
     for (Edge e : edges) {
-      std::cout << "edge " << pos++ << "/" << edges.size() << "\n";
+      std::clog << "edge " << pos++ << "/" << edges.size() << "\n";
       auto eh = filled_complex_.add_edge_without_blockers(e.first, e.second);
       int is_contractible(is_link_reducible(eh));
 

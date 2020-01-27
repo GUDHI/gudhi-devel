@@ -55,9 +55,9 @@ std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, do
   }
 
   if (dbg) {
-    std::cout << "Kernel initialize \n";
-    std::cout << "pixel_radius : " << pixel_radius << std::endl;
-    std::cout << "kernel.size() : " << kernel.size() << std::endl;
+    std::clog << "Kernel initialize \n";
+    std::clog << "pixel_radius : " << pixel_radius << std::endl;
+    std::clog << "kernel.size() : " << kernel.size() << std::endl;
     getchar();
   }
 
@@ -79,12 +79,12 @@ std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, do
   }
 
   if (dbg) {
-    std::cout << "Here is the kernel : \n";
+    std::clog << "Here is the kernel : \n";
     for (size_t i = 0; i != kernel.size(); ++i) {
       for (size_t j = 0; j != kernel[i].size(); ++j) {
-        std::cout << kernel[i][j] << " ";
+        std::clog << kernel[i][j] << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
   }
   return kernel;
@@ -290,16 +290,16 @@ class Persistence_heat_maps {
     bool dbg = false;
     if (this->heat_map.size() != second.heat_map.size()) {
       if (dbg)
-        std::cout << "this->heat_map.size() : " << this->heat_map.size()
+        std::clog << "this->heat_map.size() : " << this->heat_map.size()
                   << " \n second.heat_map.size() : " << second.heat_map.size() << std::endl;
       return false;
     }
     if (this->min_ != second.min_) {
-      if (dbg) std::cout << "this->min_ : " << this->min_ << ", second.min_ : " << second.min_ << std::endl;
+      if (dbg) std::clog << "this->min_ : " << this->min_ << ", second.min_ : " << second.min_ << std::endl;
       return false;
     }
     if (this->max_ != second.max_) {
-      if (dbg) std::cout << "this->max_ : " << this->max_ << ", second.max_ : " << second.max_ << std::endl;
+      if (dbg) std::clog << "this->max_ : " << this->max_ << ", second.max_ : " << second.max_ << std::endl;
       return false;
     }
     // in the other case we may assume that the persistence images are defined on the same domain.
@@ -322,15 +322,15 @@ class Persistence_heat_maps {
   bool operator==(const Persistence_heat_maps& rhs) const {
     bool dbg = false;
     if (!this->check_if_the_same(rhs)) {
-      if (dbg) std::cout << "The domains are not the same \n";
+      if (dbg) std::clog << "The domains are not the same \n";
       return false;  // in this case, the domains are not the same, so the maps cannot be the same.
     }
     for (size_t i = 0; i != this->heat_map.size(); ++i) {
       for (size_t j = 0; j != this->heat_map[i].size(); ++j) {
         if (!almost_equal(this->heat_map[i][j], rhs.heat_map[i][j])) {
           if (dbg) {
-            std::cout << "this->heat_map[" << i << "][" << j << "] = " << this->heat_map[i][j] << std::endl;
-            std::cout << "rhs.heat_map[" << i << "][" << j << "] = " << rhs.heat_map[i][j] << std::endl;
+            std::clog << "this->heat_map[" << i << "][" << j << "] = " << this->heat_map[i][j] << std::endl;
+            std::clog << "rhs.heat_map[" << i << "][" << j << "] = " << rhs.heat_map[i][j] << std::endl;
           }
           return false;
         }
@@ -586,14 +586,14 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
                                                            bool erase_below_diagonal, size_t number_of_pixels,
                                                            double min_, double max_) {
   bool dbg = false;
-  if (dbg) std::cout << "Entering construct procedure \n";
+  if (dbg) std::clog << "Entering construct procedure \n";
   Scalling_of_kernels f;
   this->f = f;
 
-  if (dbg) std::cout << "min and max passed to construct() procedure: " << min_ << " " << max_ << std::endl;
+  if (dbg) std::clog << "min and max passed to construct() procedure: " << min_ << " " << max_ << std::endl;
 
   if (min_ == max_) {
-    if (dbg) std::cout << "min and max parameters will be determined based on intervals \n";
+    if (dbg) std::clog << "min and max parameters will be determined based on intervals \n";
     // in this case, we want the program to set up the min_ and max_ values by itself.
     min_ = std::numeric_limits<int>::max();
     max_ = -std::numeric_limits<int>::max();
@@ -611,9 +611,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
   }
 
   if (dbg) {
-    std::cout << "min_ : " << min_ << std::endl;
-    std::cout << "max_ : " << max_ << std::endl;
-    std::cout << "number_of_pixels : " << number_of_pixels << std::endl;
+    std::clog << "min_ : " << min_ << std::endl;
+    std::clog << "max_ : " << max_ << std::endl;
+    std::clog << "number_of_pixels : " << number_of_pixels << std::endl;
     getchar();
   }
 
@@ -628,7 +628,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
   }
   this->heat_map = heat_map_;
 
-  if (dbg) std::cout << "Done creating of the heat map, now we will fill in the structure \n";
+  if (dbg) std::clog << "Done creating of the heat map, now we will fill in the structure \n";
 
   for (size_t pt_nr = 0; pt_nr != intervals_.size(); ++pt_nr) {
     // compute the value of intervals_[pt_nr] in the grid:
@@ -638,9 +638,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
         static_cast<int>((intervals_[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
 
     if (dbg) {
-      std::cout << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
-      std::cout << "x_grid : " << x_grid << std::endl;
-      std::cout << "y_grid : " << y_grid << std::endl;
+      std::clog << "point : " << intervals_[pt_nr].first << " , " << intervals_[pt_nr].second << std::endl;
+      std::clog << "x_grid : " << x_grid << std::endl;
+      std::clog << "y_grid : " << y_grid << std::endl;
     }
 
     // x_grid and y_grid gives a center of the kernel. We want to have its lower left corner. To get this, we need to
@@ -650,9 +650,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
     // note that the numbers x_grid and y_grid may be negative.
 
     if (dbg) {
-      std::cout << "After shift : \n";
-      std::cout << "x_grid : " << x_grid << std::endl;
-      std::cout << "y_grid : " << y_grid << std::endl;
+      std::clog << "After shift : \n";
+      std::clog << "x_grid : " << x_grid << std::endl;
+      std::clog << "y_grid : " << y_grid << std::endl;
     }
 
     double scaling_value = this->f(intervals_[pt_nr]);
@@ -663,11 +663,11 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
         if (((x_grid + i) >= 0) && (x_grid + i < this->heat_map.size()) && ((y_grid + j) >= 0) &&
             (y_grid + j < this->heat_map.size())) {
           if (dbg) {
-            std::cout << y_grid + j << " " << x_grid + i << std::endl;
+            std::clog << y_grid + j << " " << x_grid + i << std::endl;
           }
           this->heat_map[y_grid + j][x_grid + i] += scaling_value * filter[i][j];
           if (dbg) {
-            std::cout << "Position : (" << x_grid + i << "," << y_grid + j
+            std::clog << "Position : (" << x_grid + i << "," << y_grid + j
                       << ") got increased by the value : " << filter[i][j] << std::endl;
           }
         }
@@ -805,7 +805,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) cons
     out << std::endl;
   }
   out.close();
-  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+  std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 
@@ -842,7 +842,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
   in >> this->min_ >> this->max_;
   if (dbg) {
-    std::cout << "Reading the following values of min and max : " << this->min_ << " , " << this->max_ << std::endl;
+    std::clog << "Reading the following values of min and max : " << this->min_ << " , " << this->max_ << std::endl;
   }
 
   std::string temp;
@@ -859,18 +859,18 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
       lineSS >> point;
       line_of_heat_map.push_back(point);
       if (dbg) {
-        std::cout << point << " ";
+        std::clog << point << " ";
       }
     }
     if (dbg) {
-      std::cout << std::endl;
+      std::clog << std::endl;
       getchar();
     }
 
     if (in.good()) this->heat_map.push_back(line_of_heat_map);
   }
   in.close();
-  if (dbg) std::cout << "Done \n";
+  if (dbg) std::clog << "Done \n";
 }
 
 // Concretizations of virtual methods:

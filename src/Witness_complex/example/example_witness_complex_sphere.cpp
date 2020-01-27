@@ -47,8 +47,8 @@ int main(int argc, char* const argv[]) {
     Gudhi::Simplex_tree<> simplex_tree;
     Point_Vector point_vector, landmarks;
     generate_points_sphere(point_vector, nbP, 4);
-    std::cout << "Successfully generated " << point_vector.size() << " points.\n";
-    std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
+    std::clog << "Successfully generated " << point_vector.size() << " points.\n";
+    std::clog << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
     // Choose landmarks
     start = clock();
@@ -62,8 +62,8 @@ int main(int argc, char* const argv[]) {
     witness_complex.create_complex(simplex_tree, 0);
     end = clock();
     double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-    std::cout << "Witness complex for " << number_of_landmarks << " landmarks took " << time << " s. \n";
-    std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
+    std::clog << "Witness complex for " << number_of_landmarks << " landmarks took " << time << " s. \n";
+    std::clog << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
     l_time.push_back(std::make_pair(nbP, time));
   }
   write_data(l_time, "w_time.dat");

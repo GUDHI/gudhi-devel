@@ -33,7 +33,7 @@ int main(int argc, char * const argv[]) {
   Witness_complex witness_complex(nlt);
   witness_complex.create_complex(simplex_tree, .41);
 
-  std::cout << "Number of simplices: " << simplex_tree.num_simplices() << std::endl;
+  std::clog << "Number of simplices: " << simplex_tree.num_simplices() << std::endl;
 
   Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology

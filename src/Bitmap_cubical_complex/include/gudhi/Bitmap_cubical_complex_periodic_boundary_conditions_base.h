@@ -237,7 +237,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     if (inFiltration.eof()) break;
 
     if (dbg) {
-      std::cout << "Cell of an index : " << it.compute_index_in_bitmap()
+      std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
                 << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
                 << " get the value : " << filtrationLevel << std::endl;
     }
@@ -278,7 +278,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
     std::size_t cell) const {
   bool dbg = false;
   if (dbg) {
-    std::cout << "Computations of boundary of a cell : " << cell << std::endl;
+    std::clog << "Computations of boundary of a cell : " << cell << std::endl;
   }
 
   std::vector<std::size_t> boundary_elements;
@@ -300,7 +300,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
           boundary_elements.push_back(cell - this->multipliers[i - 1]);
         }
         if (dbg) {
-          std::cout << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+          std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
         }
       } else {
         // in this direction we have to do boundary conditions. Therefore, we need to check if we are not at the end.
@@ -313,7 +313,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
           if (dbg) {
-            std::cout << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+            std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
           }
         } else {
           if (sum_of_dimensions % 2) {
@@ -324,7 +324,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
           if (dbg) {
-            std::cout << cell - this->multipliers[i - 1] << " "
+            std::clog << cell - this->multipliers[i - 1] << " "
                       << cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1] << " ";
           }
         }

@@ -69,7 +69,7 @@ class Bitmap_cubical_complex : public T {
   Bitmap_cubical_complex(const char* perseus_style_file)
       : T(perseus_style_file), key_associated_to_simplex(this->total_number_of_cells + 1) {
     if (globalDbg) {
-      std::cout << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
+      std::clog << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
     }
     for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
@@ -137,7 +137,7 @@ class Bitmap_cubical_complex : public T {
    **/
   static Simplex_handle null_simplex() {
     if (globalDbg) {
-      std::cout << "Simplex_handle null_simplex()\n";
+      std::clog << "Simplex_handle null_simplex()\n";
     }
     return std::numeric_limits<Simplex_handle>::max();
   }
@@ -152,7 +152,7 @@ class Bitmap_cubical_complex : public T {
    **/
   inline unsigned dimension(Simplex_handle sh) const {
     if (globalDbg) {
-      std::cout << "unsigned dimension(const Simplex_handle& sh)\n";
+      std::clog << "unsigned dimension(const Simplex_handle& sh)\n";
     }
     if (sh != null_simplex()) return this->get_dimension_of_a_cell(sh);
     return -1;
@@ -163,7 +163,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Filtration_value filtration(Simplex_handle sh) {
     if (globalDbg) {
-      std::cout << "Filtration_value filtration(const Simplex_handle& sh)\n";
+      std::clog << "Filtration_value filtration(const Simplex_handle& sh)\n";
     }
     // Returns the filtration value of a simplex.
     if (sh != null_simplex()) return this->data[sh];
@@ -175,7 +175,7 @@ class Bitmap_cubical_complex : public T {
    **/
   static Simplex_key null_key() {
     if (globalDbg) {
-      std::cout << "Simplex_key null_key()\n";
+      std::clog << "Simplex_key null_key()\n";
     }
     return std::numeric_limits<Simplex_handle>::max();
   }
@@ -185,7 +185,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Simplex_key key(Simplex_handle sh) const {
     if (globalDbg) {
-      std::cout << "Simplex_key key(const Simplex_handle& sh)\n";
+      std::clog << "Simplex_key key(const Simplex_handle& sh)\n";
     }
     if (sh != null_simplex()) {
       return this->key_associated_to_simplex[sh];
@@ -198,7 +198,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Simplex_handle simplex(Simplex_key key) {
     if (globalDbg) {
-      std::cout << "Simplex_handle simplex(Simplex_key key)\n";
+      std::clog << "Simplex_handle simplex(Simplex_key key)\n";
     }
     if (key != null_key()) {
       return this->simplex_associated_to_key[key];
@@ -211,7 +211,7 @@ class Bitmap_cubical_complex : public T {
    **/
   void assign_key(Simplex_handle sh, Simplex_key key) {
     if (globalDbg) {
-      std::cout << "void assign_key(Simplex_handle& sh, Simplex_key key)\n";
+      std::clog << "void assign_key(Simplex_handle& sh, Simplex_key key)\n";
     }
     if (key == null_key()) return;
     this->key_associated_to_simplex[sh] = key;
@@ -251,7 +251,7 @@ class Bitmap_cubical_complex : public T {
 
     Filtration_simplex_iterator operator++() {
       if (globalDbg) {
-        std::cout << "Filtration_simplex_iterator operator++\n";
+        std::clog << "Filtration_simplex_iterator operator++\n";
       }
       ++this->position;
       return (*this);
@@ -265,7 +265,7 @@ class Bitmap_cubical_complex : public T {
 
     Filtration_simplex_iterator& operator=(const Filtration_simplex_iterator& rhs) {
       if (globalDbg) {
-        std::cout << "Filtration_simplex_iterator operator =\n";
+        std::clog << "Filtration_simplex_iterator operator =\n";
       }
       this->b = rhs.b;
       this->position = rhs.position;
@@ -274,21 +274,21 @@ class Bitmap_cubical_complex : public T {
 
     bool operator==(const Filtration_simplex_iterator& rhs) const {
       if (globalDbg) {
-        std::cout << "bool operator == ( const Filtration_simplex_iterator& rhs )\n";
+        std::clog << "bool operator == ( const Filtration_simplex_iterator& rhs )\n";
       }
       return (this->position == rhs.position);
     }
 
     bool operator!=(const Filtration_simplex_iterator& rhs) const {
       if (globalDbg) {
-        std::cout << "bool operator != ( const Filtration_simplex_iterator& rhs )\n";
+        std::clog << "bool operator != ( const Filtration_simplex_iterator& rhs )\n";
       }
       return !(*this == rhs);
     }
 
     Simplex_handle operator*() {
       if (globalDbg) {
-        std::cout << "Simplex_handle operator*()\n";
+        std::clog << "Simplex_handle operator*()\n";
       }
       return this->b->simplex_associated_to_key[this->position];
     }
@@ -314,14 +314,14 @@ class Bitmap_cubical_complex : public T {
 
     Filtration_simplex_iterator begin() {
       if (globalDbg) {
-        std::cout << "Filtration_simplex_iterator begin() \n";
+        std::clog << "Filtration_simplex_iterator begin() \n";
       }
       return Filtration_simplex_iterator(this->b);
     }
 
     Filtration_simplex_iterator end() {
       if (globalDbg) {
-        std::cout << "Filtration_simplex_iterator end()\n";
+        std::clog << "Filtration_simplex_iterator end()\n";
       }
       Filtration_simplex_iterator it(this->b);
       it.position = this->b->simplex_associated_to_key.size();
@@ -347,7 +347,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Filtration_simplex_range filtration_simplex_range() {
     if (globalDbg) {
-      std::cout << "Filtration_simplex_range filtration_simplex_range()\n";
+      std::clog << "Filtration_simplex_range filtration_simplex_range()\n";
     }
     // Returns a range over the simplices of the complex in the order of the filtration
     return Filtration_simplex_range(this);
@@ -370,8 +370,8 @@ class Bitmap_cubical_complex : public T {
   std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
     std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(sh);
     if (globalDbg) {
-      std::cout << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
-      std::cout << "bdry.size() : " << bdry.size() << "\n";
+      std::clog << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
+      std::clog << "bdry.size() : " << bdry.size() << "\n";
     }
     // this method returns two first elements from the boundary of sh.
     if (bdry.size() < 2)
@@ -392,7 +392,7 @@ class Bitmap_cubical_complex : public T {
    public:
     Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
       if (globalDbg) {
-        std::cout << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
+        std::clog << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
       }
       // find the position of the first simplex of a dimension d
       this->position = 0;
@@ -406,7 +406,7 @@ class Bitmap_cubical_complex : public T {
 
     Skeleton_simplex_iterator operator++() {
       if (globalDbg) {
-        std::cout << "Skeleton_simplex_iterator operator++()\n";
+        std::clog << "Skeleton_simplex_iterator operator++()\n";
       }
       // increment the position as long as you did not get to the next element of the dimension dimension.
       ++this->position;
@@ -425,7 +425,7 @@ class Bitmap_cubical_complex : public T {
 
     Skeleton_simplex_iterator& operator=(const Skeleton_simplex_iterator& rhs) {
       if (globalDbg) {
-        std::cout << "Skeleton_simplex_iterator operator =\n";
+        std::clog << "Skeleton_simplex_iterator operator =\n";
       }
       this->b = rhs.b;
       this->position = rhs.position;
@@ -435,21 +435,21 @@ class Bitmap_cubical_complex : public T {
 
     bool operator==(const Skeleton_simplex_iterator& rhs) const {
       if (globalDbg) {
-        std::cout << "bool operator ==\n";
+        std::clog << "bool operator ==\n";
       }
       return (this->position == rhs.position);
     }
 
     bool operator!=(const Skeleton_simplex_iterator& rhs) const {
       if (globalDbg) {
-        std::cout << "bool operator != ( const Skeleton_simplex_iterator& rhs )\n";
+        std::clog << "bool operator != ( const Skeleton_simplex_iterator& rhs )\n";
       }
       return !(*this == rhs);
     }
 
     Simplex_handle operator*() {
       if (globalDbg) {
-        std::cout << "Simplex_handle operator*() \n";
+        std::clog << "Simplex_handle operator*() \n";
       }
       return this->position;
     }
@@ -476,14 +476,14 @@ class Bitmap_cubical_complex : public T {
 
     Skeleton_simplex_iterator begin() {
       if (globalDbg) {
-        std::cout << "Skeleton_simplex_iterator begin()\n";
+        std::clog << "Skeleton_simplex_iterator begin()\n";
       }
       return Skeleton_simplex_iterator(this->b, this->dimension);
     }
 
     Skeleton_simplex_iterator end() {
       if (globalDbg) {
-        std::cout << "Skeleton_simplex_iterator end()\n";
+        std::clog << "Skeleton_simplex_iterator end()\n";
       }
       Skeleton_simplex_iterator it(this->b, this->dimension);
       it.position = this->b->data.size();
@@ -500,7 +500,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Skeleton_simplex_range skeleton_simplex_range(unsigned dimension) {
     if (globalDbg) {
-      std::cout << "Skeleton_simplex_range skeleton_simplex_range( unsigned dimension )\n";
+      std::clog << "Skeleton_simplex_range skeleton_simplex_range( unsigned dimension )\n";
     }
     return Skeleton_simplex_range(this, dimension);
   }
@@ -515,7 +515,7 @@ class Bitmap_cubical_complex : public T {
 template <typename T>
 void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
   if (globalDbg) {
-    std::cout << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
+    std::clog << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
   }
   this->simplex_associated_to_key = std::vector<std::size_t>(this->data.size());
   std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);

@@ -189,7 +189,7 @@ class Vector_distances_in_diagram {
     }
     out << std::endl;
     out.close();
-    std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+    std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
               << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   }
 
@@ -360,9 +360,9 @@ template <typename F>
 void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap(size_t where_to_cut) {
   bool dbg = false;
   if (dbg) {
-    std::cout << "Here are the intervals : \n";
+    std::clog << "Here are the intervals : \n";
     for (size_t i = 0; i != this->intervals.size(); ++i) {
-      std::cout << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
+      std::clog << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
     }
   }
   where_to_cut = std::min(
@@ -385,14 +385,14 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
                                                    0.5 * (this->intervals[j].first + this->intervals[j].second)))));
 
       if (dbg) {
-        std::cout << "Value : " << value << std::endl;
-        std::cout << "heap.front() : " << heap.front() << std::endl;
+        std::clog << "Value : " << value << std::endl;
+        std::clog << "heap.front() : " << heap.front() << std::endl;
         getchar();
       }
 
       if (-value < heap.front()) {
         if (dbg) {
-          std::cout << "Replacing : " << heap.front() << " with : " << -value << std::endl;
+          std::clog << "Replacing : " << heap.front() << " with : " << -value << std::endl;
           getchar();
         }
         // remove the first element from the heap
@@ -431,11 +431,11 @@ void Vector_distances_in_diagram<F>::compute_sorted_vector_of_distances_via_heap
   }
 
   if (dbg) {
-    std::cout << "This is the heap after all the operations :\n";
+    std::clog << "This is the heap after all the operations :\n";
     for (size_t i = 0; i != heap.size(); ++i) {
-      std::cout << heap[i] << " ";
+      std::clog << heap[i] << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   this->sorted_vector_of_distances = heap;
@@ -519,11 +519,11 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
   bool dbg = false;
 
   if (dbg) {
-    std::cout << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* "
+    std::clog << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* "
                  "second , double power ) procedure \n";
-    std::cout << "Power : " << power << std::endl;
-    std::cout << "This : " << *this << std::endl;
-    std::cout << "second : " << second_ << std::endl;
+    std::clog << "Power : " << power << std::endl;
+    std::clog << "This : " << *this << std::endl;
+    std::clog << "second : " << second_ << std::endl;
   }
 
   double result = 0;
@@ -531,7 +531,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
        ++i) {
     if (power == 1) {
       if (dbg) {
-        std::cout << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i]
+        std::clog << "|" << this->sorted_vector_of_distances[i] << " -  " << second_.sorted_vector_of_distances[i]
                   << " |  : " << fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i])
                   << std::endl;
       }
@@ -545,7 +545,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
           result = fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i]);
       }
       if (dbg) {
-        std::cout << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]
+        std::clog << "| " << this->sorted_vector_of_distances[i] << " - " << second_.sorted_vector_of_distances[i]
                   << " : " << fabs(this->sorted_vector_of_distances[i] - second_.sorted_vector_of_distances[i])
                   << std::endl;
       }

@@ -185,7 +185,7 @@ class Persistence_intervals {
 
     out.close();
 
-    std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+    std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
               << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   }
 
@@ -293,7 +293,7 @@ std::vector<std::pair<double, double> > Persistence_intervals::dominant_interval
   for (size_t i = 0; i != std::min(where_to_cut, position_length_vector.size()); ++i) {
     result.push_back(this->intervals[position_length_vector[i].first]);
     if (dbg)
-      std::cout << "Position : " << position_length_vector[i].first << " length : " << position_length_vector[i].second
+      std::clog << "Position : " << position_length_vector[i].first << " length : " << position_length_vector[i].second
                 << std::endl;
   }
 
@@ -303,7 +303,7 @@ std::vector<std::pair<double, double> > Persistence_intervals::dominant_interval
 std::vector<size_t> Persistence_intervals::histogram_of_lengths(size_t number_of_bins) const {
   bool dbg = false;
 
-  if (dbg) std::cout << "this->intervals.size() : " << this->intervals.size() << std::endl;
+  if (dbg) std::clog << "this->intervals.size() : " << this->intervals.size() << std::endl;
   // first find the length of the longest interval:
   double lengthOfLongest = 0;
   for (size_t i = 0; i != this->intervals.size(); ++i) {
@@ -313,7 +313,7 @@ std::vector<size_t> Persistence_intervals::histogram_of_lengths(size_t number_of
   }
 
   if (dbg) {
-    std::cout << "lengthOfLongest : " << lengthOfLongest << std::endl;
+    std::clog << "lengthOfLongest : " << lengthOfLongest << std::endl;
   }
 
   // this is a container we will use to store the resulting histogram
@@ -330,10 +330,10 @@ std::vector<size_t> Persistence_intervals::histogram_of_lengths(size_t number_of
     ++result[position];
 
     if (dbg) {
-      std::cout << "i : " << i << std::endl;
-      std::cout << "Interval : [" << this->intervals[i].first << " , " << this->intervals[i].second << " ] \n";
-      std::cout << "relative_length_of_this_interval : " << relative_length_of_this_interval << std::endl;
-      std::cout << "position : " << position << std::endl;
+      std::clog << "i : " << i << std::endl;
+      std::clog << "Interval : [" << this->intervals[i].first << " , " << this->intervals[i].second << " ] \n";
+      std::clog << "relative_length_of_this_interval : " << relative_length_of_this_interval << std::endl;
+      std::clog << "position : " << position << std::endl;
       getchar();
     }
   }
@@ -342,7 +342,7 @@ std::vector<size_t> Persistence_intervals::histogram_of_lengths(size_t number_of
   result.resize(number_of_bins);
 
   if (dbg) {
-    for (size_t i = 0; i != result.size(); ++i) std::cout << result[i] << std::endl;
+    for (size_t i = 0; i != result.size(); ++i) std::clog << result[i] << std::endl;
   }
   return result;
 }
@@ -368,7 +368,7 @@ std::vector<double> Persistence_intervals::characteristic_function_of_diagram(do
 
   for (size_t i = 0; i != this->intervals.size(); ++i) {
     if (dbg) {
-      std::cout << "Interval : " << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
+      std::clog << "Interval : " << this->intervals[i].first << " , " << this->intervals[i].second << std::endl;
     }
 
     size_t beginIt = 0;
@@ -390,8 +390,8 @@ std::vector<double> Persistence_intervals::characteristic_function_of_diagram(do
     }
 
     if (dbg) {
-      std::cout << "beginIt : " << beginIt << std::endl;
-      std::cout << "endIt : " << endIt << std::endl;
+      std::clog << "beginIt : " << beginIt << std::endl;
+      std::clog << "endIt : " << endIt << std::endl;
     }
 
     for (size_t pos = beginIt; pos != endIt; ++pos) {
@@ -399,11 +399,11 @@ std::vector<double> Persistence_intervals::characteristic_function_of_diagram(do
                      (this->intervals[i].second - this->intervals[i].first);
     }
     if (dbg) {
-      std::cout << "Result at this stage \n";
+      std::clog << "Result at this stage \n";
       for (size_t aa = 0; aa != result.size(); ++aa) {
-        std::cout << result[aa] << " ";
+        std::clog << result[aa] << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
   }
   return result;
@@ -455,9 +455,9 @@ inline double compute_euclidean_distance(const std::pair<double, double>& f, con
 std::vector<double> Persistence_intervals::k_n_n(size_t k, size_t where_to_cut) const {
   bool dbg = false;
   if (dbg) {
-    std::cout << "Here are the intervals : \n";
+    std::clog << "Here are the intervals : \n";
     for (size_t i = 0; i != this->intervals.size(); ++i) {
-      std::cout << "[ " << this->intervals[i].first << " , " << this->intervals[i].second << "] \n";
+      std::clog << "[ " << this->intervals[i].first << " , " << this->intervals[i].second << "] \n";
     }
     getchar();
   }
@@ -486,12 +486,12 @@ std::vector<double> Persistence_intervals::k_n_n(size_t k, size_t where_to_cut) 
     distances_from_diagonal[i] = distanceToDiagonal;
 
     if (dbg) {
-      std::cout << "Here are the distances form the point : [" << this->intervals[i].first << " , "
+      std::clog << "Here are the distances form the point : [" << this->intervals[i].first << " , "
                 << this->intervals[i].second << "] in the diagram \n";
       for (size_t aa = 0; aa != distancesFromI.size(); ++aa) {
-        std::cout << "To : " << i + aa << " : " << distancesFromI[aa] << " ";
+        std::clog << "To : " << i + aa << " : " << distancesFromI[aa] << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
       getchar();
     }
 
@@ -502,18 +502,18 @@ std::vector<double> Persistence_intervals::k_n_n(size_t k, size_t where_to_cut) 
     }
   }
   if (dbg) {
-    std::cout << "Here is the distance matrix : \n";
+    std::clog << "Here is the distance matrix : \n";
     for (size_t i = 0; i != distances.size(); ++i) {
       for (size_t j = 0; j != distances.size(); ++j) {
-        std::cout << distances[i][j] << " ";
+        std::clog << distances[i][j] << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
-    std::cout << std::endl << std::endl << "And here are the distances to the diagonal : " << std::endl;
+    std::clog << std::endl << std::endl << "And here are the distances to the diagonal : " << std::endl;
     for (size_t i = 0; i != distances_from_diagonal.size(); ++i) {
-      std::cout << distances_from_diagonal[i] << " ";
+      std::clog << distances_from_diagonal[i] << " ";
     }
-    std::cout << std::endl << std::endl;
+    std::clog << std::endl << std::endl;
     getchar();
   }
 
@@ -526,13 +526,13 @@ std::vector<double> Persistence_intervals::k_n_n(size_t k, size_t where_to_cut) 
 
     if (k > distancesFromI.size()) {
       if (dbg) {
-        std::cout << "There are not enough neighbors in your set. We set the result to plus infty \n";
+        std::clog << "There are not enough neighbors in your set. We set the result to plus infty \n";
       }
       result.push_back(std::numeric_limits<double>::max());
     } else {
       if (distances_from_diagonal[i] > distancesFromI[k]) {
         if (dbg) {
-          std::cout << "The k-th n.n. is on a diagonal. Therefore we set up a distance to diagonal \n";
+          std::clog << "The k-th n.n. is on a diagonal. Therefore we set up a distance to diagonal \n";
         }
         result.push_back(distances_from_diagonal[i]);
       } else {

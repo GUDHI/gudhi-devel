@@ -60,7 +60,7 @@ class CGAL_geometric_flag_complex_wrapper {
 
   void maximal_face(std::vector<int> vertices) {
     if (!load_only_points_) {
-      // std::cout << "size:" << vertices.size() << std::endl;
+      // std::clog << "size:" << vertices.size() << std::endl;
       for (std::size_t i = 0; i < vertices.size(); ++i)
         for (std::size_t j = i + 1; j < vertices.size(); ++j)
           complex_.add_edge_without_blockers(Vertex_handle(vertices[i]), Vertex_handle(vertices[j]));
@@ -178,7 +178,7 @@ class Model {
   void contract_edges(unsigned num_contractions) {
     Gudhi::Clock c;
     Edge_contractor<Complex> contractor(complex_, num_contractions);
-    std::cout << "Time to simplify: " << c.num_seconds() << "s" << std::endl;
+    std::clog << "Time to simplify: " << c.num_seconds() << "s" << std::endl;
   }
 
   void collapse_vertices(unsigned num_collapses) {
@@ -192,14 +192,14 @@ class Model {
   }
 
   void show_graph_stats() {
-    std::cout << "++++++ Graph stats +++++++" << std::endl;
-    std::cout << "Num vertices : " << complex_.num_vertices() << std::endl;
-    std::cout << "Num edges : " << complex_.num_edges() << std::endl;
-    std::cout << "Num connected components : " << complex_.num_connected_components() << std::endl;
-    std::cout << "Min/avg/max degree : " << min_degree() << "/" << avg_degree() << "/" << max_degree() << std::endl;
-    std::cout << "Num connected components : " << complex_.num_connected_components() << std::endl;
-    std::cout << "Num connected components : " << complex_.num_connected_components() << std::endl;
-    std::cout << "+++++++++++++++++++++++++" << std::endl;
+    std::clog << "++++++ Graph stats +++++++" << std::endl;
+    std::clog << "Num vertices : " << complex_.num_vertices() << std::endl;
+    std::clog << "Num edges : " << complex_.num_edges() << std::endl;
+    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
+    std::clog << "Min/avg/max degree : " << min_degree() << "/" << avg_degree() << "/" << max_degree() << std::endl;
+    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
+    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
+    std::clog << "+++++++++++++++++++++++++" << std::endl;
   }
 
  private:
@@ -226,11 +226,11 @@ class Model {
 
  public:
   void show_complex_stats() {
-    std::cout << "++++++ Mesh stats +++++++" << std::endl;
-    std::cout << "Num vertices : " << complex_.num_vertices() << std::endl;
-    std::cout << "Num edges : " << complex_.num_edges() << std::endl;
-    std::cout << "Num connected components : " << complex_.num_connected_components() << std::endl;
-    std::cout << "+++++++++++++++++++++++++" << std::endl;
+    std::clog << "++++++ Mesh stats +++++++" << std::endl;
+    std::clog << "Num vertices : " << complex_.num_vertices() << std::endl;
+    std::clog << "Num edges : " << complex_.num_edges() << std::endl;
+    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
+    std::clog << "+++++++++++++++++++++++++" << std::endl;
   }
 
   void show_complex_dimension() {
@@ -247,18 +247,18 @@ class Model {
         euler -= 1;
     }
     clock.end();
-    std::cout << "++++++ Mesh dimension +++++++" << std::endl;
-    std::cout << "Dimension : " << dimension << std::endl;
-    std::cout << "Euler characteristic : " << euler << std::endl;
-    std::cout << "Num simplices : " << num_simplices << std::endl;
-    std::cout << "Total time: " << clock << std::endl;
-    std::cout << "Time per simplex: " << clock.num_seconds() / num_simplices << " s" << std::endl;
-    std::cout << "+++++++++++++++++++++++++" << std::endl;
+    std::clog << "++++++ Mesh dimension +++++++" << std::endl;
+    std::clog << "Dimension : " << dimension << std::endl;
+    std::clog << "Euler characteristic : " << euler << std::endl;
+    std::clog << "Num simplices : " << num_simplices << std::endl;
+    std::clog << "Total time: " << clock << std::endl;
+    std::clog << "Time per simplex: " << clock.num_seconds() / num_simplices << " s" << std::endl;
+    std::clog << "+++++++++++++++++++++++++" << std::endl;
   }
 
   void show_homology_group() {
 #ifdef _WIN32
-    std::cout << "Works only on linux x64 for the moment\n";
+    std::clog << "Works only on linux x64 for the moment\n";
 #else
     Gudhi::Clock clock;
     run_chomp();
@@ -278,16 +278,16 @@ class Model {
       else
         euler -= 1;
     }
-    std::cout << "Saw " << num_simplices << " simplices with maximum dimension " << dimension << std::endl;
-    std::cout << "The euler characteristic is : " << euler << std::endl;
+    std::clog << "Saw " << num_simplices << " simplices with maximum dimension " << dimension << std::endl;
+    std::clog << "The euler characteristic is : " << euler << std::endl;
   }
 
   void show_persistence(int p, double threshold, int max_dim, double min_pers) {
-    Persistence_compute<Complex> persistence(complex_, std::cout, Persistence_params(p, threshold, max_dim, min_pers));
+    Persistence_compute<Complex> persistence(complex_, std::clog, Persistence_params(p, threshold, max_dim, min_pers));
   }
 
   void show_critical_points(double max_distance) {
-    Critical_points<Complex> critical_points(complex_, std::cout, max_distance);
+    Critical_points<Complex> critical_points(complex_, std::clog, max_distance);
   }
 
   void show_is_manifold() {
@@ -296,12 +296,12 @@ class Model {
     Is_manifold<Complex> test_manifold(complex_, dim, is_manifold);
 
     if (is_manifold) {
-      std::cout << "The complex is a " << dim << "-manifold\n";
+      std::clog << "The complex is a " << dim << "-manifold\n";
     } else {
       if (dim < 4) {
-        std::cout << "The complex has dimension greater than " << dim << " and is not a manifold\n";
+        std::clog << "The complex has dimension greater than " << dim << " and is not a manifold\n";
       } else {
-        std::cout << "The complex has dimension>=4 and may or may not be a manifold\n";
+        std::clog << "The complex has dimension>=4 and may or may not be a manifold\n";
       }
     }
   }
@@ -309,7 +309,7 @@ class Model {
  private:
   void run_chomp() {
     save_complex_in_file_for_chomp();
-    std::cout << "Call CHOMP library\n";
+    std::clog << "Call CHOMP library\n";
     int returnValue = system("homsimpl chomp.sim");
     if (returnValue != 0) {
         std::cerr << "homsimpl (from CHOMP) failed. Please check it is installed or available in the PATH."

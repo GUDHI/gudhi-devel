@@ -20,9 +20,9 @@ int main() {
 
   double b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2);
 
-  std::cout << "Bottleneck distance = " << b << std::endl;
+  std::clog << "Bottleneck distance = " << b << std::endl;
 
   b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.1);
 
-  std::cout << "Approx bottleneck distance = " << b << std::endl;
+  std::clog << "Approx bottleneck distance = " << b << std::endl;
 }
