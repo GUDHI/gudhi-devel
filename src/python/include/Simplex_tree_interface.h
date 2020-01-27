@@ -33,7 +33,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Filtered_simplices = std::vector<std::pair<Simplex, Filtration_value>>;
+  using Filtered_simplex = std::pair<Simplex, Filtration_value>;
+  using Filtered_simplices = std::vector<Filtered_simplex>;
 
  public:
   bool find_simplex(const Simplex& vh) {
@@ -82,17 +83,12 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  Filtered_simplices get_filtration() {
-    Base::initialize_filtration();
-    Filtered_simplices filtrations;
-    for (auto f_simplex : Base::filtration_simplex_range()) {
-      Simplex simplex;
-      for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      filtrations.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+  Filtered_simplex get_simplex_filtration(Simplex_handle f_simplex) {
+    Simplex simplex;
+    for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
+      simplex.insert(simplex.begin(), vertex);
     }
-    return filtrations;
+    return std::make_pair(simplex, Base::filtration(f_simplex));
   }
 
   Filtered_simplices get_skeleton(int dimension) {
@@ -134,6 +130,16 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
     Base::initialize_filtration();
     pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
+  }
+
+  // Iterator over the simplex tree
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
+    Base::initialize_filtration();
+    return Base::filtration_simplex_range().begin();
+  }
+
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
+    return Base::filtration_simplex_range().end();
   }
 };
 

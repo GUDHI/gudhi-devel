@@ -21,6 +21,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_options_full_featured:
         pass
 
+    cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Simplex_handle":
+        pass
+
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree()
         double simplex_filtration(vector[int] simplex)
@@ -34,7 +37,6 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool find_simplex(vector[int] simplex)
         bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
-        vector[pair[vector[int], double]] get_filtration()
         vector[pair[vector[int], double]] get_skeleton(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
@@ -43,6 +45,10 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
+        # Iterators over Simplex tree
+        pair[vector[int], double] get_simplex_filtration(Simplex_tree_simplex_handle f_simplex)
+        vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_begin()
+        vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end()
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":

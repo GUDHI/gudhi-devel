@@ -7,6 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
 from numpy import array as np_array
 cimport simplex_tree
@@ -214,15 +215,14 @@ cdef class SimplexTree:
         :returns:  The simplices sorted by increasing filtration values.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] filtration \
-            = self.get_ptr().get_filtration()
-        ct = []
-        for filtered_complex in filtration:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
+        cdef vector[Simplex_tree_simplex_handle].const_iterator it = self.get_ptr().get_filtration_iterator_begin()
+        cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
+
+        while True:
+            yield(self.get_ptr().get_simplex_filtration(dereference(it)))
+            preincrement(it)
+            if it == end:
+                raise StopIteration
 
     def get_skeleton(self, dimension):
         """This function returns the (simplices of the) skeleton of a maximum

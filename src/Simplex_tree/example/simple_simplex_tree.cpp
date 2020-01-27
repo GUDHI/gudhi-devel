@@ -165,6 +165,10 @@ int main(int argc, char* const argv[]) {
 
   // ++ GENERAL VARIABLE SET
 
+  //std::vector<Simplex_tree::Simplex_handle>::const_iterator
+  std::vector<Simplex_tree::Simplex_handle>::const_iterator begin = simplexTree.filtration_simplex_range().begin();
+  auto end = simplexTree.filtration_simplex_range().end();
+  
   std::cout << "********************************************************************\n";
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
