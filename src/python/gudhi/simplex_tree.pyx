@@ -209,20 +209,18 @@ cdef class SimplexTree:
                                                         <double>filtration)
 
     def get_filtration(self):
-        """This function returns a list of all simplices with their given
+        """This function returns a generator with simplices and their given
         filtration values.
 
         :returns:  The simplices sorted by increasing filtration values.
-        :rtype:  list of tuples(simplex, filtration)
+        :rtype:  generator with tuples(simplex, filtration)
         """
         cdef vector[Simplex_tree_simplex_handle].const_iterator it = self.get_ptr().get_filtration_iterator_begin()
         cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
 
-        while True:
-            yield(self.get_ptr().get_simplex_filtration(dereference(it)))
+        while it != end:
+            yield(self.get_ptr().get_simplex_and_filtration(dereference(it)))
             preincrement(it)
-            if it == end:
-                raise StopIteration
 
     def get_skeleton(self, dimension):
         """This function returns the (simplices of the) skeleton of a maximum

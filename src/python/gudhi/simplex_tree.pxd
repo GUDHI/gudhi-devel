@@ -46,7 +46,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
         # Iterators over Simplex tree
-        pair[vector[int], double] get_simplex_filtration(Simplex_tree_simplex_handle f_simplex)
+        pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex)
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_begin()
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end()
 

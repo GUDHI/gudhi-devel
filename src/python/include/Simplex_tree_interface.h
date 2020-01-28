@@ -33,8 +33,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Filtered_simplex = std::pair<Simplex, Filtration_value>;
-  using Filtered_simplices = std::vector<Filtered_simplex>;
+  using Simplex_and_filtration = std::pair<Simplex, Filtration_value>;
+  using Filtered_simplices = std::vector<Simplex_and_filtration>;
 
  public:
   bool find_simplex(const Simplex& vh) {
@@ -83,7 +83,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  Filtered_simplex get_simplex_filtration(Simplex_handle f_simplex) {
+  Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex) {
     Simplex simplex;
     for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
       simplex.insert(simplex.begin(), vertex);

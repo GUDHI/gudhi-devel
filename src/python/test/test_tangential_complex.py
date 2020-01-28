@@ -9,6 +9,7 @@
 """
 
 from gudhi import TangentialComplex, SimplexTree
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -37,14 +38,16 @@ def test_tangential():
     assert st.num_simplices() == 6
     assert st.num_vertices() == 4
 
-    assert st.get_filtration() == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([0, 2], 0.0),
-        ([3], 0.0),
-        ([1, 3], 0.0),
-    ]
+    filtration_generator = st.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    assert(next(filtration_generator) == ([0, 2], 0.0))
+    assert(next(filtration_generator) == ([3], 0.0))
+    assert(next(filtration_generator) == ([1, 3], 0.0))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)
+
     assert st.get_cofaces([0], 1) == [([0, 2], 0.0)]
 
     assert point_list[0] == tc.get_point(0)

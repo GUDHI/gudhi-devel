@@ -47,7 +47,10 @@ else:
     print("[4] Not found...")
 
 print("dimension=", simplex_tree.dimension())
-print("filtrations=", simplex_tree.get_filtration())
+print("filtrations=")
+for simplex_with_filtration in simplex_tree.get_filtration():
+    print("(%s, %.2f)" % tuple(simplex_with_filtration))
+
 print("star([0])=", simplex_tree.get_star([0]))
 print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))
 

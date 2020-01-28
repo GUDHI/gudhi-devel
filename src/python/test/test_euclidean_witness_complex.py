@@ -9,6 +9,7 @@
 """
 
 import gudhi
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -40,15 +41,16 @@ def test_witness_complex():
     assert landmarks[1] == euclidean_witness_complex.get_point(1)
     assert landmarks[2] == euclidean_witness_complex.get_point(2)
 
-    assert simplex_tree.get_filtration() == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([0, 1], 0.0),
-        ([2], 0.0),
-        ([0, 2], 0.0),
-        ([1, 2], 0.0),
-        ([0, 1, 2], 0.0),
-    ]
+    filtration_generator = simplex_tree.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([0, 1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    assert(next(filtration_generator) == ([0, 2], 0.0))
+    assert(next(filtration_generator) == ([1, 2], 0.0))
+    assert(next(filtration_generator) == ([0, 1, 2], 0.0))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)
 
 
 def test_empty_euclidean_strong_witness_complex():
@@ -78,18 +80,24 @@ def test_strong_witness_complex():
     assert landmarks[1] == euclidean_strong_witness_complex.get_point(1)
     assert landmarks[2] == euclidean_strong_witness_complex.get_point(2)
 
-    assert simplex_tree.get_filtration() == [([0], 0.0), ([1], 0.0), ([2], 0.0)]
+    filtration_generator = simplex_tree.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)
 
     simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(
         max_alpha_square=100.0
     )
 
-    assert simplex_tree.get_filtration() == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([1, 2], 15.0),
-        ([0, 2], 34.0),
-        ([0, 1], 37.0),
-        ([0, 1, 2], 37.0),
-    ]
+    filtration_generator = simplex_tree.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    assert(next(filtration_generator) == ([1, 2], 15.0))
+    assert(next(filtration_generator) == ([0, 2], 34.0))
+    assert(next(filtration_generator) == ([0, 1], 37.0))
+    assert(next(filtration_generator) == ([0, 1, 2], 37.0))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)

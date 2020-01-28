@@ -10,6 +10,7 @@
 
 from gudhi import RipsComplex
 from math import sqrt
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -32,18 +33,20 @@ def test_rips_from_points():
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
 
-    assert simplex_tree.get_filtration() == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([3], 0.0),
-        ([0, 1], 1.0),
-        ([0, 2], 1.0),
-        ([1, 3], 1.0),
-        ([2, 3], 1.0),
-        ([1, 2], 1.4142135623730951),
-        ([0, 3], 1.4142135623730951),
-    ]
+    filtration_generator = simplex_tree.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    assert(next(filtration_generator) == ([3], 0.0))
+    assert(next(filtration_generator) == ([0, 1], 1.0))
+    assert(next(filtration_generator) == ([0, 2], 1.0))
+    assert(next(filtration_generator) == ([1, 3], 1.0))
+    assert(next(filtration_generator) == ([2, 3], 1.0))
+    assert(next(filtration_generator) == ([1, 2], 1.4142135623730951))
+    assert(next(filtration_generator) == ([0, 3], 1.4142135623730951))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)
+
     assert simplex_tree.get_star([0]) == [
         ([0], 0.0),
         ([0, 1], 1.0),
@@ -95,18 +98,20 @@ def test_rips_from_distance_matrix():
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
 
-    assert simplex_tree.get_filtration() == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([3], 0.0),
-        ([0, 1], 1.0),
-        ([0, 2], 1.0),
-        ([1, 3], 1.0),
-        ([2, 3], 1.0),
-        ([1, 2], 1.4142135623730951),
-        ([0, 3], 1.4142135623730951),
-    ]
+    filtration_generator = simplex_tree.get_filtration()
+    assert(next(filtration_generator) == ([0], 0.0))
+    assert(next(filtration_generator) == ([1], 0.0))
+    assert(next(filtration_generator) == ([2], 0.0))
+    assert(next(filtration_generator) == ([3], 0.0))
+    assert(next(filtration_generator) == ([0, 1], 1.0))
+    assert(next(filtration_generator) == ([0, 2], 1.0))
+    assert(next(filtration_generator) == ([1, 3], 1.0))
+    assert(next(filtration_generator) == ([2, 3], 1.0))
+    assert(next(filtration_generator) == ([1, 2], 1.4142135623730951))
+    assert(next(filtration_generator) == ([0, 3], 1.4142135623730951))
+    with pytest.raises(StopIteration):
+        next(filtration_generator)
+
     assert simplex_tree.get_star([0]) == [
         ([0], 0.0),
         ([0, 1], 1.0),
