@@ -35,6 +35,9 @@ if(CGAL_FOUND)
   include( ${CGAL_USE_FILE} )
 endif()
 
+# For those who dislike bundled dependencies, this indicates where to find a preinstalled Hera.
+set(HERA_WASSERSTEIN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/geom_matching/wasserstein/include CACHE PATH "Directory where one can find Hera's wasserstein.h")
+
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
 # Find TBB package for parallel sort - not mandatory, just optional.

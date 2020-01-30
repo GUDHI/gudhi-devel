@@ -63,7 +63,7 @@ ext_modules.append(Extension(
     sources = [source_dir + 'hera.cc'],
     language = 'c++',
     include_dirs = include_dirs +
-        ['@CMAKE_SOURCE_DIR@/ext/hera/geom_matching/wasserstein/include',
+        ['@HERA_WASSERSTEIN_INCLUDE_DIR@',
         get_pybind_include(False), get_pybind_include(True)],
     extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
     ))
