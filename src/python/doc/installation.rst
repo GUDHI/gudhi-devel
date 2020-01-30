@@ -257,6 +257,14 @@ The :doc:`Wasserstein distance </wasserstein_distance_user>`
 module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
 
+Pybind11
+========
+
+The :doc:`Wasserstein distance </wasserstein_distance_user>` module requires
+`pybind11 <https://pybind11.readthedocs.io/>`_, a library that provides
+interoperability between C++ and Python, for its interface to `Hera
+<https://bitbucket.org/grey_narn/hera/src/master/>`_.
+
 Scikit-learn
 ============
 
