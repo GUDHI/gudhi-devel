@@ -20,3 +20,10 @@ Subsampling
    :members:
    :special-members:
    :show-inheritance:
+
+TimeDelayEmbedding
+------------------
+
+.. autoclass:: gudhi.point_cloud.timedelay.TimeDelayEmbedding
+   :members:
+
