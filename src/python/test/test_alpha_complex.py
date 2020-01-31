@@ -65,8 +65,18 @@ def test_infinite_alpha():
     assert point_list[1] == alpha_complex.get_point(1)
     assert point_list[2] == alpha_complex.get_point(2)
     assert point_list[3] == alpha_complex.get_point(3)
-    assert alpha_complex.get_point(4) == []
-    assert alpha_complex.get_point(125) == []
+    try:
+        alpha_complex.get_point(4) == []
+    except IndexError:
+        pass
+    else:
+        assert False
+    try:
+        alpha_complex.get_point(125) == []
+    except IndexError:
+        pass
+    else:
+        assert False
 
 
 def test_filtered_alpha():
@@ -82,8 +92,18 @@ def test_filtered_alpha():
     assert point_list[1] == filtered_alpha.get_point(1)
     assert point_list[2] == filtered_alpha.get_point(2)
     assert point_list[3] == filtered_alpha.get_point(3)
-    assert filtered_alpha.get_point(4) == []
-    assert filtered_alpha.get_point(125) == []
+    try:
+        filtered_alpha.get_point(4) == []
+    except IndexError:
+        pass
+    else:
+        assert False
+    try:
+        filtered_alpha.get_point(125) == []
+    except IndexError:
+        pass
+    else:
+        assert False
 
     assert simplex_tree.get_filtration() == [
         ([0], 0.0),
