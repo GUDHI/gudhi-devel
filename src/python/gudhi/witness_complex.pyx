@@ -22,9 +22,9 @@ __license__ = "MIT"
 cdef extern from "Witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Witness_complex_interface "Gudhi::witness_complex::Witness_complex_interface":
         Witness_complex_interface(vector[vector[pair[size_t, double]]] nearest_landmark_table)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
-            unsigned limit_dimension)
+            unsigned limit_dimension) except +
 
 # WitnessComplex python interface
 cdef class WitnessComplex:

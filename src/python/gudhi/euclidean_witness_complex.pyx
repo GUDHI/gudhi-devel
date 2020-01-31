@@ -22,9 +22,9 @@ __license__ = "GPL v3"
 cdef extern from "Euclidean_witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Euclidean_witness_complex_interface "Gudhi::witness_complex::Euclidean_witness_complex_interface":
         Euclidean_witness_complex_interface(vector[vector[double]] landmarks, vector[vector[double]] witnesses)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
-            unsigned limit_dimension)
+            unsigned limit_dimension) except +
         vector[double] get_point(unsigned vertex)
 
 # EuclideanWitnessComplex python interface
