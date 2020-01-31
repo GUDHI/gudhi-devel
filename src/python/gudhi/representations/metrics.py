@@ -11,6 +11,8 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
 from gudhi.wasserstein import wasserstein_distance
+from .preprocessing import Padding
+
 try:
     from .. import bottleneck_distance
     USE_GUDHI = True
@@ -21,6 +23,108 @@ except ImportError:
 #############################################
 # Metrics ###################################
 #############################################
+
+def sliced_wasserstein_distance(D1, D2, num_directions):
+    """
+    This is a function for computing the sliced Wasserstein distance from two persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally integrating over all possible lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
+    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+    :param D2: (m x 2) numpy.array encoding the second diagram.
+    :param num_directions: number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
+    :returns: the sliced Wasserstein distance between persistence diagrams.
+    :rtype: float 
+    """
+    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
+    lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
+    approx1 = np.matmul(D1, lines)
+    diag_proj1 = (1./2) * np.ones((2,2))
+    approx_diag1 = np.matmul(np.matmul(D1, diag_proj1), lines)
+    approx2 = np.matmul(D2, lines)
+    diag_proj2 = (1./2) * np.ones((2,2))
+    approx_diag2 = np.matmul(np.matmul(D2, diag_proj2), lines)
+    A = np.sort(np.concatenate([approx1, approx_diag2], axis=0), axis=0)
+    B = np.sort(np.concatenate([approx2, approx_diag1], axis=0), axis=0)
+    L1 = np.sum(np.abs(A-B), axis=0)
+    return np.mean(L1)
+
+def persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
+    """
+    This is a function for computing the persistence Fisher distance from two persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
+    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+    :param D2: (m x 2) numpy.array encoding the second diagram.
+    :param bandwidth: bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions.
+    :param kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+    :returns: the persistence Fisher distance between persistence diagrams.
+    :rtype: float 
+    """
+    projection = (1./2) * np.ones((2,2))
+    diagonal_projections1 = np.matmul(D1, projection)
+    diagonal_projections2 = np.matmul(D2, projection)
+    if kernel_approx is not None:
+        approx1 = kernel_approx.transform(D1)
+        approx_diagonal1 = kernel_approx.transform(diagonal_projections1)
+        approx2 = kernel_approx.transform(D2)
+        approx_diagonal2 = kernel_approx.transform(diagonal_projections2)
+        Z = np.concatenate([approx1, approx_diagonal1, approx2, approx_diagonal2], axis=0)
+        U, V = np.sum(np.concatenate([approx1, approx_diagonal2], axis=0), axis=0), np.sum(np.concatenate([approx2, approx_diagonal1], axis=0), axis=0) 
+        vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
+        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+        if vectori_sum != 0:
+            vectori = vectori/vectori_sum
+        if vectorj_sum != 0:
+            vectorj = vectorj/vectorj_sum
+        return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
+    else:
+        Z = np.concatenate([D1, diagonal_projections1, D2, diagonal_projections2], axis=0)
+        U, V = np.concatenate([D1, diagonal_projections2], axis=0), np.concatenate([D2, diagonal_projections1], axis=0) 
+        vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
+        vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
+        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
+        if vectori_sum != 0:
+            vectori = vectori/vectori_sum
+        if vectorj_sum != 0:
+            vectorj = vectorj/vectorj_sum
+        return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
+
+def sklearn_wrapper(metric, **kwargs):
+    """
+    This function is a wrapper for any metric between two persistence diagrams that takes two numpy arrays of shapes (nx2) and (mx2) as arguments. It turns the metric into another that takes flattened and padded diagrams as inputs. 
+    """
+    def flat_metric(D1, D2):
+        DD1, DD2 = np.reshape(D1, [-1,3]), np.reshape(D2, [-1,3])
+        return metric(DD1[DD1[:,2]==1,0:2], DD2[DD2[:,2]==1,0:2], **kwargs)
+    return flat_metric
+
+def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", **kwargs):
+    """
+    This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
+    :param X: first list of persistence diagrams. 
+    :param Y: second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
+    :param metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
+    :returns: distance matrix, i.e., numpy array of shape (num diagrams 1 x num diagrams 2)
+    :rtype: float
+    """
+    if Y is None:
+        YY = None
+        pX = Padding(use=True).fit_transform(X)
+        diag_len = len(pX[0])
+        XX = np.reshape(np.vstack(pX), [-1, diag_len*3])
+    else:
+        nX, nY = len(X), len(Y)
+        pD = Padding(use=True).fit_transform(X + Y)
+        diag_len = len(pD[0])
+        XX = np.reshape(np.vstack(pD[:nX]), [-1, diag_len*3])
+        YY = np.reshape(np.vstack(pD[nX:]), [-1, diag_len*3])
+
+    if metric == "bottleneck":
+        return pairwise_distances(XX, YY, metric=sklearn_wrapper(bottleneck_distance, **kwargs))
+    elif metric == "wasserstein":
+        return pairwise_distances(XX, YY, metric=sklearn_wrapper(wasserstein_distance, **kwargs))
+    elif metric == "sliced_wasserstein":
+        return pairwise_distances(XX, YY, metric=sklearn_wrapper(sliced_wasserstein_distance, **kwargs))
+    elif metric == "persistence_fisher":
+        return pairwise_distances(XX, YY, metric=sklearn_wrapper(persistence_fisher_distance, **kwargs))
+    else:
+        return pairwise_distances(XX, YY, metric=sklearn_wrapper(metric, **kwargs))
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
     """
@@ -34,8 +138,6 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
             num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10). 
         """
         self.num_directions = num_directions
-        thetas = np.linspace(-np.pi/2, np.pi/2, num=self.num_directions+1)[np.newaxis,:-1]
-        self.lines_ = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
 
     def fit(self, X, y=None):
         """
@@ -46,9 +148,6 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.diagrams_ = X
-        self.approx_ = [np.matmul(X[i], self.lines_) for i in range(len(X))]
-        diag_proj = (1./2) * np.ones((2,2))
-        self.approx_diag_ = [np.matmul(np.matmul(X[i], diag_proj), self.lines_) for i in range(len(X))]
         return self
 
     def transform(self, X):
@@ -61,27 +160,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise sliced Wasserstein distances.
         """
-        Xfit = np.zeros((len(X), len(self.approx_)))
-        if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
-            for i in range(len(self.approx_)):
-                for j in range(i+1, len(self.approx_)):
-                    A = np.sort(np.concatenate([self.approx_[i], self.approx_diag_[j]], axis=0), axis=0)
-                    B = np.sort(np.concatenate([self.approx_[j], self.approx_diag_[i]], axis=0), axis=0)
-                    L1 = np.sum(np.abs(A-B), axis=0)
-                    Xfit[i,j] = np.mean(L1)
-                    Xfit[j,i] = Xfit[i,j]
-        else:
-            diag_proj = (1./2) * np.ones((2,2))
-            approx = [np.matmul(X[i], self.lines_) for i in range(len(X))]
-            approx_diag = [np.matmul(np.matmul(X[i], diag_proj), self.lines_) for i in range(len(X))]
-            for i in range(len(approx)):
-                for j in range(len(self.approx_)):
-                    A = np.sort(np.concatenate([approx[i], self.approx_diag_[j]], axis=0), axis=0)
-                    B = np.sort(np.concatenate([self.approx_[j], approx_diag[i]], axis=0), axis=0)
-                    L1 = np.sum(np.abs(A-B), axis=0)
-                    Xfit[i,j] = np.mean(L1)
-
-        return Xfit
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="sliced_wasserstein", num_directions=self.num_directions)
 
 class BottleneckDistance(BaseEstimator, TransformerMixin):
     """
@@ -117,33 +196,9 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
         """
-        num_diag1 = len(X)
-
-        #if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
-        if X is self.diagrams_:
-            matrix = np.zeros((num_diag1, num_diag1))
-
-            if USE_GUDHI:
-                for i in range(num_diag1):
-                    for j in range(i+1, num_diag1):
-                        matrix[i,j] = bottleneck_distance(X[i], X[j], self.epsilon)
-                        matrix[j,i] = matrix[i,j]
-            else:
-                print("Gudhi built without CGAL: returning a null matrix")
-
-        else:
-            num_diag2 = len(self.diagrams_)
-            matrix = np.zeros((num_diag1, num_diag2))
-
-            if USE_GUDHI:
-                for i in range(num_diag1):
-                    for j in range(num_diag2):
-                        matrix[i,j] = bottleneck_distance(X[i], self.diagrams_[j], self.epsilon)
-            else:
-                print("Gudhi built without CGAL: returning a null matrix")
-
-        Xfit = matrix
-
+        if not USE_GUDHI:
+            print("Gudhi built without CGAL: returning a null matrix")
+        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.epsilon) if USE_GUDHI else np.zeros((len(X), len(self.diagrams_)))
         return Xfit
 
 class WassersteinDistance(BaseEstimator, TransformerMixin):
@@ -181,28 +236,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise Wasserstein distances.
         """
-        num_diag1 = len(X)
-
-        #if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
-        if X is self.diagrams_:
-            matrix = np.zeros((num_diag1, num_diag1))
-
-            for i in range(num_diag1):
-                for j in range(i+1, num_diag1):
-                    matrix[i,j] = wasserstein_distance(X[i], X[j], self.order, self.internal_p)
-                    matrix[j,i] = matrix[i,j]
-
-        else:
-            num_diag2 = len(self.diagrams_)
-            matrix = np.zeros((num_diag1, num_diag2))
-
-            for i in range(num_diag1):
-                for j in range(num_diag2):
-                    matrix[i,j] = wasserstein_distance(X[i], self.diagrams_[j], self.order, self.internal_p)
-
-        Xfit = matrix 
-
-        return Xfit
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="wasserstein", order=self.order, internal_p=self.internal_p)
 
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
     """
@@ -227,11 +261,6 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.diagrams_ = X
-        projection = (1./2) * np.ones((2,2))
-        self.diagonal_projections_ = [np.matmul(X[i], projection) for i in range(len(X))]
-        if self.kernel_approx is not None:
-            self.approx_ = [self.kernel_approx.transform(X[i]) for i in range(len(X))]
-            self.approx_diagonal_ = [self.kernel_approx.transform(self.diagonal_projections_[i]) for i in range(len(X))]
         return self
 
     def transform(self, X):
@@ -244,60 +273,4 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher distances.
         """
-        Xfit = np.zeros((len(X), len(self.diagrams_)))
-        if len(self.diagrams_) == len(X) and np.all([np.array_equal(self.diagrams_[i], X[i]) for i in range(len(X))]):
-            for i in range(len(self.diagrams_)):
-                for j in range(i+1, len(self.diagrams_)):
-                    if self.kernel_approx is not None:
-                        Z = np.concatenate([self.approx_[i], self.approx_diagonal_[i], self.approx_[j], self.approx_diagonal_[j]], axis=0)
-                        U, V = np.sum(np.concatenate([self.approx_[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], self.approx_diagonal_[i]], axis=0), axis=0) 
-                        vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
-                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
-                        if vectori_sum != 0:
-                            vectori = vectori/vectori_sum
-                        if vectorj_sum != 0:
-                            vectorj = vectorj/vectorj_sum
-                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
-                        Xfit[j,i] = Xfit[i,j]
-                    else:
-                        Z = np.concatenate([self.diagrams_[i], self.diagonal_projections_[i], self.diagrams_[j], self.diagonal_projections_[j]], axis=0)
-                        U, V = np.concatenate([self.diagrams_[i], self.diagonal_projections_[j]], axis=0), np.concatenate([self.diagrams_[j], self.diagonal_projections_[i]], axis=0) 
-                        vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
-                        if vectori_sum != 0:
-                            vectori = vectori/vectori_sum
-                        if vectorj_sum != 0:
-                            vectorj = vectorj/vectorj_sum
-                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
-                        Xfit[j,i] = Xfit[i,j]
-        else:
-            projection = (1./2) * np.ones((2,2))
-            diagonal_projections = [np.matmul(X[i], projection) for i in range(len(X))]
-            if self.kernel_approx is not None:
-                approx = [self.kernel_approx.transform(X[i]) for i in range(len(X))]
-                approx_diagonal = [self.kernel_approx.transform(diagonal_projections[i]) for i in range(len(X))]
-            for i in range(len(X)):
-                for j in range(len(self.diagrams_)):
-                    if self.kernel_approx is not None:
-                        Z = np.concatenate([approx[i], approx_diagonal[i], self.approx_[j], self.approx_diagonal_[j]], axis=0)
-                        U, V = np.sum(np.concatenate([approx[i], self.approx_diagonal_[j]], axis=0), axis=0), np.sum(np.concatenate([self.approx_[j], approx_diagonal[i]], axis=0), axis=0) 
-                        vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
-                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
-                        if vectori_sum != 0:
-                            vectori = vectori/vectori_sum
-                        if vectorj_sum != 0:
-                            vectorj = vectorj/vectorj_sum
-                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
-                    else:
-                        Z = np.concatenate([X[i], diagonal_projections[i], self.diagrams_[j], self.diagonal_projections_[j]], axis=0)
-                        U, V = np.concatenate([X[i], self.diagonal_projections_[j]], axis=0), np.concatenate([self.diagrams_[j], diagonal_projections[i]], axis=0) 
-                        vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(self.bandwidth)))/(self.bandwidth * np.sqrt(2*np.pi)), axis=1)
-                        vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
-                        if vectori_sum != 0:
-                            vectori = vectori/vectori_sum
-                        if vectorj_sum != 0:
-                            vectorj = vectorj/vectorj_sum
-                        Xfit[i,j] = np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
-        return Xfit
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)
