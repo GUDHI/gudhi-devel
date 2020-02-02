@@ -1471,7 +1471,7 @@ class Simplex_tree {
    * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration and this->get_persistence.
    * @return A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
    */
-  std::vector<std::vector<std::pair<int, std::pair<double, double>>>> convert(const std::vector<std::pair<int, std::pair<double, double>>>& dgm){
+  std::vector<std::vector<std::pair<int, std::pair<double, double>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<double, double>>>& dgm){
     std::vector<std::vector<std::pair<int, std::pair<double, double>>>> new_dgm(4); double x, y;
     for(unsigned int i = 0; i < dgm.size(); i++){ int h = dgm[i].first; double px = dgm[i].second.first; double py = dgm[i].second.second;
       if(std::isinf(py))  continue;
@@ -1487,7 +1487,7 @@ class Simplex_tree {
     return new_dgm;
   }
 
-  /** \brief Extend filtration for computing extended persistence.
+  /** \brief Extend filtration for computing extended persistence. This function only uses the filtration values at the 0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration computed with these values. Note that after calling this function, the filtration values are actually modified. The function compute_extended_persistence_subdiagrams retrieves the original values and separates the extended persistence diagram points w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after computing the persistent homology of the extended simplicial complex.
    */
   void extend_filtration() {
 
