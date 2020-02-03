@@ -1,3 +1,11 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Martin Royer, Yuichi Ike, Masatoshi Takenouchi
+#
+# Copyright (C) 2020 Inria, Copyright (C) 2020 Fujitsu Laboratories Ltd.
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 import numpy as np
 
 class TimeDelayEmbedding:
