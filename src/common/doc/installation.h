@@ -204,8 +204,6 @@ make doxygen
  * Nerve_GIC/Nerve.cpp</a>
  * \li <a href="_nerve__g_i_c_2_voronoi_g_i_c_8cpp-example.html">
  * Nerve_GIC/VoronoiGIC.cpp</a>
- * \li <a href="_simplex_tree_2mini_simplex_tree_8cpp-example.html">
- * Simplex_tree/mini_simplex_tree.cpp</a>
  * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a>
  * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
@@ -246,12 +244,6 @@ make doxygen
  * Witness_complex/weak_witness_persistence.cpp</a>
  * \li <a href="_witness_complex_2example_nearest_landmark_table_8cpp-example.html">
  * Witness_complex/example_nearest_landmark_table.cpp</a>
- * \li <a href="_witness_complex_2example_strong_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_strong_witness_complex_off.cpp</a>
- * \li <a href="_witness_complex_2example_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_witness_complex_off.cpp</a>
- * \li <a href="_witness_complex_2example_witness_complex_sphere_8cpp-example.html">
- * Witness_complex/example_witness_complex_sphere.cpp</a>
  *
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
