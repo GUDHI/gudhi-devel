@@ -44,7 +44,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
         void extend_filtration()
-        vector[vector[pair[int, pair[double, double]]]] convert(vector[pair[int, pair[double, double]]])
+        vector[vector[pair[int, pair[double, double]]]] compute_extended_persistence_subdiagrams(vector[pair[int, pair[double, double]]])
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":

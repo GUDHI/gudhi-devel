@@ -387,17 +387,21 @@ cdef class SimplexTree:
         return self.get_ptr().make_filtration_non_decreasing()
 
     def extend_filtration(self):
-        """ This function extends filtration for computing extended persistence.
+        """ Extend filtration for computing extended persistence. This function only uses the filtration values at the 0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration computed with these values. Note that after calling this function, the filtration values are actually modified. The function :func:`compute_extended_persistence_subdiagrams()<gudhi.SimplexTree.compute_extended_persistence_subdiagrams>` retrieves the original values and separates the extended persistence diagram points w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after computing the persistent homology of the extended simplicial complex.
         """
         return self.get_ptr().extend_filtration()
 
-    def convert(self, dgm):
-        """This function retrieves good values for extended persistence, and separate the diagrams into the ordinary, relative, extended+ and extended- subdiagrams. Need extend_filtration to be called first!
+    def compute_extended_persistence_subdiagrams(self, dgm):
+        """This function retrieves good values for extended persistence, and separate the diagrams into the ordinary, relative, extended+ and extended- subdiagrams.
 
-        :param dgm: Persistence diagram obtained after calling this->extend_filtration and this->get_persistence.
+        :param dgm: Persistence diagram obtained after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>` and :func:`persistence()<gudhi.SimplexTree.persistence>`.
         :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+
+        .. note::
+
+            This function should be called only after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>` and :func:`persistence()<gudhi.SimplexTree.persistence>`.
         """
-        return self.get_ptr().convert(dgm)
+        return self.get_ptr().compute_extended_persistence_subdiagrams(dgm)
 
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
