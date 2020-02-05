@@ -895,7 +895,7 @@ class Cover_complex {
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
       if (verbose) std::clog << "Computing geodesic distances (parallelized)..." << std::endl;
-      std::mutex coverMutex; tbb::mutex mindistMutex;
+      std::mutex coverMutex; std::mutex mindistMutex;
       tbb::parallel_for(0, m, [&](int i){
         int seed = voronoi_subsamples[i];
         std::vector<double> dmap(n);
