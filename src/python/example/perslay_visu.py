@@ -1,174 +1,47 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-import sys
-sys.path.append("expe/")
 import numpy             as np
-import perslay           as ps
 import tensorflow        as tf
 import matplotlib.pyplot as plt
-from perslay.perslay            import perslay_channel
-from perslay.preprocessing      import DiagramScaler, Padding
+
+from gudhi.perslay              import perslay_channel
+from gudhi.representations      import DiagramScaler, Padding
 from sklearn.preprocessing      import MinMaxScaler
 from tensorflow                 import random_uniform_initializer as rui
 
-
-# # Input persistence diagram and tensorflow graph
-
-# ## Plot and preprocess persistence diagram
-
-# In[ ]:
-
-
 diag = [np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])]
-
-
-# In[ ]:
-
-
-plt.scatter(diag[0][:,0], diag[0][:,1])
-plt.plot([0.,6.],[0.,6.])
-plt.show()
-
-
-# In[ ]:
-
-
 diag = DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]).fit_transform(diag)
 diag = Padding(use=True).fit_transform(diag)
-
-
-# In[ ]:
-
-
 plt.scatter(diag[0][:,0], diag[0][:,1])
 plt.plot([0.,1.],[0.,1.])
 plt.show()
 
-
-# In[ ]:
-
-
 D = np.stack(diag, 0)
 
 
-# ## Initialize tensorflow graph
-
-# In[ ]:
-
-
+# Initialize tensorflow graph
 tf.reset_default_graph()
-
-
-# In[ ]:
-
 
 diagram = tf.placeholder(tf.float32, shape=D.shape)
 feed    = {diagram: D}
 
-
-# In[ ]:
-
-
 perslayParameters = {}
 
-
-# # Persistence weight and permutation invariant operation
-
-# ## Choose persistence weights
-
-# In[ ]:
-
-
-perslayParameters["persistence_weight"]  = "linear"
-perslayParameters["coeff_init"]          = rui(1.0, 1.0)
-perslayParameters["coeff_const"]         = False
-
-
-# In[ ]:
-
-
-perslayParameters["persistence_weight"]  = "grid"
-perslayParameters["grid_size"]           = [100,100]
-epsilon = .001
-perslayParameters["grid_bnds"]           = ((0. - epsilon, 1. + epsilon), (0. - epsilon, 1. + epsilon))
-perslayParameters["grid_init"]           = np.tile(np.arange(0.,100.,1, dtype=np.float32)[np.newaxis,:], [100,1])
-perslayParameters["grid_const"]          = True
-
-
-# In[ ]:
-
-
-perslayParameters["persistence_weight"]  = "gmix"
-perslayParameters["gmix_num"]            = 3
-perslayParameters["gmix_m_init"]         = rui(0., 1.)
-perslayParameters["gmix_m_const"]        = False
-perslayParameters["gmix_v_init"]         = rui(5, 5)
-perslayParameters["gmix_v_const"]        = False
-
-
-# In[ ]:
-
+#####################
+# Persistence image #
+#####################
 
 perslayParameters["persistence_weight"]  = None
-
-
-# ## Choose permutation invariant operation
-
-# In[ ]:
-
-
-perslayParameters["perm_op"] = "sum"
-
-
-# In[ ]:
-
-
-perslayParameters["perm_op"] = "topk"
-perslayParameters["keep"]    = 3
-
-
-# In[ ]:
-
-
-perslayParameters["perm_op"] = "max"
-
-
-# In[ ]:
-
-
-perslayParameters["perm_op"] = "mean"
-
-
-# # Persistence representation
-
-# ## Persistence image
-
-# In[ ]:
-
-
-perslayParameters["layer"]          = "im"
-perslayParameters["image_size"]     = (100, 100)
+perslayParameters["perm_op"]             = "sum"
+perslayParameters["layer"]               = "im"
+perslayParameters["image_size"]          = (100, 100)
 epsilon = .001
-perslayParameters["image_bnds"]     = ((-.5-epsilon, 1.5+epsilon), (-.5-epsilon, 1.5+epsilon))
-perslayParameters["variance_init"]  = rui(10., 10.) 
-perslayParameters["variance_const"] = False
-perslayParameters["cv_layers"]      = []
-
-
-# In[ ]:
-
+perslayParameters["image_bnds"]          = ((-.5-epsilon, 1.5+epsilon), (-.5-epsilon, 1.5+epsilon))
+perslayParameters["variance_init"]       = rui(.1, .1) 
+perslayParameters["variance_const"]      = False
+perslayParameters["cv_layers"]           = []
 
 list_v = []
-ps.perslay.perslay_channel(output=list_v, name="perslay", diag=diagram, **perslayParameters)
+perslay_channel(output=list_v, name="perslay", diag=diagram, **perslayParameters)
 vector = tf.concat(list_v, 1)
-
-
-# In[ ]:
-
 
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
@@ -180,7 +53,6 @@ with tf.Session() as sess:
     plt.figure()
     plt.imshow(V, cmap="Purples")
     cb = plt.colorbar()
-    cb.ax.tick_params(labelsize=14)
     plt.show()
     
     # Plot weight
@@ -210,37 +82,25 @@ with tf.Session() as sess:
         plt.scatter(diag[0][:,0], diag[0][:,1], s=50, color="red")
         plt.show()
 
+#################################################
+# Persistence landscape / entropy / Betti curve #
+#################################################
 
-# ## Persistence landscape / entropy / Betti curve
-
-# In[ ]:
-
-
-perslayParameters["layer"]          = "ls"
-#perslayParameters["layer"]          = "bc"
-#perslayParameters["layer"]          = "en"
-
-
-# In[ ]:
-
-
-perslayParameters["num_samples"]    = 3000
-perslayParameters["sample_init"]    = np.array([[ np.arange(-1.,2.,.001) ]], dtype=np.float32)
-perslayParameters["sample_const"]   = True
-perslayParameters["theta"]          = 100 # used only if layer is "bc" or "en"
-perslayParameters["fc_layers"]      = []
-
-
-# In[ ]:
-
+perslayParameters["persistence_weight"]  = None
+perslayParameters["perm_op"]             = "topk"
+perslayParameters["keep"]                = 3
+perslayParameters["layer"]               = "ls"
+#perslayParameters["layer"]              = "bc"
+#perslayParameters["layer"]              = "en"
+perslayParameters["num_samples"]         = 3000
+perslayParameters["sample_init"]         = np.array([[ np.arange(-1.,2.,.001) ]], dtype=np.float32)
+perslayParameters["sample_const"]        = True
+perslayParameters["theta"]               = 100 # used only if layer is "bc" or "en"
+perslayParameters["fc_layers"]           = []
 
 list_v = []
 perslay_channel(output=list_v, name="perslay", diag=diagram, **perslayParameters)
 vector = tf.concat(list_v, 1)
-
-
-# In[ ]:
-
 
 init = tf.global_variables_initializer()
 with tf.Session() as sess:
@@ -283,10 +143,3 @@ with tf.Session() as sess:
         plt.contourf(xx, yy, z)
         plt.scatter(diag[0][:,0], diag[0][:,1], s=100)
         plt.show()
-
-
-# In[ ]:
-
-
-
-

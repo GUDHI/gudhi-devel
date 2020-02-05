@@ -1,11 +1,11 @@
-"""Module :mod:`perslay.archi` implement the persistence layer."""
-
-# Authors: Mathieu Carriere <mathieu.carriere3@gmail.com>
-# License: MIT
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Mathieu Carriere
+#
+# Copyright (C) 2019 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
 
 import numpy as np
 import tensorflow as tf
