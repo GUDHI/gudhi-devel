@@ -12,10 +12,18 @@ install(TARGETS Witness_complex_example_nearest_landmark_table DESTINATION bin)
 # CGAL and Eigen3 are required for Euclidean version of Witness
 if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable( Witness_complex_example_off example_witness_complex_off.cpp )
+  if (TBB_FOUND)
+    target_link_libraries(Witness_complex_example_off ${TBB_LIBRARIES})
+  endif()
   add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
+  if (TBB_FOUND)
+    target_link_libraries(Witness_complex_example_sphere ${TBB_LIBRARIES})
+  endif()
   
   add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
-  target_link_libraries(Witness_complex_example_strong_off)
+  if (TBB_FOUND)
+    target_link_libraries(Witness_complex_example_strong_off ${TBB_LIBRARIES})
+  endif()
 
   add_test(NAME Witness_complex_example_off_test_torus
       COMMAND $<TARGET_FILE:Witness_complex_example_off>
