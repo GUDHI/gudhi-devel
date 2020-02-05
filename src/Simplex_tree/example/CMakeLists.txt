@@ -16,6 +16,9 @@ endif()
 add_test(NAME Simplex_tree_example_simple_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_simple_simplex_tree>)
 
 add_executable ( Simplex_tree_example_mini_simplex_tree mini_simplex_tree.cpp )
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_example_mini_simplex_tree ${TBB_LIBRARIES})
+endif()
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
