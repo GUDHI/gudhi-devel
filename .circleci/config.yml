@@ -62,7 +62,7 @@ jobs:
             cd python;
             python3 setup.py build_ext -j 4 --inplace;
             make sphinx;
-            cp -R python/sphinx /tmp/sphinx;
+            cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
             python3 setup.py clean --all;
             ctest -j 4 --output-on-failure;
