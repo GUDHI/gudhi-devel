@@ -401,8 +401,8 @@ endif(CGAL_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 
-    # Point cloud
-    add_gudhi_py_test(test_point_cloud)
+    # Time Delay
+    add_gudhi_py_test(test_time_delay)
 
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
