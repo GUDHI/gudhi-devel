@@ -14,10 +14,11 @@ Compiling
 *********
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
 `CMake <https://www.cmake.org/>`_ ≥ 3.1  to generate makefiles,
-`NumPy <http://numpy.org>`_ and `Cython <https://www.cython.org/>`_ to compile
+`NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
+`pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
-Studio 2015.
+Studio 2017.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
 ≥ 3.5 are available because of the required Visual Studio version.
@@ -256,14 +257,6 @@ Python Optimal Transport
 The :doc:`Wasserstein distance </wasserstein_distance_user>`
 module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
-
-Pybind11
-========
-
-The :doc:`Wasserstein distance </wasserstein_distance_user>` module requires
-`pybind11 <https://pybind11.readthedocs.io/>`_, a library that provides
-interoperability between C++ and Python, for its interface to `Hera
-<https://bitbucket.org/grey_narn/hera/src/master/>`_.
 
 Scikit-learn
 ============
