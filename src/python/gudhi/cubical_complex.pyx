@@ -95,8 +95,8 @@ cdef class CubicalComplex:
                                         perseus_file)
         else:
             print("CubicalComplex can be constructed from dimensions and "
-              "top_dimensional_cells or from a Perseus-style file name.",
-              file=sys.stderr)
+                "top_dimensional_cells or from a Perseus-style file name.",
+                file=sys.stderr)
 
     def __dealloc__(self):
         if self.thisptr != NULL:

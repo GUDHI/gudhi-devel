@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2018 Inria
@@ -13,7 +15,7 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
-import sys
+import errno
 import os
 from libc.stdint cimport intptr_t
 
@@ -98,7 +100,8 @@ cdef class CoverComplex:
         return self.thisptr != NULL
 
     def set_point_cloud_from_range(self, cloud):
-        """ Reads and stores the input point cloud from a vector stored in memory.
+        """ Reads and stores the input point cloud from a vector stored in
+        memory.
 
         :param cloud: Input vector containing the point cloud.
         :type cloud: vector[vector[double]]
@@ -106,7 +109,8 @@ cdef class CoverComplex:
         return self.thisptr.set_point_cloud_from_range(cloud)
 
     def set_distances_from_range(self, distance_matrix):
-        """ Reads and stores the input distance matrix from a vector stored in memory.
+        """ Reads and stores the input distance matrix from a vector stored in
+        memory.
 
         :param distance_matrix: Input vector containing the distance matrix.
         :type distance_matrix: vector[vector[double]]
@@ -165,7 +169,8 @@ cdef class CoverComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr)
+        self.thisptr.create_simplex_tree(
+            <Simplex_tree_interface_full_featured*>stree_int_ptr)
         return stree
 
     def find_simplices(self):
@@ -184,8 +189,8 @@ cdef class CoverComplex:
         if os.path.isfile(off_file):
             return self.thisptr.read_point_cloud(off_file.encode('utf-8'))
         else:
-            print("file " + off_file + " not found.", file=sys.stderr)
-            return False
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    off_file)
 
     def set_automatic_resolution(self):
         """Computes the optimal length of intervals (i.e. the smallest interval
@@ -216,7 +221,8 @@ cdef class CoverComplex:
         if os.path.isfile(color_file_name):
             self.thisptr.set_color_from_file(color_file_name.encode('utf-8'))
         else:
-            print("file " + color_file_name + " not found.", file=sys.stderr)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    color_file_name)
 
     def set_color_from_range(self, color):
         """Computes the function used to color the nodes of the simplicial
@@ -237,7 +243,8 @@ cdef class CoverComplex:
         if os.path.isfile(cover_file_name):
             self.thisptr.set_cover_from_file(cover_file_name.encode('utf-8'))
         else:
-            print("file " + cover_file_name + " not found.", file=sys.stderr)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    cover_file_name)
 
     def set_cover_from_function(self):
         """Creates a cover C from the preimages of the function f.
@@ -270,7 +277,8 @@ cdef class CoverComplex:
         if os.path.isfile(func_file_name):
             self.thisptr.set_function_from_file(func_file_name.encode('utf-8'))
         else:
-            print("file " + func_file_name + " not found.", file=sys.stderr)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    func_file_name)
 
     def set_function_from_range(self, function):
         """Creates the function f from a vector stored in memory.
@@ -304,14 +312,15 @@ cdef class CoverComplex:
         """Creates a graph G from a file containing the edges.
 
         :param graph_file_name: Name of the input graph file. The graph file
-            contains one edge per line, each edge being represented by the IDs of
-            its two nodes.
+            contains one edge per line, each edge being represented by the IDs
+            of its two nodes.
         :type graph_file_name: string
         """
         if os.path.isfile(graph_file_name):
             self.thisptr.set_graph_from_file(graph_file_name.encode('utf-8'))
         else:
-            print("file " + graph_file_name + " not found.", file=sys.stderr)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    graph_file_name)
 
     def set_graph_from_OFF(self):
         """Creates a graph G from the triangulation given by the input OFF
