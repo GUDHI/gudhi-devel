@@ -44,7 +44,7 @@ jobs:
 
   python:
     docker:
-      - image: gudhi/ci_for_gudhi:latest
+      - image: gudhi/ci_for_gudhi@sha256:9c90c7965f2288470fd5b374200f5b1bc23a9bd9939ece9f1bf864a6135fccb5
     parallelism: 4
     steps:
       - checkout
