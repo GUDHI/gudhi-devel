@@ -39,8 +39,7 @@ for module in modules:
         libraries=libraries,
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        runtime_library_dirs=runtime_library_dirs,
-        cython_directives = {'language_level': str(sys.version_info[0])},))
+        runtime_library_dirs=runtime_library_dirs,))
 
 setup(
     name = 'gudhi',
@@ -49,7 +48,8 @@ setup(
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(ext_modules),
+    ext_modules = cythonize(ext_modules,
+                            language_level=str(sys.version_info[0])),
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9',],
 )
