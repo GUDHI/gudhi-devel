@@ -3,10 +3,13 @@
 import gudhi
 import argparse
 import math
-import sys
+import errno
+import os
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -37,7 +40,7 @@ with open(args.file, "r") as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
         point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
-        print("#####################################################################")
+        print("##############################################################")
         print("RipsComplex creation from points read in a OFF file")
 
         message = "RipsComplex with max_edge_length=" + repr(args.threshold)
@@ -47,14 +50,15 @@ with open(args.file, "r") as f:
             points=point_cloud, max_edge_length=args.threshold
         )
 
-        rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
+        rips_stree = rips_complex.create_simplex_tree(
+            max_dimension=args.max_dimension)
 
         message = "Number of simplices=" + repr(rips_stree.num_simplices())
         print(message)
 
         rips_diag = rips_stree.persistence()
 
-        print("#####################################################################")
+        print("##############################################################")
         print("AlphaComplex creation from points read in a OFF file")
 
         message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
@@ -94,13 +98,13 @@ with open(args.file, "r") as f:
             print(message)
             max_b_distance = max(bottleneck_distance, max_b_distance)
 
-        print(
-            "================================================================================"
-        )
+        print("==============================================================")
         message = "Bottleneck distance is " + repr(max_b_distance)
         print(message)
 
     else:
-        print(args.file, "is not a valid OFF file", file=sys.stderr)
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                args.file)
+
 
     f.close()

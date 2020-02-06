@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -13,7 +15,7 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
-import sys
+import errno
 import os
 
 import numpy as np
@@ -89,7 +91,8 @@ cdef class CubicalComplex:
             if os.path.isfile(perseus_file):
                 self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file.encode('utf-8'))
             else:
-                print("file " + perseus_file + " not found.", file=sys.stderr)
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                        perseus_file)
         else:
             print("CubicalComplex can be constructed from dimensions and "
               "top_dimensional_cells or from a Perseus-style file name.",

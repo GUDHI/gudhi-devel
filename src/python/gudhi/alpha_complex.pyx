@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -14,7 +16,6 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
-import sys
 import os
 
 from gudhi.simplex_tree cimport *
@@ -71,7 +72,8 @@ cdef class AlphaComplex:
     def __cinit__(self, points = None, off_file = ''):
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(off_file.encode('utf-8'), True)
+                self.thisptr = new Alpha_complex_interface(
+                    off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:
