@@ -32,6 +32,10 @@ function( add_gudhi_debug_info DEBUG_INFO )
 endfunction( add_gudhi_debug_info )
 
 if(PYTHONINTERP_FOUND)
+  if(PYBIND11_FOUND)
+    add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
+  endif()
   if(CYTHON_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_reader', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
@@ -391,9 +395,9 @@ endif(CGAL_FOUND)
     add_gudhi_py_test(test_reader_utils)
 
     # Wasserstein
-    if(OT_FOUND)
+    if(OT_FOUND AND PYBIND11_FOUND)
       add_gudhi_py_test(test_wasserstein_distance)
-    endif(OT_FOUND)
+    endif()
 
     # Representations
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
