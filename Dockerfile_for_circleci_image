@@ -49,6 +49,7 @@ RUN apt-get install -y make \
     pkg-config
 
 RUN pip3 install \
+    setuptools \
     numpy \
     matplotlib \
     scipy \
