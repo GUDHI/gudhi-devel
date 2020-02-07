@@ -16,13 +16,13 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   if (DIFF_PATH)
     add_test(Alpha_complex_utilities_diff_exact_alpha_complex ${DIFF_PATH}
              "exact.pers" "safe.pers")
-    set_tests_properties(Alpha_complex_utilities_diff_exact_alpha_complex APPEND PROPERTY DEPENDS Alpha_complex_utilities_exact_alpha_complex_persistence)
-    set_tests_properties(Alpha_complex_utilities_diff_exact_alpha_complex APPEND PROPERTY DEPENDS Alpha_complex_utilities_safe_alpha_complex_persistence)
+    set_tests_properties(Alpha_complex_utilities_diff_exact_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_exact_alpha_complex_persistence;Alpha_complex_utilities_safe_alpha_complex_persistence")
              
     add_test(Alpha_complex_utilities_diff_fast_alpha_complex ${DIFF_PATH}
              "fast.pers" "safe.pers")
-    set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex APPEND PROPERTY DEPENDS Alpha_complex_utilities_fast_alpha_complex_persistence)
-    set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex APPEND PROPERTY DEPENDS Alpha_complex_utilities_safe_alpha_complex_persistence)
+    set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_fast_alpha_complex_persistence;Alpha_complex_utilities_safe_alpha_complex_persistence")
 
   endif()
   
