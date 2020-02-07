@@ -66,7 +66,7 @@ def hera_wrap(delta):
     return fun
 
 def test_wasserstein_distance_pot():
-    _basic_wasserstein(pot, 1e-15, False)
+    _basic_wasserstein(pot, 1e-15, test_infinity=False)
 
 def test_wasserstein_distance_hera():
     _basic_wasserstein(hera_wrap(1e-12), 1e-12)
