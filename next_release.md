@@ -11,4 +11,4 @@ We provide [bibtex entries](https://gudhi.inria.fr/doc/latest/_citation.html) fo
 
 Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any questions or remarks.
 
-For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/3.1.1.rc1/installation.html) or [Python](https://gudhi.inria.fr/python/3.1.1.rc1/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
+For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/3.1.1/installation.html) or [Python](https://gudhi.inria.fr/python/3.1.1/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
