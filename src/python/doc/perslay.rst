@@ -18,14 +18,43 @@ A small example is provided
 
     * :download:`perslay_visu.py <../example/perslay_visu.py>`
 
-Readme
-------
-
-.. mdinclude:: perslay.md
-
 Function
 --------
 .. autofunction:: gudhi.perslay.perslay_channel
 
 Basic example
 -------------
+
+This example computes the first two Landscapes associated to a persistence diagram with four points. The landscapes are evaluated on ten samples, leading to two vectors with ten coordinates each, that are eventually concatenated in order to produce a single vector representation.
+
+.. testcode::
+
+    import numpy as np
+    import tensorflow as tf
+    from gudhi.representations.preprocessing import Padding 
+    from gudhi.perslay import perslay_channel
+    # A single diagram with 4 points
+    diags = [np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])]
+    diags = Padding(use=True).fit_transform(diags)
+    D = np.stack(diags, 0)
+    tf.reset_default_graph()
+    diagram = tf.placeholder(tf.float32, shape=D.shape)
+    feed = {diagram: D}
+    list_v = []
+    perslay_channel(output=list_v, name="perslay", diag=diagram, "persistence_weight"=None, "perm_op"="topk", "keep"=3, "layer"="ls", "num_samples"=3000, \
+                   "sample_init"=np.array([[ np.arange(-1.,2.,.001) ]], dtype=np.float32), "sample_const"= True, "fc_layers"=[])
+    vector = tf.concat(list_v, 1)
+    init = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init)
+        L = vector.eval(feed_dict=feed)[0,:]
+        print(V)
+
+The output is:
+
+.. testoutput::
+
+    [[1.02851895 2.05703791 2.57129739 1.54277843 0.89995409 1.92847304
+      2.95699199 3.08555686 2.05703791 1.02851895 0.         0.64282435
+      0.         0.         0.51425948 0.         0.         0.
+      0.77138922 1.02851895]]
