@@ -27,8 +27,8 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
     '''
     :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
     :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param internal_p: Ground metric (i.e. norm l_p).
     :param order: exponent for the Wasserstein metric.
+    :param internal_p: Ground metric (i.e. norm L^p).
     :returns: (n+1) x (m+1) np.array encoding the cost matrix C. 
                 For 1 <= i <= n, 1 <= j <= m, C[i,j] encodes the distance between X[i] and Y[j], while C[i, m+1] (resp. C[n+1, j]) encodes the distance (to the p) between X[i] (resp Y[j]) and its orthogonal proj onto the diagonal.
                 note also that C[n+1, m+1] = 0  (it costs nothing to move from the diagonal to the diagonal).
@@ -54,8 +54,8 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
 def _perstot(X, order, internal_p):
     '''
     :param X: (n x 2) numpy.array (points of a given diagram).
-    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm l_p in R^2); Default value is 2 (Euclidean norm).
     :param order: exponent for Wasserstein. Default value is 2.
+    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (Euclidean norm).
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).    
     '''
     Xdiag = _proj_on_diag(X)
@@ -66,8 +66,8 @@ def wasserstein_distance(X, Y, order=2., internal_p=2.):
     '''
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
     :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm l_p in R^2); Default value is 2 (euclidean norm).
     :param order: exponent for Wasserstein; Default value is 2.
+    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (euclidean norm).
     :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with respect to the internal_p-norm as ground metric.
     :rtype: float
     '''
