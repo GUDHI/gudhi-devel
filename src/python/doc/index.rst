@@ -76,6 +76,11 @@ Persistence representations
 
 .. include:: representations_sum.inc
 
+PersLay
+=======
+
+.. include:: perslay_sum.inc
+
 Persistence graphical tools
 ===========================
 

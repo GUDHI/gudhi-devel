@@ -110,12 +110,12 @@ def image_layer(inp, image_size, image_bnds, variance_init, variance_const, trai
 
 
 def perslay_channel(output, name, diag, **kwargs):
-    """ PersLay channel for persistence diagrams
-        output :   list on which perslay output will be appended
-        name :     name of the operation for tensorflow
-        diag :     big matrix of shape [N_diag, N_pts_per_diag, dimension_diag (coordinates of points) + 1 (mask--0 or 1)]
-    """
-
+    '''
+    :param output: list on which perslay output will be appended.
+    :param name:   name of the operation for tensorflow.
+    :param diag:   tensor of shape [N_diag, N_pts_per_diag, dimension_diag (coordinates of points) + 1 (mask--0 or 1)].
+    :param **kwargs: additional parameters.
+    '''
     try:
         train_weight = kwargs["train_weight"]
     except KeyError:
