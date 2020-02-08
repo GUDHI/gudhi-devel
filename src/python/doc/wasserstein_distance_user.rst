@@ -28,7 +28,7 @@ Morozov, and Arnur Nigmetov.
 Basic example
 -------------
 
-This example computes the 1-Wasserstein distance from 2 persistence diagrams with euclidean ground metric.
+This example computes the 1-Wasserstein distance from 2 persistence diagrams with Euclidean ground metric.
 Note that persistence diagrams must be submitted as (n x 2) numpy arrays and must not contain inf values.
 
 .. testcode::

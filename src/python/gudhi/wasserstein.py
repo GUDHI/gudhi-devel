@@ -67,7 +67,7 @@ def wasserstein_distance(X, Y, order=2., internal_p=2.):
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param order: exponent for Wasserstein; Default value is 2.
-    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (euclidean norm).
+    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (Euclidean norm).
     :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with respect to the internal_p-norm as ground metric.
     :rtype: float
     '''
