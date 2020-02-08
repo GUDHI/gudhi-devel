@@ -75,7 +75,7 @@ def exponential_layer(inp, num_elements, mean_init, variance_init, mean_const, v
 def landscape_layer(inp, num_samples, sample_init, sample_const, train_vect):
     """ Landscape PersLay """
     sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=tf.reshape(sample_init, [1,1,num_samples]))
-    return tf.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
+    return np.sqrt(2) * tf.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
 
 # Vectorizations implementing Betti curves
 def betti_layer(inp, theta, num_samples, sample_init, sample_const, train_vect):
