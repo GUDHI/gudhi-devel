@@ -8,7 +8,7 @@
      - YYYY/MM Author: Description of the modification
 """
 
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import sys
@@ -44,7 +44,7 @@ for module in modules:
 
 setup(
     name = 'gudhi',
-    packages=["gudhi","gudhi.representations"],
+    packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
     author='GUDHI Editorial Board',
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
