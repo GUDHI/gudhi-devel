@@ -90,8 +90,8 @@ ln -s @GUDHI_VERSION@ latest
 ***[Where X, Y and Z corresponds respectively to the major, minor, and patch version number]***
 
 
-===Mail sending===
+## Mail sending
 Send version mail to the following lists :
-gudhi-devel@lists.gforge.inria.fr
-gudhi-users@lists.gforge.inria.fr (not for release candidate)
+* gudhi-devel@lists.gforge.inria.fr
+* gudhi-users@lists.gforge.inria.fr (not for release candidate)
 
