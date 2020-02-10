@@ -11,11 +11,21 @@ configuration:
 environment:
   # update the vcpkg cache even if build fails
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  PYTHON: "C:\\Python37-x64"
 
   matrix:
-      - target: BuildAndTest
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
+      - target: Examples
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+
+      - target: UnitaryTests
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+
+      - target: Utilities
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+
+      - target: Python
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
+
 
 cache:
   - c:\Tools\vcpkg\installed
@@ -41,9 +51,11 @@ build_script:
   - mkdir build
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
-  - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
-  - ctest -j 4 --output-on-failure -C Release -E diff_files
-  - cmake -DWITH_GUDHI_PYTHON=ON .
-  - cd src/python
-  - MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64
-  - ctest -j 4 --output-on-failure -C Release
+  - if [%target%]==[Python] (
+      cd src/python &
+      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
+      ctest -j 2 --output-on-failure -C Release
+    ) else (
+      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
+      ctest -j 2 --output-on-failure -C Release -E diff_files
+    )
