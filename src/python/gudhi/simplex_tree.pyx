@@ -219,7 +219,7 @@ cdef class SimplexTree:
         cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
 
         while it != end:
-            yield(self.get_ptr().get_simplex_and_filtration(dereference(it)))
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
             preincrement(it)
 
     def get_skeleton(self, dimension):
