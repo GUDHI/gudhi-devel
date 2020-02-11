@@ -1,17 +1,18 @@
 # How to use github to contribute to gudhi
 
 Similar information is available in many places:
-https://jarv.is/notes/how-to-pull-request-fork-github/ (this one is using `upstream/master` when creating a new branch)
-https://help.github.com/en/github/getting-started-with-github/fork-a-repo
-https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/
-https://gist.github.com/Chaser324/ce0505fbed06b947d962
-etc
+* https://jarv.is/notes/how-to-pull-request-fork-github/ (this one is using `upstream/master` when creating a new branch)
+* https://help.github.com/en/github/getting-started-with-github/fork-a-repo
+* https://blog.scottlowe.org/2015/01/27/using-fork-branch-git-workflow/
+* https://gist.github.com/Chaser324/ce0505fbed06b947d962
+* etc
 
 ## Get a github account
-I assume the account is called "LOGIN", please replace as appropriate below. Log in to github.com using this account.
+I assume the account is called **LOGIN**, please replace as appropriate below. Log in to github.com using this account.
 
 ## Fork GUDHI/gudhi-devel project
-Go to https://github.com/GUDHI/gudhi-devel and click on "fork" (top right). Feel free to also click on the star next to it to show you like the project!
+Go to https://github.com/GUDHI/gudhi-devel and click on **fork** (top right).
+Feel free to also click on the star next to it to show you like the project!
 You can see your fork at https://github.com/LOGIN/gudhi-devel
 
 ## Create a local clone on your computer
@@ -36,10 +37,10 @@ because you want to see the real gudhi, not just your clone.
 Optional, if you are interested in one of the old branches
 git remote add oldies https://github.com/GUDHI/branches.git
 
-Or if you want to spy on someone's work. I assume the someone's account is called "SOMEONE"
+Or if you want to spy on someone's work. I assume the someone's account is called **SOMEONE**
 git remote add someone https://github.com/SOMEONE/gudhi-devel.git
 
-## Download
+## Stay up-to-date
 ```bash
 git fetch -p --all
 ```
@@ -48,8 +49,10 @@ It tells git to check all that happened on github.
 It is safe, it will not mess with your files.
 
 ## Create a branch, based on the current master
+```bash
 git checkout -b some-fancy-name --no-track upstream/master
-Your local branch "master" and the one on your github clone are useless and often outdated, but for technical reasons there has to exist at least one branch at all times, it might as well be that one. upstream/master is the real deal, that's what you want to base your new branch on.
+```
+Your local branch `master` and the one on your github clone are useless and often outdated, but for technical reasons there has to exist at least one branch at all times, it might as well be that one. upstream/master is the real deal, that's what you want to base your new branch on.
 
 ## The real coding is here!
 Edit files, test, etc.
