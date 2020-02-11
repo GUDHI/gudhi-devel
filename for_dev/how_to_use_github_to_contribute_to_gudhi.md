@@ -35,10 +35,14 @@ because you want to see the real gudhi, not just your clone.
 
 ## Optional remotes
 Optional, if you are interested in one of the old branches
+```bash
 git remote add oldies https://github.com/GUDHI/branches.git
+```
 
 Or if you want to spy on someone's work. I assume the someone's account is called **SOMEONE**
+```bash
 git remote add someone https://github.com/SOMEONE/gudhi-devel.git
+```
 
 ## Stay up-to-date
 ```bash
@@ -89,7 +93,7 @@ You may want to look at https://github.com/settings/notifications (and other set
 Some bold reviewer might make changes to your branch. You will then need `git pull` for your local branch to reflect those.
 
 ## Your work is merged!
-Once your pull request has been closed (your branch merged), you can remove your branch, both locally
+Once your pull request has been closed (your branch merged), you can remove your branch, both locally and also the branch on your github fork:
 ```bash
 git checkout master # or any other branch, but you cannot remove the branch you are currently in
 git branch -d some-fancy-name # local branch delete
@@ -99,7 +103,7 @@ If you add @VincentRouvreau or @mglisse as collaborator (https://github.com/LOGI
 
 ## Keep in touch
 Create a new branch and keep contributing!
+
 Do not try to reuse an old branch that has already been merged.
 Make sure you run the fetch command just before creating any new branch, so you don't base it on some outdated version of master.
 You can also work on several branches at the same time, using `git checkout some-fancy-name` and `git checkout name-of-other-branch` to switch between them (commit before switching or things may get complicated).
-
