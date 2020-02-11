@@ -1,6 +1,6 @@
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Theo Lacombe
+    Author(s):       Theo Lacombe, Marc Glisse
 
     Copyright (C) 2019 Inria
 

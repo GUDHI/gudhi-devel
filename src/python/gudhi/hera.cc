@@ -1,9 +1,19 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Marc Glisse
+ *
+ *    Copyright (C) 2020 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
 #include <boost/range/iterator_range.hpp>
 
-#include <wasserstein.h>
+#include <wasserstein.h> // Hera
 
 #include <array>
 
@@ -41,7 +51,6 @@ double wasserstein_distance(
 PYBIND11_MODULE(hera, m) {
       m.def("wasserstein_distance", &wasserstein_distance,
           py::arg("X"), py::arg("Y"),
-          // Should we name those q, p and d instead?
           py::arg("order") = 1,
           py::arg("internal_p") = std::numeric_limits<double>::infinity(),
           py::arg("delta") = .01,
