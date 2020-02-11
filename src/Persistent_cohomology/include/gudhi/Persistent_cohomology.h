@@ -561,7 +561,7 @@ class Persistent_cohomology {
    * p1*...*pr is the product of prime numbers pi such that the homology
    * feature exists in homology with Z/piZ coefficients.
    */
-  void output_diagram(std::ostream& ostream = std::clog) {
+  void output_diagram(std::ostream& ostream = std::cout) {
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     bool has_infinity = std::numeric_limits<Filtration_value>::has_infinity;

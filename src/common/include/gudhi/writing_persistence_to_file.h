@@ -94,7 +94,7 @@ class Persistence_interval_common {
 **/
 template <typename Persistence_interval_range>
 void write_persistence_intervals_to_stream(const Persistence_interval_range& intervals,
-                                           std::ostream& out = std::clog) {
+                                           std::ostream& out = std::cout) {
   for (auto interval : intervals) {
     out << interval << "\n";
   }
