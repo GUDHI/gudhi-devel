@@ -40,20 +40,19 @@ def test_infinite_alpha():
     assert simplex_tree.num_simplices() == 11
     assert simplex_tree.num_vertices() == 4
 
-    filtration_generator = simplex_tree.get_filtration()
-    assert(next(filtration_generator) == ([0], 0.0))
-    assert(next(filtration_generator) == ([1], 0.0))
-    assert(next(filtration_generator) == ([2], 0.0))
-    assert(next(filtration_generator) == ([3], 0.0))
-    assert(next(filtration_generator) == ([0, 1], 0.25))
-    assert(next(filtration_generator) == ([0, 2], 0.25))
-    assert(next(filtration_generator) == ([1, 3], 0.25))
-    assert(next(filtration_generator) == ([2, 3], 0.25))
-    assert(next(filtration_generator) == ([1, 2], 0.5))
-    assert(next(filtration_generator) == ([0, 1, 2], 0.5))
-    assert(next(filtration_generator) == ([1, 2, 3], 0.5))
-    with pytest.raises(StopIteration):
-        next(filtration_generator)
+    assert list(simplex_tree.get_filtration()) == [
+        ([0], 0.0),
+        ([1], 0.0),
+        ([2], 0.0),
+        ([3], 0.0),
+        ([0, 1], 0.25),
+        ([0, 2], 0.25),
+        ([1, 3], 0.25),
+        ([2, 3], 0.25),
+        ([1, 2], 0.5),
+        ([0, 1, 2], 0.5),
+        ([1, 2, 3], 0.5),
+    ]
 
     assert simplex_tree.get_star([0]) == [
         ([0], 0.0),
@@ -107,18 +106,16 @@ def test_filtered_alpha():
     else:
         assert False
 
-    filtration_generator = simplex_tree.get_filtration()
-    assert(next(filtration_generator) == ([0], 0.0))
-    assert(next(filtration_generator) == ([1], 0.0))
-    assert(next(filtration_generator) == ([2], 0.0))
-    assert(next(filtration_generator) == ([3], 0.0))
-    assert(next(filtration_generator) == ([0, 1], 0.25))
-    assert(next(filtration_generator) == ([0, 2], 0.25))
-    assert(next(filtration_generator) == ([1, 3], 0.25))
-    assert(next(filtration_generator) == ([2, 3], 0.25))
-    with pytest.raises(StopIteration):
-        next(filtration_generator)
-
+    assert list(simplex_tree.get_filtration()) == [
+        ([0], 0.0),
+        ([1], 0.0),
+        ([2], 0.0),
+        ([3], 0.0),
+        ([0, 1], 0.25),
+        ([0, 2], 0.25),
+        ([1, 3], 0.25),
+        ([2, 3], 0.25),
+    ]
     assert simplex_tree.get_star([0]) == [([0], 0.0), ([0, 1], 0.25), ([0, 2], 0.25)]
     assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.25), ([0, 2], 0.25)]
 

@@ -128,57 +128,55 @@ def test_expansion():
     assert st.num_vertices() == 7
     assert st.num_simplices() == 17
 
-    filtration_generator = st.get_filtration()
-    assert(next(filtration_generator) == ([2], 0.1))
-    assert(next(filtration_generator) == ([3], 0.1))
-    assert(next(filtration_generator) == ([2, 3], 0.1))
-    assert(next(filtration_generator) == ([0], 0.2))
-    assert(next(filtration_generator) == ([0, 2], 0.2))
-    assert(next(filtration_generator) == ([1], 0.3))
-    assert(next(filtration_generator) == ([0, 1], 0.3))
-    assert(next(filtration_generator) == ([1, 3], 0.4))
-    assert(next(filtration_generator) == ([1, 2], 0.5))
-    assert(next(filtration_generator) == ([5], 0.6))
-    assert(next(filtration_generator) == ([6], 0.6))
-    assert(next(filtration_generator) == ([5, 6], 0.6))
-    assert(next(filtration_generator) == ([4], 0.7))
-    assert(next(filtration_generator) == ([2, 4], 0.7))
-    assert(next(filtration_generator) == ([0, 3], 0.8))
-    assert(next(filtration_generator) == ([4, 6], 0.9))
-    assert(next(filtration_generator) == ([3, 6], 1.0))
-    with pytest.raises(StopIteration):
-        next(filtration_generator)
+    assert list(st.get_filtration()) == [
+        ([2], 0.1),
+        ([3], 0.1),
+        ([2, 3], 0.1),
+        ([0], 0.2),
+        ([0, 2], 0.2),
+        ([1], 0.3),
+        ([0, 1], 0.3),
+        ([1, 3], 0.4),
+        ([1, 2], 0.5),
+        ([5], 0.6),
+        ([6], 0.6),
+        ([5, 6], 0.6),
+        ([4], 0.7),
+        ([2, 4], 0.7),
+        ([0, 3], 0.8),
+        ([4, 6], 0.9),
+        ([3, 6], 1.0),
+    ]
 
     st.expansion(3)
     assert st.num_vertices() == 7
     assert st.num_simplices() == 22
     st.initialize_filtration()
 
-    filtration_generator = st.get_filtration()
-    assert(next(filtration_generator) == ([2], 0.1))
-    assert(next(filtration_generator) == ([3], 0.1))
-    assert(next(filtration_generator) == ([2, 3], 0.1))
-    assert(next(filtration_generator) == ([0], 0.2))
-    assert(next(filtration_generator) == ([0, 2], 0.2))
-    assert(next(filtration_generator) == ([1], 0.3))
-    assert(next(filtration_generator) == ([0, 1], 0.3))
-    assert(next(filtration_generator) == ([1, 3], 0.4))
-    assert(next(filtration_generator) == ([1, 2], 0.5))
-    assert(next(filtration_generator) == ([0, 1, 2], 0.5))
-    assert(next(filtration_generator) == ([1, 2, 3], 0.5))
-    assert(next(filtration_generator) == ([5], 0.6))
-    assert(next(filtration_generator) == ([6], 0.6))
-    assert(next(filtration_generator) == ([5, 6], 0.6))
-    assert(next(filtration_generator) == ([4], 0.7))
-    assert(next(filtration_generator) == ([2, 4], 0.7))
-    assert(next(filtration_generator) == ([0, 3], 0.8))
-    assert(next(filtration_generator) == ([0, 1, 3], 0.8))
-    assert(next(filtration_generator) == ([0, 2, 3], 0.8))
-    assert(next(filtration_generator) == ([0, 1, 2, 3], 0.8))
-    assert(next(filtration_generator) == ([4, 6], 0.9))
-    assert(next(filtration_generator) == ([3, 6], 1.0))
-    with pytest.raises(StopIteration):
-        next(filtration_generator)
+    assert list(st.get_filtration()) == [
+        ([2], 0.1),
+        ([3], 0.1),
+        ([2, 3], 0.1),
+        ([0], 0.2),
+        ([0, 2], 0.2),
+        ([1], 0.3),
+        ([0, 1], 0.3),
+        ([1, 3], 0.4),
+        ([1, 2], 0.5),
+        ([0, 1, 2], 0.5),
+        ([1, 2, 3], 0.5),
+        ([5], 0.6),
+        ([6], 0.6),
+        ([5, 6], 0.6),
+        ([4], 0.7),
+        ([2, 4], 0.7),
+        ([0, 3], 0.8),
+        ([0, 1, 3], 0.8),
+        ([0, 2, 3], 0.8),
+        ([0, 1, 2, 3], 0.8),
+        ([4, 6], 0.9),
+        ([3, 6], 1.0),
+    ]
 
 
 def test_automatic_dimension():
