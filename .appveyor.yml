@@ -39,7 +39,8 @@ install:
   - python --version
   - pip --version
   - python -m pip install --upgrade pip
-  - pip install -U setuptools numpy matplotlib scipy Cython pytest POT
+  - pip install -U setuptools numpy matplotlib scipy Cython pytest
+  - pip install -U POT
 
 build_script:
   - mkdir build
