@@ -88,7 +88,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
       simplex.insert(simplex.begin(), vertex);
     }
-    return std::make_pair(simplex, Base::filtration(f_simplex));
+    return std::make_pair(std::move(simplex), Base::filtration(f_simplex));
   }
 
   Filtered_simplices get_skeleton(int dimension) {
