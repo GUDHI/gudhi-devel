@@ -21,6 +21,21 @@
 * The name of the "project" should be in this form: `Package_[tests|examples|…]`. E.g. `project(Simplex_tree_examples)`.
 * The name if each "target" (first parameter of add_executable) should be in this form: `Package_{name of the cpp file without extension}`. E.g `add_executable(Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)`.
 
+### Code style
+We are using [google c++ style guide](https://google.github.io/styleguide/cppguide.html) recommendations with 120 characters per line of code.
+[clang-format](https://clang.llvm.org/docs/ClangFormat.html) can be used to format automatically your code:
+```bash
+cd src # there is a .clang-format file with these specifications
+clang-format -style=file -i Simplex_tree/include/gudhi/Simplex_tree.h # -i means in place, your file will be modified
+```
+
 ## Python
 
 In progress...
+
+### Code style
+We are using [PEP8 Python style guide](https://www.python.org/dev/peps/pep-0008/) recommendations with 120 characters per line of code.
+[black](https://black.readthedocs.io/en/stable/) can be used to format automatically your code:
+```bash
+black -l 120 src/python/example/bottleneck_basic_example.py
+```
