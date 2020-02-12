@@ -17,6 +17,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import errno
 import os
+import sys
 
 import numpy as np
 
