@@ -12,6 +12,7 @@ from setuptools import setup, Extension, find_packages
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import sys
+import pybind11
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
@@ -42,6 +43,18 @@ for module in modules:
         runtime_library_dirs=runtime_library_dirs,
         cython_directives = {'language_level': str(sys.version_info[0])},))
 
+ext_modules = cythonize(ext_modules)
+
+ext_modules.append(Extension(
+    'gudhi.hera',
+    sources = [source_dir + 'hera.cc'],
+    language = 'c++',
+    include_dirs = include_dirs +
+        ['@HERA_WASSERSTEIN_INCLUDE_DIR@',
+        pybind11.get_include(False), pybind11.get_include(True)],
+    extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
+    ))
+
 setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
@@ -49,7 +62,7 @@ setup(
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
     url='http://gudhi.gforge.inria.fr/',
-    ext_modules = cythonize(ext_modules),
+    ext_modules = ext_modules,
     install_requires = ['cython','numpy >= 1.9',],
-    setup_requires = ['numpy >= 1.9',],
+    setup_requires = ['numpy >= 1.9','pybind11',],
 )

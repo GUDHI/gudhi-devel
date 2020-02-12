@@ -10,6 +10,15 @@
 
 The GUDHI library is a generic open source C++ library, with a Python interface, for Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding. The library offers state-of-the-art data structures and algorithms to construct simplicial complexes and compute persistent homology.
 
+# Source code
+
+We recommend that users get official releases from [the GUDHI website](https://gudhi.inria.fr/).
+
+For potential contributors, to fully checkout GUDHI, after cloning the git repository, you may also need to checkout its submodules using
+```sh
+git submodule update --init
+```
+
 # Compilation and installation
 
 To install GUDHI, you can follow the [C++ compilation procedure](https://gudhi.inria.fr/doc/latest/installation.html), the [Python compilation procedure](https://gudhi.inria.fr/python/latest/installation.html), use our [conda-forge package](https://gudhi.inria.fr/conda/), or [go with Docker](https://gudhi.inria.fr/dockerfile/).

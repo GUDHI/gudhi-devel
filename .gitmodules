@@ -1,0 +1,3 @@
+[submodule "ext/hera"]
+	path = ext/hera
+	url = https://bitbucket.org/grey_narn/hera.git
