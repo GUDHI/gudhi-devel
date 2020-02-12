@@ -24,11 +24,11 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points)
+        Alpha_complex_interface(vector[vector[double]] points) except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool from_file)
-        vector[double] get_point(int vertex)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        Alpha_complex_interface(string off_file, bool from_file) except +
+        vector[double] get_point(int vertex) except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -96,8 +96,7 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        cdef vector[double] point = self.thisptr.get_point(vertex)
-        return point
+        return self.thisptr.get_point(vertex)
 
     def create_simplex_tree(self, max_alpha_square = float('inf')):
         """

@@ -4,8 +4,8 @@
 \image html "Gudhi_banner.png"
 <br><br><br><br>
 
-## Complexes {#Complexes}
-### Cubical complex
+## Data structures for cell complexes {#Complexes}
+### Cubical complexes
  
 <table>
   <tr>
@@ -29,9 +29,114 @@
  </tr>
 </table>
 
-### Simplicial complex
+### Simplicial complexes
 
-#### Alpha complex
+#### Simplex tree
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "Simplex_tree_representation.png"
+    </td>
+    <td width="50%">
+    The simplex tree is an efficient and flexible
+ data structure for representing general (filtered) simplicial complexes. The data structure
+ is described in \cite boissonnatmariasimplextreealgorithmica .
+    </td>
+    <td width="15%">
+      <b>Author:</b> Cl&eacute;ment Maria<br>
+      <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref simplex_tree
+    </td>
+ </tr>
+</table>
+
+#### Toplex Map
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "map.png"
+    </td>
+    <td width="50%">
+    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
+    and secondly of a map which associate any vertex to a set of pointers toward all toplices
+    containing this vertex.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Fran&ccedil;ois Godi<br>
+      <b>Introduced in:</b> GUDHI 2.1.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref toplex_map
+    </td>
+ </tr>
+</table>
+
+#### Skeleton blocker
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "ds_representation.png"
+    </td>
+    <td width="50%">
+    The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit*
+    representation of its simplices \cite socg_blockers_2011,\cite blockers2012. Intuitively, it just stores the
+    1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that is very small in practice.
+    This data-structure handles all simplicial complexes operations such as simplex enumeration or simplex removal but
+    operations that are particularly efficient are operations that do not require simplex enumeration such as edge
+    iteration, link computation or simplex contraction.
+    </td>
+    <td width="15%">
+      <b>Author:</b> David Salinas<br>
+      <b>Introduced in:</b> GUDHI 1.1.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref skbl
+    </td>
+ </tr>
+</table>
+
+#### Basic operation: contraction
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "sphere_contraction_representation.png"
+    </td>
+    <td width="50%">
+    The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge
+    simplicial complexes. It uses the \ref skbl data-structure whose size remains small  during simplification of most
+    used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice,
+    the size of this data-structure is even much lower than the total number of simplices.
+    </td>
+    <td width="15%">
+      <b>Author:</b> David Salinas<br>
+      <b>Introduced in:</b> GUDHI 1.1.0<br>
+      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref contr
+    </td>
+ </tr>
+</table>
+
+## Filtrations and reconstructions {#FiltrationsReconstructions}
+### Alpha complex
 
 <table>
   <tr>
@@ -61,7 +166,7 @@
  </tr>
 </table>
 
-#### Čech complex
+### Čech complex
 
 <table>
  <tr>
@@ -86,7 +191,7 @@
  </tr>
 </table>
 
-#### Rips complex
+### Rips complex
 
 <table>
   <tr>
@@ -112,7 +217,7 @@
  </tr>
 </table>
 
-#### Witness complex
+### Witness complex
 
 <table>
   <tr>
@@ -163,112 +268,30 @@
  </tr>
 </table>
 
-## Data structures and basic operations {#DataStructuresAndBasicOperations}
-
-### Data structures
-
-#### Simplex tree
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "Simplex_tree_representation.png"
-    </td>
-    <td width="50%">
-    The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica .
-    </td>
-    <td width="15%">
-      <b>Author:</b> Cl&eacute;ment Maria<br>
-      <b>Introduced in:</b> GUDHI 1.0.0<br>
-      <b>Copyright:</b> MIT<br>
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref simplex_tree
-    </td>
- </tr>
-</table>
-
-#### Skeleton blocker
+### Tangential complex
 
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "ds_representation.png"
+      \image html "tc_examples.png"
     </td>
     <td width="50%">
-    The Skeleton-Blocker data-structure proposes a light encoding for simplicial complexes by storing only an *implicit*
-    representation of its simplices \cite socg_blockers_2011,\cite blockers2012. Intuitively, it just stores the
-    1-skeleton of a simplicial complex with a graph and the set of its "missing faces" that is very small in practice.
-    This data-structure handles all simplicial complexes operations such as simplex enumeration or simplex removal but
-    operations that are particularly efficient are operations that do not require simplex enumeration such as edge
-    iteration, link computation or simplex contraction.
+    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    The input is a point sample coming from an unknown manifold.
+    The running time depends only linearly on the extrinsic dimension \f$ d \f$
+    and exponentially on the intrinsic dimension \f$ k \f$.
     </td>
     <td width="15%">
-      <b>Author:</b> David Salinas<br>
-      <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>Author:</b> Cl&eacute;ment Jamin<br>
+      <b>Introduced in:</b> GUDHI 2.0.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
     </td>
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref skbl
-    </td>
- </tr>
-</table>
-
-#### Toplex Map
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "map.png"
-    </td>
-    <td width="50%">
-    The Toplex map data structure is composed firstly of a raw storage of toplices (the maximal simplices)
-    and secondly of a map which associate any vertex to a set of pointers toward all toplices
-    containing this vertex.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Fran&ccedil;ois Godi<br>
-      <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT<br>
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref toplex_map
-    </td>
- </tr>
-</table>
-
-### Basic operations
-
-#### Contraction
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "sphere_contraction_representation.png"
-    </td>
-    <td width="50%">
-    The purpose of this package is to offer a user-friendly interface for edge contraction simplification of huge
-    simplicial complexes. It uses the \ref skbl data-structure whose size remains small  during simplification of most
-    used geometrical complexes of topological data analysis such as the Rips or the Delaunay complexes. In practice,
-    the size of this data-structure is even much lower than the total number of simplices.
-    </td>
-    <td width="15%">
-      <b>Author:</b> David Salinas<br>
-      <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref contr
+    <b>User manual:</b> \ref tangential_complex
     </td>
  </tr>
 </table>
@@ -301,36 +324,6 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref persistent_cohomology
-    </td>
- </tr>
-</table>
-
-## Manifold reconstruction {#ManifoldReconstruction}
-
-### Tangential complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "tc_examples.png"
-    </td>
-    <td width="50%">
-    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
-    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
-    The input is a point sample coming from an unknown manifold.
-    The running time depends only linearly on the extrinsic dimension \f$ d \f$
-    and exponentially on the intrinsic dimension \f$ k \f$.
-    </td>
-    <td width="15%">
-      <b>Author:</b> Cl&eacute;ment Jamin<br>
-      <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref tangential_complex
     </td>
  </tr>
 </table>
@@ -387,6 +380,29 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref Persistence_representations
+    </td>
+ </tr>
+</table>
+
+## Point cloud utilities {#PointCloudUtils}
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \f$(x_1,\ldots,x_d)\f$
+    </td>
+    <td width="50%">
+    This contains various tools to handle point clouds: spatial searching, subsampling, etc.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Clément Jamin<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>Manuals:</b> \ref spatial_searching, \ref subsampling
     </td>
  </tr>
 </table>
