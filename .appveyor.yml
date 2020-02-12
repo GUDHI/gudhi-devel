@@ -31,11 +31,10 @@ init:
 
 
 install:
-  - cmd: |
-    cd "C:\Tools\vcpkg"
-    git pull
-    .\bootstrap-vcpkg.bat
-    cd %appveyor_build_folder%
+  - cd "C:\Tools\vcpkg"
+  - git pull
+  - .\bootstrap-vcpkg.bat
+  - cd %appveyor_build_folder%
   - vcpkg install %BOOST_PACKAGES% tbb:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
