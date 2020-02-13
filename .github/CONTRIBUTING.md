@@ -12,7 +12,7 @@ Please, first check [opened issues on GUDHI](https://github.com/GUDHI/gudhi-deve
 
 If the problem you are facing is not referenced, do not hesitate to open a [new issue](https://github.com/GUDHI/gudhi-devel/issues/new).
 
-This place is also a good place if you have some enhancement you want to propose for the GUDHI library.
+This place is also a good place if you have some enhancement you want to propose.
 There is a label **enhancement** in the [new issue](https://github.com/GUDHI/gudhi-devel/issues/new) page.
 
 # In case you want to contribute to GUDHI
@@ -38,3 +38,6 @@ We use Sphinx to generate the code and you will be able to verify the result in 
 
 Please first take some time to read our [code conventions](code_conventions.md)
 
+As a convention, we set a Pull Request as a **Draft Pull Request** when we work on something we want the other contributors to see.
+
+We click on **Ready for review** to ask for a peer review of the contribution.
