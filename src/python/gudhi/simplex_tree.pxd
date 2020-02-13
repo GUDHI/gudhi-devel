@@ -24,6 +24,13 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Simplex_handle":
         pass
 
+    cdef cppclass Simplex_tree_skeleton_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Skeleton_simplex_iterator":
+        Simplex_tree_skeleton_iterator()
+        Simplex_tree_simplex_handle& operator*()
+        Simplex_tree_skeleton_iterator operator++()
+        bint operator!=(Simplex_tree_skeleton_iterator)
+
+
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree()
         double simplex_filtration(vector[int] simplex)
@@ -37,7 +44,6 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool find_simplex(vector[int] simplex)
         bool insert_simplex_and_subfaces(vector[int] simplex,
                                          double filtration)
-        vector[pair[vector[int], double]] get_skeleton(int dimension)
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
@@ -49,6 +55,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex)
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_begin()
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end()
+        Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension)
+        Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":

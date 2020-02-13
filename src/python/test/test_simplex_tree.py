@@ -56,7 +56,7 @@ def test_insertion():
     assert st.filtration([1]) == 0.0
 
     # skeleton test
-    assert st.get_skeleton(2) == [
+    assert list(st.get_skeleton(2)) == [
         ([0, 1, 2], 4.0),
         ([0, 1], 0.0),
         ([0, 2], 4.0),
@@ -65,7 +65,7 @@ def test_insertion():
         ([1], 0.0),
         ([2], 4.0),
     ]
-    assert st.get_skeleton(1) == [
+    assert list(st.get_skeleton(1)) == [
         ([0, 1], 0.0),
         ([0, 2], 4.0),
         ([0], 0.0),
@@ -73,12 +73,12 @@ def test_insertion():
         ([1], 0.0),
         ([2], 4.0),
     ]
-    assert st.get_skeleton(0) == [([0], 0.0), ([1], 0.0), ([2], 4.0)]
+    assert list(st.get_skeleton(0)) == [([0], 0.0), ([1], 0.0), ([2], 4.0)]
 
     # remove_maximal_simplex test
     assert st.get_cofaces([0, 1, 2], 1) == []
     st.remove_maximal_simplex([0, 1, 2])
-    assert st.get_skeleton(2) == [
+    assert list(st.get_skeleton(2)) == [
         ([0, 1], 0.0),
         ([0, 2], 4.0),
         ([0], 0.0),

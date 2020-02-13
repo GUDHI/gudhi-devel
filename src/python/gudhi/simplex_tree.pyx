@@ -231,15 +231,12 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] skeleton \
-            = self.get_ptr().get_skeleton(<int>dimension)
-        ct = []
-        for filtered_simplex in skeleton:
-            v = []
-            for vertex in filtered_simplex.first:
-                v.append(vertex)
-            ct.append((v, filtered_simplex.second))
-        return ct
+        cdef Simplex_tree_skeleton_iterator it = self.get_ptr().get_skeleton_iterator_begin(dimension)
+        cdef Simplex_tree_skeleton_iterator end = self.get_ptr().get_skeleton_iterator_end(dimension)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
 
     def get_star(self, simplex):
         """This function returns the star of a given N-simplex.
