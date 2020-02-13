@@ -117,7 +117,12 @@ X = SW.fit(diags)
 Y = SW.transform(diags2)
 print("SW kernel is " + str(Y[0][0]))
 
-W = WassersteinDistance(order=2, internal_p=2)
+W = WassersteinDistance(order=2, internal_p=2, mode="pot")
+X = W.fit(diags)
+Y = W.transform(diags2)
+print("Wasserstein distance is " + str(Y[0][0]))
+
+W = WassersteinDistance(order=2, internal_p=2, mode="hera", delta=0.0001)
 X = W.fit(diags)
 Y = W.transform(diags2)
 print("Wasserstein distance is " + str(Y[0][0]))
