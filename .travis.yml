@@ -42,7 +42,7 @@ before_cache:
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
   - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
-  - python3 -m pip install --user POT
+  - python3 -m pip install --user POT pybind11
 
 script: 
   - rm -rf build
