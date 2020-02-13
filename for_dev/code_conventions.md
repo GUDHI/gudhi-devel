@@ -29,6 +29,9 @@ cd src # there is a .clang-format file with these specifications
 clang-format -style=file -i Simplex_tree/include/gudhi/Simplex_tree.h # -i means in place, your file will be modified
 ```
 
+### Template
+Please use the file [following template](copyright_template.h).
+
 ## Python
 
 In progress...
@@ -39,3 +42,6 @@ We are using [PEP8 Python style guide](https://www.python.org/dev/peps/pep-0008/
 ```bash
 black -l 120 src/python/example/bottleneck_basic_example.py
 ```
+
+### Template
+Please use the file [following template](copyright_template.py).
