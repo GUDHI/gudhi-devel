@@ -9,6 +9,9 @@ os: osx
 osx_image: xcode10.2
 compiler: clang
 
+env:
+  - CMAKE_OPTIONS='-DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3'
+
 cache:
   directories:
     - $HOME/.cache/pip
@@ -45,7 +48,7 @@ script:
   - rm -rf build
   - mkdir -p build 
   - cd build 
-  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .. 
+  - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_OPTIONS} .. 
   - make -j 4 all
   - make doxygen
   - ctest -j 4 --output-on-failure -E sphinx
