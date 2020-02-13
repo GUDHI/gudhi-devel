@@ -26,7 +26,7 @@ cd gudhi-devel
 ```
 
 ## Submodule
-An interface to Hera for Wasserstein distanceis available on an external git repository.
+An interface to Hera for Wasserstein distance is available on an external git repository.
 Everytime you checkout master or merge from master, afterwards, you will need to run the command:
 ```bash
 git submodule update --init
