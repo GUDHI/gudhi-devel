@@ -25,6 +25,13 @@ This creates a directory gudhi-devel, which you are free to move around or renam
 cd gudhi-devel
 ```
 
+## Submodule
+An interface to Hera for Wasserstein distanceis available on an external git repository.
+Everytime you checkout master or merge from master, afterwards, you will need to run the command:
+```bash
+git submodule update --init
+```
+
 ## Configuring a remote for a fork
 ```bash
 git remote add upstream https://github.com/GUDHI/gudhi-devel.git
