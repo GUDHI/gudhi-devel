@@ -25,7 +25,7 @@ namespace Gudhi {
 
 namespace persistence_diagram {
 
-/** \internal \brief Structure representing an euclidean bipartite graph containing
+/** \internal \brief Structure representing a Euclidean bipartite graph containing
  *  the points from the two persistence diagrams (including the projections).
  *
  * \ingroup bottleneck_distance

@@ -4,7 +4,7 @@ As a major new feature, the GUDHI library now offers ...
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since Gudhi 3.1.0:
+Below is a list of changes made since GUDHI 3.X-1.X-1:
 
 - [Module](link)
      - ...
@@ -13,8 +13,7 @@ Below is a list of changes made since Gudhi 3.1.0:
      - ...
 
 - Miscellaneous
-     - See the list of [bug fixes](https://github.com/GUDHI/gudhi-devel/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3A3.X.X+).
-
+     - The [list of bugs that were solved since GUDHI-3.X-1.X-1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.1.1+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -25,4 +24,5 @@ We provide [bibtex entries](https://gudhi.inria.fr/doc/latest/_citation.html) fo
 
 Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any questions or remarks.
 
-For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/3.1.0.rc1/installation.html) or [Python](https://gudhi.inria.fr/python/3.1.0.rc1/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
+For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/latest/installation.html) or [Python](https://gudhi.inria.fr/python/latest/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
+
