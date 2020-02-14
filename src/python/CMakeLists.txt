@@ -126,6 +126,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_PYTHON_MODULES_TO_COMPILE "${GUDHI_PYTHON_MODULES_TO_COMPILE}'euclidean_strong_witness_complex', ")
     endif ()
 
+    set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${Boost_INCLUDE_DIRS}', ")
     if(CGAL_FOUND)
       can_cgal_use_cxx11_thread_local()
       if (NOT CGAL_CAN_USE_CXX11_THREAD_LOCAL_RESULT)
