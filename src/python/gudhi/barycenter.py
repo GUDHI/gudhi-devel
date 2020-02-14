@@ -2,7 +2,7 @@ import ot
 import numpy as np
 import scipy.spatial.distance as sc
 
-from wasserstein import _build_dist_matrix, _perstot
+from gudhi.wasserstein import _build_dist_matrix, _perstot
 
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
