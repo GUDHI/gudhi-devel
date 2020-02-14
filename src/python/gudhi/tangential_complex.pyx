@@ -1,3 +1,12 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -8,15 +17,6 @@ import os
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
-
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Vincent Rouvreau
-#
-# Copyright (C) 2016 Inria
-#
-# Modification(s):
-#   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -66,7 +66,7 @@ cdef class TangentialComplex:
     def __cinit__(self, intrisic_dim, points=None, off_file=''):
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Tangential_complex_interface(intrisic_dim, str.encode(off_file), True)
+                self.thisptr = new Tangential_complex_interface(intrisic_dim, off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:

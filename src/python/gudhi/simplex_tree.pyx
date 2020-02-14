@@ -1,7 +1,3 @@
-from libc.stdint cimport intptr_t
-from numpy import array as np_array
-cimport simplex_tree
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -10,6 +6,10 @@ cimport simplex_tree
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+from libc.stdint cimport intptr_t
+from numpy import array as np_array
+cimport simplex_tree
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -508,7 +508,7 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             if persistence_file != '':
-                self.pcohptr.write_output_diagram(str.encode(persistence_file))
+                self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
             else:
                 print("persistence_file must be specified")
         else:

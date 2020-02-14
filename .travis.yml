@@ -36,10 +36,13 @@ cache:
     - $HOME/.cache/pip
     - $HOME/Library/Caches/Homebrew
 
+before_install:
+  - brew update && brew unlink python@2 && brew upgrade python
+
 addons:
   homebrew:
-    update: true
     packages:
+      - python3
       - cmake
       - graphviz 
       - doxygen
@@ -49,7 +52,6 @@ addons:
       - mpfr
       - tbb
       - cgal
-      - python3
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
@@ -59,7 +61,7 @@ before_cache:
 install: 
   - python3 -m pip install --upgrade pip setuptools wheel
   - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
-  - python3 -m pip install --user POT
+  - python3 -m pip install --user POT pybind11
 
 script: 
   - rm -rf build

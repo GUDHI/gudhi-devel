@@ -15,6 +15,7 @@
 
 #include <random>
 #include <gudhi/Bottleneck.h>
+#include <gudhi/Unitary_tests_utils.h>
 
 using namespace Gudhi::persistence_diagram;
 
@@ -59,24 +60,24 @@ BOOST_AUTO_TEST_CASE(persistence_graph) {
   BOOST_CHECK(g.size() == (n1 + n2));
   //
   BOOST_CHECK((int) d.size() == (n1 + n2)*(n1 + n2) + n1 + n2 + 1);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, 0)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, n1 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, n1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, n2 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, n2)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(0, (n1 + n2) - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, 0)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, n1 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, n1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, n2 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, n2)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance(n1, (n1 + n2) - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, 0)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, n1 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, n1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, n2 - 1)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, n2)) > 0);
-  BOOST_CHECK(std::count(d.begin(), d.end(), g.distance((n1 + n2) - 1, (n1 + n2) - 1)) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, 0))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, n1 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, n1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, n2 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, n2))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(0, (n1 + n2) - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, 0))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, n1 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, n1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, n2 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, n2))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance(n1, (n1 + n2) - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, 0))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, n1 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, n1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, n2 - 1))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, n2))) > 0);
+  BOOST_CHECK(std::count(d.begin(), d.end(), GUDHI_PROTECT_FLOAT(g.distance((n1 + n2) - 1, (n1 + n2) - 1))) > 0);
 }
 
 BOOST_AUTO_TEST_CASE(neighbors_finder) {

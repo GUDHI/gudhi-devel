@@ -136,7 +136,8 @@ Finally, it is asked to display information about the Rips complex.
 .. testcode::
 
     import gudhi
-    point_cloud = gudhi.read_off(off_file=gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off')
+    off_file = gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off'
+    point_cloud = gudhi.read_points_from_off_file(off_file = off_file)
     rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=12.0)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \

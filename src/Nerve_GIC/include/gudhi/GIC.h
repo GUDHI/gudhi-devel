@@ -14,7 +14,7 @@
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
-#include <tbb/mutex.h>
+#include <mutex>
 #endif
 
 #include <gudhi/Debug_utils.h>
@@ -459,7 +459,7 @@ class Cover_complex {
     // This cannot be parallelized if thread_local is not defined
     // thread_local is not defined for XCode < v.8
     #if defined(GUDHI_USE_TBB) && defined(GUDHI_CAN_USE_CXX11_THREAD_LOCAL)
-    tbb::mutex deltamutex;
+    std::mutex deltamutex;
     tbb::parallel_for(0, N, [&](int i){
         std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
@@ -707,7 +707,7 @@ class Cover_complex {
     // Sort points according to function values
     std::vector<int> points(n);
     for (int i = 0; i < n; i++) points[i] = i;
-    std::sort(points.begin(), points.end(), [=](const int & p1, const int & p2){return (this->func[p1] < this->func[p2]);});
+    std::sort(points.begin(), points.end(), [this](int p1, int p2){return (this->func[p1] < this->func[p2]);});
 
     int id = 0;
     int pos = 0;
@@ -765,7 +765,7 @@ class Cover_complex {
 
     #ifdef GUDHI_USE_TBB
       if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
-      tbb::mutex covermutex, idmutex;
+      std::mutex covermutex, idmutex;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
         Graph G = one_skeleton.create_subgraph();
@@ -895,7 +895,7 @@ class Cover_complex {
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
       if (verbose) std::cout << "Computing geodesic distances (parallelized)..." << std::endl;
-      tbb::mutex coverMutex; tbb::mutex mindistMutex;
+      std::mutex coverMutex; std::mutex mindistMutex;
       tbb::parallel_for(0, m, [&](int i){
         int seed = voronoi_subsamples[i];
         std::vector<double> dmap(n);

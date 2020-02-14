@@ -6,6 +6,8 @@
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
+ *      - 2019/12 Vincent Rouvreau: Fix #118 - Make histogram_of_lengths and cumulative_histogram_of_lengths
+ *          return the exact number_of_bins (was failing on x86)
  */
 
 #ifndef PERSISTENCE_INTERVALS_H_
@@ -335,6 +337,9 @@ std::vector<size_t> Persistence_intervals::histogram_of_lengths(size_t number_of
       getchar();
     }
   }
+  // we want number of bins equals to number_of_bins (some unexpected results on x86)
+  result[number_of_bins-1]+=result[number_of_bins];
+  result.resize(number_of_bins);
 
   if (dbg) {
     for (size_t i = 0; i != result.size(); ++i) std::cerr << result[i] << std::endl;

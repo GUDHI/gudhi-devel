@@ -1,11 +1,3 @@
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.utility cimport pair
-from libc.stdint cimport intptr_t
-
-from gudhi.simplex_tree cimport *
-from gudhi.simplex_tree import SimplexTree
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -15,6 +7,14 @@ from gudhi.simplex_tree import SimplexTree
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from cython cimport numeric
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libc.stdint cimport intptr_t
+
+from gudhi.simplex_tree cimport *
+from gudhi.simplex_tree import SimplexTree
+
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
@@ -22,9 +22,9 @@ __license__ = "GPL v3"
 cdef extern from "Euclidean_strong_witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Euclidean_strong_witness_complex_interface "Gudhi::witness_complex::Euclidean_strong_witness_complex_interface":
         Euclidean_strong_witness_complex_interface(vector[vector[double]] landmarks, vector[vector[double]] witnesses)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square)
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
-            unsigned limit_dimension)
+            unsigned limit_dimension) except +
         vector[double] get_point(unsigned vertex)
 
 # EuclideanStrongWitnessComplex python interface

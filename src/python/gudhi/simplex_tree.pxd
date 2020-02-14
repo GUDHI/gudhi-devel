@@ -1,18 +1,17 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Vincent Rouvreau
+#
+# Copyright (C) 2016 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.string cimport string
-
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Vincent Rouvreau
-
-    Copyright (C) 2016 Inria
-
-    Modification(s):
-      - YYYY/MM Author: Description of the modification
-"""
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -40,7 +39,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[pair[vector[int], double]] get_star(vector[int] simplex)
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex,
                                                           int dimension)
-        void expansion(int max_dim)
+        void expansion(int max_dim) except +
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
