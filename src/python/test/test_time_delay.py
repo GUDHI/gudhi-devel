@@ -7,7 +7,8 @@ def test_normal():
     # Normal case.
     prep = TimeDelayEmbedding()
     attractor = prep(ts)
-    assert (attractor[0] == np.array([1, 2, 3]))
+    assert (attractor[0] == np.array([1, 2, 3])
+            print(attractor[0].all()))
     assert (attractor[1] == np.array([2, 3, 4]))
     assert (attractor[2] == np.array([3, 4, 5]))
     assert (attractor[3] == np.array([4, 5, 6]))
