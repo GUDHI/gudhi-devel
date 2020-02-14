@@ -31,7 +31,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max)
         vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
-        vector[pair[int, pair[pair[double, int], pair[double, int]]]] get_cofaces_of_cubical_persistence_pairs(int homology_coeff_field, double min_persistence)
+        vector[vector[int]] cofaces_of_cubical_persistence_pairs()
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
@@ -146,31 +146,32 @@ cdef class CubicalComplex:
             persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
         return persistence_result
 
-    def cofaces_of_cubical_persistence_pairs(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
-        """This function returns the persistence of the simplicial complex.
+    def cofaces_of_persistence_pairs(self):
+        """A persistence interval is described by a pair of cells, one that creates the 
+           feature and one that kills it. The filtration values of those 2 cells give coordinates 
+           for a point in a persistence diagram, or a bar in a barcode. Structurally, in the 
+           cubical complexes provided here, the filtration value of any cell is the minimum of the 
+           filtration values of the maximal cells that contain it. Connecting persistence diagram 
+           coordinates to the corresponding value in the input (i.e. the filtration values of 
+           the top-dimensional cells) is useful for differentiation purposes.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
-        :type homology_coeff_field: int.
-        :param min_persistence: The minimum persistence value to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Sets min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
-        :param persistence_dim_max: If true, the persistent homology for the
-            maximal dimension in the complex is computed. If false, it is
-            ignored. Default is false.
-        :type persistence_dim_max: bool
-        :returns: The persistence of the simplicial complex, together with the cofaces of the corresponding generators, i.e., the top-dimensional cells/cofaces of the positive and negative simplices.
-        :rtype:  list of pairs(dimension, pair(index of positive top-dimensional cell, index of negative top-dimensional cell))
+           This function returns a list of pairs of top-dimensional cells corresponding to 
+           the persistence birth and death cells of the filtration. The cells are represented by 
+           their indices in the input list of top-dimensional cells (and not their indices in the 
+           internal datastructure that includes non-maximal cells). Note that when two adjacent 
+           top-dimensional cells have the same filtration value, we arbitrarily return one of the two
+           when calling the function on one of their common faces.
+
+        :returns: The top-dimensional cells/cofaces of the positive and negative cells.
+        :rtype:  list of pairs(index of positive top-dimensional cell, index of negative top-dimensional cell)
         """
+        cdef vector[vector[int]] persistence_result
         if self.pcohptr != NULL:
-            del self.pcohptr
-        self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, True)
-        cdef vector[pair[int, pair[pair[double, int], pair[double, int]]]] persistence_result
-        if self.pcohptr != NULL:
-            persistence_result = self.pcohptr.get_cofaces_of_cubical_persistence_pairs(homology_coeff_field, min_persistence)
-        return persistence_result
+            persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+        else:
+            print("cofaces_of_persistence_pairs function requires persistence function"
+                  " to be launched first.")
+        return np.array(persistence_result)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the complex.

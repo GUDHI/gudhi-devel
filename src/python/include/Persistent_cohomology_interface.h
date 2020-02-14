@@ -63,7 +63,6 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     auto persistent_pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
       persistent_cohomology::Field_Zp>::get_persistent_pairs();
     std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
-
     std::vector<std::pair<int, std::pair<double, double>>> persistence;
     for (auto pair : persistent_pairs) {
       persistence.push_back(std::make_pair(stptr_->dimension(get<0>(pair)),
@@ -73,58 +72,52 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     return persistence;
   }
 
-  void top_dimensional_cofaces(std::vector<int> & cofaces, int splx){
-    if (stptr_->dimension(stptr_->simplex(splx)) == stptr_->dimension()){cofaces.push_back(stptr_->simplex(splx));}
-    else{  for (auto v : stptr_->coboundary_simplex_range(stptr_->simplex(splx))){top_dimensional_cofaces(cofaces, stptr_->key(v));}  }
+  int top_dimensional_coface(int splx){
+    if (stptr_->dimension(splx) == stptr_->dimension()){return splx;}
+    else{  
+      for (auto v : stptr_->coboundary_simplex_range(splx)){
+        if(stptr_->filtration(v) == stptr_->filtration(splx)){
+          return top_dimensional_coface(v);
+        }
+      }  
+    }
   }
 
-  std::vector<std::pair<int, std::pair<std::pair<double, int>, std::pair<double, int>>>> get_cofaces_of_cubical_persistence_pairs(int homology_coeff_field,
-                                                                                                                                  double min_persistence) {
+  std::vector<std::vector<int>> cofaces_of_cubical_persistence_pairs() {
 
     // Warning: this function is meant to be used with CubicalComplex only!!
 
+    auto pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::get_persistent_pairs();
+
     // Gather all top-dimensional cells and store their simplex handles
-    std::vector<int> max_splx; for (auto splx : stptr_->filtration_simplex_range()){ if (stptr_->dimension(splx) == stptr_->dimension())  max_splx.push_back(splx); }
+    std::vector<int> max_splx; for (auto splx : stptr_->top_dimensional_cells_range()){
+      max_splx.push_back(splx); 
+    }
     // Sort these simplex handles and compute the ordering function
     // This function allows to go directly from the simplex handle to the position of the corresponding top-dimensional cell in the input data 
-    std::map<int, int> order; std::sort(max_splx.begin(), max_splx.end()); for (unsigned int i = 0; i < max_splx.size(); i++)  order.insert(std::make_pair(max_splx[i], i));
+    std::map<int, int> order; std::sort(max_splx.begin(), max_splx.end()); 
+    for (unsigned int i = 0; i < max_splx.size(); i++)  order.insert(std::make_pair(max_splx[i], i));
 
-    persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
-    persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
-
-    // Custom sort and output persistence
-    cmp_intervals_by_dim_then_length cmp(stptr_);
-    auto persistent_pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::get_persistent_pairs();
-    std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
-
-    std::vector<std::pair<int, std::pair<std::pair<double, int>, std::pair<double, int>>>> persistence;
-    for (auto pair : persistent_pairs) {
-
-      double f0 = stptr_->filtration(get<0>(pair));
-      // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
-      std::vector<int> faces0; top_dimensional_cofaces(faces0, stptr_->key(get<0>(pair)));
-      // Find the top-dimensional cell / coface with the same filtration value
-      int cf; for (unsigned int i = 0; i < faces0.size(); i++){if (stptr_->filtration(faces0[i]) == f0){cf = i; break;}}
+    std::vector<std::vector<int>> persistence_pairs;
+    for (auto pair : pairs) {
+      int h = stptr_->dimension(get<0>(pair));
+      // Recursively get the top-dimensional cell / coface associated to the persistence generator
+      int face0 = top_dimensional_coface(get<0>(pair));
       // Retrieve the index of the corresponding top-dimensional cell in the input data
-      int splx0 = order[faces0[cf]];
+      int splx0 = order[face0];
 
       int splx1 = -1;
       if (isfinite(stptr_->filtration(get<1>(pair)))){
-      double f1 = stptr_->filtration(get<1>(pair));
-      // Recursively get the top-dimensional cells / cofaces associated to the persistence generator
-      std::vector<int> faces1; top_dimensional_cofaces(faces1, stptr_->key(get<1>(pair)));
-      // Find the top-dimensional cell / coface with the same filtration value
-      int cf; for (unsigned int i = 0; i < faces1.size(); i++){if (stptr_->filtration(faces1[i]) == f1){cf = i; break;}}
+      // Recursively get the top-dimensional cell / coface associated to the persistence generator
+      int face1 = top_dimensional_coface(get<1>(pair));
       // Retrieve the index of the corresponding top-dimensional cell in the input data
-      splx1 = order[faces1[cf]];
+      splx1 = order[face1];
       }
-
-      persistence.push_back(std::make_pair(stptr_->dimension(get<0>(pair)), std::make_pair(std::make_pair(stptr_->filtration(get<0>(pair)), splx0), std::make_pair(stptr_->filtration(get<1>(pair)), splx1))));
+      std::vector<int> vect{ h, splx0, splx1};
+      persistence_pairs.push_back(vect);
     }
-    return persistence;
+    return persistence_pairs;
   }
 
   std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs() {
