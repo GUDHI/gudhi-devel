@@ -1,4 +1,5 @@
 from gudhi.point_cloud.timedelay import TimeDelayEmbedding
+import numpy as np
 
 def test_normal():
     # Sample array
