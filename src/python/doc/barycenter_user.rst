@@ -9,7 +9,8 @@ Definition
 
 .. include:: barycenter_sum.inc
 
-This implementation is based on ideas from "Frechet means for distribution of persistence diagrams", Turner et al. 2014.
+This implementation is based on ideas from "Frechet means for distribution of 
+persistence diagrams", Turner et al. 2014.
 
 Function
 --------
@@ -21,6 +22,10 @@ Basic example
 
 This example computes the Frechet mean (aka Wasserstein barycenter) between four persistence diagrams.
 It is initialized on the 4th diagram, which is the empty diagram. It is encoded by np.array([]).
+As the algorithm is not convex, its output depends on the initialization and is only a local minimum of the objective function.
+Initialization can be either given as an integer (in which case the i-th diagram of the list is used as initial estimate)
+or as a diagram. 
+If None, it will randomly select one of the diagram of the list as initial estimate.
 Note that persistence diagrams must be submitted as (n x 2) numpy arrays and must not contain inf values.
 
 .. testcode::
