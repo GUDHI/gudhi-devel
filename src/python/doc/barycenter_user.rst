@@ -21,7 +21,7 @@ Basic example
 -------------
 
 This example computes the Frechet mean (aka Wasserstein barycenter) between four persistence diagrams.
-It is initialized on the 4th diagram, which is the empty diagram. It is encoded by np.array([]).
+It is initialized on the 4th diagram.
 As the algorithm is not convex, its output depends on the initialization and is only a local minimum of the objective function.
 Initialization can be either given as an integer (in which case the i-th diagram of the list is used as initial estimate)
 or as a diagram. 
