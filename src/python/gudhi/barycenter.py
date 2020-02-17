@@ -103,6 +103,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     :param pdiagset: a list of size m containing numpy.array of shape (n x 2) 
                         (n can variate), encoding a set of 
                         persistence diagrams with only finite coordinates. 
+                        If empty, returns None.
     :param init: The initial value for barycenter estimate. 
                     If None, init is made on a random diagram from the dataset. 
                     Otherwise, it must be an int 
