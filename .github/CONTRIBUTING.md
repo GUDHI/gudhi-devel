@@ -36,7 +36,12 @@ We use Sphinx to generate the code and you will be able to verify the result in 
 
 ## Something you want to improve in the code
 
-Please first take some time to read our [code conventions](code_conventions.md)
+We don't ask for any paperwork but we expect you don't submit anything you are not allowed to:
+* check that your work contract and your employer allow you to contribute to this open source project.
+* insure you do not violate someone's intellectual property.
+* ...
+
+Please, take some time to read our [code conventions](code_conventions.md)
 
 As a convention, we set a Pull Request as a **Draft Pull Request** when we work on something we want the other contributors to see.
 
