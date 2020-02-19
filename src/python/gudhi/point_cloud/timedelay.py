@@ -43,7 +43,7 @@ class TimeDelayEmbedding:
             A single time-series data.
         Returns
         -------
-        point clouds : list[list[float, float, float]]
+        point clouds : list of n x 2 numpy arrays
             Makes point cloud every a single time-series data.
         Raises
         -------
@@ -80,7 +80,7 @@ class TimeDelayEmbedding:
              the same size. 
         Returns
         -------
-        point clouds : list[list[list[float, float, float]]]
+        point clouds : list of n x 3 numpy arrays
             Makes point cloud every a single time-series data.
         Raises
         -------
