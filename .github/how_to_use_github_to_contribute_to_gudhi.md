@@ -25,9 +25,10 @@ This creates a directory gudhi-devel, which you are free to move around or renam
 cd gudhi-devel
 ```
 
-## Submodule
-An interface to Hera for Wasserstein distance is available on an external git repository.
-Everytime you checkout master or merge from master, afterwards, you will need to run the command:
+Everytime you clone the repository, you will have to download the *submodules*.
+
+## Submodules
+An interface to Hera for Wasserstein distance is available on an external git repository. To download it:
 ```bash
 git submodule update --init
 ```
@@ -58,6 +59,11 @@ git fetch -p --all
 This is a command you can run quite regularly.
 It tells git to check all that happened on github.
 It is safe, it will not mess with your files.
+
+**Reminder:** Everytime you checkout master or merge from master, afterwards, if the version of one the submodule has changed, or if a submodule was added, you will have to:
+```bash
+git submodule update --init
+```
 
 ## Create a branch, based on the current master
 ```bash
