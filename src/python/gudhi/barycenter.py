@@ -95,11 +95,6 @@ def _optimal_matching(X, Y, withcost=False):
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     '''
-        Returns the estimated barycenter computed with the algorithm provided
-        by Turner et al (2014).
-        As the algorithm is not convex, the output depends on initialization.
-        It is a local minimum of the corresponding Frechet function.
-        
     :param pdiagset: a list of size m containing numpy.array of shape (n x 2) 
                         (n can variate), encoding a set of 
                         persistence diagrams with only finite coordinates. 
