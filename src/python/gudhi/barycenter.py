@@ -17,12 +17,12 @@ from gudhi.wasserstein import _build_dist_matrix, _perstot
 
 
 def _mean(x, m):
-    """
+    '''
     :param x: a list of 2D-points, off diagonal, x_0... x_{k-1}
     :param m: total amount of points taken into account, 
                 that is we have (m-k) copies of diagonal
     :returns: the weighted mean of x with (m-k) copies of the diagonal
-    """
+    '''
     k = len(x)
     if k > 0:
         w = np.mean(x, axis=0)
@@ -33,7 +33,7 @@ def _mean(x, m):
 
 
 def _optimal_matching(X, Y, withcost=False):
-    """
+    '''
     :param X: numpy.array of size (n x 2)
     :param Y: numpy.array of size (m x 2)
     :param withcost: returns also the cost corresponding to the optimal matching
@@ -44,7 +44,7 @@ def _optimal_matching(X, Y, withcost=False):
                 if i >= len(X) or j >= len(Y), it means they 
                 represent the diagonal.
                 They will be encoded by -1 afterwards.
-    """
+    '''
 
     n = len(X)
     m = len(Y)
@@ -94,7 +94,7 @@ def _optimal_matching(X, Y, withcost=False):
 
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
-    """
+    '''
         Returns the estimated barycenter computed with the algorithm provided
         by Turner et al (2014).
         As the algorithm is not convex, the output depends on initialization.
@@ -129,7 +129,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                                 of observations to the output.
                     - nb_iter, integer representing the number of iterations 
                                performed before convergence of the algorithm.
-    """
+    '''
     X = pdiagset  # to shorten notations, not a copy
     m = len(X)  # number of diagrams we are averaging
     if m == 0:
