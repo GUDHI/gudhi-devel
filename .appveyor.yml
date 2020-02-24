@@ -39,27 +39,27 @@ install:
   # Install packages with vcpkg
   - vcpkg install %BOOST_PACKAGES% tbb:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
   # Set the different paths
-  #- SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
-  #- SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
-  #- SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
+  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
+  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   # For Visual Studio 2017
-  #- CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   # Install pip packages - POT needs to be on a separate line
-  #- python -m pip install --upgrade pip
-  #- pip install -U setuptools numpy matplotlib scipy Cython pytest
-  #- pip install -U POT pybind11
+  - python -m pip install --upgrade pip
+  - pip install -U setuptools numpy matplotlib scipy Cython pytest
+  - pip install -U POT pybind11
   - dir "C:/Tools/vcpkg/installed/x64-windows/include/boost"
 
 build_script:
   - git submodule update --init
-  #- mkdir build
-  #- cd build
+  - mkdir build
+  - cd build
   # Build and test all except the Python module
-  #- cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR=%GMP_INCLUDE_DIR% -DGMP_LIBRARIES=%GMP_LIBRARIES% -DGMP_LIBRARIES_DIR=%GMP_LIBRARIES_DIR% -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN_FILE% ..
-  #- MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
-  #- ctest -j 4 --output-on-failure -C Release -E diff_files
+  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR=%GMP_INCLUDE_DIR% -DGMP_LIBRARIES=%GMP_LIBRARIES% -DGMP_LIBRARIES_DIR=%GMP_LIBRARIES_DIR% -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN_FILE% ..
+  - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+  - ctest -j 4 --output-on-failure -C Release -E diff_files
   # Build and test the Python module
-  #- cmake -DWITH_GUDHI_PYTHON=ON .
-  #- cd src/python
-  #- MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64
-  #- ctest -j 4 --output-on-failure -C Release
+  - cmake -DWITH_GUDHI_PYTHON=ON .
+  - cd src/python
+  - MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64
+  - ctest -j 4 --output-on-failure -C Release
