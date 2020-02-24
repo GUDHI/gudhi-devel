@@ -15,7 +15,6 @@ environment:
   matrix:
       - target: BuildAndTest
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
-        BOOST_PACKAGES: "boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows"
         PYTHON: "C:\\Python37-x64"
         GMP_INCLUDE_DIR: "c:/Tools/vcpkg/installed/x64-windows/include"
         GMP_LIBRARIES: "c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
@@ -23,32 +22,24 @@ environment:
         CMAKE_TOOLCHAIN_FILE: "c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 cache:
-  - c:\Tools\vcpkg
+  # comment these 2 lines to reset the cache
+  # appveyor does not allow to recache vcpkg and pip separately
+  - c:\Tools\vcpkg -> .github/vcpkg-requirements.txt, .github/build-requirements.txt, .github/test-requirements.txt
   - '%LOCALAPPDATA%\pip\Cache'
 
-init:
-  - echo %target%
-
-
 install:
-  # Update vcpkg
-  - cd "C:\Tools\vcpkg"
-  - git pull
-  - .\bootstrap-vcpkg.bat
-  - cd %appveyor_build_folder%
   # Install packages with vcpkg
-  - vcpkg install %BOOST_PACKAGES% tbb:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
+  - for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg install %%a )
   # Set the different paths
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   # For Visual Studio 2017
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  # Install pip packages - POT needs to be on a separate line
+  # Install pip packages
   - python -m pip install --upgrade pip
-  - pip install -U setuptools numpy matplotlib scipy Cython pytest
-  - pip install -U POT pybind11
-  - dir "C:/Tools/vcpkg/installed/x64-windows/include/boost"
+  - pip install -U -r .github/build-requirements.txt
+  - pip install -U -r .github/test-requirements.txt
 
 build_script:
   - git submodule update --init
