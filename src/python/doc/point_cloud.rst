@@ -26,4 +26,5 @@ TimeDelayEmbedding
 
 .. autoclass:: gudhi.point_cloud.timedelay.TimeDelayEmbedding
    :members:
+   :special-members: __call__
 
