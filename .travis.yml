@@ -6,7 +6,7 @@ git:
  depth: 3
 
 os: osx
-osx_image: xcode10.3
+osx_image: xcode10.2
 compiler: clang
 
 env:
@@ -50,8 +50,8 @@ script:
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_OPTIONS} .. 
   - make -j 4 all
-  - make doxygen
-  - ctest -j 4 --output-on-failure -E sphinx
+  #- make doxygen
+  - ctest -j 4 --output-on-failure
 
 notifications:
   email:
