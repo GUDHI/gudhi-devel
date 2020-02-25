@@ -6,7 +6,7 @@ git:
  depth: 3
 
 os: osx
-osx_image: xcode10.2
+osx_image: xcode10.3
 compiler: clang
 
 env:
@@ -15,7 +15,7 @@ env:
 cache:
   directories:
     - $HOME/.cache/pip
-#    - $HOME/Library/Caches/Homebrew
+    - $HOME/Library/Caches/Homebrew
 
 before_install:
   - brew update && brew unlink python@2 && brew upgrade python
