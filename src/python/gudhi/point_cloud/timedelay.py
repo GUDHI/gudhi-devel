@@ -50,6 +50,7 @@ class TimeDelayEmbedding:
 
     def __call__(self, ts):
         """Transform method for single time-series data.
+
         Parameters
         ----------
         ts : Iterable[float] or Iterable[Iterable[float]]
