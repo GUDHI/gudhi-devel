@@ -18,7 +18,7 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 before_install:
-  - brew update && brew unlink python@2 && brew upgrade python
+  - brew update
 
 addons:
   homebrew:
