@@ -15,7 +15,7 @@ env:
 cache:
   directories:
     - $HOME/.cache/pip
-    - $HOME/Library/Caches/Homebrew
+#    - $HOME/Library/Caches/Homebrew
 
 before_install:
   - brew update && brew unlink python@2 && brew upgrade python
