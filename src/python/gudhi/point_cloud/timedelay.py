@@ -8,10 +8,12 @@
 
 import numpy as np
 
+
 class TimeDelayEmbedding:
     """Point cloud transformation class.
     Embeds time-series data in the R^d according to Takens' Embedding Theorem
     and obtains the coordinates of each point.
+
     Parameters
     ----------
     dim : int, optional (default=3)
@@ -20,16 +22,27 @@ class TimeDelayEmbedding:
         Time-Delay embedding.
     skip : int, optional (default=1)
         How often to skip embedded points.
-        Given delay=3 and skip=2, an point cloud which is obtained by embedding 
-        a single time-series data into R^3 is as follows.
-        
-    .. code-block:: none
-    
-    time-series = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    point clouds = [[1, 4, 7], 
-                    [3, 6, 9]]
-                   
+
+    Example
+    -------
+
+    Given delay=3 and skip=2, a point cloud which is obtained by embedding
+    a scalar time-series into R^3 is as follows::
+
+        time-series = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        point cloud = [[1, 4, 7],
+                       [3, 6, 9]]
+
+    Given delay=1 and skip=1, a point cloud which is obtained by embedding
+    a 2D vector time-series data into R^4 is as follows::
+
+        time-series = [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]
+        point cloud = [[0, 1, 2, 3],
+                       [2, 3, 4, 5],
+                       [4, 5, 6, 7],
+                       [6, 7, 8, 9]]
     """
+
     def __init__(self, dim=3, delay=1, skip=1):
         self._dim = dim
         self._delay = delay
@@ -39,56 +52,42 @@ class TimeDelayEmbedding:
         """Transform method for single time-series data.
         Parameters
         ----------
-        ts : list[float]
-            A single time-series data.
+        ts : Iterable[float] or Iterable[Iterable[float]]
+            A single time-series data, with scalar or vector values.
+
         Returns
         -------
-        point clouds : list of n x 2 numpy arrays
-            Makes point cloud every a single time-series data.
-        Raises
-        -------
-        TypeError
-            If the parameter's type does not match the desired type.
+        point cloud : n x dim numpy arrays
+            Makes point cloud from a single time-series data.
         """
-        ndts = np.array(ts)
-        if ndts.ndim == 1:
-            return self._transform(ndts)
-        else:
-            raise TypeError("Expects 1-dimensional array.")
+        return self._transform(np.array(ts))
 
     def fit(self, ts, y=None):
         return self
     
     def _transform(self, ts):
         """Guts of transform method."""
-        return ts[
-            np.add.outer(
-                np.arange(0, len(ts)-self._delay*(self._dim-1), self._skip),
-                np.arange(0, self._dim*self._delay, self._delay))
-        ]
+        if ts.ndim == 1:
+            repeat = self._dim
+        else:
+            assert self._dim % ts.shape[1] == 0
+            repeat = self._dim // ts.shape[1]
+        end = len(ts) - self._delay * (repeat - 1)
+        short = np.arange(0, end, self._skip)
+        vertical = np.arange(0, repeat * self._delay, self._delay)
+        return ts[np.add.outer(short, vertical)].reshape(len(short), -1)
 
     def transform(self, ts):
         """Transform method for multiple time-series data.
+
         Parameters
         ----------
-        ts : list[list[float]]
-            Multiple time-series data.
-        Attributes
-        ----------
-        ndts : 
-             The ndts means that all time series need to have exactly 
-             the same size. 
+        ts : Iterable[Iterable[float]] or Iterable[Iterable[Iterable[float]]]
+            Multiple time-series data, with scalar or vector values.
+
         Returns
         -------
-        point clouds : list of n x 3 numpy arrays
-            Makes point cloud every a single time-series data.
-        Raises
-        -------
-        TypeError
-            If the parameter's type does not match the desired type.
+        point clouds : list of n x dim numpy arrays
+            Makes point cloud from each time-series data.
         """
-        ndts = np.array(ts)
-        if ndts.ndim == 2:
-            return np.apply_along_axis(self._transform, 1, ndts)
-        else:
-            raise TypeError("Expects 2-dimensional array.")
+        return [self._transform(np.array(s)) for s in ts]
