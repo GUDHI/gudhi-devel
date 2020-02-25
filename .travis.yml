@@ -18,11 +18,12 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 before_install:
-  - brew update
+  - brew unlink python@2 && brew upgrade python
 
 addons:
   homebrew:
     packages:
+      - python3
       - cmake
       - graphviz 
       - doxygen
@@ -32,6 +33,7 @@ addons:
       - mpfr
       - tbb
       - cgal
+      update: true
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
@@ -39,9 +41,6 @@ before_cache:
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - brew unlink python@2
-  - brew upgrade python
-  - brew install python3
   - brew list
   - python3 -m pip install --upgrade pip
   - python3 -m pip install -U -r .github/build-requirements.txt
