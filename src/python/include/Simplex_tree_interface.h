@@ -124,18 +124,22 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   // Iterator over the simplex tree
   typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
     // Base::initialize_filtration(); already performed in filtration_simplex_range
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::filtration_simplex_range().begin();
   }
 
   typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::filtration_simplex_range().end();
   }
 
   Skeleton_simplex_iterator get_skeleton_iterator_begin(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::skeleton_simplex_range(dimension).begin();
   }
 
   Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::skeleton_simplex_range(dimension).end();
   }
 };
