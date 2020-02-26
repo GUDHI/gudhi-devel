@@ -18,8 +18,11 @@ namespace py=pybind11;
 
 template<class T, class=std::enable_if_t<std::is_integral<T>::value>>
 int getint(int i){return i;}
-template<class T, class=decltype(std::declval<T>().template cast<int>())>
-int getint(T i){return i.template cast<int>();}
+// Gcc-8 has a bug that breaks this version, fixed in gcc-9
+// template<class T, class=decltype(std::declval<T>().template cast<int>())>
+// int getint(T i){return i.template cast<int>();}
+template<class T>
+auto getint(T i)->decltype(i.template cast<int>()){return i.template cast<int>();}
 
 // Raw clusters are clusters obtained through single-linkage, no merging.
 
