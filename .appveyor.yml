@@ -13,53 +13,44 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
-      - target: Examples
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+      - target: BuildAndTest
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
         PYTHON: "C:\\Python37-x64"
-
-      - target: UnitaryTests
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
-
-      - target: Utilities
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
-        PYTHON: "C:\\Python37-x64"
-
-      - target: Python
-        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
-        PYTHON: "C:\\Python37-x64"
-
+        GMP_INCLUDE_DIR: "c:/Tools/vcpkg/installed/x64-windows/include"
+        GMP_LIBRARIES: "c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
+        GMP_LIBRARIES_DIR: "c:/Tools/vcpkg/installed/x64-windows/lib"
+        CMAKE_TOOLCHAIN_FILE: "c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 cache:
-  - c:\Tools\vcpkg\installed
+  # comment these 2 lines to reset the cache
+  # appveyor does not allow to recache vcpkg and pip separately
+  - c:\Tools\vcpkg -> .github/vcpkg-requirements.txt, .github/build-requirements.txt, .github/test-requirements.txt
   - '%LOCALAPPDATA%\pip\Cache'
 
-init:
-  - echo %target%
-
-
 install:
-  - git submodule update --init
-  - vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
+  # Install packages with vcpkg
+  - for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg install %%a )
+  # Set the different paths
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
+  # For Visual Studio 2017
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  - python --version
-  - pip --version
+  # Install pip packages
   - python -m pip install --upgrade pip
-  - pip install -U setuptools numpy matplotlib scipy Cython pytest
-  - pip install -U POT pybind11
+  - pip install -U -r .github/build-requirements.txt
+  - pip install -U -r .github/test-requirements.txt
 
 build_script:
+  - git submodule update --init
   - mkdir build
   - cd build
-  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
-  - if [%target%]==[Python] (
-      cd src/python &
-      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
-      ctest -j 1 --output-on-failure -C Release
-    ) else (
-      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
-      ctest -j 1 --output-on-failure -C Release -E diff_files
-    )
+  # Build and test all except the Python module
+  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR=%GMP_INCLUDE_DIR% -DGMP_LIBRARIES=%GMP_LIBRARIES% -DGMP_LIBRARIES_DIR=%GMP_LIBRARIES_DIR% -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN_FILE% ..
+  - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+  - ctest -j 4 --output-on-failure -C Release -E diff_files
+  # Build and test the Python module
+  - cmake -DWITH_GUDHI_PYTHON=ON .
+  - cd src/python
+  - MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64
+  - ctest -j 4 --output-on-failure -C Release

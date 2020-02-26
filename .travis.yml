@@ -9,27 +9,8 @@ os: osx
 osx_image: xcode10.2
 compiler: clang
 
-matrix:
-  include:
-    - env:
-        # 1. Only examples and associated tests
-        - CMAKE_EXAMPLE='ON' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
-    - env:
-        # 2. Only unitary tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='ON' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
-    - env:
-        # 3. Only utilities and associated tests
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='ON' CMAKE_PYTHON='OFF' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure'
-    - env:
-        # 4. Only doxygen documentation
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='OFF' MAKE_TARGET='doxygen' CTEST_COMMAND='echo No tests for doxygen target'
-    - env:
-        # 5. Only Python, associated tests and sphinx documentation
-        # $ which python3   => /usr/local/bin/python3
-        # cmake             => -- Found PythonInterp: /usr/local/bin/python3 (found version "3.7.5")
-        # In python3-sphinx-build.py, print(sys.executable)   => /usr/local/opt/python/bin/python3.7   ???
-        # should be : MAKE_TARGET='all sphinx' CTEST_COMMAND='ctest --output-on-failure'
-        - CMAKE_EXAMPLE='OFF' CMAKE_TEST='OFF' CMAKE_UTILITIES='OFF' CMAKE_PYTHON='ON' MAKE_TARGET='all' CTEST_COMMAND='ctest --output-on-failure -E sphinx'
+env:
+  - CMAKE_OPTIONS='-DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3'
 
 cache:
   directories:
@@ -37,7 +18,7 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 before_install:
-  - brew update && brew unlink python@2 && brew upgrade python
+  - brew unlink python@2 && brew upgrade python
 
 addons:
   homebrew:
@@ -52,6 +33,7 @@ addons:
       - mpfr
       - tbb
       - cgal
+      update: true
 
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
@@ -59,18 +41,19 @@ before_cache:
 
 # When installing through libcgal-dev apt, CMake Error at CGAL Exports.cmake The imported target "CGAL::CGAL Qt5" references the file
 install: 
-  - python3 -m pip install --upgrade pip setuptools wheel
-  - python3 -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
-  - python3 -m pip install --user POT pybind11
+  - brew list
+  - python3 -m pip install --upgrade pip
+  - python3 -m pip install -U -r .github/build-requirements.txt
+  - python3 -m pip install -U -r .github/test-requirements.txt
 
 script: 
   - rm -rf build
   - mkdir -p build 
   - cd build 
-  - cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=${CMAKE_EXAMPLE} -DWITH_GUDHI_TEST=${CMAKE_TEST} -DWITH_GUDHI_UTILITIES=${CMAKE_UTILITIES} -DWITH_GUDHI_PYTHON=${CMAKE_PYTHON} -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 .. 
-  - make ${MAKE_TARGET}
-  - ${CTEST_COMMAND}
-  - cd ..
+  - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_OPTIONS} .. 
+  - make -j 4 all
+  - make doxygen
+  - ctest -j 4 --output-on-failure
 
 notifications:
   email:
