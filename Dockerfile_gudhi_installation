@@ -42,6 +42,7 @@ RUN apt-get install -y make \
     python3-pip \
     python3-pytest \
     python3-tk \
+    python3-pybind11 \
     libfreetype6-dev \
     pkg-config \
     curl
@@ -50,14 +51,16 @@ RUN pip3 install \
     numpy \
     matplotlib \
     scipy \
-    Cython
+    Cython \
+    POT \
+    scikit-learn
 
 # apt clean up
 RUN apt autoremove && rm -rf /var/lib/apt/lists/*
 
-RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-3.0.0/gudhi.3.0.0.tar.gz" \
-&& tar xf gudhi.3.0.0.tar.gz \
-&& cd gudhi.3.0.0 \
+RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-3.1.1/gudhi.3.1.1.tar.gz" \
+&& tar xf gudhi.3.1.1.tar.gz \
+&& cd gudhi.3.1.1 \
 && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_PYTHON=OFF -DPython_ADDITIONAL_VERSIONS=3 ..  \
 && make all test install \
 && cmake -DWITH_GUDHI_PYTHON=ON . \
