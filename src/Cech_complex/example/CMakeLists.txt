@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Cech_complex_examples)
 
 add_executable ( Cech_complex_example_step_by_step cech_complex_step_by_step.cpp )
-target_link_libraries(Cech_complex_example_step_by_step ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(Cech_complex_example_step_by_step Boost::program_options)
 if (TBB_FOUND)
   target_link_libraries(Cech_complex_example_step_by_step ${TBB_LIBRARIES})
 endif()
