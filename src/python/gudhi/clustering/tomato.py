@@ -29,7 +29,18 @@ class Tomato:
     params_: dict
         Parameters like input_type, metric, etc
     """
-    def __init__(self, input_type='points', metric=None, graph_type=None, density_type='manual', n_clusters=None, merge_threshold=None, eliminate_threshold=None, **params):
+
+    def __init__(
+        self,
+        input_type="points",
+        metric=None,
+        graph_type=None,
+        density_type="manual",
+        n_clusters=None,
+        merge_threshold=None,
+        eliminate_threshold=None,
+        **params
+    ):
         """
         Each parameter has a corresponding attribute, like self.merge_threshold_, that can be changed later.
 
@@ -72,179 +83,207 @@ class Tomato:
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
         # TODO: less code duplication (subroutines?), less spaghetti, but don't compute neighbors twice if not needed. Clear error message for missing or contradictory parameters.
         if weights:
-            density_type = 'manual'
+            density_type = "manual"
         else:
             density_type = self.density_type_
-            assert density_type != 'manual'
-            if density_type == 'manual':
+            assert density_type != "manual"
+            if density_type == "manual":
                 raise ValueError("If density_type is 'manual', you must provide weights to fit()")
 
-        if self.input_type_ == 'distance_matrix' and self.graph_type_ == 'radius':
+        if self.input_type_ == "distance_matrix" and self.graph_type_ == "radius":
             X = numpy.array(X)
-            r = self.params_['r']
+            r = self.params_["r"]
             self.neighbors_ = [numpy.nonzero(l <= r) for l in X]
 
-        if self.input_type_ == 'distance_matrix' and self.graph_type_ == 'knn':
-            k = self.params_['k']
-            self.neighbors_ = numpy.argpartition(X, k-1)[:,0:k]
+        if self.input_type_ == "distance_matrix" and self.graph_type_ == "knn":
+            k = self.params_["k"]
+            self.neighbors_ = numpy.argpartition(X, k - 1)[:, 0:k]
 
-        if self.input_type_ == 'neighbors':
+        if self.input_type_ == "neighbors":
             self.neighbors_ = X
-            assert density_type == 'manual'
+            assert density_type == "manual"
 
-        if self.input_type_ == 'points' and self.graph_type_ == 'knn' and self.density_type_ in {'DTM', 'logDTM'}:
+        if self.input_type_ == "points" and self.graph_type_ == "knn" and self.density_type_ in {"DTM", "logDTM"}:
             self.points_ = X
-            q = self.params_.get('p_DTM', 2)
-            p = self.params_.get('p', 2)
-            k = self.params_.get('k', 10)
-            k_DTM = self.params_.get('k_DTM', k)
+            q = self.params_.get("p_DTM", 2)
+            p = self.params_.get("p", 2)
+            k = self.params_.get("k", 10)
+            k_DTM = self.params_.get("k_DTM", k)
             kmax = max(k, k_DTM)
-            if self.params_.get('gpu'):
+            if self.params_.get("gpu"):
                 import torch
                 from pykeops.torch import LazyTensor
+
                 # 'float64' is slow except on super expensive GPUs. Allow it with some param?
                 XX = torch.tensor(self.points_, dtype=torch.float32)
                 if p == numpy.inf:
                     # Requires a version of pykeops strictly more recent than 1.3
-                    dd, nn = (LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs().max(-1).Kmin_argKmin(kmax, dim=1)
-                elif p == 2: # Any even integer?
-                    dd, nn = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:]))**p).sum(-1).Kmin_argKmin(kmax, dim=1)
+                    dd, nn = (
+                        (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :]))
+                        .abs()
+                        .max(-1)
+                        .Kmin_argKmin(kmax, dim=1)
+                    )
+                elif p == 2:  # Any even integer?
+                    dd, nn = (
+                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p)
+                        .sum(-1)
+                        .Kmin_argKmin(kmax, dim=1)
+                    )
                 else:
-                    dd, nn = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs()**p).sum(-1).Kmin_argKmin(kmax, dim=1)
+                    dd, nn = (
+                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p)
+                        .sum(-1)
+                        .Kmin_argKmin(kmax, dim=1)
+                    )
                 if k < kmax:
                     nn = nn[:, 0:k]
                 if k_DTM < kmax:
                     dd = dd[:, 0:k_DTM]
-                assert q != numpy.inf # for now
+                assert q != numpy.inf  # for now
                 if p != numpy.inf:
                     qp = float(q) / p
                 else:
                     qp = q
                 if qp != 1:
-                    dd = dd**qp
+                    dd = dd ** qp
                 weights = dd.sum(-1)
                 # **1/q is a waste of time, whether we take another **-.25 or a log
 
                 # Back to the CPU. Not sure this is necessary, or the right way to do it.
                 weights = numpy.array(weights)
                 self.neighbors_ = numpy.array(nn)
-            else: # CPU
+            else:  # CPU
                 from scipy.spatial import cKDTree
+
                 kdtree = cKDTree(self.points_)
-                qargs = { k:v for k,v in self.params_.items() if k in {'eps', 'n_jobs'}}
+                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
                 dd, self.neighbors_ = kdtree.query(self.points_, k=kmax, p=p, **qargs)
                 if k < kmax:
                     self.neighbors_ = self.neighbors_[:, 0:k]
                 if k_DTM < kmax:
                     dd = dd[:, 0:k_DTM]
-                #weights = numpy.linalg.norm(dd, axis=1, ord=q)
-                weights = (dd**q).sum(-1)
+                # weights = numpy.linalg.norm(dd, axis=1, ord=q)
+                weights = (dd ** q).sum(-1)
 
             # TODO: check the formula in Fred's paper
-            if self.density_type_ == 'DTM':
-                weights = weights ** (-.25 / q)
+            if self.density_type_ == "DTM":
+                weights = weights ** (-0.25 / q)
             else:
                 weights = -numpy.log(weights)
 
-        if self.input_type_ == 'points' and self.graph_type_ == 'knn' and self.density_type_ not in {'DTM', 'logDTM'}:
+        if self.input_type_ == "points" and self.graph_type_ == "knn" and self.density_type_ not in {"DTM", "logDTM"}:
             self.points_ = X
-            p = self.params_.get('p', 2)
-            k = self.params_.get('k', 10)
-            if self.params_.get('gpu'):
+            p = self.params_.get("p", 2)
+            k = self.params_.get("k", 10)
+            if self.params_.get("gpu"):
                 import torch
                 from pykeops.torch import LazyTensor
+
                 # 'float64' is slow except on super expensive GPUs. Allow it with some param?
                 XX = torch.tensor(self.points_, dtype=torch.float32)
                 if p == numpy.inf:
                     # Requires a version of pykeops strictly more recent than 1.3
-                    nn = (LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs().max(-1).argKmin(k, dim=1)
-                elif p == 2: # Any even integer?
-                    nn = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:]))**p).sum(-1).argKmin(k, dim=1)
+                    nn = (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs().max(-1).argKmin(k, dim=1)
+                elif p == 2:  # Any even integer?
+                    nn = ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p).sum(-1).argKmin(k, dim=1)
                 else:
-                    nn = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs()**p).sum(-1).argKmin(k, dim=1)
+                    nn = (
+                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p).sum(-1).argKmin(k, dim=1)
+                    )
                 # Back to the CPU. Not sure this is necessary, or the right way to do it.
                 self.neighbors_ = numpy.array(nn)
-            else: # CPU
+            else:  # CPU
                 from scipy.spatial import cKDTree
+
                 kdtree = cKDTree(self.points_)
                 # FIXME 'p'
-                qargs = { k:v for k,v in self.params_.items() if k in {'eps', 'n_jobs'}}
+                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
                 _, self.neighbors_ = kdtree.query(self.points_, k=k, p=p, **qargs)
 
-        if self.input_type_ == 'points' and self.graph_type_ != 'knn' and self.density_type_ in {'DTM', 'logDTM'}:
+        if self.input_type_ == "points" and self.graph_type_ != "knn" and self.density_type_ in {"DTM", "logDTM"}:
             self.points_ = X
-            q = self.params_.get('p_DTM', 2)
-            p = self.params_.get('p', 2)
-            k = self.params_.get('k', 10)
-            k_DTM = self.params_.get('k_DTM', k)
-            if self.params_.get('gpu'):
+            q = self.params_.get("p_DTM", 2)
+            p = self.params_.get("p", 2)
+            k = self.params_.get("k", 10)
+            k_DTM = self.params_.get("k_DTM", k)
+            if self.params_.get("gpu"):
                 import torch
                 from pykeops.torch import LazyTensor
+
                 # 'float64' is slow except on super expensive GPUs. Allow it with some param?
                 XX = torch.tensor(self.points_, dtype=torch.float32)
                 if p == numpy.inf:
-                    assert False # Not supported???
-                    dd = (LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs().max(-1).Kmin(k_DTM, dim=1)
-                elif p == 2: # Any even integer?
-                    dd = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:]))**p).sum(-1).Kmin(k_DTM, dim=1)
+                    assert False  # Not supported???
+                    dd = (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs().max(-1).Kmin(k_DTM, dim=1)
+                elif p == 2:  # Any even integer?
+                    dd = ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p).sum(-1).Kmin(k_DTM, dim=1)
                 else:
-                    dd = ((LazyTensor(XX[:,None,:])-LazyTensor(XX[None,:,:])).abs()**p).sum(-1).Kmin(k_DTM, dim=1)
-                assert q != numpy.inf # for now
+                    dd = (
+                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p)
+                        .sum(-1)
+                        .Kmin(k_DTM, dim=1)
+                    )
+                assert q != numpy.inf  # for now
                 if p != numpy.inf:
                     qp = float(q) / p
                 else:
                     qp = q
                 if qp != 1:
-                    dd = dd**qp
+                    dd = dd ** qp
                 weights = dd.sum(-1)
                 # **1/q is a waste of time, whether we take another **-.25 or a log
 
                 # Back to the CPU. Not sure this is necessary, or the right way to do it.
                 weights = numpy.array(weights)
-            else: # CPU
+            else:  # CPU
                 from scipy.spatial import cKDTree
+
                 kdtree = cKDTree(self.points_)
-                qargs = { k:v for k,v in self.params_.items() if k in {'eps', 'n_jobs'}}
+                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
                 dd, _ = kdtree.query(self.points_, k=k_DTM, p=p, **qargs)
-                #weights = numpy.linalg.norm(dd, axis=1, ord=q)
-                weights = (dd**q).sum(-1)
+                # weights = numpy.linalg.norm(dd, axis=1, ord=q)
+                weights = (dd ** q).sum(-1)
 
             # TODO: check the formula in Fred's paper
-            if self.density_type_ == 'DTM':
-                weights = weights ** (-.25 / q)
+            if self.density_type_ == "DTM":
+                weights = weights ** (-0.25 / q)
             else:
                 weights = -numpy.log(weights)
 
-        if self.input_type_ == 'distance_matrix' and self.density_type_ in {'DTM', 'logDTM'}:
-            q = self.params_.get('p_DTM', 2)
+        if self.input_type_ == "distance_matrix" and self.density_type_ in {"DTM", "logDTM"}:
+            q = self.params_.get("p_DTM", 2)
             X = numpy.array(X)
-            k = self.params_.get('k_DTM')
+            k = self.params_.get("k_DTM")
             if not k:
-                k = self.params_['k']
-            q = self.params_.get('p_DTM', 2)
-            weights = (numpy.partition(X)**q, k-1).sum(-1)
+                k = self.params_["k"]
+            q = self.params_.get("p_DTM", 2)
+            weights = (numpy.partition(X) ** q, k - 1).sum(-1)
             # TODO: check the formula in Fred's paper
-            if self.density_type_ == 'DTM':
-                weights = weights ** (-.25 / q)
+            if self.density_type_ == "DTM":
+                weights = weights ** (-0.25 / q)
             else:
                 weights = -numpy.log(weights)
 
-        if self.density_type_ == 'kde':
+        if self.density_type_ == "kde":
             # FIXME: replace most assert with raise ValueError("blabla")
-            assert self.input_type_ == 'points'
-            kde_params = self.params_.get('kde_params', dict())
+            assert self.input_type_ == "points"
+            kde_params = self.params_.get("kde_params", dict())
             from sklearn.neighbors import KernelDensity
+
             weights = KernelDensity(**kde_params).fit(X).score_samples(X)
 
-        if self.params_.get('symmetrize_graph'):
+        if self.params_.get("symmetrize_graph"):
             self.neighbors_ = [set(line) for line in self.neighbors_]
-            for i,line in enumerate(self.neighbors_):
+            for i, line in enumerate(self.neighbors_):
                 line.discard(i)
                 for j in line:
                     self.neighbors_[j].add(i)
 
-        self.weights_=weights # TODO remove
-        self.leaf_labels_, self.children_, self.diagram_, self.max_density_per_cc_ = tomato.doit(list(self.neighbors_), weights)
+        self.weights_ = weights  # TODO remove
+        self.leaf_labels_, self.children_, self.diagram_, self.max_density_per_cc_ = tomato.doit(
+            list(self.neighbors_), weights
+        )
         self.n_leaves_ = len(self.max_density_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_density_per_cc_) + len(self.children_)
         if self.__n_clusters:
@@ -265,65 +304,82 @@ class Tomato:
         """
         """
         import matplotlib.pyplot as plt
-        plt.plot(self.diagram_[:,0],self.diagram_[:,1],'ro')
-        l = self.diagram_[:,1].min()
-        r = max(self.diagram_[:,0].max(), self.max_density_per_cc_.max())
-        plt.plot([l,r],[l,r])
-        plt.plot(self.max_density_per_cc_, numpy.full(self.max_density_per_cc_.shape,1.1*l-.1*r),'ro',color='green')
+
+        plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "ro")
+        l = self.diagram_[:, 1].min()
+        r = max(self.diagram_[:, 0].max(), self.max_density_per_cc_.max())
+        plt.plot([l, r], [l, r])
+        plt.plot(
+            self.max_density_per_cc_, numpy.full(self.max_density_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
+        )
         plt.show()
 
-#    def predict(self, X):
-#        # X had better be the same as in fit()
-#        return labels_
+    #    def predict(self, X):
+    #        # X had better be the same as in fit()
+    #        return labels_
 
     # Use set_params instead?
     @property
     def n_clusters_(self):
         return self.__n_clusters
+
     @n_clusters_.setter
     def n_clusters_(self, n_clusters):
         if n_clusters == self.__n_clusters:
             return
         self.__n_clusters = n_clusters
         self.__merge_threshold = None
-        if hasattr(self, 'leaf_labels_'):
+        if hasattr(self, "leaf_labels_"):
             renaming = tomato.merge(self.children_, self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
 
     @property
     def merge_threshold_(self):
         return self.__merge_threshold
+
     @merge_threshold_.setter
     def merge_threshold_(self, merge_threshold):
         if merge_threshold == self.__merge_threshold:
             return
-        if hasattr(self, 'leaf_labels_'):
-            self.n_clusters_ = numpy.count_nonzero(self.diagram_[1]-self.diagram_[0] > merge_threshold) + len(max_density_per_cc_)
+        if hasattr(self, "leaf_labels_"):
+            self.n_clusters_ = numpy.count_nonzero(self.diagram_[1] - self.diagram_[0] > merge_threshold) + len(
+                max_density_per_cc_
+            )
         else:
             self.__n_clusters = None
         self.__merge_threshold = merge_threshold
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
-    a=[(1,2),(1.1,1.9),(.9,1.8),(10,0),(10.1,.05),(10.2,-.1),(5.4,0)]
-    a=numpy.random.rand(500,2)
-    t=Tomato(input_type='points', metric='Euclidean', graph_type='knn', density_type='DTM', n_clusters=2, k=4, n_jobs=-1, eps=.05)
+
+    a = [(1, 2), (1.1, 1.9), (0.9, 1.8), (10, 0), (10.1, 0.05), (10.2, -0.1), (5.4, 0)]
+    a = numpy.random.rand(500, 2)
+    t = Tomato(
+        input_type="points",
+        metric="Euclidean",
+        graph_type="knn",
+        density_type="DTM",
+        n_clusters=2,
+        k=4,
+        n_jobs=-1,
+        eps=0.05,
+    )
     t.fit(a)
-    #print("neighbors\n",t.neighbors_)
-    #print()
-    #print("weights\n",t.weights_)
-    #print()
-    #print("diagram\n",t.diagram_)
-    #print()
-    print("max\n",t.max_density_per_cc_, file=sys.stderr)
-    #print()
-    print("leaf labels\n",t.leaf_labels_)
-    #print()
-    print("labels\n",t.labels_)
-    #print()
-    print("children\n",t.children_)
-    #print()
+    # print("neighbors\n",t.neighbors_)
+    # print()
+    # print("weights\n",t.weights_)
+    # print()
+    # print("diagram\n",t.diagram_)
+    # print()
+    print("max\n", t.max_density_per_cc_, file=sys.stderr)
+    # print()
+    print("leaf labels\n", t.leaf_labels_)
+    # print()
+    print("labels\n", t.labels_)
+    # print()
+    print("children\n", t.children_)
+    # print()
     t.n_clusters_ = 2
-    print("labels\n",t.labels_)
+    print("labels\n", t.labels_)
     t.plot_diagram()
