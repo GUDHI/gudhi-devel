@@ -54,6 +54,14 @@ ext_modules.append(Extension(
         pybind11.get_include(False), pybind11.get_include(True)],
     extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
     ))
+ext_modules.append(Extension(
+    'gudhi.clustering._tomato',
+    sources = [source_dir + 'clustering/_tomato.cc'],
+    language = 'c++',
+    include_dirs = include_dirs +
+        [pybind11.get_include(False), pybind11.get_include(True)],
+    extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
+    ))
 
 setup(
     name = 'gudhi',

@@ -86,6 +86,11 @@ Point cloud utilities
 
 .. include:: point_cloud_sum.inc
 
+Clustering
+**********
+
+.. include:: clustering.inc
+
 Bibliography
 ************
 
