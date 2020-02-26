@@ -33,25 +33,24 @@ class Tomato:
         """
         Each parameter has a corresponding attribute, like self.merge_threshold_, that can be changed later.
 
-        Parameters
-        ----------
-            input_type(str): 'points', 'distance_matrix' or 'neighbors'.
-            metric(str or callable): FIXME ???
-            graph_type(str): 'manual', 'knn' or 'radius'. Ignored if input_type is 'neighbors'.
-            density_type(str): 'manual', 'DTM', 'logDTM' or 'kde'.
-            kde_params(dict): if density_type is 'kde', additional parameters passed directly to sklearn.neighbors.KernelDensity.
-            k(int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
-            k_DTM(int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
-            r(float): size of a neighborhood if graph_type is 'radius'
-            eps(float): approximation factor when computing nearest neighbors without a GPU
-            gpu(bool): enable use of CUDA (through pykeops) to compute k nearest neighbors. This is useful when the dimension becomes large (10+) but the number of points remains low (less than a million).
-            n_clusters(int): number of clusters requested. Defaults to ???
-            merge_threshold(float): minimum prominence of a cluster so it doesn't get merged.
-            eliminate_threshold(float): minimum height of a cluster so it doesn't get eliminated
-            symmetrize_graph(bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
-            p(float): norm L^p on input points (numpy.inf is supported without gpu). Defaults to 2.
-            p_DTM(float): order used to compute the distance to measure. Defaults to 2.
-            n_jobs(int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU. If -1 is given all processors are used. Default: 1.
+        Args:
+            input_type (str): 'points', 'distance_matrix' or 'neighbors'.
+            metric (str or callable): FIXME ???
+            graph_type (str): 'manual', 'knn' or 'radius'. Ignored if input_type is 'neighbors'.
+            density_type (str): 'manual', 'DTM', 'logDTM' or 'kde'.
+            kde_params (dict): if density_type is 'kde', additional parameters passed directly to sklearn.neighbors.KernelDensity.
+            k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
+            k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
+            r (float): size of a neighborhood if graph_type is 'radius'
+            eps (float): approximation factor when computing nearest neighbors without a GPU
+            gpu (bool): enable use of CUDA (through pykeops) to compute k nearest neighbors. This is useful when the dimension becomes large (10+) but the number of points remains low (less than a million).
+            n_clusters (int): number of clusters requested. Defaults to ???
+            merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
+            eliminate_threshold (float): minimum height of a cluster so it doesn't get eliminated
+            symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
+            p (float): norm L^p on input points (numpy.inf is supported without gpu). Defaults to 2.
+            p_DTM (float): order used to compute the distance to measure. Defaults to 2.
+            n_jobs (int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU. If -1 is given all processors are used. Default: 1.
         """
         self.input_type_ = input_type
         self.metric_ = metric
@@ -66,10 +65,9 @@ class Tomato:
 
     def fit(self, X, y=None, weights=None):
         """
-        Parameters
-        ----------
-            X(?): points or distance_matrix or list of neighbors
-            weights(ndarray of shape (n_samples)): if density_type == 'manual', a density estimate at each point
+        Args:
+            X (?): points or distance_matrix or list of neighbors
+            weights (ndarray of shape (n_samples)): if density_type == 'manual', a density estimate at each point
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
         # TODO: less code duplication (subroutines?), less spaghetti, but don't compute neighbors twice if not needed. Clear error message for missing or contradictory parameters.
@@ -257,11 +255,15 @@ class Tomato:
             self.__n_clusters = self.n_leaves_
 
     def fit_predict(self, X, y=None):
+        """
+        """
         self.fit(X)
         return labels_
 
     # TODO: add argument k or threshold? Have a version where you can click and it shows the line and the corresponding k?
     def plot_diagram(self):
+        """
+        """
         import matplotlib.pyplot as plt
         plt.plot(self.diagram_[:,0],self.diagram_[:,1],'ro')
         l = self.diagram_[:,1].min()
