@@ -9,7 +9,6 @@
 """
 
 from gudhi import TangentialComplex, SimplexTree
-import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
