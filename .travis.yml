@@ -52,7 +52,7 @@ script:
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=Release ${CMAKE_OPTIONS} .. 
   - make -j 4 all
-  #- make doxygen
+  - make doxygen
   - ctest -j 4 --output-on-failure
 
 notifications:
