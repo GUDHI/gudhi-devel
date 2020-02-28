@@ -20,13 +20,17 @@ Function
 Basic example
 -------------
 
-This example computes the Frechet mean (aka Wasserstein barycenter) between four persistence diagrams.
+This example computes the Frechet mean (aka Wasserstein barycenter) between 
+four persistence diagrams.
 It is initialized on the 4th diagram.
-As the algorithm is not convex, its output depends on the initialization and is only a local minimum of the objective function.
-Initialization can be either given as an integer (in which case the i-th diagram of the list is used as initial estimate)
-or as a diagram. 
-If None, it will randomly select one of the diagram of the list as initial estimate.
-Note that persistence diagrams must be submitted as (n x 2) numpy arrays and must not contain inf values.
+As the algorithm is not convex, its output depends on the initialization and 
+is only a local minimum of the objective function.
+Initialization can be either given as an integer (in which case the i-th 
+diagram of the list is used as initial estimate) or as a diagram. 
+If None, it will randomly select one of the diagram of the list 
+as initial estimate.
+Note that persistence diagrams must be submitted as 
+(n x 2) numpy arrays and must not contain inf values.
 
 .. testcode::
 
@@ -37,8 +41,8 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays and mus
     dg2 = np.array([[0.2, 0.7]])
     dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
     dg4 = np.array([])
-    
-    bary = gudhi.barycenter.lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3)
+    pdiagset = [dg1, dg2, dg3, dg4]
+    bary = gudhi.barycenter.lagrangian_barycenter(pdiagset=pdiagset,init=3)
 
     message = "Wasserstein barycenter estimated:"    
     print(message)
