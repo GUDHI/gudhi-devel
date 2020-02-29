@@ -1,5 +1,5 @@
 variables:
-    CMakeBuildType: Release
+    customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
   
 jobs:
   
@@ -10,18 +10,12 @@ jobs:
   
     strategy:
       matrix:
-        Linux:
-          imageName: 'ubuntu-18.04'
-          cCompiler: gcc
-          cxxCompiler: g++
-          customInstallation: 'sudo apt-get update && sudo apt-get install  -y make graphviz texlive-bibtex-extra biber doxygen libboost-all-dev libeigen3-dev libgmp3-dev libmpfr-dev libtbb-dev libcgal-dev'
-          compilerInitialization: ''
-        macOS:
+        macOSrelease:
           imageName: 'macos-10.14'
-          cCompiler: clang
-          cxxCompiler: clang++
-          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
-          compilerInitialization: ''
+          CMakeBuildType: Release
+        macOSdebug:
+          imageName: 'macos-10.14'
+          CMakeBuildType: Debug
   
     pool:
       vmImage: $(imageName)
@@ -36,15 +30,17 @@ jobs:
         $(customInstallation)
         git submodule update --init
         python -m pip install --upgrade pip
-        python -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
+      # sphinx sphinxcontrib-bibtex sphinx-paramlinks
+        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn
         python -m pip install --user POT pybind11
       displayName: 'Install build dependencies'
     - script: |
         ls
         mkdir build
         cd build
-        $(compilerInitialization)
-        cmake -DCMAKE_C_COMPILER:FILEPATH="$(cCompiler)" -DCMAKE_CXX_COMPILER="$(cxxCompiler)" -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType)  -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
         make -j all
-        ctest --output-on-failure
-      displayName: 'Build GUDHI'
+      # sphinx build failed
+        ctest --output-on-failure -E sphinx
+        make doxygen
+      displayName: 'Build, test and documentation generation'
