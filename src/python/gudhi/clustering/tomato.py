@@ -2,6 +2,8 @@ import numpy
 from ._tomato import *
 
 # The fit/predict interface is not so well suited...
+# TODO: option for a faster, weaker (probabilistic) knn
+
 class Tomato:
     """
     Clustering
@@ -15,20 +17,22 @@ class Tomato:
     merge_threshold_: float
         minimum prominence of a cluster so it doesn't get merged. Writing to it automatically adjusts labels_.
     n_leaves_: int
-        number of leaves in the hierarchical tree
+        number of leaves (unstable clusters) in the hierarchical tree
     leaf_labels_: ndarray of shape (n_samples)
         cluster labels for each point, at the very bottom of the hierarchy
     labels_: ndarray of shape (n_samples)
-        cluster labels for each point
+        cluster labels for each point, after merging
     diagram_: ndarray of shape (n_leaves_,2)
         persistence diagram (only the finite points)
-    max_density_per_cc_: ndarray os shape (n_connected_components)
-        maximum of the density function on each connected component
     children_: ndarray of shape (n_leaves_-1,2)
         The children of each non-leaf node. Values less than n_leaves_ correspond to leaves of the tree. A node i greater than or equal to n_leaves_ is a non-leaf node and has children children_[i - n_leaves_]. Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node n_leaves_ + i
     params_: dict
         Parameters like input_type, metric, etc
     """
+
+    # Not documented for now, because I am not sure how useful it is.
+    #    max_density_per_cc_: ndarray of shape (n_connected_components)
+    #        maximum of the density function on each connected component
 
     def __init__(
         self,
@@ -54,15 +58,17 @@ class Tomato:
             k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
             k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
             r (float): size of a neighborhood if graph_type is 'radius'
-            eps (float): approximation factor when computing nearest neighbors without a GPU
+            eps (float): approximation factor when computing nearest neighbors (currently ignored with a GPU)
             gpu (bool): enable use of CUDA (through pykeops) to compute k nearest neighbors. This is useful when the dimension becomes large (10+) but the number of points remains low (less than a million).
             n_clusters (int): number of clusters requested. Defaults to ???
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
             symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points (numpy.inf is supported without gpu). Defaults to 2.
-            p_DTM (float): order used to compute the distance to measure. Defaults to 2.
+            p_DTM (float): order used to compute the distance to measure. Defaults to the dimension, or 2 if input_type is 'distance_matrix'.
             n_jobs (int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU. If -1 is given all processors are used. Default: 1.
         """
+        # Should metric='precomputed' mean input_type='distance_matrix'?
+        # Should we be able to pass metric='minkowski' (what None does currently)?
         self.input_type_ = input_type
         self.metric_ = metric
         self.graph_type_ = graph_type
@@ -77,7 +83,7 @@ class Tomato:
     def fit(self, X, y=None, weights=None):
         """
         Args:
-            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance_matrix (full, not just a triangle), or list of neighbors for each point (points are represented by their index, starting from 0)
+            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance_matrix (full, not just a triangle), or list of neighbors for each point (points are represented by their index, starting from 0), according to input_type.
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
@@ -112,7 +118,7 @@ class Tomato:
 
         if input_type == "points" and self.graph_type_ == "knn" and self.density_type_ in {"DTM", "logDTM"}:
             self.points_ = X
-            q = self.params_.get("p_DTM", 2)
+            q = self.params_.get("p_DTM", len(X[0]))
             p = self.params_.get("p", 2)
             k = self.params_.get("k", 10)
             k_DTM = self.params_.get("k_DTM", k)
@@ -212,7 +218,7 @@ class Tomato:
 
         if input_type == "points" and self.graph_type_ != "knn" and self.density_type_ in {"DTM", "logDTM"}:
             self.points_ = X
-            q = self.params_.get("p_DTM", 2)
+            q = self.params_.get("p_DTM", len(X[0]))
             p = self.params_.get("p", 2)
             k = self.params_.get("k", 10)
             k_DTM = self.params_.get("k_DTM", k)
@@ -266,7 +272,6 @@ class Tomato:
             k = self.params_.get("k_DTM")
             if not k:
                 k = self.params_["k"]
-            q = self.params_.get("p_DTM", 2)
             weights = (numpy.partition(X, k - 1)[:, 0:k] ** q).sum(-1)
             if self.density_type_ == "DTM":
                 dim = len(self.points_[0])
