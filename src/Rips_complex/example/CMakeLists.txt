@@ -53,15 +53,23 @@ if (DIFF_PATH)
   add_test(Rips_complex_example_from_off_doc_12_1_diff_files ${DIFF_PATH}
       ${CMAKE_CURRENT_BINARY_DIR}/ripsoffreader_result_12_1.txt
       ${CMAKE_CURRENT_BINARY_DIR}/one_skeleton_rips_for_doc.txt)
+  set_tests_properties(Rips_complex_example_from_off_doc_12_1_diff_files PROPERTIES DEPENDS Rips_complex_example_from_off_doc_12_1) 
+
   add_test(Rips_complex_example_from_off_doc_12_3_diff_files ${DIFF_PATH}
       ${CMAKE_CURRENT_BINARY_DIR}/ripsoffreader_result_12_3.txt
       ${CMAKE_CURRENT_BINARY_DIR}/full_skeleton_rips_for_doc.txt)
+  set_tests_properties(Rips_complex_example_from_off_doc_12_3_diff_files PROPERTIES DEPENDS Rips_complex_example_from_off_doc_12_3) 
+
   add_test(Rips_complex_example_from_csv_distance_matrix_doc_12_1_diff_files ${DIFF_PATH}
       ${CMAKE_CURRENT_BINARY_DIR}/ripscsvreader_result_12_1.txt
       ${CMAKE_CURRENT_BINARY_DIR}/one_skeleton_rips_for_doc.txt)
+  set_tests_properties(Rips_complex_example_from_csv_distance_matrix_doc_12_1_diff_files PROPERTIES DEPENDS Rips_complex_example_from_csv_distance_matrix_doc_12_1) 
+
   add_test(Rips_complex_example_from_csv_distance_matrix_doc_12_3_diff_files ${DIFF_PATH}
       ${CMAKE_CURRENT_BINARY_DIR}/ripscsvreader_result_12_3.txt
       ${CMAKE_CURRENT_BINARY_DIR}/full_skeleton_rips_for_doc.txt)
+  set_tests_properties(Rips_complex_example_from_csv_distance_matrix_doc_12_3_diff_files PROPERTIES DEPENDS Rips_complex_example_from_csv_distance_matrix_doc_12_3) 
+
 endif()
 
 install(TARGETS Rips_complex_example_from_off DESTINATION bin)

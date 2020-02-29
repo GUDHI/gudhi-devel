@@ -32,14 +32,18 @@ if (DIFF_PATH)
 
     add_test(Alpha_complex_example_from_off_60_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_60.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_60.txt)
+    set_tests_properties(Alpha_complex_example_from_off_60_diff_files PROPERTIES DEPENDS Alpha_complex_example_from_off_60) 
     add_test(Alpha_complex_example_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
+    set_tests_properties(Alpha_complex_example_from_off_32_diff_files PROPERTIES DEPENDS Alpha_complex_example_from_off_32) 
 
     add_test(Alpha_complex_example_fast_from_off_60_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/fastalphaoffreader_result_60.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_60.txt)
+    set_tests_properties(Alpha_complex_example_fast_from_off_60_diff_files PROPERTIES DEPENDS Alpha_complex_example_fast_from_off_60) 
     add_test(Alpha_complex_example_fast_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/fastalphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
-  endif()
+    set_tests_properties(Alpha_complex_example_fast_from_off_32_diff_files PROPERTIES DEPENDS Alpha_complex_example_fast_from_off_32) 
+endif()
 
   add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
   target_link_libraries(Alpha_complex_example_weighted_3d_from_points  ${CGAL_LIBRARY})
