@@ -12,16 +12,16 @@ jobs:
   - job: 'Test'
     displayName: "Build and test"
     timeoutInMinutes: 0
-    cancelTimeoutInMinutes: 300
+    cancelTimeoutInMinutes: 60
   
     strategy:
       matrix:
         macOSrelease:
           imageName: 'macos-10.14'
           CMakeBuildType: Release
-        macOSdebug:
-          imageName: 'macos-10.14'
-          CMakeBuildType: Debug
+#        macOSdebug:
+#          imageName: 'macos-10.14'
+#          CMakeBuildType: Debug
   
     pool:
       vmImage: $(imageName)
