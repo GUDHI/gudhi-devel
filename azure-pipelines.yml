@@ -1,6 +1,12 @@
 variables:
     customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal ninja'
-  
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'  # All branches
+
 jobs:
   
   - job: 'Test'
@@ -30,7 +36,7 @@ jobs:
         $(customInstallation)
         git submodule update --init
         python -m pip install --upgrade pip
-        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn # sphinx sphinxcontrib-bibtex sphinx-paramlinks
+        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn # sphinx sphinxcontrib-bibtex sphinx-paramlinks - remove sphinx as it fails
 
         python -m pip install --user POT pybind11
       displayName: 'Install build dependencies'
@@ -41,5 +47,5 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -GNinja -DPython_ADDITIONAL_VERSIONS=3 ..
         ninja
         ninja doxygen
-        ninja test # ctest --output-on-failure -E sphinx  As sphinx build fail
+        ctest -j 8 --output-on-failure
       displayName: 'Build, test and documentation generation'
