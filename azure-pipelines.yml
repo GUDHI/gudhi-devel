@@ -1,0 +1,45 @@
+variables:
+    CMakeBuildType: Release
+  
+jobs:
+  
+  - job: 'Test'
+    displayName: "Build and test"
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 300
+  
+    strategy:
+      matrix:
+        Linux:
+          imageName: 'ubuntu-18.04'
+          cCompiler: gcc
+          cxxCompiler: g++
+          compilerInitialization: ''
+        macOS:
+          imageName: 'macos-10.14'
+          cCompiler: clang
+          cxxCompiler: clang++
+          compilerInitialization: ''
+  
+    pool:
+      vmImage: $(imageName)
+  
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.7'
+        architecture: 'x64'
+  
+    - script: |
+        python -m pip install --upgrade pip
+        python -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
+        python -m pip install --user POT pybind11
+      displayName: 'Install build dependencies'
+    - script: |
+        mkdir build
+        cd build
+        $(compilerInitialization)
+        cmake -DCMAKE_C_COMPILER:FILEPATH="$(cCompiler)" -DCMAKE_CXX_COMPILER="$(cxxCompiler)" -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType)  -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
+        make -j all
+      workingDirectory: $(Agent.BuildDirectory)
+      displayName: 'Build GUDHI'
