@@ -1,5 +1,5 @@
 variables:
-    customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
+    customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal ninja'
   
 jobs:
   
@@ -38,8 +38,8 @@ jobs:
         ls
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
-        make -j all
-        ctest --output-on-failure -E sphinx # As sphinx build fail
-        make doxygen
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -GNinja -DPython_ADDITIONAL_VERSIONS=3 ..
+        ninja
+        ninja doxygen
+        ninja test # ctest --output-on-failure -E sphinx  As sphinx build fail
       displayName: 'Build, test and documentation generation'
