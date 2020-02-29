@@ -14,11 +14,13 @@ jobs:
           imageName: 'ubuntu-18.04'
           cCompiler: gcc
           cxxCompiler: g++
+          customInstallation: 'sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install  -y make graphviz texlive-bibtex-extra biber doxygen libboost-all-dev libeigen3-dev libgmp3-dev libmpfr-dev libtbb-dev libcgal-dev'
           compilerInitialization: ''
         macOS:
           imageName: 'macos-10.14'
           cCompiler: clang
           cxxCompiler: clang++
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
           compilerInitialization: ''
   
     pool:
@@ -31,6 +33,7 @@ jobs:
         architecture: 'x64'
   
     - script: |
+        $(customInstallation)
         python -m pip install --upgrade pip
         python -m pip install --user pytest Cython sphinx sphinxcontrib-bibtex sphinx-paramlinks matplotlib numpy scipy scikit-learn
         python -m pip install --user POT pybind11
