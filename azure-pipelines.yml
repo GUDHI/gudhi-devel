@@ -36,10 +36,10 @@ jobs:
         python -m pip install --user POT pybind11
       displayName: 'Install build dependencies'
     - script: |
+        ls
         mkdir build
         cd build
         $(compilerInitialization)
         cmake -DCMAKE_C_COMPILER:FILEPATH="$(cCompiler)" -DCMAKE_CXX_COMPILER="$(cxxCompiler)" -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType)  -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
         make -j all
-      workingDirectory: $(Agent.BuildDirectory)
       displayName: 'Build GUDHI'
