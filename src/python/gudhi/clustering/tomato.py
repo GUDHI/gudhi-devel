@@ -38,8 +38,8 @@ class Tomato:
         density_type="DTM",
         n_clusters=None,
         merge_threshold=None,
-#       eliminate_threshold=None,
-#           eliminate_threshold (float): minimum max weight of a cluster so it doesn't get eliminated
+        #       eliminate_threshold=None,
+        #           eliminate_threshold (float): minimum max weight of a cluster so it doesn't get eliminated
         **params
     ):
         """
@@ -93,8 +93,9 @@ class Tomato:
         input_type = self.input_type_
         if input_type == "points" and self.metric_:
             from sklearn.metrics import pairwise_distances
-            X = pairwise_distances(X,metric=self.metric_,n_jobs=self.params_.get("n_jobs"))
-            input_type="distance_matrix"
+
+            X = pairwise_distances(X, metric=self.metric_, n_jobs=self.params_.get("n_jobs"))
+            input_type = "distance_matrix"
 
         if input_type == "distance_matrix" and self.graph_type_ == "radius":
             X = numpy.array(X)
@@ -266,7 +267,7 @@ class Tomato:
             if not k:
                 k = self.params_["k"]
             q = self.params_.get("p_DTM", 2)
-            weights = (numpy.partition(X, k - 1)[:,0:k] ** q).sum(-1)
+            weights = (numpy.partition(X, k - 1)[:, 0:k] ** q).sum(-1)
             if self.density_type_ == "DTM":
                 dim = len(self.points_[0])
                 weights = weights ** (-dim / q)
