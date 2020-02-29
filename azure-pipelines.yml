@@ -30,8 +30,8 @@ jobs:
         $(customInstallation)
         git submodule update --init
         python -m pip install --upgrade pip
-      # sphinx sphinxcontrib-bibtex sphinx-paramlinks
-        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn
+        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn # sphinx sphinxcontrib-bibtex sphinx-paramlinks
+
         python -m pip install --user POT pybind11
       displayName: 'Install build dependencies'
     - script: |
@@ -40,7 +40,6 @@ jobs:
         cd build
         cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DUSER_VERSION_DIR=version -DPython_ADDITIONAL_VERSIONS=3 ..
         make -j all
-      # sphinx build failed
-        ctest --output-on-failure -E sphinx
+        ctest --output-on-failure -E sphinx # As sphinx build fail
         make doxygen
       displayName: 'Build, test and documentation generation'
