@@ -12,7 +12,6 @@ environment:
   # update the vcpkg cache even if build fails
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python37-x64"
-  CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
   GMP_CMAKE_FLAGS: "-DGMP_INCLUDE_DIR=c:/Tools/vcpkg/installed/x64-windows/include -DGMP_LIBRARIES=c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib -DGMP_LIBRARIES_DIR=c:/Tools/vcpkg/installed/x64-windows/lib"
   CMAKE_TOOLCHAIN_FILE: "c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
@@ -59,7 +58,7 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G %CMAKE_GENERATOR% %CMAKE_FLAGS% %GMP_CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN_FILE% ..
+  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% %GMP_CMAKE_FLAGS% -DCMAKE_TOOLCHAIN_FILE=%CMAKE_TOOLCHAIN_FILE% ..
   - if [%target%]==[Python] (
       cd src/python &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
