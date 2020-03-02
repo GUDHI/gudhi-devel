@@ -30,7 +30,7 @@ jobs:
           CMakeBuildType: Release
           compilerInitialization: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
           customInstallation: 'where vcpkg & for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg install %%a )'
-          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64"'
+          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" -DGMP_INCLUDE_DIR=c:/Tools/vcpkg/installed/x64-windows/include -DGMP_LIBRARIES=c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib -DGMP_LIBRARIES_DIR=c:/Tools/vcpkg/installed/x64-windows/lib'
 
     pool:
       vmImage: $(imageName)
