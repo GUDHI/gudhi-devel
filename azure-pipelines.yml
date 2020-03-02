@@ -13,24 +13,10 @@ jobs:
   
     strategy:
       matrix:
-#        macOSrelease:
-#          imageName: 'macos-10.14'
-#          CMakeBuildType: Release
-#          compilerInitialization: ''
-#          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
-#          customCmakeOptions: ''
-#        macOSdebug:
-#          imageName: 'macos-10.14'
-#          CMakeBuildType: Debug
-#          compilerInitialization: ''
-#          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
-#          customCmakeOptions: ''
-        WindowsOSRelease:
-          imageName: 'vs2017-win2016'
+        macOSrelease:
+          imageName: 'macos-10.14'
           CMakeBuildType: Release
-          compilerInitialization: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
-          customInstallation: 'where vcpkg & for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg install %%a )'
-          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64" -DGMP_INCLUDE_DIR=c:/Tools/vcpkg/installed/x64-windows/include -DGMP_LIBRARIES=c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib -DGMP_LIBRARIES_DIR=c:/Tools/vcpkg/installed/x64-windows/lib'
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
 
     pool:
       vmImage: $(imageName)
@@ -49,10 +35,9 @@ jobs:
         python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
     - script: |
-        $(compilerInitialization)
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) $(customCmakeOptions) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
         make
         make doxygen
         ctest -j 8 --output-on-failure -E sphinx # remove sphinx build as it fails
