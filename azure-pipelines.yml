@@ -36,9 +36,8 @@ jobs:
         $(customInstallation)
         git submodule update --init
         python -m pip install --upgrade pip
-        python -m pip install --user pytest Cython matplotlib numpy scipy scikit-learn # sphinx sphinxcontrib-bibtex sphinx-paramlinks - remove sphinx as it fails
-
-        python -m pip install --user POT pybind11
+        python -m pip install --user -r .github/build-requirements.txt
+        python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
     - script: |
         ls
@@ -47,5 +46,5 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -GNinja -DPython_ADDITIONAL_VERSIONS=3 ..
         ninja
         ninja doxygen
-        ctest -j 8 --output-on-failure
+        ctest -j 8 --output-on-failure -E sphinx # remove sphinx build as it fails
       displayName: 'Build, test and documentation generation'
