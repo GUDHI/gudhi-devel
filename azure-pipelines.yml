@@ -1,6 +1,3 @@
-variables:
-    customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal ninja'
-
 trigger:
   batch: true
   branches:
@@ -19,10 +16,22 @@ jobs:
         macOSrelease:
           imageName: 'macos-10.14'
           CMakeBuildType: Release
+          compilerInitialization: ''
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
+          customCmakeOptions: ''
 #        macOSdebug:
 #          imageName: 'macos-10.14'
 #          CMakeBuildType: Debug
-  
+#          compilerInitialization: ''
+#          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
+#          customCmakeOptions: ''
+        WindowsOSRelease:
+          imageName: 'vs2017-win2016'
+          CMakeBuildType: Release
+          compilerInitialization: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
+          customInstallation: 'call .github/vcpkg-build-requirements.bat'
+          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake'
+
     pool:
       vmImage: $(imageName)
   
@@ -40,10 +49,10 @@ jobs:
         python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
     - script: |
-        ls
+        $(compilerInitialization)
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -GNinja -DPython_ADDITIONAL_VERSIONS=3 ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) $(customCmakeOptions) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
         ninja
         ninja doxygen
         ctest -j 8 --output-on-failure -E sphinx # remove sphinx build as it fails
