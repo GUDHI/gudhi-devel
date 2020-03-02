@@ -13,12 +13,12 @@ jobs:
   
     strategy:
       matrix:
-        macOSrelease:
-          imageName: 'macos-10.14'
-          CMakeBuildType: Release
-          compilerInitialization: ''
-          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
-          customCmakeOptions: ''
+#        macOSrelease:
+#          imageName: 'macos-10.14'
+#          CMakeBuildType: Release
+#          compilerInitialization: ''
+#          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
+#          customCmakeOptions: ''
 #        macOSdebug:
 #          imageName: 'macos-10.14'
 #          CMakeBuildType: Debug
@@ -29,8 +29,8 @@ jobs:
           imageName: 'vs2017-win2016'
           CMakeBuildType: Release
           compilerInitialization: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
-          customInstallation: 'git clone https://github.com/Microsoft/vcpkg & vcpkg\bootstrap-vcpkg.bat & vcpkg\vcpkg integrate install & for /F "delims=" %%a in (vcpkg-requirements.txt) do ( vcpkg\vcpkg install %%a )'
-          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake'
+          customInstallation: 'git clone https://github.com/Microsoft/vcpkg & vcpkg\bootstrap-vcpkg.bat & vcpkg\vcpkg integrate install & for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg\vcpkg install %%a )'
+          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=D:/a/1/s/vcpkg/scripts/buildsystems/vcpkg.cmake'
 
     pool:
       vmImage: $(imageName)
