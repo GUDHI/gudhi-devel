@@ -2,7 +2,7 @@ project(Alpha_complex_utilities)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-  target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} Boost::program_options)
 
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
@@ -23,7 +23,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   install(TARGETS alpha_complex_persistence DESTINATION bin)
 
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
-  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} Boost::program_options)
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
   endif(TBB_FOUND)
