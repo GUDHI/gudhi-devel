@@ -1,3 +1,4 @@
+@ECHO OFF
 git clone https://github.com/Microsoft/vcpkg
 vcpkg\bootstrap-vcpkg.bat
 dir
