@@ -29,8 +29,8 @@ jobs:
           imageName: 'vs2017-win2016'
           CMakeBuildType: Release
           compilerInitialization: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
-          customInstallation: 'git clone https://github.com/Microsoft/vcpkg & vcpkg\bootstrap-vcpkg.bat & vcpkg\vcpkg integrate install & for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg\vcpkg install %%a )'
-          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=D:/a/1/s/vcpkg/scripts/buildsystems/vcpkg.cmake'
+          customInstallation: 'where vcpkg & for /F "delims=" %%a in (.github/vcpkg-requirements.txt) do ( vcpkg install %%a )'
+          customCmakeOptions: '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 15 2017 Win64"'
 
     pool:
       vmImage: $(imageName)
