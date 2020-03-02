@@ -53,7 +53,7 @@ jobs:
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) $(customCmakeOptions) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
-        ninja
-        ninja doxygen
+        make
+        make doxygen
         ctest -j 8 --output-on-failure -E sphinx # remove sphinx build as it fails
       displayName: 'Build, test and documentation generation'
