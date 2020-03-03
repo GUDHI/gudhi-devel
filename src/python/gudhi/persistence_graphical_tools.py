@@ -15,7 +15,7 @@ import numpy as np
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
 
-__author__ = "Vincent Rouvreau, Bertrand Michel"
+__author__ = "Vincent Rouvreau, Bertrand Michel, Theo Lacombe"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
@@ -46,6 +46,11 @@ def __min_birth_max_death(persistence, band=0.0):
 
 
 def _array_handler(a):
+    '''
+    :param a: if array, assumes it is a (n x 2) np.array and return a
+                persistence-compatible list (padding with 0), so that the
+                plot can be performed seamlessly.
+    '''
     if isinstance(a, np.ndarray): 
         return [[0, x] for x in a]
     else:
@@ -65,9 +70,12 @@ def plot_persistence_barcode(
     fontsize=16,
 ):
     """This function plots the persistence bar code from persistence values list
+    , a np.array of shape (N x 2) (representing a diagram 
+    in a single homology dimension), 
     or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: Persistence intervals values list grouped by dimension.
+    :param persistence: Persistence intervals values list grouped by dimension, 
+                        or np.array of shape (N x 2).
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>` style name
         (reset persistence if both are set).
@@ -206,9 +214,11 @@ def plot_persistence_diagram(
     greyblock=True
 ):
     """This function plots the persistence diagram from persistence values
-    list or from a :doc:`persistence file <fileformats>`.
+    list, a np.array of shape (N x 2) representing a diagram in a single
+    homology dimension, or from a :doc:`persistence file <fileformats>`.
 
-    :param persistence: Persistence intervals values list grouped by dimension.
+    :param persistence: Persistence intervals values list grouped by dimension,
+                        or np.array of shape (N x 2).
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>` style name
         (reset persistence if both are set).
@@ -356,12 +366,15 @@ def plot_persistence_density(
     greyblock=True
 ):
     """This function plots the persistence density from persistence
-    values list or from a :doc:`persistence file <fileformats>`. Be
+    values list, np.array of shape (N x 2) representing a diagram
+    in a single homology dimension,
+    or from a :doc:`persistence file <fileformats>`. Be
     aware that this function does not distinguish the dimension, it is
     up to you to select the required one. This function also does not handle
     degenerate data set (scipy correlation matrix inversion can fail).
 
-    :param persistence: Persistence intervals values list grouped by dimension.
+    :param persistence: Persistence intervals values list grouped by dimension,
+                        or np.array of shape (N x 2).
     :type persistence: list of tuples(dimension, tuple(birth, death)).
     :param persistence_file: A :doc:`persistence file <fileformats>`
         style name (reset persistence if both are set).
