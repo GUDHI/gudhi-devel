@@ -45,6 +45,13 @@ def __min_birth_max_death(persistence, band=0.0):
     return (min_birth, max_death)
 
 
+def _array_handler(a):
+    if isinstance(a, np.ndarray): 
+        return [[0, x] for x in a]
+    else:
+        return a
+
+
 def plot_persistence_barcode(
     persistence=[],
     persistence_file="",
@@ -94,6 +101,9 @@ def plot_persistence_barcode(
         from matplotlib import rc
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
+
+
+        persistence = _array_handler(persistence)
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -237,6 +247,7 @@ def plot_persistence_diagram(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
+        persistence = _array_handler(persistence)
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -399,6 +410,7 @@ def plot_persistence_density(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
+        persistence = _array_handler(persistence)
 
         if persistence_file != "":
             if dimension is None:
