@@ -60,7 +60,7 @@
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
 #include <tbb/combinable.h>
-#include <tbb/mutex.h>
+#include <mutex>
 #endif
 
 // #define GUDHI_TC_EXPORT_NORMALS // Only for 3D surfaces (k=2, d=3)
@@ -147,7 +147,7 @@ class Tangential_complex {
   typedef typename Tr_traits::Vector_d Tr_vector;
 
 #if defined(GUDHI_USE_TBB)
-  typedef tbb::mutex Mutex_for_perturb;
+  typedef std::mutex Mutex_for_perturb;
   typedef Vector Translation_for_perturb;
   typedef std::vector<Atomic_wrapper<FT> > Weights;
 #else

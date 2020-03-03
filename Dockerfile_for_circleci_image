@@ -49,6 +49,7 @@ RUN apt-get install -y make \
     pkg-config
 
 RUN pip3 install \
+    setuptools \
     numpy \
     matplotlib \
     scipy \
@@ -57,7 +58,8 @@ RUN pip3 install \
     scikit-learn \
     sphinx \
     sphinx-paramlinks \
-    sphinxcontrib-bibtex
+    sphinxcontrib-bibtex \
+    tensorflow
 
 # apt clean up
 RUN apt autoremove && rm -rf /var/lib/apt/lists/*
