@@ -1347,7 +1347,9 @@ class Simplex_tree {
                                                               });
 
       Filtration_value max_filt_border_value = filtration(*max_border);
-      if (simplex.second.filtration() < max_filt_border_value) {
+      // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
+      // That seems more useful than keeping NaN.
+      if (!(simplex.second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
         simplex.second.assign_filtration(max_filt_border_value);
