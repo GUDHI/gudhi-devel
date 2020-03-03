@@ -65,5 +65,5 @@ build_script:
       ctest -j 4 --output-on-failure -C Release
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
-      ctest -j 4 --output-on-failure -C Release -E diff_files
+      ctest -j 4 --output-on-failure -C Release -E "(sphinx)|(diff_files)"
     )
