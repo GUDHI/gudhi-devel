@@ -47,3 +47,27 @@ The output is:
 .. testoutput::
 
     Wasserstein distance value = 1.45
+
+We can also have access to the optimal matching by letting `matching=True`. 
+It is encoded as a list of indices (i,j), meaning that the i-th point in X
+is mapped to the j-th point in Y. 
+An index of -1 represents the diagonal.
+
+.. testcode::
+
+    import gudhi.wasserstein
+    import numpy as np
+
+    diag1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
+    diag2 = np.array([[2.8, 4.45], [5, 6], [9.5, 14.1]])
+    cost, matching = gudhi.wasserstein.wasserstein_distance(diag1, diag2, matching=True, order=1., internal_p=2.)
+
+    message = "Wasserstein distance value = %.2f, optimal matching: %s"  %(cost, matching)
+    print(message)
+
+The output is:
+
+.. testoutput::
+    
+    Wasserstein distance value = 2.15, optimal matching: [(0, 0), (1, 2), (2, -1), (-1, 1)]
+
