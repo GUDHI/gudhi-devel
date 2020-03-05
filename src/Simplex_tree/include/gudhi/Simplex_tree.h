@@ -1317,6 +1317,8 @@ class Simplex_tree {
    * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
+   * 
+   * If a simplex has a `NaN` filtration value, it is considered lower than any other defined filtration value.
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
