@@ -3,16 +3,15 @@ project(Persistence_representations_intervals_utilities)
 
 add_executable ( plot_histogram_of_intervals_lengths plot_histogram_of_intervals_lengths.cpp )
 
-add_test(NAME plot_histogram_of_intervals_lengths COMMAND $<TARGET_FILE:plot_histogram_of_intervals_lengths>
+add_test(NAME Persistence_representation_utilities_plot_histogram_of_intervals_lengths COMMAND $<TARGET_FILE:plot_histogram_of_intervals_lengths>
     "${CMAKE_CURRENT_BINARY_DIR}/../first.pers" "-1")
 
 install(TARGETS plot_histogram_of_intervals_lengths DESTINATION bin)
 
-add_persistence_representation_plot_utility(plot_persistence_intervals "")
-add_persistence_representation_plot_utility(plot_persistence_Betti_numbers "")
+add_persistence_representation_plot_utility(plot_histogram_of_intervals_lengths plot_persistence_intervals "")
+add_persistence_representation_plot_utility(plot_histogram_of_intervals_lengths plot_persistence_Betti_numbers "")
 
 add_persistence_representation_creation_utility(compute_birth_death_range_in_persistence_diagram "-1")
-
 
 add_executable ( compute_number_of_dominant_intervals compute_number_of_dominant_intervals.cpp )
 add_test(NAME Persistence_representation_utilities_compute_number_of_dominant_intervals
