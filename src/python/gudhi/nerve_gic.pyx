@@ -194,7 +194,7 @@ cdef class CoverComplex:
 
     def set_automatic_resolution(self):
         """Computes the optimal length of intervals (i.e. the smallest interval
-        length avoiding discretization artifacts—see :cite:`Carriere17c`) for a
+        length avoiding discretization artifacts - see :cite:`Carriere17c`) for a
         functional cover.
 
         :rtype: double
@@ -298,7 +298,7 @@ cdef class CoverComplex:
 
     def set_graph_from_automatic_rips(self, N=100):
         """Creates a graph G from a Rips complex whose threshold value is
-        automatically tuned with subsampling—see.
+        automatically tuned with subsampling - see :cite:`Carriere17c`.
 
         :param N: Number of subsampling iteration (the default reasonable value
             is 100, but there is no guarantee on how to choose it).

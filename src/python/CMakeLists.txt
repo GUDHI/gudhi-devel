@@ -32,6 +32,10 @@ function( add_gudhi_debug_info DEBUG_INFO )
 endfunction( add_gudhi_debug_info )
 
 if(PYTHONINTERP_FOUND)
+  if(PYBIND11_FOUND)
+    add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
+  endif()
   if(CYTHON_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_reader', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
@@ -86,6 +90,7 @@ if(PYTHONINTERP_FOUND)
     endif(MSVC)
     if(CMAKE_COMPILER_IS_GNUCXX)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
+      set(GUDHI_PYBIND11_EXTRA_COMPILE_ARGS "${GUDHI_PYBIND11_EXTRA_COMPILE_ARGS}'-fvisibility=hidden', ")
     endif(CMAKE_COMPILER_IS_GNUCXX)
     if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
@@ -390,9 +395,9 @@ endif(CGAL_FOUND)
     add_gudhi_py_test(test_reader_utils)
 
     # Wasserstein
-    if(OT_FOUND)
+    if(OT_FOUND AND PYBIND11_FOUND)
       add_gudhi_py_test(test_wasserstein_distance)
-    endif(OT_FOUND)
+    endif()
 
     # Representations
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
@@ -406,32 +411,37 @@ endif(CGAL_FOUND)
           if(SCIPY_FOUND)
             if(SKLEARN_FOUND)
               if(OT_FOUND)
-                if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                  set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
-                  # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                  # Images and biblio warnings because not found on developper version
-                  if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                    set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
-                  endif()
-                  # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
-                  add_custom_target(sphinx
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
-                      COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                      ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-                      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                      COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
+                if(PYBIND11_FOUND)
+                  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                    set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+                    # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+                    # Images and biblio warnings because not found on developper version
+                    if (GUDHI_PYTHON_PATH STREQUAL "src/python")
+                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                    endif()
+                    # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+                    add_custom_target(sphinx
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+                        COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                        ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+                        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                        COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
   
-                  add_test(NAME sphinx_py_test
-                           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                           ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
+                    add_test(NAME sphinx_py_test
+                             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                             COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                             ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
   
-                  # Set missing or not modules
-                  set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                  message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                    # Set missing or not modules
+                    set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
+                  else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                    message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                    set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+                  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                else(PYBIND11_FOUND)
+                  message("++ Python documentation module will not be compiled because pybind11 was not found")
                   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                endif(PYBIND11_FOUND)
               else(OT_FOUND)
                 message("++ Python documentation module will not be compiled because POT was not found")
                 set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
