@@ -30,7 +30,7 @@ RUN apt-get install -y make \
     cmake \
     graphviz \
     perl \
-    texlive-bibtex-extra \
+    texlive-full \
     biber \
     doxygen \
     libboost-all-dev \
