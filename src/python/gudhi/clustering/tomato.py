@@ -40,7 +40,7 @@ class Tomato:
         input_type="points",
         metric=None,
         graph_type="knn",
-        density_type="DTM",
+        density_type="logDTM",
         n_clusters=None,
         merge_threshold=None,
         #       eliminate_threshold=None,
