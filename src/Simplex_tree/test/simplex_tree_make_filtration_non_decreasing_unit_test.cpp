@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing_on_nan_values, type
   st.make_filtration_non_decreasing();
 
   std::cout << "Check all filtration values are NaN" << std::endl;
-  for (auto f_simplex : st.filtration_simplex_range()) {
+  for (auto f_simplex : st.complex_simplex_range()) {
     BOOST_CHECK(std::isnan(st.filtration(f_simplex)));
   }
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing_on_nan_values, type
   BOOST_CHECK(st.make_filtration_non_decreasing());
   
   std::cout << "Check all filtration values are now defined" << std::endl;
-  for (auto f_simplex : st.filtration_simplex_range()) {
+  for (auto f_simplex : st.complex_simplex_range()) {
     BOOST_CHECK(!std::isnan(st.filtration(f_simplex)));
   }
 }
