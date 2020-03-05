@@ -90,6 +90,8 @@ Because of `-u`, it will remember where you like to push this branch, and next t
 Possibly iterate a few times, add more commits and push them.
 
 ## Your pull request is ready
+Do not forget to update `.github/next_release.md` to announce your development in the next release note.
+
 Get your web browser to https://github.com/LOGIN/gudhi-devel, click on the button that says **Branch: some-name** (below the number of commits, above the list of files) and select the branch you are so proud of.
 Click on **New pull request** next to it.
 

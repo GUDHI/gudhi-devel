@@ -1,0 +1,8 @@
+pytest
+sphinx
+sphinxcontrib-bibtex
+sphinx-paramlinks
+matplotlib
+scipy
+scikit-learn
+POT
