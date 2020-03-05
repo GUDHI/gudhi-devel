@@ -4,6 +4,7 @@ from ._tomato import *
 # The fit/predict interface is not so well suited...
 # TODO: option for a faster, weaker (probabilistic) knn
 
+
 class Tomato:
     """
     Clustering
@@ -76,7 +77,7 @@ class Tomato:
         self.params_ = params
         self.__n_clusters = n_clusters
         self.__merge_threshold = merge_threshold
-        #self.eliminate_threshold_ = eliminate_threshold
+        # self.eliminate_threshold_ = eliminate_threshold
         if n_clusters and merge_threshold:
             raise ValueError("Cannot specify both a merge threshold and a number of clusters")
 
@@ -300,6 +301,11 @@ class Tomato:
         )
         self.n_leaves_ = len(self.max_density_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_density_per_cc_) + len(self.children_)
+        if self.__merge_threshold:
+            assert not self.__n_clusters
+            self.__n_clusters = numpy.count_nonzero(
+                self.diagram_[:, 1] - self.diagram_[:, 0] > self.__merge_threshold
+            ) + len(self.max_density_per_cc_)
         if self.__n_clusters:
             renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
@@ -330,7 +336,7 @@ class Tomato:
 
     #    def predict(self, X):
     #        # X had better be the same as in fit()
-    #        return labels_
+    #        return self.labels_
 
     # Use set_params instead?
     @property
@@ -356,8 +362,8 @@ class Tomato:
         if merge_threshold == self.__merge_threshold:
             return
         if hasattr(self, "leaf_labels_"):
-            self.n_clusters_ = numpy.count_nonzero(self.diagram_[1] - self.diagram_[0] > merge_threshold) + len(
-                max_density_per_cc_
+            self.n_clusters_ = numpy.count_nonzero(self.diagram_[:, 1] - self.diagram_[:, 0] > merge_threshold) + len(
+                self.max_density_per_cc_
             )
         else:
             self.__n_clusters = None
