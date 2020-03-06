@@ -986,5 +986,41 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested
             << " - num_simplices = " << st.num_simplices() << std::endl;
   BOOST_CHECK(st.dimension() == 1);
   BOOST_CHECK(st.num_simplices() == st.num_vertices() + 1);
+}
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(generators, typeST, list_of_tested_variants) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST FIND GENERATORS" << std::endl;
+  {
+    typeST st;
+    st.insert_simplex_and_subfaces({0,1,2,3,4,5,6},0);
+    st.assign_filtration(st.find({0,2,4}), 10);
+    st.assign_filtration(st.find({1,5}), 20);
+    st.assign_filtration(st.find({1,2,4}), 30);
+    st.assign_filtration(st.find({3}), 5);
+    st.make_filtration_non_decreasing();
+    BOOST_CHECK(st.filtration(st.find({1,2}))==0);
+    BOOST_CHECK(st.filtration(st.find({0,1,2,3,4}))==30);
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,1,2,3,4,5}))==st.find({1,2,4}));
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,2,3}))==st.find({3}));
+    auto s=st.minimal_simplex_with_same_filtration(st.find({0,2,6}));
+    BOOST_CHECK(s==st.find({0})||s==st.find({2})||s==st.find({6}));
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({2}))==2);
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({1,5}))==st.null_vertex());
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({5,6}))>=5);
+  }
+  {
+    typeST st;
+    st.insert_simplex_and_subfaces({0,1}, 8);
+    st.insert_simplex_and_subfaces({0,2}, 10);
+    st.insert_simplex_and_subfaces({3,4}, 6);
+    st.insert_simplex_and_subfaces({1,2}, 5);
+    st.insert_simplex_and_subfaces({1,5}, 4);
+    st.insert_simplex_and_subfaces({0,5}, 3);
+    st.insert_simplex_and_subfaces({2,5}, 2);
+    st.insert_simplex_and_subfaces({1,3}, 9);
+    st.expansion(50);
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({0,1,2,5}))==st.find({0,2}));
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
+  }
 }

@@ -24,6 +24,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/container/static_vector.hpp>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -246,8 +247,8 @@ class Simplex_tree {
    * which is consequenlty
    * equal to \f$(-1)^{\text{dim} \sigma}\f$ the canonical orientation on the simplex.
    */
-  Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) {
-    assert(sh != null_simplex());  // Empty simplex
+  Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) const {
+    GUDHI_CHECK(sh != null_simplex(), "empty simplex");
     return Simplex_vertex_range(Simplex_vertex_iterator(this, sh),
                                 Simplex_vertex_iterator(this));
   }
@@ -448,6 +449,15 @@ class Simplex_tree {
           return false;
     }
     return true;
+  }
+
+  /** \brief Returns the filtration value of a simplex.
+   *
+   * Same as `filtration()`, but does not handle `null_simplex()`.
+   */
+  static Filtration_value filtration_(Simplex_handle sh) {
+    GUDHI_CHECK (sh != null_simplex(), "null simplex");
+    return sh->second.filtration();
   }
 
  public:
@@ -827,7 +837,7 @@ class Simplex_tree {
 
   /** Returns the Siblings containing a simplex.*/
   template<class SimplexHandle>
-  Siblings* self_siblings(SimplexHandle sh) {
+  static Siblings* self_siblings(SimplexHandle sh) {
     if (sh->second.children()->parent() == sh->first)
       return sh->second.children()->oncles();
     else
@@ -1463,6 +1473,76 @@ class Simplex_tree {
       // dimension may need to be lowered
       dimension_to_be_lowered_ = true;
     }
+  }
+
+  /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.
+   *
+   * For a lower-star filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which vertex had its filtration value propagated to `sh`.
+   * If several vertices have the same filtration value, the one it returns is arbitrary. */
+  Vertex_handle vertex_with_same_filtration(Simplex_handle sh) {
+    auto filt = filtration_(sh);
+    for(auto v : simplex_vertex_range(sh))
+      if(filtration_(find_vertex(v)) == filt)
+        return v;
+    return null_vertex();
+  }
+
+  /** \brief Returns an edge of `sh` that has the same filtration value as `sh` if it exists, and `null_simplex()` otherwise.
+   *
+   * For a flag-complex built with `expansion()`, this is a way to invert the process and find out which edge had its filtration value propagated to `sh`.
+   * If several edges have the same filtration value, the one it returns is arbitrary.
+   *
+   * \pre `sh` must have dimension at least 1. */
+  Simplex_handle edge_with_same_filtration(Simplex_handle sh) {
+#if 0
+    // FIXME: Only do this if dim >= 2, since we don't want to return a vertex...
+    // Test if we are lucky and the parent has the same filtration value.
+    Siblings* sib = self_siblings(sh);
+    Vertex_handle v_par = sib->parent();
+    sib = sib->oncles();
+    Simplex_handle par = sib->find(v_par);
+    if(filtration_(par) == filt) return edge_with_same_filtration(par);
+#endif
+    auto&& vertices = simplex_vertex_range(sh);
+    auto end = std::end(vertices);
+    auto vi = std::begin(vertices);
+    GUDHI_CHECK(vi != end, "empty simplex");
+    auto v0 = *vi;
+    ++vi;
+    GUDHI_CHECK(vi != end, "simplex of dimension 0");
+    if(std::next(vi) == end) return sh; // shortcut for dimension 1
+    boost::container::static_vector<Vertex_handle, 40> suffix;
+    suffix.push_back(v0);
+    auto filt = filtration_(sh);
+    do
+    {
+      Vertex_handle v = *vi;
+      auto&& children1 = find_vertex(v)->second.children()->members_;
+      for(auto w : suffix){
+        // Can we take advantage of the fact that suffix is ordered?
+        Simplex_handle s = children1.find(w);
+        if(filtration_(s) == filt)
+          return s;
+      }
+      suffix.push_back(v);
+    }
+    while(++vi != end);
+    return null_simplex();
+  }
+
+  /** \brief Returns an edge of `sh` that has the same filtration value as `sh` if it exists, and `null_simplex()` otherwise.
+   *
+   * For a flag-complex built with `expansion()`, this is a way to invert the process and find out which edge had its filtration value propagated to `sh`.
+   * If several edges have the same filtration value, the one it returns is arbitrary. */
+  Simplex_handle minimal_simplex_with_same_filtration(Simplex_handle sh) {
+    if(dimension(sh) == 0) // vertices are minimal
+      return sh;
+    auto filt = filtration_(sh);
+    // Naive implementation, it can be sped up.
+    for(auto b : boundary_simplex_range(sh))
+      if(filtration_(b) == filt)
+        return minimal_simplex_with_same_filtration(b);
+    return sh; // None of its faces has the same filtration.
   }
 
  private:
