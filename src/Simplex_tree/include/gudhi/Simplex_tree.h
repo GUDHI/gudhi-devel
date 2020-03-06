@@ -1532,7 +1532,7 @@ class Simplex_tree {
 
   /** \brief Returns a minimal face of `sh` that has the same filtration value as `sh`.
    *
-   * For a complex built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which simplex had its filtration value propagated to `sh`.
+   * For a filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which simplex had its filtration value propagated to `sh`.
    * If several minimal (for inclusion) simplices have the same filtration value, the one it returns is arbitrary, and it is not guaranteed to be the one with smallest dimension. */
   Simplex_handle minimal_simplex_with_same_filtration(Simplex_handle sh) {
     auto filt = filtration_(sh);
