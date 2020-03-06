@@ -1530,13 +1530,11 @@ class Simplex_tree {
     return null_simplex();
   }
 
-  /** \brief Returns an edge of `sh` that has the same filtration value as `sh` if it exists, and `null_simplex()` otherwise.
+  /** \brief Returns a minimal face of `sh` that has the same filtration value as `sh`.
    *
-   * For a flag-complex built with `expansion()`, this is a way to invert the process and find out which edge had its filtration value propagated to `sh`.
-   * If several edges have the same filtration value, the one it returns is arbitrary. */
+   * For a complex built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which simplex had its filtration value propagated to `sh`.
+   * If several minimal (for inclusion) simplices have the same filtration value, the one it returns is arbitrary, and it is not guaranteed to be the one with smallest dimension. */
   Simplex_handle minimal_simplex_with_same_filtration(Simplex_handle sh) {
-    if(dimension(sh) == 0) // vertices are minimal
-      return sh;
     auto filt = filtration_(sh);
     // Naive implementation, it can be sped up.
     for(auto b : boundary_simplex_range(sh))
