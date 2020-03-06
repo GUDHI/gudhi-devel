@@ -361,7 +361,7 @@ def plot_persistence_density(
     legend=False,
     axes=None,
     fontsize=16,
-    greyblock=True
+    greyblock=False
 ):
     """This function plots the persistence density from persistence
     values list, np.array of shape (N x 2) representing a diagram
@@ -410,7 +410,7 @@ def plot_persistence_density(
     :param fontsize: Fontsize to use in axis.
     :type fontsize: int
     :param greyblock: if we want to plot a grey patch on the lower half plane 
-                         for nicer rendering. Default True.
+                         for nicer rendering. Default False.
     :type greyblock: boolean
     :returns: (`matplotlib.axes.Axes`): The axes on which the plot was drawn.
     """
