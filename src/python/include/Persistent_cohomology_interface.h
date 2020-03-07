@@ -95,11 +95,10 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   }
 
   // TODO: (possibly at the python level)
-  // - an option to ignore intervals of length 0?
   // - an option to return only some of those vectors?
   typedef std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> Generators;
 
-  Generators lower_star_generators() {
+  Generators lower_star_generators(double min_persistence) {
     Generators out;
     // diags[i] should be interpreted as vector<array<int,2>>
     auto& diags = out.first;
@@ -108,6 +107,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     for (auto pair : Base::get_persistent_pairs()) {
       auto s = std::get<0>(pair);
       auto t = std::get<1>(pair);
+      if(stptr_->filtration(t) - stptr_->filtration(s) <= min_persistence)
+        continue;
       int dim = stptr_->dimension(s);
       auto v = stptr_->vertex_with_same_filtration(s);
       if(t == stptr_->null_simplex()) {
@@ -123,7 +124,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     return out;
   }
 
-  Generators flag_generators() {
+  // An alternative, to avoid those different sizes, would be to "pad" vertex generator v as (v, v) or (v, -1). When using it as index, this corresponds to adding the vertex filtration values either on the diagonal of the distance matrix, or as an extra row or column.
+  Generators flag_generators(double min_persistence) {
     Generators out;
     // diags[0] should be interpreted as vector<array<int,3>> and other diags[i] as vector<array<int,4>>
     auto& diags = out.first;
@@ -132,6 +134,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     for (auto pair : Base::get_persistent_pairs()) {
       auto s = std::get<0>(pair);
       auto t = std::get<1>(pair);
+      if(stptr_->filtration(t) - stptr_->filtration(s) <= min_persistence)
+        continue;
       int dim = stptr_->dimension(s);
       bool infinite = t == stptr_->null_simplex();
       if(infinite) {

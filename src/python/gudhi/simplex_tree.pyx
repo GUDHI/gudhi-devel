@@ -395,7 +395,7 @@ cdef class SimplexTree:
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
             0.0.
-            Sets min_persistence to -1.0 to see all values.
+            Set min_persistence to -1.0 to see all values.
         :type min_persistence: float.
         :param persistence_dim_max: If true, the persistent homology for the
             maximal dimension in the complex is computed. If false, it is
@@ -515,42 +515,48 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
 
-    def lower_star_persistence_generators(self):
+    def lower_star_persistence_generators(self, min_persistence=0.):
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
         where each simplex is replaced with the vertex that gave it its filtration value.
 
-        :returns: first the regular persistence pairs, grouped by dimension, with one vertex per extremity,
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Set min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: First the regular persistence pairs, grouped by dimension, with one vertex per extremity,
             and second the essential features, grouped by dimension, with one vertex each
         :rtype: Tuple[List[numpy.array[int] of shape (n,2)], List[numpy.array[int] of shape (m,)]]
 
-        :note: intervals_in_dim function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
-            function to be launched first.
+        :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
         if self.pcohptr != NULL:
-            gen = self.pcohptr.lower_star_generators()
+            gen = self.pcohptr.lower_star_generators(min_persistence)
             normal = [np_array(d).reshape(-1,2) for d in gen.first]
             infinite = [np_array(d) for d in gen.second]
             return (normal, infinite)
         else:
             print("lower_star_persistence_generators() requires that persistence() be called first.")
 
-    def flag_persistence_generators(self):
+    def flag_persistence_generators(self, min_persistence=0.):
         """Assuming this is a flag complex, this function returns the persistence pairs,
         where each simplex is replaced with the vertices of the edges that gave it its filtration value.
 
-        :returns: first the regular persistence pairs of dimension 0, with one vertex for birth and two for death;
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Set min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: First the regular persistence pairs of dimension 0, with one vertex for birth and two for death;
             then the other regular persistence pairs, grouped by dimension, with 2 vertices per extremity;
             then the connected components, with one vertex each;
             finally the other essential features, grouped by dimension, with 2 vertices for birth.
-        :rtype: Tuple[List[numpy.array[int] of shape (n,3)], List[numpy.array[int] of shape (m,4)], List[numpy.array[int] of shape (l,)], List[numpy.array[int] of shape (k,2)]]
+        :rtype: Tuple[numpy.array[int] of shape (n,3), List[numpy.array[int] of shape (m,4)], numpy.array[int] of shape (l,), List[numpy.array[int] of shape (k,2)]]
 
-        :note: intervals_in_dim function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
-            function to be launched first.
+        :note: flag_persistence_generators requires that `persistence()` be called first.
         """
         if self.pcohptr != NULL:
-            gen = self.pcohptr.flag_generators()
+            gen = self.pcohptr.flag_generators(min_persistence)
             if len(gen.first) == 0:
                 normal0 = np_array([])
                 normals = np_array([])
@@ -568,4 +574,4 @@ cdef class SimplexTree:
 
             return (normal0, normals, infinite0, infinites)
         else:
-            print("lower_star_persistence_generators() requires that persistence() be called first.")
+            print("flag_persistence_generators() requires that persistence() be called first.")
