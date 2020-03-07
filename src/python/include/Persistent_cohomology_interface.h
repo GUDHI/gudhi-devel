@@ -125,6 +125,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   }
 
   // An alternative, to avoid those different sizes, would be to "pad" vertex generator v as (v, v) or (v, -1). When using it as index, this corresponds to adding the vertex filtration values either on the diagonal of the distance matrix, or as an extra row or column.
+  // We could also merge the vectors for different dimensions into a single one, with an extra column for the dimension (converted to type double).
   Generators flag_generators(double min_persistence) {
     Generators out;
     // diags[0] should be interpreted as vector<array<int,3>> and other diags[i] as vector<array<int,4>>
