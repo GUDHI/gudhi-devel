@@ -8,6 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from libc.stdint cimport intptr_t
+import numpy
 from numpy import array as np_array
 cimport simplex_tree
 
@@ -558,19 +559,19 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             gen = self.pcohptr.flag_generators(min_persistence)
             if len(gen.first) == 0:
-                normal0 = np_array([])
-                normals = np_array([])
+                normal0 = numpy.empty((0,3))
+                normals = []
             else:
                 l = iter(gen.first)
                 normal0 = np_array(next(l)).reshape(-1,3)
                 normals = [np_array(d).reshape(-1,4) for d in l]
             if len(gen.second) == 0:
-                infinite0 = np_array([])
-                infinites = np_array([])
+                infinite0 = numpy.empty(0)
+                infinites = []
             else:
                 l = iter(gen.second)
                 infinite0 = np_array(next(l))
-                infinites = [np_array(d).reshape(-1,3) for d in l]
+                infinites = [np_array(d).reshape(-1,2) for d in l]
 
             return (normal0, normals, infinite0, infinites)
         else:
