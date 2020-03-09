@@ -312,13 +312,13 @@ class Tomato:
         else:
             self.labels_ = self.leaf_labels_
             self.__n_clusters = self.n_leaves_
+        return self
 
     def fit_predict(self, X, y=None, weights=None):
         """
         Equivalent to fit(), and returns the `labels_`.
         """
-        self.fit(X, y, weights)
-        return self.labels_
+        return self.fit(X, y, weights).labels_
 
     # TODO: add argument k or threshold? Have a version where you can click and it shows the line and the corresponding k?
     def plot_diagram(self):
