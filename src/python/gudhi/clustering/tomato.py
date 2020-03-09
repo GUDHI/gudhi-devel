@@ -89,7 +89,7 @@ class Tomato:
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
         # TODO: less code duplication (subroutines?), less spaghetti, but don't compute neighbors twice if not needed. Clear error message for missing or contradictory parameters.
-        if weights:
+        if weights is not None:
             density_type = "manual"
         else:
             density_type = self.density_type_
