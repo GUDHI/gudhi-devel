@@ -64,34 +64,13 @@ def _perstot(X, order, internal_p):
     return (np.sum(np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order))**(1./order)
 
 
-def _clean_match(match, n, m):
-    '''
-    :param match: a list of the form [(i,j) ...]
-    :param n: int, size of the first dgm
-    :param m: int, size of the second dgm
-    :return: a modified version of match where indices greater than n, m are replaced by -1, encoding the diagonal.
-                and (-1, -1) are removed
-    '''
-    new_match = []
-    for i,j in match:
-        if i >= n:
-            if j < m:
-               new_match.append((-1, j))
-        elif j >= m:
-            if i < n:
-                new_match.append((i,-1))
-        else:
-            new_match.append((i,j))
-    return new_match
-
-
 def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     '''
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points 
                 (i.e. with infinite coordinate).
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param matching: if True, computes and returns the optimal matching between X and Y, encoded as
-                        a list of tuple [...(i,j)...], meaning the i-th point in X is matched to
+                        a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
                         the j-th point in Y, with the convention (-1) represents the diagonal.
     :param order: exponent for Wasserstein; Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); 
@@ -114,12 +93,12 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
             if not matching:
                 return _perstot(Y, order, internal_p)
             else:
-                return _perstot(Y, order, internal_p), [(-1, j) for j in range(m)]
+                return _perstot(Y, order, internal_p), np.array([[-1, j] for j in range(m)])
     elif Y.size == 0:
         if not matching:
             return _perstot(X, order, internal_p)
         else:
-            return _perstot(X, order, internal_p), [(i, -1) for i in range(n)]
+            return _perstot(X, order, internal_p), np.array([[i, -1] for i in range(n)])
 
     M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
     a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
@@ -130,9 +109,11 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     if matching:
         P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
         ot_cost = np.sum(np.multiply(P,M))
+        P[-1, -1] = 0  # Remove matching corresponding to the diagonal
         match = np.argwhere(P)
         # Now we turn to -1 points encoding the diagonal
-        match = _clean_match(match, n, m)
+        match[:,0][match[:,0] >= n] = -1
+        match[:,1][match[:,1] >= m] = -1
         return ot_cost ** (1./order) , match
 
     # Comptuation of the otcost using the ot.emd2 library.
