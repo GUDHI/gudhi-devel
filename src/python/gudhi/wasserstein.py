@@ -70,13 +70,13 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
                 (i.e. with infinite coordinate).
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param matching: if True, computes and returns the optimal matching between X and Y, encoded as
-                        a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
-                        the j-th point in Y, with the convention (-1) represents the diagonal.
+                     a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
+                     the j-th point in Y, with the convention (-1) represents the diagonal.
     :param order: exponent for Wasserstein; Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); 
-                        Default value is 2 (Euclidean norm).
+                       Default value is 2 (Euclidean norm).
     :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with 
-                        respect to the internal_p-norm as ground metric.
+              respect to the internal_p-norm as ground metric.
               If matching is set to True, also returns the optimal matching between X and Y.
     '''
     n = len(X)
