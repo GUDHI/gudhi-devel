@@ -6,6 +6,38 @@ if(NOT Boost_FOUND)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_FOUND)
 
+# cf. https://cliutils.gitlab.io/modern-cmake/chapters/packages/Boost.html
+# This is needed if your Boost version is newer than your CMake version
+# or if you have an old version of CMake (<3.5)
+if(NOT TARGET Boost::program_options)
+    add_library(Boost::program_options IMPORTED INTERFACE)
+    set_property(TARGET Boost::program_options PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+    set_property(TARGET Boost::program_options PROPERTY
+        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+endif()
+if(NOT TARGET Boost::filesystem)
+    add_library(Boost::filesystem IMPORTED INTERFACE)
+    set_property(TARGET Boost::filesystem PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+    set_property(TARGET Boost::filesystem PROPERTY
+        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+endif()
+if(NOT TARGET Boost::unit_test_framework)
+    add_library(Boost::unit_test_framework IMPORTED INTERFACE)
+    set_property(TARGET Boost::unit_test_framework PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+    set_property(TARGET Boost::unit_test_framework PROPERTY
+        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+endif()
+if(NOT TARGET Boost::system)
+    add_library(Boost::system IMPORTED INTERFACE)
+    set_property(TARGET Boost::system PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+    set_property(TARGET Boost::system PROPERTY
+        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+endif()
+
 find_package(GMP)
 if(GMP_FOUND)
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
@@ -34,6 +66,9 @@ if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
   include( ${CGAL_USE_FILE} )
 endif()
+
+# For those who dislike bundled dependencies, this indicates where to find a preinstalled Hera.
+set(HERA_WASSERSTEIN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/geom_matching/wasserstein/include CACHE PATH "Directory where one can find Hera's wasserstein.h")
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
@@ -82,9 +117,6 @@ add_definitions( -DBOOST_ALL_DYN_LINK )
 # problem on Mac with boost_system and boost_thread
 add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
@@ -127,6 +159,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("sphinx")
   find_python_module("sklearn")
   find_python_module("ot")
+  find_python_module("pybind11")
 endif()
 
 if(NOT GUDHI_PYTHON_PATH)

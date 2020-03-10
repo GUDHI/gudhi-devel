@@ -65,5 +65,7 @@ include(GUDHI_user_version_target)
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set - Done in GUDHI_user_version_target for dev version
 include(GUDHI_doxygen_target)
 
+configure_file(${CMAKE_SOURCE_DIR}/.github/for_maintainers/new_gudhi_version_creation.md "${CMAKE_CURRENT_BINARY_DIR}/" @ONLY)
+
 message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 message("++ GUDHI_MISSING_MODULES list is:\"${GUDHI_MISSING_MODULES}\"")
