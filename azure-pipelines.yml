@@ -1,9 +1,3 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - '*'  # All branches
-
 jobs:
   
   - job: 'Test'
