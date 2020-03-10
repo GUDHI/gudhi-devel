@@ -69,7 +69,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         match = wasserstein_distance(diag2, emptydiag, matching=True, internal_p=np.inf, order=2.24)[1]
         assert np.array_equal(match , np.array([[0, -1], [1, -1]]))
         match = wasserstein_distance(diag1, diag2, matching=True, internal_p=2., order=2.)[1]
-        assert np.array_equal(match, np.array_equal([[0, 0], [1, 1], [2, -1]]))
+        assert np.array_equal(match, np.array([[0, 0], [1, 1], [2, -1]]))
         
 
 
