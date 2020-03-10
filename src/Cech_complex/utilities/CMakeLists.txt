@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Cech_complex_utilities)
 
 add_executable(cech_persistence cech_persistence.cpp)
-target_link_libraries(cech_persistence ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(cech_persistence Boost::program_options)
 
 if (TBB_FOUND)
   target_link_libraries(cech_persistence ${TBB_LIBRARIES})

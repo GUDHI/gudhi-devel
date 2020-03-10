@@ -2,7 +2,7 @@ project(Alpha_complex_utilities)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-  target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} Boost::program_options)
 
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
@@ -16,14 +16,20 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   if (DIFF_PATH)
     add_test(Alpha_complex_utilities_diff_exact_alpha_complex ${DIFF_PATH}
              "exact.pers" "safe.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_exact_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_exact_alpha_complex_persistence;Alpha_complex_utilities_safe_alpha_complex_persistence")
+             
     add_test(Alpha_complex_utilities_diff_fast_alpha_complex ${DIFF_PATH}
              "fast.pers" "safe.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_fast_alpha_complex_persistence;Alpha_complex_utilities_safe_alpha_complex_persistence")
+
   endif()
   
   install(TARGETS alpha_complex_persistence DESTINATION bin)
 
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
-  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} Boost::program_options)
   if (TBB_FOUND)
     target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
   endif(TBB_FOUND)
@@ -36,15 +42,19 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
           "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
           "-p" "2" "-m" "0.45" "-o" "exact_3d.pers" "-e")
 
-  add_test(NAME Alpha_complex_utilities_safe_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
+  add_test(NAME Alpha_complex_utilities_fast_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
           "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
           "-p" "2" "-m" "0.45" "-o" "fast_3d.pers" "-f")
 
   if (DIFF_PATH)
     add_test(Alpha_complex_utilities_diff_exact_alpha_complex_3d ${DIFF_PATH}
             "exact_3d.pers" "safe_3d.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_exact_alpha_complex_3d PROPERTIES DEPENDS
+            "Alpha_complex_utilities_exact_alpha_complex_3d;Alpha_complex_utilities_alpha_complex_3d")
     add_test(Alpha_complex_utilities_diff_fast_alpha_complex_3d ${DIFF_PATH}
             "fast_3d.pers" "safe_3d.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex_3d PROPERTIES DEPENDS
+            "Alpha_complex_utilities_fast_alpha_complex_3d;Alpha_complex_utilities_alpha_complex_3d")
   endif()
 
   add_test(NAME Alpha_complex_utilities_periodic_alpha_complex_3d_persistence COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
