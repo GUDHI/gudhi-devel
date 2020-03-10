@@ -75,12 +75,13 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   int top_dimensional_coface(int splx){
     if (stptr_->dimension(splx) == stptr_->dimension()){return splx;}
     else{  
-      for (auto v : stptr_->coboundary_simplex_range(splx)){
+      for (auto v : stptr_->get_coboundary_of_a_cell(splx)){
         if(stptr_->filtration(v) == stptr_->filtration(splx)){
           return top_dimensional_coface(v);
         }
       }  
     }
+    return splx;
   }
 
   std::vector<std::vector<int>> cofaces_of_cubical_persistence_pairs() {

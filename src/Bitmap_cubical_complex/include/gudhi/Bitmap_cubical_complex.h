@@ -340,7 +340,6 @@ class Bitmap_cubical_complex : public T {
    * that provides ranges for the Boundary_simplex_iterator.
    **/
   Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) { return this->get_boundary_of_a_cell(sh); }
-  Boundary_simplex_range coboundary_simplex_range(Simplex_handle sh) { return this->get_coboundary_of_a_cell(sh); }
 
   /**
    * filtration_simplex_range creates an object of a Filtration_simplex_range class

@@ -148,22 +148,22 @@ cdef class CubicalComplex:
 
     def cofaces_of_persistence_pairs(self):
         """A persistence interval is described by a pair of cells, one that creates the 
-           feature and one that kills it. The filtration values of those 2 cells give coordinates 
-           for a point in a persistence diagram, or a bar in a barcode. Structurally, in the 
-           cubical complexes provided here, the filtration value of any cell is the minimum of the 
-           filtration values of the maximal cells that contain it. Connecting persistence diagram 
-           coordinates to the corresponding value in the input (i.e. the filtration values of 
-           the top-dimensional cells) is useful for differentiation purposes.
+        feature and one that kills it. The filtration values of those 2 cells give coordinates 
+        for a point in a persistence diagram, or a bar in a barcode. Structurally, in the 
+        cubical complexes provided here, the filtration value of any cell is the minimum of the 
+        filtration values of the maximal cells that contain it. Connecting persistence diagram 
+        coordinates to the corresponding value in the input (i.e. the filtration values of 
+        the top-dimensional cells) is useful for differentiation purposes.
 
-           This function returns a list of pairs of top-dimensional cells corresponding to 
-           the persistence birth and death cells of the filtration. The cells are represented by 
-           their indices in the input list of top-dimensional cells (and not their indices in the 
-           internal datastructure that includes non-maximal cells). Note that when two adjacent 
-           top-dimensional cells have the same filtration value, we arbitrarily return one of the two
-           when calling the function on one of their common faces.
+        This function returns a list of pairs of top-dimensional cells corresponding to 
+        the persistence birth and death cells of the filtration. The cells are represented by 
+        their indices in the input list of top-dimensional cells (and not their indices in the 
+        internal datastructure that includes non-maximal cells). Note that when two adjacent 
+        top-dimensional cells have the same filtration value, we arbitrarily return one of the two
+        when calling the function on one of their common faces.
 
-        :returns: The top-dimensional cells/cofaces of the positive and negative cells.
-        :rtype:  list of pairs(index of positive top-dimensional cell, index of negative top-dimensional cell)
+        :returns: The top-dimensional cells/cofaces of the positive and negative cells, together with the corresponding homological dimension.
+        :rtype:  numpy array of integers of shape [number_of_persistence_points, 3], the integers of eah row being: (homological dimension, index of positive top-dimensional cell, index of negative top-dimensional cell). If the homological feature is essential, i.e., if the death time is +infinity, then the index of the corresponding negative top-dimensional cell is -1.
         """
         cdef vector[vector[int]] persistence_result
         if self.pcohptr != NULL:
