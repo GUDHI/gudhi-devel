@@ -18,14 +18,48 @@ A small example is provided
 
     * :download:`perslay_visu.py <../example/perslay_visu.py>`
 
-Readme
-------
-
-.. mdinclude:: perslay.md
-
 Function
 --------
 .. autofunction:: gudhi.perslay.perslay_channel
 
 Basic example
 -------------
+
+This example computes the first landscape associated to a persistence diagram with four points. The landscape is evaluated evenly on [-1,11].
+
+.. testcode::
+
+    import numpy as np
+    import tensorflow as tf
+    from gudhi.representations.preprocessing import Padding
+    from gudhi.representations import Landscape, PersistenceImage
+    from gudhi.perslay import perslay_channel
+    import matplotlib.pyplot as plt
+    # A single diagram with 4 points
+    diags = [np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])]
+    diags = Padding(use=True).fit_transform(diags)
+    D = np.stack(diags, 0)
+    tf.reset_default_graph()
+    diagram = tf.placeholder(tf.float32, shape=D.shape)
+    feed = {diagram: D}
+    list_v = []
+    samples = np.array(np.arange(-1.,11.,.5), dtype=np.float32)
+    perslay_channel(output=list_v, name="perslay", diag=diagram, persistence_weight=None, 
+                    perm_op="topk", keep=1, layer="ls", num_samples=len(samples),
+                    sample_init=samples, sample_const=True, fc_layers=[])
+    vector = tf.concat(list_v, 1)
+    init = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init)
+        L = vector.eval(feed_dict=feed)[0,:]
+        print(L)
+
+The output is:
+
+.. testoutput::
+
+    [0.         0.         0.         0.70710677 1.4142135  2.1213202
+     2.828427   2.1213202  1.4142135  0.70710677 1.4142135  2.1213202
+     2.828427   3.535534   2.828427   2.1213202  1.4142135  0.70710677
+     0.         0.         0.         0.         0.         0.        ]
+

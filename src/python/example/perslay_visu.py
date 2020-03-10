@@ -29,18 +29,28 @@ perslayParameters = {}
 # Persistence image #
 #####################
 
-perslayParameters["persistence_weight"]  = None
+def func(x, y):
+    return np.cos((np.pi)**2 * y * x)
+xaxis = np.linspace(0, 1, 100)
+yaxis = np.linspace(0, 1, 100)
+weight_function = np.array(func(xaxis[:,None], yaxis[None,:]), dtype=np.float32)
+
+epsilon = .1
+perslayParameters["persistence_weight"]  = "grid"
+perslayParameters["grid_size"]           = (100,100)
+perslayParameters["grid_bnds"]           = ((0.-epsilon, 1.+epsilon), (0.-epsilon, 1.+epsilon))
+perslayParameters["grid_init"]           = weight_function
+perslayParameters["grid_const"]          = True
 perslayParameters["perm_op"]             = "sum"
 perslayParameters["layer"]               = "im"
 perslayParameters["image_size"]          = (100, 100)
-epsilon = .001
-perslayParameters["image_bnds"]          = ((-.5-epsilon, 1.5+epsilon), (-.5-epsilon, 1.5+epsilon))
-perslayParameters["variance_init"]       = rui(.1, .1) 
-perslayParameters["variance_const"]      = False
+perslayParameters["image_bnds"]          = ((0.-epsilon, 1.+epsilon), (0.-epsilon, 1.+epsilon))
+perslayParameters["variance_init"]       = np.array([.1], dtype=np.float32) 
+perslayParameters["variance_const"]      = True
 perslayParameters["cv_layers"]           = []
 
 list_v = []
-perslay_channel(output=list_v, name="perslay", diag=diagram, **perslayParameters)
+perslay_channel(output=list_v, name="perslay-image", diag=diagram, **perslayParameters)
 vector = tf.concat(list_v, 1)
 
 init = tf.global_variables_initializer()
@@ -56,50 +66,37 @@ with tf.Session() as sess:
     plt.show()
     
     # Plot weight
-    if perslayParameters["persistence_weight"] == "grid":
-        W = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,"perslay-grid_pweight/W")[0]).T
-        weights = np.flip(W, 0)
-        plt.figure()
-        plt.imshow(weights, cmap="Purples", zorder=1)
-        ((xm,xM),(ym,yM)) = perslayParameters["grid_bnds"]
-        [xs, ys] = perslayParameters["grid_size"]
-        plt.scatter([int(xs*(x-xm)/(xM-xm)) for x in diag[0][:,0]], 
-                    [ys-int(ys*(y-ym)/(yM-ym)) for y in diag[0][:,1]], 
-                    s=10, color="red", zorder=2)
-        plt.show()
-        
-    if perslayParameters["persistence_weight"] == "gmix":
-        means = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-gmix_pweight/M")[0])
-        varis = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-gmix_pweight/V")[0])
-        x = np.arange(-.5, 1.5, .001)
-        y = np.arange(-.5, 1.5, .001)
-        xx, yy = np.meshgrid(x, y)
-        z = np.zeros(xx.shape)
-        for idx_g in range(means.shape[3]):
-            z += np.exp(-((xx-means[0,0,0,idx_g])**2 * (varis[0,0,0,idx_g])**2 
-                        + (yy-means[0,0,1,idx_g])**2 * (varis[0,0,1,idx_g])**2 ))
-        plt.contourf(xx, yy, z)
-        plt.scatter(diag[0][:,0], diag[0][:,1], s=50, color="red")
-        plt.show()
+    W = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,"perslay-image-grid_pweight/W")[0]).T
+    weights = np.flip(W, 0)
+    plt.figure()
+    plt.imshow(weights, cmap="Purples", zorder=1)
+    ((xm,xM),(ym,yM)) = perslayParameters["grid_bnds"]
+    [xs, ys] = perslayParameters["grid_size"]
+    plt.scatter([int(xs*(x-xm)/(xM-xm)) for x in diag[0][:,0]], 
+                [ys-int(ys*(y-ym)/(yM-ym)) for y in diag[0][:,1]], 
+                s=10, color="red", zorder=2)
+    plt.show()
 
-#################################################
-# Persistence landscape / entropy / Betti curve #
-#################################################
+#########################
+# Persistence landscape #
+#########################
 
-perslayParameters["persistence_weight"]  = None
+perslayParameters["persistence_weight"]  = "gmix"
+perslayParameters["gmix_num"]            = 2
+perslayParameters["gmix_m_init"]         = np.array([[.1,.4],[.25,1.]], dtype=np.float32)
+perslayParameters["gmix_m_const"]        = True
+perslayParameters["gmix_v_init"]         = np.array(10 * np.ones([2,2]), dtype=np.float32)
+perslayParameters["gmix_v_const"]        = True
 perslayParameters["perm_op"]             = "topk"
 perslayParameters["keep"]                = 3
 perslayParameters["layer"]               = "ls"
-#perslayParameters["layer"]              = "bc"
-#perslayParameters["layer"]              = "en"
 perslayParameters["num_samples"]         = 3000
 perslayParameters["sample_init"]         = np.array([[ np.arange(-1.,2.,.001) ]], dtype=np.float32)
 perslayParameters["sample_const"]        = True
-perslayParameters["theta"]               = 100 # used only if layer is "bc" or "en"
 perslayParameters["fc_layers"]           = []
 
 list_v = []
-perslay_channel(output=list_v, name="perslay", diag=diagram, **perslayParameters)
+perslay_channel(output=list_v, name="perslay-landscape", diag=diagram, **perslayParameters)
 vector = tf.concat(list_v, 1)
 
 init = tf.global_variables_initializer()
@@ -109,37 +106,56 @@ with tf.Session() as sess:
     #Plot representation
     V = vector.eval(feed_dict=feed)[0,:]
     plt.figure()
-    if perslayParameters["perm_op"] == "topk":
-        V = np.reshape(V, [-1, perslayParameters["keep"]])
-        for k in range(perslayParameters["keep"]):
-            plt.plot(V[:,k], linewidth=5.0)
-    else:
-        plt.plot(V, linewidth=5.0)
+    V = np.reshape(V, [-1, perslayParameters["keep"]])
+    for k in range(perslayParameters["keep"]):
+        plt.plot(V[:,k])
     plt.show()
     
     # Plot weight
-    if perslayParameters["persistence_weight"] == "grid":
-        W = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,"perslay-grid_pweight/W")[0]).T
-        weights = np.flip(W, 0)
-        plt.figure()
-        plt.imshow(weights, cmap="Purples", zorder=1)
-        ((xm,xM),(ym,yM)) = perslayParameters["grid_bnds"]
-        [xs, ys] = perslayParameters["grid_size"]
-        plt.scatter([int(xs*(x-xm)/(xM-xm)) for x in diag[0][:,0]], 
-                    [ys-int(ys*(y-ym)/(yM-ym)) for y in diag[0][:,1]], 
-                    s=10, color="red", zorder=2)
-        plt.show()
-        
-    if perslayParameters["persistence_weight"] == "gmix":
-        means = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-gmix_pweight/M")[0])
-        varis = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-gmix_pweight/V")[0])
-        x = np.arange(-.5, 1.5, .001)
-        y = np.arange(-.5, 1.5, .001)
-        xx, yy = np.meshgrid(x, y)
-        z = np.zeros(xx.shape)
-        for idx_g in range(means.shape[3]):
-            z += np.exp(-((xx-means[0,0,0,idx_g])**2 * (varis[0,0,0,idx_g])**2 
-                        + (yy-means[0,0,1,idx_g])**2 * (varis[0,0,1,idx_g])**2 ))
-        plt.contourf(xx, yy, z)
-        plt.scatter(diag[0][:,0], diag[0][:,1], s=100)
-        plt.show()
+    means = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-landscape-gmix_pweight/M")[0])
+    varis = sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "perslay-landscape-gmix_pweight/V")[0])
+    x = np.arange(-.1, 1.1, .001)
+    y = np.arange(-.1, 1.1, .001)
+    xx, yy = np.meshgrid(x, y)
+    z = np.zeros(xx.shape)
+    for idx_g in range(means.shape[3]):
+        z += np.exp(-((xx-means[0,0,0,idx_g])**2 * (varis[0,0,0,idx_g])**2 
+                    + (yy-means[0,0,1,idx_g])**2 * (varis[0,0,1,idx_g])**2 ))
+    plt.contourf(xx, yy, z)
+    plt.scatter(diag[0][:,0], diag[0][:,1], s=100)
+    plt.show()
+
+
+
+
+
+
+
+#######################
+# Persistence entropy #
+#######################
+
+perslayParameters["persistence_weight"]  = "linear"
+perslayParameters["coeff_init"]          = np.array([1.], dtype=np.float32)
+perslayParameters["coeff_const"]         = True
+perslayParameters["perm_op"]             = "sum"
+perslayParameters["layer"]               = "en"
+perslayParameters["num_samples"]         = 3000
+perslayParameters["sample_init"]         = np.array([[ np.arange(-1.,2.,.001) ]], dtype=np.float32)
+perslayParameters["sample_const"]        = True
+perslayParameters["theta"]               = np.array([1000.], dtype=np.float32)
+perslayParameters["fc_layers"]           = []
+
+list_v = []
+perslay_channel(output=list_v, name="perslay-silhouette", diag=diagram, **perslayParameters)
+vector = tf.concat(list_v, 1)
+
+init = tf.global_variables_initializer()
+with tf.Session() as sess:
+    sess.run(init)
+    
+    #Plot representation
+    V = vector.eval(feed_dict=feed)[0,:]
+    plt.figure()
+    plt.plot(V)
+    plt.show()

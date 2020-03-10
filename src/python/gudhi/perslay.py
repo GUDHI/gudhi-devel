@@ -27,7 +27,7 @@ def permutation_equivariant_layer(inp, dimension, perm_op, L_init, G_init, bias_
     """ DeepSet PersLay """
     dimension_before, num_pts = inp.shape[2].value, inp.shape[1].value
     lbda = tf.get_variable("L", shape=[dimension_before, dimension], initializer=L_init, trainable=train_vect)   if not L_const     else tf.get_variable("L", initializer=L_init)
-    b    = tf.get_variable("b", shape=[1, 1, dimension], initializer=bias_init, trainable=train_vect)            if not bias_const  else tf.get_variable("b", initializer=bias_init)
+    b    = tf.get_variable("b", shape=[1, 1, dimension], initializer=bias_init, trainable=train_vect)            if not bias_const  else tf.get_variable("b", initializer=tf.reshape(bias_init, [1, 1, dimension]))
     A    = tf.reshape(tf.einsum("ijk,kl->ijl", inp, lbda), [-1, num_pts, dimension])
     if perm_op is not None:
         if perm_op == "max":
@@ -48,8 +48,8 @@ def permutation_equivariant_layer(inp, dimension, perm_op, L_init, G_init, bias_
 def rational_hat_layer(inp, num_elements, q, mean_init, r_init, mean_const, r_const, train_vect):
     """ Rational Hat PersLay """
     dimension_before, num_pts = inp.shape[2].value, inp.shape[1].value
-    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=mean_init)
-    r  = tf.get_variable("r", shape=[1, 1, 1],                              initializer=r_init, trainable=train_vect)         if not r_const         else tf.get_variable("r", initializer=r_init)
+    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=tf.reshape(mean_init, [1, 1, dimension_before, num_elements]))
+    r  = tf.get_variable("r", shape=[1, 1, 1],                              initializer=r_init, trainable=train_vect)         if not r_const         else tf.get_variable("r", initializer=tf.reshape(r_init, [1, 1, 1]))
     bc_inp = tf.expand_dims(inp, -1)
     norms = tf.norm(bc_inp - mu, ord=q, axis=2)
     return 1/(1 + norms) - 1/(1 + tf.abs(tf.abs(r)-norms)) 
@@ -57,30 +57,30 @@ def rational_hat_layer(inp, num_elements, q, mean_init, r_init, mean_const, r_co
 def rational_layer(inp, num_elements, mean_init, variance_init, alpha_init, mean_const, variance_const, alpha_const, train_vect):
     """ Rational PersLay """
     dimension_before, num_pts = inp.shape[2].value, inp.shape[1].value
-    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=mean_init)
-    sg = tf.get_variable("s", shape=[1, 1, dimension_before, num_elements], initializer=variance_init, trainable=train_vect)  if not variance_const  else tf.get_variable("s", initializer=variance_init)
-    al = tf.get_variable("a", shape=[1, 1, num_elements],                   initializer=alpha_init, trainable=train_vect)     if not alpha_const     else tf.get_variable("a", initializer=alpha_init)
+    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=tf.reshape(mean_init, [1, 1, dimension_before, num_elements]))
+    sg = tf.get_variable("s", shape=[1, 1, dimension_before, num_elements], initializer=variance_init, trainable=train_vect)  if not variance_const  else tf.get_variable("s", initializer=tf.reshape(variance_init, [1, 1, dimension_before, num_elements]))
+    al = tf.get_variable("a", shape=[1, 1, num_elements],                   initializer=alpha_init, trainable=train_vect)     if not alpha_const     else tf.get_variable("a", initializer=tf.reshape(alpha_init, [1, 1, num_elements]))
     bc_inp = tf.expand_dims(inp, -1)
     return 1/tf.pow(1+tf.reduce_sum(tf.multiply(tf.abs(bc_inp - mu), tf.abs(sg)), axis=2), al)
 
 def exponential_layer(inp, num_elements, mean_init, variance_init, mean_const, variance_const, train_vect):
     """ Exponential PersLay """
     dimension_before, num_pts = inp.shape[2].value, inp.shape[1].value
-    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=mean_init)
-    sg = tf.get_variable("s", shape=[1, 1, dimension_before, num_elements], initializer=variance_init, trainable=train_vect)  if not variance_const  else tf.get_variable("s", initializer=variance_init)
+    mu = tf.get_variable("m", shape=[1, 1, dimension_before, num_elements], initializer=mean_init, trainable=train_vect)      if not mean_const      else tf.get_variable("m", initializer=tf.reshape(mean_init, [1, 1, dimension_before, num_elements]))
+    sg = tf.get_variable("s", shape=[1, 1, dimension_before, num_elements], initializer=variance_init, trainable=train_vect)  if not variance_const  else tf.get_variable("s", initializer=tf.reshape(variance_init, [1, 1, dimension_before, num_elements]))
     bc_inp = tf.expand_dims(inp, -1)
     return tf.exp(tf.reduce_sum(-tf.multiply(tf.square(bc_inp - mu), tf.square(sg)), axis=2))
 
 # Vectorizations implementing persistence landscapes
 def landscape_layer(inp, num_samples, sample_init, sample_const, train_vect):
     """ Landscape PersLay """
-    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=sample_init)
-    return tf.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
+    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=tf.reshape(sample_init, [1,1,num_samples]))
+    return np.sqrt(2) * tf.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
 
 # Vectorizations implementing Betti curves
 def betti_layer(inp, theta, num_samples, sample_init, sample_const, train_vect):
     """ Betti PersLay """
-    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=sample_init)
+    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=tf.reshape(sample_init, [1,1,num_samples]))
     X, Y = inp[:, :, 0:1], inp[:, :, 1:2]
     return  1. / ( 1. + tf.exp( -theta * (.5*(Y-X) - tf.abs(sp - .5*(Y+X))) )  )
 
@@ -90,7 +90,7 @@ def entropy_layer(inp, theta, num_samples, sample_init, sample_const, train_vect
     WARNING: this function assumes that padding values are zero
     """
     bp_inp = tf.einsum("ijk,kl->ijl", inp, tf.constant(np.array([[1.,-1.],[0.,1.]], dtype=np.float32)))
-    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=sample_init)
+    sp = tf.get_variable("s", shape=[1, 1, num_samples], initializer=sample_init, trainable=train_vect) if not sample_const else tf.get_variable("s", initializer=tf.reshape(sample_init, [1,1,num_samples]))
     L, X, Y = bp_inp[:, :, 1:2], bp_inp[:, :, 0:1], bp_inp[:, :, 0:1] + bp_inp[:, :, 1:2]
     LN = tf.multiply(L, 1. / tf.expand_dims(tf.matmul(L[:,:,0], tf.ones([L.shape[1],1])), -1))
     entropy_terms = tf.where(LN > 0., -tf.multiply(LN, tf.log(LN)), LN)
@@ -154,8 +154,8 @@ def perslay_channel(output, name, diag, **kwargs):
 
     if kwargs["persistence_weight"] == "gmix":
         with tf.variable_scope(name + "-gmix_pweight"):
-            M = tf.get_variable("M", shape=[1,1,2,kwargs["gmix_num"]], initializer=kwargs["gmix_m_init"], trainable=train_weight) if not kwargs["gmix_m_const"] else tf.get_variable("M", initializer=kwargs["gmix_m_init"])
-            V = tf.get_variable("V", shape=[1,1,2,kwargs["gmix_num"]], initializer=kwargs["gmix_v_init"], trainable=train_weight) if not kwargs["gmix_v_const"] else tf.get_variable("V", initializer=kwargs["gmix_v_init"])
+            M = tf.get_variable("M", shape=[1,1,2,kwargs["gmix_num"]], initializer=kwargs["gmix_m_init"], trainable=train_weight) if not kwargs["gmix_m_const"] else tf.get_variable("M", initializer=np.reshape(kwargs["gmix_m_init"], [1,1,2,kwargs["gmix_num"]]))
+            V = tf.get_variable("V", shape=[1,1,2,kwargs["gmix_num"]], initializer=kwargs["gmix_v_init"], trainable=train_weight) if not kwargs["gmix_v_const"] else tf.get_variable("V", initializer=np.reshape(kwargs["gmix_v_init"], [1,1,2,kwargs["gmix_num"]]))
             bc_inp = tf.expand_dims(tensor_diag, -1)
             weight = tf.expand_dims(tf.reduce_sum(tf.exp(tf.reduce_sum(-tf.multiply(tf.square(bc_inp - M), tf.square(V)), axis=2)), axis=2), -1)
 
