@@ -87,9 +87,6 @@ ln -s @GUDHI_VERSION@ latest
 * Tick the *This is a pre-release* check button if this is a release candidate (untick if this is an official version)
 * Click the *Publish the release* button
 
-***[Where X, Y and Z corresponds respectively to the major, minor, and patch version number]***
-
-
 ## Mail sending
 Send version mail to the following lists :
 * gudhi-devel@lists.gforge.inria.fr
