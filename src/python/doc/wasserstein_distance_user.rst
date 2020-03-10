@@ -69,5 +69,5 @@ The output is:
 
 .. testoutput::
     
-    Wasserstein distance value = 2.15, optimal matching: [(0, 0), (1, 2), (2, -1), (-1, 1)]
+    Wasserstein distance value = 2.15, optimal matching: [[0, 0], [1, 2], [2, -1], [-1, 1]]
 

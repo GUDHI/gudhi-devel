@@ -88,7 +88,7 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
             if not matching:
                 return 0.
             else:
-                return 0., []
+                return 0., np.array([])
         else:
             if not matching:
                 return _perstot(Y, order, internal_p)
