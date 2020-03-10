@@ -130,7 +130,6 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     if matching:
         P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
         ot_cost = np.sum(np.multiply(P,M))
-        P[P < 0.5] = 0  # trick to avoid numerical issue, could it be improved?
         match = np.argwhere(P)
         # Now we turn to -1 points encoding the diagonal
         match = _clean_match(match, n, m)
