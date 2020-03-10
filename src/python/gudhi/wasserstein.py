@@ -30,10 +30,10 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
     :param order: exponent for the Wasserstein metric.
     :param internal_p: Ground metric (i.e. norm L^p).
     :returns: (n+1) x (m+1) np.array encoding the cost matrix C. 
-                For 1 <= i <= n, 1 <= j <= m, C[i,j] encodes the distance between X[i] and Y[j], 
-                while C[i, m+1] (resp. C[n+1, j]) encodes the distance (to the p) between X[i] (resp Y[j]) 
+                For 0 <= i < n, 0 <= j < m, C[i,j] encodes the distance between X[i] and Y[j], 
+                while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j]) 
                 and its orthogonal proj onto the diagonal.
-                note also that C[n+1, m+1] = 0  (it costs nothing to move from the diagonal to the diagonal).
+                note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
     '''
     Xdiag = _proj_on_diag(X)
     Ydiag = _proj_on_diag(Y)
