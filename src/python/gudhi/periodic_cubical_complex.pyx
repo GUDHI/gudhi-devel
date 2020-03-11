@@ -173,7 +173,9 @@ cdef class PeriodicCubicalComplex:
         when calling the function on one of their common faces.
 
         :returns: The top-dimensional cells/cofaces of the positive and negative cells, together with the corresponding homological dimension.
-        :rtype:  numpy array of integers of shape [number_of_persistence_points, 3], the integers of eah row being: (homological dimension, index of positive top-dimensional cell, index of negative top-dimensional cell). If the homological feature is essential, i.e., if the death time is +infinity, then the index of the corresponding negative top-dimensional cell is -1.
+        :rtype:  numpy array of integers of shape [number_of_persistence_points, 3], the integers of eah row being: (homological dimension, 
+            index of positive top-dimensional cell, index of negative top-dimensional cell). If the homological feature is essential, i.e., if 
+            the death time is +infinity, then the index of the corresponding negative top-dimensional cell is -1.
         """
         cdef vector[vector[int]] persistence_result
         if self.pcohptr != NULL:

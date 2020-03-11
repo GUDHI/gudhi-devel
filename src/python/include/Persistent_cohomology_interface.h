@@ -72,18 +72,6 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     return persistence;
   }
 
-  int top_dimensional_coface(int splx){
-    if (stptr_->dimension(splx) == stptr_->dimension()){return splx;}
-    else{  
-      for (auto v : stptr_->get_coboundary_of_a_cell(splx)){
-        if(stptr_->filtration(v) == stptr_->filtration(splx)){
-          return top_dimensional_coface(v);
-        }
-      }  
-    }
-    return splx;
-  }
-
   std::vector<std::vector<int>> cofaces_of_cubical_persistence_pairs() {
 
     // Warning: this function is meant to be used with CubicalComplex only!!
@@ -104,14 +92,14 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     for (auto pair : pairs) {
       int h = stptr_->dimension(get<0>(pair));
       // Recursively get the top-dimensional cell / coface associated to the persistence generator
-      int face0 = top_dimensional_coface(get<0>(pair));
+      int face0 = stptr_->get_top_dimensional_coface_of_a_cell(get<0>(pair));
       // Retrieve the index of the corresponding top-dimensional cell in the input data
       int splx0 = order[face0];
 
       int splx1 = -1;
       if (isfinite(stptr_->filtration(get<1>(pair)))){
       // Recursively get the top-dimensional cell / coface associated to the persistence generator
-      int face1 = top_dimensional_coface(get<1>(pair));
+      int face1 = stptr_->get_top_dimensional_coface_of_a_cell(get<1>(pair));
       // Retrieve the index of the corresponding top-dimensional cell in the input data
       splx1 = order[face1];
       }

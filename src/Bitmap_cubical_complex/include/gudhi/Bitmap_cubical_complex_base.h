@@ -110,6 +110,14 @@ class Bitmap_cubical_complex_base {
   virtual inline std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
 
   /**
+   * This function computes the index of one of the top-dimensional cubes (chosen arbitrarily) associated
+   * to a given simplex handle. Note that the input parameter is not necessarily a cube, it might also
+   * be an edge or vertex of a cube. On the other hand, the output is always indicating the position of
+   * a cube in the data structure. 
+   **/
+  inline int get_top_dimensional_coface_of_a_cell(int splx);
+
+  /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
   * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
   * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
@@ -600,6 +608,19 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     ++index;
   }
   this->impose_lower_star_filtration();
+}
+
+template <typename T>
+int Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(int splx) {
+  if (this->get_dimension_of_a_cell(splx) == this->dimension()){return splx;}
+  else{  
+    for (auto v : this->get_coboundary_of_a_cell(splx)){
+      if(this->get_cell_data(v) == this->get_cell_data(splx)){
+        return this->get_top_dimensional_coface_of_a_cell(v);
+      }
+    }  
+  }
+  return splx;
 }
 
 template <typename T>
