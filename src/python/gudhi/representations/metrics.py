@@ -147,7 +147,7 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", **kwa
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
             return pairwise_distances(XX, YY, metric=sklearn_wrapper(pot_wasserstein_distance,  X, Y, **kwargs))
         except ImportError:
-            print("Gudhi built without POT. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
+            print("POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
             raise
     elif metric == "sliced_wasserstein":
         Xproj = compute_persistence_diagram_projections(X, **kwargs)
