@@ -148,7 +148,7 @@ def test_connected_sublevel_sets():
     assert cub.persistence() == [(0, (2.0, float("inf")))]
     assert cub.betti_numbers() == [1, 0, 0]
 
-def test_connected_sublevel_sets():
+def test_cubical_generators():
     cub = CubicalComplex(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]])
     cub.persistence()
-    assert cub.cofaces_of_persistence_pairs() == np.array([[1, 7, 4], [0, 8, -1]])
+    assert np.array_equal(cub.cofaces_of_persistence_pairs(), np.array([[1, 7, 4], [0, 8, -1]]))
