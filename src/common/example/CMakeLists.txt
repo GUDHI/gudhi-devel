@@ -12,6 +12,7 @@ if (DIFF_PATH)
 
   add_test(Common_example_vector_double_off_reader_diff_files ${DIFF_PATH}
       ${CMAKE_CURRENT_BINARY_DIR}/vectordoubleoffreader_result.txt ${CMAKE_CURRENT_BINARY_DIR}/alphacomplexdoc.off.txt)
+  set_tests_properties(Common_example_vector_double_off_reader_diff_files PROPERTIES DEPENDS Common_example_vector_double_off_reader) 
 endif()
 
 if(NOT CGAL_VERSION VERSION_LESS 4.11.0)
