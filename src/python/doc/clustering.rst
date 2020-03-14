@@ -43,7 +43,28 @@ As one can see in `t.n_clusters_`, the algorithm found 6316 initial clusters. Th
 
 .. image:: img/spiral-color.png
 
-Of course this is just the result for one set of parameters. We can ask for a different density estimator and a different neighborhood graph computed with different parameters. The code provides a few of those for convenience when first experimenting, but it is actually expected that users provide their own graph and density estimates instead of point coordinates.
+Of course this is just the result for one set of parameters. We can ask for a different density estimator and a different neighborhood graph computed with different parameters.
+
+.. code-block::
+
+   t = Tomato(density_type='DTM', k=100)
+   t.fit(data)
+   t.plot_diagram()
+
+Makes the number of clusters clearer, and changes a bit the shape of the clusters.
+
+.. image:: img/spiral-diag2.png
+
+A quick look at the corresponding density estimate (`weights_` is not officially supported)
+
+.. code-block::
+
+   plt.scatter(data[:,0],data[:,1],marker='.',s=1,c=t.weights_)
+   plt.show()
+
+.. image:: img/spiral-density.png
+
+The code provides a few density estimators and graph constructions for convenience when first experimenting, but it is actually expected that advanced users provide their own graph and density estimates instead of point coordinates.
 
 Since the algorithm essentially computes basins of attraction, it is also encouraged to use it on functions that do not represent densities at all.
 
