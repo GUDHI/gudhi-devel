@@ -64,8 +64,8 @@ An index of -1 represents the diagonal.
 
     message_cost = "Wasserstein distance value = %.2f" %cost
     print(message_cost)
-    dgm1_to_diagonal = matching[matching[:,0] == -1, 1]
-    dgm2_to_diagonal = matching[matching[:,1] == -1, 0]
+    dgm1_to_diagonal = matchings[matchings[:,0] == -1, 1]
+    dgm2_to_diagonal = matchings[matchings[:,1] == -1, 0]
     off_diagonal_match = np.delete(matchings, np.where(matchings == -1)[0], axis=0)
 
     for i,j in off_diagonal_match:
