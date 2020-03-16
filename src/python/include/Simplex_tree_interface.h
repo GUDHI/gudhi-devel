@@ -33,7 +33,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Filtered_simplices = std::vector<std::pair<Simplex, Filtration_value>>;
+  using Simplex_and_filtration = std::pair<Simplex, Filtration_value>;
+  using Filtered_simplices = std::vector<Simplex_and_filtration>;
+  using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
+  using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
 
  public:
   bool find_simplex(const Simplex& vh) {
@@ -82,29 +85,12 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     Base::initialize_filtration();
   }
 
-  Filtered_simplices get_filtration() {
-    Base::initialize_filtration();
-    Filtered_simplices filtrations;
-    for (auto f_simplex : Base::filtration_simplex_range()) {
-      Simplex simplex;
-      for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      filtrations.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
+  Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex) {
+    Simplex simplex;
+    for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
+      simplex.insert(simplex.begin(), vertex);
     }
-    return filtrations;
-  }
-
-  Filtered_simplices get_skeleton(int dimension) {
-    Filtered_simplices skeletons;
-    for (auto f_simplex : Base::skeleton_simplex_range(dimension)) {
-      Simplex simplex;
-      for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
-      skeletons.push_back(std::make_pair(simplex, Base::filtration(f_simplex)));
-    }
-    return skeletons;
+    return std::make_pair(std::move(simplex), Base::filtration(f_simplex));
   }
 
   Filtered_simplices get_star(const Simplex& simplex) {
@@ -134,6 +120,38 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
     Base::initialize_filtration();
     pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
+  }
+
+  // Iterator over the simplex tree
+  Complex_simplex_iterator get_simplices_iterator_begin() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::complex_simplex_range().begin();
+  }
+
+  Complex_simplex_iterator get_simplices_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::complex_simplex_range().end();
+  }
+
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
+    // Base::initialize_filtration(); already performed in filtration_simplex_range
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::filtration_simplex_range().begin();
+  }
+
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::filtration_simplex_range().end();
+  }
+
+  Skeleton_simplex_iterator get_skeleton_iterator_begin(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::skeleton_simplex_range(dimension).begin();
+  }
+
+  Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::skeleton_simplex_range(dimension).end();
   }
 };
 

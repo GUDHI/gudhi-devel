@@ -22,6 +22,9 @@ rips = gudhi.RipsComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]], max_edge_lengt
 
 simplex_tree = rips.create_simplex_tree(max_dimension=1)
 
-print("filtrations=", simplex_tree.get_filtration())
+print("filtrations=")
+for simplex_with_filtration in simplex_tree.get_filtration():
+    print("(%s, %.2f)" % tuple(simplex_with_filtration))
+
 print("star([0])=", simplex_tree.get_star([0]))
 print("coface([0], 1)=", simplex_tree.get_cofaces([0], 1))
