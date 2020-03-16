@@ -166,10 +166,19 @@ int main(int argc, char* const argv[]) {
   // ++ GENERAL VARIABLE SET
 
   std::cout << "********************************************************************\n";
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::cout << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
   std::cout << "   - dimension " << simplexTree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::cout << "* Iterator on simplices, with [filtration value]:\n";
+  for (Simplex_tree::Simplex_handle f_simplex : simplexTree.complex_simplex_range()) {
+    std::cout << "   "
+              << "[" << simplexTree.filtration(f_simplex) << "] ";
+    for (auto vertex : simplexTree.simplex_vertex_range(f_simplex)) std::cout << "(" << vertex << ")";
+    std::cout << std::endl;
+  }
+
+  std::cout << "********************************************************************\n";
+  // Can not be done in the middle of 2 inserts
+  std::cout << "* Iterator on simplices sorted by filtration values, with [filtration value]:\n";
   for (auto f_simplex : simplexTree.filtration_simplex_range()) {
     std::cout << "   "
               << "[" << simplexTree.filtration(f_simplex) << "] ";
