@@ -182,7 +182,7 @@ if(PYTHONINTERP_FOUND)
         set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${MPFR_LIBRARIES_DIR}', ")
         message("** Add mpfr ${MPFR_LIBRARIES}")
       endif(MPFR_FOUND)
-endif(CGAL_FOUND)
+    endif(CGAL_FOUND)
 
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
