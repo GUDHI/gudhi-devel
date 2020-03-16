@@ -20,11 +20,14 @@ from .preprocessing import Padding
 def sliced_wasserstein_distance(D1, D2, num_directions):
     """
     This is a function for computing the sliced Wasserstein distance from two persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally averaging over the lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
-    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
-    :param D2: (m x 2) numpy.array encoding the second diagram.
-    :param num_directions: number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
-    :returns: the sliced Wasserstein distance between persistence diagrams.
-    :rtype: float 
+    
+    Parameters:
+        D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+        D2: (m x 2) numpy.array encoding the second diagram.
+        num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
+
+    Returns: 
+        float: the sliced Wasserstein distance between persistence diagrams. 
     """
     thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
@@ -42,10 +45,13 @@ def sliced_wasserstein_distance(D1, D2, num_directions):
 def compute_persistence_diagram_projections(X, num_directions):
     """
     This is a function for projecting the points of a list of persistence diagrams (as well as their diagonal projections) onto a fixed number of lines sampled uniformly on [-pi/2, pi/2]. This function can be used as a preprocessing step in order to speed up the running time for computing all pairwise sliced Wasserstein distances / kernel values on a list of persistence diagrams. 
-    :param X: list of persistence diagrams. 
-    :param num_directions: number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
-    :returns: list of projected persistence diagrams.
-    :rtype: float
+
+    Parameters:
+        X (list of n numpy arrays of shape (numx2)): list of persistence diagrams. 
+        num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
+
+    Returns: 
+        XX (list of n numpy arrays of shape (2*numx2)): list of projected persistence diagrams.
     """
     thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
@@ -55,10 +61,13 @@ def compute_persistence_diagram_projections(X, num_directions):
 def sliced_wasserstein_distance_on_projections(D1, D2):
     """
     This is a function for computing the sliced Wasserstein distance between two persistence diagrams that have already been projected onto some lines. It simply amounts to comparing the sorted projections with the 1-norm, and averaging over the lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
-    :param D1: (2n x number_of_lines) numpy.array containing the n projected points of the first diagram, and the n projections of their diagonal projections.
-    :param D2: (2m x number_of_lines) numpy.array containing the m projected points of the second diagram, and the m projections of their diagonal projections.
-    :returns: the sliced Wasserstein distance between the projected persistence diagrams.
-    :rtype: float 
+
+    Parameters: 
+        D1: (2n x number_of_lines) numpy.array containing the n projected points of the first diagram, and the n projections of their diagonal projections.
+        D2: (2m x number_of_lines) numpy.array containing the m projected points of the second diagram, and the m projections of their diagonal projections.
+
+    Returns: 
+        float: the sliced Wasserstein distance between the projected persistence diagrams. 
     """
     lim1, lim2 = int(len(D1)/2), int(len(D2)/2)
     approx1, approx_diag1, approx2, approx_diag2 = D1[:lim1], D1[lim1:], D2[:lim2], D2[lim2:]
@@ -70,12 +79,15 @@ def sliced_wasserstein_distance_on_projections(D1, D2):
 def persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
     """
     This is a function for computing the persistence Fisher distance from two persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
-    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
-    :param D2: (m x 2) numpy.array encoding the second diagram.
-    :param bandwidth: bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions.
-    :param kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
-    :returns: the persistence Fisher distance between persistence diagrams.
-    :rtype: float 
+
+    Parameters: 
+        D1: (n x 2) numpy.array encoding the (finite points of the) first diagram). Must not contain essential points (i.e. with infinite coordinate).
+        D2: (m x 2) numpy.array encoding the second diagram.
+        bandwidth (float): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions.
+        kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+
+    Returns: 
+        float: the persistence Fisher distance between persistence diagrams. 
     """
     projection = (1./2) * np.ones((2,2))
     diagonal_projections1 = np.matmul(D1, projection)
@@ -127,11 +139,14 @@ PAIRWISE_DISTANCE_FUNCTIONS = {
 def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", **kwargs):
     """
     This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
-    :param X: first list of persistence diagrams. 
-    :param Y: second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
-    :param metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
-    :returns: distance matrix, i.e., numpy array of shape (num diagrams 1 x num diagrams 2)
-    :rtype: float
+
+    Parameters:
+        X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams. 
+        Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
+        metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
+
+    Returns: 
+        numpy array of shape (nxm): distance matrix
     """
     XX = np.reshape(np.arange(len(X)), [-1,1])
     YY = None if Y is None else np.reshape(np.arange(len(Y)), [-1,1]) 

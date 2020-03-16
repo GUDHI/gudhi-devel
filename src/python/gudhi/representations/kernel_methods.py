@@ -20,13 +20,16 @@ from .preprocessing import Padding
 def persistence_weighted_gaussian_kernel(D1, D2, weight=lambda x: 1, kernel_approx=None, bandwidth=1.):
     """
     This is a function for computing the persistence weighted Gaussian kernel value from two persistence diagrams. The persistence weighted Gaussian kernel is computed by convolving the persistence diagram points with weighted Gaussian kernels. See http://proceedings.mlr.press/v48/kusano16.html for more details.
-    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
-    :param D2: (m x 2) numpy.array encoding the second diagram.
-    :param bandwidth: bandwidth of the Gaussian kernel with which persistence diagrams will be convolved
-    :param weight: weight function for the persistence diagram points. This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
-    :param kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
-    :returns: the persistence weighted Gaussian kernel value between persistence diagrams.
-    :rtype: float 
+
+    Parameters:
+        D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+        D2: (m x 2) numpy.array encoding the second diagram.
+        bandwidth (double): bandwidth of the Gaussian kernel with which persistence diagrams will be convolved
+        weight: weight function for the persistence diagram points. This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
+        kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
+
+    Returns:
+        float: the persistence weighted Gaussian kernel value between persistence diagrams. 
     """
     ws1 = np.array([weight(D1[j,:]) for j in range(len(D1))])
     ws2 = np.array([weight(D2[j,:]) for j in range(len(D2))])
@@ -42,12 +45,15 @@ def persistence_weighted_gaussian_kernel(D1, D2, weight=lambda x: 1, kernel_appr
 def persistence_scale_space_kernel(D1, D2, kernel_approx=None, bandwidth=1.):
     """
     This is a function for computing the persistence scale space kernel value from two persistence diagrams. The persistence scale space kernel is computed by adding the symmetric to the diagonal of each point in each persistence diagram, with negative weight, and then convolving the points with a Gaussian kernel. See https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Reininghaus_A_Stable_Multi-Scale_2015_CVPR_paper.pdf for more details.
-    :param D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
-    :param D2: (m x 2) numpy.array encoding the second diagram.
-    :param bandwidth: bandwidth of the Gaussian kernel with which persistence diagrams will be convolved
-    :param kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
-    :returns: the persistence scale space kernel value between persistence diagrams.
-    :rtype: float 
+    
+    Parameters:
+        D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
+        D2: (m x 2) numpy.array encoding the second diagram.
+        bandwidth (double): bandwidth of the Gaussian kernel with which persistence diagrams will be convolved
+        kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
+    
+    Returns:
+        float: the persistence scale space kernel value between persistence diagrams. 
     """
     DD1 = np.concatenate([D1, D1[:,[1,0]]], axis=0)
     DD2 = np.concatenate([D2, D2[:,[1,0]]], axis=0)
@@ -57,11 +63,14 @@ def persistence_scale_space_kernel(D1, D2, kernel_approx=None, bandwidth=1.):
 def pairwise_persistence_diagram_kernels(X, Y=None, metric="sliced_wasserstein", **kwargs):
     """
     This function computes the kernel matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
-    :param X: first list of persistence diagrams. 
-    :param Y: second list of persistence diagrams (optional). If None, pairwise kernel values are computed from the first list only.
-    :param metric: kernel to use. It can be either a string ("sliced_wasserstein", "persistence_scale_space", "persistence_weighted_gaussian", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
-    :returns: kernel matrix, i.e., numpy array of shape (num diagrams 1 x num diagrams 2)
-    :rtype: float
+
+    Parameters:    
+        X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams. 
+        Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise kernel values are computed from the first list only.
+        metric: kernel to use. It can be either a string ("sliced_wasserstein", "persistence_scale_space", "persistence_weighted_gaussian", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
+
+    Returns: 
+        numpy array of shape (nxm): kernel matrix.
     """    
     XX = np.reshape(np.arange(len(X)), [-1,1])
     YY = None if Y is None else np.reshape(np.arange(len(Y)), [-1,1])
