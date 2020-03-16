@@ -249,3 +249,15 @@ def test_make_filtration_non_decreasing():
     assert st.filtration([3, 4, 5]) == 2.0
     assert st.filtration([3, 4]) == 2.0
     assert st.filtration([4, 5]) == 2.0
+
+def test_simplices_iterator():
+    st = SimplexTree()
+    
+    assert st.insert([0, 1, 2], filtration=4.0) == True
+    assert st.insert([2, 3, 4], filtration=2.0) == True
+
+    for simplex in st.get_simplices():
+        print("simplex is: ", simplex[0])
+        assert st.find(simplex[0]) == True
+        print("filtration is: ", simplex[1])
+        assert st.filtration(simplex[0]) == simplex[1]

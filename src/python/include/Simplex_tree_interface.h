@@ -36,6 +36,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Simplex_and_filtration = std::pair<Simplex, Filtration_value>;
   using Filtered_simplices = std::vector<Simplex_and_filtration>;
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
+  using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
 
  public:
   bool find_simplex(const Simplex& vh) {
@@ -122,6 +123,16 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   // Iterator over the simplex tree
+  Complex_simplex_iterator get_simplices_iterator_begin() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::complex_simplex_range().begin();
+  }
+
+  Complex_simplex_iterator get_simplices_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::complex_simplex_range().end();
+  }
+
   typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
     // Base::initialize_filtration(); already performed in filtration_simplex_range
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector

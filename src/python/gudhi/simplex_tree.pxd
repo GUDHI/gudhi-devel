@@ -24,6 +24,12 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Simplex_handle":
         pass
 
+    cdef cppclass Simplex_tree_simplices_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Complex_simplex_iterator":
+        Simplex_tree_simplices_iterator()
+        Simplex_tree_simplex_handle& operator*()
+        Simplex_tree_simplices_iterator operator++()
+        bint operator!=(Simplex_tree_simplices_iterator)
+
     cdef cppclass Simplex_tree_skeleton_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Skeleton_simplex_iterator":
         Simplex_tree_skeleton_iterator()
         Simplex_tree_simplex_handle& operator*()
@@ -53,6 +59,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool make_filtration_non_decreasing()
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex)
+        Simplex_tree_simplices_iterator get_simplices_iterator_begin()
+        Simplex_tree_simplices_iterator get_simplices_iterator_end()
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_begin()
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end()
         Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension)

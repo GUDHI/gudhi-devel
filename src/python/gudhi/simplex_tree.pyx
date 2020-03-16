@@ -208,9 +208,24 @@ cdef class SimplexTree:
         return self.get_ptr().insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
-    def get_filtration(self):
+    def get_simplices(self):
         """This function returns a generator with simplices and their given
         filtration values.
+
+        :returns:  The simplices.
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef Simplex_tree_simplices_iterator it = self.get_ptr().get_simplices_iterator_begin()
+        cdef Simplex_tree_simplices_iterator end = self.get_ptr().get_simplices_iterator_end()
+        cdef Simplex_tree_simplex_handle sh = dereference(it)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
+
+    def get_filtration(self):
+        """This function returns a generator with simplices and their given
+        filtration values sorted by increasing filtration values.
 
         :returns:  The simplices sorted by increasing filtration values.
         :rtype:  generator with tuples(simplex, filtration)
