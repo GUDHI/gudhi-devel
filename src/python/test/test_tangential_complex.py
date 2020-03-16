@@ -37,7 +37,7 @@ def test_tangential():
     assert st.num_simplices() == 6
     assert st.num_vertices() == 4
 
-    assert st.get_filtration() == [
+    assert list(st.get_filtration()) == [
         ([0], 0.0),
         ([1], 0.0),
         ([2], 0.0),
@@ -45,6 +45,7 @@ def test_tangential():
         ([3], 0.0),
         ([1, 3], 0.0),
     ]
+
     assert st.get_cofaces([0], 1) == [([0, 2], 0.0)]
 
     assert point_list[0] == tc.get_point(0)
