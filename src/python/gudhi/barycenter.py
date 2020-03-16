@@ -96,9 +96,8 @@ def _optimal_matching(X, Y, withcost=False):
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     '''
     :param pdiagset: a list of size m containing numpy.array of shape (n x 2) 
-                        (n can variate), encoding a set of 
-                        persistence diagrams with only finite coordinates. 
-                        If empty, returns None.
+                    (n can variate), encoding a set of 
+                    persistence diagrams with only finite coordinates. 
     :param init: The initial value for barycenter estimate. 
                     If None, init is made on a random diagram from the dataset. 
                     Otherwise, it must be an int 
@@ -106,24 +105,25 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                     or a (n x 2) numpy.array enconding 
                     a persistence diagram with n points.
     :param verbose: if True, returns additional information about the
-                        barycenter.
+                    barycenter.
     :returns: If not verbose (default), a numpy.array encoding
-                    the barycenter estimate 
+                    the barycenter estimate of pdiagset
                     (local minima of the energy function). 
+                    If pdiagset is empty, returns None.
                     If verbose, returns a couple (Y, log)
                     where Y is the barycenter estimate,
                     and log is a dict that contains additional informations:
                     - groupings, a list of list of pairs (i,j),
-                        That is, G[k] = [(i, j) ...], where (i,j) indicates 
-                        that X[i] is matched to Y[j]
-                        if i > len(X) or j > len(Y), it means they 
-                        represent the diagonal.
+                    That is, G[k] = [(i, j) ...], where (i,j) indicates 
+                    that X[i] is matched to Y[j]
+                    if i = -1 or j = -1, it means they 
+                    represent the diagonal.
                     - energy, a float representing the Frechet 
-                                energy value obtained,
-                                that is the mean of squared distances 
-                                of observations to the output.
+                    energy value obtained,
+                    that is the mean of squared distances 
+                    of observations to the output.
                     - nb_iter, integer representing the number of iterations 
-                               performed before convergence of the algorithm.
+                    performed before convergence of the algorithm.
     '''
     X = pdiagset  # to shorten notations, not a copy
     m = len(X)  # number of diagrams we are averaging
@@ -136,7 +136,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     # Initialisation of barycenter
     if init is None:
         i0 = np.random.randint(m)  # Index of first state for the barycenter
-        Y = X[i0].copy() #copy() ensure that we do not modify X[i0]
+        Y = X[i0].copy() 
     else:
         if type(init)==int:
             Y = X[init].copy()
@@ -149,7 +149,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     while not converged:
         nb_iter += 1
         K = len(Y)  # current nb of points in Y (some might be on diagonal)
-        G = np.zeros((K, m), dtype=int)-1  # will store for each j, the (index)
+        G = np.full((K, m), -1, dtype=int)  # will store for each j, the (index)
                               # point matched in each other diagram 
                               #(might be the diagonal). 
                               # that is G[j, i] = k <=> y_j is matched to
