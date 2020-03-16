@@ -55,7 +55,7 @@ def test_insertion():
     assert st.filtration([1]) == 0.0
 
     # skeleton test
-    assert st.get_skeleton(2) == [
+    assert list(st.get_skeleton(2)) == [
         ([0, 1, 2], 4.0),
         ([0, 1], 0.0),
         ([0, 2], 4.0),
@@ -64,7 +64,7 @@ def test_insertion():
         ([1], 0.0),
         ([2], 4.0),
     ]
-    assert st.get_skeleton(1) == [
+    assert list(st.get_skeleton(1)) == [
         ([0, 1], 0.0),
         ([0, 2], 4.0),
         ([0], 0.0),
@@ -72,12 +72,12 @@ def test_insertion():
         ([1], 0.0),
         ([2], 4.0),
     ]
-    assert st.get_skeleton(0) == [([0], 0.0), ([1], 0.0), ([2], 4.0)]
+    assert list(st.get_skeleton(0)) == [([0], 0.0), ([1], 0.0), ([2], 4.0)]
 
     # remove_maximal_simplex test
     assert st.get_cofaces([0, 1, 2], 1) == []
     st.remove_maximal_simplex([0, 1, 2])
-    assert st.get_skeleton(2) == [
+    assert list(st.get_skeleton(2)) == [
         ([0, 1], 0.0),
         ([0, 2], 4.0),
         ([0], 0.0),
@@ -126,7 +126,8 @@ def test_expansion():
 
     assert st.num_vertices() == 7
     assert st.num_simplices() == 17
-    assert st.get_filtration() == [
+
+    assert list(st.get_filtration()) == [
         ([2], 0.1),
         ([3], 0.1),
         ([2, 3], 0.1),
@@ -151,7 +152,7 @@ def test_expansion():
     assert st.num_simplices() == 22
     st.initialize_filtration()
 
-    assert st.get_filtration() == [
+    assert list(st.get_filtration()) == [
         ([2], 0.1),
         ([3], 0.1),
         ([2, 3], 0.1),
@@ -326,3 +327,19 @@ def test_extend_filtration():
         [(1, (6.0, 1.0))]
     ]
 
+    assert st.filtration([1]) == 1.0
+    assert st.filtration([3, 4, 5]) == 2.0
+    assert st.filtration([3, 4]) == 2.0
+    assert st.filtration([4, 5]) == 2.0
+
+def test_simplices_iterator():
+    st = SimplexTree()
+    
+    assert st.insert([0, 1, 2], filtration=4.0) == True
+    assert st.insert([2, 3, 4], filtration=2.0) == True
+
+    for simplex in st.get_simplices():
+        print("simplex is: ", simplex[0])
+        assert st.find(simplex[0]) == True
+        print("filtration is: ", simplex[1])
+        assert st.filtration(simplex[0]) == simplex[1]

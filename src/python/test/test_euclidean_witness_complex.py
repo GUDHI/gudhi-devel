@@ -40,7 +40,7 @@ def test_witness_complex():
     assert landmarks[1] == euclidean_witness_complex.get_point(1)
     assert landmarks[2] == euclidean_witness_complex.get_point(2)
 
-    assert simplex_tree.get_filtration() == [
+    assert list(simplex_tree.get_filtration()) == [
         ([0], 0.0),
         ([1], 0.0),
         ([0, 1], 0.0),
@@ -78,13 +78,13 @@ def test_strong_witness_complex():
     assert landmarks[1] == euclidean_strong_witness_complex.get_point(1)
     assert landmarks[2] == euclidean_strong_witness_complex.get_point(2)
 
-    assert simplex_tree.get_filtration() == [([0], 0.0), ([1], 0.0), ([2], 0.0)]
+    assert list(simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([2], 0.0)]
 
     simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(
         max_alpha_square=100.0
     )
 
-    assert simplex_tree.get_filtration() == [
+    assert list(simplex_tree.get_filtration()) == [
         ([0], 0.0),
         ([1], 0.0),
         ([2], 0.0),
