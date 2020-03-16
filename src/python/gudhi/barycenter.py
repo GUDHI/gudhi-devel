@@ -44,6 +44,9 @@ def _optimal_matching(X, Y, withcost=False):
                 if i >= len(X) or j >= len(Y), it means they 
                 represent the diagonal.
                 They will be encoded by -1 afterwards.
+
+    NOTE : this code will be removed for final merge, 
+    and wasserstein.optimal_matching will be used instead.
     '''
 
     n = len(X)
