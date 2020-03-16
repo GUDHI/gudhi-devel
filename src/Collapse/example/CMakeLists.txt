@@ -1,0 +1,9 @@
+project(Collapse_examples)
+
+add_executable ( Collapse_example_rips_persistence_with_collapse rips_persistence_with_sc.cpp )
+target_link_libraries(Collapse_example_rips_persistence_with_collapse Boost::program_options)
+
+if (TBB_FOUND)
+  target_link_libraries(Collapse_example_rips_persistence_with_collapse ${TBB_LIBRARIES})
+endif()
+add_test(NAME Collapse_example_rips_persistence_with_collapse COMMAND $<TARGET_FILE:Collapse_example_rips_persistence_with_collapse>)
