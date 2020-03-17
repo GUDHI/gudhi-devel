@@ -126,8 +126,8 @@ class Simplex_tree {
  private:
   typedef typename Dictionary::iterator Dictionary_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
-  double minval_;
-  double maxval_;
+  Filtration_value minval_;
+  Filtration_value maxval_;
 
   struct return_first {
     Vertex_handle operator()(const Dit_value_t& p_sh) const {
@@ -1484,25 +1484,25 @@ class Simplex_tree {
 
   /** \brief Retrieve good values for extended persistence, and separate the 
    * diagrams into the ordinary, relative, extended+ and extended- subdiagrams. 
-   * \post This function should be called only if extend_filtration has been called first!
+   * \pre This function should be called only if this->extend_filtration() has been called first!
    * \post The coordinates of the persistence diagram points might be a little different than the
    * original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
    * performed on these values during the computation of extended persistence.
-   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration, 
-   * this->initialize_filtration, and this->compute_persistent_cohomology.
+   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration(), 
+   * this->initialize_filtration(), and Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >::compute_persistent_cohomology().
    * @return A vector of four persistence diagrams. The first one is Ordinary, the 
    * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
    * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
    */
-  std::vector<std::vector<std::pair<int, std::pair<double, double>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<double, double>>>& dgm){
-    std::vector<std::vector<std::pair<int, std::pair<double, double>>>> new_dgm(4); 
-    double x, y;
-    double minval_ = this->minval_;
-    double maxval_ = this->maxval_;
+  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm){
+    std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> new_dgm(4); 
+    Filtration_value x, y;
+    Filtration_value minval_ = this->minval_;
+    Filtration_value maxval_ = this->maxval_;
     for(unsigned int i = 0; i < dgm.size(); i++){ 
       int h = dgm[i].first; 
-      double px = dgm[i].second.first; 
-      double py = dgm[i].second.second;
+      Filtration_value px = dgm[i].second.first; 
+      Filtration_value py = dgm[i].second.second;
       if(std::isinf(py))  continue;
       else{
         if ((px <= -1) & (py <= -1)){
@@ -1510,12 +1510,12 @@ class Simplex_tree {
           y = minval_ + (maxval_-minval_)*(py + 2); 
           new_dgm[0].push_back(std::make_pair(h, std::make_pair(x,y))); 
         }
-        if ((px >=  1) & (py >=  1)){
+        else if ((px >=  1) & (py >=  1)){
           x = minval_ - (maxval_-minval_)*(px - 2); 
           y = minval_ - (maxval_-minval_)*(py - 2); 
           new_dgm[1].push_back(std::make_pair(h, std::make_pair(x,y))); 
         }
-        if ((px <= -1) & (py >=  1)){
+        else {
           x = minval_ + (maxval_-minval_)*(px + 2); 
           y = minval_ - (maxval_-minval_)*(py - 2);
           if (x <= y){
@@ -1539,37 +1539,36 @@ class Simplex_tree {
    * retrieves the original values and separates the extended persistence diagram points 
    * w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after 
    * computing the persistent homology of the extended simplicial complex.
-   * \post Note that this code creates an extra vertex internally, so you should make sure that
+   * \pre Note that this code creates an extra vertex internally, so you should make sure that
    * the Simplex tree does not contain a vertex with the largest Vertex_handle. 
    */
   void extend_filtration() {
 
     // Compute maximum and minimum of filtration values
-    int maxvert = std::numeric_limits<int>::min();
-    this->minval_ = std::numeric_limits<double>::max();
-    this->maxval_ = std::numeric_limits<double>::min();
+    Vertex_handle maxvert = std::numeric_limits<int>::min();
+    this->minval_ = std::numeric_limits<Filtration_value>::infinity();
+    this->maxval_ = -std::numeric_limits<Filtration_value>::infinity();
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
-      double f = this->filtration(sh);
+      Filtration_value f = this->filtration(sh);
       this->minval_ = std::min(this->minval_, f);
       this->maxval_ = std::max(this->maxval_, f);
       maxvert = std::max(sh->first, maxvert);
     }
     
-    GUDHI_CHECK(maxvert < std::numeric_limits<int>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
+    GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
     maxvert += 1;
 
     Simplex_tree st_copy = *this;
 
     // Add point for coning the simplicial complex
-    int count = this->num_simplices();
     this->insert_simplex({maxvert}, -3);
-    count++;
 
     // For each simplex
+    std::vector<Vertex_handle> vr;
     for (auto sh_copy : st_copy.complex_simplex_range()){
 
       // Locate simplex
-      std::vector<Vertex_handle> vr;
+      vr.clear();
       for (auto vh : st_copy.simplex_vertex_range(sh_copy)){
         vr.push_back(vh);
       }
@@ -1578,18 +1577,18 @@ class Simplex_tree {
       // Create cone on simplex
       vr.push_back(maxvert);
       if (this->dimension(sh) == 0){
+        Filtration_value v = this->filtration(sh);
+        Filtration_value scaled_v = (v-this->minval_)/(this->maxval_-this->minval_);
         // Assign ascending value between -2 and -1 to vertex
-        double v = this->filtration(sh);
-        this->assign_filtration(sh, -2 + (v-this->minval_)/(this->maxval_-this->minval_));
+        this->assign_filtration(sh, -2 + scaled_v);
         // Assign descending value between 1 and 2 to cone on vertex
-        this->insert_simplex(vr, 2 - (v-this->minval_)/(this->maxval_-this->minval_));
+        this->insert_simplex(vr, 2 - scaled_v);
       }
       else{
         // Assign value -3 to simplex and cone on simplex
         this->assign_filtration(sh, -3);
         this->insert_simplex(vr, -3);
       }
-      count++;
     }
 
     // Automatically assign good values for simplices
