@@ -292,6 +292,7 @@ def test_extend_filtration():
         
 
     st.extend_filtration()
+    st.initialize_filtration()
                                                                                                                       
     assert list(st.get_filtration()) == [                                                                                                                         
         ([6], -3.0), 
