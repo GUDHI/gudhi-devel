@@ -14,7 +14,7 @@ function(add_persistence_representation_creation_utility creation_utility)
     install(TARGETS ${creation_utility} DESTINATION bin)
 endfunction(add_persistence_representation_creation_utility)
 
-function(add_persistence_representation_plot_utility plot_utility tool_extension)
+function(add_persistence_representation_plot_utility creation_utility plot_utility tool_extension)
     add_executable ( ${plot_utility} ${plot_utility}.cpp )
 
     # as the function is called in a subdirectory level, need to '../' to find persistence heat maps files
@@ -22,17 +22,21 @@ function(add_persistence_representation_plot_utility plot_utility tool_extension
         "${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}")
     #add_test(NAME Persistence_representation_utilities_${plot_utility}_second COMMAND $<TARGET_FILE:${plot_utility}>
     #    "${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}")
+    set_tests_properties(Persistence_representation_utilities_${plot_utility}_first PROPERTIES DEPENDS
+                         Persistence_representation_utilities_${creation_utility})
     if(GNUPLOT_PATH)
         add_test(NAME Persistence_representation_utilities_${plot_utility}_first_gnuplot COMMAND ${GNUPLOT_PATH}
             "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}_GnuplotScript'")
         #add_test(NAME Persistence_representation_utilities_${plot_utility}_second_gnuplot COMMAND ${GNUPLOT_PATH}
         #    "-e" "load '${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}_GnuplotScript'")
+        set_tests_properties(Persistence_representation_utilities_${plot_utility}_first_gnuplot PROPERTIES DEPENDS
+                             Persistence_representation_utilities_${plot_utility}_first)
     endif()
 
     install(TARGETS ${plot_utility} DESTINATION bin)
 endfunction(add_persistence_representation_plot_utility)
 
-function(add_persistence_representation_function_utility function_utility tool_extension)
+function(add_persistence_representation_function_utility creation_utility function_utility tool_extension)
     add_executable ( ${function_utility} ${function_utility}.cpp )
 
     # ARGV2 is an optional argument
@@ -48,6 +52,8 @@ function(add_persistence_representation_function_utility function_utility tool_e
             "${CMAKE_CURRENT_BINARY_DIR}/../first.pers${tool_extension}"
             "${CMAKE_CURRENT_BINARY_DIR}/../second.pers${tool_extension}")
     endif()
+    set_tests_properties(Persistence_representation_utilities_${function_utility} PROPERTIES DEPENDS
+                         Persistence_representation_utilities_${creation_utility})
 
     install(TARGETS ${function_utility} DESTINATION bin)
 endfunction(add_persistence_representation_function_utility)

@@ -1327,6 +1327,8 @@ class Simplex_tree {
    * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
    * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
    * complex has changed , please call `initialize_filtration()` to recompute it.
+   * 
+   * If a simplex has a `NaN` filtration value, it is considered lower than any other defined filtration value.
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
@@ -1357,7 +1359,9 @@ class Simplex_tree {
                                                               });
 
       Filtration_value max_filt_border_value = filtration(*max_border);
-      if (simplex.second.filtration() < max_filt_border_value) {
+      // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
+      // That seems more useful than keeping NaN.
+      if (!(simplex.second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
         simplex.second.assign_filtration(max_filt_border_value);
@@ -1494,16 +1498,8 @@ class Simplex_tree {
    *
    * \pre `sh` must have dimension at least 1. */
   Simplex_handle edge_with_same_filtration(Simplex_handle sh) {
-#if 0
-    // FIXME: Only do this if dim >= 2, since we don't want to return a vertex...
-    // Test if we are lucky and the parent has the same filtration value.
-    Siblings* sib = self_siblings(sh);
-    Vertex_handle v_par = sib->parent();
-    sib = sib->oncles();
-    Simplex_handle par = sib->find(v_par);
-    if(filtration_(par) == filt) return edge_with_same_filtration(par);
-#endif
-    auto&& vertices = simplex_vertex_range(sh);
+    // See issue #251 for potential speed improvements.
+    auto&& vertices = simplex_vertex_range(sh); // vertices in decreasing order
     auto end = std::end(vertices);
     auto vi = std::begin(vertices);
     GUDHI_CHECK(vi != end, "empty simplex");

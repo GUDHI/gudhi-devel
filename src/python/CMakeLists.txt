@@ -56,6 +56,7 @@ if(PYTHONINTERP_FOUND)
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
@@ -181,7 +182,7 @@ if(PYTHONINTERP_FOUND)
         set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${MPFR_LIBRARIES_DIR}', ")
         message("** Add mpfr ${MPFR_LIBRARIES}")
       endif(MPFR_FOUND)
-endif(CGAL_FOUND)
+    endif(CGAL_FOUND)
 
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -226,6 +227,7 @@ endif(CGAL_FOUND)
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
     file(COPY "gudhi/wasserstein.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
         OUTPUT gudhi.so
@@ -403,6 +405,9 @@ endif(CGAL_FOUND)
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
+
+    # Time Delay
+    add_gudhi_py_test(test_time_delay)
 
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)

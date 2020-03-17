@@ -7,6 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
 import numpy
 from numpy import array as np_array
@@ -208,22 +209,34 @@ cdef class SimplexTree:
         return self.get_ptr().insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
-    def get_filtration(self):
-        """This function returns a list of all simplices with their given
+    def get_simplices(self):
+        """This function returns a generator with simplices and their given
         filtration values.
 
-        :returns:  The simplices sorted by increasing filtration values.
-        :rtype:  list of tuples(simplex, filtration)
+        :returns:  The simplices.
+        :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] filtration \
-            = self.get_ptr().get_filtration()
-        ct = []
-        for filtered_complex in filtration:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
+        cdef Simplex_tree_simplices_iterator it = self.get_ptr().get_simplices_iterator_begin()
+        cdef Simplex_tree_simplices_iterator end = self.get_ptr().get_simplices_iterator_end()
+        cdef Simplex_tree_simplex_handle sh = dereference(it)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
+
+    def get_filtration(self):
+        """This function returns a generator with simplices and their given
+        filtration values sorted by increasing filtration values.
+
+        :returns:  The simplices sorted by increasing filtration values.
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef vector[Simplex_tree_simplex_handle].const_iterator it = self.get_ptr().get_filtration_iterator_begin()
+        cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
 
     def get_skeleton(self, dimension):
         """This function returns the (simplices of the) skeleton of a maximum
@@ -234,15 +247,12 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] skeleton \
-            = self.get_ptr().get_skeleton(<int>dimension)
-        ct = []
-        for filtered_simplex in skeleton:
-            v = []
-            for vertex in filtered_simplex.first:
-                v.append(vertex)
-            ct.append((v, filtered_simplex.second))
-        return ct
+        cdef Simplex_tree_skeleton_iterator it = self.get_ptr().get_skeleton_iterator_begin(dimension)
+        cdef Simplex_tree_skeleton_iterator end = self.get_ptr().get_skeleton_iterator_end(dimension)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
 
     def get_star(self, simplex):
         """This function returns the star of a given N-simplex.
