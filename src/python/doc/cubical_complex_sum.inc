@@ -1,5 +1,5 @@
 .. table::
-   :widths: 30 50 20
+   :widths: 30 40 30
 
    +--------------------------------------------------------------------------+----------------------------------------------------------------------+-----------------------------+
    | .. figure::                                                              | The cubical complex is an example of a structured complex useful in  | :Author: Pawel Dlotko       |

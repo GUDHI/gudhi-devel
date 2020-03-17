@@ -1,5 +1,5 @@
 .. table::
-   :widths: 30 50 20
+   :widths: 30 40 30
 
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
    | .. figure::                                                     | These graphical tools comes on top of persistence results and allows  | :Author: Vincent Rouvreau, Theo Lacombe       |

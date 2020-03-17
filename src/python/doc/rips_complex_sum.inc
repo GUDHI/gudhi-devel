@@ -1,5 +1,5 @@
 .. table::
-   :widths: 30 50 20
+   :widths: 30 40 30
 
    +----------------------------------------------------------------+------------------------------------------------------------------------+----------------------------------------------------------------------+
    | .. figure::                                                    | Rips complex is a simplicial complex constructed from a one skeleton   | :Authors: Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse |

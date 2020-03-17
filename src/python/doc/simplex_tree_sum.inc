@@ -1,5 +1,5 @@
 .. table::
-   :widths: 30 50 20
+   :widths: 30 40 30
 
    +----------------------------------------------------------------+------------------------------------------------------------------------+-----------------------------+
    | .. figure::                                                    | The simplex tree is an efficient and flexible data structure for       | :Author: Clément Maria      |
