@@ -1552,13 +1552,13 @@ class Simplex_tree {
       double f = this->filtration(sh);
       this->minval_ = std::min(this->minval_, f);
       this->maxval_ = std::max(this->maxval_, f);
-      maxvert = std::max(*this->simplex_vertex_range(sh).begin(), maxvert);
+      maxvert = std::max(sh->first, maxvert);
     }
     
     GUDHI_CHECK(maxvert < std::numeric_limits<int>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
     maxvert += 1;
 
-    Simplex_tree* st_copy = new Simplex_tree(*this);
+    Simplex_tree st_copy = *this;
 
     // Add point for coning the simplicial complex
     int count = this->num_simplices();
@@ -1566,11 +1566,11 @@ class Simplex_tree {
     count++;
 
     // For each simplex
-    for (auto sh_copy : st_copy->complex_simplex_range()){
+    for (auto sh_copy : st_copy.complex_simplex_range()){
 
       // Locate simplex
       std::vector<Vertex_handle> vr;
-      for (auto vh : st_copy->simplex_vertex_range(sh_copy)){
+      for (auto vh : st_copy.simplex_vertex_range(sh_copy)){
         vr.push_back(vh);
       }
       auto sh = this->find(vr);
@@ -1591,9 +1591,6 @@ class Simplex_tree {
       }
       count++;
     }
-
-    // Deallocate memory
-    delete st_copy;
 
     // Automatically assign good values for simplices
     this->make_filtration_non_decreasing();
