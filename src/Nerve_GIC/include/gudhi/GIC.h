@@ -139,19 +139,9 @@ class Cover_complex {
     for (boost::tie(ei, ei_end) = boost::edges(G); ei != ei_end; ++ei) boost::remove_edge(*ei, G);
   }
 
-  // Thread local is not available on XCode version < V.8
-  // If not available, random engine is a class member.
-#ifndef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-  std::default_random_engine re;
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-
   // Find random number in [0,1].
   double GetUniform() {
-    // Thread local is not available on XCode version < V.8
-    // If available, random engine is defined for each thread.
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
     thread_local std::default_random_engine re;
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
     std::uniform_real_distribution<double> Dist(0, 1);
     return Dist(re);
   }
@@ -456,9 +446,7 @@ class Cover_complex {
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
-    // This cannot be parallelized if thread_local is not defined
-    // thread_local is not defined for XCode < v.8
-    #if defined(GUDHI_USE_TBB) && defined(GUDHI_CAN_USE_CXX11_THREAD_LOCAL)
+    #ifdef GUDHI_USE_TBB
     std::mutex deltamutex;
     tbb::parallel_for(0, N, [&](int i){
         std::vector<int> samples(m);

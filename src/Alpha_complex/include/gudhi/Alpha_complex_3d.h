@@ -61,10 +61,7 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
+thread_local double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
 
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //

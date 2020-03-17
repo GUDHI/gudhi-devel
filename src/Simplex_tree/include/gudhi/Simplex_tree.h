@@ -765,12 +765,7 @@ class Simplex_tree {
     if (first == last)
       return { null_simplex(), true }; // FIXME: false would make more sense to me.
 
-    // Copy before sorting
-    // Thread local is not available on XCode version < V.8 - It will slow down computation
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<Vertex_handle> copy;
+    thread_local std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(copy.begin(), copy.end());
@@ -1133,10 +1128,7 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<std::pair<Vertex_handle, Node> > inter;
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
