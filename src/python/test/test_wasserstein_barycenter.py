@@ -38,7 +38,7 @@ def test_lagrangian_barycenter():
     assert np.linalg.norm(lagrangian_barycenter(pdiagset=[dg7], verbose=False) - dg7) < eps
     Y, log = lagrangian_barycenter(pdiagset=[dg4, dg8], verbose=True)
     assert np.linalg.norm(Y - np.array([[1,3], [5, 7]])) < eps
-    assert np.abs(log["energy"] - 4) < eps
+    assert np.abs(log["energy"] - 2) < eps
     assert np.array_equal(log["groupings"][0] , np.array([[0, -1], [1, -1]]))
     assert np.array_equal(log["groupings"][1] , np.array([[0, 0], [1, 1]]))
     assert np.linalg.norm(lagrangian_barycenter(pdiagset=[dg8, dg4], init=np.array([[0.2, 0.6], [0.5, 0.7]]), verbose=False) - np.array([[1, 3], [5, 7]])) < eps
