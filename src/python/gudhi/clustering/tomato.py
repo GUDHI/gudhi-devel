@@ -58,10 +58,10 @@ class Tomato:
             kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to sklearn.neighbors.KernelDensity.
             k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
             k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
-            r (float): size of a neighborhood if graph_type is 'radius'
-            eps (float): approximation factor when computing nearest neighbors (currently ignored with a GPU)
+            r (float): size of a neighborhood if graph_type is 'radius'.
+            eps (float): approximation factor when computing nearest neighbors (currently ignored with a GPU).
             gpu (bool): enable use of CUDA (through pykeops) to compute k nearest neighbors. This is useful when the dimension becomes large (10+) but the number of points remains low (less than a million).
-            n_clusters (int): number of clusters requested. Defaults to ???
+            n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get the maximal number of clusters.
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
             symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points (numpy.inf is supported without gpu). Defaults to 2.
@@ -280,7 +280,7 @@ class Tomato:
             else:
                 weights = -numpy.log(weights)
 
-        if self.density_type_ == "KDE" or self.density_type_ == "logKDE":
+        if self.density_type_ in {"KDE", "logKDE"}:
             # FIXME: replace most assert with raise ValueError("blabla")
             assert input_type == "points"
             kde_params = self.params_.get("kde_params", dict())
