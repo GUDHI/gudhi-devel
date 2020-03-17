@@ -1478,8 +1478,8 @@ class Simplex_tree {
    * \post The coordinates of the persistence diagram points might be a little different than the
    * original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
    * performed on these values during the computation of extended persistence.
-   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration 
-   * and this->get_persistence.
+   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration, 
+   * this->initialize_filtration, and this->compute_persistent_cohomology.
    * @return A vector of four persistence diagrams. The first one is Ordinary, the 
    * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
    * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
@@ -1538,14 +1538,14 @@ class Simplex_tree {
     int maxvert = std::numeric_limits<int>::min();
     this->minval_ = std::numeric_limits<double>::max();
     this->maxval_ = std::numeric_limits<double>::min();
-    for (auto sh : this->skeleton_simplex_range(0)) {
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
       double f = this->filtration(sh);
       this->minval_ = std::min(this->minval_, f);
       this->maxval_ = std::max(this->maxval_, f);
       maxvert = std::max(*this->simplex_vertex_range(sh).begin(), maxvert);
     }
     
-    assert (maxvert < std::numeric_limits<int>::max());
+    GUDHI_CHECK(maxvert < std::numeric_limits<int>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
     maxvert += 1;
 
     Simplex_tree* st_copy = new Simplex_tree(*this);

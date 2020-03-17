@@ -397,19 +397,43 @@ cdef class SimplexTree:
         return self.get_ptr().make_filtration_non_decreasing()
 
     def extend_filtration(self):
-        """ Extend filtration for computing extended persistence. This function only uses the filtration values at the 0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration computed with these values. Note that after calling this function, the filtration values are actually modified. The function :func:`compute_extended_persistence_subdiagrams()<gudhi.SimplexTree.compute_extended_persistence_subdiagrams>` retrieves the original values and separates the extended persistence diagram points w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after computing the persistent homology of the extended simplicial complex.
+        """ Extend filtration for computing extended persistence. This function only uses the 
+        filtration values at the 0-dimensional simplices, and computes the extended persistence 
+        diagram induced by the lower-star filtration computed with these values. 
+
+        .. note::
+
+            Note that after calling this function, the filtration 
+            values are actually modified within the Simplex_tree. 
+            The function :func:`compute_extended_persistence_subdiagrams()<gudhi.SimplexTree.compute_extended_persistence_subdiagrams>`
+            retrieves the original values.
+
+        .. note::
+
+            Note that this code creates an extra vertex internally, so you should make sure that
+            the Simplex_tree does not contain a vertex with the largest Vertex_handle. 
         """
         return self.get_ptr().extend_filtration()
 
     def compute_extended_persistence_subdiagrams(self, dgm):
-        """This function retrieves good values for extended persistence, and separate the diagrams into the ordinary, relative, extended+ and extended- subdiagrams.
+        """This function retrieves good values for extended persistence, and separate the diagrams 
+        into the ordinary, relative, extended+ and extended- subdiagrams.
 
-        :param dgm: Persistence diagram obtained after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>` and :func:`persistence()<gudhi.SimplexTree.persistence>`.
-        :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+        :param dgm: Persistence diagram obtained after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>`, :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`, and :func:`persistence()<gudhi.SimplexTree.persistence>`.
+
+        :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
 
-            This function should be called only after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>` and :func:`persistence()<gudhi.SimplexTree.persistence>`.
+            This function should be called only if :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>`,
+            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`, 
+            and :func:`persistence()<gudhi.SimplexTree.persistence>` have been called first!
+
+        .. note::
+
+            The coordinates of the persistence diagram points might be a little different than the
+            original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+            performed on these values during the computation of extended persistence.
         """
         return self.get_ptr().compute_extended_persistence_subdiagrams(dgm)
 
