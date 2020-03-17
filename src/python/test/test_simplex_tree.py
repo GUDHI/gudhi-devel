@@ -245,6 +245,10 @@ def test_make_filtration_non_decreasing():
     assert st.filtration([0, 1, 6]) == 1.0
     assert st.filtration([0, 1]) == 1.0
     assert st.filtration([0]) == 1.0
+    assert st.filtration([1]) == 1.0
+    assert st.filtration([3, 4, 5]) == 2.0
+    assert st.filtration([3, 4]) == 2.0
+    assert st.filtration([4, 5]) == 2.0
 
 def test_extend_filtration():
 
@@ -271,7 +275,7 @@ def test_extend_filtration():
     st.assign_filtration([4], 5.)                                                                                                                
     st.assign_filtration([5], 6.)                                                                                                                
 
-    assert st.get_filtration() == [                                                                                                                         
+    assert list(st.get_filtration()) == [                                                                                                                         
         ([0, 2], 0.0), 
         ([1, 2], 0.0), 
         ([0, 3], 0.0), 
@@ -289,7 +293,7 @@ def test_extend_filtration():
 
     st.extend_filtration()
                                                                                                                       
-    assert st.get_filtration() == [                                                                                                                         
+    assert list(st.get_filtration()) == [                                                                                                                         
         ([6], -3.0), 
         ([0], -2.0), 
         ([1], -1.8), 
@@ -327,10 +331,6 @@ def test_extend_filtration():
         [(1, (6.0, 1.0))]
     ]
 
-    assert st.filtration([1]) == 1.0
-    assert st.filtration([3, 4, 5]) == 2.0
-    assert st.filtration([3, 4]) == 2.0
-    assert st.filtration([4, 5]) == 2.0
 
 def test_simplices_iterator():
     st = SimplexTree()

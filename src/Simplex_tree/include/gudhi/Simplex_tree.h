@@ -1354,6 +1354,7 @@ class Simplex_tree {
       // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
       // That seems more useful than keeping NaN.
       if (!(simplex.second.filtration() >= max_filt_border_value)) {
+
         // Store the filtration modification information
         modified = true;
         simplex.second.assign_filtration(max_filt_border_value);
@@ -1473,15 +1474,21 @@ class Simplex_tree {
 
   /** \brief Retrieve good values for extended persistence, and separate the 
    * diagrams into the ordinary, relative, extended+ and extended- subdiagrams. 
-   * Need extend_filtration to be called first!
+   * \post This function should be called only if extend_filtration has been called first!
+   * \post The coordinates of the persistence diagram points might be a little different than the
+   * original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+   * performed on these values during the computation of extended persistence.
    * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration 
    * and this->get_persistence.
    * @return A vector of four persistence diagrams. The first one is Ordinary, the 
    * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+   * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
    */
   std::vector<std::vector<std::pair<int, std::pair<double, double>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<double, double>>>& dgm){
     std::vector<std::vector<std::pair<int, std::pair<double, double>>>> new_dgm(4); 
     double x, y;
+    double minval_ = this->minval_;
+    double maxval_ = this->maxval_;
     for(unsigned int i = 0; i < dgm.size(); i++){ 
       int h = dgm[i].first; 
       double px = dgm[i].second.first; 
@@ -1516,69 +1523,70 @@ class Simplex_tree {
   /** \brief Extend filtration for computing extended persistence. 
    * This function only uses the filtration values at the 0-dimensional simplices, 
    * and computes the extended persistence diagram induced by the lower-star filtration 
-   * computed with these values. Note that after calling this function, the filtration 
+   * computed with these values. 
+   * \post Note that after calling this function, the filtration 
    * values are actually modified. The function compute_extended_persistence_subdiagrams 
    * retrieves the original values and separates the extended persistence diagram points 
    * w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after 
    * computing the persistent homology of the extended simplicial complex.
+   * \post Note that this code creates an extra vertex internally, so you should make sure that
+   * the Simplex tree does not contain a vertex with the largest Vertex_handle. 
    */
   void extend_filtration() {
 
     // Compute maximum and minimum of filtration values
-    int maxvert = -std::numeric_limits<int>::infinity();
-    std::vector<double> filt;
-    for (auto sh : this->complex_simplex_range()) {
-      if (this->dimension(sh) == 0){
-        filt.push_back(this->filtration(sh)); 
-        maxvert = std::max(*this->simplex_vertex_range(sh).begin(), maxvert);
-      }
+    int maxvert = std::numeric_limits<int>::min();
+    this->minval_ = std::numeric_limits<double>::max();
+    this->maxval_ = std::numeric_limits<double>::min();
+    for (auto sh : this->skeleton_simplex_range(0)) {
+      double f = this->filtration(sh);
+      this->minval_ = std::min(this->minval_, f);
+      this->maxval_ = std::max(this->maxval_, f);
+      maxvert = std::max(*this->simplex_vertex_range(sh).begin(), maxvert);
     }
-    minval_ = *std::min_element(filt.begin(), filt.end());
-    maxval_ = *std::max_element(filt.begin(), filt.end());
+    
+    assert (maxvert < std::numeric_limits<int>::max());
     maxvert += 1;
 
-    // Compute vectors of integers corresponding to the Simplex handles
-    std::vector<std::vector<int> > splxs;
-    for (auto sh : this->complex_simplex_range()) {
-      std::vector<int> vr; 
-      for (auto vh : this->simplex_vertex_range(sh)){
-        vr.push_back(vh);
-      }
-      splxs.push_back(vr);
-    }
+    Simplex_tree* st_copy = new Simplex_tree(*this);
 
     // Add point for coning the simplicial complex
     int count = this->num_simplices();
-    std::vector<int> cone; 
-    cone.push_back(maxvert); 
-    auto ins = this->insert_simplex(cone, -3); 
-    this->assign_key(ins.first, count); 
+    this->insert_simplex({maxvert}, -3);
     count++;
 
     // For each simplex
-    for (auto vr : splxs){
+    for (auto sh_copy : st_copy->complex_simplex_range()){
+
+      // Locate simplex
+      std::vector<Vertex_handle> vr;
+      for (auto vh : st_copy->simplex_vertex_range(sh_copy)){
+        vr.push_back(vh);
+      }
+      auto sh = this->find(vr);
+
       // Create cone on simplex
-      auto sh = this->find(vr); vr.push_back(maxvert);
+      vr.push_back(maxvert);
       if (this->dimension(sh) == 0){
         // Assign ascending value between -2 and -1 to vertex
         double v = this->filtration(sh);
-        this->assign_filtration(sh, -2 + (v-minval_)/(maxval_-minval_));
+        this->assign_filtration(sh, -2 + (v-this->minval_)/(this->maxval_-this->minval_));
         // Assign descending value between 1 and 2 to cone on vertex
-        auto ins = this->insert_simplex(vr, 2 - (v-minval_)/(maxval_-minval_));
-        this->assign_key(ins.first, count);
+        this->insert_simplex(vr, 2 - (v-this->minval_)/(this->maxval_-this->minval_));
       }
       else{
         // Assign value -3 to simplex and cone on simplex
         this->assign_filtration(sh, -3);
-        auto ins = this->insert_simplex(vr, -3);
-        this->assign_key(ins.first, count);
+        this->insert_simplex(vr, -3);
       }
       count++;
     }
 
-    this->make_filtration_non_decreasing(); 
-    this->initialize_filtration();
+    // Deallocate memory
+    delete st_copy;
 
+    // Automatically assign good values for simplices
+    this->make_filtration_non_decreasing();
   }
 
 
