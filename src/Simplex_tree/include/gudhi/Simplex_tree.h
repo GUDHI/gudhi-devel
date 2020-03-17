@@ -1494,16 +1494,8 @@ class Simplex_tree {
    *
    * \pre `sh` must have dimension at least 1. */
   Simplex_handle edge_with_same_filtration(Simplex_handle sh) {
-#if 0
-    // FIXME: Only do this if dim >= 2, since we don't want to return a vertex...
-    // Test if we are lucky and the parent has the same filtration value.
-    Siblings* sib = self_siblings(sh);
-    Vertex_handle v_par = sib->parent();
-    sib = sib->oncles();
-    Simplex_handle par = sib->find(v_par);
-    if(filtration_(par) == filt) return edge_with_same_filtration(par);
-#endif
-    auto&& vertices = simplex_vertex_range(sh);
+    // See issue #251 for potential speed improvements.
+    auto&& vertices = simplex_vertex_range(sh); // vertices in decreasing order
     auto end = std::end(vertices);
     auto vi = std::begin(vertices);
     GUDHI_CHECK(vi != end, "empty simplex");
