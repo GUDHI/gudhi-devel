@@ -63,21 +63,17 @@ int main(int argc, char * const argv[]) {
     int     dimension;
     double  end_threshold;
     double  steps;
-    int     repetetions = 1;
     char    manifold;
 
     Vector_of_points * point_vector;
-
-    std::string manifold_full = "sphere";
     
-    double r_min  = 0.6;
     int dim_max  = 2;
 
-    point_generator.program_options(argc, argv, steps, end_threshold, repetetions, manifold, dimension, dim_max, in_file_name, out_file_name);
+    point_generator.program_options(argc, argv, steps, end_threshold, manifold, dimension, dim_max, in_file_name, out_file_name);
     
     std::cout << "The current input values to run the program is: "<< std::endl;
-    std::cout << "steps, end_threshold, repetetions, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
-    std::cout << steps << ", " << end_threshold << ", " << repetetions << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
+    std::cout << "steps, end_threshold, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
+    std::cout << steps << ", " << end_threshold << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
     
     Map map_empty;
     
@@ -120,7 +116,6 @@ int main(int argc, char * const argv[]) {
     Filtered_sorted_edge_list * edge_t = new Filtered_sorted_edge_list();
     std::cout << "Computing the one-skeleton for threshold: " << end_threshold << std::endl; 
     
-    auto begin_full_cmplx = std::chrono::high_resolution_clock::now();
     if(manifold == 'm') {                                           //Input is a distance 'm'atrix //Creating the edge list
         Rips_edge_list Rips_edge_list_from_file(distances, end_threshold);
         Rips_edge_list_from_file.create_edges(*edge_t);
@@ -149,9 +144,6 @@ int main(int argc, char * const argv[]) {
         std::cerr << "Total number of egdes are zero." <<std::endl;
         exit(-1) ;
     }
-    
-    auto end_full_cmplx = std::chrono::high_resolution_clock::now();
-    currentCreationTime = std::chrono::duration<double, std::milli>(end_full_cmplx - begin_full_cmplx).count();
  
     // Rips_complex rips_complex_before_collapse(distances, end_threshold);
     Rips_complex rips_complex_after_collapse(*sparse_distances, end_threshold);

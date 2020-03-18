@@ -10,15 +10,11 @@
 using Point = CGAL::Epick_d< CGAL::Dynamic_dimension_tag>::Point_d;
 using Vector_of_points = std::vector<Point>;
 
-const double PI  = 3.141592653589793238463;
-#define _USE_MATH_DEFINES
-
 class PointSetGen {
   public:
     void program_options(int argc, char * const argv[]
                          , double & steps
                          , double & end_thresold
-                         , int 	  & repetetions
                          , char   & manifold
                          , int 	  & dimension
                          , int    & dim_max
@@ -34,9 +30,6 @@ class PointSetGen {
        		"Steps of the threshold")
         ("end_thresold,e", po::value<double>(&end_thresold)->default_value(1),
       		"Final threshold for rips complex.")
-          
-        ("repetetions,r", po::value<int>(&repetetions)->default_value(1),
-        	"Num of repetetions of the experiments.")
       	("manifold,m", po::value<char>(&manifold)->default_value('s'),
        		"Type of manifold")
            
