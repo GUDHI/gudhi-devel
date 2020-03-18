@@ -1,4 +1,3 @@
-#include <gudhi/TowerAssembler_FlagComplex.h>
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
@@ -46,83 +45,7 @@ public:
       
     }
 };
-class strong_filtered_vertex_collapse
-{
-public:
-    template<class Filtered_sorted_edge_list, class Distance_matrix>
-    strong_filtered_vertex_collapse(std::size_t number_of_points, Filtered_sorted_edge_list & edge_t, double steps, Distance_matrix & sparse_distances)
-    {
-         auto the_collapse_begin = std::chrono::high_resolution_clock::now();
-        //An additional vector <edge_filt> to perform binary search to find the index of given threshold
-        std::vector<Filtration_value> * edge_filt = new std::vector<Filtration_value>();
-        edge_filt->clear();
-        for(auto edIt = edge_t.begin(); edIt != edge_t.end(); edIt++) {
-            edge_filt->push_back(std::get<0>(*edIt));
-        }
-        double begin_thresold = edge_filt->at(0);
-        double end_threshold = edge_filt->at(edge_filt->size()-1);
-        double totAssembleTime = 0.0;
-        Filtered_sorted_edge_list * sub_skeleton  = new Filtered_sorted_edge_list();  
-        TowerAssembler_FlagComplex twr_assembler(number_of_points) ;
 
-        std::cout<< "Begin and end thresholds (filteration values) are , " << begin_thresold <<", " << end_threshold << "." <<std::endl;
-
-        // int iterations = (end_threshold - begin_thresold)/steps;
-        // std::cout << "Total number of iterations to be run are: " << iterations << std::endl;
-       
-        auto threshold =  begin_thresold;  
-
-        FlagComplexSpMatrix * mat_coll       = new FlagComplexSpMatrix(); 
-        FlagComplexSpMatrix * mat_prev_coll  = new FlagComplexSpMatrix(number_of_points); 
-
-        std::cout << "Going for vertex collapse and tower assembly" << std::endl;
-
-        int i = 1;
-        Map * redmap;
-        while(edge_filt->size() > 0) {
-           
-            if(steps > 0)
-                extract_sub_one_skeleton(threshold, *sub_skeleton, edge_t, *edge_filt);
-
-            else
-                extract_one_new_edge(*sub_skeleton, edge_t, *edge_filt);
-
-
-            mat_coll = new FlagComplexSpMatrix(number_of_points, *sub_skeleton);
-            // mat_coll->strong_vertex_edge_collapse();
-            mat_coll->strong_vertex_collapse();
-            // std::cout<< " Total number of current edges are " << sub_skeleton->size() << std::endl;
-                       
-            redmap = new Map();
-            *redmap = mat_coll->reduction_map(); 
-            
-            // std::cout << "Subcomplex #" << i << " of threshold "<< threshold << " Collapsed" << std::endl;
-            totAssembleTime += twr_assembler.build_tower_for_two_cmplxs(*mat_prev_coll, *mat_coll, *redmap, threshold, "./PersistenceOutput/CollapsedTowerRips.txt");
-            // std::cout << "Tower updated for subcomplex #" << i << std::endl; 
-            
-            delete mat_prev_coll;
-            mat_prev_coll = new FlagComplexSpMatrix();
-            mat_prev_coll = mat_coll;
-            mat_coll  = new FlagComplexSpMatrix();
-            i++;
-            delete redmap;
-            if(steps > 0) {
-                threshold = threshold+steps;
-                if(threshold > end_threshold)
-                    threshold = end_threshold; 
-            }
-            else {
-                if(edge_filt->size() > 0)
-                    threshold = edge_filt->at(0);  
-            }    
-        }
-        std::cout << "Tower updated for subcomplex #" << i << std::endl; 
-        auto the_collapse = std::chrono::high_resolution_clock::now();    
-        sparse_distances = twr_assembler.distance_matrix();
-        std::cout << "Collapse And assembly time : " <<  std::chrono::duration<double, std::milli>(the_collapse- the_collapse_begin).count() << " ms\n" << std::endl;
-    }    
-
-};
 class filt_edge_to_dist_matrix
 {
 public:
@@ -320,10 +243,6 @@ int main(int argc, char * const argv[]) {
         exit(-1) ;
     }
     
-
-    // std::cout<< "Vertex strong-collapse begins" << std::endl;
-    // strong_filtered_vertex_collapse(number_of_points, *edge_t, steps, *sparse_distances); 
-
     auto end_full_cmplx = std::chrono::high_resolution_clock::now();
     currentCreationTime = std::chrono::duration<double, std::milli>(end_full_cmplx - begin_full_cmplx).count();
     maxCreationTime = currentCreationTime;
