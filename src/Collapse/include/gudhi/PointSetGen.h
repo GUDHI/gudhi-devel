@@ -19,7 +19,6 @@ class PointSetGen {
   public:
     void program_options(int argc, char * const argv[]
                          , std::size_t & number_of_points
-                         , double & begin_thresold
                          , double & steps
                          , double & end_thresold
                          , int 	  & repetetions
@@ -36,9 +35,6 @@ class PointSetGen {
         ("help,h", "produce help message")
         ("number,n", po::value<std::size_t>(&number_of_points)->default_value(0),
            "Number of generated point_vector.")
-        
-        ("begin_thresold,b", po::value<double>(&begin_thresold)->default_value(0),
-           "Initial threshold for rips complex.")
       	("steps,s", po::value<double>(&steps)->default_value(0.1),
        		"Steps of the threshold")
         ("end_thresold,e", po::value<double>(&end_thresold)->default_value(1),
@@ -70,7 +66,7 @@ class PointSetGen {
 
       if (vm.count("help")) {
         std::cout << std::endl;
-        std::cout << "Computes rips complexes of different threshold values, from 'begin_thresold' to 'end_thresold', with priodic steps of 'steps' from a n random uniform point_vector on a selected manifold, . \n";
+        std::cout << "Computes rips complexes of different threshold values, to 'end_thresold', with priodic steps of 'steps' from a n random uniform point_vector on a selected manifold, . \n";
         std::cout << "Strongly collapses all the rips complexes and output the results in out_file. \n";
         std::cout << "The experiments are repeted 'repete' num of times for each threshold value. \n";
         std::cout << "type -m for manifold options, 's' for uni sphere, 'b' for unit ball, 'f' for file. \n";

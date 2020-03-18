@@ -1,3 +1,4 @@
+#include <gudhi/FlagComplexSpMatrix.h>
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
@@ -87,7 +88,6 @@ int main(int argc, char * const argv[]) {
     typedef std::vector< std::tuple<Filtration_value, Vertex_handle, Vertex_handle > > Filtered_sorted_edge_list;
 
     int     dimension;
-    double  begin_thresold;
     double  end_threshold;
     double  steps;
     int     repetetions = 1;
@@ -98,16 +98,14 @@ int main(int argc, char * const argv[]) {
 
     std::string manifold_full = "sphere";
     
-    double radius  = 1;
     double r_min  = 0.6;
-    double r_max = 1;
     int dim_max  = 2;
 
-    point_generator.program_options(argc, argv, number_of_points, begin_thresold, steps, end_threshold, repetetions, manifold, dimension, dim_max, in_file_name, out_file_name);
+    point_generator.program_options(argc, argv, number_of_points, steps, end_threshold, repetetions, manifold, dimension, dim_max, in_file_name, out_file_name);
     
     std::cout << "The current input values to run the program is: "<< std::endl;
-    std::cout << "number_of_points, begin_thresold, steps, end_threshold, repetetions, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
-    std::cout << number_of_points << ", " << begin_thresold << ", " << steps << ", " << end_threshold << ", " << repetetions << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
+    std::cout << "number_of_points, steps, end_threshold, repetetions, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
+    std::cout << number_of_points << ", " << steps << ", " << end_threshold << ", " << repetetions << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
     
     if(manifold == 'f' || manifold =='F') {
         Gudhi::Points_off_reader<Point> off_reader(in_file_name);
@@ -123,60 +121,25 @@ int main(int argc, char * const argv[]) {
     }
    
     Map map_empty;
-
-    std::string origFile ("./PersistenceOutput/original_tower_rips" );
-    std::string collFile  ("./PersistenceOutput/collapsed_tower_rips") ;
     
-    std::string filediag_bfr ("./PersistenceOutput/uncollapsed_persistence_diags") ;
     std::string filediag_aft ("./PersistenceOutput/collapsed_persistence_diags") ;
     
      std::string origPoints ("./PersistenceOutput/pointsamaple.off");
     // std::string otherStats ("./PersistenceOutput/maximal_simplx_cnt");
     // otherStats = otherStats+"_"+ out_file_name+ ".txt";
-    filediag_bfr = filediag_bfr+"_"+ out_file_name+ ".txt";
     filediag_aft = filediag_aft+"_"+ out_file_name+ ".txt";
 
     double currentCreationTime = 0.0;
-    double maxCreationTime     = 0.0;
-
    
     point_vector = new Vector_of_points();
     Distance_matrix distances;
     Distance_matrix *sparse_distances = new Distance_matrix();
 
 
-    if(manifold == 's' || manifold == 'S'){
-        // point_generator.generate_points_sphere(*point_vector, number_of_points, dimension, radius); 
-        point_generator.generate_grid_2sphere(*point_vector, number_of_points, radius); 
-        origFile = origFile+"_sphere_"+out_file_name+".txt";
-        collFile = collFile+"_sphere_"+out_file_name+".txt";
-        std::cout << number_of_points << " points successfully chosen randomly from "<< dimension <<"-sphere of radius " << radius << std::endl;
-    }
-    else if(manifold == 'b' || manifold == 'B'){
-        point_generator.generate_points_ball(*point_vector, number_of_points, dimension, radius); 
-        origFile = origFile+"_ball_"+out_file_name+".txt";
-        collFile = collFile+"_ball_"+out_file_name+".txt";
-        std::cout << number_of_points << " points successfully chosen randomly from "<< dimension <<"-ball of radius " << radius << std::endl;
-    
-    }
-    else if( (manifold == 'a' || manifold == 'A')&& dimension == 2){
-        point_generator.generate_points_2annulus(*point_vector, number_of_points, r_min, r_max); 
-        origFile = origFile+"_annulus_"+out_file_name+".txt";
-        collFile = collFile+"_annulus_"+out_file_name+".txt";
-        std::cout << number_of_points << " points successfully chosen randomly from "<< 2 <<"-annulus of radii (" << r_min << ',' << r_max << ") " << std::endl;
-    }
-    else if( (manifold == 'a' || manifold == 'A') && dimension == 3){
-        point_generator.generate_points_spherical_shell(*point_vector, number_of_points, r_min, r_max); 
-        origFile = origFile+"_annulus_"+out_file_name+".txt";
-        collFile = collFile+"_annulus_"+out_file_name+".txt";
-        std::cout << number_of_points << " points successfully chosen randomly from spherical shell of radii (" << r_min << ',' << r_max << ") " << std::endl;
-    }
-    
-    else if(manifold == 'f' || manifold =='f') {
+    if(manifold == 'f' || manifold =='f') {
         // Subsampling from all points for each iterations
         Gudhi::subsampling::pick_n_random_points(file_all_points, number_of_points, std::back_inserter(*point_vector));
-        origFile = origFile+"_"+ out_file_name+ ".txt";
-        collFile = collFile+"_"+ out_file_name+ ".txt";
+        number_of_points = point_vector->size();
         std::cout << number_of_points << " points succesfully chosen randomly of dimension "<< dimension << " ." << std::endl;
     }
     else if (manifold == 'm'){
@@ -184,16 +147,12 @@ int main(int argc, char * const argv[]) {
         distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
         number_of_points = distances.size();
         std::cout << "Read the distance matrix succesfully, of size: " << number_of_points << std::endl;
-        origFile = origFile+"_"+ out_file_name+ ".txt";
-        collFile = collFile+"_"+ out_file_name+ ".txt";
     }
     else {
         std::cerr << "Wrong parameters for input manifold..." <<std::endl;  
         exit(-1); 
     }
     
-    if( manifold != 'm')
-        number_of_points = point_vector->size();
     std::cout << "Point Set Generated."  <<std::endl;
  
     // for(int i = 0; i < number_of_points; i++ )
@@ -245,8 +204,6 @@ int main(int argc, char * const argv[]) {
     
     auto end_full_cmplx = std::chrono::high_resolution_clock::now();
     currentCreationTime = std::chrono::duration<double, std::milli>(end_full_cmplx - begin_full_cmplx).count();
-    maxCreationTime = currentCreationTime;
-   
  
     // Rips_complex rips_complex_before_collapse(distances, end_threshold);
     Rips_complex rips_complex_after_collapse(*sparse_distances, end_threshold);
@@ -276,16 +233,6 @@ int main(int argc, char * const argv[]) {
 
     // pcoh_bfr.compute_persistent_cohomology(steps);
     pcoh_aft.compute_persistent_cohomology(steps);
-    // Output the diagram in filediag
-    // if (filediag_bfr.empty()) {
-    //     pcoh_bfr.output_diagram();
-    // } 
-    // else {
-    //     std::ofstream out(filediag_bfr);
-    //     pcoh_bfr.output_diagram(out);
-    //     out.close();
-    //   }
-
     if (filediag_aft.empty()) {
         pcoh_aft.output_diagram();
     } 
