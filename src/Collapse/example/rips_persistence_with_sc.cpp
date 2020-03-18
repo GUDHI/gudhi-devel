@@ -18,34 +18,7 @@ using Rips_edge_list      = Gudhi::rips_edge_list::Rips_edge_list<Filtration_val
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
-class extract_sub_one_skeleton
-{
-public:
-    template<class Filtered_sorted_edge_list,  class Fil_vector >
-    extract_sub_one_skeleton(double threshold, Filtered_sorted_edge_list & current_edge_t, Filtered_sorted_edge_list & edge_t, Fil_vector & edge_filt ) {
- 
-        auto end_it = std::upper_bound(edge_filt.begin(), edge_filt.end(), threshold); // find_index(edge_t, threshold, 0, end_idx);
-        size_t end_idx = std::distance(edge_filt.begin(), end_it);
 
-        for( size_t idx = 0; idx < end_idx ; idx++) {
-           current_edge_t.push_back(*edge_t.begin()); 
-           edge_filt.erase(edge_filt.begin());
-           edge_t.erase(edge_t.begin());
-        }
-        
-    }
-};
-class extract_one_new_edge
-{
-public:
-    template<class Filtered_sorted_edge_list,  class Fil_vector >
-    extract_one_new_edge(Filtered_sorted_edge_list & current_edge_t, Filtered_sorted_edge_list & edge_t, Fil_vector & edge_filt ) {
-        current_edge_t.push_back(*edge_t.begin()); 
-        edge_filt.erase(edge_filt.begin());
-        edge_t.erase(edge_t.begin());
-      
-    }
-};
 
 class filt_edge_to_dist_matrix
 {
@@ -94,53 +67,42 @@ int main(int argc, char * const argv[]) {
     char    manifold;
 
     Vector_of_points * point_vector;
-    Vector_of_points file_all_points;
 
     std::string manifold_full = "sphere";
     
     double r_min  = 0.6;
     int dim_max  = 2;
 
-    point_generator.program_options(argc, argv, number_of_points, steps, end_threshold, repetetions, manifold, dimension, dim_max, in_file_name, out_file_name);
+    point_generator.program_options(argc, argv, steps, end_threshold, repetetions, manifold, dimension, dim_max, in_file_name, out_file_name);
     
     std::cout << "The current input values to run the program is: "<< std::endl;
-    std::cout << "number_of_points, steps, end_threshold, repetetions, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
-    std::cout << number_of_points << ", " << steps << ", " << end_threshold << ", " << repetetions << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
+    std::cout << "steps, end_threshold, repetetions, manifold, dimension, max_complex_dimension, in_file_name, out_file_name" << std::endl;
+    std::cout << steps << ", " << end_threshold << ", " << repetetions << ", " << manifold << ", " << dimension << ", " << dim_max << ", " << in_file_name << ", " << out_file_name << std::endl;
     
-    if(manifold == 'f' || manifold =='F') {
+    Map map_empty;
+    
+    std::string filediag_aft ("./PersistenceOutput/collapsed_persistence_diags") ;
+    
+    filediag_aft = filediag_aft+"_"+ out_file_name+ ".txt";
+
+    double currentCreationTime = 0.0;
+   
+    Distance_matrix distances;
+    Distance_matrix *sparse_distances = new Distance_matrix();
+
+
+    if(manifold == 'f' || manifold =='f') {
         Gudhi::Points_off_reader<Point> off_reader(in_file_name);
         if (!off_reader.is_valid()) {
             std::cerr << "Unable to read file " << in_file_name << "\n";
             exit(-1);  // ----- >>
         }
 
-        file_all_points = Vector_of_points(off_reader.get_point_cloud());
-        dimension = file_all_points[0].dimension() ;
-        std::cout << "Successfully read " << file_all_points.size() << " point_vector.\n";
-        std::cout << "Ambient dimension is " << dimension << ".\n";
-    }
-   
-    Map map_empty;
-    
-    std::string filediag_aft ("./PersistenceOutput/collapsed_persistence_diags") ;
-    
-     std::string origPoints ("./PersistenceOutput/pointsamaple.off");
-    // std::string otherStats ("./PersistenceOutput/maximal_simplx_cnt");
-    // otherStats = otherStats+"_"+ out_file_name+ ".txt";
-    filediag_aft = filediag_aft+"_"+ out_file_name+ ".txt";
-
-    double currentCreationTime = 0.0;
-   
-    point_vector = new Vector_of_points();
-    Distance_matrix distances;
-    Distance_matrix *sparse_distances = new Distance_matrix();
-
-
-    if(manifold == 'f' || manifold =='f') {
-        // Subsampling from all points for each iterations
-        Gudhi::subsampling::pick_n_random_points(file_all_points, number_of_points, std::back_inserter(*point_vector));
+        point_vector = new Vector_of_points(off_reader.get_point_cloud().begin(), off_reader.get_point_cloud().end());
+        dimension = point_vector->at(0).dimension() ;
         number_of_points = point_vector->size();
-        std::cout << number_of_points << " points succesfully chosen randomly of dimension "<< dimension << " ." << std::endl;
+        std::cout << "Successfully read " << number_of_points << " point_vector.\n";
+        std::cout << "Ambient dimension is " << dimension << ".\n";
     }
     else if (manifold == 'm'){
         std::string csv_file_name(in_file_name);
@@ -155,10 +117,6 @@ int main(int argc, char * const argv[]) {
     
     std::cout << "Point Set Generated."  <<std::endl;
  
-    // for(int i = 0; i < number_of_points; i++ )
-    //     point_generator.print_point(point_vector->at(i));
-    // point_generator.output_points(*point_vector, origPoints);
-   
     Filtered_sorted_edge_list * edge_t = new Filtered_sorted_edge_list();
     std::cout << "Computing the one-skeleton for threshold: " << end_threshold << std::endl; 
     
@@ -167,22 +125,12 @@ int main(int argc, char * const argv[]) {
         Rips_edge_list Rips_edge_list_from_file(distances, end_threshold);
         Rips_edge_list_from_file.create_edges(*edge_t);
         std::cout<< "Sorted edge list computed" << std::endl;
-
-        //Creating the Rips Complex
-        //Rips_complex rips_complex_from_file(distances, end_threshold);
-        //rips_complex_from_file.create_complex(*subComplex, dim_max);
-        //std::cout<< "Rips complex computed" << std::endl;
     }
     else{ //Point cloud input  //Creating the edge list
         Rips_edge_list Rips_edge_list_from_points(*point_vector, end_threshold, Gudhi::Euclidean_distance());
         Rips_edge_list_from_points.create_edges(*edge_t);
         std::cout<< "Sorted edge list computed" << std::endl;
         std::cout << "Total number of edges before collapse are: " << edge_t->size() << std::endl;
-
-        // Creating the Rips Complex
-        // Rips_complex rips_complex_after_collapse(*point_vector, end_threshold, Gudhi::Euclidean_distance());
-        // rips_complex_from_points.create_complex(*subComplex, dim_max);
-        // std::cout<< "Rips complex computed" << std::endl;
     }
     
     //Now we will perform filtered edge collapse to sparsify the edge list edge_t.
@@ -207,28 +155,18 @@ int main(int argc, char * const argv[]) {
  
     // Rips_complex rips_complex_before_collapse(distances, end_threshold);
     Rips_complex rips_complex_after_collapse(*sparse_distances, end_threshold);
-     // Rips_complex rips_complex_after_collapse(*point_vector, end_threshold, Gudhi::Euclidean_distance());
-    // Construct the Rips complex in a Simplex Tree
     
     Simplex_tree   simplex_tree_aft;
-    // Simplex_tree   simplex_tree_bfr;
-    // rips_complex_before_collapse.create_complex(simplex_tree_bfr, dim_max);
     rips_complex_after_collapse.create_complex(simplex_tree_aft, dim_max);
-
-    // std::cout << "The complex contains " << simplex_tree_bfr.num_simplices() << " simplices before collapse. \n";
-    // std::cout << "   and has dimension " << simplex_tree_bfr.dimension() << " \n";
 
     std::cout << "The complex contains " << simplex_tree_aft.num_simplices() << " simplices  after collapse. \n";
     std::cout << "   and has dimension " << simplex_tree_aft.dimension() << " \n";
 
     // Sort the simplices in the order of the filtration
-    // simplex_tree_bfr.initialize_filtration();
     simplex_tree_aft.initialize_filtration();
     // Compute the persistence diagram of the complex
-    // Persistent_cohomology pcoh_bfr(simplex_tree_bfr);
     Persistent_cohomology pcoh_aft(simplex_tree_aft);
     // initializes the coefficient field for homology
-    // pcoh_bfr.init_coefficients(2);
     pcoh_aft.init_coefficients(2);
 
     // pcoh_bfr.compute_persistent_cohomology(steps);
