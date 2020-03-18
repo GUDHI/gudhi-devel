@@ -1484,12 +1484,12 @@ class Simplex_tree {
 
   /** \brief Retrieve good values for extended persistence, and separate the 
    * diagrams into the ordinary, relative, extended+ and extended- subdiagrams. 
-   * \pre This function should be called only if this->extend_filtration() has been called first!
+   * \pre This function should be called only if `extend_filtration()` has been called first!
    * \post The coordinates of the persistence diagram points might be a little different than the
    * original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
    * performed on these values during the computation of extended persistence.
-   * @param[in] dgm Persistence diagram obtained after calling this->extend_filtration(), 
-   * this->initialize_filtration(), and Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp >::compute_persistent_cohomology().
+   * @param[in] dgm Persistence diagram obtained after calling `extend_filtration()`, 
+   * `initialize_filtration()`, and `Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, CoefficientField >::compute_persistent_cohomology()`.
    * @return A vector of four persistence diagrams. The first one is Ordinary, the 
    * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
    * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
@@ -1535,7 +1535,7 @@ class Simplex_tree {
    * and computes the extended persistence diagram induced by the lower-star filtration 
    * computed with these values. 
    * \post Note that after calling this function, the filtration 
-   * values are actually modified. The function compute_extended_persistence_subdiagrams 
+   * values are actually modified. The function `compute_extended_persistence_subdiagrams()` 
    * retrieves the original values and separates the extended persistence diagram points 
    * w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after 
    * computing the persistent homology of the extended simplicial complex.
@@ -1545,7 +1545,7 @@ class Simplex_tree {
   void extend_filtration() {
 
     // Compute maximum and minimum of filtration values
-    Vertex_handle maxvert = std::numeric_limits<int>::min();
+    Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
     this->minval_ = std::numeric_limits<Filtration_value>::infinity();
     this->maxval_ = -std::numeric_limits<Filtration_value>::infinity();
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
