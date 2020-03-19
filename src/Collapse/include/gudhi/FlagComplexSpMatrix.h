@@ -217,7 +217,6 @@ class FlagComplexSpMatrix
 	bool vertexCollapsed;
 	bool edgeCollapsed;
 	//Variable to indicate if filtered-edge-collapse has to be performed. 
-	bool filtEdgeCol;
 	int expansion_limit;
 
 	void init()
@@ -244,7 +243,6 @@ class FlagComplexSpMatrix
 
   		vertexCollapsed = false;
   		edgeCollapsed   = false;
-  		filtEdgeCol     = false;
 	}
 	
 	//!	Function for computing the sparse-matrix corresponding to the core of the complex. It also prepares the working list filteredEgdeIter for edge collapses
@@ -633,26 +631,8 @@ public:
       <B>rowToVertex</B>, <B>vertexToRow</B>, <B>rows</B>, <B>cols</B>, <B>sparseRowAdjMatrix</B> are initialised here.
       <B>vertDomnIndicator</B>, <B>rowInsertIndicator</B> ,<B>rowIterator<B> are initialised by init() function which is called at the begining of this. <br>
     */
-    //Filtered_sorted_edge_list * edge_t = new Filtered_sorted_edge_list();
-	FlagComplexSpMatrix(const size_t & num_vertices, const Filtered_sorted_edge_list  &edge_t) {
-		init();
-
- 	  	filtEdgeCol = false; 
- 		sparseRowAdjMatrix  = sparseRowMatrix(expansion_limit*num_vertices, expansion_limit*num_vertices);    	// Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.  
-		
-		for(size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-	  		std::vector<size_t>  s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
-	  		insert_new_edges(std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx)), 1);
-	  	}	
-  	 	sparseRowAdjMatrix.makeCompressed(); 
-       	
- 	  	// std::cout << sparseRowAdjMatrix << std::endl;
-	}
-	FlagComplexSpMatrix(const size_t & num_vertices, const Filtered_sorted_edge_list  & edge_t,  const bool fEdgeCol) {
-		if(fEdgeCol)
-		{	
+	FlagComplexSpMatrix(const size_t & num_vertices, const Filtered_sorted_edge_list  & edge_t) {
 			init();
-	 	  	filtEdgeCol = true;  
 	 		sparseRowAdjMatrix  = sparseRowMatrix(num_vertices, num_vertices);    	// Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.  
 			
 			for(size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
@@ -662,11 +642,6 @@ public:
 		  	}	
 		
 		  	// sparseRowAdjMatrix.makeCompressed(); 
-       	}
-       	else
-       		FlagComplexSpMatrix(num_vertices, edge_t);
-
- 	  	// std::cout << sparseRowAdjMatrix << std::endl;
 	}
 
 	//!	Destructor.
@@ -697,25 +672,9 @@ public:
 		after_vertex_collapse();
 		return collapseTime;
 	}
-
-	// Performs edge collapse in of a given sparse-matrix(graph) without considering the filtration value.
-	// double strong_edge_collapse() {
-	// 	auto begin_collapse  = std::chrono::high_resolution_clock::now();
-	// 	critical_core_edges();
-	// 	vertexCollapsed = false;
-	// 	edgeCollapsed	= true;
-	// 	auto end_collapse  = std::chrono::high_resolution_clock::now();
-	
-	// 	auto collapseTime = std::chrono::duration<double, std::milli>(end_collapse- begin_collapse).count();
-	// 	// std::cout << "Time of Collapse : " << collapseTime << " ms\n" << std::endl;
-	// 	//Post processing...
-	// 	after_edge_collapse();
-	// 	return collapseTime;
-	// }
-
 	
 	// Performs edge collapse in a decreasing sequence of the filtration value.
-	Filtered_sorted_edge_list filtered_edge_collapse(double steps) {
+	Filtered_sorted_edge_list filtered_edge_collapse() {
 		auto begin_collapse  = std::chrono::high_resolution_clock::now();
 		critical_core_edges();
 		vertexCollapsed = false;

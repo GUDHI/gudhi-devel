@@ -9,7 +9,6 @@
 
 // Types definition
 using Vector_of_points         = std::vector<Point>;
-using Vector_of_SM_pointers    = std::vector<FlagComplexSpMatrix*>;
 
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = double;
@@ -130,12 +129,12 @@ int main(int argc, char * const argv[]) {
     
     //Now we will perform filtered edge collapse to sparsify the edge list edge_t.
     std::cout<< "Filtered edge collapse begins" << std::endl;
-    FlagComplexSpMatrix * mat_filt_edge_coll  = new FlagComplexSpMatrix(number_of_points,*edge_t,true);
+    FlagComplexSpMatrix * mat_filt_edge_coll  = new FlagComplexSpMatrix(number_of_points,*edge_t);
     std::cout<< "Matrix instansiated" << std::endl;
     if(edge_t->size() >0){
         delete edge_t;
         edge_t = new Filtered_sorted_edge_list();
-        *edge_t = mat_filt_edge_coll->filtered_edge_collapse(0); 
+        *edge_t = mat_filt_edge_coll->filtered_edge_collapse(); 
         filt_edge_to_dist_matrix(*sparse_distances, *edge_t, number_of_points); 
         std::cout << "Total number of vertices after collapse in the sparse matrix are: " << mat_filt_edge_coll->num_vertices() << std::endl;
     }
