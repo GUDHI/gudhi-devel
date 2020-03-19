@@ -37,8 +37,12 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Filtered_simplices = std::vector<Simplex_and_filtration>;
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
+  using Extended_filtration_data = typename Base::Extended_filtration_data;
 
  public:
+
+  Extended_filtration_data efd;
+  
   bool find_simplex(const Simplex& vh) {
     return (Base::find(vh) != Base::null_simplex());
   }
@@ -115,6 +119,15 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       cofaces.push_back(std::make_pair(simplex_coface, Base::filtration(f_simplex)));
     }
     return cofaces;
+  }
+
+  void compute_extended_filtration() {
+    this->efd = this->extend_filtration();
+    return;
+  }
+
+  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm){
+    return this->extended_persistence_subdiagrams(dgm, this->efd);
   }
 
   void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {

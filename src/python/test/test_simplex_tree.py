@@ -9,6 +9,7 @@
 """
 
 from gudhi import SimplexTree
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -322,15 +323,16 @@ def test_extend_filtration():
         ([0, 3, 6], 2.0)
     ]
 
+    dgms = st.extended_persistence()
 
-    dgm = st.persistence()
-    L = st.compute_extended_persistence_subdiagrams(dgm)
-    assert L == [
-        [(0, (1.9999999999999998, 2.9999999999999996))], 
-        [(1, (5.0, 4.0))], 
-        [(0, (1.0, 6.0))], 
-        [(1, (6.0, 1.0))]
-    ]
+    assert dgms[0][0][1][0] == pytest.approx(2.)
+    assert dgms[0][0][1][1] == pytest.approx(3.)
+    assert dgms[1][0][1][0] == pytest.approx(5.)
+    assert dgms[1][0][1][1] == pytest.approx(4.)
+    assert dgms[2][0][1][0] == pytest.approx(1.)
+    assert dgms[2][0][1][1] == pytest.approx(6.)
+    assert dgms[3][0][1][0] == pytest.approx(6.)
+    assert dgms[3][0][1][1] == pytest.approx(1.) 
 
 
 def test_simplices_iterator():

@@ -405,7 +405,7 @@ cdef class SimplexTree:
 
             Note that after calling this function, the filtration 
             values are actually modified within the Simplex_tree. 
-            The function :func:`compute_extended_persistence_subdiagrams()<gudhi.SimplexTree.compute_extended_persistence_subdiagrams>`
+            The function :func:`extended_persistence()<gudhi.SimplexTree.extended_persistence>`
             retrieves the original values.
 
         .. note::
@@ -413,21 +413,31 @@ cdef class SimplexTree:
             Note that this code creates an extra vertex internally, so you should make sure that
             the Simplex_tree does not contain a vertex with the largest Vertex_handle. 
         """
-        return self.get_ptr().extend_filtration()
+        return self.get_ptr().compute_extended_filtration()
 
-    def compute_extended_persistence_subdiagrams(self, dgm):
+    def extended_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function retrieves good values for extended persistence, and separate the diagrams 
         into the ordinary, relative, extended+ and extended- subdiagrams.
 
-        :param dgm: Persistence diagram obtained after calling :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>`, :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`, and :func:`persistence()<gudhi.SimplexTree.persistence>`.
-
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
         :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
 
             This function should be called only if :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>`,
             :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`, 
-            and :func:`persistence()<gudhi.SimplexTree.persistence>` have been called first!
+            and (optionally) :func:`persistence()<gudhi.SimplexTree.persistence>` have been called first!
 
         .. note::
 
@@ -435,7 +445,15 @@ cdef class SimplexTree:
             original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
             performed on these values during the computation of extended persistence.
         """
-        return self.get_ptr().compute_extended_persistence_subdiagrams(dgm)
+        cdef vector[pair[int, pair[double, double]]] persistence_result
+        if self.pcohptr == NULL:
+            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
+            if self.pcohptr != NULL:
+                self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
+        if self.pcohptr != NULL:
+            pairs = self.pcohptr.persistence_pairs()
+            persistence_result = [(len(splx1)-1, [self.filtration(splx1), self.filtration(splx2)]) for [splx1, splx2] in pairs]
+        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result)
 
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):

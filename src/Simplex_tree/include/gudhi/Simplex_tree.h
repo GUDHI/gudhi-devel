@@ -100,6 +100,12 @@ class Simplex_tree {
     void assign_key(Simplex_key);
     Simplex_key key() const;
   };
+  struct Extended_filtration_data {
+    Filtration_value minval;
+    Filtration_value maxval;
+    Extended_filtration_data(){}
+    Extended_filtration_data(Filtration_value vmin, Filtration_value vmax){ minval = vmin; maxval = vmax; }
+  };
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
 
@@ -126,8 +132,6 @@ class Simplex_tree {
  private:
   typedef typename Dictionary::iterator Dictionary_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
-  Filtration_value minval_;
-  Filtration_value maxval_;
 
   struct return_first {
     Vertex_handle operator()(const Dit_value_t& p_sh) const {
@@ -1490,15 +1494,16 @@ class Simplex_tree {
    * performed on these values during the computation of extended persistence.
    * @param[in] dgm Persistence diagram obtained after calling `extend_filtration()`, 
    * `initialize_filtration()`, and `Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, CoefficientField >::compute_persistent_cohomology()`.
+   * @param[in] efd Structure containing the minimum and maximum values of the original filtration
    * @return A vector of four persistence diagrams. The first one is Ordinary, the 
    * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
    * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
    */
-  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm){
+  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm, const Extended_filtration_data& efd){
     std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> new_dgm(4); 
     Filtration_value x, y;
-    Filtration_value minval_ = this->minval_;
-    Filtration_value maxval_ = this->maxval_;
+    Filtration_value minval = efd.minval;
+    Filtration_value maxval = efd.maxval;
     for(unsigned int i = 0; i < dgm.size(); i++){ 
       int h = dgm[i].first; 
       Filtration_value px = dgm[i].second.first; 
@@ -1506,18 +1511,18 @@ class Simplex_tree {
       if(std::isinf(py))  continue;
       else{
         if ((px <= -1) & (py <= -1)){
-          x = minval_ + (maxval_-minval_)*(px + 2); 
-          y = minval_ + (maxval_-minval_)*(py + 2); 
+          x = minval + (maxval-minval)*(px + 2); 
+          y = minval + (maxval-minval)*(py + 2); 
           new_dgm[0].push_back(std::make_pair(h, std::make_pair(x,y))); 
         }
         else if ((px >=  1) & (py >=  1)){
-          x = minval_ - (maxval_-minval_)*(px - 2); 
-          y = minval_ - (maxval_-minval_)*(py - 2); 
+          x = minval - (maxval-minval)*(px - 2); 
+          y = minval - (maxval-minval)*(py - 2); 
           new_dgm[1].push_back(std::make_pair(h, std::make_pair(x,y))); 
         }
         else {
-          x = minval_ + (maxval_-minval_)*(px + 2); 
-          y = minval_ - (maxval_-minval_)*(py - 2);
+          x = minval + (maxval-minval)*(px + 2); 
+          y = minval - (maxval-minval)*(py - 2);
           if (x <= y){
             new_dgm[2].push_back(std::make_pair(h, std::make_pair(x,y)));
           }
@@ -1535,23 +1540,23 @@ class Simplex_tree {
    * and computes the extended persistence diagram induced by the lower-star filtration 
    * computed with these values. 
    * \post Note that after calling this function, the filtration 
-   * values are actually modified. The function `compute_extended_persistence_subdiagrams()` 
+   * values are actually modified. The function `extended_persistence_subdiagrams()` 
    * retrieves the original values and separates the extended persistence diagram points 
    * w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after 
    * computing the persistent homology of the extended simplicial complex.
    * \pre Note that this code creates an extra vertex internally, so you should make sure that
    * the Simplex tree does not contain a vertex with the largest Vertex_handle. 
    */
-  void extend_filtration() {
+  Extended_filtration_data extend_filtration() {
 
     // Compute maximum and minimum of filtration values
     Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
-    this->minval_ = std::numeric_limits<Filtration_value>::infinity();
-    this->maxval_ = -std::numeric_limits<Filtration_value>::infinity();
+    Filtration_value minval = std::numeric_limits<Filtration_value>::infinity();
+    Filtration_value maxval = -std::numeric_limits<Filtration_value>::infinity();
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
       Filtration_value f = this->filtration(sh);
-      this->minval_ = std::min(this->minval_, f);
-      this->maxval_ = std::max(this->maxval_, f);
+      minval = std::min(minval, f);
+      maxval = std::max(maxval, f);
       maxvert = std::max(sh->first, maxvert);
     }
     
@@ -1578,7 +1583,7 @@ class Simplex_tree {
       vr.push_back(maxvert);
       if (this->dimension(sh) == 0){
         Filtration_value v = this->filtration(sh);
-        Filtration_value scaled_v = (v-this->minval_)/(this->maxval_-this->minval_);
+        Filtration_value scaled_v = (v-minval)/(maxval-minval);
         // Assign ascending value between -2 and -1 to vertex
         this->assign_filtration(sh, -2 + scaled_v);
         // Assign descending value between 1 and 2 to cone on vertex
@@ -1593,6 +1598,10 @@ class Simplex_tree {
 
     // Automatically assign good values for simplices
     this->make_filtration_non_decreasing();
+
+    // Return the filtration data 
+    Extended_filtration_data efd(minval, maxval);
+    return efd;
   }
 
   /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.
