@@ -29,7 +29,7 @@ public:
         doubleVector distances ; 
         std::pair<std::size_t, std::size_t> e;
         for(std::size_t indx = 0; indx < number_of_points; indx++) { 
-            for (int j = 0; j <= indx; j++) {
+            for (std::size_t j = 0; j <= indx; j++) {
                if( j == indx)
                     distances.push_back(0);
                 
@@ -80,13 +80,11 @@ int main(int argc, char * const argv[]) {
     
     filediag_aft = filediag_aft+"_"+ out_file_name+ ".txt";
 
-    double currentCreationTime = 0.0;
-   
     Distance_matrix distances;
     Distance_matrix *sparse_distances = new Distance_matrix();
 
 
-    if(manifold == 'f' || manifold =='f') {
+    if(manifold == 'f') {
         Gudhi::Points_off_reader<Point> off_reader(in_file_name);
         if (!off_reader.is_valid()) {
             std::cerr << "Unable to read file " << in_file_name << "\n";

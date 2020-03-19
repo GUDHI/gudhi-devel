@@ -250,10 +250,10 @@ class FlagComplexSpMatrix
 	{
      	sparse_colpsd_adj_Matrix   =  new sparseRowMatrix(rows,rows); // Just for debugging purpose.
     	oneSimplices.clear();  
-    	if(not filteredEgdeIter.empty())
+    	if(not filteredEgdeIter.empty()) {
     		std::cout << "Working list for edge collapses are not empty before the edge-collapse." << std::endl;
-
-		for(int rw = 0 ; rw < rows ; ++rw)
+		}
+		for(std::size_t rw = 0 ; rw < rows ; ++rw)
 		{
 			if(not vertDomnIndicator[rw]) 				//If the current column is not dominated
 			{
@@ -468,8 +468,6 @@ class FlagComplexSpMatrix
 	    	EdgeFilt fec = fEgdeVector.at(endIdx);
 
 		    insert_new_edges(std::get<0>(std::get<0>(fec)), std::get<1>(std::get<0>(fec)),std::get<1>(fec)); // Inserts the edge in the sparse matrix to update the graph (G_i)
-		    // cfiltVal = std::get<1>(fEgdeVector.at(endIdx));
-		    // std::cout << "The current processing index is " << endIdx << std::endl;
 
 	      	Edge e = std::get<0>(fec);
 	      	Vertex u = std::get<0>(e);
@@ -675,21 +673,9 @@ public:
 	
 	// Performs edge collapse in a decreasing sequence of the filtration value.
 	Filtered_sorted_edge_list filtered_edge_collapse() {
-		auto begin_collapse  = std::chrono::high_resolution_clock::now();
 		critical_core_edges();
 		vertexCollapsed = false;
 		edgeCollapsed	= true;
-		auto end_collapse  = std::chrono::high_resolution_clock::now();
-	
-		auto collapseTime = std::chrono::duration<double, std::milli>(end_collapse- begin_collapse).count();
-		std::cout << "Time of filtered edge Collapse : " << collapseTime << " ms\n" << std::endl;
-		//Post processing...
-		// after_edge_collapse();
-		// std::cout << sparseRowAdjMatrix << std::endl;
-		// for(auto idx = criticalCoreEdges.begin(); idx != criticalCoreEdges.end(); idx++ )
-		// {	
-		// 	std::cout << 
-		// }
 		return criticalCoreEdges;
 	}
 
@@ -805,8 +791,9 @@ public:
     vertexVector active_neighbors(const Vertex & v) {  
     	vertexVector nb;
     	auto rw_v = vertexToRow.find(v);
-    	if(rw_v != vertexToRow.end())  		
+    	if(rw_v != vertexToRow.end()) {
     		nb = vertex_closed_active_neighbours(rw_v->second);
+		}
 	   	return nb;
     }
 
