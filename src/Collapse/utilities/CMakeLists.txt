@@ -8,7 +8,7 @@ if (TBB_FOUND)
   target_link_libraries(point_cloud_edge_collapse_rips_persistence ${TBB_LIBRARIES})
 endif()
 add_test(NAME point_cloud_edge_collapse_rips_persistence COMMAND $<TARGET_FILE:point_cloud_edge_collapse_rips_persistence>
-         "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3")
+         "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3" "-o" "off_results.pers")
 
 install(TARGETS point_cloud_edge_collapse_rips_persistence DESTINATION bin)
 
@@ -20,6 +20,6 @@ if (TBB_FOUND)
   target_link_libraries(distance_matrix_edge_collapse_rips_persistence ${TBB_LIBRARIES})
 endif()
 add_test(NAME distance_matrix_edge_collapse_rips_persistence COMMAND $<TARGET_FILE:distance_matrix_edge_collapse_rips_persistence>
-         "-i" "${CMAKE_SOURCE_DIR}/data/distance_matrix/tore3D_300_distance_matrix.csv" "-e" "1e40" "-o" "csv_result.pers")
+         "${CMAKE_SOURCE_DIR}/data/distance_matrix/tore3D_1307_distance_matrix.csv" "-r" "0.25" "-m" "0.5" "-d" "3" "-p" "3" "-o" "csv_results.pers")
 
 install(TARGETS distance_matrix_edge_collapse_rips_persistence DESTINATION bin)

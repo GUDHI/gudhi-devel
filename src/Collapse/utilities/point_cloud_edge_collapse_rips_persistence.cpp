@@ -78,7 +78,6 @@ int main(int argc, char* argv[]) {
 
   Map map_empty;
 
-  Distance_matrix distances;
   Distance_matrix sparse_distances;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_points);
@@ -105,6 +104,7 @@ int main(int argc, char* argv[]) {
 
   Rips_edge_list Rips_edge_list_from_file(point_vector, threshold, Gudhi::Euclidean_distance());
   Rips_edge_list_from_file.create_edges(edge_t);
+
   std::cout << "Sorted edge list computed" << std::endl;
   std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
 
