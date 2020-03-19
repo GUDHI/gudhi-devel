@@ -415,9 +415,9 @@ cdef class SimplexTree:
         """
         return self.get_ptr().compute_extended_filtration()
 
-    def extended_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+    def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function retrieves good values for extended persistence, and separate the diagrams 
-        into the ordinary, relative, extended+ and extended- subdiagrams.
+        into the Ordinary, Relative, Extended+ and Extended- subdiagrams.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number. Default value is 11.
@@ -427,10 +427,6 @@ cdef class SimplexTree:
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
-        :param persistence_dim_max: If true, the persistent homology for the
-            maximal dimension in the complex is computed. If false, it is
-            ignored. Default is false.
-        :type persistence_dim_max: bool
         :returns: A vector of four persistence diagrams. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
@@ -447,7 +443,7 @@ cdef class SimplexTree:
         """
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr == NULL:
-            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
+            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), True)
             if self.pcohptr != NULL:
                 self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
         if self.pcohptr != NULL:

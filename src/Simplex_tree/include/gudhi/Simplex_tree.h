@@ -87,6 +87,8 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
+  enum Extended_simplex_type {UP, DOWN, EXTRA};
+
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
@@ -1486,66 +1488,50 @@ class Simplex_tree {
     }
   }
 
-  /** \brief Retrieve good values for extended persistence, and separate the 
-   * diagrams into the ordinary, relative, extended+ and extended- subdiagrams. 
+  /** \brief Retrieve the original filtration value for a given simplex in the Simplex_tree. Since the 
+   * computation of extended persistence requires modifying the filtration values, this function can be used
+   * to recover the original values. Moreover, computing extended persistence requires adding new simplices
+   * in the Simplex_tree. Hence, this function also outputs the type of each simplex. It can be either UP (which means
+   * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+   * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+   * EXTRA (which means the simplex is the cone point). Note that if the simplex type is DOWN, the original filtration value
+   * is set to be the original filtration value of the corresponding (not coned) original simplex. 
    * \pre This function should be called only if `extend_filtration()` has been called first!
-   * \post The coordinates of the persistence diagram points might be a little different than the
-   * original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
-   * performed on these values during the computation of extended persistence.
-   * @param[in] dgm Persistence diagram obtained after calling `extend_filtration()`, 
-   * `initialize_filtration()`, and `Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, CoefficientField >::compute_persistent_cohomology()`.
-   * @param[in] efd Structure containing the minimum and maximum values of the original filtration
-   * @return A vector of four persistence diagrams. The first one is Ordinary, the 
-   * second one is Relative, the third one is Extended+ and the fourth one is Extended-.
-   * See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+   * \post The output filtration value is supposed to be the same, but might be a little different, than the
+   * original filtration value, due to the internal transformation (scaling to [-2,-1]) that is 
+   * performed on the original filtration values during the computation of extended persistence.
+   * @param[in] f Filtration value of the simplex in the extended (i.e., modified) filtration.
+   * @param[in] efd Structure containing the minimum and maximum values of the original filtration. This the output of `extend_filtration()`.
+   * @return A pair containing the original filtration value of the simplex as well as the simplex type.
    */
-  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm, const Extended_filtration_data& efd){
-    std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> new_dgm(4); 
-    Filtration_value x, y;
+  std::pair<Filtration_value, Extended_simplex_type> decode_extended_filtration(Filtration_value f, const Extended_filtration_data& efd){
+    std::pair<Filtration_value, Extended_simplex_type> p;
     Filtration_value minval = efd.minval;
     Filtration_value maxval = efd.maxval;
-    for(unsigned int i = 0; i < dgm.size(); i++){ 
-      int h = dgm[i].first; 
-      Filtration_value px = dgm[i].second.first; 
-      Filtration_value py = dgm[i].second.second;
-      if(std::isinf(py))  continue;
-      else{
-        if ((px <= -1) & (py <= -1)){
-          x = minval + (maxval-minval)*(px + 2); 
-          y = minval + (maxval-minval)*(py + 2); 
-          new_dgm[0].push_back(std::make_pair(h, std::make_pair(x,y))); 
-        }
-        else if ((px >=  1) & (py >=  1)){
-          x = minval - (maxval-minval)*(px - 2); 
-          y = minval - (maxval-minval)*(py - 2); 
-          new_dgm[1].push_back(std::make_pair(h, std::make_pair(x,y))); 
-        }
-        else {
-          x = minval + (maxval-minval)*(px + 2); 
-          y = minval - (maxval-minval)*(py - 2);
-          if (x <= y){
-            new_dgm[2].push_back(std::make_pair(h, std::make_pair(x,y)));
-          }
-          else{  
-            new_dgm[3].push_back(std::make_pair(h, std::make_pair(x,y)));
-          }
-        }
-      }
+    if (f >= -2 && f <= -1){
+      p.first = minval + (maxval-minval)*(f + 2); p.second = UP;
     }
-    return new_dgm;
-  }
+    else if (f >= 1 && f <= 2){
+      p.first = minval - (maxval-minval)*(f - 2); p.second = DOWN;
+    }
+    else{
+      p.first = -3; p.second = EXTRA;
+    }
+    return p;
+  };
 
   /** \brief Extend filtration for computing extended persistence. 
    * This function only uses the filtration values at the 0-dimensional simplices, 
    * and computes the extended persistence diagram induced by the lower-star filtration 
    * computed with these values. 
    * \post Note that after calling this function, the filtration 
-   * values are actually modified. The function `extended_persistence_subdiagrams()` 
-   * retrieves the original values and separates the extended persistence diagram points 
-   * w.r.t. their types (Ord, Rel, Ext+, Ext-) and should always be called after 
-   * computing the persistent homology of the extended simplicial complex.
+   * values are actually modified. The function `decode_extended_filtration()` 
+   * retrieves the original values and outputs the extended simplex type.
    * \pre Note that this code creates an extra vertex internally, so you should make sure that
-   * the Simplex tree does not contain a vertex with the largest Vertex_handle. 
+   * the Simplex tree does not contain a vertex with the largest Vertex_handle.
+   * @return A data structure containing the maximum and minimum values of the original filtration.
+   * It is meant to be provided as input to `decode_extended_filtration()` in order to retrieve
+   * the original filtration values for each simplex.
    */
   Extended_filtration_data extend_filtration() {
 
