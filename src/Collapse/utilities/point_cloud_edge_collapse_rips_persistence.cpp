@@ -23,44 +23,6 @@ using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
-void program_options(int argc, char* const argv[], double& min_persistence, double& end_thresold,
-                     int& dimension, int& dim_max, std::string& in_file_name, std::string& out_file_name) {
-  namespace po = boost::program_options;
-  po::options_description visible("Allowed options", 100);
-      visible.add_options()
-        ("help,h", "produce help message")
-      	("min_persistence,m", po::value<double>(&min_persistence)->default_value(0.1),
-         "Minimum persistence interval length")
-        ("end_thresold,e", po::value<double>(&end_thresold)->default_value(1),
-         "Final threshold for rips complex.")
-        ("dimensions,D", po::value<int>(&dimension)->default_value(2),
-         "Dimension of the manifold.")
-        ("dim_max,k ", po::value<int>(&dim_max)->default_value(2),
-         "Maximum allowed dimension of the Rips complex.")
-        ("input_file_name,i", po::value<std::string>(&in_file_name),
-         "The input file.")
-        ("out_file_name,o", po::value<std::string>(&out_file_name),
-         "The output file.");
-
-  po::options_description all;
-  all.add(visible);
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
-  po::notify(vm);
-  if (vm.count("help")) {
-    std::cout << std::endl;
-    std::cout << "Computes rips complexes of different threshold values, to 'end_thresold' from a n random uniform "
-                 "point_vector on a selected manifold, . \n";
-    std::cout << "Strongly collapses all the rips complexes and output the results in out_file. \n";
-    std::cout << "The experiments are repeted 'repete' num of times for each threshold value. \n";
-    std::cout << "type -m for manifold options, 's' for uni sphere, 'b' for unit ball, 'f' for file. \n";
-    std::cout << "type -i 'filename' for Input file option for exported point sample. \n";
-    std::cout << std::endl << std::endl;
-    std::cout << "Usage: " << argv[0] << " [options]" << std::endl << std::endl;
-    std::cout << visible << std::endl;
-    std::abort();
-  }
-}
 
 class filt_edge_to_dist_matrix {
  public:
@@ -88,37 +50,40 @@ class filt_edge_to_dist_matrix {
   }
 };
 
-int main(int argc, char* const argv[]) {
-  auto the_begin = std::chrono::high_resolution_clock::now();
-  std::string out_file_name;
-  std::string in_file_name;
-  std::size_t number_of_points;
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
 
+int main(int argc, char* argv[]) {
   typedef size_t Vertex_handle;
   typedef std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>> Filtered_sorted_edge_list;
 
-  int dimension;
-  double end_threshold;
-  double min_persistence;
-  int dim_max = 2;
+  auto the_begin = std::chrono::high_resolution_clock::now();
+  std::size_t number_of_points;
 
-  program_options(argc, argv, min_persistence, end_threshold, dimension, dim_max, in_file_name,
-                  out_file_name);
+
+  std::string off_file_points;
+  std::string filediag;
+  double threshold;
+  int dim_max;
+  int p;
+  double min_persistence;
+
+  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
 
   std::cout << "The current input values to run the program is: " << std::endl;
-  std::cout << "min_persistence, end_threshold, dimension, max_complex_dimension, in_file_name, out_file_name"
+  std::cout << "min_persistence, threshold, max_complex_dimension, off_file_points, filediag"
             << std::endl;
-  std::cout << min_persistence << ", " << end_threshold << ", " << dimension << ", " << dim_max
-            << ", " << in_file_name << ", " << out_file_name << std::endl;
+  std::cout << min_persistence << ", " << threshold << ", " << dim_max
+            << ", " << off_file_points << ", " << filediag << std::endl;
 
   Map map_empty;
 
   Distance_matrix distances;
   Distance_matrix sparse_distances;
 
-  Gudhi::Points_off_reader<Point> off_reader(in_file_name);
+  Gudhi::Points_off_reader<Point> off_reader(off_file_points);
   if (!off_reader.is_valid()) {
-    std::cerr << "Unable to read file " << in_file_name << "\n";
+    std::cerr << "Unable to read file " << off_file_points << "\n";
     exit(-1);  // ----- >>
   }
 
@@ -128,7 +93,7 @@ int main(int argc, char* const argv[]) {
     exit(-1);  // ----- >>
   }
 
-  dimension = point_vector[0].dimension();
+  int dimension = point_vector[0].dimension();
   number_of_points = point_vector.size();
   std::cout << "Successfully read " << number_of_points << " point_vector.\n";
   std::cout << "Ambient dimension is " << dimension << ".\n";
@@ -136,9 +101,9 @@ int main(int argc, char* const argv[]) {
   std::cout << "Point Set Generated." << std::endl;
 
   Filtered_sorted_edge_list edge_t;
-  std::cout << "Computing the one-skeleton for threshold: " << end_threshold << std::endl;
+  std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
 
-  Rips_edge_list Rips_edge_list_from_file(point_vector, end_threshold, Gudhi::Euclidean_distance());
+  Rips_edge_list Rips_edge_list_from_file(point_vector, threshold, Gudhi::Euclidean_distance());
   Rips_edge_list_from_file.create_edges(edge_t);
   std::cout << "Sorted edge list computed" << std::endl;
   std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
@@ -158,8 +123,8 @@ int main(int argc, char* const argv[]) {
   std::cout << "Total number of vertices after collapse in the sparse matrix are: " << mat_filt_edge_coll.num_vertices()
             << std::endl;
 
-  // Rips_complex rips_complex_before_collapse(distances, end_threshold);
-  Rips_complex rips_complex_after_collapse(sparse_distances, end_threshold);
+  // Rips_complex rips_complex_before_collapse(distances, threshold);
+  Rips_complex rips_complex_after_collapse(sparse_distances, threshold);
 
   Simplex_tree stree;
   rips_complex_after_collapse.create_complex(stree, dim_max);
@@ -172,13 +137,13 @@ int main(int argc, char* const argv[]) {
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(stree);
   // initializes the coefficient field for homology
-  pcoh.init_coefficients(3);
+  pcoh.init_coefficients(p);
 
   pcoh.compute_persistent_cohomology(min_persistence);
-  if (out_file_name.empty()) {
+  if (filediag.empty()) {
     pcoh.output_diagram();
   } else {
-    std::ofstream out(out_file_name);
+    std::ofstream out(filediag);
     pcoh.output_diagram(out);
     out.close();
   }
@@ -189,4 +154,52 @@ int main(int argc, char* const argv[]) {
             << " ms\n"
             << std::endl;
   return 0;
+}
+
+void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
+                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
+  namespace po = boost::program_options;
+  po::options_description hidden("Hidden options");
+  hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
+                       "Name of an OFF file containing a point set.\n");
+
+  po::options_description visible("Allowed options", 100);
+  visible.add_options()("help,h", "produce help message")(
+      "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
+      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "max-edge-length,r",
+      po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
+      "Maximal length of an edge for the Rips complex construction.")(
+      "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
+      "Maximal dimension of the Rips complex we want to compute.")(
+      "field-charac,p", po::value<int>(&p)->default_value(11),
+      "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "min-persistence,m", po::value<Filtration_value>(&min_persistence),
+      "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
+      "intervals");
+
+  po::positional_options_description pos;
+  pos.add("input-file", 1);
+
+  po::options_description all;
+  all.add(visible).add(hidden);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).options(all).positional(pos).run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help") || !vm.count("input-file")) {
+    std::cout << std::endl;
+    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::cout << "of a Rips complex, after edge collapse, defined on a set of input points.\n \n";
+    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
+    std::cout << "   p   dim b d \n";
+    std::cout << "where dim is the dimension of the homological feature,\n";
+    std::cout << "b and d are respectively the birth and death of the feature and \n";
+    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+
+    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::cout << visible << std::endl;
+    exit(-1);
+  }
 }
