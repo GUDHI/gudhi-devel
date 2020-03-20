@@ -443,7 +443,7 @@ cdef class SimplexTree:
         """
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr == NULL:
-            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), True)
+            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
             if self.pcohptr != NULL:
                 self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
         if self.pcohptr != NULL:
