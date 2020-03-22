@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   // Fast version
   // -----------------
-  std::cout << "Fast alpha complex 3d" << std::endl;
+  std::clog << "Fast alpha complex 3d" << std::endl;
 
   std::vector<Fast_alpha_complex_3d::Bare_point_3> points = get_points<Fast_alpha_complex_3d::Bare_point_3>();
   Fast_alpha_complex_3d alpha_complex(points);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   // Exact version
   // -----------------
-  std::cout << "Exact alpha complex 3d" << std::endl;
+  std::clog << "Exact alpha complex 3d" << std::endl;
 
   std::vector<Exact_alpha_complex_3d::Bare_point_3> exact_points = get_points<Exact_alpha_complex_3d::Bare_point_3>();
   Exact_alpha_complex_3d exact_alpha_complex(exact_points);
@@ -105,13 +105,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact Alpha complex 3d is of dimension " << exact_stree.dimension() << " - Fast is "
+  std::clog << "Exact Alpha complex 3d is of dimension " << exact_stree.dimension() << " - Fast is "
             << stree.dimension() << std::endl;
   BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact Alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Fast is "
+  std::clog << "Exact Alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Fast is "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact Alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Fast is "
+  std::clog << "Exact Alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Fast is "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
 
@@ -119,18 +119,18 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   while (sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-    std::cout << "Fast ( ";
+    std::clog << "Fast ( ";
     for (auto vertex : stree.simplex_vertex_range(*sh)) {
       simplex.push_back(vertex);
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << ") -> [" << stree.filtration(*sh) << "] ";
+    std::clog << ") -> [" << stree.filtration(*sh) << "] ";
 
     // Find it in the exact structure
     auto sh_exact = exact_stree.find(simplex);
     BOOST_CHECK(sh_exact != exact_stree.null_simplex());
 
-    std::cout << " versus [" << exact_stree.filtration(sh_exact) << "] " << std::endl;
+    std::clog << " versus [" << exact_stree.filtration(sh_exact) << "] " << std::endl;
     // Exact and non-exact version is not exactly the same due to float comparison
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(exact_stree.filtration(sh_exact), stree.filtration(*sh));
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // -----------------
   // Safe version
   // -----------------
-  std::cout << "Safe alpha complex 3d" << std::endl;
+  std::clog << "Safe alpha complex 3d" << std::endl;
 
   std::vector<Safe_alpha_complex_3d::Bare_point_3> safe_points = get_points<Safe_alpha_complex_3d::Bare_point_3>();
   Safe_alpha_complex_3d safe_alpha_complex(safe_points);
@@ -165,13 +165,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Safe Alpha complex 3d is of dimension " << safe_stree.dimension() << " - Fast is "
+  std::clog << "Safe Alpha complex 3d is of dimension " << safe_stree.dimension() << " - Fast is "
             << stree.dimension() << std::endl;
   BOOST_CHECK(safe_stree.dimension() == stree.dimension());
-  std::cout << "Safe Alpha complex 3d num_simplices " << safe_stree.num_simplices() << " - Fast is "
+  std::clog << "Safe Alpha complex 3d num_simplices " << safe_stree.num_simplices() << " - Fast is "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(safe_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Safe Alpha complex 3d num_vertices " << safe_stree.num_vertices() << " - Fast is "
+  std::clog << "Safe Alpha complex 3d num_vertices " << safe_stree.num_vertices() << " - Fast is "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(safe_stree.num_vertices() == stree.num_vertices());
 
@@ -179,18 +179,18 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
   while (safe_sh != stree.filtration_simplex_range().end()) {
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
-    std::cout << "Fast ( ";
+    std::clog << "Fast ( ";
     for (auto vertex : stree.simplex_vertex_range(*safe_sh)) {
       simplex.push_back(vertex);
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << ") -> [" << stree.filtration(*safe_sh) << "] ";
+    std::clog << ") -> [" << stree.filtration(*safe_sh) << "] ";
 
     // Find it in the exact structure
     auto sh_exact = safe_stree.find(simplex);
     BOOST_CHECK(sh_exact != safe_stree.null_simplex());
 
-    std::cout << " versus [" << safe_stree.filtration(sh_exact) << "] " << std::endl;
+    std::clog << " versus [" << safe_stree.filtration(sh_exact) << "] " << std::endl;
     // Exact and non-exact version is not exactly the same due to float comparison
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(safe_stree.filtration(sh_exact), stree.filtration(*safe_sh), 1e-15);
 

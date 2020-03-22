@@ -56,8 +56,8 @@ int main(int argc, char* argv[]) {
     exit(-1);  // ----- >>
   }
   witnesses = Point_vector(off_reader.get_point_cloud());
-  std::cout << "Successfully read " << witnesses.size() << " points.\n";
-  std::cout << "Ambient dimension is " << witnesses[0].dimension() << ".\n";
+  std::clog << "Successfully read " << witnesses.size() << " points.\n";
+  std::clog << "Ambient dimension is " << witnesses[0].dimension() << ".\n";
 
   // Choose landmarks (decomment one of the following two lines)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
@@ -69,8 +69,8 @@ int main(int argc, char* argv[]) {
 
   witness_complex.create_complex(simplex_tree, max_squared_alpha, lim_d);
 
-  std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
+  std::clog << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
+  std::clog << "   and has dimension " << simplex_tree.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
   simplex_tree.initialize_filtration();
@@ -107,7 +107,7 @@ void program_options(int argc, char* argv[], int& nbL, std::string& file_name, s
   visible.add_options()("help,h", "produce help message")("landmarks,l", po::value<int>(&nbL),
                                                           "Number of landmarks to choose from the point cloud.")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "Name of file in which the persistence diagram is written. Default print in std::clog")(
       "max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
       "Maximal squared relaxation parameter.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),
@@ -128,17 +128,17 @@ void program_options(int argc, char* argv[], int& nbL, std::string& file_name, s
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Weak witness complex defined on a set of input points.\n \n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a Weak witness complex defined on a set of input points.\n \n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

@@ -19,7 +19,7 @@
 #include <cstddef>
 
 int main(int argc, char** argv) {
-  std::cout
+  std::clog
       << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical "
       << "complexes provided in text files in Perseus style (the only numbered in the first line is a dimension D of a"
       << "bitmap. In the lines I between 2 and D+1 there are numbers of top dimensional cells in the direction I. Let "
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
   pcoh.output_diagram(out);
   out.close();
 
-  std::cout << "Result in file: " << output_file_name << "\n";
+  std::clog << "Result in file: " << output_file_name << "\n";
 
   return 0;
 }

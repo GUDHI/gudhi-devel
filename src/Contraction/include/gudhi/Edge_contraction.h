@@ -164,13 +164,13 @@ int main (int argc, char *argv[])
 		std::cerr << "Unable to read file:"<<argv[1]<<std::endl;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Build the Rips complex"<<std::endl;
+	std::clog << "Build the Rips complex"<<std::endl;
 
 	build_rips(complex,atof(argv[2]));
 
 	boost::timer::auto_cpu_timer t;
 
-	std::cout << "Initial complex has "<<
+	std::clog << "Initial complex has "<<
 			complex.num_vertices()<<" vertices and "<<
 			complex.num_edges()<<" edges"<<std::endl;
 
@@ -181,17 +181,17 @@ int main (int argc, char *argv[])
 			contraction::make_remove_popable_blockers_visitor<Profile>());
 	contractor.contract_edges();
 
-	std::cout << "Counting final number of simplices \n";
+	std::clog << "Counting final number of simplices \n";
 	unsigned num_simplices = std::distance(complex.star_simplex_range().begin(),complex.star_simplex_range().end());
 
-	std::cout << "Final complex has "<<
+	std::clog << "Final complex has "<<
 			complex.num_vertices()<<" vertices, "<<
 			complex.num_edges()<<" edges, "<<
 			complex.num_blockers()<<" blockers and "<<
 			num_simplices<<" simplices"<<std::endl;
 
 
-	std::cout << "Time to simplify and enumerate simplices:\n";
+	std::clog << "Time to simplify and enumerate simplices:\n";
 
 	return EXIT_SUCCESS;
 }

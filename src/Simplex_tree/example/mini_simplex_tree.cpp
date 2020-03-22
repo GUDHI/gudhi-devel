@@ -48,7 +48,7 @@ int main() {
   for (ST::Simplex_handle t : st.cofaces_simplex_range(e, 1)) {
     // Only coface is 012
     for (ST::Vertex_handle v : st.simplex_vertex_range(t))  // v in { 0, 1, 2 }
-        std::cout << v;
-      std::cout << '\n';
+        std::clog << v;
+      std::clog << '\n';
   }
 }

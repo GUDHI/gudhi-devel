@@ -32,8 +32,8 @@ using Mini_stree = Simplex_tree<MyOptions>;
 using Stree = Simplex_tree<>;
 
 BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "REMOVE MAXIMAL SIMPLEX" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "REMOVE MAXIMAL SIMPLEX" << std::endl;
 
   Mini_stree st;
 
@@ -66,21 +66,21 @@ BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   //            5
 
 #ifdef GUDHI_DEBUG
-  std::cout << "Check exception throw in debug mode" << std::endl;
+  std::clog << "Check exception throw in debug mode" << std::endl;
   // throw excpt because sh has children
   BOOST_CHECK_THROW (st.remove_maximal_simplex(st.find({0, 1, 6})), std::invalid_argument);
   BOOST_CHECK_THROW (st.remove_maximal_simplex(st.find({3})), std::invalid_argument);
   BOOST_CHECK(st == st_complete);
 #endif
-  std::cout << "st.remove_maximal_simplex({0, 2})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 2})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 2}));
-  std::cout << "st.remove_maximal_simplex({0, 1, 2})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 1, 2})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 2}));
-  std::cout << "st.remove_maximal_simplex({1, 2})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 2})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2}));
-  std::cout << "st.remove_maximal_simplex({2})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({2})" << std::endl;
   st.remove_maximal_simplex(st.find({2}));
-  std::cout << "st.remove_maximal_simplex({3})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({3})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 3}));
   
   BOOST_CHECK(st == st_pruned);
@@ -102,39 +102,39 @@ BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   //            5
 
   // Remove all 7 to test the both remove_maximal_simplex cases (when _members is empty or not)
-  std::cout << "st.remove_maximal_simplex({0, 1, 6, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 1, 6, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 6, 7}));
-  std::cout << "st.remove_maximal_simplex({0, 1, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 1, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 7}));
-  std::cout << "st.remove_maximal_simplex({0, 6, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 6, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 6, 7}));
-  std::cout << "st.remove_maximal_simplex({0, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 7}));
-  std::cout << "st.remove_maximal_simplex({1, 6, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 6, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 6, 7}));
-  std::cout << "st.remove_maximal_simplex({1, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 7}));
-  std::cout << "st.remove_maximal_simplex({6, 7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({6, 7})" << std::endl;
   st.remove_maximal_simplex(st.find({6, 7}));
-  std::cout << "st.remove_maximal_simplex({7})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({7})" << std::endl;
   st.remove_maximal_simplex(st.find({7}));
 
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
 
   // Check dimension calls lower_upper_bound_dimension to recompute dimension
   BOOST_CHECK(st.dimension() == 2);
   BOOST_CHECK(st.upper_bound_dimension() == 2);
 
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension()
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension()
             << " | st_wo_seven.upper_bound_dimension()=" << st_wo_seven.upper_bound_dimension() << std::endl;
-  std::cout << "st.dimension()=" << st.dimension() << " | st_wo_seven.dimension()=" << st_wo_seven.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << " | st_wo_seven.dimension()=" << st_wo_seven.dimension() << std::endl;
   BOOST_CHECK(st == st_wo_seven);
 }
 
 BOOST_AUTO_TEST_CASE(auto_dimension_set) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "DIMENSION ON REMOVE MAXIMAL SIMPLEX" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "DIMENSION ON REMOVE MAXIMAL SIMPLEX" << std::endl;
 
   Mini_stree st;
 
@@ -148,80 +148,80 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.remove_maximal_simplex({6, 7, 8, 10})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({6, 7, 8, 10})" << std::endl;
   st.remove_maximal_simplex(st.find({6, 7, 8, 10}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.remove_maximal_simplex({6, 7, 8, 9})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({6, 7, 8, 9})" << std::endl;
   st.remove_maximal_simplex(st.find({6, 7, 8, 9}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
 
-  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 5});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 4});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
 
-  std::cout << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 2, 3, 5})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 5}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
 
-  std::cout << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({1, 2, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({1, 2, 3, 4}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
 
-  std::cout << "st.insert_simplex_and_subfaces({0, 1, 3, 4})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({0, 1, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({0, 1, 3, 4});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.remove_maximal_simplex({0, 1, 3, 4})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 1, 3, 4})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 3, 4}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 2);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
 
-  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({1, 2, 3, 5})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 5});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({1, 2, 3, 4})" << std::endl;
   st.insert_simplex_and_subfaces({1, 2, 3, 4});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   // Check you can override the dimension
   // This is a limit test case - shall not happen
   st.set_dimension(1);
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 1);
   // check dimension() and lower_upper_bound_dimension() is not giving the right answer because dimension is too low
   BOOST_CHECK(st.dimension() == 1);
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   // Check you can override the dimension
   // This is a limit test case - shall not happen
   st.set_dimension(6);
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 6);
   // check dimension() do not launch lower_upper_bound_dimension()
   BOOST_CHECK(st.dimension() == 6);
@@ -246,27 +246,27 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
 
   // Reset with the correct value
   st.set_dimension(3);
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
   BOOST_CHECK(st.dimension() == 3);
 
-  std::cout << "st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6})" << std::endl;
+  std::clog << "st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6})" << std::endl;
   st.insert_simplex_and_subfaces({0, 1, 2, 3, 4, 5, 6});
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 6);
   BOOST_CHECK(st.dimension() == 6);
 
-  std::cout << "st.remove_maximal_simplex({0, 1, 2, 3, 4, 5, 6})" << std::endl;
+  std::clog << "st.remove_maximal_simplex({0, 1, 2, 3, 4, 5, 6})" << std::endl;
   st.remove_maximal_simplex(st.find({0, 1, 2, 3, 4, 5, 6}));
-  std::cout << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 6);
   BOOST_CHECK(st.dimension() == 5);
 
 }
 
 BOOST_AUTO_TEST_CASE(prune_above_filtration) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "PRUNE ABOVE FILTRATION" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "PRUNE ABOVE FILTRATION" << std::endl;
 
   Stree st;
 
@@ -321,15 +321,15 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   BOOST_CHECK(!simplex_is_changed);
 
   // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
-  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << "The complex contains " << st.num_simplices() << " simplices";
+  std::clog << " - dimension " << st.dimension() << std::endl;
+  std::clog << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::clog << (int) vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   // Check the pruned cases
@@ -340,15 +340,15 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
   BOOST_CHECK(simplex_is_changed);
 
   // Display the Simplex_tree
-  std::cout << "The complex pruned at 2.5 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
+  std::clog << "The complex pruned at 2.5 contains " << st.num_simplices() << " simplices";
+  std::clog << " - dimension " << st.dimension() << std::endl;
 
   simplex_is_changed = st.prune_above_filtration(2.0);
   if (simplex_is_changed)
     st.initialize_filtration();
   
-  std::cout << "The complex pruned at 2.0 contains " << st.num_simplices() << " simplices";
-  std::cout << " - dimension " << st.dimension() << std::endl;
+  std::clog << "The complex pruned at 2.0 contains " << st.num_simplices() << " simplices";
+  std::clog << " - dimension " << st.dimension() << std::endl;
 
   BOOST_CHECK(st == st_pruned);
   BOOST_CHECK(!simplex_is_changed);
@@ -360,12 +360,12 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
     st.initialize_filtration();
 
   // Display the Simplex_tree
-  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices";
-  std::cout << " - upper_bound_dimension " << st.upper_bound_dimension() << std::endl;
+  std::clog << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices";
+  std::clog << " - upper_bound_dimension " << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
 
   BOOST_CHECK(st.dimension() == -1);
-  std::cout << "upper_bound_dimension=" << st.upper_bound_dimension() << std::endl;
+  std::clog << "upper_bound_dimension=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == -1);
 
   BOOST_CHECK(st == st_empty);
@@ -380,8 +380,8 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration) {
 }
 
 BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "MINI PRUNE ABOVE FILTRATION" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "MINI PRUNE ABOVE FILTRATION" << std::endl;
 
   Mini_stree st;
 
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   st.initialize_filtration();
   
   // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(st.num_simplices() == 27);
 
   // Test case to the limit - With these options, there is no filtration, which means filtration is 0
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   if (simplex_is_changed)
     st.initialize_filtration();
   // Display the Simplex_tree
-  std::cout << "The complex pruned at 1.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << "The complex pruned at 1.0 contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(!simplex_is_changed);
   BOOST_CHECK(st.num_simplices() == 27);
 
@@ -418,7 +418,7 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   if (simplex_is_changed)
     st.initialize_filtration();
   // Display the Simplex_tree
-  std::cout << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << "The complex pruned at 0.0 contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(!simplex_is_changed);
   BOOST_CHECK(st.num_simplices() == 27);
 
@@ -427,11 +427,11 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   if (simplex_is_changed)
     st.initialize_filtration();
   // Display the Simplex_tree
-  std::cout << "The complex pruned at -1.0 contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << "The complex pruned at -1.0 contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(simplex_is_changed);
   BOOST_CHECK(st.num_simplices() == 0);
 
   // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
 
 }

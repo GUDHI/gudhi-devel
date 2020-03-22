@@ -28,15 +28,15 @@ BOOST_AUTO_TEST_CASE( lower_triangular_distance_matrix )
                                                                              ',');
   for (auto& i : from_lower_triangular) {
     for (auto j : i) {
-      std::cout << j << " ";
+      std::clog << j << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
-  std::cout << "from_lower_triangular size = " << from_lower_triangular.size() << std::endl;
+  std::clog << "from_lower_triangular size = " << from_lower_triangular.size() << std::endl;
   BOOST_CHECK(from_lower_triangular.size() == 5);
 
   for (std::size_t i = 0; i < from_lower_triangular.size(); i++) {
-    std::cout << "from_lower_triangular[" << i << "] size = " << from_lower_triangular[i].size() << std::endl;
+    std::clog << "from_lower_triangular[" << i << "] size = " << from_lower_triangular[i].size() << std::endl;
     BOOST_CHECK(from_lower_triangular[i].size() == i);
   }
   std::vector<double> expected = {1};
@@ -60,14 +60,14 @@ BOOST_AUTO_TEST_CASE( full_square_distance_matrix )
   from_full_square = Gudhi::read_lower_triangular_matrix_from_csv_file<double>("full_square_distance_matrix.csv");
   for (auto& i : from_full_square) {
     for (auto j : i) {
-      std::cout << j << " ";
+      std::clog << j << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
-  std::cout << "from_full_square size = " << from_full_square.size() << std::endl;
+  std::clog << "from_full_square size = " << from_full_square.size() << std::endl;
   BOOST_CHECK(from_full_square.size() == 7);
   for (std::size_t i = 0; i < from_full_square.size(); i++) {
-    std::cout << "from_full_square[" << i << "] size = " << from_full_square[i].size() << std::endl;
+    std::clog << "from_full_square[" << i << "] size = " << from_full_square[i].size() << std::endl;
     BOOST_CHECK(from_full_square[i].size() == i);
   }  
 }

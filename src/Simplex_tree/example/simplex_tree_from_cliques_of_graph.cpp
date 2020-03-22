@@ -42,67 +42,67 @@ int main(int argc, char * const argv[]) {
   // insert the graph in the simplex tree as 1-skeleton
   st.insert_graph(g);
   end = clock();
-  std::cout << "Insert the 1-skeleton in the simplex tree in "
+  std::clog << "Insert the 1-skeleton in the simplex tree in "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
 
   start = clock();
   // expand the 1-skeleton until dimension max_dim
   st.expansion(max_dim);
   end = clock();
-  std::cout << "max_dim = " << max_dim << "\n";
-  std::cout << "Expand the simplex tree in "
+  std::clog << "max_dim = " << max_dim << "\n";
+  std::clog << "Expand the simplex tree in "
       << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
 
-  std::cout << "Information of the Simplex Tree: " << std::endl;
-  std::cout << "  Number of vertices = " << st.num_vertices() << " ";
-  std::cout << "  Number of simplices = " << st.num_simplices() << std::endl;
-  std::cout << std::endl << std::endl;
+  std::clog << "Information of the Simplex Tree: " << std::endl;
+  std::clog << "  Number of vertices = " << st.num_vertices() << " ";
+  std::clog << "  Number of simplices = " << st.num_simplices() << std::endl;
+  std::clog << std::endl << std::endl;
 
-  std::cout << "Iterator on vertices: ";
+  std::clog << "Iterator on vertices: ";
   for (auto vertex : st.complex_vertex_range()) {
-    std::cout << vertex << " ";
+    std::clog << vertex << " ";
   }
 
-  std::cout << std::endl;
+  std::clog << std::endl;
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
 
-  std::cout << "Iterator on simplices: " << std::endl;
+  std::clog << "Iterator on simplices: " << std::endl;
   for (auto simplex : st.complex_simplex_range()) {
-    std::cout << "   ";
+    std::clog << "   ";
     for (auto vertex : st.simplex_vertex_range(simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
 
-  std::cout << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
 
-  std::cout << "Iterator on Simplices in the filtration, and their boundary simplices:" << std::endl;
+  std::clog << "Iterator on Simplices in the filtration, and their boundary simplices:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
 
     for (auto b_simplex : st.boundary_simplex_range(f_simplex)) {
-      std::cout << "      " << "[" << st.filtration(b_simplex) << "] ";
+      std::clog << "      " << "[" << st.filtration(b_simplex) << "] ";
       for (auto vertex : st.simplex_vertex_range(b_simplex)) {
-        std::cout << vertex << " ";
+        std::clog << vertex << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
   }
   return 0;

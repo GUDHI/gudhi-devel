@@ -20,7 +20,7 @@
 #include <string>
 
 int main(int argc, char** argv) {
-  std::cout
+  std::clog
       << "This program computes persistent homology, by using "
       << "Bitmap_cubical_complex_periodic_boundary_conditions class, of cubical complexes provided in text files in "
       << "Perseus style (the only numbered in the first line is a dimension D of a bitmap. In the lines I between 2 "
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   pcoh.output_diagram(out);
   out.close();
 
-  std::cout << "Result in file: " << output_file_name << "\n";
+  std::clog << "Result in file: " << output_file_name << "\n";
 
   return 0;
 }

@@ -55,13 +55,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_throw, Weighted_alpha_compl
   // weights size is different from w_points size to make weighted Alpha_complex_3d throw in debug mode
   std::vector<double> weights = {0.01, 0.005, 0.006, 0.01, 0.009, 0.001};
 
-  std::cout << "Check exception throw in debug mode" << std::endl;
+  std::clog << "Check exception throw in debug mode" << std::endl;
   BOOST_CHECK_THROW(Weighted_alpha_complex_3d wac(w_points, weights), std::invalid_argument);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d, weighted_variants_type_list) {
-  std::cout << "Weighted alpha complex 3d from points and weights" << std::endl;
+  std::clog << "Weighted alpha complex 3d from points and weights" << std::endl;
   using Bare_point_3 = typename Weighted_alpha_complex_3d::Bare_point_3;
   std::vector<Bare_point_3> w_points;
   w_points.push_back(Bare_point_3(0.0, 0.0, 0.0));
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d,
   Gudhi::Simplex_tree<> stree;
   alpha_complex_p_a_w.create_complex(stree);
 
-  std::cout << "Weighted alpha complex 3d from weighted points" << std::endl;
+  std::clog << "Weighted alpha complex 3d from weighted points" << std::endl;
   using Weighted_point_3 = typename Weighted_alpha_complex_3d::Weighted_point_3;
 
   std::vector<Weighted_point_3> weighted_points;
@@ -112,13 +112,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d,
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Weighted alpha complex 3d is of dimension " << stree_bis.dimension() << " - versus "
+  std::clog << "Weighted alpha complex 3d is of dimension " << stree_bis.dimension() << " - versus "
             << stree.dimension() << std::endl;
   BOOST_CHECK(stree_bis.dimension() == stree.dimension());
-  std::cout << "Weighted alpha complex 3d num_simplices " << stree_bis.num_simplices() << " - versus "
+  std::clog << "Weighted alpha complex 3d num_simplices " << stree_bis.num_simplices() << " - versus "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(stree_bis.num_simplices() == stree.num_simplices());
-  std::cout << "Weighted alpha complex 3d num_vertices " << stree_bis.num_vertices() << " - versus "
+  std::clog << "Weighted alpha complex 3d num_vertices " << stree_bis.num_vertices() << " - versus "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(stree_bis.num_vertices() == stree.num_vertices());
 
@@ -127,18 +127,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted, Weighted_alpha_complex_3d,
     std::vector<int> simplex;
     std::vector<int> exact_simplex;
 #ifdef DEBUG_TRACES
-    std::cout << " ( ";
+    std::clog << " ( ";
 #endif
     for (auto vertex : stree.simplex_vertex_range(*sh)) {
       simplex.push_back(vertex);
 #ifdef DEBUG_TRACES
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
 #endif
     }
 #ifdef DEBUG_TRACES
-    std::cout << ") -> "
+    std::clog << ") -> "
               << "[" << stree.filtration(*sh) << "] ";
-    std::cout << std::endl;
+    std::clog << std::endl;
 #endif
 
     // Find it in the exact structure

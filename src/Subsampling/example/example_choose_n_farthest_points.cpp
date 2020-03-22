@@ -23,8 +23,8 @@ int main(void) {
   Gudhi::subsampling::choose_n_farthest_points(k, points, 100,
                                                Gudhi::subsampling::random_starting_point,
                                                std::back_inserter(results));
-  std::cout << "Before sparsification: " << points.size() << " points.\n";
-  std::cout << "After  sparsification: " << results.size() << " points.\n";
+  std::clog << "Before sparsification: " << points.size() << " points.\n";
+  std::clog << "After  sparsification: " << results.size() << " points.\n";
 
   return 0;
 }

@@ -38,8 +38,8 @@ int main(int argc, char* const argv[]) {
   }
   point_vector = Point_vector(off_reader.get_point_cloud());
 
-  std::cout << "Successfully read " << point_vector.size() << " points.\n";
-  std::cout << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
+  std::clog << "Successfully read " << point_vector.size() << " points.\n";
+  std::clog << "Ambient dimension is " << point_vector[0].dimension() << ".\n";
 
   // Choose landmarks (decomment one of the following two lines)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
@@ -52,6 +52,6 @@ int main(int argc, char* const argv[]) {
 
   witness_complex.create_complex(simplex_tree, alpha2, lim_dim);
   end = clock();
-  std::cout << "Strong witness complex took " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
-  std::cout << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
+  std::clog << "Strong witness complex took " << static_cast<double>(end - start) / CLOCKS_PER_SEC << " s. \n";
+  std::clog << "Number of simplices is: " << simplex_tree.num_simplices() << "\n";
 }
