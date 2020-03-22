@@ -19,7 +19,7 @@ There is a label **enhancement** in the [new issue](https://github.com/GUDHI/gud
 
 ## You are not familiar with GitHub ?
 
-Please take some time to read our [how to use GitHub to contribute to GUDHI](/home/vincent/workspace/gudhi/gudhi-devel/for_dev/how_to_use_github_to_contribute_to_gudhi.md).
+Please take some time to read our [how to use GitHub to contribute to GUDHI](how_to_use_github_to_contribute_to_gudhi.md).
 
 ## Something you want to improve in the documentation
 

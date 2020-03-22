@@ -791,90 +791,6 @@ BOOST_AUTO_TEST_CASE(non_contiguous) {
   BOOST_CHECK(++i == std::end(b));
 }
 
-BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing) {
-  std::clog << "********************************************************************" << std::endl;
-  std::clog << "MAKE FILTRATION NON DECREASING" << std::endl;
-  typedef Simplex_tree<> typeST;
-  typeST st;
-
-  st.insert_simplex_and_subfaces({2, 1, 0}, 2.0);
-  st.insert_simplex_and_subfaces({3, 0}, 2.0);
-  st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
-  
-  /* Inserted simplex:     */
-  /*    1                  */
-  /*    o                  */
-  /*   /X\                 */
-  /*  o---o---o---o        */
-  /*  2   0   3\X/4        */
-  /*            o          */
-  /*            5          */
-
-  std::clog << "Check default insertion ensures the filtration values are non decreasing" << std::endl;
-  BOOST_CHECK(!st.make_filtration_non_decreasing());
-
-  // Because of non decreasing property of simplex tree, { 0 } , { 1 } and { 0, 1 } are going to be set from value 2.0
-  // to 1.0
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
-  
-  // Inserted simplex:
-  //    1   6
-  //    o---o
-  //   /X\7/
-  //  o---o---o---o
-  //  2   0   3\X/4
-  //            o
-  //            5
-  
-  std::clog << "Check default second insertion ensures the filtration values are non decreasing" << std::endl;
-  BOOST_CHECK(!st.make_filtration_non_decreasing());
-  
-  // Copy original simplex tree
-  typeST st_copy = st;
-
-  // Modify specific values for st to become like st_copy thanks to make_filtration_non_decreasing
-  st.assign_filtration(st.find({0,1,6,7}), 0.8);
-  st.assign_filtration(st.find({0,1,6}), 0.9);
-  st.assign_filtration(st.find({0,6}), 0.6);
-  st.assign_filtration(st.find({3,4,5}), 1.2);
-  st.assign_filtration(st.find({3,4}), 1.1);
-  st.assign_filtration(st.find({4,5}), 1.99);
-  
-  std::clog << "Check the simplex_tree is rolled back in case of decreasing filtration values" << std::endl;
-  BOOST_CHECK(st.make_filtration_non_decreasing());
-  BOOST_CHECK(st == st_copy);
-
-  // Other simplex tree
-  typeST st_other;
-  st_other.insert_simplex_and_subfaces({2, 1, 0}, 3.0);  // This one is different from st
-  st_other.insert_simplex_and_subfaces({3, 0}, 2.0);
-  st_other.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
-  st_other.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
-
-  // Modify specific values for st to become like st_other thanks to make_filtration_non_decreasing
-  st.assign_filtration(st.find({2}), 3.0);
-  // By modifying just the simplex {2}
-  // {0,1,2}, {1,2} and {0,2} will be modified
-  
-  std::clog << "Check the simplex_tree is repaired in case of decreasing filtration values" << std::endl;
-  BOOST_CHECK(st.make_filtration_non_decreasing());
-  BOOST_CHECK(st == st_other);
-
-  // Modify specific values for st still to be non-decreasing
-  st.assign_filtration(st.find({0,1,2}), 10.0);
-  st.assign_filtration(st.find({0,2}), 9.0);
-  st.assign_filtration(st.find({0,1,6,7}), 50.0);
-  st.assign_filtration(st.find({0,1,6}), 49.0);
-  st.assign_filtration(st.find({0,1,7}), 48.0);
-  // Other copy simplex tree
-  typeST st_other_copy = st;
-  
-  std::clog << "Check the simplex_tree is not modified in case of non-decreasing filtration values" << std::endl;
-  BOOST_CHECK(!st.make_filtration_non_decreasing());
-  BOOST_CHECK(st == st_other_copy);
-  
-}
-
 
 typedef boost::mpl::list<boost::adjacency_list<boost::setS, boost::vecS, boost::directedS,
                                                boost::property<vertex_filtration_t, double>,
@@ -986,5 +902,41 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested
             << " - num_simplices = " << st.num_simplices() << std::endl;
   BOOST_CHECK(st.dimension() == 1);
   BOOST_CHECK(st.num_simplices() == st.num_vertices() + 1);
+}
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(generators, typeST, list_of_tested_variants) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST FIND GENERATORS" << std::endl;
+  {
+    typeST st;
+    st.insert_simplex_and_subfaces({0,1,2,3,4,5,6},0);
+    st.assign_filtration(st.find({0,2,4}), 10);
+    st.assign_filtration(st.find({1,5}), 20);
+    st.assign_filtration(st.find({1,2,4}), 30);
+    st.assign_filtration(st.find({3}), 5);
+    st.make_filtration_non_decreasing();
+    BOOST_CHECK(st.filtration(st.find({1,2}))==0);
+    BOOST_CHECK(st.filtration(st.find({0,1,2,3,4}))==30);
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,1,2,3,4,5}))==st.find({1,2,4}));
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,2,3}))==st.find({3}));
+    auto s=st.minimal_simplex_with_same_filtration(st.find({0,2,6}));
+    BOOST_CHECK(s==st.find({0})||s==st.find({2})||s==st.find({6}));
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({2}))==2);
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({1,5}))==st.null_vertex());
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({5,6}))>=5);
+  }
+  {
+    typeST st;
+    st.insert_simplex_and_subfaces({0,1}, 8);
+    st.insert_simplex_and_subfaces({0,2}, 10);
+    st.insert_simplex_and_subfaces({3,4}, 6);
+    st.insert_simplex_and_subfaces({1,2}, 5);
+    st.insert_simplex_and_subfaces({1,5}, 4);
+    st.insert_simplex_and_subfaces({0,5}, 3);
+    st.insert_simplex_and_subfaces({2,5}, 2);
+    st.insert_simplex_and_subfaces({1,3}, 9);
+    st.expansion(50);
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({0,1,2,5}))==st.find({0,2}));
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
+  }
 }

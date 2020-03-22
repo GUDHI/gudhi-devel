@@ -38,8 +38,15 @@ else:
 
 print("dimension=", st.dimension())
 
+print("simplices=")
+for simplex_with_filtration in st.get_simplices():
+    print("(%s, %.2f)" % tuple(simplex_with_filtration))
+
 st.initialize_filtration()
-print("filtration=", st.get_filtration())
+print("filtration=")
+for simplex_with_filtration in st.get_filtration():
+    print("(%s, %.2f)" % tuple(simplex_with_filtration))
+
 print("filtration[1, 2]=", st.filtration([1, 2]))
 print("filtration[4, 2]=", st.filtration([4, 2]))
 

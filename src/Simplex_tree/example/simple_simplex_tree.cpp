@@ -166,7 +166,6 @@ int main(int argc, char* const argv[]) {
   // ++ GENERAL VARIABLE SET
 
   std::clog << "********************************************************************\n";
-  // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::clog << "* The complex contains " << simplexTree.num_simplices() << " simplices\n";
   std::clog << "   - dimension " << simplexTree.dimension() << "\n";
   std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
