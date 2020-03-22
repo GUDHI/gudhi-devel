@@ -18,7 +18,7 @@
 
 int main(int argc, char** argv) {
   if (argc < 3) {
-    std::cout << "To run this program please provide as an input two files with persistence diagrams. Each file" <<
+    std::clog << "To run this program please provide as an input two files with persistence diagrams. Each file" <<
         " should contain a birth-death pair per line. Third, optional parameter is an error bound on the bottleneck" <<
         " distance (set by default to the smallest positive double value). If you set the error bound to 0, be" <<
         " aware this version is exact but expensive. The program will now terminate \n";
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     tolerance = atof(argv[3]);
   }
   double b = Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, tolerance);
-  std::cout << "The distance between the diagrams is : " << b << ". The tolerance is : " << tolerance << std::endl;
+  std::clog << "The distance between the diagrams is : " << b << ". The tolerance is : " << tolerance << std::endl;
 
   return 0;
 }

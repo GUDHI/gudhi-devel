@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_contraction1) {
                               static_cast<Vertex_handle> (y)));
 
   // Print result
-  std::cout << "complex before complex" << complex.to_string() << std::endl;
+  std::clog << "complex before complex" << complex.to_string() << std::endl;
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
   complex.contract_edge(static_cast<Vertex_handle> (a), static_cast<Vertex_handle> (b));
   // Print result
-  std::cout << "ContractEdge(0,1)\n";
+  std::clog << "ContractEdge(0,1)\n";
   PRINT(complex.to_string());
 
   // verification
@@ -89,13 +89,13 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_contraction2) {
   complex.add_blocker(blocker);
 
   // Print result
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
   complex.contract_edge(static_cast<Vertex_handle> (a), static_cast<Vertex_handle> (b));
 
-  std::cout << "complex.ContractEdge(a,b)" << complex.to_string();
+  std::clog << "complex.ContractEdge(a,b)" << complex.to_string();
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
 
   // there should be one blocker (a,c,d,e) in the complex
   BOOST_CHECK(complex.contains_blocker(Simplex(static_cast<Vertex_handle> (a), static_cast<Vertex_handle> (x),
@@ -110,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_link_condition1) {
   complex.add_blocker(Simplex(static_cast<Vertex_handle> (0), static_cast<Vertex_handle> (1), static_cast<Vertex_handle> (2)));
 
   // Print result
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   BOOST_CHECK(complex.link_condition(Vertex_handle(1), Vertex_handle(2), true));
 
@@ -125,13 +125,13 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_collapse0) {
   complex.add_edge_without_blockers(static_cast<Vertex_handle> (2), static_cast<Vertex_handle> (4));
   complex.add_edge_without_blockers(static_cast<Vertex_handle> (3), static_cast<Vertex_handle> (4));
   // Print result
-  std::cout << "initial complex :\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex :\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   Simplex simplex_123(static_cast<Vertex_handle> (1), static_cast<Vertex_handle> (2), static_cast<Vertex_handle> (3));
   complex.remove_star(simplex_123);
-  std::cout << "complex.remove_star(1,2,3):\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex.remove_star(1,2,3):\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   // verification
   BOOST_CHECK(complex.contains_blocker(simplex_123));
@@ -142,13 +142,13 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_collapse1) {
   build_complete(4, complex);
   complex.add_blocker(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3)));
   // Print result
-  std::cout << "initial complex :\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex :\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   Simplex simplex_123(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
   complex.remove_star(simplex_123);
-  std::cout << "complex.remove_star(1,2,3):\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex.remove_star(1,2,3):\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   // verification
   BOOST_CHECK(complex.contains_blocker(simplex_123));
@@ -164,13 +164,13 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_collapse2) {
   complex.add_edge_without_blockers(Vertex_handle(3), Vertex_handle(4));
   complex.add_blocker(Simplex(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3), Vertex_handle(4)));
   // Print result
-  std::cout << "initial complex :\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex :\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   Simplex sigma(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
   complex.remove_star(sigma);
-  std::cout << "complex.remove_star(1,2,3):\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex.remove_star(1,2,3):\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   // verification
   BOOST_CHECK(!complex.contains_blocker(Simplex(Vertex_handle(1), Vertex_handle(2),
@@ -187,11 +187,11 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_collapse3) {
   complex.add_edge_without_blockers(Vertex_handle(3), Vertex_handle(4));
   complex.add_blocker(Simplex(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3), Vertex_handle(4)));
   // Print result
-  std::cout << "initial complex:\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex:\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   complex.remove_star(static_cast<Vertex_handle> (2));
-  std::cout << "complex after remove star of 2:\n" << complex.to_string();
+  std::clog << "complex after remove star of 2:\n" << complex.to_string();
 
   BOOST_CHECK(complex.contains_blocker(Simplex(Vertex_handle(1), Vertex_handle(3), Vertex_handle(4))));
   BOOST_CHECK(!complex.contains_blocker(Simplex(Vertex_handle(1), Vertex_handle(2),
@@ -202,11 +202,11 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_add_simplex) {
   Complex complex(4);
   build_complete(4, complex);
   complex.add_blocker(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(3)));
-  std::cout << "initial complex:\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex:\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   complex.add_simplex(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(3)));
-  std::cout << "complex after add_simplex:\n" << complex.to_string();
+  std::clog << "complex after add_simplex:\n" << complex.to_string();
   BOOST_CHECK(complex.num_blockers() == 1);
   BOOST_CHECK(complex.contains_blocker(Simplex(Vertex_handle(0), Vertex_handle(1),
                                                Vertex_handle(2), Vertex_handle(3))));
@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_add_simplex2) {
   Complex complex;
   build_complete(4, complex);
   // Print result
-  std::cout << "initial complex:\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex:\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   Complex copy(complex.num_vertices());
 
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_add_simplex2) {
       copy.add_simplex(simplex);
   }
 
-  std::cout << "complex after add_simplex:\n" << copy.to_string();
+  std::clog << "complex after add_simplex:\n" << copy.to_string();
 
   BOOST_CHECK(complex.num_blockers() == copy.num_blockers());
   BOOST_CHECK(complex.num_edges() == copy.num_edges());
@@ -246,11 +246,11 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_add_simplex3) {
   Simplex sigma(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2));
   complex.add_blocker(sigma);
   // Print result
-  std::cout << "initial complex:\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex:\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
   complex.add_simplex(sigma);
   //should create two blockers 0123 and 0124
-  std::cout << "complex after adding simplex 012:\n" << complex.to_string();
+  std::clog << "complex after adding simplex 012:\n" << complex.to_string();
   BOOST_CHECK(complex.num_blockers() == 2);
   BOOST_CHECK(complex.contains_blocker(Simplex(Vertex_handle(0), Vertex_handle(1),
                                                Vertex_handle(2), Vertex_handle(3))));
@@ -292,11 +292,11 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_add_edge) {
     complex.add_edge(Vertex_handle(i), Vertex_handle((i + 1) % 4));
 
   // Print result
-  std::cout << "initial complex:\n" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "initial complex:\n" << complex.to_string();
+  std::clog << std::endl << std::endl;
   complex.add_edge(Vertex_handle(1), Vertex_handle(3));
   //should create two blockers 013 and 012
-  std::cout << "complex after adding edge 13:\n" << complex.to_string();
+  std::clog << "complex after adding edge 13:\n" << complex.to_string();
   BOOST_CHECK(complex.num_blockers() == 2);
   BOOST_CHECK(complex.contains_blocker(Simplex(Vertex_handle(0), Vertex_handle(1), Vertex_handle(3))));
   BOOST_CHECK(complex.contains_blocker(Simplex(Vertex_handle(1), Vertex_handle(2), Vertex_handle(3))));
@@ -313,12 +313,12 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_remove_popable_blockers)
 
   complex.add_blocker(sigma1);
   complex.add_blocker(sigma2);
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
-  std::cout << "complex.RemovePopableBlockers();" << std::endl;
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
+  std::clog << "complex.RemovePopableBlockers();" << std::endl;
   complex.remove_popable_blockers();
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
 
   BOOST_CHECK(complex.num_blockers() == 1);
 
@@ -337,12 +337,12 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_simplifiable_remove_popable_blockers)
 
   complex.add_blocker(sigma1);
   complex.add_blocker(sigma2);
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
-  std::cout << "complex.RemovePopableBlockers();" << std::endl;
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
+  std::clog << "complex.RemovePopableBlockers();" << std::endl;
   complex.remove_popable_blockers();
-  std::cout << "complex complex" << complex.to_string();
+  std::clog << "complex complex" << complex.to_string();
 
-  std::cout << std::endl << std::endl;
+  std::clog << std::endl << std::endl;
   BOOST_CHECK(complex.num_blockers() == 0);
 }

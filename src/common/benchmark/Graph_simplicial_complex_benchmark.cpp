@@ -66,7 +66,7 @@ void benchmark_proximity_graph(const std::string& msg, const std::string& off_fi
   Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file_name);
   assert(off_reader.is_valid());
 
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"nb_points\";"
               << "\"nb_simplices\";"
@@ -82,7 +82,7 @@ void benchmark_proximity_graph(const std::string& msg, const std::string& off_fi
                                                                                Gudhi::Euclidean_distance());
   // benchmark end
   pg_compute_proximity_graph.end();
-  std::cout << pg_compute_proximity_graph;
+  std::clog << pg_compute_proximity_graph;
 
   Gudhi::Simplex_tree<> complex;
   Gudhi::Clock st_create_clock("    benchmark_proximity_graph - complex creation");
@@ -91,13 +91,13 @@ void benchmark_proximity_graph(const std::string& msg, const std::string& off_fi
   complex.insert_graph(proximity_graph);
   // benchmark end
   st_create_clock.end();
-  std::cout << st_create_clock;
+  std::clog << st_create_clock;
 
   results_csv << off_reader.get_point_cloud().size() << ";" << complex.num_simplices() << ";"
               << pg_compute_proximity_graph.num_seconds() << ";"
               << st_create_clock.num_seconds() << ";" << std::endl;
 
-  std::cout << "    benchmark_proximity_graph - nb simplices = " << complex.num_simplices() << std::endl;
+  std::clog << "    benchmark_proximity_graph - nb simplices = " << complex.num_simplices() << std::endl;
 }
 
 int main(int argc, char * const argv[]) {

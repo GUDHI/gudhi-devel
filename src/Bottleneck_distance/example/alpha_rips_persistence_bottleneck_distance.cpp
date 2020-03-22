@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
   Simplex_tree rips_stree;
 
   rips_complex.create_complex(rips_stree, dim_max);
-  std::cout << "The Rips complex contains " << rips_stree.num_simplices() << " simplices and has dimension "
+  std::clog << "The Rips complex contains " << rips_stree.num_simplices() << " simplices and has dimension "
             << rips_stree.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
@@ -89,7 +89,7 @@ int main(int argc, char * argv[]) {
 
   Simplex_tree alpha_stree;
   alpha_complex.create_complex(alpha_stree, threshold * threshold);
-  std::cout << "The Alpha complex contains " << alpha_stree.num_simplices() << " simplices and has dimension "
+  std::clog << "The Alpha complex contains " << alpha_stree.num_simplices() << " simplices and has dimension "
             << alpha_stree.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
@@ -115,12 +115,12 @@ int main(int argc, char * argv[]) {
     std::transform(alpha_intervals.begin(), alpha_intervals.end(), alpha_intervals.begin(), compute_root_square);
 
     double bottleneck_distance = Gudhi::persistence_diagram::bottleneck_distance(rips_intervals, alpha_intervals);
-    std::cout << "In dimension " << dim << ", bottleneck distance = " << bottleneck_distance << std::endl;
+    std::clog << "In dimension " << dim << ", bottleneck distance = " << bottleneck_distance << std::endl;
     if (bottleneck_distance > max_b_distance)
       max_b_distance = bottleneck_distance;
   }
-  std::cout << "================================================================================" << std::endl;
-  std::cout << "Bottleneck distance is " << max_b_distance << std::endl;
+  std::clog << "================================================================================" << std::endl;
+  std::clog << "Bottleneck distance is " << max_b_distance << std::endl;
 
   return 0;
 }
@@ -162,17 +162,17 @@ void program_options(int argc, char * argv[]
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Rips complex defined on a set of input points.\n \n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a Rips complex defined on a set of input points.\n \n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

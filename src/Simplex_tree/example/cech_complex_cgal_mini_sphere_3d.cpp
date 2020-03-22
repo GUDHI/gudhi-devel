@@ -55,18 +55,18 @@ class Cech_blocker {
   bool operator()(Simplex_handle sh) {
     std::vector<Point> points;
 #if DEBUG_TRACES
-    std::cout << "Cech_blocker on [";
+    std::clog << "Cech_blocker on [";
 #endif  // DEBUG_TRACES
     for (auto vertex : simplex_tree_.simplex_vertex_range(sh)) {
       points.push_back(point_cloud_[vertex]);
 #if DEBUG_TRACES
-      std::cout << vertex << ", ";
+      std::clog << vertex << ", ";
 #endif  // DEBUG_TRACES
     }
     Min_sphere ms(points.begin(), points.end());
     Filtration_value radius = ms.radius();
 #if DEBUG_TRACES
-    std::cout << "] - radius = " << radius << " - returns " << (radius > threshold_) << std::endl;
+    std::clog << "] - radius = " << radius << " - returns " << (radius > threshold_) << std::endl;
 #endif  // DEBUG_TRACES
     simplex_tree_.assign_filtration(sh, radius);
     return (radius > threshold_);
@@ -106,24 +106,24 @@ int main(int argc, char* argv[]) {
   // expand the graph until dimension dim_max
   st.expansion_with_blockers(dim_max, Cech_blocker(st, threshold, off_reader.get_point_cloud()));
 
-  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << st.dimension() << " \n";
+  std::clog << "The complex contains " << st.num_simplices() << " simplices \n";
+  std::clog << "   and has dimension " << st.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
 
 #if DEBUG_TRACES
-  std::cout << "********************************************************************\n";
+  std::clog << "********************************************************************\n";
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
-  std::cout << "* The complex contains " << st.num_simplices() << " simplices - dimension=" << st.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "* The complex contains " << st.num_simplices() << " simplices - dimension=" << st.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   "
+    std::clog << "   "
               << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << static_cast<int>(vertex) << " ";
+      std::clog << static_cast<int>(vertex) << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 #endif  // DEBUG_TRACES
   return 0;
@@ -154,11 +154,11 @@ void program_options(int argc, char* argv[], std::string& off_file_points, Filtr
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Construct a Cech complex defined on a set of input points.\n \n";
+    std::clog << std::endl;
+    std::clog << "Construct a Cech complex defined on a set of input points.\n \n";
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

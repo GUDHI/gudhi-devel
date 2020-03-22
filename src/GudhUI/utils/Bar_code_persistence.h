@@ -58,13 +58,13 @@ class Bar_code_persistence {
     QGraphicsScene * scene = new QGraphicsScene();
     view->setScene(scene);
     double ratio = 600.0 / (max_death - min_birth);
-    // std::cout << "min_birth=" << min_birth << " - max_death=" << max_death << " - ratio=" << ratio << std::endl;
+    // std::clog << "min_birth=" << min_birth << " - max_death=" << max_death << " - ratio=" << ratio << std::endl;
 
     double height = 0.0, birth = 0.0, death = 0.0;
     int pers_num = 1;
     for (auto& persistence : persistence_vector) {
       height = 5.0 * pers_num;
-      // std::cout << "[" << pers_num << "] birth=" << persistence.first << " - death=" << persistence.second << std::endl;
+      // std::clog << "[" << pers_num << "] birth=" << persistence.first << " - death=" << persistence.second << std::endl;
       if (std::isfinite(persistence.first))
         birth = ((persistence.first - min_birth) * ratio) + 50.0;
       else

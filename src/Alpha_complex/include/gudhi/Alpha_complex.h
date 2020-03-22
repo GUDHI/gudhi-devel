@@ -237,7 +237,7 @@ class Alpha_complex {
       for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
         if (!triangulation_->is_infinite(*vit)) {
 #ifdef DEBUG_TRACES
-          std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
+          std::clog << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
           vertex_handle_to_iterator_[vit->data()] = vit;
         }
@@ -296,19 +296,19 @@ class Alpha_complex {
            ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-        std::cout << "Simplex_tree insertion ";
+        std::clog << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-            std::cout << " " << (*vit)->data();
+            std::clog << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
             // Vector of vertex construction for simplex_tree structure
             vertexVector.push_back((*vit)->data());
           }
         }
 #ifdef DEBUG_TRACES
-        std::cout << std::endl;
+        std::clog << std::endl;
 #endif  // DEBUG_TRACES
         // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
         complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
@@ -327,16 +327,16 @@ class Alpha_complex {
         if (decr_dim == f_simplex_dim) {
           pointVector.clear();
 #ifdef DEBUG_TRACES
-          std::cout << "Sigma of dim " << decr_dim << " is";
+          std::clog << "Sigma of dim " << decr_dim << " is";
 #endif  // DEBUG_TRACES
           for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
             pointVector.push_back(get_point(vertex));
 #ifdef DEBUG_TRACES
-            std::cout << " " << vertex;
+            std::clog << " " << vertex;
 #endif  // DEBUG_TRACES
           }
 #ifdef DEBUG_TRACES
-          std::cout << std::endl;
+          std::clog << std::endl;
 #endif  // DEBUG_TRACES
           // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
           if (std::isnan(complex.filtration(f_simplex))) {
@@ -355,7 +355,7 @@ class Alpha_complex {
             }
             complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
+            std::clog << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
 #endif  // DEBUG_TRACES
           }
           // No need to propagate further, unweighted points all have value 0
@@ -387,13 +387,13 @@ class Alpha_complex {
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
-      std::cout << " | --------------------------------------------------\n";
-      std::cout << " | Tau ";
+      std::clog << " | --------------------------------------------------\n";
+      std::clog << " | Tau ";
       for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
-        std::cout << vertex << " ";
+        std::clog << vertex << " ";
       }
-      std::cout << "is a face of Sigma\n";
-      std::cout << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
+      std::clog << "is a face of Sigma\n";
+      std::clog << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
       if (!std::isnan(complex.filtration(f_boundary))) {
@@ -402,7 +402,7 @@ class Alpha_complex {
                                                                              complex.filtration(f_simplex));
         complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << complex.filtration(f_boundary) << std::endl;
+        std::clog << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
         // ### Else
       } else {
@@ -432,7 +432,7 @@ class Alpha_complex {
         bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
           != CGAL::ON_BOUNDED_SIDE;
 #ifdef DEBUG_TRACES
-        std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
+        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
 #endif  // DEBUG_TRACES
         // ### If Tau is not Gabriel of Sigma
         if (false == is_gab) {
@@ -440,7 +440,7 @@ class Alpha_complex {
           Filtration_value alpha_complex_filtration = complex.filtration(f_simplex);
           complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-          std::cout << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
+          std::clog << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
         }
       }

@@ -334,7 +334,7 @@ class Cover_complex {
     if (num_edges(one_skeleton_OFF))
       one_skeleton = one_skeleton_OFF;
     else
-      std::cout << "No triangulation read in OFF file!" << std::endl;
+      std::cerr << "No triangulation read in OFF file!" << std::endl;
   }
 
  public:  // Set graph from Rips complex.
@@ -397,7 +397,7 @@ class Cover_complex {
     std::ifstream input(distance, std::ios::out | std::ios::binary);
 
     if (input.good()) {
-      if (verbose) std::cout << "Reading distances..." << std::endl;
+      if (verbose) std::clog << "Reading distances..." << std::endl;
       for (int i = 0; i < n; i++) {
         for (int j = i; j < n; j++) {
           input.read((char*)&d, 8);
@@ -407,12 +407,12 @@ class Cover_complex {
       }
       input.close();
     } else {
-      if (verbose) std::cout << "Computing distances..." << std::endl;
+      if (verbose) std::clog << "Computing distances..." << std::endl;
       input.close();
       std::ofstream output(distance, std::ios::out | std::ios::binary);
       for (int i = 0; i < n; i++) {
         int state = (int)floor(100 * (i * 1.0 + 1) / n) % 10;
-        if (state == 0 && verbose) std::cout << "\r" << state << "%" << std::flush;
+        if (state == 0 && verbose) std::clog << "\r" << state << "%" << std::flush;
         for (int j = i; j < n; j++) {
           double dis = ref_distance(point_cloud[i], point_cloud[j]);
           distances[i][j] = dis;
@@ -421,7 +421,7 @@ class Cover_complex {
         }
       }
       output.close();
-      if (verbose) std::cout << std::endl;
+      if (verbose) std::clog << std::endl;
     }
   }
 
@@ -441,8 +441,8 @@ class Cover_complex {
     m = (std::min)(m, n - 1);
     double delta = 0;
 
-    if (verbose) std::cout << n << " points in R^" << data_dimension << std::endl;
-    if (verbose) std::cout << "Subsampling " << m << " points" << std::endl;
+    if (verbose) std::clog << n << " points in R^" << data_dimension << std::endl;
+    if (verbose) std::clog << "Subsampling " << m << " points" << std::endl;
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
 
@@ -475,7 +475,7 @@ class Cover_complex {
       }
     #endif
 
-    if (verbose) std::cout << "delta = " << delta << std::endl;
+    if (verbose) std::clog << "delta = " << delta << std::endl;
     set_graph_from_rips(delta, distance);
     return delta;
   }
@@ -518,7 +518,7 @@ class Cover_complex {
       cover_name = "coordinate " + std::to_string(k);
     }
     else{
-      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
@@ -551,11 +551,11 @@ class Cover_complex {
            */
   double set_automatic_resolution() {
     if (!functional_cover) {
-      std::cout << "Cover needs to come from the preimages of a function." << std::endl;
+      std::cerr << "Cover needs to come from the preimages of a function." << std::endl;
       return 0;
     }
     if (type != "Nerve" && type != "GIC") {
-      std::cout << "Type of complex needs to be specified." << std::endl;
+      std::cerr << "Type of complex needs to be specified." << std::endl;
       return 0;
     }
 
@@ -567,7 +567,7 @@ class Cover_complex {
       for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
         reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
                                        func[index[boost::target(*ei, one_skeleton)]]));
-      if (verbose) std::cout << "resolution = " << reso << std::endl;
+      if (verbose) std::clog << "resolution = " << reso << std::endl;
       resolution_double = reso;
     }
 
@@ -577,7 +577,7 @@ class Cover_complex {
         reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
                                        func[index[boost::target(*ei, one_skeleton)]]) /
                                   gain);
-      if (verbose) std::cout << "resolution = " << reso << std::endl;
+      if (verbose) std::clog << "resolution = " << reso << std::endl;
       resolution_double = reso;
     }
 
@@ -610,11 +610,11 @@ class Cover_complex {
            */
   void set_cover_from_function() {
     if (resolution_double == -1 && resolution_int == -1) {
-      std::cout << "Number and/or length of intervals not specified" << std::endl;
+      std::cerr << "Number and/or length of intervals not specified" << std::endl;
       return;
     }
     if (gain == -1) {
-      std::cout << "Gain not specified" << std::endl;
+      std::cerr << "Gain not specified" << std::endl;
       return;
     }
 
@@ -625,7 +625,7 @@ class Cover_complex {
       minf = (std::min)(minf, func[i]);
       maxf = (std::max)(maxf, func[i]);
     }
-    if (verbose) std::cout << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
+    if (verbose) std::clog << "Min function value = " << minf << " and Max function value = " << maxf << std::endl;
 
     // Compute cover of im(f)
     std::vector<std::pair<double, double> > intervals;
@@ -651,7 +651,7 @@ class Cover_complex {
       res = intervals.size();
       if (verbose) {
         for (int i = 0; i < res; i++)
-          std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
+          std::clog << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                     << std::endl;
       }
     } else {
@@ -669,7 +669,7 @@ class Cover_complex {
         res = intervals.size();
         if (verbose) {
           for (int i = 0; i < res; i++)
-            std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
+            std::clog << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                       << std::endl;
         }
       } else {  // Case we use an integer and a double for the length of the intervals.
@@ -686,7 +686,7 @@ class Cover_complex {
         res = intervals.size();
         if (verbose) {
           for (int i = 0; i < res; i++)
-            std::cout << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
+            std::clog << "Interval " << i << " = [" << intervals[i].first << ", " << intervals[i].second << "]"
                       << std::endl;
         }
       }
@@ -703,7 +703,7 @@ class Cover_complex {
     std::map<int, std::vector<int> > preimages;
     std::map<int, double> funcstd;
 
-    if (verbose) std::cout << "Computing preimages..." << std::endl;
+    if (verbose) std::clog << "Computing preimages..." << std::endl;
     for (int i = 0; i < res; i++) {
       // Find points in the preimage
       std::pair<double, double> inter1 = intervals[i];
@@ -752,7 +752,7 @@ class Cover_complex {
     }
 
     #ifdef GUDHI_USE_TBB
-      if (verbose) std::cout << "Computing connected components (parallelized)..." << std::endl;
+      if (verbose) std::clog << "Computing connected components (parallelized)..." << std::endl;
       std::mutex covermutex, idmutex;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
@@ -788,7 +788,7 @@ class Cover_complex {
         idmutex.unlock();
       });
     #else
-      if (verbose) std::cout << "Computing connected components..." << std::endl;
+      if (verbose) std::clog << "Computing connected components..." << std::endl;
       for (int i = 0; i < res; i++) {
         // Compute connected components
         Graph G = one_skeleton.create_subgraph();
@@ -882,7 +882,7 @@ class Cover_complex {
 
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
-      if (verbose) std::cout << "Computing geodesic distances (parallelized)..." << std::endl;
+      if (verbose) std::clog << "Computing geodesic distances (parallelized)..." << std::endl;
       std::mutex coverMutex; std::mutex mindistMutex;
       tbb::parallel_for(0, m, [&](int i){
         int seed = voronoi_subsamples[i];
@@ -904,7 +904,7 @@ class Cover_complex {
       });
     #else
       for (int i = 0; i < m; i++) {
-        if (verbose) std::cout << "Computing geodesic distances to seed " << i << "..." << std::endl;
+        if (verbose) std::clog << "Computing geodesic distances to seed " << i << "..." << std::endl;
         int seed = voronoi_subsamples[i];
         std::vector<double> dmap(n);
         boost::dijkstra_shortest_paths(
@@ -979,7 +979,7 @@ class Cover_complex {
       color_name.append(std::to_string(k));
     }
     else{
-      std::cout << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
+      std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
@@ -1042,7 +1042,7 @@ class Cover_complex {
       }
     graphic << "}";
     graphic.close();
-    std::cout << mapp << " file generated. It can be visualized with e.g. neato." << std::endl;
+    std::clog << mapp << " file generated. It can be visualized with e.g. neato." << std::endl;
   }
 
  public:  // Create a .txt file that can be compiled with KeplerMapper.
@@ -1078,7 +1078,7 @@ class Cover_complex {
         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask)
           graphic << name2id[simplices[i][0]] << " " << name2id[simplices[i][1]] << std::endl;
     graphic.close();
-    std::cout << mapp
+    std::clog << mapp
               << " generated. It can be visualized with e.g. python KeplerMapperVisuFromTxtFile.py and firefox."
               << std::endl;
   }
@@ -1125,7 +1125,7 @@ class Cover_complex {
     for (int i = 0; i < numfaces; i++)
       graphic << 3 << " " << faces[i][0] << " " << faces[i][1] << " " << faces[i][2] << std::endl;
     graphic.close();
-    std::cout << mapp << " generated. It can be visualized with e.g. geomview." << std::endl;
+    std::clog << mapp << " generated. It can be visualized with e.g. geomview." << std::endl;
   }
 
   // *******************************************************************************************************************
@@ -1173,7 +1173,7 @@ class Cover_complex {
     for (int i = 0; i < max_dim; i++) {
       std::vector<std::pair<double, double> > bars = pcoh.intervals_in_dimension(i);
       int num_bars = bars.size(); if(i == 0)  num_bars -= 1;
-      if(verbose)  std::cout << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
+      if(verbose)  std::clog << num_bars << " interval(s) in dimension " << i << ":" << std::endl;
       for (int j = 0; j < num_bars; j++) {
         double birth = bars[j].first;
         double death = bars[j].second;
@@ -1187,7 +1187,7 @@ class Cover_complex {
         else
           death = minf + (2 - death) * (maxf - minf);
         PD.push_back(std::pair<double, double>(birth, death));
-        if (verbose) std::cout << "  [" << birth << ", " << death << "]" << std::endl;
+        if (verbose) std::clog << "  [" << birth << ", " << death << "]" << std::endl;
       }
     }
     return PD;
@@ -1201,11 +1201,9 @@ class Cover_complex {
    */
   void compute_distribution(unsigned int N = 100) {
     unsigned int sz = distribution.size();
-    if (sz >= N) {
-      std::cout << "Already done!" << std::endl;
-    } else {
+    if (sz < N) {
       for (unsigned int i = 0; i < N - sz; i++) {
-        if (verbose)  std::cout << "Computing " << i << "th bootstrap, bottleneck distance = ";
+        if (verbose)  std::clog << "Computing " << i << "th bootstrap, bottleneck distance = ";
 
         Cover_complex Cboot; Cboot.n = this->n; Cboot.data_dimension = this->data_dimension; Cboot.type = this->type; Cboot.functional_cover = true;
 
@@ -1231,7 +1229,7 @@ class Cover_complex {
         Cboot.find_simplices();
         Cboot.compute_PD();
         double db = Gudhi::persistence_diagram::bottleneck_distance(this->PD, Cboot.PD);
-        if (verbose)  std::cout << db << std::endl;
+        if (verbose)  std::clog << db << std::endl;
         distribution.push_back(db);
       }
 
@@ -1248,7 +1246,7 @@ class Cover_complex {
   double compute_distance_from_confidence_level(double alpha) {
     unsigned int N = distribution.size();
     double d = distribution[std::floor(alpha * N)];
-    if (verbose)  std::cout << "Distance corresponding to confidence " << alpha << " is " << d << std::endl;
+    if (verbose)  std::clog << "Distance corresponding to confidence " << alpha << " is " << d << std::endl;
     return d;
   }
 
@@ -1263,7 +1261,7 @@ class Cover_complex {
     double level = 1;
     for (unsigned int i = 0; i < N; i++)
       if (distribution[i] >= d){ level = i * 1.0 / N; break; }
-    if (verbose)  std::cout << "Confidence level of distance " << d << " is " << level << std::endl;
+    if (verbose)  std::clog << "Confidence level of distance " << d << " is " << level << std::endl;
     return level;
   }
 
@@ -1276,7 +1274,7 @@ class Cover_complex {
     double distancemin = (std::numeric_limits<double>::max)(); int N = PD.size();
     for (int i = 0; i < N; i++) distancemin = (std::min)(distancemin, 0.5 * std::abs(PD[i].second - PD[i].first));
     double p_value = 1 - compute_confidence_level_from_distance(distancemin);
-    if (verbose)  std::cout << "p value = " << p_value << std::endl;
+    if (verbose)  std::clog << "p value = " << p_value << std::endl;
     return p_value;
   }
 
@@ -1307,7 +1305,7 @@ class Cover_complex {
    */
   void find_simplices() {
     if (type != "Nerve" && type != "GIC") {
-      std::cout << "Type of complex needs to be specified." << std::endl;
+      std::cerr << "Type of complex needs to be specified." << std::endl;
       return;
     }
 
