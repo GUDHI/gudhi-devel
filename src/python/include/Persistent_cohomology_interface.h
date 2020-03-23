@@ -117,8 +117,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
       } else {
         while(diags.size() < dim+1) diags.emplace_back();
         auto w = stptr_->vertex_with_same_filtration(t);
-        diags[dim].push_back(v);
-        diags[dim].push_back(w);
+        auto& d = diags[dim];
+        d.insert(d.end(), { v, w });
       }
     }
     return out;
@@ -152,8 +152,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
           auto v2 = *++i;
           GUDHI_CHECK(++i==std::end(e_vertices), "must be an edge");
           while(diagsinf.size() < dim+1) diagsinf.emplace_back();
-          diagsinf[dim].push_back(v1);
-          diagsinf[dim].push_back(v2);
+          auto& d = diagsinf[dim];
+          d.insert(d.end(), { v1, v2 });
         }
       } else {
         auto et = stptr_->edge_with_same_filtration(t);
@@ -165,9 +165,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
         if(dim == 0) {
           auto v = *std::begin(stptr_->simplex_vertex_range(s));
           if(diags.size()==0)diags.emplace_back();
-          diags[0].push_back(v);
-          diags[0].push_back(w1);
-          diags[0].push_back(w2);
+          auto& d = diags[0];
+          d.insert(d.end(), { v, w1, w2 });
         } else {
           auto es = stptr_->edge_with_same_filtration(s);
           auto&& es_vertices = stptr_->simplex_vertex_range(es);
@@ -176,10 +175,8 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
           auto v2 = *++is;
           GUDHI_CHECK(++is==std::end(es_vertices), "must be an edge");
           while(diags.size() < dim+1) diags.emplace_back();
-          diags[dim].push_back(v1);
-          diags[dim].push_back(v2);
-          diags[dim].push_back(w1);
-          diags[dim].push_back(w2);
+          auto& d = diags[dim];
+          d.insert(d.end(), { v1, v2, w1, w2 });
         }
       }
     }
