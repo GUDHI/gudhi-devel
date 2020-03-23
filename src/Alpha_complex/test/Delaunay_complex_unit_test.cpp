@@ -39,6 +39,9 @@ typedef CGAL::Epick_d< CGAL::Dimension_tag<5> > Inexact_kernel_s;
 
 typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Simplex_handle = Simplex_tree::Simplex_handle;
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of_kernel_variants) {
   std::cout << "*****************************************************************************************************";
   using Point = typename TestedKernel::Point_d;
@@ -49,22 +52,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
   Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex(points);
 
   // Alpha complex
-  Gudhi::Simplex_tree<> stree_from_alpha_complex;
+  Simplex_tree stree_from_alpha_complex;
   BOOST_CHECK(alpha_complex.create_complex(stree_from_alpha_complex));
 
   // Delaunay complex
-  Gudhi::Simplex_tree<> stree_from_delaunay_complex;
+  Simplex_tree stree_from_delaunay_complex;
   BOOST_CHECK(alpha_complex.create_complex(stree_from_delaunay_complex, 0., false, true));
 
   // Check all the simplices from alpha complex are in the Delaunay complex
   for (auto f_simplex : stree_from_alpha_complex.complex_simplex_range()) {
-    std::vector<Gudhi::Simplex_tree<>::Vertex_handle> simplex;
-    for (Gudhi::Simplex_tree<>::Vertex_handle vertex : stree_from_alpha_complex.simplex_vertex_range(f_simplex)) {
-      std::cout << "(" << vertex << ")";
-      simplex.push_back(vertex);
-    }
-    std::cout << std::endl;
-    Gudhi::Simplex_tree<>::Simplex_handle sh = stree_from_delaunay_complex.find(simplex);
+    Simplex_handle sh = stree_from_delaunay_complex.find(stree_from_alpha_complex.simplex_vertex_range(f_simplex));
     BOOST_CHECK(std::isnan(stree_from_delaunay_complex.filtration(sh)));
     BOOST_CHECK(sh != stree_from_delaunay_complex.null_simplex());
   }
