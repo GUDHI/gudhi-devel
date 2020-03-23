@@ -259,7 +259,8 @@ class Alpha_complex {
    * `true`.
    * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
    * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
-   * @param[in] default_filtration_value Set this value to `true` if filtration values are not needed to be computed.
+   * @param[in] default_filtration_value Set this value to `true` if filtration values are not needed to be computed
+   * (will be set to `NaN`).
    * Default value is `false` (which means compute the filtration values).
    *
    * @return true if creation succeeds, false otherwise.
