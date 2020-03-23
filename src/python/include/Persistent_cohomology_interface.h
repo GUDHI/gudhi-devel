@@ -73,15 +73,17 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs;
     auto const& pairs = Base::get_persistent_pairs();
     persistence_pairs.reserve(pairs.size());
+    std::vector<int> birth;
+    std::vector<int> death;
     for (auto pair : pairs) {
-      std::vector<int> birth;
+      birth.clear();
       if (get<0>(pair) != stptr_->null_simplex()) {
         for (auto vertex : stptr_->simplex_vertex_range(get<0>(pair))) {
           birth.push_back(vertex);
         }
       }
 
-      std::vector<int> death;
+      death.clear();
       if (get<1>(pair) != stptr_->null_simplex()) {
         death.reserve(birth.size()+1);
         for (auto vertex : stptr_->simplex_vertex_range(get<1>(pair))) {
@@ -89,7 +91,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
         }
       }
 
-      persistence_pairs.emplace_back(std::move(birth), std::move(death));
+      persistence_pairs.emplace_back(birth, death);
     }
     return persistence_pairs;
   }
