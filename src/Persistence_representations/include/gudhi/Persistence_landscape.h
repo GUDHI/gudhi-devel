@@ -343,7 +343,7 @@ class Persistence_landscape {
     bool dbg = false;
 
     if (dbg) {
-      std::cerr << "to_average.size() : " << to_average.size() << std::endl;
+      std::clog << "to_average.size() : " << to_average.size() << std::endl;
     }
 
     std::vector<Persistence_landscape*> nextLevelMerge(to_average.size());
@@ -357,13 +357,13 @@ class Persistence_landscape {
 
     while (nextLevelMerge.size() != 1) {
       if (dbg) {
-        std::cerr << "nextLevelMerge.size() : " << nextLevelMerge.size() << std::endl;
+        std::clog << "nextLevelMerge.size() : " << nextLevelMerge.size() << std::endl;
       }
       std::vector<Persistence_landscape*> nextNextLevelMerge;
       nextNextLevelMerge.reserve(to_average.size());
       for (size_t i = 0; i < nextLevelMerge.size(); i = i + 2) {
         if (dbg) {
-          std::cerr << "i : " << i << std::endl;
+          std::clog << "i : " << i << std::endl;
         }
         Persistence_landscape* l = new Persistence_landscape;
         if (i + 1 != nextLevelMerge.size()) {
@@ -374,7 +374,7 @@ class Persistence_landscape {
         nextNextLevelMerge.push_back(l);
       }
       if (dbg) {
-        std::cerr << "After this iteration \n";
+        std::clog << "After this iteration \n";
         getchar();
       }
 
@@ -471,25 +471,25 @@ Persistence_landscape::Persistence_landscape(const char* filename, size_t dimens
 bool operatorEqualDbg = false;
 bool Persistence_landscape::operator==(const Persistence_landscape& rhs) const {
   if (this->land.size() != rhs.land.size()) {
-    if (operatorEqualDbg) std::cerr << "1\n";
+    if (operatorEqualDbg) std::clog << "1\n";
     return false;
   }
   for (size_t level = 0; level != this->land.size(); ++level) {
     if (this->land[level].size() != rhs.land[level].size()) {
-      if (operatorEqualDbg) std::cerr << "this->land[level].size() : " << this->land[level].size() << "\n";
-      if (operatorEqualDbg) std::cerr << "rhs.land[level].size() : " << rhs.land[level].size() << "\n";
-      if (operatorEqualDbg) std::cerr << "2\n";
+      if (operatorEqualDbg) std::clog << "this->land[level].size() : " << this->land[level].size() << "\n";
+      if (operatorEqualDbg) std::clog << "rhs.land[level].size() : " << rhs.land[level].size() << "\n";
+      if (operatorEqualDbg) std::clog << "2\n";
       return false;
     }
     for (size_t i = 0; i != this->land[level].size(); ++i) {
       if (!(almost_equal(this->land[level][i].first, rhs.land[level][i].first) &&
             almost_equal(this->land[level][i].second, rhs.land[level][i].second))) {
         if (operatorEqualDbg)
-          std::cerr << "this->land[level][i] : " << this->land[level][i].first << " " << this->land[level][i].second
+          std::clog << "this->land[level][i] : " << this->land[level][i].first << " " << this->land[level][i].second
                     << "\n";
         if (operatorEqualDbg)
-          std::cerr << "rhs.land[level][i] : " << rhs.land[level][i].first << " " << rhs.land[level][i].second << "\n";
-        if (operatorEqualDbg) std::cerr << "3\n";
+          std::clog << "rhs.land[level][i] : " << rhs.land[level][i].first << " " << rhs.land[level][i].second << "\n";
+        if (operatorEqualDbg) std::clog << "3\n";
         return false;
       }
     }
@@ -507,7 +507,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
     const std::vector<std::pair<double, double> >& p, size_t number_of_levels) {
   bool dbg = false;
   if (dbg) {
-    std::cerr << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )"
+    std::clog << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )"
               << std::endl;
   }
 
@@ -517,9 +517,9 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
   std::sort(bars.begin(), bars.end(), compare_points_sorting);
 
   if (dbg) {
-    std::cerr << "Bars : \n";
+    std::clog << "Bars : \n";
     for (size_t i = 0; i != bars.size(); ++i) {
-      std::cerr << bars[i].first << " " << bars[i].second << "\n";
+      std::clog << bars[i].first << " " << bars[i].second << "\n";
     }
     getchar();
   }
@@ -534,7 +534,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
   while (!characteristicPoints.empty()) {
     if (dbg) {
       for (size_t i = 0; i != characteristicPoints.size(); ++i) {
-        std::cout << "(" << characteristicPoints[i].first << " " << characteristicPoints[i].second << ")\n";
+        std::clog << "(" << characteristicPoints[i].first << " " << characteristicPoints[i].second << ")\n";
       }
       std::cin.ignore();
     }
@@ -545,7 +545,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
     lambda_n.push_back(characteristicPoints[0]);
 
     if (dbg) {
-      std::cerr << "1 Adding to lambda_n : (" << -std::numeric_limits<int>::max() << " " << 0 << ") , ("
+      std::clog << "1 Adding to lambda_n : (" << -std::numeric_limits<int>::max() << " " << 0 << ") , ("
                 << minus_length(characteristicPoints[0]) << " " << 0 << ") , (" << characteristicPoints[0].first << " "
                 << characteristicPoints[0].second << ") \n";
     }
@@ -562,13 +562,13 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
               (birth_plus_deaths(lambda_n[lambda_n.size() - 1]) - minus_length(characteristicPoints[i])) / 2);
           lambda_n.push_back(point);
           if (dbg) {
-            std::cerr << "2 Adding to lambda_n : (" << point.first << " " << point.second << ")\n";
+            std::clog << "2 Adding to lambda_n : (" << point.first << " " << point.second << ")\n";
           }
 
           if (dbg) {
-            std::cerr << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
+            std::clog << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
                       << characteristicPoints[i + p].second << "\n";
-            std::cerr << "point : " << point.first << " " << point.second << "\n";
+            std::clog << "point : " << point.first << " " << point.second << "\n";
             getchar();
           }
 
@@ -577,7 +577,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
                  (birth_plus_deaths(point) <= birth_plus_deaths(characteristicPoints[i + p]))) {
             newCharacteristicPoints.push_back(characteristicPoints[i + p]);
             if (dbg) {
-              std::cerr << "3.5 Adding to newCharacteristicPoints : (" << characteristicPoints[i + p].first << " "
+              std::clog << "3.5 Adding to newCharacteristicPoints : (" << characteristicPoints[i + p].first << " "
                         << characteristicPoints[i + p].second << ")\n";
               getchar();
             }
@@ -586,7 +586,7 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
 
           newCharacteristicPoints.push_back(point);
           if (dbg) {
-            std::cerr << "4 Adding to newCharacteristicPoints : (" << point.first << " " << point.second << ")\n";
+            std::clog << "4 Adding to newCharacteristicPoints : (" << point.first << " " << point.second << ")\n";
           }
 
           while ((i + p < characteristicPoints.size()) &&
@@ -594,15 +594,15 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
                  (birth_plus_deaths(point) >= birth_plus_deaths(characteristicPoints[i + p]))) {
             newCharacteristicPoints.push_back(characteristicPoints[i + p]);
             if (dbg) {
-              std::cerr << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
+              std::clog << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
                         << characteristicPoints[i + p].second << "\n";
-              std::cerr << "point : " << point.first << " " << point.second << "\n";
-              std::cerr << "characteristicPoints[i+p] birth and death : " << minus_length(characteristicPoints[i + p])
+              std::clog << "point : " << point.first << " " << point.second << "\n";
+              std::clog << "characteristicPoints[i+p] birth and death : " << minus_length(characteristicPoints[i + p])
                         << " , " << birth_plus_deaths(characteristicPoints[i + p]) << "\n";
-              std::cerr << "point birth and death : " << minus_length(point) << " , " << birth_plus_deaths(point)
+              std::clog << "point birth and death : " << minus_length(point) << " , " << birth_plus_deaths(point)
                         << "\n";
 
-              std::cerr << "3 Adding to newCharacteristicPoints : (" << characteristicPoints[i + p].first << " "
+              std::clog << "3 Adding to newCharacteristicPoints : (" << characteristicPoints[i + p].first << " "
                         << characteristicPoints[i + p].second << ")\n";
               getchar();
             }
@@ -613,20 +613,20 @@ void Persistence_landscape::construct_persistence_landscape_from_barcode(
           lambda_n.push_back(std::make_pair(birth_plus_deaths(lambda_n[lambda_n.size() - 1]), 0));
           lambda_n.push_back(std::make_pair(minus_length(characteristicPoints[i]), 0));
           if (dbg) {
-            std::cerr << "5 Adding to lambda_n : (" << birth_plus_deaths(lambda_n[lambda_n.size() - 1]) << " " << 0
+            std::clog << "5 Adding to lambda_n : (" << birth_plus_deaths(lambda_n[lambda_n.size() - 1]) << " " << 0
                       << ")\n";
-            std::cerr << "5 Adding to lambda_n : (" << minus_length(characteristicPoints[i]) << " " << 0 << ")\n";
+            std::clog << "5 Adding to lambda_n : (" << minus_length(characteristicPoints[i]) << " " << 0 << ")\n";
           }
         }
         lambda_n.push_back(characteristicPoints[i]);
         if (dbg) {
-          std::cerr << "6 Adding to lambda_n : (" << characteristicPoints[i].first << " "
+          std::clog << "6 Adding to lambda_n : (" << characteristicPoints[i].first << " "
                     << characteristicPoints[i].second << ")\n";
         }
       } else {
         newCharacteristicPoints.push_back(characteristicPoints[i]);
         if (dbg) {
-          std::cerr << "7 Adding to newCharacteristicPoints : (" << characteristicPoints[i].first << " "
+          std::clog << "7 Adding to newCharacteristicPoints : (" << characteristicPoints[i].first << " "
                     << characteristicPoints[i].second << ")\n";
         }
       }
@@ -692,7 +692,7 @@ double Persistence_landscape::compute_integral_of_landscape(double p) const {
   double result = 0;
   for (size_t i = 0; i != this->land.size(); ++i) {
     for (size_t nr = 2; nr != this->land[i].size() - 1; ++nr) {
-      if (dbg) std::cout << "nr : " << nr << "\n";
+      if (dbg) std::clog << "nr : " << nr << "\n";
       // In this interval, the landscape has a form f(x) = ax+b. We want to compute integral of (ax+b)^p = 1/a *
       // (ax+b)^{p+1}/(p+1)
       std::pair<double, double> coef = compute_parameters_of_a_line(this->land[i][nr], this->land[i][nr - 1]);
@@ -700,7 +700,7 @@ double Persistence_landscape::compute_integral_of_landscape(double p) const {
       double b = coef.second;
 
       if (dbg)
-        std::cout << "(" << this->land[i][nr].first << "," << this->land[i][nr].second << ") , "
+        std::clog << "(" << this->land[i][nr].first << "," << this->land[i][nr].second << ") , "
                   << this->land[i][nr - 1].first << "," << this->land[i][nr].second << ")" << std::endl;
       if (this->land[i][nr].first == this->land[i][nr - 1].first) continue;
       if (a != 0) {
@@ -710,8 +710,8 @@ double Persistence_landscape::compute_integral_of_landscape(double p) const {
         result += (this->land[i][nr].first - this->land[i][nr - 1].first) * (pow(this->land[i][nr].second, p));
       }
       if (dbg) {
-        std::cout << "a : " << a << " , b : " << b << std::endl;
-        std::cout << "result : " << result << std::endl;
+        std::clog << "a : " << a << " , b : " << b << std::endl;
+        std::clog << "result : " << result << std::endl;
       }
     }
   }
@@ -730,31 +730,31 @@ double Persistence_landscape::compute_value_at_a_given_point(unsigned level, dou
   unsigned coordEnd = this->land[level].size() - 2;
 
   if (compute_value_at_a_given_pointDbg) {
-    std::cerr << "Here \n";
-    std::cerr << "x : " << x << "\n";
-    std::cerr << "this->land[level][coordBegin].first : " << this->land[level][coordBegin].first << "\n";
-    std::cerr << "this->land[level][coordEnd].first : " << this->land[level][coordEnd].first << "\n";
+    std::clog << "Here \n";
+    std::clog << "x : " << x << "\n";
+    std::clog << "this->land[level][coordBegin].first : " << this->land[level][coordBegin].first << "\n";
+    std::clog << "this->land[level][coordEnd].first : " << this->land[level][coordEnd].first << "\n";
   }
 
   // in this case x is outside the support of the landscape, therefore the value of the landscape is 0.
   if (x <= this->land[level][coordBegin].first) return 0;
   if (x >= this->land[level][coordEnd].first) return 0;
 
-  if (compute_value_at_a_given_pointDbg) std::cerr << "Entering to the while loop \n";
+  if (compute_value_at_a_given_pointDbg) std::clog << "Entering to the while loop \n";
 
   while (coordBegin + 1 != coordEnd) {
     if (compute_value_at_a_given_pointDbg) {
-      std::cerr << "coordBegin : " << coordBegin << "\n";
-      std::cerr << "coordEnd : " << coordEnd << "\n";
-      std::cerr << "this->land[level][coordBegin].first : " << this->land[level][coordBegin].first << "\n";
-      std::cerr << "this->land[level][coordEnd].first : " << this->land[level][coordEnd].first << "\n";
+      std::clog << "coordBegin : " << coordBegin << "\n";
+      std::clog << "coordEnd : " << coordEnd << "\n";
+      std::clog << "this->land[level][coordBegin].first : " << this->land[level][coordBegin].first << "\n";
+      std::clog << "this->land[level][coordEnd].first : " << this->land[level][coordEnd].first << "\n";
     }
 
     unsigned newCord = (unsigned)floor((coordEnd + coordBegin) / 2.0);
 
     if (compute_value_at_a_given_pointDbg) {
-      std::cerr << "newCord : " << newCord << "\n";
-      std::cerr << "this->land[level][newCord].first : " << this->land[level][newCord].first << "\n";
+      std::clog << "newCord : " << newCord << "\n";
+      std::clog << "this->land[level][newCord].first : " << this->land[level][newCord].first << "\n";
       std::cin.ignore();
     }
 
@@ -767,12 +767,12 @@ double Persistence_landscape::compute_value_at_a_given_point(unsigned level, dou
   }
 
   if (compute_value_at_a_given_pointDbg) {
-    std::cout << "x : " << x << " is between : " << this->land[level][coordBegin].first << " a  "
+    std::clog << "x : " << x << " is between : " << this->land[level][coordBegin].first << " a  "
               << this->land[level][coordEnd].first << "\n";
-    std::cout << "the y coords are : " << this->land[level][coordBegin].second << " a  "
+    std::clog << "the y coords are : " << this->land[level][coordBegin].second << " a  "
               << this->land[level][coordEnd].second << "\n";
-    std::cerr << "coordBegin : " << coordBegin << "\n";
-    std::cerr << "coordEnd : " << coordEnd << "\n";
+    std::clog << "coordBegin : " << coordBegin << "\n";
+    std::clog << "coordEnd : " << coordEnd << "\n";
     std::cin.ignore();
   }
   return function_value(this->land[level][coordBegin], this->land[level][coordEnd], x);
@@ -810,13 +810,13 @@ Persistence_landscape Persistence_landscape::abs() {
   Persistence_landscape result;
   for (size_t level = 0; level != this->land.size(); ++level) {
     if (AbsDbg) {
-      std::cout << "level: " << level << std::endl;
+      std::clog << "level: " << level << std::endl;
     }
     std::vector<std::pair<double, double> > lambda_n;
     lambda_n.push_back(std::make_pair(-std::numeric_limits<int>::max(), 0));
     for (size_t i = 1; i != this->land[level].size(); ++i) {
       if (AbsDbg) {
-        std::cout << "this->land[" << level << "][" << i << "] : " << this->land[level][i].first << " "
+        std::clog << "this->land[" << level << "][" << i << "] : " << this->land[level][i].first << " "
                   << this->land[level][i].second << std::endl;
       }
       // if a line segment between this->land[level][i-1] and this->land[level][i] crosses the x-axis, then we have to
@@ -828,15 +828,15 @@ Persistence_landscape Persistence_landscape::abs() {
         lambda_n.push_back(std::make_pair(zero, 0));
         lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
         if (AbsDbg) {
-          std::cout << "Adding pair : (" << zero << ",0)" << std::endl;
-          std::cout << "In the same step adding pair : (" << this->land[level][i].first << ","
+          std::clog << "Adding pair : (" << zero << ",0)" << std::endl;
+          std::clog << "In the same step adding pair : (" << this->land[level][i].first << ","
                     << fabs(this->land[level][i].second) << ") " << std::endl;
           std::cin.ignore();
         }
       } else {
         lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
         if (AbsDbg) {
-          std::cout << "Adding pair : (" << this->land[level][i].first << "," << fabs(this->land[level][i].second)
+          std::clog << "Adding pair : (" << this->land[level][i].first << "," << fabs(this->land[level][i].second)
                     << ") " << std::endl;
           std::cin.ignore();
         }
@@ -851,13 +851,13 @@ Persistence_landscape* Persistence_landscape::new_abs() {
   Persistence_landscape* result = new Persistence_landscape(*this);
   for (size_t level = 0; level != this->land.size(); ++level) {
     if (AbsDbg) {
-      std::cout << "level: " << level << std::endl;
+      std::clog << "level: " << level << std::endl;
     }
     std::vector<std::pair<double, double> > lambda_n;
     lambda_n.push_back(std::make_pair(-std::numeric_limits<int>::max(), 0));
     for (size_t i = 1; i != this->land[level].size(); ++i) {
       if (AbsDbg) {
-        std::cout << "this->land[" << level << "][" << i << "] : " << this->land[level][i].first << " "
+        std::clog << "this->land[" << level << "][" << i << "] : " << this->land[level][i].first << " "
                   << this->land[level][i].second << std::endl;
       }
       // if a line segment between this->land[level][i-1] and this->land[level][i] crosses the x-axis, then we have to
@@ -869,15 +869,15 @@ Persistence_landscape* Persistence_landscape::new_abs() {
         lambda_n.push_back(std::make_pair(zero, 0));
         lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
         if (AbsDbg) {
-          std::cout << "Adding pair : (" << zero << ",0)" << std::endl;
-          std::cout << "In the same step adding pair : (" << this->land[level][i].first << ","
+          std::clog << "Adding pair : (" << zero << ",0)" << std::endl;
+          std::clog << "In the same step adding pair : (" << this->land[level][i].first << ","
                     << fabs(this->land[level][i].second) << ") " << std::endl;
           std::cin.ignore();
         }
       } else {
         lambda_n.push_back(std::make_pair(this->land[level][i].first, fabs(this->land[level][i].second)));
         if (AbsDbg) {
-          std::cout << "Adding pair : (" << this->land[level][i].first << "," << fabs(this->land[level][i].second)
+          std::clog << "Adding pair : (" << this->land[level][i].first << "," << fabs(this->land[level][i].second)
                     << ") " << std::endl;
           std::cin.ignore();
         }
@@ -943,11 +943,11 @@ void Persistence_landscape::load_landscape_from_file(const char* filename) {
       lineSS >> endd;
       landscapeAtThisLevel.push_back(std::make_pair(beginn, endd));
       if (dbg) {
-        std::cerr << "Reading a point : " << beginn << " , " << endd << std::endl;
+        std::clog << "Reading a point : " << beginn << " , " << endd << std::endl;
       }
     } else {
       if (dbg) {
-        std::cout << "IGNORE LINE\n";
+        std::clog << "IGNORE LINE\n";
         getchar();
       }
       if (!isThisAFirsLine) {
@@ -975,7 +975,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
                                                       const Persistence_landscape& land2) {
   bool operation_on_pair_of_landscapesDBG = false;
   if (operation_on_pair_of_landscapesDBG) {
-    std::cout << "operation_on_pair_of_landscapes\n";
+    std::clog << "operation_on_pair_of_landscapes\n";
     std::cin.ignore();
   }
   Persistence_landscape result;
@@ -985,8 +985,8 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
 
   if (operation_on_pair_of_landscapesDBG) {
     for (size_t i = 0; i != std::min(land1.land.size(), land2.land.size()); ++i) {
-      std::cerr << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
-      std::cerr << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;
+      std::clog << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
+      std::clog << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;
     }
     getchar();
   }
@@ -997,20 +997,20 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
     size_t q = 0;
     while ((p + 1 < land1.land[i].size()) && (q + 1 < land2.land[i].size())) {
       if (operation_on_pair_of_landscapesDBG) {
-        std::cerr << "p : " << p << "\n";
-        std::cerr << "q : " << q << "\n";
-        std::cerr << "land1.land.size() : " << land1.land.size() << std::endl;
-        std::cerr << "land2.land.size() : " << land2.land.size() << std::endl;
-        std::cerr << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
-        std::cerr << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;
-        std::cout << "land1.land[i][p].first : " << land1.land[i][p].first << "\n";
-        std::cout << "land2.land[i][q].first : " << land2.land[i][q].first << "\n";
+        std::clog << "p : " << p << "\n";
+        std::clog << "q : " << q << "\n";
+        std::clog << "land1.land.size() : " << land1.land.size() << std::endl;
+        std::clog << "land2.land.size() : " << land2.land.size() << std::endl;
+        std::clog << "land1.land[" << i << "].size() : " << land1.land[i].size() << std::endl;
+        std::clog << "land2.land[" << i << "].size() : " << land2.land[i].size() << std::endl;
+        std::clog << "land1.land[i][p].first : " << land1.land[i][p].first << "\n";
+        std::clog << "land2.land[i][q].first : " << land2.land[i][q].first << "\n";
       }
 
       if (land1.land[i][p].first < land2.land[i][q].first) {
         if (operation_on_pair_of_landscapesDBG) {
-          std::cout << "first \n";
-          std::cout << " function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) : "
+          std::clog << "first \n";
+          std::clog << " function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) : "
                     << function_value(land2.land[i][q - 1], land2.land[i][q], land1.land[i][p].first) << "\n";
         }
         lambda_n.push_back(
@@ -1022,12 +1022,12 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
       }
       if (land1.land[i][p].first > land2.land[i][q].first) {
         if (operation_on_pair_of_landscapesDBG) {
-          std::cout << "Second \n";
-          std::cout << "function_value(" << land1.land[i][p - 1].first << " " << land1.land[i][p - 1].second << " ,"
+          std::clog << "Second \n";
+          std::clog << "function_value(" << land1.land[i][p - 1].first << " " << land1.land[i][p - 1].second << " ,"
                     << land1.land[i][p].first << " " << land1.land[i][p].second << ", " << land2.land[i][q].first
                     << " ) : " << function_value(land1.land[i][p - 1], land1.land[i][p - 1], land2.land[i][q].first)
                     << "\n";
-          std::cout << "oper( " << function_value(land1.land[i][p], land1.land[i][p - 1], land2.land[i][q].first) << ","
+          std::clog << "oper( " << function_value(land1.land[i][p], land1.land[i][p - 1], land2.land[i][q].first) << ","
                     << land2.land[i][q].second << " : "
                     << oper(land2.land[i][q].second,
                             function_value(land1.land[i][p], land1.land[i][p - 1], land2.land[i][q].first))
@@ -1040,19 +1040,19 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
         continue;
       }
       if (land1.land[i][p].first == land2.land[i][q].first) {
-        if (operation_on_pair_of_landscapesDBG) std::cout << "Third \n";
+        if (operation_on_pair_of_landscapesDBG) std::clog << "Third \n";
         lambda_n.push_back(
             std::make_pair(land2.land[i][q].first, oper(land1.land[i][p].second, land2.land[i][q].second)));
         ++p;
         ++q;
       }
       if (operation_on_pair_of_landscapesDBG) {
-        std::cout << "Next iteration \n";
+        std::clog << "Next iteration \n";
       }
     }
     while ((p + 1 < land1.land[i].size()) && (q + 1 >= land2.land[i].size())) {
       if (operation_on_pair_of_landscapesDBG) {
-        std::cout << "New point : " << land1.land[i][p].first
+        std::clog << "New point : " << land1.land[i][p].first
                   << "  oper(land1.land[i][p].second,0) : " << oper(land1.land[i][p].second, 0) << std::endl;
       }
       lambda_n.push_back(std::make_pair(land1.land[i][p].first, oper(land1.land[i][p].second, 0)));
@@ -1060,7 +1060,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
     }
     while ((p + 1 >= land1.land[i].size()) && (q + 1 < land2.land[i].size())) {
       if (operation_on_pair_of_landscapesDBG) {
-        std::cout << "New point : " << land2.land[i][q].first
+        std::clog << "New point : " << land2.land[i][q].first
                   << " oper(0,land2.land[i][q].second) : " << oper(0, land2.land[i][q].second) << std::endl;
       }
       lambda_n.push_back(std::make_pair(land2.land[i][q].first, oper(0, land2.land[i][q].second)));
@@ -1073,7 +1073,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
   }
   if (land1.land.size() > std::min(land1.land.size(), land2.land.size())) {
     if (operation_on_pair_of_landscapesDBG) {
-      std::cout << "land1.land.size() > std::min( land1.land.size() , land2.land.size() )" << std::endl;
+      std::clog << "land1.land.size() > std::min( land1.land.size() , land2.land.size() )" << std::endl;
     }
     for (size_t i = std::min(land1.land.size(), land2.land.size()); i != std::max(land1.land.size(), land2.land.size());
          ++i) {
@@ -1088,7 +1088,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
   }
   if (land2.land.size() > std::min(land1.land.size(), land2.land.size())) {
     if (operation_on_pair_of_landscapesDBG) {
-      std::cout << "( land2.land.size() > std::min( land1.land.size() , land2.land.size() ) ) " << std::endl;
+      std::clog << "( land2.land.size() > std::min( land1.land.size() , land2.land.size() ) ) " << std::endl;
     }
     for (size_t i = std::min(land1.land.size(), land2.land.size()); i != std::max(land1.land.size(), land2.land.size());
          ++i) {
@@ -1102,7 +1102,7 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
     }
   }
   if (operation_on_pair_of_landscapesDBG) {
-    std::cout << "operation_on_pair_of_landscapes END\n";
+    std::clog << "operation_on_pair_of_landscapes END\n";
     std::cin.ignore();
   }
   return result;
@@ -1110,20 +1110,20 @@ Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscap
 
 double compute_maximal_distance_non_symmetric(const Persistence_landscape& pl1, const Persistence_landscape& pl2) {
   bool dbg = false;
-  if (dbg) std::cerr << " compute_maximal_distance_non_symmetric \n";
+  if (dbg) std::clog << " compute_maximal_distance_non_symmetric \n";
   // this distance is not symmetric. It compute ONLY distance between inflection points of pl1 and pl2.
   double maxDist = 0;
   size_t minimalNumberOfLevels = std::min(pl1.land.size(), pl2.land.size());
   for (size_t level = 0; level != minimalNumberOfLevels; ++level) {
     if (dbg) {
-      std::cerr << "Level : " << level << std::endl;
-      std::cerr << "PL1 : \n";
+      std::clog << "Level : " << level << std::endl;
+      std::clog << "PL1 : \n";
       for (size_t i = 0; i != pl1.land[level].size(); ++i) {
-        std::cerr << "(" << pl1.land[level][i].first << "," << pl1.land[level][i].second << ") \n";
+        std::clog << "(" << pl1.land[level][i].first << "," << pl1.land[level][i].second << ") \n";
       }
-      std::cerr << "PL2 : \n";
+      std::clog << "PL2 : \n";
       for (size_t i = 0; i != pl2.land[level].size(); ++i) {
-        std::cerr << "(" << pl2.land[level][i].first << "," << pl2.land[level][i].second << ") \n";
+        std::clog << "(" << pl2.land[level][i].first << "," << pl2.land[level][i].second << ") \n";
       }
       std::cin.ignore();
     }
@@ -1143,24 +1143,24 @@ double compute_maximal_distance_non_symmetric(const Persistence_landscape& pl1, 
       if (maxDist <= val) maxDist = val;
 
       if (dbg) {
-        std::cerr << pl1.land[level][i].first << "in [" << pl2.land[level][p2Count].first << ","
+        std::clog << pl1.land[level][i].first << "in [" << pl2.land[level][p2Count].first << ","
                   << pl2.land[level][p2Count + 1].first << "] \n";
-        std::cerr << "pl1[level][i].second : " << pl1.land[level][i].second << std::endl;
-        std::cerr << "function_value( pl2[level][p2Count] , pl2[level][p2Count+1] , pl1[level][i].first ) : "
+        std::clog << "pl1[level][i].second : " << pl1.land[level][i].second << std::endl;
+        std::clog << "function_value( pl2[level][p2Count] , pl2[level][p2Count+1] , pl1[level][i].first ) : "
                   << function_value(pl2.land[level][p2Count], pl2.land[level][p2Count + 1], pl1.land[level][i].first)
                   << std::endl;
-        std::cerr << "val : " << val << std::endl;
+        std::clog << "val : " << val << std::endl;
         std::cin.ignore();
       }
     }
   }
 
-  if (dbg) std::cerr << "minimalNumberOfLevels : " << minimalNumberOfLevels << std::endl;
+  if (dbg) std::clog << "minimalNumberOfLevels : " << minimalNumberOfLevels << std::endl;
 
   if (minimalNumberOfLevels < pl1.land.size()) {
     for (size_t level = minimalNumberOfLevels; level != pl1.land.size(); ++level) {
       for (size_t i = 0; i != pl1.land[level].size(); ++i) {
-        if (dbg) std::cerr << "pl1[level][i].second  : " << pl1.land[level][i].second << std::endl;
+        if (dbg) std::clog << "pl1[level][i].second  : " << pl1.land[level][i].second << std::endl;
         if (maxDist < pl1.land[level][i].second) maxDist = pl1.land[level][i].second;
       }
     }
@@ -1181,7 +1181,7 @@ double compute_distance_of_landscapes(const Persistence_landscape& first, const 
   lan = lan.abs();
 
   if (dbg) {
-    std::cerr << "Abs of difference ; " << lan << std::endl;
+    std::clog << "Abs of difference ; " << lan << std::endl;
     getchar();
   }
 
@@ -1189,17 +1189,17 @@ double compute_distance_of_landscapes(const Persistence_landscape& first, const 
     // \int_{- \infty}^{+\infty}| first-second |^p
     double result;
     if (p != 1) {
-      if (dbg) std::cerr << "Power != 1, compute integral to the power p\n";
+      if (dbg) std::clog << "Power != 1, compute integral to the power p\n";
       result = lan.compute_integral_of_landscape(p);
     } else {
-      if (dbg) std::cerr << "Power = 1, compute integral \n";
+      if (dbg) std::clog << "Power = 1, compute integral \n";
       result = lan.compute_integral_of_landscape();
     }
     // (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p)
     return pow(result, 1.0 / p);
   } else {
     // p == infty
-    if (dbg) std::cerr << "Power = infty, compute maximum \n";
+    if (dbg) std::clog << "Power = infty, compute maximum \n";
     return lan.compute_maximum();
   }
 }
@@ -1220,7 +1220,7 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
 
   for (size_t level = 0; level != std::min(l1.size(), l2.size()); ++level) {
     if (dbg) {
-      std::cerr << "Computing inner product for a level : " << level << std::endl;
+      std::clog << "Computing inner product for a level : " << level << std::endl;
       getchar();
     }
     auto&& l1_land_level = l1.land[level];
@@ -1267,14 +1267,14 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
       result += contributionFromThisPart;
 
       if (dbg) {
-        std::cerr << "[l1_land_level[l1It].first,l1_land_level[l1It+1].first] : " << l1_land_level[l1It].first
+        std::clog << "[l1_land_level[l1It].first,l1_land_level[l1It+1].first] : " << l1_land_level[l1It].first
                   << " , " << l1_land_level[l1It + 1].first << std::endl;
-        std::cerr << "[l2_land_level[l2It].first,l2_land_level[l2It+1].first] : " << l2_land_level[l2It].first
+        std::clog << "[l2_land_level[l2It].first,l2_land_level[l2It+1].first] : " << l2_land_level[l2It].first
                   << " , " << l2_land_level[l2It + 1].first << std::endl;
-        std::cerr << "a : " << a << ", b : " << b << " , c: " << c << ", d : " << d << std::endl;
-        std::cerr << "x1 : " << x1 << " , x2 : " << x2 << std::endl;
-        std::cerr << "contributionFromThisPart : " << contributionFromThisPart << std::endl;
-        std::cerr << "result : " << result << std::endl;
+        std::clog << "a : " << a << ", b : " << b << " , c: " << c << ", d : " << d << std::endl;
+        std::clog << "x1 : " << x1 << " , x2 : " << x2 << std::endl;
+        std::clog << "contributionFromThisPart : " << contributionFromThisPart << std::endl;
+        std::clog << "result : " << result << std::endl;
         getchar();
       }
 
@@ -1290,11 +1290,11 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
           // in this case, we increment both:
           ++l2It;
           if (dbg) {
-            std::cerr << "Incrementing both \n";
+            std::clog << "Incrementing both \n";
           }
         } else {
           if (dbg) {
-            std::cerr << "Incrementing first \n";
+            std::clog << "Incrementing first \n";
           }
         }
         ++l1It;
@@ -1302,7 +1302,7 @@ double compute_inner_product(const Persistence_landscape& l1, const Persistence_
         // in this case we increment l2It
         ++l2It;
         if (dbg) {
-          std::cerr << "Incrementing second \n";
+          std::clog << "Incrementing second \n";
         }
       }
 
@@ -1361,7 +1361,7 @@ void Persistence_landscape::plot(const char* filename, double xRangeBegin, doubl
     }
     out << "EOF" << std::endl;
   }
-  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+  std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 }
 

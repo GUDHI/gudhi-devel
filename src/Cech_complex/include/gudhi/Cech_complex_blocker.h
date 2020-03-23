@@ -53,12 +53,12 @@ class Cech_blocker {
     for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
       points.push_back(cc_ptr_->get_point(vertex));
 #ifdef DEBUG_TRACES
-      std::cout << "#(" << vertex << ")#";
+      std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
     Filtration_value radius = Gudhi::Minimal_enclosing_ball_radius()(points);
 #ifdef DEBUG_TRACES
-    if (radius > cc_ptr_->max_radius()) std::cout << "radius > max_radius => expansion is blocked\n";
+    if (radius > cc_ptr_->max_radius()) std::clog << "radius > max_radius => expansion is blocked\n";
 #endif  // DEBUG_TRACES
     sc_ptr_->assign_filtration(sh, radius);
     return (radius > cc_ptr_->max_radius());

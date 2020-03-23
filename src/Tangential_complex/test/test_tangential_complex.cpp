@@ -76,14 +76,14 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
   points.push_back(Point(point.size(), point.begin(), point.end()));
   point = {1.0, 1.0};
   points.push_back(Point(point.size(), point.begin(), point.end()));
-  std::cout << "points = " << points.size() << std::endl;
+  std::clog << "points = " << points.size() << std::endl;
   Kernel k;
 
   // Compute the TC
   TC tc(points, INTRINSIC_DIM, k);
   tc.compute_tangential_complex();
   TC::Num_inconsistencies num_inc = tc.number_of_inconsistent_simplices();
-  std::cout << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
+  std::clog << "TC vertices = " << tc.number_of_vertices() << " - simplices = " << num_inc.num_simplices <<
                " - inc simplices = " << num_inc.num_inconsistent_simplices <<
                " - inc stars = " << num_inc.num_inconsistent_stars << std::endl;
 
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
   tc.create_complex(stree);
-  std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
+  std::clog << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
 
   BOOST_CHECK(stree.num_vertices() == 4);
   BOOST_CHECK(stree.num_simplices() == 6);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_mini_tangential) {
 
   // Export the TC into a Simplex_tree
   tc.create_complex(stree);
-  std::cout << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
+  std::clog << "ST vertices = " << stree.num_vertices() << " - simplices = " << stree.num_simplices() << std::endl;
 
   BOOST_CHECK(stree.num_vertices() == 4);
   BOOST_CHECK(stree.num_simplices() == 6);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_basic_example_throw) {
   // Compute the TC
   TC tc(points, INTRINSIC_DIM, k);
   tc.set_max_squared_edge_length(0.01);
-  std::cout << "test_basic_example_throw - set_max_squared_edge_length(0.01) to make GUDHI_CHECK fail" << std::endl;
+  std::clog << "test_basic_example_throw - set_max_squared_edge_length(0.01) to make GUDHI_CHECK fail" << std::endl;
   BOOST_CHECK_THROW(tc.compute_tangential_complex(), std::invalid_argument);
 
 }

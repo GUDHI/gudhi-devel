@@ -21,7 +21,7 @@
 int main(int argc, char** argv) {
   srand(time(0));
 
-  std::cout
+  std::clog
       << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical "
       << "complexes. The first parameter of the program is the dimension D of the bitmap. The next D parameters are "
       << "number of top dimensional cubes in each dimension of the bitmap. The program will create random cubical "

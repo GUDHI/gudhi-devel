@@ -41,9 +41,9 @@ class Clock {
     return msg;
   }
 
-  // Print current value to std::cout
+  // Print current value to std::clog
   void print() const {
-    std::cout << *this << std::endl;
+    std::clog << *this << std::endl;
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const Clock& clock) {

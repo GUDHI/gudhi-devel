@@ -61,10 +61,7 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
+thread_local double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
 
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //
@@ -472,7 +469,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
 
     alpha_shape_3_ptr_->filtration_with_alpha_values(dispatcher);
 #ifdef DEBUG_TRACES
-    std::cout << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
+    std::clog << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
     using Alpha_value_iterator = typename std::vector<FT>::const_iterator;
@@ -484,7 +481,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
       if (const Cell_handle* cell = CGAL::object_cast<Cell_handle>(&object_iterator)) {
         for (auto i = 0; i < 4; i++) {
 #ifdef DEBUG_TRACES
-          std::cout << "from cell[" << i << "] - Point coordinates (" << (*cell)->vertex(i)->point() << ")"
+          std::clog << "from cell[" << i << "] - Point coordinates (" << (*cell)->vertex(i)->point() << ")"
                     << std::endl;
 #endif  // DEBUG_TRACES
           vertex_list.push_back((*cell)->vertex(i));
@@ -496,7 +493,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
         for (auto i = 0; i < 4; i++) {
           if ((*facet).second != i) {
 #ifdef DEBUG_TRACES
-            std::cout << "from facet=[" << i << "] - Point coordinates (" << (*facet).first->vertex(i)->point() << ")"
+            std::clog << "from facet=[" << i << "] - Point coordinates (" << (*facet).first->vertex(i)->point() << ")"
                       << std::endl;
 #endif  // DEBUG_TRACES
             vertex_list.push_back((*facet).first->vertex(i));
@@ -508,7 +505,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
       } else if (const Edge* edge = CGAL::object_cast<Edge>(&object_iterator)) {
         for (auto i : {(*edge).second, (*edge).third}) {
 #ifdef DEBUG_TRACES
-          std::cout << "from edge[" << i << "] - Point coordinates (" << (*edge).first->vertex(i)->point() << ")"
+          std::clog << "from edge[" << i << "] - Point coordinates (" << (*edge).first->vertex(i)->point() << ")"
                     << std::endl;
 #endif  // DEBUG_TRACES
           vertex_list.push_back((*edge).first->vertex(i));
@@ -519,7 +516,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
       } else if (const Alpha_vertex_handle* vertex = CGAL::object_cast<Alpha_vertex_handle>(&object_iterator)) {
 #ifdef DEBUG_TRACES
         count_vertices++;
-        std::cout << "from vertex - Point coordinates (" << (*vertex)->point() << ")" << std::endl;
+        std::clog << "from vertex - Point coordinates (" << (*vertex)->point() << ")" << std::endl;
 #endif  // DEBUG_TRACES
         vertex_list.push_back((*vertex));
       }
@@ -531,7 +528,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
           // alpha shape not found
           Complex_vertex_handle vertex = map_cgal_simplex_tree.size();
 #ifdef DEBUG_TRACES
-          std::cout << "Point (" << the_alpha_shape_vertex->point() << ") not found - insert new vertex id " << vertex
+          std::clog << "Point (" << the_alpha_shape_vertex->point() << ") not found - insert new vertex id " << vertex
                     << std::endl;
 #endif  // DEBUG_TRACES
           the_simplex.push_back(vertex);
@@ -540,7 +537,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
           // alpha shape found
           Complex_vertex_handle vertex = the_map_iterator->second;
 #ifdef DEBUG_TRACES
-          std::cout << "Point (" << the_alpha_shape_vertex->point() << ") found as vertex id " << vertex << std::endl;
+          std::clog << "Point (" << the_alpha_shape_vertex->point() << ") found as vertex id " << vertex << std::endl;
 #endif  // DEBUG_TRACES
           the_simplex.push_back(vertex);
         }
@@ -549,7 +546,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
       Filtration_value filtr = Value_from_iterator<Complexity>::perform(alpha_value_iterator);
 
 #ifdef DEBUG_TRACES
-      std::cout << "filtration = " << filtr << std::endl;
+      std::clog << "filtration = " << filtr << std::endl;
 #endif  // DEBUG_TRACES
       complex.insert_simplex(the_simplex, static_cast<Filtration_value>(filtr));
       GUDHI_CHECK(alpha_value_iterator != alpha_values.end(), "CGAL provided more simplices than values");
@@ -557,10 +554,10 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
     }
 
 #ifdef DEBUG_TRACES
-    std::cout << "vertices \t" << count_vertices << std::endl;
-    std::cout << "edges \t\t" << count_edges << std::endl;
-    std::cout << "facets \t\t" << count_facets << std::endl;
-    std::cout << "cells \t\t" << count_cells << std::endl;
+    std::clog << "vertices \t" << count_vertices << std::endl;
+    std::clog << "edges \t\t" << count_edges << std::endl;
+    std::clog << "facets \t\t" << count_facets << std::endl;
+    std::clog << "cells \t\t" << count_cells << std::endl;
 #endif  // DEBUG_TRACES
     // --------------------------------------------------------------------------------------------
     // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension

@@ -142,7 +142,7 @@ class Bitmap_cubical_complex_base {
       }
       if (coface_counter[i] != face_counter[i]) {
         if (number_of_position_in_which_counters_do_not_agree != -1) {
-          std::cout << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
+          std::cerr << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
           throw std::logic_error(
               "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
         }
@@ -408,7 +408,7 @@ class Bitmap_cubical_complex_base {
 
     void print_counter() const {
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
-        std::cout << this->counter[i] << " ";
+        std::clog << this->counter[i] << " ";
       }
     }
     friend class Bitmap_cubical_complex_base;
@@ -521,11 +521,11 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(std::size_t number_of_bins
   // now put the data into the appropriate bins:
   for (std::size_t i = 0; i != this->data.size(); ++i) {
     if (dbg) {
-      std::cerr << "Before binning : " << this->data[i] << std::endl;
+      std::clog << "Before binning : " << this->data[i] << std::endl;
     }
     this->data[i] = min_max.first + dx * (this->data[i] - min_max.first) / number_of_bins;
     if (dbg) {
-      std::cerr << "After binning : " << this->data[i] << std::endl;
+      std::clog << "After binning : " << this->data[i] << std::endl;
     }
   }
 }
@@ -539,11 +539,11 @@ void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
   // now put the data into the appropriate bins:
   for (std::size_t i = 0; i != this->data.size(); ++i) {
     if (dbg) {
-      std::cerr << "Before binning : " << this->data[i] << std::endl;
+      std::clog << "Before binning : " << this->data[i] << std::endl;
     }
     this->data[i] = min_max.first + diameter_of_bin * (this->data[i] - min_max.first) / number_of_bins;
     if (dbg) {
-      std::cerr << "After binning : " << this->data[i] << std::endl;
+      std::clog << "After binning : " << this->data[i] << std::endl;
     }
   }
 }
@@ -617,7 +617,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   inFiltration >> dimensionOfData;
 
   if (dbg) {
-    std::cerr << "dimensionOfData : " << dimensionOfData << std::endl;
+    std::clog << "dimensionOfData : " << dimensionOfData << std::endl;
   }
 
   std::vector<unsigned> sizes;
@@ -630,7 +630,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
     sizes.push_back(size_in_this_dimension);
     dimensions *= size_in_this_dimension;
     if (dbg) {
-      std::cerr << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
+      std::clog << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
     }
   }
   this->set_up_containers(sizes);
@@ -651,7 +651,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
       }
 
       if (dbg) {
-        std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
+        std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
                   << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
                   << " get the value : " << filtrationLevel << std::endl;
       }
@@ -754,20 +754,20 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cel
 template <typename T>
 unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(std::size_t cell) const {
   bool dbg = false;
-  if (dbg) std::cerr << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
+  if (dbg) std::clog << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
   unsigned dimension = 0;
   for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell / this->multipliers[i - 1];
 
     if (dbg) {
-      std::cerr << "i-1 :" << i - 1 << std::endl;
-      std::cerr << "cell : " << cell << std::endl;
-      std::cerr << "position : " << position << std::endl;
-      std::cerr << "multipliers[" << i - 1 << "] = " << this->multipliers[i - 1] << std::endl;
+      std::clog << "i-1 :" << i - 1 << std::endl;
+      std::clog << "cell : " << cell << std::endl;
+      std::clog << "position : " << position << std::endl;
+      std::clog << "multipliers[" << i - 1 << "] = " << this->multipliers[i - 1] << std::endl;
     }
 
     if (position % 2 == 1) {
-      if (dbg) std::cerr << "Nonzero length in this direction \n";
+      if (dbg) std::clog << "Nonzero length in this direction \n";
       dimension++;
     }
     cell = cell % this->multipliers[i - 1];
@@ -803,9 +803,9 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
 
   while (indices_to_consider.size()) {
     if (dbg) {
-      std::cerr << "indices_to_consider in this iteration \n";
+      std::clog << "indices_to_consider in this iteration \n";
       for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-        std::cout << indices_to_consider[i] << "  ";
+        std::clog << indices_to_consider[i] << "  ";
       }
     }
     std::vector<std::size_t> new_indices_to_consider;
@@ -813,14 +813,14 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
       std::vector<std::size_t> bd = this->get_boundary_of_a_cell(indices_to_consider[i]);
       for (std::size_t boundaryIt = 0; boundaryIt != bd.size(); ++boundaryIt) {
         if (dbg) {
-          std::cerr << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
+          std::clog << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
                     << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
                     << std::endl;
         }
         if (this->data[bd[boundaryIt]] > this->data[indices_to_consider[i]]) {
           this->data[bd[boundaryIt]] = this->data[indices_to_consider[i]];
           if (dbg) {
-            std::cerr << "Setting the value of a cell : " << bd[boundaryIt]
+            std::clog << "Setting the value of a cell : " << bd[boundaryIt]
                       << " to : " << this->data[indices_to_consider[i]] << std::endl;
           }
         }

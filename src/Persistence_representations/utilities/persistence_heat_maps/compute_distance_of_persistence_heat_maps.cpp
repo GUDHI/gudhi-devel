@@ -19,14 +19,14 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes distance of persistence heat maps stored in files (the files needs to be "
+  std::clog << "This program computes distance of persistence heat maps stored in files (the files needs to be "
             << "created beforehand).\n"
             << "The first parameter of a program is an integer p. The program compute L^p distance of the two heat "
             << "maps. For L^infty distance choose p = -1. \n"
             << "The remaining parameters of this program are names of files with persistence heat maps.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -69,14 +69,14 @@ int main(int argc, char** argv) {
   out.open("distance.mps");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
-      std::cout << distance[i][j] << " ";
+      std::clog << distance[i][j] << " ";
       out << distance[i][j] << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     out << std::endl;
   }
   out.close();
 
-  std::cout << "Distance can be found in 'distance.mps' file\n";
+  std::clog << "Distance can be found in 'distance.mps' file\n";
   return 0;
 }

@@ -287,7 +287,7 @@ class Simplex_tree {
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree copy constructor" << std::endl;
+    std::clog << "Simplex_tree copy constructor" << std::endl;
 #endif  // DEBUG_TRACES
     copy_from(complex_source);
   }
@@ -297,7 +297,7 @@ class Simplex_tree {
    */
   Simplex_tree(Simplex_tree && complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move constructor" << std::endl;
+    std::clog << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
     move_from(complex_source);
 
@@ -314,7 +314,7 @@ class Simplex_tree {
   /** \brief User-defined copy assignment reproduces the whole tree structure. */
   Simplex_tree& operator= (const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree copy assignment" << std::endl;
+    std::clog << "Simplex_tree copy assignment" << std::endl;
 #endif  // DEBUG_TRACES
     // Self-assignment detection
     if (&complex_source != this) {
@@ -331,7 +331,7 @@ class Simplex_tree {
    */
   Simplex_tree& operator=(Simplex_tree&& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move assignment" << std::endl;
+    std::clog << "Simplex_tree move assignment" << std::endl;
 #endif  // DEBUG_TRACES
     // Self-assignment detection
     if (&complex_source != this) {
@@ -765,12 +765,7 @@ class Simplex_tree {
     if (first == last)
       return { null_simplex(), true }; // FIXME: false would make more sense to me.
 
-    // Copy before sorting
-    // Thread local is not available on XCode version < V.8 - It will slow down computation
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<Vertex_handle> copy;
+    thread_local std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(copy.begin(), copy.end());
@@ -1133,10 +1128,7 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<std::pair<Vertex_handle, Node> > inter;
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
@@ -1432,9 +1424,9 @@ class Simplex_tree {
     for (Simplex_handle sh : complex_simplex_range()) {
 #ifdef DEBUG_TRACES
       for (auto vertex : simplex_vertex_range(sh)) {
-        std::cout << " " << vertex;
+        std::clog << " " << vertex;
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
 #endif  // DEBUG_TRACES
 
       int sh_dimension = dimension(sh);

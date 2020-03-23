@@ -43,13 +43,13 @@ template<typename SkBlComplex> class Rips_builder {
   void compute_edges(double alpha) {
     auto vertices = complex_.vertex_range();
     for (auto p = vertices.begin(); p != vertices.end(); ++p) {
-      std::cout << *p << " ";
-      std::cout.flush();
+      std::clog << *p << " ";
+      std::clog.flush();
       for (auto q = p; ++q != vertices.end(); /**/)
         if (squared_eucl_distance(complex_.point(*p), complex_.point(*q)) < 4 * alpha * alpha)
           complex_.add_edge_without_blockers(*p, *q);
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 };
 
