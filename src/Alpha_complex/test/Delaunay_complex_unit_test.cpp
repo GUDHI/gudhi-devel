@@ -51,14 +51,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
   // Alpha complex
   Gudhi::Simplex_tree<> stree_from_alpha_complex;
   BOOST_CHECK(alpha_complex.create_complex(stree_from_alpha_complex));
-  stree_from_alpha_complex.initialize_filtration();
 
   // Delaunay complex
   Gudhi::Simplex_tree<> stree_from_delaunay_complex;
   BOOST_CHECK(alpha_complex.create_complex(stree_from_delaunay_complex, 0., false, true));
 
   // Check all the simplices from alpha complex are in the Delaunay complex
-  for (auto f_simplex : stree_from_alpha_complex.filtration_simplex_range()) {
+  for (auto f_simplex : stree_from_alpha_complex.complex_simplex_range()) {
     std::vector<Gudhi::Simplex_tree<>::Vertex_handle> simplex;
     for (Gudhi::Simplex_tree<>::Vertex_handle vertex : stree_from_alpha_complex.simplex_vertex_range(f_simplex)) {
       std::cout << "(" << vertex << ")";
