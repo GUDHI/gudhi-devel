@@ -4,9 +4,9 @@
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
    | .. figure::                                                     | These graphical tools comes on top of persistence results and allows  | :Author: Vincent Rouvreau, Theo Lacombe       |
    |      img/graphical_tools_representation.png                     | the user to display easily persistence barcode, diagram or density.   |                                               |
-   |                                                                 |                                                                       | :Introduced in: GUDHI 2.0.0                   |
+   |                                                                 |                                                                       | :Since: GUDHI 2.0.0                           |
    |                                                                 | Note that these functions return the matplotlib axis, allowing        |                                               |
-   |                                                                 | for further modifications (title, aspect, etc.)                       | :Copyright: MIT                               |
+   |                                                                 | for further modifications (title, aspect, etc.)                       | :License: MIT                                 |
    |                                                                 |                                                                       |                                               |
    |                                                                 |                                                                       | :Requires: matplotlib, numpy and scipy        |
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
