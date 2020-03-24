@@ -42,6 +42,20 @@
 
 namespace Gudhi {
 
+/**
+ * \class Extended_simplex_type Simplex_tree.h gudhi/Simplex_tree.h
+ * \brief Extended simplex type data structure for representing the type of simplices in an extended filtration.
+ *
+ * \details The extended simplex type can be either UP (which means
+ * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+ * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+ * EXTRA (which means the simplex is the cone point).
+ *
+ * Details may be found in section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z.
+ *
+ */
+enum class Extended_simplex_type {UP, DOWN, EXTRA};
+
 struct Simplex_tree_options_full_featured;
 
 /**
@@ -87,7 +101,7 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
-  enum Extended_simplex_type {UP, DOWN, EXTRA};
+
 
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
@@ -106,7 +120,7 @@ class Simplex_tree {
     Filtration_value minval;
     Filtration_value maxval;
     Extended_filtration_data(){}
-    Extended_filtration_data(Filtration_value vmin, Filtration_value vmax){ minval = vmin; maxval = vmax; }
+    Extended_filtration_data(Filtration_value vmin, Filtration_value vmax): minval(vmin), maxval(vmax) {}
   };
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
@@ -1370,7 +1384,6 @@ class Simplex_tree {
       // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
       // That seems more useful than keeping NaN.
       if (!(simplex.second.filtration() >= max_filt_border_value)) {
-
         // Store the filtration modification information
         modified = true;
         simplex.second.assign_filtration(max_filt_border_value);
@@ -1509,13 +1522,13 @@ class Simplex_tree {
     Filtration_value minval = efd.minval;
     Filtration_value maxval = efd.maxval;
     if (f >= -2 && f <= -1){
-      p.first = minval + (maxval-minval)*(f + 2); p.second = UP;
+      p.first = minval + (maxval-minval)*(f + 2); p.second = Extended_simplex_type::UP;
     }
     else if (f >= 1 && f <= 2){
-      p.first = minval - (maxval-minval)*(f - 2); p.second = DOWN;
+      p.first = minval - (maxval-minval)*(f - 2); p.second = Extended_simplex_type::DOWN;
     }
     else{
-      p.first = -3; p.second = EXTRA;
+      p.first = std::numeric_limits<Filtration_value>::quiet_NaN(); p.second = Extended_simplex_type::EXTRA;
     }
     return p;
   };

@@ -291,10 +291,8 @@ def test_extend_filtration():
         ([5], 6.0)
     ]
         
-
     st.extend_filtration()
-    st.initialize_filtration()
-                                                                                                                      
+    
     assert list(st.get_filtration()) == [                                                                                                                         
         ([6], -3.0), 
         ([0], -2.0), 
@@ -323,7 +321,7 @@ def test_extend_filtration():
         ([0, 3, 6], 2.0)
     ]
 
-    dgms = st.extended_persistence()
+    dgms = st.extended_persistence(min_persistence=-1.)
 
     assert dgms[0][0][1][0] == pytest.approx(2.)
     assert dgms[0][0][1][1] == pytest.approx(3.)
@@ -333,7 +331,6 @@ def test_extend_filtration():
     assert dgms[2][0][1][1] == pytest.approx(6.)
     assert dgms[3][0][1][0] == pytest.approx(6.)
     assert dgms[3][0][1][1] == pytest.approx(1.) 
-
 
 def test_simplices_iterator():
     st = SimplexTree()
