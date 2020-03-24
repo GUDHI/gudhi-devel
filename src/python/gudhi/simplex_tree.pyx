@@ -536,13 +536,11 @@ cdef class SimplexTree:
 
         :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
-        if self.pcohptr != NULL:
-            gen = self.pcohptr.lower_star_generators()
-            normal = [np_array(d).reshape(-1,2) for d in gen.first]
-            infinite = [np_array(d) for d in gen.second]
-            return (normal, infinite)
-        else:
-            print("lower_star_persistence_generators() requires that persistence() be called first.")
+        assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.lower_star_generators()
+        normal = [np_array(d).reshape(-1,2) for d in gen.first]
+        infinite = [np_array(d) for d in gen.second]
+        return (normal, infinite)
 
     def flag_persistence_generators(self):
         """Assuming this is a flag complex, this function returns the persistence pairs,
@@ -556,23 +554,20 @@ cdef class SimplexTree:
 
         :note: flag_persistence_generators requires that `persistence()` be called first.
         """
-        if self.pcohptr != NULL:
-            gen = self.pcohptr.flag_generators()
-            if len(gen.first) == 0:
-                normal0 = numpy.empty((0,3))
-                normals = []
-            else:
-                l = iter(gen.first)
-                normal0 = np_array(next(l)).reshape(-1,3)
-                normals = [np_array(d).reshape(-1,4) for d in l]
-            if len(gen.second) == 0:
-                infinite0 = numpy.empty(0)
-                infinites = []
-            else:
-                l = iter(gen.second)
-                infinite0 = np_array(next(l))
-                infinites = [np_array(d).reshape(-1,2) for d in l]
-
-            return (normal0, normals, infinite0, infinites)
+        assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.flag_generators()
+        if len(gen.first) == 0:
+            normal0 = numpy.empty((0,3))
+            normals = []
         else:
-            print("flag_persistence_generators() requires that persistence() be called first.")
+            l = iter(gen.first)
+            normal0 = np_array(next(l)).reshape(-1,3)
+            normals = [np_array(d).reshape(-1,4) for d in l]
+        if len(gen.second) == 0:
+            infinite0 = numpy.empty(0)
+            infinites = []
+        else:
+            l = iter(gen.second)
+            infinite0 = np_array(next(l))
+            infinites = [np_array(d).reshape(-1,2) for d in l]
+        return (normal0, normals, infinite0, infinites)
