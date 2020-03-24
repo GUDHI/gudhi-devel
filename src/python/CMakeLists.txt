@@ -374,6 +374,7 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/simplex_tree_example.py)
 
     add_gudhi_py_test(test_simplex_tree)
+    add_gudhi_py_test(test_simplex_generators)
 
     # Witness
     add_test(NAME witness_complex_from_nearest_landmark_table_py_test

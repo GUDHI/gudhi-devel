@@ -526,15 +526,10 @@ cdef class SimplexTree:
             print("intervals_in_dim function requires persistence function"
                   " to be launched first.")
 
-    def lower_star_persistence_generators(self, min_persistence=0.):
+    def lower_star_persistence_generators(self):
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
         where each simplex is replaced with the vertex that gave it its filtration value.
 
-        :param min_persistence: The minimum persistence value to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Set min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
         :returns: First the regular persistence pairs, grouped by dimension, with one vertex per extremity,
             and second the essential features, grouped by dimension, with one vertex each
         :rtype: Tuple[List[numpy.array[int] of shape (n,2)], List[numpy.array[int] of shape (m,)]]
@@ -542,22 +537,17 @@ cdef class SimplexTree:
         :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
         if self.pcohptr != NULL:
-            gen = self.pcohptr.lower_star_generators(min_persistence)
+            gen = self.pcohptr.lower_star_generators()
             normal = [np_array(d).reshape(-1,2) for d in gen.first]
             infinite = [np_array(d) for d in gen.second]
             return (normal, infinite)
         else:
             print("lower_star_persistence_generators() requires that persistence() be called first.")
 
-    def flag_persistence_generators(self, min_persistence=0.):
+    def flag_persistence_generators(self):
         """Assuming this is a flag complex, this function returns the persistence pairs,
         where each simplex is replaced with the vertices of the edges that gave it its filtration value.
 
-        :param min_persistence: The minimum persistence value to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Set min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
         :returns: First the regular persistence pairs of dimension 0, with one vertex for birth and two for death;
             then the other regular persistence pairs, grouped by dimension, with 2 vertices per extremity;
             then the connected components, with one vertex each;
@@ -567,7 +557,7 @@ cdef class SimplexTree:
         :note: flag_persistence_generators requires that `persistence()` be called first.
         """
         if self.pcohptr != NULL:
-            gen = self.pcohptr.flag_generators(min_persistence)
+            gen = self.pcohptr.flag_generators()
             if len(gen.first) == 0:
                 normal0 = numpy.empty((0,3))
                 normals = []

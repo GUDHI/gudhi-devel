@@ -37,7 +37,7 @@ def test_lower_star_generators():
     st.assign_filtration([1], 2)
     st.make_filtration_non_decreasing()
     st.persistence(min_persistence=-1)
-    g = st.lower_star_persistence_generators(min_persistence=-1)
+    g = st.lower_star_persistence_generators()
     assert len(g[0]) == 2
     assert np.array_equal(g[0][0], [[0, 0], [3, 0], [1, 1]])
     assert np.array_equal(g[0][1], [[1, 1]])
