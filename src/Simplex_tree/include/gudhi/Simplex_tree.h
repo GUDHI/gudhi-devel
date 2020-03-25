@@ -51,7 +51,7 @@ namespace Gudhi {
  * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
  * EXTRA (which means the simplex is the cone point).
  *
- * Details may be found in section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z.
+ * Details may be found in \cite Cohen-Steiner2009 and section 2.2 in \cite Carriere16.
  *
  */
 enum class Extended_simplex_type {UP, DOWN, EXTRA};
@@ -1507,7 +1507,7 @@ class Simplex_tree {
    * in the Simplex_tree. Hence, this function also outputs the type of each simplex. It can be either UP (which means
    * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
    * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
-   * EXTRA (which means the simplex is the cone point). Note that if the simplex type is DOWN, the original filtration value
+   * EXTRA (which means the simplex is the cone point). See the definition of Extended_simplex_type. Note that if the simplex type is DOWN, the original filtration value
    * is set to be the original filtration value of the corresponding (not coned) original simplex. 
    * \pre This function should be called only if `extend_filtration()` has been called first!
    * \post The output filtration value is supposed to be the same, but might be a little different, than the

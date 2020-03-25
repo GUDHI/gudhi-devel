@@ -427,7 +427,7 @@ cdef class SimplexTree:
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float.
-        :returns: A list of four persistence diagrams in the format described in :func:`persistence()<gudhi.SimplexTree.persistence>`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+        :returns: A list of four persistence diagrams in the format described in :func:`persistence()<gudhi.SimplexTree.persistence>`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See and https://link.springer.com/article/10.1007/s10208-008-9027-z and section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
 
