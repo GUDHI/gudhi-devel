@@ -150,6 +150,25 @@ function( find_python_module PYTHON_MODULE_NAME )
   endif()
 endfunction( find_python_module )
 
+# For modules that do not define module.__version__
+function( find_python_module_no_version PYTHON_MODULE_NAME )
+  string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
+  execute_process(
+          COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}"
+          RESULT_VARIABLE PYTHON_MODULE_RESULT
+          ERROR_VARIABLE PYTHON_MODULE_ERROR)
+  if(PYTHON_MODULE_RESULT EQUAL 0)
+    # Remove carriage return
+    message ("++ Python module ${PYTHON_MODULE_NAME} found")
+    set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
+  else()
+    message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
+     - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
+     - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
+    set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
+  endif()
+endfunction( find_python_module_no_version )
+
 if( PYTHONINTERP_FOUND )
   find_python_module("cython")
   find_python_module("pytest")
@@ -161,8 +180,8 @@ if( PYTHONINTERP_FOUND )
   find_python_module("ot")
   find_python_module("pybind11")
   find_python_module("torch")
-  find_python_module("hnswlib")
   find_python_module("pykeops")
+  find_python_module_no_version("hnswlib")
 endif()
 
 if(NOT GUDHI_PYTHON_PATH)
