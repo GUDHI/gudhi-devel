@@ -78,6 +78,15 @@ if(PYTHONINTERP_FOUND)
     if(OT_FOUND)
       add_gudhi_debug_info("POT version ${OT_VERSION}")
     endif()
+    if(HNSWLIB_FOUND)
+      add_gudhi_debug_info("HNSWlib version ${OT_VERSION}")
+    endif()
+    if(TORCH_FOUND)
+      add_gudhi_debug_info("PyTorch version ${OT_VERSION}")
+    endif()
+    if(PYKEOPS_FOUND)
+      add_gudhi_debug_info("PyKeOps version ${OT_VERSION}")
+    endif()
 
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
@@ -398,6 +407,11 @@ if(PYTHONINTERP_FOUND)
 
     # Time Delay
     add_gudhi_py_test(test_time_delay)
+
+    # DTM
+    if(SCIPY_FOUND AND SKLEARN_FOUND AND TORCH_FOUND AND HNSWLIB_FOUND AND PYKEOPS_FOUND)
+      add_gudhi_py_test(test_dtm)
+    endif()
 
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
