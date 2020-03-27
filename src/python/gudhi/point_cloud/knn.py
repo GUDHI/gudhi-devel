@@ -11,6 +11,10 @@ import numpy
 
 
 class KNN:
+    """
+    Class wrapping several implementations for computing the k nearest neighbors in a point set.
+    """
+
     def __init__(self, k, return_index=True, return_distance=False, metric="euclidean", **kwargs):
         """
         Args:
@@ -19,22 +23,17 @@ class KNN:
             return_distance (bool): if True, return the distance to each neighbor.
             implementation (str): Choice of the library that does the real work.
 
-                * 'keops' for a brute-force, CUDA implementation through pykeops. Useful when the dimension becomes
-                    large (10+) but the number of points remains low (less than a million).
-                    Only "minkowski" and its aliases are supported.
+                * 'keops' for a brute-force, CUDA implementation through pykeops. Useful when the dimension becomes large (10+) but the number of points remains low (less than a million). Only "minkowski" and its aliases are supported.
                 * 'ckdtree' for scipy's cKDTree. Only "minkowski" and its aliases are supported.
-                * 'sklearn' for scikit-learn's NearestNeighbors.
-                    Note that this provides in particular an option algorithm="brute".
-                * 'hnsw' for hnswlib.Index. It is very fast but does not provide guarantees.
-                    Only supports "euclidean" for now.
+                * 'sklearn' for scikit-learn's NearestNeighbors. Note that this provides in particular an option algorithm="brute".
+                * 'hnsw' for hnswlib.Index. It can be very fast but does not provide guarantees. Only supports "euclidean" for now.
                 * None will try to select a sensible one (scipy if possible, scikit-learn otherwise).
             metric (str): see `sklearn.neighbors.NearestNeighbors`.
             eps (float): relative error when computing nearest neighbors with the cKDTree.
             p (float): norm L^p on input points (including numpy.inf) if metric is "minkowski". Defaults to 2.
             n_jobs (int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU.
                 If -1 is given all processors are used. Default: 1.
-
-        Additional parameters are forwarded to the backends.
+            kwargs: additional parameters are forwarded to the backends.
         """
         self.k = k
         self.return_index = return_index
@@ -75,20 +74,26 @@ class KNN:
         if self.params["implementation"] == "ckdtree":
             # sklearn could handle this, but it is much slower
             from scipy.spatial import cKDTree
+
             self.kdtree = cKDTree(X)
 
         if self.params["implementation"] == "sklearn" and self.metric != "precomputed":
             # FIXME: sklearn badly handles "precomputed"
             from sklearn.neighbors import NearestNeighbors
 
-            nargs = {k: v for k, v in self.params.items() if k in {"p", "n_jobs", "metric_params", "algorithm", "leaf_size"}}
+            nargs = {
+                k: v for k, v in self.params.items() if k in {"p", "n_jobs", "metric_params", "algorithm", "leaf_size"}
+            }
             self.nn = NearestNeighbors(self.k, metric=self.metric, **nargs)
             self.nn.fit(X)
 
         if self.params["implementation"] == "hnsw":
             import hnswlib
-            self.graph = hnswlib.Index("l2", len(X[0])) # Actually returns squared distances
-            self.graph.init_index(len(X), **{k:v for k,v in self.params.items() if k in {"ef_construction", "M", "random_seed"}})
+
+            self.graph = hnswlib.Index("l2", len(X[0]))  # Actually returns squared distances
+            self.graph.init_index(
+                len(X), **{k: v for k, v in self.params.items() if k in {"ef_construction", "M", "random_seed"}}
+            )
             n = self.params.get("num_threads")
             if n is None:
                 n = self.params.get("n_jobs", 1)
@@ -154,7 +159,7 @@ class KNN:
 
             p = self.params["p"]
             if p == numpy.inf:
-                # Requires a version of pykeops strictly more recent than 1.3
+                # Requires pykeops 1.4 or later
                 mat = (LazyTensor(XX[:, None, :]) - LazyTensor(YY[None, :, :])).abs().max(-1)
             elif p == 2:  # Any even integer?
                 mat = ((LazyTensor(XX[:, None, :]) - LazyTensor(YY[None, :, :])) ** p).sum(-1)

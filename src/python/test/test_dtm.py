@@ -47,4 +47,4 @@ def test_dtm_precomputed():
     dist = numpy.array([[2.0, 2], [0, 1], [3, 4]])
     dtm = DTM(2, q=2, metric="neighbors")
     r = dtm.fit_transform(dist)
-    assert r == pytest.approx([2.0, .707, 3.5355], rel=.01)
+    assert r == pytest.approx([2.0, 0.707, 3.5355], rel=0.01)

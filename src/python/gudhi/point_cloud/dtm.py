@@ -11,11 +11,15 @@ from .knn import KNN
 
 
 class DTM:
+    """
+    Class to compute the distance to the empirical measure defined by a point set.
+    """
+
     def __init__(self, k, q=2, **kwargs):
         """
         Args:
             q (float): order used to compute the distance to measure. Defaults to the dimension, or 2 if input_type is 'distance_matrix'.
-            kwargs: Same parameters as KNN, except that metric="neighbors" means that transform() expects an array with the distances to the k nearest neighbors.
+            kwargs: Same parameters as :class:`~gudhi.point_cloud.knn.KNN`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
         """
         self.k = k
         self.q = q
