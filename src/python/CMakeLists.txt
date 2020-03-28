@@ -411,6 +411,7 @@ if(PYTHONINTERP_FOUND)
 
     # DTM
     if(SCIPY_FOUND AND SKLEARN_FOUND AND TORCH_FOUND AND HNSWLIB_FOUND AND PYKEOPS_FOUND)
+      add_gudhi_py_test(test_knn)
       add_gudhi_py_test(test_dtm)
     endif()
 
