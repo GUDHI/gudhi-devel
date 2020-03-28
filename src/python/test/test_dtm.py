@@ -30,7 +30,7 @@ def test_dtm_compare_euclidean():
     from scipy.spatial.distance import cdist
 
     d = cdist(pts, pts)
-    dtm = DTM(k, q=2, metric="precomputed")
+    dtm = DTM(k, q=4, metric="precomputed")
     r4 = dtm.fit_transform(d)
     assert r4 == pytest.approx(r0)
     dtm = DTM(k, implementation="keops")
