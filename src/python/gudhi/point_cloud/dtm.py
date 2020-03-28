@@ -59,4 +59,6 @@ class DTM:
         distances = distances ** q
         dtm = distances.sum(-1) / self.k
         dtm = dtm ** (1.0 / q)
+        # We compute too many powers, 1/p in knn then q in dtm, 1/q in dtm then q or some log in the caller.
+        # Add option to skip the final root?
         return dtm
