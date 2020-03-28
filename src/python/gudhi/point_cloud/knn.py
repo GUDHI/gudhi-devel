@@ -21,7 +21,7 @@ class KNN:
             k (int): number of neighbors (possibly including the point itself).
             return_index (bool): if True, return the index of each neighbor.
             return_distance (bool): if True, return the distance to each neighbor.
-            implementation (str): Choice of the library that does the real work.
+            implementation (str): choice of the library that does the real work.
 
                 * 'keops' for a brute-force, CUDA implementation through pykeops. Useful when the dimension becomes large (10+) but the number of points remains low (less than a million). Only "minkowski" and its aliases are supported.
                 * 'ckdtree' for scipy's cKDTree. Only "minkowski" and its aliases are supported.
@@ -31,7 +31,7 @@ class KNN:
             metric (str): see `sklearn.neighbors.NearestNeighbors`.
             eps (float): relative error when computing nearest neighbors with the cKDTree.
             p (float): norm L^p on input points (including numpy.inf) if metric is "minkowski". Defaults to 2.
-            n_jobs (int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU.
+            n_jobs (int): number of jobs to schedule for parallel processing of nearest neighbors on the CPU.
                 If -1 is given all processors are used. Default: 1.
             kwargs: additional parameters are forwarded to the backends.
         """
