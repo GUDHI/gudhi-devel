@@ -18,7 +18,7 @@ class KNN:
     def __init__(self, k, return_index=True, return_distance=False, metric="euclidean", **kwargs):
         """
         Args:
-            k (int): number of neighbors (including the point itself).
+            k (int): number of neighbors (possibly including the point itself).
             return_index (bool): if True, return the index of each neighbor.
             return_distance (bool): if True, return the distance to each neighbor.
             implementation (str): Choice of the library that does the real work.
@@ -68,7 +68,7 @@ class KNN:
     def fit(self, X, y=None):
         """
         Args:
-            X (numpy.array): coordinates for reference points
+            X (numpy.array): coordinates for reference points.
         """
         self.ref_points = X
         if self.params["implementation"] == "ckdtree":
@@ -105,7 +105,7 @@ class KNN:
     def transform(self, X):
         """
         Args:
-            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed"
+            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed".
         """
         metric = self.metric
         k = self.k

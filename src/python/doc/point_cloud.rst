@@ -28,11 +28,12 @@ Time Delay Embedding
    :members:
    :special-members: __call__
 
-Nearest neighbors
------------------
+K nearest neighbors
+-------------------
 
 .. automodule:: gudhi.point_cloud.knn
    :members:
+   :undoc-members:
    :special-members: __init__
 
 Distance to measure
@@ -40,4 +41,5 @@ Distance to measure
 
 .. automodule:: gudhi.point_cloud.dtm
    :members:
+   :undoc-members:
    :special-members: __init__
