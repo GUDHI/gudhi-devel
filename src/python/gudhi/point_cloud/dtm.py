@@ -35,9 +35,7 @@ class DTM:
             X (numpy.array): coordinates for mass points.
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
-            # KNN gives sorted distances, which is unnecessary here.
-            # Maybe add a parameter to say we don't need sorting?
-            self.knn = KNN(self.k, return_index=False, return_distance=True, **self.params)
+            self.knn = KNN(self.k, return_index=False, return_distance=True, sort_results=False, **self.params)
             self.knn.fit(X)
         return self
 
