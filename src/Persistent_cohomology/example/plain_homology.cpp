@@ -59,9 +59,6 @@ int main() {
   st.insert_simplex_and_subfaces(edge35);
   st.insert_simplex(vertex4);
 
-  // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
-
   // Class for homology computation
   // By default, since the complex has dimension 1, only 0-dimensional homology would be computed.
   // Here we also want persistent homology to be computed for the maximal dimension in the complex (persistence_dim_max = true)

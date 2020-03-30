@@ -222,9 +222,6 @@ int main(int argc, char **argv) {
       break;
   }
 
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
-
   std::clog << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(simplex_tree, true);
