@@ -12,7 +12,7 @@ from .knn import KNN
 
 class DTM:
     """
-    Class to compute the distance to the empirical measure defined by a point set.
+    Class to compute the distance to the empirical measure defined by a point set, as introduced in :cite:`dtm`.
     """
 
     def __init__(self, k, q=2, **kwargs):
