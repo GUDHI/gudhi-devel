@@ -57,6 +57,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void remove_maximal_simplex(vector[int] simplex)
         bool prune_above_filtration(double filtration)
         bool make_filtration_non_decreasing()
+        void compute_extended_filtration()
+        vector[vector[pair[int, pair[double, double]]]] compute_extended_persistence_subdiagrams(vector[pair[int, pair[double, double]]] dgm, double min_persistence)
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex)
         Simplex_tree_simplices_iterator get_simplices_iterator_begin()
