@@ -9,7 +9,7 @@
 
 import numpy as np
 import scipy.spatial.distance as sc
-import gudhi.barycenter as barycenter
+
 try:
     import ot
 except ImportError:
