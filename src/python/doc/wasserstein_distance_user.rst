@@ -112,7 +112,7 @@ to the Lloyd algorithm to estimate a solution to the k-means
 problem). The local minimum returned depends on the initialization of
 the barycenter.                                                      
 The combinatorial structure of the algorithm limits its              
-scaling on large scale problems (thousands of diagrams and of points 
+performances on large scale problems (thousands of diagrams and of points 
 per diagram).                                                        
 
 .. figure::                                                    
