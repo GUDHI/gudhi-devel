@@ -12,7 +12,7 @@ import ot
 import numpy as np
 import scipy.spatial.distance as sc
 
-from gudhi.wasserstein import wasserstein_distance, _perstot
+from gudhi.wasserstein import wasserstein_distance
 
 
 def _mean(x, m):
