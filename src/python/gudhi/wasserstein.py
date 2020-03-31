@@ -9,6 +9,7 @@
 
 import numpy as np
 import scipy.spatial.distance as sc
+import barycenter
 try:
     import ot
 except ImportError:
