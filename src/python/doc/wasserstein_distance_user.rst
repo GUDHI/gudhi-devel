@@ -128,7 +128,7 @@ per diagram).
 Basic example
 -------------
 
-This example computes the Frechet mean (aka Wasserstein barycenter) between 
+This example estimates the Frechet mean (aka Wasserstein barycenter) between 
 four persistence diagrams.
 It is initialized on the 4th diagram.
 As the algorithm is not convex, its output depends on the initialization and 
@@ -143,7 +143,7 @@ Note that persistence diagrams must be submitted as
 
 .. testcode::
 
-    import gudhi.barycenter
+    from gudhi.wasserstein.barycenter import lagrangian_barycenter
     import numpy as np
 
     dg1 = np.array([[0.2, 0.5]])
@@ -151,7 +151,7 @@ Note that persistence diagrams must be submitted as
     dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
     dg4 = np.array([])
     pdiagset = [dg1, dg2, dg3, dg4]
-    bary = gudhi.wasserstein.barycenter.lagrangian_barycenter(pdiagset=pdiagset,init=3)
+    bary = lagrangian_barycenter(pdiagset=pdiagset,init=3)
 
     message = "Wasserstein barycenter estimated:"    
     print(message)
