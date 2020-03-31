@@ -1,4 +1,4 @@
-from gudhi.barycenter import lagrangian_barycenter
+from gudhi.wasserstein.barycenter import lagrangian_barycenter
 import numpy as np
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
