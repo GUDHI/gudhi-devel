@@ -56,7 +56,6 @@ if(PYTHONINTERP_FOUND)
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
-    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'barycenter', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
@@ -217,8 +216,7 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-    file(COPY "gudhi/barycenter.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
