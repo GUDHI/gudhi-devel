@@ -71,10 +71,6 @@ Wasserstein distance
 
 .. include:: wasserstein_distance_sum.inc
 
-Barycenter
-============
-
-.. include:: barycenter_sum.inc
 
 Persistence representations
 ===========================
