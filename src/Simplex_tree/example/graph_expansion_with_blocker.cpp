@@ -34,31 +34,31 @@ int main(int argc, char* const argv[]) {
 
   stree.expansion_with_blockers(3, [&](Simplex_handle sh) {
     bool result = false;
-    std::cout << "Blocker on [";
+    std::clog << "Blocker on [";
     // User can loop on the vertices from the given simplex_handle i.e.
     for (auto vertex : stree.simplex_vertex_range(sh)) {
       // We block the expansion, if the vertex '6' is in the given list of vertices
       if (vertex == 6) result = true;
-      std::cout << vertex << ", ";
+      std::clog << vertex << ", ";
     }
-    std::cout << "] ( " << stree.filtration(sh);
+    std::clog << "] ( " << stree.filtration(sh);
     // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
     stree.assign_filtration(sh, stree.filtration(sh) + 1.);
 
-    std::cout << " + 1. ) = " << result << std::endl;
+    std::clog << " + 1. ) = " << result << std::endl;
 
     return result;
   });
 
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << stree.num_simplices() << " simplices";
-  std::cout << "   - dimension " << stree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* The complex contains " << stree.num_simplices() << " simplices";
+  std::clog << "   - dimension " << stree.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : stree.filtration_simplex_range()) {
-    std::cout << "   "
+    std::clog << "   "
               << "[" << stree.filtration(f_simplex) << "] ";
-    for (auto vertex : stree.simplex_vertex_range(f_simplex)) std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+    for (auto vertex : stree.simplex_vertex_range(f_simplex)) std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
   return 0;

@@ -154,8 +154,8 @@ of a simplicial complex.
                 else 
                         euler -= 1;
         }
-        std::cout << "Saw "<<num_vertices<<" vertices, "<<num_edges<<" edges and "<<num_simplices<<" simplices"<<std::endl;
-        std::cout << "The Euler Characteristic is "<<euler<<std::endl;
+        std::clog << "Saw "<<num_vertices<<" vertices, "<<num_edges<<" edges and "<<num_simplices<<" simplices"<<std::endl;
+        std::clog << "The Euler Characteristic is "<<euler<<std::endl;
   \endcode
 
 
@@ -182,13 +182,13 @@ The Euler Characteristic is 1
         //get complex from top faces
         make_complex_from_top_faces(complex,simplices.begin(),simplices.end());
 
-        std::cout << "Simplices:"<<std::endl;
+        std::clog << "Simplices:"<<std::endl;
         for(const Simplex & s : complex.star_simplex_range())
-                std::cout << s << " ";
-        std::cout << std::endl;
+                std::clog << s << " ";
+        std::clog << std::endl;
 
         //One blocker as simplex 0123 is not in the complex but all its proper faces are.
-        std::cout << "Blockers: "<<complex.blockers_to_string()<<std::endl;
+        std::clog << "Blockers: "<<complex.blockers_to_string()<<std::endl;
 
         //now build a complex from its full list of simplices
         simplices.clear();
@@ -200,13 +200,13 @@ The Euler Characteristic is 1
         simplices.push_back(Simplex(Vertex_handle(2),Vertex_handle(0)));
         complex = Complex(simplices.begin(),simplices.end());
 
-        std::cout << "Simplices:"<<std::endl;
+        std::clog << "Simplices:"<<std::endl;
         for(const Simplex & s : complex.star_simplex_range())
-                std::cout << s << " ";
-        std::cout << std::endl;
+                std::clog << s << " ";
+        std::clog << std::endl;
 
         //One blocker as simplex 012 is not in the complex but all its proper faces are.
-        std::cout << "Blockers: "<<complex.blockers_to_string()<<std::endl;
+        std::clog << "Blockers: "<<complex.blockers_to_string()<<std::endl;
  \endcode
 \verbatim
 ./SkeletonBlockerFromSimplices

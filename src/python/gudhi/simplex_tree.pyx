@@ -7,6 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
 from numpy import array as np_array
 cimport simplex_tree
@@ -207,22 +208,34 @@ cdef class SimplexTree:
         return self.get_ptr().insert_simplex_and_subfaces(csimplex,
                                                         <double>filtration)
 
-    def get_filtration(self):
-        """This function returns a list of all simplices with their given
+    def get_simplices(self):
+        """This function returns a generator with simplices and their given
         filtration values.
 
-        :returns:  The simplices sorted by increasing filtration values.
-        :rtype:  list of tuples(simplex, filtration)
+        :returns:  The simplices.
+        :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] filtration \
-            = self.get_ptr().get_filtration()
-        ct = []
-        for filtered_complex in filtration:
-            v = []
-            for vertex in filtered_complex.first:
-                v.append(vertex)
-            ct.append((v, filtered_complex.second))
-        return ct
+        cdef Simplex_tree_simplices_iterator it = self.get_ptr().get_simplices_iterator_begin()
+        cdef Simplex_tree_simplices_iterator end = self.get_ptr().get_simplices_iterator_end()
+        cdef Simplex_tree_simplex_handle sh = dereference(it)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
+
+    def get_filtration(self):
+        """This function returns a generator with simplices and their given
+        filtration values sorted by increasing filtration values.
+
+        :returns:  The simplices sorted by increasing filtration values.
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef vector[Simplex_tree_simplex_handle].const_iterator it = self.get_ptr().get_filtration_iterator_begin()
+        cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
 
     def get_skeleton(self, dimension):
         """This function returns the (simplices of the) skeleton of a maximum
@@ -233,15 +246,12 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  list of tuples(simplex, filtration)
         """
-        cdef vector[pair[vector[int], double]] skeleton \
-            = self.get_ptr().get_skeleton(<int>dimension)
-        ct = []
-        for filtered_simplex in skeleton:
-            v = []
-            for vertex in filtered_simplex.first:
-                v.append(vertex)
-            ct.append((v, filtered_simplex.second))
-        return ct
+        cdef Simplex_tree_skeleton_iterator it = self.get_ptr().get_skeleton_iterator_begin(dimension)
+        cdef Simplex_tree_skeleton_iterator end = self.get_ptr().get_skeleton_iterator_end(dimension)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
 
     def get_star(self, simplex):
         """This function returns the star of a given N-simplex.
@@ -385,6 +395,57 @@ cdef class SimplexTree:
             to recompute it.
         """
         return self.get_ptr().make_filtration_non_decreasing()
+
+    def extend_filtration(self):
+        """ Extend filtration for computing extended persistence. This function only uses the 
+        filtration values at the 0-dimensional simplices, and computes the extended persistence 
+        diagram induced by the lower-star filtration computed with these values. 
+
+        .. note::
+
+            Note that after calling this function, the filtration 
+            values are actually modified within the Simplex_tree. 
+            The function :func:`extended_persistence()<gudhi.SimplexTree.extended_persistence>`
+            retrieves the original values.
+
+        .. note::
+
+            Note that this code creates an extra vertex internally, so you should make sure that
+            the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
+        """
+        return self.get_ptr().compute_extended_filtration()
+
+    def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
+        """This function retrieves good values for extended persistence, and separate the diagrams 
+        into the Ordinary, Relative, Extended+ and Extended- subdiagrams.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the persistence diagram point coordinates) to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: A list of four persistence diagrams in the format described in :func:`persistence()<gudhi.SimplexTree.persistence>`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+
+        .. note::
+
+            This function should be called only if :func:`extend_filtration()<gudhi.SimplexTree.extend_filtration>` has been called first!
+
+        .. note::
+
+            The coordinates of the persistence diagram points might be a little different than the
+            original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+            performed on these values during the computation of extended persistence.
+        """
+        cdef vector[pair[int, pair[double, double]]] persistence_result
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
+        persistence_result = self.pcohptr.get_persistence(homology_coeff_field, -1.)
+        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
+
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function returns the persistence of the simplicial complex.

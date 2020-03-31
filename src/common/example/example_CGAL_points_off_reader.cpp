@@ -36,10 +36,10 @@ int main(int argc, char **argv) {
 
   int n {};
   for (auto point : point_cloud) {
-    std::cout << "Point[" << n << "] = ";
+    std::clog << "Point[" << n << "] = ";
     for (std::size_t i {0}; i < point.size(); i++)
-      std::cout << point[i] << " ";
-    std::cout << "\n";
+      std::clog << point[i] << " ";
+    std::clog << "\n";
     ++n;
   }
   return 0;

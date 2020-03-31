@@ -20,7 +20,7 @@ template<typename FloatingType >
 void GUDHI_TEST_FLOAT_EQUALITY_CHECK(FloatingType a, FloatingType b,
                                      FloatingType epsilon = std::numeric_limits<FloatingType>::epsilon()) {
 #ifdef DEBUG_TRACES
-  std::cout << "GUDHI_TEST_FLOAT_EQUALITY_CHECK - " << a << " versus " << b
+  std::clog << "GUDHI_TEST_FLOAT_EQUALITY_CHECK - " << a << " versus " << b
             << " | diff = " << std::fabs(a - b) << " - epsilon = " << epsilon << std::endl;
 #endif
   BOOST_CHECK(std::fabs(a - b) <= epsilon);
@@ -32,7 +32,7 @@ template<typename FloatingType >
 FloatingType GUDHI_PROTECT_FLOAT(FloatingType value) {
   volatile FloatingType protected_value = value;
 #ifdef DEBUG_TRACES
-  std::cout << "GUDHI_PROTECT_FLOAT - " << protected_value << std::endl;
+  std::clog << "GUDHI_PROTECT_FLOAT - " << protected_value << std::endl;
 #endif
   return protected_value;
 }

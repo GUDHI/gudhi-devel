@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   bool check = SC.read_point_cloud(off_file_name);
 
   if (!check) {
-    std::cout << "Incorrect OFF file." << std::endl;
+    std::clog << "Incorrect OFF file." << std::endl;
   } else {
     SC.set_type("Nerve");
 
@@ -67,15 +67,15 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
 
     if (verb) {
-      std::cout << "Nerve is of dimension " << stree.dimension() << " - " << stree.num_simplices() << " simplices - "
+      std::clog << "Nerve is of dimension " << stree.dimension() << " - " << stree.num_simplices() << " simplices - "
                 << stree.num_vertices() << " vertices." << std::endl;
 
-      std::cout << "Iterator on Nerve simplices" << std::endl;
+      std::clog << "Iterator on Nerve simplices" << std::endl;
       for (auto f_simplex : stree.filtration_simplex_range()) {
         for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-          std::cout << vertex << " ";
+          std::clog << vertex << " ";
         }
-        std::cout << std::endl;
+        std::clog << std::endl;
       }
     }
   }

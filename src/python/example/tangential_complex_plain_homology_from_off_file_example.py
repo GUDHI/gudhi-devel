@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
+import errno
+import os
 import matplotlib.pyplot as plot
 import gudhi
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -19,7 +23,7 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 parser = argparse.ArgumentParser(
-    description="TangentialComplex creation from " "points read in a OFF file.",
+    description="TangentialComplex creation from points read in a OFF file.",
     epilog="Example: "
     "example/tangential_complex_plain_homology_from_off_file_example.py "
     "-f ../data/points/tore3D_300.off -i 3"
@@ -41,10 +45,11 @@ args = parser.parse_args()
 with open(args.file, "r") as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
-        print("#####################################################################")
+        print("##############################################################")
         print("TangentialComplex creation from points read in a OFF file")
 
-        tc = gudhi.TangentialComplex(intrisic_dim=args.intrisic_dim, off_file=args.file)
+        tc = gudhi.TangentialComplex(intrisic_dim=args.intrisic_dim,
+            off_file=args.file)
         tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
 
@@ -60,6 +65,7 @@ with open(args.file, "r") as f:
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
-        print(args.file, "is not a valid OFF file")
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                args.file)
 
     f.close()

@@ -30,7 +30,7 @@ std::string test_rips_persistence(int coefficient, int min_persistence) {
   simplex_tree_stream.close();
 
   // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
       << std::endl;
 
   // Check
@@ -76,11 +76,11 @@ void test_rips_persistence_in_dimension(int dimension) {
   value8.insert(0,std::to_string(dimension));
   value9.insert(0,std::to_string(dimension));
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=0" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=0" << std::endl;
 
   std::string str_rips_persistence = test_rips_persistence(dimension, 0);
-  std::cout << str_rips_persistence << std::endl;
+  std::clog << str_rips_persistence << std::endl;
   
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
@@ -92,10 +92,10 @@ void test_rips_persistence_in_dimension(int dimension) {
   BOOST_CHECK(str_rips_persistence.find(value7) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=1" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=1" << std::endl;
 
   str_rips_persistence = test_rips_persistence(dimension, 1);
 
@@ -109,10 +109,10 @@ void test_rips_persistence_in_dimension(int dimension) {
   BOOST_CHECK(str_rips_persistence.find(value7) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=2" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=2" << std::endl;
 
   str_rips_persistence = test_rips_persistence(dimension, 2);
 
@@ -126,10 +126,10 @@ void test_rips_persistence_in_dimension(int dimension) {
   BOOST_CHECK(str_rips_persistence.find(value7) == std::string::npos); // Check not found
   BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=Inf" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=Inf" << std::endl;
 
   str_rips_persistence = test_rips_persistence(dimension, (std::numeric_limits<int>::max)());
 
@@ -143,7 +143,7 @@ void test_rips_persistence_in_dimension(int dimension) {
   BOOST_CHECK(str_rips_persistence.find(value7) == std::string::npos); // Check not found
   BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_1 )

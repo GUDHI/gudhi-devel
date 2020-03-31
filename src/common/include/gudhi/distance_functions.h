@@ -97,7 +97,7 @@ class Minimal_enclosing_ball_radius {
 
     Min_sphere ms(boost::size(*point_cloud.begin()), point_cloud.begin(), point_cloud.end());
 #ifdef DEBUG_TRACES
-    std::cout << "Minimal_enclosing_ball_radius = " << std::sqrt(ms.squared_radius()) << " | nb points = "
+    std::clog << "Minimal_enclosing_ball_radius = " << std::sqrt(ms.squared_radius()) << " | nb points = "
               << boost::size(point_cloud) << " | dimension = "
               << boost::size(*point_cloud.begin()) << std::endl;
 #endif  // DEBUG_TRACES

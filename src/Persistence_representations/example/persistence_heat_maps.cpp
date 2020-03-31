@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
   median.compute_median(vector_of_maps);
 
   // to compute L^1 distance between hm1 and hm2:
-  std::cout << "The L^1 distance is : " << hm1.distance(hm2, 1) << std::endl;
+  std::clog << "The L^1 distance is : " << hm1.distance(hm2, 1) << std::endl;
 
   // to average of hm1 and hm2:
   std::vector<Persistence_heat_maps*> to_average;
@@ -75,15 +75,15 @@ int main(int argc, char** argv) {
   av.compute_average(to_average);
 
   // to compute scalar product of hm1 and hm2:
-  std::cout << "Scalar product is : " << hm1.compute_scalar_product(hm2) << std::endl;
+  std::clog << "Scalar product is : " << hm1.compute_scalar_product(hm2) << std::endl;
 
   Persistence_heat_maps hm1k(persistence1, Gaussian_function(1.0));
   Persistence_heat_maps hm2k(persistence2, Gaussian_function(1.0));
   Persistence_heat_maps hm1i(persistence1, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
   Persistence_heat_maps hm2i(persistence2, Gaussian_function(1.0), 20, 20, 0, 11, 0, 11);
-  std::cout << "Scalar product computed with exact 2D kernel on grid is : " << hm1i.compute_scalar_product(hm2i)
+  std::clog << "Scalar product computed with exact 2D kernel on grid is : " << hm1i.compute_scalar_product(hm2i)
             << std::endl;
-  std::cout << "Scalar product computed with exact 2D kernel is : " << hm1k.compute_scalar_product(hm2k) << std::endl;
+  std::clog << "Scalar product computed with exact 2D kernel is : " << hm1k.compute_scalar_product(hm2k) << std::endl;
 
   return 0;
 }

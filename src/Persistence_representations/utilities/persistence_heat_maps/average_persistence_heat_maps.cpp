@@ -17,12 +17,12 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average of persistence heat maps stored in files (the files needs to be "
+  std::clog << "This program computes average of persistence heat maps stored in files (the files needs to be "
             << "created beforehand).\n"
             << "The parameters of this programs are names of files with persistence heat maps.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -46,6 +46,6 @@ int main(int argc, char** argv) {
     delete maps[i];
   }
 
-  std::cout << "Average can be found in 'average.mps' file\n";
+  std::clog << "Average can be found in 'average.mps' file\n";
   return 0;
 }

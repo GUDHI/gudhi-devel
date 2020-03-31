@@ -25,10 +25,10 @@ typedef std::pair<Simplex_tree<>::Simplex_handle, bool> typePairSimplexBool;
 class ST_wrapper {
  public:
   void insert_simplex(const Simplex& tau) {
-    /*std::cout << "insert_simplex - " << simplexTree.num_simplices() << " - ";
+    /*std::clog << "insert_simplex - " << simplexTree.num_simplices() << " - ";
     for (auto v : tau)
-      std::cout << v << ", ";
-    std::cout << std::endl;
+      std::clog << v << ", ";
+    std::clog << std::endl;
     */
     simplexTree.insert_simplex_and_subfaces(tau);
   }
@@ -104,22 +104,22 @@ void chrono(int n, int d) {
   auto c2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   if (c3 > 0)
-    std::cout << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
+    std::clog << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
   else
-    std::cout << c1 << "\t \t" << c2 << "\t \tN/A\t \t" << K.num_maximal_simplices() << std::endl;
+    std::clog << c1 << "\t \t" << c2 << "\t \tN/A\t \t" << K.num_maximal_simplices() << std::endl;
 }
 
 int main() {
   for (int d = 5; d <= 40; d += 5) {
-    std::cout << "d=" << d << " \t  Insertions \t   Membership \t Contractions \t        Size" << std::endl;
-    std::cout << "T Map \t \t";
+    std::clog << "d=" << d << " \t  Insertions \t   Membership \t Contractions \t        Size" << std::endl;
+    std::clog << "T Map \t \t";
     chrono<Toplex_map>(n, d);
-    std::cout << "Lazy \t \t";
+    std::clog << "Lazy \t \t";
     chrono<Lazy_toplex_map>(n, d);
     if (d <= 15) {
-      std::cout << "ST \t \t";
+      std::clog << "ST \t \t";
       chrono<ST_wrapper>(n, d);
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 }

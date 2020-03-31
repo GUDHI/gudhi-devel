@@ -17,12 +17,12 @@ using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average of persistence vectors stored in files (the files needs to "
+  std::clog << "This program computes average of persistence vectors stored in files (the files needs to "
             << "be created beforehand).\n"
             << "The parameters of this programs are names of files with persistence vectors.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     delete lands[i];
   }
 
-  std::cout << "Done \n";
+  std::clog << "Done \n";
 
   return 0;
 }
