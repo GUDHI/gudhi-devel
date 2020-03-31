@@ -70,26 +70,26 @@ struct cmp_intervals_by_dim_then_length {
 int main(int argc, char **argv) {
   std::vector<Point> points = random_points();
 
-  std::cout << "Points size=" << points.size() << std::endl;
+  std::clog << "Points size=" << points.size() << std::endl;
   // Alpha complex persistence computation from generated points
   Alpha_complex alpha_complex_from_points(points);
-  std::cout << "alpha_complex_from_points" << std::endl;
+  std::clog << "alpha_complex_from_points" << std::endl;
 
   Simplex_tree simplex;
-  std::cout << "simplex" << std::endl;
+  std::clog << "simplex" << std::endl;
   if (alpha_complex_from_points.create_complex(simplex, 0.6)) {
-    std::cout << "simplex" << std::endl;
+    std::clog << "simplex" << std::endl;
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::cout << "Simplicial complex is of dimension " << simplex.dimension() <<
+    std::clog << "Simplicial complex is of dimension " << simplex.dimension() <<
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
 
     // Sort the simplices in the order of the filtration
     simplex.initialize_filtration();
 
-    std::cout << "Simplex_tree dim: " << simplex.dimension() << std::endl;
+    std::clog << "Simplex_tree dim: " << simplex.dimension() << std::endl;
 
     Persistent_cohomology pcoh(simplex);
 
@@ -102,23 +102,23 @@ int main(int argc, char **argv) {
     auto persistent_pairs = pcoh.get_persistent_pairs();
     std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
     for (auto pair : persistent_pairs) {
-      std::cout << simplex.dimension(get<0>(pair)) << " "
+      std::clog << simplex.dimension(get<0>(pair)) << " "
             << simplex.filtration(get<0>(pair)) << " "
             << simplex.filtration(get<1>(pair)) << std::endl;
     }
 
     // Persistent Betti numbers
-    std::cout << "The persistent Betti numbers in interval [0.40, 0.41] are : ";
+    std::clog << "The persistent Betti numbers in interval [0.40, 0.41] are : ";
     for (int dim = 0; dim < simplex.dimension(); dim++)
-      std::cout << "b" << dim << " = " << pcoh.persistent_betti_number(dim, 0.40, 0.41) << " ; ";
-    std::cout << std::endl;
+      std::clog << "b" << dim << " = " << pcoh.persistent_betti_number(dim, 0.40, 0.41) << " ; ";
+    std::clog << std::endl;
 
     // Betti numbers
     std::vector<int> betti_numbers = pcoh.betti_numbers();
-    std::cout << "The Betti numbers are : ";
+    std::clog << "The Betti numbers are : ";
     for (std::size_t i = 0; i < betti_numbers.size(); i++)
-      std::cout << "b" << i << " = " << betti_numbers[i] << " ; ";
-    std::cout << std::endl;
+      std::clog << "b" << i << " = " << betti_numbers[i] << " ; ";
+    std::clog << std::endl;
   }
   return 0;
 }

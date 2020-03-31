@@ -16,10 +16,10 @@
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates a gnuplot script from a persistence landscape stored in a file (the file needs "
+  std::clog << "This program creates a gnuplot script from a persistence landscape stored in a file (the file needs "
             << "to be created beforehand). Please call the code with the name of a single landscape file.\n";
   if (argc != 2) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
+    std::clog << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
 

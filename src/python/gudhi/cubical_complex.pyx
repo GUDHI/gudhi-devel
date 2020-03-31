@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -7,12 +9,15 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
+import errno
 import os
+import sys
 
 import numpy as np
 
@@ -87,10 +92,12 @@ cdef class CubicalComplex:
             if os.path.isfile(perseus_file):
                 self.thisptr = new Bitmap_cubical_complex_base_interface(perseus_file.encode('utf-8'))
             else:
-                print("file " + perseus_file + " not found.")
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                        perseus_file)
         else:
             print("CubicalComplex can be constructed from dimensions and "
-              "top_dimensional_cells or from a Perseus-style file name.")
+                "top_dimensional_cells or from a Perseus-style file name.",
+                file=sys.stderr)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -199,5 +206,5 @@ cdef class CubicalComplex:
             intervals_result = self.pcohptr.intervals_in_dimension(dimension)
         else:
             print("intervals_in_dim function requires persistence function"
-                  " to be launched first.")
+                  " to be launched first.", file=sys.stderr)
         return np.array(intervals_result)

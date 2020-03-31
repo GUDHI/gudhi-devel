@@ -18,10 +18,10 @@
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes a histogram of barcode's length. A number of bins in the histogram is a "
+  std::clog << "This program computes a histogram of barcode's length. A number of bins in the histogram is a "
             << "parameter of this program. \n";
   if ((argc != 3) && (argc != 4)) {
-    std::cout << "To run this program, please provide the name of a file with persistence diagram and number of "
+    std::clog << "To run this program, please provide the name of a file with persistence diagram and number of "
               << "dominant intervals you would like to get. Set a negative number dominant intervals value "
               << "If your file contains only birth-death pairs.\n"
               << "The third parameter is the dimension of the persistence that is to be used. If your "
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
   out << std::endl;
   out.close();
 
-  std::cout << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
+  std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
   return 0;
 }

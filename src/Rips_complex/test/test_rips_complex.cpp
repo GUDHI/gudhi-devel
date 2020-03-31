@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
   double rips_threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
+  std::clog << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
@@ -52,14 +52,14 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   const int DIMENSION_1 = 1;
   Simplex_tree st;
   rips_complex_from_file.create_complex(st, DIMENSION_1);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION_1);
 
   const int NUMBER_OF_VERTICES = 7;
-  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
+  std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
+  std::clog << "st.num_simplices()=" << st.num_simplices() << std::endl;
   BOOST_CHECK(st.num_simplices() == 18);
 
   // Check filtration values of vertices is 0.0
@@ -71,12 +71,12 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   for (auto f_simplex : st.skeleton_simplex_range(DIMENSION_1)) {
     if (DIMENSION_1 == st.dimension(f_simplex)) {
       std::vector<Point> vp;
-      std::cout << "vertex = (";
+      std::clog << "vertex = (";
       for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << ",";
+        std::clog << vertex << ",";
         vp.push_back(off_reader.get_point_cloud().at(vertex));
       }
-      std::cout << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)) <<
+      std::clog << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)) <<
           " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)));
@@ -86,46 +86,46 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   const int DIMENSION_2 = 2;
   Simplex_tree st2;
   rips_complex_from_file.create_complex(st2, DIMENSION_2);
-  std::cout << "st2.dimension()=" << st2.dimension() << std::endl;
+  std::clog << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
   
-  std::cout << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
+  std::clog << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
+  std::clog << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
   BOOST_CHECK(st2.num_simplices() == 23);
 
   Simplex_tree::Filtration_value f01 = st2.filtration(st2.find({0, 1}));
   Simplex_tree::Filtration_value f02 = st2.filtration(st2.find({0, 2}));
   Simplex_tree::Filtration_value f12 = st2.filtration(st2.find({1, 2}));
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
-  std::cout << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
+  std::clog << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
   
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
   Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
-  std::cout << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
+  std::clog << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f456, std::max(f45, std::max(f56,f46)));
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
   rips_complex_from_file.create_complex(st3, DIMENSION_3);
-  std::cout << "st3.dimension()=" << st3.dimension() << std::endl;
+  std::clog << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
   
-  std::cout << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
+  std::clog << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
   BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
+  std::clog << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
   BOOST_CHECK(st3.num_simplices() == 24);
 
   Simplex_tree::Filtration_value f123 = st3.filtration(st3.find({1, 2, 3}));
   Simplex_tree::Filtration_value f013 = st3.filtration(st3.find({0, 1, 3}));
   Simplex_tree::Filtration_value f023 = st3.filtration(st3.find({0, 2, 3}));
   Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
-  std::cout << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
+  std::clog << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
       " - f023= " << f023 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f0123, std::max(f012, std::max(f123, std::max(f013, f023))));
 
@@ -176,34 +176,34 @@ BOOST_AUTO_TEST_CASE(Rips_complex_from_points) {
   // ----------------------------------------------------------------------------
   Rips_complex rips_complex_from_points(points, 2.0, Custom_square_euclidean_distance());
 
-  std::cout << "========== Rips_complex_from_points ==========" << std::endl;
+  std::clog << "========== Rips_complex_from_points ==========" << std::endl;
   Simplex_tree st;
   const int DIMENSION = 3;
   rips_complex_from_points.create_complex(st, DIMENSION);
 
   // Another way to check num_simplices
-  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
   int num_simplices = 0;
   for (auto f_simplex : st.filtration_simplex_range()) {
     num_simplices++;
-    std::cout << "   ( ";
+    std::clog << "   ( ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << ") -> " << "[" << st.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
+    std::clog << ") -> " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << std::endl;
   }
   BOOST_CHECK(num_simplices == 15);
-  std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
+  std::clog << "st.num_simplices()=" << st.num_simplices() << std::endl;
   BOOST_CHECK(st.num_simplices() == 15);
 
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION);
-  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
+  std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == 4);
 
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
+    std::clog << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
     switch (st.dimension(f_simplex)) {
       case 0:
         GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
@@ -241,34 +241,34 @@ BOOST_AUTO_TEST_CASE(Sparse_rips_complex_from_points) {
   // .001 is small enough that we get a deterministic result matching the exact Rips
   Sparse_rips_complex sparse_rips(points, Custom_square_euclidean_distance(), .001);
 
-  std::cout << "========== Sparse_rips_complex_from_points ==========" << std::endl;
+  std::clog << "========== Sparse_rips_complex_from_points ==========" << std::endl;
   Simplex_tree st;
   const int DIMENSION = 3;
   sparse_rips.create_complex(st, DIMENSION);
 
   // Another way to check num_simplices
-  std::cout << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on Rips complex simplices in the filtration order, with [filtration value]:" << std::endl;
   int num_simplices = 0;
   for (auto f_simplex : st.filtration_simplex_range()) {
     num_simplices++;
-    std::cout << "   ( ";
+    std::clog << "   ( ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << ") -> " << "[" << st.filtration(f_simplex) << "] ";
-    std::cout << std::endl;
+    std::clog << ") -> " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << std::endl;
   }
   BOOST_CHECK(num_simplices == 15);
-  std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
+  std::clog << "st.num_simplices()=" << st.num_simplices() << std::endl;
   BOOST_CHECK(st.num_simplices() == 15);
 
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION);
-  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
+  std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == 4);
 
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
+    std::clog << "dimension(" << st.dimension(f_simplex) << ") - f = " << st.filtration(f_simplex) << std::endl;
     switch (st.dimension(f_simplex)) {
       case 0:
         GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 0.0);
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   // ----------------------------------------------------------------------------
   std::string csv_file_name("full_square_distance_matrix.csv");
   double rips_threshold = 12.0;
-  std::cout << "========== CSV FILE NAME = " << csv_file_name << " - Rips threshold=" <<
+  std::clog << "========== CSV FILE NAME = " << csv_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_file_name);
@@ -302,14 +302,14 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   const int DIMENSION_1 = 1;
   Simplex_tree st;
   rips_complex_from_file.create_complex(st, DIMENSION_1);
-  std::cout << "st.dimension()=" << st.dimension() << std::endl;
+  std::clog << "st.dimension()=" << st.dimension() << std::endl;
   BOOST_CHECK(st.dimension() == DIMENSION_1);
 
   const int NUMBER_OF_VERTICES = 7;
-  std::cout << "st.num_vertices()=" << st.num_vertices() << std::endl;
+  std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st.num_simplices()=" << st.num_simplices() << std::endl;
+  std::clog << "st.num_simplices()=" << st.num_simplices() << std::endl;
   BOOST_CHECK(st.num_simplices() == 18);
 
   // Check filtration values of vertices is 0.0
@@ -321,12 +321,12 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   for (auto f_simplex : st.skeleton_simplex_range(DIMENSION_1)) {
     if (DIMENSION_1 == st.dimension(f_simplex)) {
       std::vector<Simplex_tree::Vertex_handle> vvh;
-      std::cout << "vertex = (";
+      std::clog << "vertex = (";
       for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << ",";
+        std::clog << vertex << ",";
         vvh.push_back(vertex);
       }
-      std::cout << ") - filtration =" << st.filtration(f_simplex) << std::endl;
+      std::clog << ") - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vvh.size() == 2);
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), distances[vvh.at(0)][vvh.at(1)]);
     }
@@ -335,46 +335,46 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   const int DIMENSION_2 = 2;
   Simplex_tree st2;
   rips_complex_from_file.create_complex(st2, DIMENSION_2);
-  std::cout << "st2.dimension()=" << st2.dimension() << std::endl;
+  std::clog << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
   
-  std::cout << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
+  std::clog << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
+  std::clog << "st2.num_simplices()=" << st2.num_simplices() << std::endl;
   BOOST_CHECK(st2.num_simplices() == 23);
 
   Simplex_tree::Filtration_value f01 = st2.filtration(st2.find({0, 1}));
   Simplex_tree::Filtration_value f02 = st2.filtration(st2.find({0, 2}));
   Simplex_tree::Filtration_value f12 = st2.filtration(st2.find({1, 2}));
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
-  std::cout << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
+  std::clog << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
   
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
   Simplex_tree::Filtration_value f456 = st2.filtration(st2.find({4, 5, 6}));
-  std::cout << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
+  std::clog << "f456= " << f456 << " | f45= " << f45 << " - f56= " << f56 << " - f46= " << f46 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f456, std::max(f45, std::max(f56,f46)));
 
   const int DIMENSION_3 = 3;
   Simplex_tree st3;
   rips_complex_from_file.create_complex(st3, DIMENSION_3);
-  std::cout << "st3.dimension()=" << st3.dimension() << std::endl;
+  std::clog << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
   
-  std::cout << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
+  std::clog << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
   BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
 
-  std::cout << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
+  std::clog << "st3.num_simplices()=" << st3.num_simplices() << std::endl;
   BOOST_CHECK(st3.num_simplices() == 24);
 
   Simplex_tree::Filtration_value f123 = st3.filtration(st3.find({1, 2, 3}));
   Simplex_tree::Filtration_value f013 = st3.filtration(st3.find({0, 1, 3}));
   Simplex_tree::Filtration_value f023 = st3.filtration(st3.find({0, 2, 3}));
   Simplex_tree::Filtration_value f0123 = st3.filtration(st3.find({0, 1, 2, 3}));
-  std::cout << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
+  std::clog << "f0123= " << f0123 << " | f012= " << f012 << " - f123= " << f123 << " - f013= " << f013 <<
       " - f023= " << f023 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f0123, std::max(f012, std::max(f123, std::max(f013, f023))));
 
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(Rips_create_complex_throw) {
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
   double rips_threshold = 12.0;
-  std::cout << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
+  std::clog << "========== OFF FILE NAME = " << off_file_name << " - Rips threshold=" <<
       rips_threshold << "==========" << std::endl;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_name);
@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(Rips_create_complex_throw) {
   Simplex_tree stree;
   std::vector<int> simplex = {0, 1, 2};
   stree.insert_simplex_and_subfaces(simplex);
-  std::cout << "Check exception throw in debug mode" << std::endl;
+  std::clog << "Check exception throw in debug mode" << std::endl;
   // throw excpt because stree is not empty
   BOOST_CHECK_THROW (rips_complex_from_file.create_complex(stree, 1), std::invalid_argument);
 }

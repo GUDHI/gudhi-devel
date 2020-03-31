@@ -9,6 +9,7 @@
 """
 
 from gudhi import SimplexTree
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -249,6 +250,87 @@ def test_make_filtration_non_decreasing():
     assert st.filtration([3, 4, 5]) == 2.0
     assert st.filtration([3, 4]) == 2.0
     assert st.filtration([4, 5]) == 2.0
+
+def test_extend_filtration():
+
+    # Inserted simplex:
+    #      5   4
+    #      o   o
+    #     / \ /
+    #    o   o
+    #   /2\ /3
+    #  o   o        
+    #  1   0        
+
+    st = SimplexTree()                                                                                                                     
+    st.insert([0,2])
+    st.insert([1,2])
+    st.insert([0,3])
+    st.insert([2,5])
+    st.insert([3,4])
+    st.insert([3,5])                                                                                                         
+    st.assign_filtration([0], 1.)                                                                                                                
+    st.assign_filtration([1], 2.)                                                                                                                
+    st.assign_filtration([2], 3.)                                                                                                                
+    st.assign_filtration([3], 4.)                                                                                                                
+    st.assign_filtration([4], 5.)                                                                                                                
+    st.assign_filtration([5], 6.)                                                                                                                
+
+    assert list(st.get_filtration()) == [                                                                                                                         
+        ([0, 2], 0.0), 
+        ([1, 2], 0.0), 
+        ([0, 3], 0.0), 
+        ([3, 4], 0.0), 
+        ([2, 5], 0.0), 
+        ([3, 5], 0.0), 
+        ([0], 1.0), 
+        ([1], 2.0), 
+        ([2], 3.0), 
+        ([3], 4.0), 
+        ([4], 5.0), 
+        ([5], 6.0)
+    ]
+        
+    st.extend_filtration()
+    
+    assert list(st.get_filtration()) == [                                                                                                                         
+        ([6], -3.0), 
+        ([0], -2.0), 
+        ([1], -1.8), 
+        ([2], -1.6), 
+        ([0, 2], -1.6), 
+        ([1, 2], -1.6), 
+        ([3], -1.4), 
+        ([0, 3], -1.4), 
+        ([4], -1.2), 
+        ([3, 4], -1.2), 
+        ([5], -1.0), 
+        ([2, 5], -1.0), 
+        ([3, 5], -1.0), 
+        ([5, 6], 1.0), 
+        ([4, 6], 1.2), 
+        ([3, 6], 1.4), 
+        ([3, 4, 6], 1.4),
+        ([3, 5, 6], 1.4), 
+        ([2, 6], 1.6), 
+        ([2, 5, 6], 1.6), 
+        ([1, 6], 1.8), 
+        ([1, 2, 6], 1.8), 
+        ([0, 6], 2.0), 
+        ([0, 2, 6], 2.0), 
+        ([0, 3, 6], 2.0)
+    ]
+
+    dgms = st.extended_persistence(min_persistence=-1.)
+
+    assert dgms[0][0][1][0] == pytest.approx(2.)
+    assert dgms[0][0][1][1] == pytest.approx(3.)
+    assert dgms[1][0][1][0] == pytest.approx(5.)
+    assert dgms[1][0][1][1] == pytest.approx(4.)
+    assert dgms[2][0][1][0] == pytest.approx(1.)
+    assert dgms[2][0][1][1] == pytest.approx(6.)
+    assert dgms[3][0][1][0] == pytest.approx(6.)
+    assert dgms[3][0][1][1] == pytest.approx(1.) 
 
 def test_simplices_iterator():
     st = SimplexTree()

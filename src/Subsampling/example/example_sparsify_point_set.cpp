@@ -21,8 +21,8 @@ int main(void) {
   K k;
   std::vector<Point_d> results;
   Gudhi::subsampling::sparsify_point_set(k, points, 0.4, std::back_inserter(results));
-  std::cout << "Before sparsification: " << points.size() << " points.\n";
-  std::cout << "After  sparsification: " << results.size() << " points.\n";
+  std::clog << "Before sparsification: " << points.size() << " points.\n";
+  std::clog << "After  sparsification: " << results.size() << " points.\n";
 
   return 0;
 }

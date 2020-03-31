@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_off_reader_writer) {
   Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
   BOOST_CHECK(off_reader.is_valid());
   
-  std::cout << "complex has " <<
+  std::clog << "complex has " <<
       complex.num_vertices() << " vertices, " <<
       complex.num_blockers() << " blockers, " <<
       complex.num_edges() << " edges and " <<
@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_off_reader_writer) {
   Complex same;
   Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader2("tmp.off", same);
 
-  std::cout << "\ncomplex:" << complex.to_string() << std::endl;
-  std::cout << "\nsame:" << same.to_string() << std::endl;
+  std::clog << "\ncomplex:" << complex.to_string() << std::endl;
+  std::clog << "\nsame:" << same.to_string() << std::endl;
 
   BOOST_CHECK(complex == same);
 }
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_abstract_link) {
   Gudhi::skeleton_blocker::Skeleton_blocker_off_reader<Complex> off_reader("test2.off", complex);
   BOOST_CHECK(off_reader.is_valid());
 
-  std::cout << "complex has " <<
+  std::clog << "complex has " <<
       complex.num_vertices() << " vertices, " <<
       complex.num_blockers() << " blockers, " <<
       complex.num_edges() << " edges and " <<
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_abstract_link) {
 
   auto link_0 = complex.abstract_link(Vertex_handle(0));
 
-  std::cout << "\n link(0):" << link_0.to_string() << std::endl;
+  std::clog << "\n link(0):" << link_0.to_string() << std::endl;
 
   BOOST_CHECK(link_0.num_vertices() == 2);
   BOOST_CHECK(link_0.num_edges() == 1);
@@ -91,13 +91,13 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_abstract_link) {
   BOOST_CHECK(link_0[*(edge_handle)].second() == Root_vertex_handle(4));
 
   auto link_geometric_0 = complex.link(Vertex_handle(0));
-  std::cout << "\n link_geometric(0):" << link_geometric_0.to_string() << std::endl;
+  std::clog << "\n link_geometric(0):" << link_geometric_0.to_string() << std::endl;
 
   BOOST_CHECK(link_0 == link_geometric_0);
 
   auto print_point = [&](Vertex_handle v) {
-    for (auto x : link_geometric_0.point(v)) std::cout << x << " ";
-    std::cout << std::endl;
+    for (auto x : link_geometric_0.point(v)) std::clog << x << " ";
+    std::clog << std::endl;
   };
 
   std::for_each(link_geometric_0.vertex_range().begin(), link_geometric_0.vertex_range().end(), print_point);

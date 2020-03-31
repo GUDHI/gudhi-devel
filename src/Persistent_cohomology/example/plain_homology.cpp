@@ -83,9 +83,9 @@ int main() {
   pcoh.output_diagram();
 
   // Print the Betti numbers are b0=2 and b1=2.
-  std::cout << std::endl;
-  std::cout << "The Betti numbers are : ";
+  std::clog << std::endl;
+  std::clog << "The Betti numbers are : ";
   for (int i = 0; i < 3; i++)
-    std::cout << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
-  std::cout << std::endl;
+    std::clog << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
+  std::clog << std::endl;
 }

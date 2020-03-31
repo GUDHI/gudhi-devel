@@ -8,11 +8,15 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
   add_executable ( Alpha_complex_test_unit Alpha_complex_unit_test.cpp )
   target_link_libraries(Alpha_complex_test_unit ${CGAL_LIBRARY})
+  add_executable ( Delaunay_complex_test_unit Delaunay_complex_unit_test.cpp )
+  target_link_libraries(Delaunay_complex_test_unit ${CGAL_LIBRARY})
   if (TBB_FOUND)
     target_link_libraries(Alpha_complex_test_unit ${TBB_LIBRARIES})
+    target_link_libraries(Delaunay_complex_test_unit ${TBB_LIBRARIES})
   endif()
 
   gudhi_add_boost_test(Alpha_complex_test_unit)
+  gudhi_add_boost_test(Delaunay_complex_test_unit)
 
   add_executable ( Alpha_complex_3d_test_unit Alpha_complex_3d_unit_test.cpp )
   target_link_libraries(Alpha_complex_3d_test_unit ${CGAL_LIBRARY})

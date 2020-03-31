@@ -43,14 +43,14 @@ typedef boost::mpl::list<Fast_periodic_alpha_complex_3d, Safe_periodic_alpha_com
     periodic_variants_type_list;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_periodic_throw, Periodic_alpha_complex_3d, periodic_variants_type_list) {
-  std::cout << "Periodic alpha complex 3d exception throw" << std::endl;
+  std::clog << "Periodic alpha complex 3d exception throw" << std::endl;
   using Bare_point_3 = typename Periodic_alpha_complex_3d::Bare_point_3;
   std::vector<Bare_point_3> p_points;
 
   // Not important, this is not what we want to check
   p_points.push_back(Bare_point_3(0.0, 0.0, 0.0));
 
-  std::cout << "Check exception throw in debug mode" << std::endl;
+  std::clog << "Check exception throw in debug mode" << std::endl;
   // Check it throws an exception when the cuboid is not iso
   BOOST_CHECK_THROW(Periodic_alpha_complex_3d periodic_alpha_complex(p_points, 0., 0., 0., 0.9, 1., 1.),
                     std::invalid_argument);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ---------------------
   // Fast periodic version
   // ---------------------
-  std::cout << "Fast periodic alpha complex 3d" << std::endl;
+  std::clog << "Fast periodic alpha complex 3d" << std::endl;
 
   using Creator = CGAL::Creator_uniform_3<double, Fast_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ----------------------
   // Exact periodic version
   // ----------------------
-  std::cout << "Exact periodic alpha complex 3d" << std::endl;
+  std::clog << "Exact periodic alpha complex 3d" << std::endl;
 
   std::vector<Exact_periodic_alpha_complex_3d::Bare_point_3> e_p_points;
 
@@ -122,13 +122,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact periodic alpha complex 3d is of dimension " << exact_stree.dimension() << " - Non exact is "
+  std::clog << "Exact periodic alpha complex 3d is of dimension " << exact_stree.dimension() << " - Non exact is "
             << stree.dimension() << std::endl;
   BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact periodic alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Non exact is "
+  std::clog << "Exact periodic alpha complex 3d num_simplices " << exact_stree.num_simplices() << " - Non exact is "
             << stree.num_simplices() << std::endl;
   BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact periodic alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Non exact is "
+  std::clog << "Exact periodic alpha complex 3d num_vertices " << exact_stree.num_vertices() << " - Non exact is "
             << stree.num_vertices() << std::endl;
   BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_periodic) {
   // ----------------------
   // Safe periodic version
   // ----------------------
-  std::cout << "Safe periodic alpha complex 3d" << std::endl;
+  std::clog << "Safe periodic alpha complex 3d" << std::endl;
 
   std::vector<Safe_periodic_alpha_complex_3d::Bare_point_3> s_p_points;
 

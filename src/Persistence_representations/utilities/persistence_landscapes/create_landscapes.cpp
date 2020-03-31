@@ -18,7 +18,7 @@
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates persistence landscapes files (*.land) of persistence diagrams files (*.pers) "
+  std::clog << "This program creates persistence landscapes files (*.land) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of this program is a dimension of persistence that will be used in creation of "
             << "the persistence heat maps."
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
             << "The remaining parameters are the names of files with persistence diagrams. \n";
 
   if (argc < 3) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
+    std::clog << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
   std::vector<const char*> filenames;
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
   }
 
   for (size_t i = 0; i != filenames.size(); ++i) {
-    std::cout << "Creating a landscape based on file : " << filenames[i] << std::endl;
+    std::clog << "Creating a landscape based on file : " << filenames[i] << std::endl;
     Persistence_landscape l(filenames[i], dimension);
     std::stringstream ss;
     ss << filenames[i] << ".land";

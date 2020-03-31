@@ -52,13 +52,13 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "Build the Rips complex with " << complex.num_vertices() << " vertices" << std::endl;
+  std::clog << "Build the Rips complex with " << complex.num_vertices() << " vertices" << std::endl;
 
   build_rips(complex, atof(argv[2]));
 
   Gudhi::Clock contraction_chrono("Time to simplify and enumerate simplices");
 
-  std::cout << "Initial complex has " <<
+  std::clog << "Initial complex has " <<
       complex.num_vertices() << " vertices and " <<
       complex.num_edges() << " edges" << std::endl;
 
@@ -69,16 +69,16 @@ int main(int argc, char *argv[]) {
                                 Gudhi::contraction::make_remove_popable_blockers_visitor<Profile>());
   contractor.contract_edges();
 
-  std::cout << "Counting final number of simplices \n";
+  std::clog << "Counting final number of simplices \n";
   unsigned num_simplices = std::distance(complex.complex_simplex_range().begin(), complex.complex_simplex_range().end());
 
-  std::cout << "Final complex has " <<
+  std::clog << "Final complex has " <<
       complex.num_vertices() << " vertices, " <<
       complex.num_edges() << " edges, " <<
       complex.num_blockers() << " blockers and " <<
       num_simplices << " simplices" << std::endl;
 
-  std::cout << contraction_chrono;
+  std::clog << contraction_chrono;
 
   return EXIT_SUCCESS;
 }

@@ -24,6 +24,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/container/static_vector.hpp>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -40,6 +41,20 @@
 #include <iterator>  // for std::distance
 
 namespace Gudhi {
+
+/**
+ * \class Extended_simplex_type Simplex_tree.h gudhi/Simplex_tree.h
+ * \brief Extended simplex type data structure for representing the type of simplices in an extended filtration.
+ *
+ * \details The extended simplex type can be either UP (which means
+ * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+ * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+ * EXTRA (which means the simplex is the cone point).
+ *
+ * Details may be found in \cite Cohen-Steiner2009 and section 2.2 in \cite Carriere16.
+ *
+ */
+enum class Extended_simplex_type {UP, DOWN, EXTRA};
 
 struct Simplex_tree_options_full_featured;
 
@@ -86,6 +101,8 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
+
+
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
@@ -98,6 +115,12 @@ class Simplex_tree {
     // Undefined so it will not link
     void assign_key(Simplex_key);
     Simplex_key key() const;
+  };
+  struct Extended_filtration_data {
+    Filtration_value minval;
+    Filtration_value maxval;
+    Extended_filtration_data(){}
+    Extended_filtration_data(Filtration_value vmin, Filtration_value vmax): minval(vmin), maxval(vmax) {}
   };
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
@@ -246,8 +269,8 @@ class Simplex_tree {
    * which is consequenlty
    * equal to \f$(-1)^{\text{dim} \sigma}\f$ the canonical orientation on the simplex.
    */
-  Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) {
-    assert(sh != null_simplex());  // Empty simplex
+  Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) const {
+    GUDHI_CHECK(sh != null_simplex(), "empty simplex");
     return Simplex_vertex_range(Simplex_vertex_iterator(this, sh),
                                 Simplex_vertex_iterator(this));
   }
@@ -286,7 +309,7 @@ class Simplex_tree {
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree copy constructor" << std::endl;
+    std::clog << "Simplex_tree copy constructor" << std::endl;
 #endif  // DEBUG_TRACES
     copy_from(complex_source);
   }
@@ -296,7 +319,7 @@ class Simplex_tree {
    */
   Simplex_tree(Simplex_tree && complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move constructor" << std::endl;
+    std::clog << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
     move_from(complex_source);
 
@@ -313,7 +336,7 @@ class Simplex_tree {
   /** \brief User-defined copy assignment reproduces the whole tree structure. */
   Simplex_tree& operator= (const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree copy assignment" << std::endl;
+    std::clog << "Simplex_tree copy assignment" << std::endl;
 #endif  // DEBUG_TRACES
     // Self-assignment detection
     if (&complex_source != this) {
@@ -330,7 +353,7 @@ class Simplex_tree {
    */
   Simplex_tree& operator=(Simplex_tree&& complex_source) {
 #ifdef DEBUG_TRACES
-    std::cout << "Simplex_tree move assignment" << std::endl;
+    std::clog << "Simplex_tree move assignment" << std::endl;
 #endif  // DEBUG_TRACES
     // Self-assignment detection
     if (&complex_source != this) {
@@ -448,6 +471,15 @@ class Simplex_tree {
           return false;
     }
     return true;
+  }
+
+  /** \brief Returns the filtration value of a simplex.
+   *
+   * Same as `filtration()`, but does not handle `null_simplex()`.
+   */
+  static Filtration_value filtration_(Simplex_handle sh) {
+    GUDHI_CHECK (sh != null_simplex(), "null simplex");
+    return sh->second.filtration();
   }
 
  public:
@@ -755,12 +787,7 @@ class Simplex_tree {
     if (first == last)
       return { null_simplex(), true }; // FIXME: false would make more sense to me.
 
-    // Copy before sorting
-    // Thread local is not available on XCode version < V.8 - It will slow down computation
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<Vertex_handle> copy;
+    thread_local std::vector<Vertex_handle> copy;
     copy.clear();
     copy.insert(copy.end(), first, last);
     std::sort(copy.begin(), copy.end());
@@ -827,7 +854,7 @@ class Simplex_tree {
 
   /** Returns the Siblings containing a simplex.*/
   template<class SimplexHandle>
-  Siblings* self_siblings(SimplexHandle sh) {
+  static Siblings* self_siblings(SimplexHandle sh) {
     if (sh->second.children()->parent() == sh->first)
       return sh->second.children()->oncles();
     else
@@ -1123,10 +1150,7 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-#ifdef GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    thread_local
-#endif  // GUDHI_CAN_USE_CXX11_THREAD_LOCAL
-    std::vector<std::pair<Vertex_handle, Node> > inter;
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next) {
       Simplex_handle root_sh = find_vertex(s_h->first);
@@ -1422,9 +1446,9 @@ class Simplex_tree {
     for (Simplex_handle sh : complex_simplex_range()) {
 #ifdef DEBUG_TRACES
       for (auto vertex : simplex_vertex_range(sh)) {
-        std::cout << " " << vertex;
+        std::clog << " " << vertex;
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
 #endif  // DEBUG_TRACES
 
       int sh_dimension = dimension(sh);
@@ -1467,6 +1491,168 @@ class Simplex_tree {
       // dimension may need to be lowered
       dimension_to_be_lowered_ = true;
     }
+  }
+
+  /** \brief Retrieve the original filtration value for a given simplex in the Simplex_tree. Since the 
+   * computation of extended persistence requires modifying the filtration values, this function can be used
+   * to recover the original values. Moreover, computing extended persistence requires adding new simplices
+   * in the Simplex_tree. Hence, this function also outputs the type of each simplex. It can be either UP (which means
+   * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+   * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+   * EXTRA (which means the simplex is the cone point). See the definition of Extended_simplex_type. Note that if the simplex type is DOWN, the original filtration value
+   * is set to be the original filtration value of the corresponding (not coned) original simplex. 
+   * \pre This function should be called only if `extend_filtration()` has been called first!
+   * \post The output filtration value is supposed to be the same, but might be a little different, than the
+   * original filtration value, due to the internal transformation (scaling to [-2,-1]) that is 
+   * performed on the original filtration values during the computation of extended persistence.
+   * @param[in] f Filtration value of the simplex in the extended (i.e., modified) filtration.
+   * @param[in] efd Structure containing the minimum and maximum values of the original filtration. This the output of `extend_filtration()`.
+   * @return A pair containing the original filtration value of the simplex as well as the simplex type.
+   */
+  std::pair<Filtration_value, Extended_simplex_type> decode_extended_filtration(Filtration_value f, const Extended_filtration_data& efd){
+    std::pair<Filtration_value, Extended_simplex_type> p;
+    Filtration_value minval = efd.minval;
+    Filtration_value maxval = efd.maxval;
+    if (f >= -2 && f <= -1){
+      p.first = minval + (maxval-minval)*(f + 2); p.second = Extended_simplex_type::UP;
+    }
+    else if (f >= 1 && f <= 2){
+      p.first = minval - (maxval-minval)*(f - 2); p.second = Extended_simplex_type::DOWN;
+    }
+    else{
+      p.first = std::numeric_limits<Filtration_value>::quiet_NaN(); p.second = Extended_simplex_type::EXTRA;
+    }
+    return p;
+  };
+
+  /** \brief Extend filtration for computing extended persistence. 
+   * This function only uses the filtration values at the 0-dimensional simplices, 
+   * and computes the extended persistence diagram induced by the lower-star filtration 
+   * computed with these values. 
+   * \post Note that after calling this function, the filtration 
+   * values are actually modified. The function `decode_extended_filtration()` 
+   * retrieves the original values and outputs the extended simplex type.
+   * \pre Note that this code creates an extra vertex internally, so you should make sure that
+   * the Simplex tree does not contain a vertex with the largest Vertex_handle.
+   * @return A data structure containing the maximum and minimum values of the original filtration.
+   * It is meant to be provided as input to `decode_extended_filtration()` in order to retrieve
+   * the original filtration values for each simplex.
+   */
+  Extended_filtration_data extend_filtration() {
+
+    // Compute maximum and minimum of filtration values
+    Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
+    Filtration_value minval = std::numeric_limits<Filtration_value>::infinity();
+    Filtration_value maxval = -std::numeric_limits<Filtration_value>::infinity();
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
+      Filtration_value f = this->filtration(sh);
+      minval = std::min(minval, f);
+      maxval = std::max(maxval, f);
+      maxvert = std::max(sh->first, maxvert);
+    }
+    
+    GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
+    maxvert += 1;
+
+    Simplex_tree st_copy = *this;
+
+    // Add point for coning the simplicial complex
+    this->insert_simplex({maxvert}, -3);
+
+    // For each simplex
+    std::vector<Vertex_handle> vr;
+    for (auto sh_copy : st_copy.complex_simplex_range()){
+
+      // Locate simplex
+      vr.clear();
+      for (auto vh : st_copy.simplex_vertex_range(sh_copy)){
+        vr.push_back(vh);
+      }
+      auto sh = this->find(vr);
+
+      // Create cone on simplex
+      vr.push_back(maxvert);
+      if (this->dimension(sh) == 0){
+        Filtration_value v = this->filtration(sh);
+        Filtration_value scaled_v = (v-minval)/(maxval-minval);
+        // Assign ascending value between -2 and -1 to vertex
+        this->assign_filtration(sh, -2 + scaled_v);
+        // Assign descending value between 1 and 2 to cone on vertex
+        this->insert_simplex(vr, 2 - scaled_v);
+      }
+      else{
+        // Assign value -3 to simplex and cone on simplex
+        this->assign_filtration(sh, -3);
+        this->insert_simplex(vr, -3);
+      }
+    }
+
+    // Automatically assign good values for simplices
+    this->make_filtration_non_decreasing();
+
+    // Return the filtration data 
+    Extended_filtration_data efd(minval, maxval);
+    return efd;
+  }
+
+  /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.
+   *
+   * For a lower-star filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which vertex had its filtration value propagated to `sh`.
+   * If several vertices have the same filtration value, the one it returns is arbitrary. */
+  Vertex_handle vertex_with_same_filtration(Simplex_handle sh) {
+    auto filt = filtration_(sh);
+    for(auto v : simplex_vertex_range(sh))
+      if(filtration_(find_vertex(v)) == filt)
+        return v;
+    return null_vertex();
+  }
+
+  /** \brief Returns an edge of `sh` that has the same filtration value as `sh` if it exists, and `null_simplex()` otherwise.
+   *
+   * For a flag-complex built with `expansion()`, this is a way to invert the process and find out which edge had its filtration value propagated to `sh`.
+   * If several edges have the same filtration value, the one it returns is arbitrary.
+   *
+   * \pre `sh` must have dimension at least 1. */
+  Simplex_handle edge_with_same_filtration(Simplex_handle sh) {
+    // See issue #251 for potential speed improvements.
+    auto&& vertices = simplex_vertex_range(sh); // vertices in decreasing order
+    auto end = std::end(vertices);
+    auto vi = std::begin(vertices);
+    GUDHI_CHECK(vi != end, "empty simplex");
+    auto v0 = *vi;
+    ++vi;
+    GUDHI_CHECK(vi != end, "simplex of dimension 0");
+    if(std::next(vi) == end) return sh; // shortcut for dimension 1
+    boost::container::static_vector<Vertex_handle, 40> suffix;
+    suffix.push_back(v0);
+    auto filt = filtration_(sh);
+    do
+    {
+      Vertex_handle v = *vi;
+      auto&& children1 = find_vertex(v)->second.children()->members_;
+      for(auto w : suffix){
+        // Can we take advantage of the fact that suffix is ordered?
+        Simplex_handle s = children1.find(w);
+        if(filtration_(s) == filt)
+          return s;
+      }
+      suffix.push_back(v);
+    }
+    while(++vi != end);
+    return null_simplex();
+  }
+
+  /** \brief Returns a minimal face of `sh` that has the same filtration value as `sh`.
+   *
+   * For a filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which simplex had its filtration value propagated to `sh`.
+   * If several minimal (for inclusion) simplices have the same filtration value, the one it returns is arbitrary, and it is not guaranteed to be the one with smallest dimension. */
+  Simplex_handle minimal_simplex_with_same_filtration(Simplex_handle sh) {
+    auto filt = filtration_(sh);
+    // Naive implementation, it can be sped up.
+    for(auto b : boundary_simplex_range(sh))
+      if(filtration_(b) == filt)
+        return minimal_simplex_with_same_filtration(b);
+    return sh; // None of its faces has the same filtration.
   }
 
  private:

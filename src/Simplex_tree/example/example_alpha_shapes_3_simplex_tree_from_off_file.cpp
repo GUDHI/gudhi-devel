@@ -63,7 +63,7 @@ Vertex_list from(const Cell_handle& ch) {
   Vertex_list the_list;
   for (auto i = 0; i < 4; i++) {
 #ifdef DEBUG_TRACES
-    std::cout << "from cell[" << i << "]=" << ch->vertex(i)->point() << std::endl;
+    std::clog << "from cell[" << i << "]=" << ch->vertex(i)->point() << std::endl;
 #endif  // DEBUG_TRACES
     the_list.push_back(ch->vertex(i));
   }
@@ -75,7 +75,7 @@ Vertex_list from(const Facet& fct) {
   for (auto i = 0; i < 4; i++) {
     if (fct.second != i) {
 #ifdef DEBUG_TRACES
-      std::cout << "from facet=[" << i << "]" << fct.first->vertex(i)->point() << std::endl;
+      std::clog << "from facet=[" << i << "]" << fct.first->vertex(i)->point() << std::endl;
 #endif  // DEBUG_TRACES
       the_list.push_back(fct.first->vertex(i));
     }
@@ -88,7 +88,7 @@ Vertex_list from(const Edge& edg) {
   for (auto i = 0; i < 4; i++) {
     if ((edg.second == i) || (edg.third == i)) {
 #ifdef DEBUG_TRACES
-      std::cout << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
+      std::clog << "from edge[" << i << "]=" << edg.first->vertex(i)->point() << std::endl;
 #endif  // DEBUG_TRACES
       the_list.push_back(edg.first->vertex(i));
     }
@@ -99,7 +99,7 @@ Vertex_list from(const Edge& edg) {
 Vertex_list from(const Alpha_shape_3::Vertex_handle& vh) {
   Vertex_list the_list;
 #ifdef DEBUG_TRACES
-  std::cout << "from vertex=" << vh->point() << std::endl;
+  std::clog << "from vertex=" << vh->point() << std::endl;
 #endif  // DEBUG_TRACES
   the_list.push_back(vh);
   return the_list;
@@ -128,7 +128,7 @@ int main(int argc, char * const argv[]) {
   // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode.
   Alpha_shape_3 as(lp.begin(), lp.end(), 0, Alpha_shape_3::GENERAL);
 #ifdef DEBUG_TRACES
-  std::cout << "Alpha shape computed in GENERAL mode" << std::endl;
+  std::clog << "Alpha shape computed in GENERAL mode" << std::endl;
 #endif  // DEBUG_TRACES
 
   // filtration with alpha values from alpha shape
@@ -140,7 +140,7 @@ int main(int argc, char * const argv[]) {
 
   as.filtration_with_alpha_values(disp);
 #ifdef DEBUG_TRACES
-  std::cout << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
+  std::clog << "filtration_with_alpha_values returns : " << the_objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
 
   Alpha_shape_3::size_type count_vertices = 0;
@@ -177,7 +177,7 @@ int main(int argc, char * const argv[]) {
         // alpha shape not found
         Simplex_tree_vertex vertex = map_cgal_simplex_tree.size();
 #ifdef DEBUG_TRACES
-        std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert_simplex " << vertex << "\n";
+        std::clog << "vertex [" << the_alpha_shape_vertex->point() << "] not found - insert_simplex " << vertex << "\n";
 #endif  // DEBUG_TRACES
         the_simplex_tree.push_back(vertex);
         map_cgal_simplex_tree.insert(Alpha_shape_simplex_tree_pair(the_alpha_shape_vertex, vertex));
@@ -185,14 +185,14 @@ int main(int argc, char * const argv[]) {
         // alpha shape found
         Simplex_tree_vertex vertex = the_map_iterator->second;
 #ifdef DEBUG_TRACES
-        std::cout << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
+        std::clog << "vertex [" << the_alpha_shape_vertex->point() << "] found in " << vertex << std::endl;
 #endif  // DEBUG_TRACES
         the_simplex_tree.push_back(vertex);
       }
     }
     // Construction of the simplex_tree
 #ifdef DEBUG_TRACES
-    std::cout << "filtration = " << *the_alpha_value_iterator << std::endl;
+    std::clog << "filtration = " << *the_alpha_value_iterator << std::endl;
 #endif  // DEBUG_TRACES
     simplex_tree.insert_simplex(the_simplex_tree, std::sqrt(*the_alpha_value_iterator));
     if (the_alpha_value_iterator != the_alpha_values.end())
@@ -201,61 +201,61 @@ int main(int argc, char * const argv[]) {
       std::cerr << "This shall not happen" << std::endl;
   }
 #ifdef DEBUG_TRACES
-  std::cout << "vertices \t\t" << count_vertices << std::endl;
-  std::cout << "edges \t\t" << count_edges << std::endl;
-  std::cout << "facets \t\t" << count_facets << std::endl;
-  std::cout << "cells \t\t" << count_cells << std::endl;
+  std::clog << "vertices \t\t" << count_vertices << std::endl;
+  std::clog << "edges \t\t" << count_edges << std::endl;
+  std::clog << "facets \t\t" << count_facets << std::endl;
+  std::clog << "cells \t\t" << count_cells << std::endl;
 
 
-  std::cout << "Information of the Simplex Tree:\n";
-  std::cout << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
-  std::cout << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
+  std::clog << "Information of the Simplex Tree:\n";
+  std::clog << "  Number of vertices = " << simplex_tree.num_vertices() << " ";
+  std::clog << "  Number of simplices = " << simplex_tree.num_simplices() << std::endl << std::endl;
 #endif  // DEBUG_TRACES
 
 #ifdef DEBUG_TRACES
-  std::cout << "Iterator on vertices: \n";
+  std::clog << "Iterator on vertices: \n";
   for (auto vertex : simplex_tree.complex_vertex_range()) {
-    std::cout << vertex << " ";
+    std::clog << vertex << " ";
   }
 #endif  // DEBUG_TRACES
 
-  std::cout << simplex_tree << std::endl;
+  std::clog << simplex_tree << std::endl;
 
 #ifdef DEBUG_TRACES
-  std::cout << std::endl << std::endl << "Iterator on simplices:\n";
+  std::clog << std::endl << std::endl << "Iterator on simplices:\n";
   for (auto simplex : simplex_tree.complex_simplex_range()) {
-    std::cout << "   ";
+    std::clog << "   ";
     for (auto vertex : simplex_tree.simplex_vertex_range(simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 #endif  // DEBUG_TRACES
 #ifdef DEBUG_TRACES
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 #endif  // DEBUG_TRACES
 #ifdef DEBUG_TRACES
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, and their boundary simplices:\n";
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, and their boundary simplices:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex)) {
-      std::cout << vertex << " ";
+      std::clog << vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
 
     for (auto b_simplex : simplex_tree.boundary_simplex_range(f_simplex)) {
-      std::cout << "      " << "[" << simplex_tree.filtration(b_simplex) << "] ";
+      std::clog << "      " << "[" << simplex_tree.filtration(b_simplex) << "] ";
       for (auto vertex : simplex_tree.simplex_vertex_range(b_simplex)) {
-        std::cout << vertex << " ";
+        std::clog << vertex << " ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
   }
 #endif  // DEBUG_TRACES
