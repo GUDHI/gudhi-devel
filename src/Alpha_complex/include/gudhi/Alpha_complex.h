@@ -248,6 +248,16 @@ class Alpha_complex {
     }
   }
 
+  /** \brief get_point_ returns the point corresponding to the vertex given as parameter.
+   * Only for internal use for faster access.
+   *
+   * @param[in] vertex Vertex handle of the point to retrieve.
+   * @return The point found.
+   */
+  const Point_d& get_point_(std::size_t vertex) const {
+    return vertex_handle_to_iterator_[vertex]->point();
+  }
+
   template<class SimplicialComplexForAlpha>
   auto& get_cache(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
     auto k = cplx.key(s);
@@ -258,7 +268,7 @@ class Alpha_complex {
       thread_local std::vector<Point_d> v;
       v.clear();
       for (auto vertex : cplx.simplex_vertex_range(s))
-        v.push_back(get_point(vertex));
+        v.push_back(get_point_(vertex));
       Point_d c = kernel_.construct_circumcenter_d_object()(v.cbegin(), v.cend());
       typename Kernel::FT r = kernel_.squared_distance_d_object()(c, v[0]);
       cache_.emplace_back(std::move(c), std::move(r));
@@ -423,7 +433,7 @@ class Alpha_complex {
         while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
         Vertex_handle extra = *longiter;
         auto const& cache=get_cache(complex, f_boundary);
-        bool is_gab = kernel_.squared_distance_d_object()(cache.first, get_point(extra)) >= cache.second;
+        bool is_gab = kernel_.squared_distance_d_object()(cache.first, get_point_(extra)) >= cache.second;
 #ifdef DEBUG_TRACES
         std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
 #endif  // DEBUG_TRACES
