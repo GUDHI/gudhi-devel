@@ -51,9 +51,6 @@ class Filtered_edges_container {
   using Filtered_edge_set = std::vector<Filtered_edge>;
 
   using Filtered_edge_set_iterator = typename Filtered_edge_set::const_iterator;
-  /** \brief Range over the `Gudhi::Filtered_edges_container` data structure.
-   */
-  using Filtered_edge_range = boost::iterator_range<Filtered_edge_set_iterator>;
 
   template <class EdgeIterator, class EdgePropertyIterator>
   Filtered_edges_container(EdgeIterator first, EdgeIterator last, EdgePropertyIterator ep_iter,
@@ -92,7 +89,7 @@ class Filtered_edges_container {
 
   /** \brief Returns a range which contains the edges with filtration value smaller than `new_threshold`.
    */
-  Filtered_edge_range sub_filter_edges_by_filtration(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
+  Filtered_edge_set sub_filter_edges_by_filtration(typename SimplicialComplexForFilteredEdges::Filtration_value new_threshold) const {
     auto edge_it = std::lower_bound (edges_.begin(), edges_.end(), new_threshold,
           [](const Filtered_edge& edge, double d)
           { return std::get<0>(edge) < d; });
@@ -108,14 +105,14 @@ class Filtered_edges_container {
       std::cout << "Filtered_edges_container::sub_filter_edges_by_filtration is empty " << std::endl;
     }
 #endif  // DEBUG_TRACES
-    return Filtered_edge_range(edges_.begin(), edge_it);
+    return Filtered_edge_set(edges_.begin(), edge_it);
   }
 
   /** \brief Returns the sub-filtered edges range from a `new_index` index value.
    */
-  Filtered_edge_range sub_filter_edges_by_index(std::size_t new_index) const {
+  Filtered_edge_set sub_filter_edges_by_index(std::size_t new_index) const {
     if (new_index >= size())
-      return Filtered_edge_range(edges_.begin(), edges_.end());
+      return Filtered_edge_set(edges_.begin(), edges_.end());
 
 #ifdef DEBUG_TRACES
     if (edges_.begin() != edges_.begin() + new_index + 1) {
@@ -129,7 +126,7 @@ class Filtered_edges_container {
       std::cout << "Filtered_edges_container::sub_filter_edges_by_index is empty " << std::endl;
     }
 #endif  // DEBUG_TRACES
-    return Filtered_edge_range(edges_.begin(), edges_.begin() + new_index + 1);
+    return Filtered_edge_set(edges_.begin(), edges_.begin() + new_index + 1);
   }
 
 private:
@@ -158,7 +155,6 @@ Edge_graph<SimplicialComplexForEdgeGraph> compute_edge_graph(
 
   std::vector<std::pair<Vertex_handle, Vertex_handle>> edges;
   std::vector<Filtration_value> edges_fil;
-  std::map<Vertex_handle, Filtration_value> vertices;
 
   Vertex_handle idx_u, idx_v;
   Filtration_value fil;
