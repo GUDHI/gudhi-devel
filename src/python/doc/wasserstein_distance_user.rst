@@ -9,7 +9,7 @@ Definition
 
 .. include:: wasserstein_distance_sum.inc
 
-The q-Wasserstein distance is defined as the minimal value 
+The q-Wasserstein distance is defined as the minimal value achieved
 by a perfect matching between the points of the two diagrams (+ all  
 diagonal points), where the value of a matching is defined as the    
 q-th root of the sum of all edge lengths to the power q. Edge lengths
@@ -32,7 +32,7 @@ Morozov, and Arnur Nigmetov.
 .. autofunction:: gudhi.hera.wasserstein_distance
 
 Basic example
--------------
+*************
 
 This example computes the 1-Wasserstein distance from 2 persistence diagrams with Euclidean ground metric.
 Note that persistence diagrams must be submitted as (n x 2) numpy arrays and must not contain inf values.
@@ -123,10 +123,10 @@ per diagram).
      diagrams.                                                 
 
 
-.. autofunction:: gudhi.barycenter.lagrangian_barycenter
+.. autofunction:: gudhi.wasserstein.barycenter.lagrangian_barycenter
 
 Basic example
--------------
+*************
 
 This example estimates the Frechet mean (aka Wasserstein barycenter) between 
 four persistence diagrams.
@@ -135,7 +135,7 @@ As the algorithm is not convex, its output depends on the initialization and
 is only a local minimum of the objective function.
 Initialization can be either given as an integer (in which case the i-th 
 diagram of the list is used as initial estimate) or as a diagram. 
-If None, it will randomly select one of the diagram of the list 
+If None, it will randomly select one of the diagrams of the list 
 as initial estimate.
 Note that persistence diagrams must be submitted as 
 (n x 2) numpy arrays and must not contain inf values.
