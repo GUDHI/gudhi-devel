@@ -42,7 +42,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                     (then initialization is made on ``pdiagset[init]``)
                     or a `(n x 2)` ``numpy.array`` enconding 
                     a persistence diagram with `n` points.
-    :type init: int, (n x 2) np.array
+    :type init: ``int``, or (n x 2) ``np.array``
     :param verbose: if ``True``, returns additional information about the
                     barycenter.
     :type verbose: boolean
