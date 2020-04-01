@@ -33,35 +33,37 @@ def _mean(x, m):
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     '''
-    :param pdiagset: a list of size m containing numpy.array of shape (n x 2) 
-                    (n can variate), encoding a set of 
+    :param pdiagset: a list of ``numpy.array`` of shape `(n x 2)` 
+                    (`n` can variate), encoding a set of 
                     persistence diagrams with only finite coordinates. 
     :param init: The initial value for barycenter estimate. 
-                    If None, init is made on a random diagram from the dataset. 
-                    Otherwise, it must be an int 
-                    (then we init with diagset[init])
-                    or a (n x 2) numpy.array enconding 
-                    a persistence diagram with n points.
-    :param verbose: if True, returns additional information about the
+                    If ``None``, init is made on a random diagram from the dataset. 
+                    Otherwise, it can be an ``int`` 
+                    (then initialization is made on ``pdiagset[init]``)
+                    or a `(n x 2)` ``numpy.array`` enconding 
+                    a persistence diagram with `n` points.
+    :type init: int, (n x 2) np.array
+    :param verbose: if ``True``, returns additional information about the
                     barycenter.
-    :returns: If not verbose (default), a numpy.array encoding
-                    the barycenter estimate of pdiagset
-                    (local minima of the energy function). 
-                    If pdiagset is empty, returns None.
-                    If verbose, returns a couple (Y, log)
-                    where Y is the barycenter estimate,
-                    and log is a dict that contains additional informations:
-                    - groupings, a list of list of pairs (i,j),
-                    That is, G[k] = [(i, j) ...], where (i,j) indicates 
-                    that X[i] is matched to Y[j]
-                    if i = -1 or j = -1, it means they 
-                    represent the diagonal.
-                    - energy, a float representing the Frechet 
-                    energy value obtained,
-                    that is the mean of squared distances 
-                    of observations to the output.
-                    - nb_iter, integer representing the number of iterations 
-                    performed before convergence of the algorithm.
+    :type verbose: boolean
+    :returns: If not verbose (default), a ``numpy.array`` encoding
+              the barycenter estimate of pdiagset
+              (local minimum of the energy function). 
+              If ``pdiagset`` is empty, returns ``None``.
+              If verbose, returns a couple ``(Y, log)``
+              where ``Y`` is the barycenter estimate,
+              and ``log`` is a ``dict`` that contains additional informations:
+
+              - `"groupings"`, a list of list of pairs ``(i,j)``.
+              Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates 
+              that ``pdiagset[k][i]`` is matched to ``Y[j]``
+              if ``i = -1`` or ``j = -1``, it means they 
+              represent the diagonal.
+
+              - `"energy"`, ``float`` representing the Frechet energy value obtained.
+              It is the mean of squared distances of observations to the output.
+
+              - `"nb_iter"`, ``int`` number of iterations performed before convergence of the algorithm.
     '''
     X = pdiagset  # to shorten notations, not a copy
     m = len(X)  # number of diagrams we are averaging
