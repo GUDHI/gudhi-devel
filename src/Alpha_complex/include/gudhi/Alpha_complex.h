@@ -112,9 +112,6 @@ class Alpha_complex {
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
   typedef typename Kernel::Point_dimension_d        Point_Dimension;
 
-  // Type required to compute squared radius, or side of bounded sphere on a vector of points.
-  typedef typename std::vector<Point_d> Vector_of_CGAL_points;
-
   // Vertex_iterator type from CGAL.
   typedef typename Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
 
@@ -123,6 +120,9 @@ class Alpha_complex {
 
   // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
   typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
+
+  // Numeric type of coordinates in the kernel
+  typedef typename Kernel::FT FT;
 
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
@@ -133,7 +133,7 @@ class Alpha_complex {
   /** \brief Kernel for triangulation_ functions access.*/
   Kernel kernel_;
   /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
-  std::vector<std::pair<Point_d, typename Kernel::FT>> cache_;
+  std::vector<std::pair<Point_d, FT>> cache_, old_cache_;
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
@@ -258,22 +258,37 @@ class Alpha_complex {
     return vertex_handle_to_iterator_[vertex]->point();
   }
 
+  /// Return a reference to the circumcenter and circumradius, writing them in the cache if necessary.
   template<class SimplicialComplexForAlpha>
   auto& get_cache(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
     auto k = cplx.key(s);
     if(k==cplx.null_key()){
       k = cache_.size();
       cplx.assign_key(s, k);
-      // Use a transform_range? Check the impact on perf.
+      // Using a transform_range is slower, currently.
       thread_local std::vector<Point_d> v;
       v.clear();
       for (auto vertex : cplx.simplex_vertex_range(s))
         v.push_back(get_point_(vertex));
       Point_d c = kernel_.construct_circumcenter_d_object()(v.cbegin(), v.cend());
-      typename Kernel::FT r = kernel_.squared_distance_d_object()(c, v[0]);
+      FT r = kernel_.squared_distance_d_object()(c, v[0]);
       cache_.emplace_back(std::move(c), std::move(r));
     }
     return cache_[k];
+  }
+
+  /// Return the circumradius, either from the old cache or computed, without writing to the cache.
+  template<class SimplicialComplexForAlpha>
+  auto radius(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
+    auto k = cplx.key(s);
+    if(k!=cplx.null_key())
+      return old_cache_[k].second;
+    // Using a transform_range is slower, currently.
+    thread_local std::vector<Point_d> v;
+    v.clear();
+    for (auto vertex : cplx.simplex_vertex_range(s))
+      v.push_back(get_point_(vertex));
+    return kernel_.compute_squared_radius_d_object()(v.cbegin(), v.cend());
   }
 
  public:
@@ -365,11 +380,11 @@ class Alpha_complex {
               Filtration_value alpha_complex_filtration = 0.0;
               // No need to compute squared_radius on a single point - alpha is 0.0
               if (f_simplex_dim > 0) {
-                auto const& sqrad = get_cache(complex, f_simplex).second;
+                auto const& sqrad = radius(complex, f_simplex);
 #if CGAL_VERSION_NR >= 1050000000
                 if(exact) CGAL::exact(sqrad);
 #endif
-                CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
+                CGAL::NT_converter<FT, Filtration_value> cv;
                 alpha_complex_filtration = cv(sqrad);
               }
               complex.assign_filtration(f_simplex, alpha_complex_filtration);
@@ -382,6 +397,8 @@ class Alpha_complex {
               propagate_alpha_filtration(complex, f_simplex);
           }
         }
+        old_cache_ = std::move(cache_);
+        cache_.clear();
       }
       // --------------------------------------------------------------------------------------------
   
