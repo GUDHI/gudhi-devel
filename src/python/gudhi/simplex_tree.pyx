@@ -413,7 +413,7 @@ cdef class SimplexTree:
             Note that this code creates an extra vertex internally, so you should make sure that
             the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
         """
-        return self.get_ptr().compute_extended_filtration()
+        self.get_ptr().compute_extended_filtration()
 
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function retrieves good values for extended persistence, and separate the diagrams 
@@ -469,11 +469,8 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
-        cdef vector[pair[int, pair[double, double]]] persistence_result
-        if self.pcohptr != NULL:
-            self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
-            persistence_result = self.pcohptr.get_persistence()
-        return persistence_result
+        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        return self.pcohptr.get_persistence()
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
