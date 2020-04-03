@@ -150,7 +150,6 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
             energy += cost
             log["groupings"] = groupings
         energy = energy/m
-        print(energy)
         log["energy"] = energy
         log["nb_iter"] = nb_iter
 
