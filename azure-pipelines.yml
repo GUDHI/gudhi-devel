@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         macOSrelease:
-          imageName: 'macos-10.14'
+          imageName: 'macos-10.15'
           CMakeBuildType: Release
           customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
 
@@ -18,7 +18,7 @@ jobs:
     steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.8'
+        versionSpec: '3.7'
         architecture: 'x64'
   
     - script: |
