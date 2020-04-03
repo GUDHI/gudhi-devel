@@ -10,7 +10,7 @@ jobs:
         macOSrelease:
           imageName: 'macos-10.14'
           CMakeBuildType: Release
-          customInstallation: 'brew update && brew upgrade && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal && brew uninstall --ignore-dependencies openssl && brew install https://github.com/tebelorg/Tump/releases/download/v1.0.0/openssl.rb'
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
 
     pool:
       vmImage: $(imageName)
@@ -18,7 +18,7 @@ jobs:
     steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.7'
+        versionSpec: '3.8'
         architecture: 'x64'
   
     - script: |
