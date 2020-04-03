@@ -10,7 +10,7 @@ jobs:
         macOSrelease:
           imageName: 'macos-10.14'
           CMakeBuildType: Release
-          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal && brew upgrade openssl'
 
     pool:
       vmImage: $(imageName)
