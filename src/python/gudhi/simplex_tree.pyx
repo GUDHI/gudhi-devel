@@ -443,7 +443,8 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
-        persistence_result = self.pcohptr.get_persistence(homology_coeff_field, -1.)
+        self.pcohptr.compute_persistence(homology_coeff_field, -1.)
+        persistence_result = self.pcohptr.get_persistence()
         return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
 
 
@@ -470,7 +471,8 @@ cdef class SimplexTree:
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
-            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+            persistence_result = self.pcohptr.get_persistence()
         return persistence_result
 
     def betti_numbers(self):

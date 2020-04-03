@@ -32,7 +32,8 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
         Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max)
-        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        void compute_persistence(int homology_coeff_field, double min_persistence)
+        vector[pair[int, pair[double, double]]] get_persistence()
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
@@ -154,7 +155,8 @@ cdef class PeriodicCubicalComplex:
             self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
-            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
+            self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+            persistence_result = self.pcohptr.get_persistence()
         return persistence_result
 
     def betti_numbers(self):
