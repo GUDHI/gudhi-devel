@@ -43,23 +43,14 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   };
 
  public:
-  Persistent_cohomology_interface(FilteredComplex* stptr)
-      : Base(*stptr),
-      stptr_(stptr) { }
-
-  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max)
+  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max=false)
       : Base(*stptr, persistence_dim_max),
         stptr_(stptr) { }
 
+  // TODO: move to the constructors?
   void compute_persistence(int homology_coeff_field, double min_persistence) {
     Base::init_coefficients(homology_coeff_field);
     Base::compute_persistent_cohomology(min_persistence);
-  }
-
-  void maybe_compute_persistence(int homology_coeff_field, double min_persistence) {
-    // Currently get_persistent_pairs safely returns an empty vector before compute_persistent_cohomology
-    if(Base::get_persistent_pairs().empty())
-      compute_persistence(homology_coeff_field, min_persistence);
   }
 
   std::vector<std::pair<int, std::pair<double, double>>> get_persistence() {
