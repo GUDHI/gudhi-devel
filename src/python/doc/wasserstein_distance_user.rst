@@ -84,3 +84,10 @@ The output is:
     point 1 in dgm1 is matched to point 2 in dgm2
     point 2 in dgm1 is matched to the diagonal
     point 1 in dgm2 is matched to the diagonal
+
+Bibliography
+============
+
+.. bibliography:: ../../biblio/bibliography.bib
+   :filter: docname in docnames
+   :style: unsrt

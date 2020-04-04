@@ -65,3 +65,10 @@ The output is:
 
     Bottleneck distance approximation = 0.81
     Bottleneck distance value = 0.75
+
+Bibliography
+============
+
+.. bibliography:: ../../biblio/bibliography.bib
+   :filter: docname in docnames
+   :style: unsrt
