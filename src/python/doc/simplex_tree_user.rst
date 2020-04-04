@@ -68,7 +68,7 @@ The output is:
     ([2], 4.0)
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames

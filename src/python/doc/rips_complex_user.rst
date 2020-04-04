@@ -349,7 +349,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
     this is a known issue.
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames

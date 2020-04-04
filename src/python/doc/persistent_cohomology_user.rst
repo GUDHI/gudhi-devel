@@ -113,7 +113,7 @@ We provide several example files: run these examples with -h for details on thei
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames

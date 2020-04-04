@@ -315,7 +315,7 @@ the program outputs again SC.dot which gives the following visualization after u
     Visualization with neato
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames

@@ -86,7 +86,7 @@ The output is:
     point 1 in dgm2 is matched to the diagonal
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames
