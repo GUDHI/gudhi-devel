@@ -30,66 +30,125 @@
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/distance_functions.h"
 
-using namespace Gudhi;
+//using namespace Gudhi;
 
 // Types definition
-using Vector_of_points = std::vector<std::vector<double>>;
+//using Vector_of_points = std::vector<std::vector<double>>;
 
 //using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
-using Filtration_value = double;
-using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<double>;
+//using Filtration_value = double;
+//using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<double>;
 /*using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 */
-using Distance_matrix = std::vector<std::vector<double>>;
+//using Distance_matrix = std::vector<std::vector<double>>;
 
+using Filtration_value = double;
+using Vertex_handle = size_t;
+using Filtered_edge = std::tuple<Filtration_value, Vertex_handle, Vertex_handle>;
+using Filtered_sorted_edge_list = std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>>;
+
+bool find_edge_in_list(const Filtered_edge& edge, const Filtered_sorted_edge_list& edge_list) {
+  for (auto edge_from_list : edge_list) {
+    if (edge_from_list == edge)
+      return true;
+  }
+  return false;
+}
+
+void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filtered_sorted_edge_list& removed_edges) {
+  std::cout << "BEFORE COLLAPSE - Total number of edges: " << edges.size() << std::endl;
+  BOOST_CHECK(edges.size() > 0);
+  for (auto edge : edges) {
+    std::cout << "f[" << std::get<1>(edge) << ", " << std::get<2>(edge) << "] = " << std::get<0>(edge) << std::endl;
+  }
+
+  FlagComplexSpMatrix flag_complex_sparse_matrix(5, edges);
+  auto collapse_edges = flag_complex_sparse_matrix.filtered_edge_collapse();
+  std::cout << "AFTER COLLAPSE - Total number of edges: " << collapse_edges.size() << std::endl;
+  BOOST_CHECK(collapse_edges.size() <= edges.size());
+  for (auto edge_from_collapse : collapse_edges) {
+    std::cout << "f[" << std::get<1>(edge_from_collapse) << ", " << std::get<2>(edge_from_collapse) << "] = "
+              << std::get<0>(edge_from_collapse) << std::endl;
+    // Check each edge from collapse is in the input
+    BOOST_CHECK(find_edge_in_list(edge_from_collapse, edges));
+  }
+
+  for (auto removed_edge : removed_edges) {
+    std::cout << "f[" << std::get<1>(removed_edge) << ", " << std::get<2>(removed_edge) << "] = "
+              << std::get<0>(removed_edge) << std::endl;
+    // Check each removed edge from collapse is in the input
+    BOOST_CHECK(!find_edge_in_list(removed_edge, collapse_edges));
+  }
+
+}
 
 BOOST_AUTO_TEST_CASE(collapse) {
-  typedef size_t Vertex_handle;
-  typedef std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>> Filtered_sorted_edge_list;
-
-  std::size_t number_of_points;
-  std::string off_file_points;
-  std::string filediag;
-
-  Map map_empty;
-
-  Distance_matrix sparse_distances;
-
-
-  Vector_of_points point_vector {{0., 0.},{0., 1.},{1., 0.},{1., 1.}};
-
-  int dimension = point_vector[0].size();
-  number_of_points = point_vector.size();
-  std::cout << "Successfully read " << number_of_points << " point_vector.\n";
-  std::cout << "Ambient dimension is " << dimension << ".\n";
-
-  std::cout << "Point Set Generated." << std::endl;
-
-  for (double threshold = 1. ; threshold <= 2.; threshold +=1.) {
-    Filtered_sorted_edge_list edge_t;
-    std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
+  /*
+      1   2
+      o---o
+      |   |
+      |   |
+      |   |
+      o---o
+      0   3
+  */
+  Filtered_sorted_edge_list edges {{1., 0, 1}, {1., 1, 2}, {1., 2, 3}, {1., 3, 0}};
+  trace_and_check_collapse(edges, {});
   
-    Rips_edge_list Rips_edge_list_from_file(point_vector, threshold, Gudhi::Euclidean_distance());
-    Rips_edge_list_from_file.create_edges(edge_t);
-  
-    std::cout << "Sorted edge list computed" << std::endl;
-    std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
-  
-    if (edge_t.size() <= 0) {
-      std::cerr << "Total number of egdes are zero." << std::endl;
-      exit(-1);
-    }
-  
-    // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-    std::cout << "Filtered edge collapse begins" << std::endl;
-    FlagComplexSpMatrix mat_filt_edge_coll(number_of_points, edge_t);
-    std::cout << "Matrix instansiated" << std::endl;
-    Filtered_sorted_edge_list collapse_edges;
-    collapse_edges = mat_filt_edge_coll.filtered_edge_collapse();
-  }
- 
+  /*
+      1   2
+      o---o
+      |\ /|
+      | x |
+      |/ \|
+      o---o
+      0   3
+  */
+  edges.push_back({2., 0, 2});
+  edges.push_back({2., 1, 3});
+  trace_and_check_collapse(edges, {{2., 1, 3}});
+
+  /*
+      1   2   4
+      o---o---o
+      |\ /|   |
+      | x |   |
+      |/ \|   |
+      o---o---o
+      0   3   5
+  */
+  edges.push_back({3., 2, 4});
+  edges.push_back({3., 4, 5});
+  edges.push_back({3., 5, 3});
+  trace_and_check_collapse(edges, {{2., 1, 3}});
+
+  /*
+      1   2   4
+      o---o---o
+      |\ /|\ /|
+      | x | x |
+      |/ \|/ \|
+      o---o---o
+      0   3   5
+  */
+  edges.push_back({4., 2, 5});
+  edges.push_back({4., 4, 3});
+  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 2, 5}, {4., 4, 3}});
+
+  /*
+      1   2   4
+      o---o---o
+      |\ /|\ /|
+      | x | x |  + [0,4] and [1,5]
+      |/ \|/ \|
+      o---o---o
+      0   3   5
+  */
+  edges.push_back({5., 1, 5});
+  edges.push_back({5., 0, 4});
+  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 2, 5}, {4., 4, 3}, {5., 0, 4}});
 }
 
 
