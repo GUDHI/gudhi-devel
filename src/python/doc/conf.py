@@ -203,3 +203,75 @@ html_last_updated_fmt = '%b %d, %Y'
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'GUDHIdoc'
 
+# Vincent hates those warnings
+import sphinxcontrib.bibtex
+sphinxcontrib.bibtex.check_duplicate_labels = lambda app, env: None
+
+# Automatically prefix citation keys with the file name
+
+import sphinxcontrib.bibtex.cache
+
+def my_get_bibliography_entries(self, docname, id_, warn):
+    """Return filtered bibliography entries, sorted by occurence
+    in the bib file.
+    Modified to use docname as keyprefix
+    """
+    import six, copy
+    from sphinxcontrib.bibtex.cache import _FilterVisitor
+    # get the information of this bibliography node
+    bibcache = self.get_bibliography_cache(docname=docname, id_=id_)
+    # generate entries
+    for bibfile in bibcache.bibfiles:
+        data = self.bibfiles[bibfile].data
+        for entry in six.itervalues(data.entries):
+            # beware: the prefix is not stored in the data
+            # to allow reusing the data for multiple bibliographies
+            cited_docnames = self.get_cited_docnames(
+                docname + entry.key)
+            visitor = _FilterVisitor(
+                entry=entry,
+                docname=docname,
+                cited_docnames=cited_docnames)
+            try:
+                success = visitor.visit(bibcache.filter_)
+            except ValueError as err:
+                warn("syntax error in :filter: expression; %s" % err)
+                # recover by falling back to the default
+                success = bool(cited_docnames)
+            if success:
+                # entries are modified in an unpickable way
+                # when formatting, so fetch a deep copy
+                # and return this copy with prefixed key
+                # we do not deep copy entry.collection because that
+                # consumes enormous amounts of memory
+                entry.collection = None
+                entry2 = copy.deepcopy(entry)
+                entry2.key = docname + entry.key
+                entry2.collection = data
+                entry.collection = data
+                yield entry2
+
+sphinxcontrib.bibtex.cache.Cache._get_bibliography_entries = my_get_bibliography_entries
+
+import sphinxcontrib.bibtex.roles
+
+def my_result_nodes(self, document, env, node, is_ref):
+    """Transform reference node into a citation reference,
+    and note that the reference was cited.
+    Modified to use docname as keyprefix
+    """
+    keys = [env.docname+r for r in node['reftarget'].split(',')]
+    # Note that at this point, usually, env.bibtex_cache.bibfiles
+    # is still empty because the bibliography directive may not
+    # have been processed yet, so we cannot get the actual entry.
+    # Instead, we simply fake an entry with the desired key, and
+    # fix the label at doctree-resolved time. This happens in
+    # process_citation_references.
+    refnodes = [
+        self.backend.citation_reference(sphinxcontrib.bibtex.roles._fake_entry(key), document)
+        for key in keys]
+    for key in keys:
+        env.bibtex_cache.add_cited(key, env.docname)
+    return refnodes, []
+
+sphinxcontrib.bibtex.roles.CiteRole.result_nodes = my_result_nodes
