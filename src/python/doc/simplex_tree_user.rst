@@ -66,3 +66,10 @@ The output is:
     ([1, 2], 4.0)
     ([1], 0.0)
     ([2], 4.0)
+
+Bibliography
+------------
+
+.. bibliography:: ../../biblio/bibliography.bib
+   :filter: docname in docnames
+   :style: unsrt
