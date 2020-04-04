@@ -92,3 +92,4 @@ Bibliography
 .. bibliography:: ../../biblio/bibliography.bib
    :filter: docname in docnames
    :style: unsrt
+   :labelprefix: I

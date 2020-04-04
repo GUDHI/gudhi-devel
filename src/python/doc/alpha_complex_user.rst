@@ -209,3 +209,4 @@ CGAL citations
 .. bibliography:: ../../biblio/how_to_cite_cgal.bib
    :filter: docname in docnames
    :style: unsrt
+   :labelprefix: A
