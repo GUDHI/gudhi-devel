@@ -449,7 +449,7 @@ cdef class SimplexTree:
 
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
-        """This function returns the persistence of the simplicial complex.
+        """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number. Default value is 11.

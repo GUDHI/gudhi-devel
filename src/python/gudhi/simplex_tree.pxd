@@ -76,5 +76,5 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
-        void write_output_diagram(string diagram_file_name)
+        void write_output_diagram(string diagram_file_name) except +
         vector[pair[vector[int], vector[int]]] persistence_pairs()
