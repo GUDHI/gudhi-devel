@@ -78,8 +78,6 @@ class FlagComplexSpMatrix {
 
   // Vertices strored as an unordered_set
   std::unordered_set<Vertex> vertices;
-  //! Stores the 1-simplices(edges) of the original Simplicial Complex.
-  edge_list oneSimplices;
 
   // Unordered set of  removed edges. (to enforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_removed_redges;
@@ -167,14 +165,8 @@ class FlagComplexSpMatrix {
 
   bool edgeCollapsed;
 
-  void init() {
-    rows = 0;
-
-    numOneSimplices = 0;
-    edgeCollapsed = false;
-  }
-
-  bool check_edge_domination(Edge e)  // Edge e is the actual edge (u,v). Not the row ids in the matrixs
+  // Edge e is the actual edge (u,v). Not the row ids in the matrixs
+  bool check_edge_domination(Edge e)
   {
     auto u = std::get<0>(e);
     auto v = std::get<1>(e);
@@ -182,13 +174,17 @@ class FlagComplexSpMatrix {
     auto rw_u = vertexToRow[u];
     auto rw_v = vertexToRow[v];
     auto rw_e = std::make_pair(rw_u, rw_v);
-    // std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
+#ifdef DEBUG_TRACES
+    std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
+#endif  // DEBUG_TRACES
     auto commonNeighbours = closed_common_neighbours_row_index(rw_e);
-    // std::cout << "And its common neighbours are." << std::endl;
-    // for (doubleVector::iterator it = commonNeighbours.begin(); it!=commonNeighbours.end(); it++) {
-    // std::cout << rowToVertex[*it] << ", " ;
-    // }
-    // std::cout<< std::endl;
+#ifdef DEBUG_TRACES
+    std::cout << "And its common neighbours are." << std::endl;
+    for (doubleVector::iterator it = commonNeighbours.begin(); it!=commonNeighbours.end(); it++) {
+      std::cout << rowToVertex[*it] << ", " ;
+    }
+    std::cout<< std::endl;
+#endif  // DEBUG_TRACES
     if (commonNeighbours.size() > 2) {
       if (commonNeighbours.size() == 3)
         return true;
@@ -197,8 +193,9 @@ class FlagComplexSpMatrix {
           auto rw_c = *it;  // Typecasting
           if (rw_c != rw_u and rw_c != rw_v) {
             auto neighbours_c = closed_neighbours_row_index(rw_c);
+            // If neighbours_c contains the common neighbours.
             if (std::includes(neighbours_c.begin(), neighbours_c.end(), commonNeighbours.begin(),
-                              commonNeighbours.end()))  // If neighbours_c contains the common neighbours.
+                              commonNeighbours.end()))
               return true;
           }
         }
@@ -206,7 +203,8 @@ class FlagComplexSpMatrix {
     return false;
   }
 
-  bool check_domination_indicator(Edge e)  // The edge should be sorted by the indices and indices are original
+  // The edge should be sorted by the indices and indices are original
+  bool check_domination_indicator(Edge e)
   {
     return dominated_edge_indicator[edge_to_index_map[e]];
   }
@@ -219,8 +217,10 @@ class FlagComplexSpMatrix {
     Vertex u = std::get<0>(e);
     Vertex v = std::get<1>(e);
 
-    // std::cout << "The  current critical edge to re-check criticality with filt value is : {" << u << "," << v << "};
-    // "<< std::get<1>(fe) << std::endl;
+#ifdef DEBUG_TRACES
+    std::cout << "The  current critical edge to re-check criticality with filt value is : f {" << u << "," << v
+              << "} = " << std::get<1>(fe) << std::endl;
+#endif  // DEBUG_TRACES
     auto rw_u = vertexToRow[u];
     auto rw_v = vertexToRow[v];
     auto rw_critical_edge = std::make_pair(rw_u, rw_v);
@@ -242,8 +242,10 @@ class FlagComplexSpMatrix {
   }
 
   void set_edge_critical(std::size_t indx, double filt) {
-    // std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
-    // std::endl;
+#ifdef DEBUG_TRACES
+    std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
+    std::endl;
+#endif  // DEBUG_TRACES
     std::set<std::size_t> effectedIndcs = three_clique_indices(indx);
     if (effectedIndcs.size() > 0) {
       for (auto idx = indx - 1; idx > 0; idx--) {
@@ -251,12 +253,15 @@ class FlagComplexSpMatrix {
         Edge e = std::get<0>(fec);
         Vertex u = std::get<0>(e);
         Vertex v = std::get<1>(e);
-        if (not critical_edge_indicator.at(
-                idx)) {  // If idx is not critical so it should be proceses, otherwise it stays in the graph // prev
-                         // code : recurCriticalCoreIndcs.find(idx) == recurCriticalCoreIndcs.end()
-          if (effectedIndcs.find(idx) != effectedIndcs.end()) {  // If idx is affected
+        // If idx is not critical so it should be proceses, otherwise it stays in the graph // prev
+        // code : recurCriticalCoreIndcs.find(idx) == recurCriticalCoreIndcs.end()
+        if (not critical_edge_indicator.at(idx)) {
+          // If idx is affected
+          if (effectedIndcs.find(idx) != effectedIndcs.end()) {
             if (not check_edge_domination(e)) {
-              // std::cout << "The curent index is became critical " << idx  << std::endl;
+#ifdef DEBUG_TRACES
+              std::cout << "The curent index became critical " << idx  << std::endl;
+#endif  // DEBUG_TRACES
               critical_edge_indicator.at(idx) = true;
               criticalCoreEdges.push_back({filt, u, v});
               std::set<std::size_t> inner_effected_indcs = three_clique_indices(idx);
@@ -264,11 +269,14 @@ class FlagComplexSpMatrix {
                 if (*inr_idx < idx) effectedIndcs.emplace(*inr_idx);
               }
               inner_effected_indcs.clear();
-              // std::cout << "The following edge is critical with filt value: {" << std::get<0>(e) << "," <<
-              // std::get<1>(e) << "}; " << filt << std::endl;
+#ifdef DEBUG_TRACES
+              std::cout << "The following edge is critical with filt value: {" << std::get<0>(e) << "," <<
+              std::get<1>(e) << "}; " << filt << std::endl;
+#endif  // DEBUG_TRACES
             } else
               u_set_dominated_redges.emplace(std::minmax(vertexToRow[u], vertexToRow[v]));
-          } else  // Idx is not affected hence dominated.
+          } else
+            // Idx is not affected hence dominated.
             u_set_dominated_redges.emplace(std::minmax(vertexToRow[u], vertexToRow[v]));
         }
       }
@@ -289,8 +297,8 @@ class FlagComplexSpMatrix {
     while (endIdx < totEdges) {
       EdgeFilt fec = fEgdeVector.at(endIdx);
 
-      insert_new_edges(std::get<0>(std::get<0>(fec)), std::get<1>(std::get<0>(fec)),
-                       std::get<1>(fec));  // Inserts the edge in the sparse matrix to update the graph (G_i)
+      // Inserts the edge in the sparse matrix to update the graph (G_i)
+      insert_new_edges(std::get<0>(std::get<0>(fec)), std::get<1>(std::get<0>(fec)), std::get<1>(fec));
 
       Edge e = std::get<0>(fec);
       Vertex u = std::get<0>(e);
@@ -310,25 +318,29 @@ class FlagComplexSpMatrix {
       endIdx++;
     }
 
+#ifdef DEBUG_TRACES
     std::cout << "The total number of critical edges is: " << criticalCoreEdges.size() << std::endl;
     std::cout << "The total number of non-critical edges is: " << totEdges - criticalCoreEdges.size() << std::endl;
+#endif  // DEBUG_TRACES
   }
 
-  doubleVector closed_neighbours_row_index(double indx)  // Returns list of non-zero columns of the particular indx.
+  // Returns list of non-zero columns of the particular indx.
+  doubleVector closed_neighbours_row_index(double indx)
   {
     doubleVector nonZeroIndices;
     Vertex u = indx;
     Vertex v;
     // std::cout << "The neighbours of the vertex: " << rowToVertex[u] << " are. " << std::endl;
     if (not vertDomnIndicator[indx]) {
-      for (rowInnerIterator it(sparseRowAdjMatrix, indx); it; ++it) {  // Iterate over the non-zero columns
+      // Iterate over the non-zero columns
+      for (rowInnerIterator it(sparseRowAdjMatrix, indx); it; ++it) {
         v = it.index();
+        // If the vertex v is not dominated and the edge {u,v} is still in the matrix
         if (not vertDomnIndicator[v] and u_set_removed_redges.find(std::minmax(u, v)) == u_set_removed_redges.end() and
-            u_set_dominated_redges.find(std::minmax(u, v)) ==
-                u_set_dominated_redges
-                    .end()) {  // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-          nonZeroIndices.push_back(it.index());  // inner index, here it is equal to it.columns()
-                                                 // std::cout << rowToVertex[it.index()] << ", " ;
+            u_set_dominated_redges.find(std::minmax(u, v)) == u_set_dominated_redges.end()) {
+          // inner index, here it is equal to it.columns()
+          nonZeroIndices.push_back(it.index());
+          // std::cout << rowToVertex[it.index()] << ", " ;
         }
       }
       // std::cout << std::endl;
@@ -361,26 +373,18 @@ class FlagComplexSpMatrix {
     <B>vertDomnIndicator</B> ,<B>rowIterator<B> are initialised by init() function which is
     called at the begining of this. <br>
   */
-  FlagComplexSpMatrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t) {
-    init();
-    sparseRowAdjMatrix = sparseRowMatrix(
-        num_vertices, num_vertices);  // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
+  FlagComplexSpMatrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t)
+  : rows(0),
+    numOneSimplices(0),
+    edgeCollapsed(false) {
+    // Initializing sparseRowAdjMatrix, This is a row-major sparse matrix.
+    sparseRowAdjMatrix = sparseRowMatrix(num_vertices, num_vertices);
 
     for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      // std::vector<size_t>  s = {std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))};
-      // insert_new_edges(std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx)), 1);
       fEgdeVector.push_back(
           {{std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))}, std::get<0>(edge_t.at(bgn_idx))});
     }
-
-    // sparseRowAdjMatrix.makeCompressed();
   }
-
-  //!	Destructor.
-  /*!
-    Frees up memory locations on the heap.
-  */
-  ~FlagComplexSpMatrix() {}
 
   // Performs edge collapse in a decreasing sequence of the filtration value.
   Filtered_sorted_edge_list filtered_edge_collapse() {
@@ -392,8 +396,8 @@ class FlagComplexSpMatrix {
   void insert_vertex(const Vertex& vertex, double filt_val) {
     auto rw = vertexToRow.find(vertex);
     if (rw == vertexToRow.end()) {
-      sparseRowAdjMatrix.insert(rows, rows) =
-          filt_val;  // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
+      // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
+      sparseRowAdjMatrix.insert(rows, rows) = filt_val;
       vertDomnIndicator.push_back(false);
       contractionIndicator.push_back(false);
       rowIterator.push(rows);
@@ -404,24 +408,30 @@ class FlagComplexSpMatrix {
     }
   }
 
-  void insert_new_edges(const Vertex& u, const Vertex& v,
-                        double filt_val)  // The edge must not be added before, it should be a new edge.
+  void insert_new_edges(const Vertex& u, const Vertex& v, double filt_val)
   {
+    // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
     if (u != v) {
       insert_vertex(v, filt_val);
-      // std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
+#ifdef DEBUG_TRACES
+      std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
+#endif  // DEBUG_TRACES
 
       auto rw_u = vertexToRow.find(u);
       auto rw_v = vertexToRow.find(v);
-      // std::cout << "Inserting the edge " << u <<", " << v << std::endl;
+#ifdef DEBUG_TRACES
+      std::cout << "Inserting the edge " << u <<", " << v << std::endl;
+#endif  // DEBUG_TRACES
       sparseRowAdjMatrix.insert(rw_u->second, rw_v->second) = filt_val;
       sparseRowAdjMatrix.insert(rw_v->second, rw_u->second) = filt_val;
-      oneSimplices.emplace_back(u, v);
       numOneSimplices++;
     }
-    // else
-    // 	std::cout << "Already a member simplex,  skipping..." << std::endl;
+#ifdef DEBUG_TRACES
+    else {
+     	std::cout << "Already a member simplex,  skipping..." << std::endl;
+    }
+#endif  // DEBUG_TRACES
   }
 
   std::size_t num_vertices() const { return vertices.size(); }
