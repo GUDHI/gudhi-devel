@@ -6,22 +6,28 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
 #include <gudhi/Points_off_io.h>
+#include <gudhi/graph_simplicial_complex.h>
 
-#include <CGAL/Epick_d.h>
-
+#include <boost/graph/adjacency_list.hpp>
 #include <boost/program_options.hpp>
 
 // Types definition
-using Point = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>::Point_d;
+
+using Simplex_tree = Gudhi::Simplex_tree<>;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
-using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
-using Filtration_value = double;
+
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
+
+using Adjacency_list = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
+                                             boost::property<Gudhi::vertex_filtration_t, double>,
+                                             boost::property<Gudhi::edge_filtration_t, double>>;
 
 
 class filt_edge_to_dist_matrix {
@@ -92,30 +98,27 @@ int main(int argc, char* argv[]) {
     exit(-1);  // ----- >>
   }
 
-  int dimension = point_vector[0].dimension();
+  //int dimension = point_vector[0].dimension();
   number_of_points = point_vector.size();
   std::cout << "Successfully read " << number_of_points << " point_vector.\n";
-  std::cout << "Ambient dimension is " << dimension << ".\n";
+  //std::cout << "Ambient dimension is " << dimension << ".\n";
 
   std::cout << "Point Set Generated." << std::endl;
 
-  Filtered_sorted_edge_list edge_t;
-  std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
+  Adjacency_list proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+                                                                                threshold,
+                                                                                Gudhi::Euclidean_distance());
 
-  Rips_edge_list Rips_edge_list_from_file(point_vector, threshold, Gudhi::Euclidean_distance());
-  Rips_edge_list_from_file.create_edges(edge_t);
-
-  std::cout << "Sorted edge list computed" << std::endl;
-  std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
-
-  if (edge_t.size() <= 0) {
+  if (num_edges(proximity_graph) <= 0) {
     std::cerr << "Total number of egdes are zero." << std::endl;
     exit(-1);
   }
 
-  // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
   std::cout << "Filtered edge collapse begins" << std::endl;
-  Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
+  Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
+
+  std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
+
   std::cout << "Matrix instansiated" << std::endl;
   Filtered_sorted_edge_list collapse_edges;
   collapse_edges = mat_filt_edge_coll.filtered_edge_collapse();

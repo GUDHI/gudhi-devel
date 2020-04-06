@@ -12,8 +12,15 @@
 #define FLAG_COMPLEX_SPARSE_MATRIX_H_
 
 #include <gudhi/Rips_edge_list.h>
+#include <gudhi/graph_simplicial_complex.h>
+
 #include <boost/functional/hash.hpp>
-// #include <boost/graph/adjacency_list.hpp>
+
+#include <Eigen/Sparse>
+
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
 
 #include <iostream>
 #include <utility>
@@ -27,8 +34,6 @@
 
 #include <ctime>
 #include <fstream>
-
-#include <Eigen/Sparse>
 
 typedef std::size_t Vertex;
 using Edge = std::pair<Vertex, Vertex>;  // This is an ordered pair, An edge is stored with convention of the first
@@ -317,6 +322,35 @@ class Flag_complex_sparse_matrix {
       vertices.emplace(u);
       vertices.emplace(v);
     }
+  }
+
+  template<typename OneSkeletonGraph>
+  Flag_complex_sparse_matrix(const OneSkeletonGraph& one_skeleton_graph)
+  : rows(0),
+    edgeCollapsed(false) {
+    // Insert all vertices
+    for (auto v_it = boost::vertices(one_skeleton_graph); v_it.first != v_it.second; ++v_it.first) {
+      vertices.emplace(*(v_it.first));
+    }
+    // Insert all edges
+    for (auto edge_it = boost::edges(one_skeleton_graph);
+         edge_it.first != edge_it.second; ++edge_it.first) {
+      auto edge = *(edge_it.first);
+      Vertex u = source(edge, one_skeleton_graph);
+      Vertex v = target(edge, one_skeleton_graph);
+      f_edge_vector.push_back({{u, v}, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)});
+    }
+    // Sort edges
+    auto sort_by_filtration = [](const EdgeFilt& edge_a, const EdgeFilt& edge_b) -> bool
+    {
+      return (get<1>(edge_a) < get<1>(edge_b)); 
+    };
+
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_sort(f_edge_vector.begin(), f_edge_vector.end(), sort_by_filtration);
+#else
+    std::stable_sort(f_edge_vector.begin(), f_edge_vector.end(), sort_by_filtration);
+#endif
   }
 
   // Performs edge collapse in a decreasing sequence of the filtration value.
