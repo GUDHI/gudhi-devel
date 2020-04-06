@@ -148,7 +148,7 @@ class FlagComplexSpMatrix {
   EdgeFiltQueue filteredEgdeIter;
 
   // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
-  EdgeFiltVector fEgdeVector;
+  EdgeFiltVector f_edge_vector;
 
   // List of non-dominated edges,  the indices of the edges are the vertex lables!!.
   Filtered_sorted_edge_list criticalCoreEdges;
@@ -212,14 +212,13 @@ class FlagComplexSpMatrix {
   std::set<std::size_t> three_clique_indices(std::size_t crit) {
     std::set<std::size_t> edge_indices;
 
-    EdgeFilt fe = fEgdeVector.at(crit);
-    Edge e = std::get<0>(fe);
+    Edge e = std::get<0>(f_edge_vector[crit]);
     Vertex u = std::get<0>(e);
     Vertex v = std::get<1>(e);
 
 #ifdef DEBUG_TRACES
     std::cout << "The  current critical edge to re-check criticality with filt value is : f {" << u << "," << v
-              << "} = " << std::get<1>(fe) << std::endl;
+              << "} = " << std::get<1>(f_edge_vector[crit]) << std::endl;
 #endif  // DEBUG_TRACES
     auto rw_u = vertexToRow[u];
     auto rw_v = vertexToRow[v];
@@ -249,8 +248,7 @@ class FlagComplexSpMatrix {
     std::set<std::size_t> effectedIndcs = three_clique_indices(indx);
     if (effectedIndcs.size() > 0) {
       for (auto idx = indx - 1; idx > 0; idx--) {
-        EdgeFilt fec = fEgdeVector.at(idx);
-        Edge e = std::get<0>(fec);
+        Edge e = std::get<0>(f_edge_vector[idx]);
         Vertex u = std::get<0>(e);
         Vertex v = std::get<1>(e);
         // If idx is not critical so it should be proceses, otherwise it stays in the graph // prev
@@ -283,45 +281,6 @@ class FlagComplexSpMatrix {
     }
     effectedIndcs.clear();
     u_set_dominated_redges.clear();
-  }
-
-  void critical_core_edges() {
-    std::size_t totEdges = fEgdeVector.size();
-
-    std::size_t endIdx = 0;
-
-    u_set_removed_redges.clear();
-    u_set_dominated_redges.clear();
-    critical_edge_indicator.clear();
-
-    while (endIdx < totEdges) {
-      EdgeFilt fec = fEgdeVector.at(endIdx);
-
-      // Inserts the edge in the sparse matrix to update the graph (G_i)
-      insert_new_edges(std::get<0>(std::get<0>(fec)), std::get<1>(std::get<0>(fec)), std::get<1>(fec));
-
-      Edge e = std::get<0>(fec);
-      Vertex u = std::get<0>(e);
-      Vertex v = std::get<1>(e);
-      edge_to_index_map.emplace(std::minmax(u, v), endIdx);
-      critical_edge_indicator.push_back(false);
-      dominated_edge_indicator.push_back(false);
-
-      if (not check_edge_domination(e)) {
-        critical_edge_indicator.at(endIdx) = true;
-        dominated_edge_indicator.at(endIdx) = false;
-        criticalCoreEdges.push_back({std::get<1>(fec), u, v});
-        if (endIdx > 1) set_edge_critical(endIdx, std::get<1>(fec));
-
-      } else
-        dominated_edge_indicator.at(endIdx) = true;
-      endIdx++;
-    }
-
-#ifdef DEBUG_TRACES
-    std::cout << "The total number of critical edges is: " << criticalCoreEdges.size() << std::endl;
-    std::cout << "The total number of non-critical edges is: " << totEdges - criticalCoreEdges.size() << std::endl;
-#endif  // DEBUG_TRACES
   }
 
   // Returns list of non-zero columns of the particular indx.
@@ -381,14 +340,50 @@ class FlagComplexSpMatrix {
     sparseRowAdjMatrix = sparseRowMatrix(num_vertices, num_vertices);
 
     for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      fEgdeVector.push_back(
+      f_edge_vector.push_back(
           {{std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))}, std::get<0>(edge_t.at(bgn_idx))});
     }
   }
 
   // Performs edge collapse in a decreasing sequence of the filtration value.
   Filtered_sorted_edge_list filtered_edge_collapse() {
-    critical_core_edges();
+    std::size_t totEdges = f_edge_vector.size();
+
+    std::size_t endIdx = 0;
+
+    u_set_removed_redges.clear();
+    u_set_dominated_redges.clear();
+    critical_edge_indicator.clear();
+
+    while (endIdx < totEdges) {
+      EdgeFilt fec = f_edge_vector[endIdx];
+      Edge e = std::get<0>(fec);
+      Vertex u = std::get<0>(e);
+      Vertex v = std::get<1>(e);
+      double filt = std::get<1>(fec);
+
+      // Inserts the edge in the sparse matrix to update the graph (G_i)
+      insert_new_edges(u, v, filt);
+
+      edge_to_index_map.emplace(std::minmax(u, v), endIdx);
+      critical_edge_indicator.push_back(false);
+      dominated_edge_indicator.push_back(false);
+
+      if (not check_edge_domination(e)) {
+        critical_edge_indicator.at(endIdx) = true;
+        dominated_edge_indicator.at(endIdx) = false;
+        criticalCoreEdges.push_back({filt, u, v});
+        if (endIdx > 1)
+          set_edge_critical(endIdx, filt);
+      } else
+        dominated_edge_indicator.at(endIdx) = true;
+      endIdx++;
+    }
+
+#ifdef DEBUG_TRACES
+    std::cout << "The total number of critical edges is: " << criticalCoreEdges.size() << std::endl;
+    std::cout << "The total number of non-critical edges is: " << totEdges - criticalCoreEdges.size() << std::endl;
+#endif  // DEBUG_TRACES
     edgeCollapsed = true;
     return criticalCoreEdges;
   }

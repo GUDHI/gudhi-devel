@@ -75,6 +75,7 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
     BOOST_CHECK(find_edge_in_list(edge_from_collapse, edges));
   }
 
+  std::cout << "CHECK COLLAPSE - Total number of removed edges: " << removed_edges.size() << std::endl;
   for (auto removed_edge : removed_edges) {
     std::cout << "f[" << std::get<1>(removed_edge) << ", " << std::get<2>(removed_edge) << "] = "
               << std::get<0>(removed_edge) << std::endl;
