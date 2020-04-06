@@ -1,6 +1,6 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Raphaël Tinarrage and Yuichi Ike
+# Author(s):       Raphaël Tinarrage, Yuichi Ike, Masatoshi Takenouchi
 #
 # Copyright (C) 2020 Inria, Copyright (C) 2020 FUjitsu Laboratories Ltd.
 #
@@ -12,23 +12,26 @@ from gudhi import SimplexTree
 class WeightedRipsComplex:
     """
     class to generate a weighted Rips complex 
-    from a distance matrix and filtration value
+    from a distance matrix and weights on vertices
     """
     def __init__(self, 
-                distance_matrix=None, 
-                filtration_values=None,
+                distance_matrix, 
+                weights=None,
                 max_filtration=float('inf')):
         """
         Parameters:
             distance_matrix: list of list of float,
                 distance matrix (full square or lower triangular)
             filtration_values: list of float,
-                flitration value for each index
+                weight for each vertex
             max_filtration: float,
                 specifies the maximal filtration value to be considered        
         """
         self.distance_matrix = distance_matrix
-        self.filtration_values = filtration_values
+        if weights is not None:
+            self.weights = weights
+        else:
+            self.weights = [0] * len(distance_matrix)
         self.max_filtration = max_filtration
             
     def create_simplex_tree(self, max_dimension):
@@ -38,7 +41,7 @@ class WeightedRipsComplex:
                 graph expansion until this given dimension
         """
         dist = self.distance_matrix
-        F = self.filtration_values
+        F = self.weights
         num_pts = len(dist)
         
         st = SimplexTree()
@@ -47,7 +50,7 @@ class WeightedRipsComplex:
             if F[i] < self.max_filtration:
                 st.insert([i], F[i])
         for i in range(num_pts):
-            for j in range(num_pts):
+            for j in range(i):
                 value = (dist[i][j] + F[i] + F[j]) / 2
                 if value < self.max_filtration:
                     st.insert([i,j], filtration=value)
