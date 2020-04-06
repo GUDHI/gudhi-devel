@@ -51,5 +51,7 @@ class WeightedRipsComplex:
                 value = (dist[i][j] + F[i] + F[j]) / 2
                 if value < self.max_filtration:
                     st.insert([i,j], filtration=value)
+                    
+        st.expansion(max_dimension) 
         return st
         
