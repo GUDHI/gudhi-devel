@@ -175,8 +175,8 @@ Documentation
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
-`Matplotlib`_, `NumPy`_ and `SciPy`_ are also mandatory to build the
-documentation.
+`Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
+also mandatory to build the documentation.
 
 Run the following commands in a terminal:
 
@@ -192,8 +192,8 @@ CGAL
 ====
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require CGAL, a C++ library that provides easy access to efficient and
-reliable geometric algorithms.
+require `CGAL <https://www.cgal.org/>`_, a C++ library that provides easy
+access to efficient and reliable geometric algorithms.
 
 
 The procedure to install this library
