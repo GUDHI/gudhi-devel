@@ -257,7 +257,7 @@ class Flag_complex_sparse_matrix {
   // Returns list of non-zero columns of the particular indx.
   doubleVector closed_neighbours_row_index(double indx)
   {
-    doubleVector nonZeroIndices;
+    doubleVector non_zero_indices;
     Vertex u = indx;
     Vertex v;
 #ifdef DEBUG_TRACES
@@ -271,7 +271,7 @@ class Flag_complex_sparse_matrix {
         if (not domination_indicator[v] and u_set_removed_redges.find(std::minmax(u, v)) == u_set_removed_redges.end() and
             u_set_dominated_redges.find(std::minmax(u, v)) == u_set_dominated_redges.end()) {
           // inner index, here it is equal to it.columns()
-          nonZeroIndices.push_back(it.index());
+          non_zero_indices.push_back(it.index());
 #ifdef DEBUG_TRACES
           std::cout << row_to_vertex[it.index()] << ", " ;
 #endif  // DEBUG_TRACES
@@ -281,21 +281,21 @@ class Flag_complex_sparse_matrix {
       std::cout << std::endl;
 #endif  // DEBUG_TRACES
     }
-    return nonZeroIndices;
+    return non_zero_indices;
   }
 
   doubleVector closed_common_neighbours_row_index(Edge e)  // Returns the list of closed neighbours of the edge :{u,v}.
   {
     doubleVector common;
-    doubleVector nonZeroIndices_u;
-    doubleVector nonZeroIndices_v;
+    doubleVector non_zero_indices_u;
+    doubleVector non_zero_indices_v;
     double u = std::get<0>(e);
     double v = std::get<1>(e);
 
-    nonZeroIndices_u = closed_neighbours_row_index(u);
-    nonZeroIndices_v = closed_neighbours_row_index(v);
-    std::set_intersection(nonZeroIndices_u.begin(), nonZeroIndices_u.end(), nonZeroIndices_v.begin(),
-                          nonZeroIndices_v.end(), std::inserter(common, common.begin()));
+    non_zero_indices_u = closed_neighbours_row_index(u);
+    non_zero_indices_v = closed_neighbours_row_index(v);
+    std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
+                          non_zero_indices_v.end(), std::inserter(common, common.begin()));
 
     return common;
   }
