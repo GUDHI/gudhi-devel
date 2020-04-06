@@ -62,7 +62,7 @@ class Flag_complex_sparse_matrix {
  private:
   std::unordered_map<int, Vertex> row_to_vertex;
 
-  // Vertices strored as an unordered_set
+  // Vertices stored as an unordered_set
   std::unordered_set<Vertex> vertices;
 
   // Unordered set of  removed edges. (to enforce removal from the matrix)
@@ -131,8 +131,6 @@ class Flag_complex_sparse_matrix {
     This stores the count of vertices (which is also the number of rows in the Matrix).
   */
   std::size_t rows;
-
-  std::size_t numOneSimplices;
 
   bool edgeCollapsed;
 
@@ -309,16 +307,15 @@ class Flag_complex_sparse_matrix {
     <B>domination_indicator</B> are initialised by init() function which is
     called at the begining of this. <br>
   */
-  Flag_complex_sparse_matrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t)
+  Flag_complex_sparse_matrix(const Filtered_sorted_edge_list& edge_t)
   : rows(0),
-    numOneSimplices(0),
     edgeCollapsed(false) {
-    // Initializing sparse_row_adjacency_matrix, This is a row-major sparse matrix.
-    sparse_row_adjacency_matrix = sparseRowMatrix(num_vertices, num_vertices);
-
     for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      f_edge_vector.push_back(
-          {{std::get<1>(edge_t.at(bgn_idx)), std::get<2>(edge_t.at(bgn_idx))}, std::get<0>(edge_t.at(bgn_idx))});
+      Vertex u = std::get<1>(edge_t.at(bgn_idx));
+      Vertex v = std::get<2>(edge_t.at(bgn_idx));
+      f_edge_vector.push_back({{u, v}, std::get<0>(edge_t.at(bgn_idx))});
+      vertices.emplace(u);
+      vertices.emplace(v);
     }
   }
 
@@ -329,6 +326,9 @@ class Flag_complex_sparse_matrix {
     u_set_removed_redges.clear();
     u_set_dominated_redges.clear();
     critical_edge_indicator.clear();
+
+    // Initializing sparse_row_adjacency_matrix, This is a row-major sparse matrix.
+    sparse_row_adjacency_matrix = sparseRowMatrix(vertices.size(), vertices.size());
 
     while (endIdx < f_edge_vector.size()) {
       EdgeFilt fec = f_edge_vector[endIdx];
@@ -371,7 +371,6 @@ class Flag_complex_sparse_matrix {
       domination_indicator.push_back(false);
       vertex_to_row.insert(std::make_pair(vertex, rows));
       row_to_vertex.insert(std::make_pair(rows, vertex));
-      vertices.emplace(vertex);
       rows++;
     }
   }
@@ -393,7 +392,6 @@ class Flag_complex_sparse_matrix {
 #endif  // DEBUG_TRACES
       sparse_row_adjacency_matrix.insert(rw_u->second, rw_v->second) = filt_val;
       sparse_row_adjacency_matrix.insert(rw_v->second, rw_u->second) = filt_val;
-      numOneSimplices++;
     }
 #ifdef DEBUG_TRACES
     else {

@@ -23,26 +23,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-//  ^
-// /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Flag_complex_sparse_matrix.h"
 #include "gudhi/Rips_edge_list.h"
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/distance_functions.h"
-
-//using namespace Gudhi;
-
-// Types definition
-//using Vector_of_points = std::vector<std::vector<double>>;
-
-//using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
-//using Filtration_value = double;
-//using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<double>;
-/*using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
-using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
-*/
-//using Distance_matrix = std::vector<std::vector<double>>;
 
 using Filtration_value = double;
 using Vertex_handle = size_t;
@@ -64,7 +48,7 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
     std::cout << "f[" << std::get<1>(edge) << ", " << std::get<2>(edge) << "] = " << std::get<0>(edge) << std::endl;
   }
 
-  Flag_complex_sparse_matrix flag_complex_sparse_matrix(5, edges);
+  Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
   auto collapse_edges = flag_complex_sparse_matrix.filtered_edge_collapse();
   std::cout << "AFTER COLLAPSE - Total number of edges: " << collapse_edges.size() << std::endl;
   BOOST_CHECK(collapse_edges.size() <= edges.size());
@@ -136,7 +120,7 @@ BOOST_AUTO_TEST_CASE(collapse) {
   */
   edges.push_back({4., 2, 5});
   edges.push_back({4., 4, 3});
-  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 2, 5}, {4., 4, 3}});
+  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 4, 3}});
 
   /*
       1   2   4
@@ -149,7 +133,7 @@ BOOST_AUTO_TEST_CASE(collapse) {
   */
   edges.push_back({5., 1, 5});
   edges.push_back({5., 0, 4});
-  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 2, 5}, {4., 4, 3}, {5., 0, 4}});
+  trace_and_check_collapse(edges, {{2., 1, 3}, {4., 4, 3}, {5., 0, 4}});
 }
 
 
