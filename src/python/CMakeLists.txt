@@ -415,6 +415,9 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm)
     endif()
 
+    # Weighted Rips
+    add_gudhi_py_test(test_weighted_rips)
+
     # Documentation generation is available through sphinx - requires all modules
     if(SPHINX_PATH)
       if(MATPLOTLIB_FOUND)
