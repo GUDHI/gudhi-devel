@@ -70,7 +70,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         assert np.array_equal(match , [[0, -1], [1, -1]])
         match = wasserstein_distance(diag1, diag2, matching=True, internal_p=2., order=2.)[1]
         assert np.array_equal(match, [[0, 0], [1, 1], [2, -1]])
-        
+
 
 
 def hera_wrap(delta):
