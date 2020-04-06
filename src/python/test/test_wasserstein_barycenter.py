@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 
 def test_lagrangian_barycenter():
-     
+
     dg1 = np.array([[0.2, 0.5]])
     dg2 = np.array([[0.2, 0.7]])
     dg3 = np.array([[0.3, 0.6], [0.7, 0.8], [0.2, 0.3]])
@@ -28,12 +28,12 @@ def test_lagrangian_barycenter():
 
     dg7 = np.array([[0.1, 0.15], [0.1, 0.7], [0.2, 0.22], [0.55, 0.84], [0.11, 0.91], [0.61, 0.75], [0.33, 0.46], [0.12, 0.41], [0.32, 0.48]])
     dg8 = np.array([[0., 4.], [4, 8]])
-   
+
     # error crit.
     eps = 1e-7
 
 
-    assert np.linalg.norm(lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3, verbose=False) - res) < eps 
+    assert np.linalg.norm(lagrangian_barycenter(pdiagset=[dg1, dg2, dg3, dg4],init=3, verbose=False) - res) < eps
     assert np.array_equal(lagrangian_barycenter(pdiagset=[dg4, dg5, dg6], verbose=False), np.empty(shape=(0,2)))
     assert np.linalg.norm(lagrangian_barycenter(pdiagset=[dg7], verbose=False) - dg7) < eps
     Y, log = lagrangian_barycenter(pdiagset=[dg4, dg8], verbose=True)

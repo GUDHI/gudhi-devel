@@ -18,7 +18,7 @@ from gudhi.wasserstein import wasserstein_distance
 def _mean(x, m):
     '''
     :param x: a list of 2D-points, off diagonal, x_0... x_{k-1}
-    :param m: total amount of points taken into account, 
+    :param m: total amount of points taken into account,
                 that is we have (m-k) copies of diagonal
     :returns: the weighted mean of x with (m-k) copies of the diagonal
     '''
@@ -33,14 +33,14 @@ def _mean(x, m):
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     '''
-    :param pdiagset: a list of ``numpy.array`` of shape `(n x 2)` 
-                    (`n` can variate), encoding a set of 
-                    persistence diagrams with only finite coordinates. 
-    :param init: The initial value for barycenter estimate. 
-                    If ``None``, init is made on a random diagram from the dataset. 
-                    Otherwise, it can be an ``int`` 
+    :param pdiagset: a list of ``numpy.array`` of shape `(n x 2)`
+                    (`n` can variate), encoding a set of
+                    persistence diagrams with only finite coordinates.
+    :param init: The initial value for barycenter estimate.
+                    If ``None``, init is made on a random diagram from the dataset.
+                    Otherwise, it can be an ``int``
                     (then initialization is made on ``pdiagset[init]``)
-                    or a `(n x 2)` ``numpy.array`` enconding 
+                    or a `(n x 2)` ``numpy.array`` enconding
                     a persistence diagram with `n` points.
     :type init: ``int``, or (n x 2) ``np.array``
     :param verbose: if ``True``, returns additional information about the
@@ -48,16 +48,16 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     :type verbose: boolean
     :returns: If not verbose (default), a ``numpy.array`` encoding
               the barycenter estimate of pdiagset
-              (local minimum of the energy function). 
+              (local minimum of the energy function).
               If ``pdiagset`` is empty, returns ``None``.
               If verbose, returns a couple ``(Y, log)``
               where ``Y`` is the barycenter estimate,
               and ``log`` is a ``dict`` that contains additional informations:
 
               - `"groupings"`, a list of list of pairs ``(i,j)``.
-              Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates 
+              Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates
               that ``pdiagset[k][i]`` is matched to ``Y[j]``
-              if ``i = -1`` or ``j = -1``, it means they 
+              if ``i = -1`` or ``j = -1``, it means they
               represent the diagonal.
 
               - `"energy"`, ``float`` representing the Frechet energy value obtained.
@@ -70,13 +70,13 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     if m == 0:
         print("Warning: computing barycenter of empty diag set. Returns None")
         return None
-    
+
     # store the number of off-diagonal point for each of the X_i
-    nb_off_diag = np.array([len(X_i) for X_i in X])  
+    nb_off_diag = np.array([len(X_i) for X_i in X])
     # Initialisation of barycenter
     if init is None:
         i0 = np.random.randint(m)  # Index of first state for the barycenter
-        Y = X[i0].copy() 
+        Y = X[i0].copy()
     else:
         if type(init)==int:
             Y = X[init].copy()
@@ -90,8 +90,8 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         nb_iter += 1
         K = len(Y)  # current nb of points in Y (some might be on diagonal)
         G = np.full((K, m), -1, dtype=int)  # will store for each j, the (index)
-                              # point matched in each other diagram 
-                              #(might be the diagonal). 
+                              # point matched in each other diagram
+                              #(might be the diagonal).
                               # that is G[j, i] = k <=> y_j is matched to
                               # x_k in the diagram i-th diagram X[i]
         updated_points = np.zeros((K, 2))  # will store the new positions of
@@ -111,7 +111,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                     else:  # ...which is a diagonal point
                         G[y_j, i] = -1  # -1 stands for the diagonal (mask)
                 else:  # We matched a diagonal point to x_i_j...
-                    if x_i_j >= 0:  # which is a off-diag point ! 
+                    if x_i_j >= 0:  # which is a off-diag point !
                                                 # need to create new point in Y
                         new_y = _mean(np.array([X[i][x_i_j]]), m)
                         # Average this point with (m-1) copies of Delta
@@ -123,19 +123,19 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
             matched_points = [X[i][G[j, i]] for i in range(m) if G[j, i] > -1]
             new_y_j = _mean(matched_points, m)
             if not np.array_equal(new_y_j, np.array([0,0])):
-                updated_points[j] = new_y_j 
+                updated_points[j] = new_y_j
             else: # this points is no longer of any use.
                 to_delete.append(j)
         # we remove the point to be deleted now.
-        updated_points = np.delete(updated_points, to_delete, axis=0)  
+        updated_points = np.delete(updated_points, to_delete, axis=0)
 
         # we cannot converge if there have been new created points.
-        if new_created_points: 
+        if new_created_points:
             Y = np.concatenate((updated_points, new_created_points))
         else:
             # Step 3 : we check convergence
             if np.array_equal(updated_points, Y):
-                converged = True 
+                converged = True
             Y = updated_points
 
 

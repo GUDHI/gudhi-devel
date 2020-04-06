@@ -10,10 +10,10 @@ Definition
 .. include:: wasserstein_distance_sum.inc
 
 The q-Wasserstein distance is defined as the minimal value achieved
-by a perfect matching between the points of the two diagrams (+ all  
-diagonal points), where the value of a matching is defined as the    
+by a perfect matching between the points of the two diagrams (+ all
+diagonal points), where the value of a matching is defined as the
 q-th root of the sum of all edge lengths to the power q. Edge lengths
-are measured in norm p, for :math:`1 \leq p \leq \infty`.            
+are measured in norm p, for :math:`1 \leq p \leq \infty`.
 
 Distance Functions
 ------------------
@@ -54,9 +54,9 @@ The output is:
 
     Wasserstein distance value = 1.45
 
-We can also have access to the optimal matching by letting `matching=True`. 
+We can also have access to the optimal matching by letting `matching=True`.
 It is encoded as a list of indices (i,j), meaning that the i-th point in X
-is mapped to the j-th point in Y. 
+is mapped to the j-th point in Y.
 An index of -1 represents the diagonal.
 
 .. testcode::
@@ -84,7 +84,7 @@ An index of -1 represents the diagonal.
 The output is:
 
 .. testoutput::
-    
+
     Wasserstein distance value = 2.15
     point 0 in dgm1 is matched to point 0 in dgm2
     point 1 in dgm1 is matched to point 2 in dgm2
@@ -94,32 +94,32 @@ The output is:
 Barycenters
 -----------
 
-A Frechet mean (or barycenter) is a generalization of the arithmetic 
-mean in a non linear space such as the one of persistence diagrams.  
-Given a set of persistence diagrams :math:`\mu_1 \dots \mu_n`, it is 
-defined as a minimizer of the variance functional, that is of        
-:math:`\mu \mapsto \sum_{i=1}^n d_2(\mu,\mu_i)^2`.                   
-where :math:`d_2` denotes the Wasserstein-2 distance between         
-persistence diagrams.                                                
-It is known to exist and is generically unique. However, an exact    
-computation is in general untractable. Current implementation        
-available is based on (Turner et al., 2014), 
+A Frechet mean (or barycenter) is a generalization of the arithmetic
+mean in a non linear space such as the one of persistence diagrams.
+Given a set of persistence diagrams :math:`\mu_1 \dots \mu_n`, it is
+defined as a minimizer of the variance functional, that is of
+:math:`\mu \mapsto \sum_{i=1}^n d_2(\mu,\mu_i)^2`.
+where :math:`d_2` denotes the Wasserstein-2 distance between
+persistence diagrams.
+It is known to exist and is generically unique. However, an exact
+computation is in general untractable. Current implementation
+available is based on (Turner et al., 2014),
 :cite:`turner2014frechet`
-and uses an EM-scheme to 
-provide a local minimum of the variance functional (somewhat similar 
-to the Lloyd algorithm to estimate a solution to the k-means         
+and uses an EM-scheme to
+provide a local minimum of the variance functional (somewhat similar
+to the Lloyd algorithm to estimate a solution to the k-means
 problem). The local minimum returned depends on the initialization of
-the barycenter.                                                      
-The combinatorial structure of the algorithm limits its              
-performances on large scale problems (thousands of diagrams and of points 
-per diagram).                                                        
+the barycenter.
+The combinatorial structure of the algorithm limits its
+performances on large scale problems (thousands of diagrams and of points
+per diagram).
 
-.. figure::                                                    
-     ./img/barycenter.png                                      
-     :figclass: align-center                                   
-                                                               
-     Illustration of Frechet mean between persistence          
-     diagrams.                                                 
+.. figure::
+     ./img/barycenter.png
+     :figclass: align-center
+
+     Illustration of Frechet mean between persistence
+     diagrams.
 
 
 .. autofunction:: gudhi.wasserstein.barycenter.lagrangian_barycenter
@@ -127,16 +127,16 @@ per diagram).
 Basic example
 *************
 
-This example estimates the Frechet mean (aka Wasserstein barycenter) between 
+This example estimates the Frechet mean (aka Wasserstein barycenter) between
 four persistence diagrams.
 It is initialized on the 4th diagram.
-As the algorithm is not convex, its output depends on the initialization and 
+As the algorithm is not convex, its output depends on the initialization and
 is only a local minimum of the objective function.
-Initialization can be either given as an integer (in which case the i-th 
-diagram of the list is used as initial estimate) or as a diagram. 
-If None, it will randomly select one of the diagrams of the list 
+Initialization can be either given as an integer (in which case the i-th
+diagram of the list is used as initial estimate) or as a diagram.
+If None, it will randomly select one of the diagrams of the list
 as initial estimate.
-Note that persistence diagrams must be submitted as 
+Note that persistence diagrams must be submitted as
 (n x 2) numpy arrays and must not contain inf values.
 
 
@@ -152,7 +152,7 @@ Note that persistence diagrams must be submitted as
     pdiagset = [dg1, dg2, dg3, dg4]
     bary = lagrangian_barycenter(pdiagset=pdiagset,init=3)
 
-    message = "Wasserstein barycenter estimated:"    
+    message = "Wasserstein barycenter estimated:"
     print(message)
     print(bary)
 
