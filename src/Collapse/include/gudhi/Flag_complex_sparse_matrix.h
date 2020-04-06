@@ -72,7 +72,7 @@ typedef std::unordered_map<Edge, std::size_t, boost::hash<Edge>> u_edge_to_idx_m
   The class for storing the Vertices v/s MaxSimplices Sparse Matrix and performing collapses operations using the N^2()
   Algorithm.
 */
-class FlagComplexSpMatrix {
+class Flag_complex_sparse_matrix {
  private:
   std::unordered_map<int, Vertex> rowToVertex;
 
@@ -332,7 +332,7 @@ class FlagComplexSpMatrix {
     <B>vertDomnIndicator</B> ,<B>rowIterator<B> are initialised by init() function which is
     called at the begining of this. <br>
   */
-  FlagComplexSpMatrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t)
+  Flag_complex_sparse_matrix(const size_t& num_vertices, const Filtered_sorted_edge_list& edge_t)
   : rows(0),
     numOneSimplices(0),
     edgeCollapsed(false) {
@@ -347,15 +347,13 @@ class FlagComplexSpMatrix {
 
   // Performs edge collapse in a decreasing sequence of the filtration value.
   Filtered_sorted_edge_list filtered_edge_collapse() {
-    std::size_t totEdges = f_edge_vector.size();
-
     std::size_t endIdx = 0;
 
     u_set_removed_redges.clear();
     u_set_dominated_redges.clear();
     critical_edge_indicator.clear();
 
-    while (endIdx < totEdges) {
+    while (endIdx < f_edge_vector.size()) {
       EdgeFilt fec = f_edge_vector[endIdx];
       Edge e = std::get<0>(fec);
       Vertex u = std::get<0>(e);
@@ -382,7 +380,7 @@ class FlagComplexSpMatrix {
 
 #ifdef DEBUG_TRACES
     std::cout << "The total number of critical edges is: " << criticalCoreEdges.size() << std::endl;
-    std::cout << "The total number of non-critical edges is: " << totEdges - criticalCoreEdges.size() << std::endl;
+    std::cout << "The total number of non-critical edges is: " << f_edge_vector.size() - criticalCoreEdges.size() << std::endl;
 #endif  // DEBUG_TRACES
     edgeCollapsed = true;
     return criticalCoreEdges;

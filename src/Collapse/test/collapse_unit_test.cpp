@@ -25,7 +25,7 @@
 
 //  ^
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
-#include "gudhi/FlagComplexSpMatrix.h"
+#include "gudhi/Flag_complex_sparse_matrix.h"
 #include "gudhi/Rips_edge_list.h"
 #include "gudhi/graph_simplicial_complex.h"
 #include "gudhi/distance_functions.h"
@@ -64,7 +64,7 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
     std::cout << "f[" << std::get<1>(edge) << ", " << std::get<2>(edge) << "] = " << std::get<0>(edge) << std::endl;
   }
 
-  FlagComplexSpMatrix flag_complex_sparse_matrix(5, edges);
+  Flag_complex_sparse_matrix flag_complex_sparse_matrix(5, edges);
   auto collapse_edges = flag_complex_sparse_matrix.filtered_edge_collapse();
   std::cout << "AFTER COLLAPSE - Total number of edges: " << collapse_edges.size() << std::endl;
   BOOST_CHECK(collapse_edges.size() <= edges.size());

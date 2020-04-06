@@ -1,4 +1,4 @@
-#include <gudhi/FlagComplexSpMatrix.h>
+#include <gudhi/Flag_complex_sparse_matrix.h>
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
   std::cout << "Filtered edge collapse begins" << std::endl;
-  FlagComplexSpMatrix mat_filt_edge_coll(number_of_points, edge_t);
+  Flag_complex_sparse_matrix mat_filt_edge_coll(number_of_points, edge_t);
   std::cout << "Matrix instansiated" << std::endl;
   Filtered_sorted_edge_list collapse_edges;
   collapse_edges = mat_filt_edge_coll.filtered_edge_collapse();
