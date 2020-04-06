@@ -91,7 +91,6 @@ The output is:
     point 2 in dgm1 is matched to the diagonal
     point 1 in dgm2 is matched to the diagonal
 
-
 Barycenters
 -----------
 
@@ -166,4 +165,9 @@ The output is:
      [0.7375     0.7625    ]
      [0.2375     0.2625    ]]
 
+Bibliography
+------------
 
+.. bibliography:: ../../biblio/bibliography.bib
+   :filter: docname in docnames
+   :style: unsrt
