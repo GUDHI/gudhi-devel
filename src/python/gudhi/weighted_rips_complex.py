@@ -17,12 +17,26 @@ class WeightedRipsComplex:
     def __init__(self, 
                 distance_matrix=None, 
                 filtration_values=None,
-                max_filtration=float('inf'), sparse=None):
+                max_filtration=float('inf')):
+        """
+        Parameters:
+            distance_matrix: list of list of float,
+                distance matrix (full square or lower triangular)
+            filtration_values: list of float,
+                flitration value for each index
+            max_filtration: float,
+                specifies the maximal filtration value to be considered        
+        """
         self.distance_matrix = distance_matrix
         self.filtration_values = filtration_values
         self.max_filtration = max_filtration
             
     def create_simplex_tree(self, max_dimension):
+        """
+        Parameter:
+            max_dimension: int
+                graph expansion until this given dimension
+        """
         dist = self.distance_matrix
         F = self.filtration_values
         num_pts = len(dist)
