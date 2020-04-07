@@ -14,13 +14,23 @@ import numpy as np
 from scipy.spatial.distance import cdist
 import pytest
 
+def test_non_dtm_rips_complex():
+      dist = [[], [1]]
+      weights = [1, 100]
+      w_rips = WeightedRipsComplex(distance_matrix=dist, weights=weights)
+      st = w_rips.create_simplex_tree(max_dimension=2)
+      assert st.filtration([0,1]) == pytest.approx(100.0)
+
+
 def test_dtm_rips_complex():
     pts = np.array([[2.0, 2], [0, 1], [3, 4]])
     dist = cdist(pts,pts)
     dtm = DTM(2, q=2, metric="precomputed")    
     r = dtm.fit_transform(dist)
-    w_rips = WeightedRipsComplex(distance_mattix=dist, weights=r)
+    w_rips = WeightedRipsComplex(distance_matrix=dist, weights=r)
     st = w_rips.create_simplex_tree(max_dimension=2)
+    st.persistence()
     persistence_intervals0 = st.persistence_intervals_in_dimension(0)
     assert persistence_intervals0 == pytest.approx(np.array([[1.58113883, 2.69917282],[1.58113883, 2.69917282], [1.58113883, float("inf")]]))
     
+  

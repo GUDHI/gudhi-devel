@@ -51,7 +51,7 @@ class WeightedRipsComplex:
                 st.insert([i], F[i])
         for i in range(num_pts):
             for j in range(i):
-                value = (dist[i][j] + F[i] + F[j]) / 2
+                value = max(F[i], F[j], (dist[i][j] + F[i] + F[j]) / 2)
                 if value < self.max_filtration:
                     st.insert([i,j], filtration=value)
                     
