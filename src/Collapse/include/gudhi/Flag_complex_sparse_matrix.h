@@ -55,7 +55,6 @@ using boolVector = std::vector<bool>;
 using EdgeFiltVector = std::vector<EdgeFilt>;
 
 typedef std::vector<std::tuple<double, Vertex, Vertex>> Filtered_sorted_edge_list;
-typedef std::unordered_map<Edge, bool, boost::hash<Edge>> u_edge_map;
 typedef std::unordered_map<Edge, std::size_t, boost::hash<Edge>> u_edge_to_idx_map;
 
 //!  Class SparseMsMatrix
@@ -126,8 +125,6 @@ class Flag_complex_sparse_matrix {
   // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
   EdgeFiltVector f_edge_vector;
 
-  // List of non-dominated edges,  the indices of the edges are the vertex lables!!.
-  Filtered_sorted_edge_list critical_core_edges;
   // Stores the indices from the sorted filtered edge vector.
   // std::set<std::size_t> recurCriticalCoreIndcs;
 
@@ -214,7 +211,8 @@ class Flag_complex_sparse_matrix {
     return edge_indices;
   }
 
-  void set_edge_critical(std::size_t indx, double filt) {
+  template<typename FilteredEdgeInsertion>
+  void set_edge_critical(std::size_t indx, double filt, FilteredEdgeInsertion filtered_edge_insert) {
 #ifdef DEBUG_TRACES
     std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
     std::endl;
@@ -235,7 +233,7 @@ class Flag_complex_sparse_matrix {
               std::cout << "The curent index became critical " << idx  << std::endl;
 #endif  // DEBUG_TRACES
               critical_edge_indicator.at(idx) = true;
-              critical_core_edges.push_back({filt, u, v});
+              filtered_edge_insert({u, v}, filt);
               std::set<std::size_t> inner_effected_indcs = three_clique_indices(idx);
               for (auto inr_idx = inner_effected_indcs.rbegin(); inr_idx != inner_effected_indcs.rend(); inr_idx++) {
                 if (*inr_idx < idx) effectedIndcs.emplace(*inr_idx);
@@ -354,7 +352,8 @@ class Flag_complex_sparse_matrix {
   }
 
   // Performs edge collapse in a decreasing sequence of the filtration value.
-  Filtered_sorted_edge_list filtered_edge_collapse() {
+  template<typename FilteredEdgeInsertion>
+  void filtered_edge_collapse(FilteredEdgeInsertion filtered_edge_insert) {
     std::size_t endIdx = 0;
 
     u_set_removed_redges.clear();
@@ -381,20 +380,15 @@ class Flag_complex_sparse_matrix {
       if (not check_edge_domination(e)) {
         critical_edge_indicator.at(endIdx) = true;
         dominated_edge_indicator.at(endIdx) = false;
-        critical_core_edges.push_back({filt, u, v});
+        filtered_edge_insert({u, v}, filt);
         if (endIdx > 1)
-          set_edge_critical(endIdx, filt);
+          set_edge_critical(endIdx, filt, filtered_edge_insert);
       } else
         dominated_edge_indicator.at(endIdx) = true;
       endIdx++;
     }
 
-#ifdef DEBUG_TRACES
-    std::cout << "The total number of critical edges is: " << critical_core_edges.size() << std::endl;
-    std::cout << "The total number of non-critical edges is: " << f_edge_vector.size() - critical_core_edges.size() << std::endl;
-#endif  // DEBUG_TRACES
     edgeCollapsed = true;
-    return critical_core_edges;
   }
 
   void insert_vertex(const Vertex& vertex, double filt_val) {

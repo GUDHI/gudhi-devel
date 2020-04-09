@@ -1,5 +1,4 @@
 #include <gudhi/Flag_complex_sparse_matrix.h>
-#include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Rips_edge_list.h>
@@ -17,7 +16,6 @@ using Vector_of_points = std::vector<Point>;
 
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = double;
-using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -61,32 +59,6 @@ void program_options(int argc, char* const argv[], double& min_persistence, doub
     std::abort();
   }
 }
-
-class filt_edge_to_dist_matrix {
- public:
-  template <class Distance_matrix, class Filtered_sorted_edge_list>
-  filt_edge_to_dist_matrix(Distance_matrix& distance_mat, Filtered_sorted_edge_list& edge_filt,
-                           std::size_t number_of_points) {
-    double inf = std::numeric_limits<double>::max();
-    doubleVector distances;
-    std::pair<std::size_t, std::size_t> e;
-    for (std::size_t indx = 0; indx < number_of_points; indx++) {
-      for (std::size_t j = 0; j <= indx; j++) {
-        if (j == indx)
-          distances.push_back(0);
-        else
-          distances.push_back(inf);
-      }
-      distance_mat.push_back(distances);
-      distances.clear();
-    }
-
-    for (auto edIt = edge_filt.begin(); edIt != edge_filt.end(); edIt++) {
-      e = std::minmax(std::get<1>(*edIt), std::get<2>(*edIt));
-      distance_mat.at(std::get<1>(e)).at(std::get<0>(e)) = std::get<0>(*edIt);
-    }
-  }
-};
 
 void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::string& filediag,
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
@@ -133,16 +105,18 @@ int main(int argc, char* argv[]) {
   std::cout << "Filtered edge collapse begins" << std::endl;
   Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
   std::cout << "Matrix instansiated" << std::endl;
-  Filtered_sorted_edge_list collapse_edges;
-  collapse_edges = mat_filt_edge_coll.filtered_edge_collapse();
-  filt_edge_to_dist_matrix(sparse_distances, collapse_edges, number_of_points);
-  std::cout << "Total number of vertices after collapse in the sparse matrix are: " << mat_filt_edge_coll.num_vertices()
-            << std::endl;
-
-  Rips_complex rips_complex_after_collapse(sparse_distances, threshold);
 
   Simplex_tree stree;
-  rips_complex_after_collapse.create_complex(stree, dim_max);
+  mat_filt_edge_coll.filtered_edge_collapse(
+    [&stree](std::vector<std::size_t> edge, double filtration) {
+        // insert the 2 vertices with a 0. filtration value just like a Rips
+        stree.insert_simplex({edge[0]}, 0.);
+        stree.insert_simplex({edge[1]}, 0.);
+        // insert the edge
+        stree.insert_simplex(edge, filtration);
+      });
+
+  stree.expansion(dim_max);
 
   std::cout << "The complex contains " << stree.num_simplices() << " simplices  after collapse. \n";
   std::cout << "   and has dimension " << stree.dimension() << " \n";

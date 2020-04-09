@@ -49,7 +49,11 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
   }
 
   Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
-  auto collapse_edges = flag_complex_sparse_matrix.filtered_edge_collapse();
+  Filtered_sorted_edge_list collapse_edges;
+  flag_complex_sparse_matrix.filtered_edge_collapse(
+    [&collapse_edges](std::pair<std::size_t, std::size_t> edge, double filtration) {
+        collapse_edges.push_back({std::get<0>(edge), std::get<1>(edge), filtration});
+      });
   std::cout << "AFTER COLLAPSE - Total number of edges: " << collapse_edges.size() << std::endl;
   BOOST_CHECK(collapse_edges.size() <= edges.size());
   for (auto edge_from_collapse : collapse_edges) {
