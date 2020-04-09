@@ -225,14 +225,14 @@ class Flag_complex_sparse_matrix {
         Vertex v = std::get<1>(e);
         // If idx is not critical so it should be proceses, otherwise it stays in the graph // prev
         // code : recurCriticalCoreIndcs.find(idx) == recurCriticalCoreIndcs.end()
-        if (not critical_edge_indicator.at(idx)) {
+        if (not critical_edge_indicator[idx]) {
           // If idx is affected
           if (effectedIndcs.find(idx) != effectedIndcs.end()) {
             if (not check_edge_domination(e)) {
 #ifdef DEBUG_TRACES
               std::cout << "The curent index became critical " << idx  << std::endl;
 #endif  // DEBUG_TRACES
-              critical_edge_indicator.at(idx) = true;
+              critical_edge_indicator[idx] = true;
               filtered_edge_insert({u, v}, filt);
               std::set<std::size_t> inner_effected_indcs = three_clique_indices(idx);
               for (auto inr_idx = inner_effected_indcs.rbegin(); inr_idx != inner_effected_indcs.rend(); inr_idx++) {
@@ -314,9 +314,9 @@ class Flag_complex_sparse_matrix {
   : rows(0),
     edgeCollapsed(false) {
     for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      Vertex u = std::get<1>(edge_t.at(bgn_idx));
-      Vertex v = std::get<2>(edge_t.at(bgn_idx));
-      f_edge_vector.push_back({{u, v}, std::get<0>(edge_t.at(bgn_idx))});
+      Vertex u = std::get<1>(edge_t[bgn_idx]);
+      Vertex v = std::get<2>(edge_t[bgn_idx]);
+      f_edge_vector.push_back({{u, v}, std::get<0>(edge_t[bgn_idx])});
       vertices.emplace(u);
       vertices.emplace(v);
     }
@@ -378,13 +378,13 @@ class Flag_complex_sparse_matrix {
       dominated_edge_indicator.push_back(false);
 
       if (not check_edge_domination(e)) {
-        critical_edge_indicator.at(endIdx) = true;
-        dominated_edge_indicator.at(endIdx) = false;
+        critical_edge_indicator[endIdx] = true;
+        dominated_edge_indicator[endIdx] = false;
         filtered_edge_insert({u, v}, filt);
         if (endIdx > 1)
           set_edge_critical(endIdx, filt, filtered_edge_insert);
       } else
-        dominated_edge_indicator.at(endIdx) = true;
+        dominated_edge_indicator[endIdx] = true;
       endIdx++;
     }
 
