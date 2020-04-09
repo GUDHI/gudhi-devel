@@ -9,14 +9,8 @@
  */
 
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <algorithm>
-#include <utility>  // std::pair, std::make_pair
-#include <cmath>  // float comparison
-#include <limits>
-#include <functional>  // greater
-#include <tuple>  // std::tie
+#include <tuple>
+#include <vector>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "collapse"
@@ -24,9 +18,6 @@
 #include <boost/mpl/list.hpp>
 
 #include "gudhi/Flag_complex_sparse_matrix.h"
-#include "gudhi/Rips_edge_list.h"
-#include "gudhi/graph_simplicial_complex.h"
-#include "gudhi/distance_functions.h"
 
 using Filtration_value = double;
 using Vertex_handle = size_t;
