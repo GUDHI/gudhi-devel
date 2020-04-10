@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "Filtered edge collapse begins" << std::endl;
-  Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
+  Gudhi::collapse::Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
 
   std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
 

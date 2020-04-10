@@ -13,7 +13,7 @@
 
 namespace Gudhi {
 
-namespace edge_collapse {
+namespace collapse {
 
 /**  \defgroup edge_collapse Edge collapse
  * 
@@ -91,7 +91,7 @@ namespace edge_collapse {
  */
 /** @} */  // end defgroup strong_collapse
 
-}  // namespace edge_collapse
+}  // namespace collapse
 
 }  // namespace Gudhi
 

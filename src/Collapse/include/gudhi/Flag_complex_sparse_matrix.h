@@ -35,27 +35,28 @@
 #include <ctime>
 #include <fstream>
 
+namespace Gudhi {
+
+namespace collapse {
+
+
 typedef std::size_t Vertex;
 using Edge = std::pair<Vertex, Vertex>;  // This is an ordered pair, An edge is stored with convention of the first
                                          // element being the smaller i.e {2,3} not {3,2}. However this is at the level
                                          // of row indices on actual vertex lables
 using EdgeFilt = std::pair<Edge, double>;
-using edge_list = std::vector<Edge>;
 
 using MapVertexToIndex = std::unordered_map<Vertex, std::size_t>;
-using Map = std::unordered_map<Vertex, Vertex>;
 
 using sparseRowMatrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
-using rowInnerIterator = sparseRowMatrix::InnerIterator;
 
 using doubleVector = std::vector<double>;
-using vertexVector = std::vector<Vertex>;
 using boolVector = std::vector<bool>;
 
 using EdgeFiltVector = std::vector<EdgeFilt>;
 
-typedef std::vector<std::tuple<double, Vertex, Vertex>> Filtered_sorted_edge_list;
-typedef std::unordered_map<Edge, std::size_t, boost::hash<Edge>> u_edge_to_idx_map;
+using Filtered_sorted_edge_list = std::vector<std::tuple<double, Vertex, Vertex>>;
+using u_edge_to_idx_map = std::unordered_map<Edge, std::size_t, boost::hash<Edge>>;
 
 //!  Class SparseMsMatrix
 /*!
@@ -266,7 +267,7 @@ class Flag_complex_sparse_matrix {
 #endif  // DEBUG_TRACES
     if (not domination_indicator[indx]) {
       // Iterate over the non-zero columns
-      for (rowInnerIterator it(sparse_row_adjacency_matrix, indx); it; ++it) {
+      for (sparseRowMatrix::InnerIterator it(sparse_row_adjacency_matrix, indx); it; ++it) {
         v = it.index();
         // If the vertex v is not dominated and the edge {u,v} is still in the matrix
         if (not domination_indicator[v] and u_set_removed_redges.find(std::minmax(u, v)) == u_set_removed_redges.end() and
@@ -431,5 +432,9 @@ class Flag_complex_sparse_matrix {
   std::size_t num_vertices() const { return vertices.size(); }
 
 };
+
+}  // namespace collapse
+
+}  // namespace Gudhi
 
 #endif  // FLAG_COMPLEX_SPARSE_MATRIX_H_

@@ -78,8 +78,6 @@ int main(int argc, char* argv[]) {
 
   program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
-  Map map_empty;
-
   Distance_matrix distances;
   Distance_matrix sparse_distances;
 
@@ -103,7 +101,7 @@ int main(int argc, char* argv[]) {
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
   std::cout << "Filtered edge collapse begins" << std::endl;
-  Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
+  Gudhi::collapse::Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
   std::cout << "Matrix instansiated" << std::endl;
 
   Simplex_tree stree;

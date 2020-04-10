@@ -40,7 +40,7 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
+  Gudhi::collapse::Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
   Filtered_sorted_edge_list collapse_edges;
   flag_complex_sparse_matrix.filtered_edge_collapse(
     [&collapse_edges](std::pair<std::size_t, std::size_t> edge, double filtration) {
