@@ -5,6 +5,7 @@
  *    Copyright (C) 2018 Inria
  *
  *    Modification(s):
+ *      - 2020/03 Vincent Rouvreau: integration to the gudhi library
  *      - YYYY/MM Author: Description of the modification
  */
 
