@@ -10,7 +10,7 @@
 import numpy
 
 
-class KNN:
+class KNearestNeighbors:
     """
     Class wrapping several implementations for computing the k nearest neighbors in a point set.
     """

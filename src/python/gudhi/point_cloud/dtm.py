@@ -7,10 +7,10 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .knn import KNN
+from .knn import KNearestNeighbors
 
 
-class DTM:
+class DistanceToMeasure:
     """
     Class to compute the distance to the empirical measure defined by a point set, as introduced in :cite:`dtm`.
     """
@@ -20,7 +20,7 @@ class DTM:
         Args:
             k (int): number of neighbors (possibly including the point itself).
             q (float): order used to compute the distance to measure. Defaults to 2.
-            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNN`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
         """
         self.k = k
         self.q = q
@@ -35,7 +35,9 @@ class DTM:
             X (numpy.array): coordinates for mass points.
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
-            self.knn = KNN(self.k, return_index=False, return_distance=True, sort_results=False, **self.params)
+            self.knn = KNearestNeighbors(
+                self.k, return_index=False, return_distance=True, sort_results=False, **self.params
+            )
             self.knn.fit(X)
         return self
 
