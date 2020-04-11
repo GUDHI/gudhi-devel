@@ -6,16 +6,14 @@
 #include <gudhi/reader_utils.h>
 #include <gudhi/Points_off_io.h>
 
-#include <CGAL/Epick_d.h>
-
 #include <boost/program_options.hpp>
 
-// Types definition
-using Point = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>::Point_d;
-using Vector_of_points = std::vector<Point>;
-
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
-using Filtration_value = double;
+using Filtration_value = Simplex_tree::Filtration_value;
+using Vertex_handle = Simplex_tree::Vertex_handle;
+
+using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
+
 using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -64,17 +62,12 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
-  auto the_begin = std::chrono::high_resolution_clock::now();
-
-  typedef size_t Vertex_handle;
-  typedef std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>> Filtered_sorted_edge_list;
-
   std::string csv_matrix_file;
   std::string filediag;
-  double threshold;
+  Filtration_value threshold;
   int dim_max = 2;
   int p;
-  double min_persistence;
+  Filtration_value min_persistence;
 
   program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
@@ -82,15 +75,12 @@ int main(int argc, char* argv[]) {
   Distance_matrix sparse_distances;
 
   distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
-  std::size_t number_of_points = distances.size();
-  std::cout << "Read the distance matrix succesfully, of size: " << number_of_points << std::endl;
+  std::cout << "Read the distance matrix succesfully, of size: " << distances.size() << std::endl;
 
-  Filtered_sorted_edge_list edge_t;
-  std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
+  Flag_complex_sparse_matrix::Filtered_sorted_edge_list edge_t;
 
   Rips_edge_list Rips_edge_list_from_file(distances, threshold);
   Rips_edge_list_from_file.create_edges(edge_t);
-  std::cout<< "Sorted edge list computed" << std::endl;
   
   if (edge_t.size() <= 0) {
     std::cerr << "Total number of egdes are zero." << std::endl;
@@ -100,13 +90,11 @@ int main(int argc, char* argv[]) {
   std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-  std::cout << "Filtered edge collapse begins" << std::endl;
-  Gudhi::collapse::Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
-  std::cout << "Matrix instansiated" << std::endl;
+  Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
 
   Simplex_tree stree;
   mat_filt_edge_coll.filtered_edge_collapse(
-    [&stree](std::vector<std::size_t> edge, double filtration) {
+    [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);
         stree.insert_simplex({edge[1]}, 0.);
@@ -134,12 +122,6 @@ int main(int argc, char* argv[]) {
     pcoh.output_diagram(out);
     out.close();
   }
-
-  auto the_end = std::chrono::high_resolution_clock::now();
-
-  std::cout << "Total computation time : " << std::chrono::duration<double, std::milli>(the_end - the_begin).count()
-            << " ms\n"
-            << std::endl;
   return 0;
 }
 

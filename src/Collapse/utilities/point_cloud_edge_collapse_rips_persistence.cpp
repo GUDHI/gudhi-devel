@@ -16,10 +16,11 @@
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
-using Vertex_handle = std::size_t; /*Simplex_tree::Vertex_handle;*/
+using Vertex_handle = Simplex_tree::Vertex_handle;
 using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
+using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -33,12 +34,6 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
-  typedef std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>> Filtered_sorted_edge_list;
-
-  auto the_begin = std::chrono::high_resolution_clock::now();
-  std::size_t number_of_points;
-
-
   std::string off_file_points;
   std::string filediag;
   double threshold;
@@ -68,12 +63,8 @@ int main(int argc, char* argv[]) {
     exit(-1);  // ----- >>
   }
 
-  //int dimension = point_vector[0].dimension();
-  number_of_points = point_vector.size();
-  std::cout << "Successfully read " << number_of_points << " point_vector.\n";
-  //std::cout << "Ambient dimension is " << dimension << ".\n";
-
-  std::cout << "Point Set Generated." << std::endl;
+  std::cout << "Successfully read " << point_vector.size() << " point_vector.\n";
+  std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
   Adjacency_list proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
                                                                                 threshold,
@@ -84,16 +75,11 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-  std::cout << "Filtered edge collapse begins" << std::endl;
-  Gudhi::collapse::Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
-
-  std::cout << "Computing the one-skeleton for threshold: " << threshold << std::endl;
-
-  std::cout << "Matrix instansiated" << std::endl;
+  Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
 
   Simplex_tree stree;
   mat_filt_edge_coll.filtered_edge_collapse(
-    [&stree](std::vector<std::size_t> edge, double filtration) {
+    [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);
         stree.insert_simplex({edge[1]}, 0.);
@@ -122,11 +108,6 @@ int main(int argc, char* argv[]) {
     out.close();
   }
 
-  auto the_end = std::chrono::high_resolution_clock::now();
-
-  std::cout << "Total computation time : " << std::chrono::duration<double, std::milli>(the_end - the_begin).count()
-            << " ms\n"
-            << std::endl;
   return 0;
 }
 

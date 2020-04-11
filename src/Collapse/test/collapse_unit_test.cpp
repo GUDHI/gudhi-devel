@@ -19,10 +19,11 @@
 
 #include "gudhi/Flag_complex_sparse_matrix.h"
 
-using Filtration_value = double;
-using Vertex_handle = size_t;
+using Filtration_value = float;
+using Vertex_handle = short;
 using Filtered_edge = std::tuple<Filtration_value, Vertex_handle, Vertex_handle>;
-using Filtered_sorted_edge_list = std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>>;
+using Filtered_sorted_edge_list = std::vector<Filtered_edge>;
+using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
 
 bool find_edge_in_list(const Filtered_edge& edge, const Filtered_sorted_edge_list& edge_list) {
   for (auto edge_from_list : edge_list) {
@@ -40,10 +41,10 @@ void trace_and_check_collapse(const Filtered_sorted_edge_list& edges, const Filt
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Gudhi::collapse::Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
+  Flag_complex_sparse_matrix flag_complex_sparse_matrix(edges);
   Filtered_sorted_edge_list collapse_edges;
   flag_complex_sparse_matrix.filtered_edge_collapse(
-    [&collapse_edges](std::pair<std::size_t, std::size_t> edge, double filtration) {
+    [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
       std::cout << "f[" << std::get<0>(edge) << ", " << std::get<1>(edge) << "] = " << filtration << std::endl;
         collapse_edges.push_back({filtration, std::get<0>(edge), std::get<1>(edge)});
       });

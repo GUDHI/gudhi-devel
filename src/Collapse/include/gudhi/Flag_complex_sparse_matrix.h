@@ -30,41 +30,48 @@
 #include <tuple>
 #include <list>
 #include <algorithm>
-#include <chrono>
-
-#include <ctime>
-#include <fstream>
 
 namespace Gudhi {
 
 namespace collapse {
 
-
-typedef std::size_t Vertex;
-using Edge = std::pair<Vertex, Vertex>;  // This is an ordered pair, An edge is stored with convention of the first
-                                         // element being the smaller i.e {2,3} not {3,2}. However this is at the level
-                                         // of row indices on actual vertex lables
-using Filtered_edge = std::pair<Edge, double>;
-
-using Map_vertex_to_index = std::unordered_map<Vertex, std::size_t>;
-
-using Sparse_row_matrix = Eigen::SparseMatrix<double, Eigen::RowMajor>;
-
-using doubleVector = std::vector<double>;
-
-using Filtered_sorted_edge_list = std::vector<std::tuple<double, Vertex, Vertex>>;
-
-//!  Class SparseMsMatrix
-/*!
-  The class for storing the Vertices v/s MaxSimplices Sparse Matrix and performing collapses operations using the N^2()
-  Algorithm.
-*/
+/**
+ * \class Flag_complex_sparse_matrix
+ * \brief Flag complex sparse matrix data structure.
+ *
+ * \ingroup collapse
+ *
+ * \details
+ * A class to store the vertices v/s MaxSimplices Sparse Matrix and to perform collapse operations using the N^2()
+ * Algorithm.
+ *
+ * \tparam Vertex_handle type must be a signed integer type. It admits a total order <.
+ * \tparam Filtration_value type for the value of the filtration function. Must be comparable with <.
+ */
+template<typename Vertex_handle, typename Filtration_value>
 class Flag_complex_sparse_matrix {
  private:
-  std::unordered_map<int, Vertex> row_to_vertex_;
+  using Edge = std::pair<Vertex_handle, Vertex_handle>;  // This is an ordered pair, An edge is stored with convention of the first
+                                         // element being the smaller i.e {2,3} not {3,2}. However this is at the level
+                                         // of row indices on actual vertex lables
+  using Filtered_edge = std::pair<Edge, Filtration_value>;
+
+  using Row_index = std::size_t;
+
+  using Map_vertex_to_index = std::unordered_map<Vertex_handle, Row_index>;
+
+  using Sparse_row_matrix = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor>;
+
+  using Row_indices_vector = std::vector<Row_index>;
+
+ public:
+  using Filtered_sorted_edge_list = std::vector<std::tuple<Filtration_value, Vertex_handle, Vertex_handle>>;
+
+ private:
+  std::unordered_map<Row_index, Vertex_handle> row_to_vertex_;
 
   // Vertices stored as an unordered_set
-  std::unordered_set<Vertex> vertices_;
+  std::unordered_set<Vertex_handle> vertices_;
 
   // Unordered set of  removed edges. (to enforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_removed_redges_;
@@ -72,8 +79,8 @@ class Flag_complex_sparse_matrix {
   // Unordered set of  dominated edges. (to inforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_dominated_redges_;
 
-  // Map from egde to its index
-  std::unordered_map<Edge, std::size_t, boost::hash<Edge>> edge_to_index_map_;
+  // Map from edge to its index
+  std::unordered_map<Edge, Row_index, boost::hash<Edge>> edge_to_index_map_;
   // Boolean vector to indicate if the index is critical or not.
   std::vector<bool> critical_edge_indicator_;  // critical indicator
 
@@ -96,12 +103,12 @@ class Flag_complex_sparse_matrix {
     5 -> 3
     \endverbatim
   */
-  std::unordered_map<Vertex, std::size_t> vertex_to_row_;
+  std::unordered_map<Vertex_handle, Row_index> vertex_to_row_;
 
-  //! Stores the Sparse matrix of double values representing the Original Simplicial Complex.
+  //! Stores the Sparse matrix of Filtration_value values representing the Original Simplicial Complex.
   /*!
     \code
-    Sparse_row_matrix   = Eigen::SparseMatrix<double, Eigen::RowMajor> ;
+    Sparse_row_matrix   = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor> ;
     \endcode
     ;
       */
@@ -119,23 +126,21 @@ class Flag_complex_sparse_matrix {
   // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
   std::vector<Filtered_edge> f_edge_vector_;
 
-  // Stores the indices from the sorted filtered edge vector.
-  // std::set<std::size_t> recurCriticalCoreIndcs;
 
   //! Stores the number of vertices_ in the original Simplicial Complex.
   /*!
     This stores the count of vertices_ (which is also the number of rows in the Matrix).
   */
-  std::size_t rows;
+  Row_index rows;
 
   // Edge e is the actual edge (u,v). Not the row ids in the matrixs
-  bool check_edge_domination(Edge e)
+  bool check_edge_domination(Edge edge)
   {
-    auto u = std::get<0>(e);
-    auto v = std::get<1>(e);
+    Vertex_handle u = std::get<0>(edge);
+    Vertex_handle v = std::get<1>(edge);
 
-    auto rw_u = vertex_to_row_[u];
-    auto rw_v = vertex_to_row_[v];
+    Row_index rw_u = vertex_to_row_[u];
+    Row_index rw_v = vertex_to_row_[v];
     auto rw_e = std::make_pair(rw_u, rw_v);
 #ifdef DEBUG_TRACES
     std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
@@ -165,18 +170,12 @@ class Flag_complex_sparse_matrix {
     return false;
   }
 
-  // The edge should be sorted by the indices and indices are original
-  bool check_domination_indicator(Edge e)
-  {
-    return dominated_edge_indicator_[edge_to_index_map_[e]];
-  }
+  std::set<Row_index> three_clique_indices(Row_index crit) {
+    std::set<Row_index> edge_indices;
 
-  std::set<std::size_t> three_clique_indices(std::size_t crit) {
-    std::set<std::size_t> edge_indices;
-
-    Edge e = std::get<0>(f_edge_vector_[crit]);
-    Vertex u = std::get<0>(e);
-    Vertex v = std::get<1>(e);
+    Edge edge = std::get<0>(f_edge_vector_[crit]);
+    Vertex_handle u = std::get<0>(edge);
+    Vertex_handle v = std::get<1>(edge);
 
 #ifdef DEBUG_TRACES
     std::cout << "The  current critical edge to re-check criticality with filt value is : f {" << u << "," << v
@@ -186,7 +185,7 @@ class Flag_complex_sparse_matrix {
     auto rw_v = vertex_to_row_[v];
     auto rw_critical_edge = std::make_pair(rw_u, rw_v);
 
-    doubleVector common_neighbours = closed_common_neighbours_row_index(rw_critical_edge);
+    Row_indices_vector common_neighbours = closed_common_neighbours_row_index(rw_critical_edge);
 
     if (common_neighbours.size() > 2) {
       for (auto rw_c : common_neighbours) {
@@ -202,36 +201,36 @@ class Flag_complex_sparse_matrix {
   }
 
   template<typename FilteredEdgeInsertion>
-  void set_edge_critical(std::size_t indx, double filt, FilteredEdgeInsertion filtered_edge_insert) {
+  void set_edge_critical(Row_index indx, Filtration_value filt, FilteredEdgeInsertion filtered_edge_insert) {
 #ifdef DEBUG_TRACES
     std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
     std::endl;
 #endif  // DEBUG_TRACES
-    std::set<std::size_t> effectedIndcs = three_clique_indices(indx);
+    std::set<Row_index> effectedIndcs = three_clique_indices(indx);
     if (effectedIndcs.size() > 0) {
       for (auto idx = indx - 1; idx > 0; idx--) {
-        Edge e = std::get<0>(f_edge_vector_[idx]);
-        Vertex u = std::get<0>(e);
-        Vertex v = std::get<1>(e);
+        Edge edge = std::get<0>(f_edge_vector_[idx]);
+        Vertex_handle u = std::get<0>(edge);
+        Vertex_handle v = std::get<1>(edge);
         // If idx is not critical so it should be proceses, otherwise it stays in the graph // prev
         // code : recurCriticalCoreIndcs.find(idx) == recurCriticalCoreIndcs.end()
         if (not critical_edge_indicator_[idx]) {
           // If idx is affected
           if (effectedIndcs.find(idx) != effectedIndcs.end()) {
-            if (not check_edge_domination(e)) {
+            if (not check_edge_domination(edge)) {
 #ifdef DEBUG_TRACES
               std::cout << "The curent index became critical " << idx  << std::endl;
 #endif  // DEBUG_TRACES
               critical_edge_indicator_[idx] = true;
               filtered_edge_insert({u, v}, filt);
-              std::set<std::size_t> inner_effected_indcs = three_clique_indices(idx);
+              std::set<Row_index> inner_effected_indcs = three_clique_indices(idx);
               for (auto inr_idx = inner_effected_indcs.rbegin(); inr_idx != inner_effected_indcs.rend(); inr_idx++) {
                 if (*inr_idx < idx) effectedIndcs.emplace(*inr_idx);
               }
               inner_effected_indcs.clear();
 #ifdef DEBUG_TRACES
-              std::cout << "The following edge is critical with filt value: {" << std::get<0>(e) << "," <<
-              std::get<1>(e) << "}; " << filt << std::endl;
+              std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
+                        << filt << std::endl;
 #endif  // DEBUG_TRACES
             } else
               u_set_dominated_redges_.emplace(std::minmax(vertex_to_row_[u], vertex_to_row_[v]));
@@ -245,26 +244,24 @@ class Flag_complex_sparse_matrix {
     u_set_dominated_redges_.clear();
   }
 
-  // Returns list of non-zero columns of the particular indx.
-  doubleVector closed_neighbours_row_index(double indx)
+  // Returns list of non-zero columns of a particular indx.
+  Row_indices_vector closed_neighbours_row_index(Row_index rw_u)
   {
-    doubleVector non_zero_indices;
-    Vertex u = indx;
-    Vertex v;
+    Row_indices_vector non_zero_indices;
 #ifdef DEBUG_TRACES
-    std::cout << "The neighbours of the vertex: " << row_to_vertex_[u] << " are. " << std::endl;
+    std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
-    if (not domination_indicator_[indx]) {
+    if (not domination_indicator_[rw_u]) {
       // Iterate over the non-zero columns
-      for (Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, indx); it; ++it) {
-        v = it.index();
+      for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
+        Row_index rw_v = it.index();
         // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-        if (not domination_indicator_[v] and u_set_removed_redges_.find(std::minmax(u, v)) == u_set_removed_redges_.end() and
-            u_set_dominated_redges_.find(std::minmax(u, v)) == u_set_dominated_redges_.end()) {
+        if (not domination_indicator_[rw_v] and u_set_removed_redges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_redges_.end() and
+            u_set_dominated_redges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_redges_.end()) {
           // inner index, here it is equal to it.columns()
-          non_zero_indices.push_back(it.index());
+          non_zero_indices.push_back(rw_v);
 #ifdef DEBUG_TRACES
-          std::cout << row_to_vertex_[it.index()] << ", " ;
+          std::cout << row_to_vertex_[rw_v] << ", " ;
 #endif  // DEBUG_TRACES
         }
       }
@@ -275,23 +272,24 @@ class Flag_complex_sparse_matrix {
     return non_zero_indices;
   }
 
-  doubleVector closed_common_neighbours_row_index(Edge e)  // Returns the list of closed neighbours of the edge :{u,v}.
+  // Returns the list of closed neighbours of the edge :{u,v}.
+  Row_indices_vector closed_common_neighbours_row_index(const std::pair<Row_index, Row_index>& rw_edge)
   {
-    doubleVector common;
-    doubleVector non_zero_indices_u;
-    doubleVector non_zero_indices_v;
-    double u = std::get<0>(e);
-    double v = std::get<1>(e);
+    Row_indices_vector common;
+    Row_indices_vector non_zero_indices_u;
+    Row_indices_vector non_zero_indices_v;
+    Row_index rw_u = std::get<0>(rw_edge);
+    Row_index rw_v = std::get<1>(rw_edge);
 
-    non_zero_indices_u = closed_neighbours_row_index(u);
-    non_zero_indices_v = closed_neighbours_row_index(v);
+    non_zero_indices_u = closed_neighbours_row_index(rw_u);
+    non_zero_indices_v = closed_neighbours_row_index(rw_v);
     std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
                           non_zero_indices_v.end(), std::inserter(common, common.begin()));
 
     return common;
   }
-  
-  void insert_vertex(const Vertex& vertex, double filt_val) {
+
+  void insert_vertex(const Vertex_handle& vertex, Filtration_value filt_val) {
     auto rw = vertex_to_row_.find(vertex);
     if (rw == vertex_to_row_.end()) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
@@ -303,7 +301,7 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  void insert_new_edges(const Vertex& u, const Vertex& v, double filt_val)
+  void insert_new_edges(const Vertex_handle& u, const Vertex_handle& v, Filtration_value filt_val)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
@@ -340,8 +338,8 @@ class Flag_complex_sparse_matrix {
   Flag_complex_sparse_matrix(const Filtered_sorted_edge_list& edge_t)
   : rows(0) {
     for (size_t bgn_idx = 0; bgn_idx < edge_t.size(); bgn_idx++) {
-      Vertex u = std::get<1>(edge_t[bgn_idx]);
-      Vertex v = std::get<2>(edge_t[bgn_idx]);
+      Vertex_handle u = std::get<1>(edge_t[bgn_idx]);
+      Vertex_handle v = std::get<2>(edge_t[bgn_idx]);
       f_edge_vector_.push_back({{u, v}, std::get<0>(edge_t[bgn_idx])});
       vertices_.emplace(u);
       vertices_.emplace(v);
@@ -352,15 +350,15 @@ class Flag_complex_sparse_matrix {
   Flag_complex_sparse_matrix(const OneSkeletonGraph& one_skeleton_graph)
   : rows(0) {
     // Insert all vertices_
-    for (auto v_it = boost::vertices_(one_skeleton_graph); v_it.first != v_it.second; ++v_it.first) {
+    for (auto v_it = boost::vertices(one_skeleton_graph); v_it.first != v_it.second; ++v_it.first) {
       vertices_.emplace(*(v_it.first));
     }
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
       auto edge = *(edge_it.first);
-      Vertex u = source(edge, one_skeleton_graph);
-      Vertex v = target(edge, one_skeleton_graph);
+      Vertex_handle u = source(edge, one_skeleton_graph);
+      Vertex_handle v = target(edge, one_skeleton_graph);
       f_edge_vector_.push_back({{u, v}, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)});
     }
     // Sort edges
@@ -379,7 +377,7 @@ class Flag_complex_sparse_matrix {
   // Performs edge collapse in a decreasing sequence of the filtration value.
   template<typename FilteredEdgeInsertion>
   void filtered_edge_collapse(FilteredEdgeInsertion filtered_edge_insert) {
-    std::size_t endIdx = 0;
+    Row_index endIdx = 0;
 
     u_set_removed_redges_.clear();
     u_set_dominated_redges_.clear();
@@ -390,10 +388,10 @@ class Flag_complex_sparse_matrix {
 
     while (endIdx < f_edge_vector_.size()) {
       Filtered_edge fec = f_edge_vector_[endIdx];
-      Edge e = std::get<0>(fec);
-      Vertex u = std::get<0>(e);
-      Vertex v = std::get<1>(e);
-      double filt = std::get<1>(fec);
+      Edge edge = std::get<0>(fec);
+      Vertex_handle u = std::get<0>(edge);
+      Vertex_handle v = std::get<1>(edge);
+      Filtration_value filt = std::get<1>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
       insert_new_edges(u, v, filt);
@@ -402,7 +400,7 @@ class Flag_complex_sparse_matrix {
       critical_edge_indicator_.push_back(false);
       dominated_edge_indicator_.push_back(false);
 
-      if (not check_edge_domination(e)) {
+      if (not check_edge_domination(edge)) {
         critical_edge_indicator_[endIdx] = true;
         dominated_edge_indicator_[endIdx] = false;
         filtered_edge_insert({u, v}, filt);
