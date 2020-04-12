@@ -12,11 +12,9 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/distance_functions.h>
-#include <gudhi/reader_utils.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/graph_simplicial_complex.h>
 
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/program_options.hpp>
 
 #include<utility>  // for std::pair
@@ -31,14 +29,11 @@ using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
 using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
+using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
-
-using Adjacency_list = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-                                             boost::property<Gudhi::vertex_filtration_t, double>,
-                                             boost::property<Gudhi::edge_filtration_t, double>>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
@@ -76,9 +71,9 @@ int main(int argc, char* argv[]) {
   std::cout << "Successfully read " << point_vector.size() << " point_vector.\n";
   std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
-  Adjacency_list proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
-                                                                                threshold,
-                                                                                Gudhi::Euclidean_distance());
+  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+                                                                                 threshold,
+                                                                                 Gudhi::Euclidean_distance());
 
   if (num_edges(proximity_graph) <= 0) {
     std::cerr << "Total number of egdes are zero." << std::endl;
@@ -89,7 +84,7 @@ int main(int argc, char* argv[]) {
 
   Simplex_tree stree;
   mat_filt_edge_coll.filtered_edge_collapse(
-    [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
+    [&stree](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);
         stree.insert_simplex({edge[1]}, 0.);

@@ -11,10 +11,8 @@
 #include <gudhi/Flag_complex_sparse_matrix.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Rips_edge_list.h>
-#include <gudhi/distance_functions.h>
 #include <gudhi/reader_utils.h>
-#include <gudhi/Points_off_io.h>
+#include <gudhi/graph_simplicial_complex.h>
 
 #include <boost/program_options.hpp>
 
@@ -23,8 +21,8 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 
 using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
+using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
 
-using Rips_edge_list = Gudhi::rips_edge_list::Rips_edge_list<Filtration_value>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
@@ -82,28 +80,22 @@ int main(int argc, char* argv[]) {
   program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
   Distance_matrix distances;
-  Distance_matrix sparse_distances;
 
   distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
   std::cout << "Read the distance matrix succesfully, of size: " << distances.size() << std::endl;
 
-  Flag_complex_sparse_matrix::Filtered_sorted_edge_list edge_t;
-
-  Rips_edge_list Rips_edge_list_from_file(distances, threshold);
-  Rips_edge_list_from_file.create_edges(edge_t);
-  
-  if (edge_t.size() <= 0) {
-    std::cerr << "Total number of egdes are zero." << std::endl;
-    exit(-1);
-  }
-
-  std::cout << "Total number of edges before collapse are: " << edge_t.size() << std::endl;
+  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(boost::irange((size_t)0,
+                                                                                               distances.size()),
+                                                                                 threshold,
+                                                                                 [&distances](size_t i, size_t j) {
+                                                                                   return distances[j][i];
+                                                                                 });
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-  Flag_complex_sparse_matrix mat_filt_edge_coll(edge_t);
+  Flag_complex_sparse_matrix flag_complex(proximity_graph);
 
   Simplex_tree stree;
-  mat_filt_edge_coll.filtered_edge_collapse(
+  flag_complex.filtered_edge_collapse(
     [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);
