@@ -135,13 +135,13 @@ class Flag_complex_sparse_matrix {
   Row_index rows;
 
   // Edge e is the actual edge (u,v). Not the row ids in the matrixs
-  bool check_edge_domination(Edge edge)
+  bool check_edge_domination(const Edge& edge) const
   {
     Vertex_handle u = std::get<0>(edge);
     Vertex_handle v = std::get<1>(edge);
 
-    Row_index rw_u = vertex_to_row_[u];
-    Row_index rw_v = vertex_to_row_[v];
+    const Row_index rw_u = vertex_to_row_.at(u);
+    const Row_index rw_v = vertex_to_row_.at(v);
     auto rw_e = std::make_pair(rw_u, rw_v);
 #ifdef DEBUG_TRACES
     std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
@@ -246,7 +246,7 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns list of non-zero columns of a particular indx.
-  Row_indices_vector closed_neighbours_row_index(Row_index rw_u)
+  Row_indices_vector closed_neighbours_row_index(Row_index rw_u) const
   {
     Row_indices_vector non_zero_indices;
 #ifdef DEBUG_TRACES
@@ -274,7 +274,7 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns the list of closed neighbours of the edge :{u,v}.
-  Row_indices_vector closed_common_neighbours_row_index(const std::pair<Row_index, Row_index>& rw_edge)
+  Row_indices_vector closed_common_neighbours_row_index(const std::pair<Row_index, Row_index>& rw_edge) const
   {
     Row_indices_vector common;
     Row_indices_vector non_zero_indices_u;
@@ -290,7 +290,7 @@ class Flag_complex_sparse_matrix {
     return common;
   }
 
-  void insert_vertex(const Vertex_handle& vertex, Filtration_value filt_val) {
+  void insert_vertex(Vertex_handle vertex, Filtration_value filt_val) {
     auto rw = vertex_to_row_.find(vertex);
     if (rw == vertex_to_row_.end()) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
@@ -302,7 +302,7 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  void insert_new_edges(const Vertex_handle& u, const Vertex_handle& v, Filtration_value filt_val)
+  void insert_new_edges(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
