@@ -52,6 +52,14 @@ def test_knn_explicit():
     r = knn.fit_transform(dist)
     assert np.array_equal(r[0], [[0, 1], [1, 0], [2, 0]])
     assert np.array_equal(r[1], [[0, 3], [0, 1], [0, 1]])
+    # Second time in parallel
+    knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=False, n_jobs=2)
+    r = knn.fit_transform(dist)
+    assert np.array_equal(r, [[0, 1], [1, 0], [2, 0]])
+    knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=True, n_jobs=2)
+    r = knn.fit_transform(dist)
+    assert np.array_equal(r[0], [[0, 1], [1, 0], [2, 0]])
+    assert np.array_equal(r[1], [[0, 3], [0, 1], [0, 1]])
 
 
 def test_knn_compare():

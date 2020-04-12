@@ -115,25 +115,71 @@ class KNearestNeighbors:
 
         if metric == "precomputed":
             # scikit-learn could handle that, but they insist on calling fit() with an unused square array, which is too unnatural.
-            X = numpy.array(X)
             if self.return_index:
-                neighbors = numpy.argpartition(X, k - 1)[:, 0:k]
-                if self.params.get("sort_results", True):
-                    X = numpy.take_along_axis(X, neighbors, axis=-1)
-                    ngb_order = numpy.argsort(X, axis=-1)
-                    neighbors = numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+                n_jobs = self.params.get("n_jobs", 1)
+                # Supposedly numpy can be compiled with OpenMP and handle this, but nobody does that?!
+                if n_jobs == 1:
+                    neighbors = numpy.argpartition(X, k - 1)[:, 0:k]
+                    if self.params.get("sort_results", True):
+                        X = numpy.take_along_axis(X, neighbors, axis=-1)
+                        ngb_order = numpy.argsort(X, axis=-1)
+                        neighbors = numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+                    else:
+                        ngb_order = neighbors
+                    if self.return_distance:
+                        distances = numpy.take_along_axis(X, ngb_order, axis=-1)
+                        return neighbors, distances
+                    else:
+                        return neighbors
                 else:
-                    ngb_order = neighbors
-                if self.return_distance:
-                    distances = numpy.take_along_axis(X, ngb_order, axis=-1)
-                    return neighbors, distances
-                else:
-                    return neighbors
+                    from joblib import Parallel, delayed, effective_n_jobs
+                    from sklearn.utils import gen_even_slices
+
+                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
+                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    if self.params.get("sort_results", True):
+
+                        def func(M):
+                            neighbors = numpy.argpartition(M, k - 1)[:, 0:k]
+                            Y = numpy.take_along_axis(M, neighbors, axis=-1)
+                            ngb_order = numpy.argsort(Y, axis=-1)
+                            return numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+
+                    else:
+
+                        def func(M):
+                            return numpy.argpartition(M, k - 1)[:, 0:k]
+
+                    neighbors = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
+                    if self.return_distance:
+                        distances = numpy.take_along_axis(X, neighbors, axis=-1)
+                        return neighbors, distances
+                    else:
+                        return neighbors
             if self.return_distance:
-                distances = numpy.partition(X, k - 1)[:, 0:k]
-                if self.params.get("sort_results"):
-                    # partition is not guaranteed to sort the lower half, although it often does
-                    distances.sort(axis=-1)
+                n_jobs = self.params.get("n_jobs", 1)
+                if n_jobs == 1:
+                    distances = numpy.partition(X, k - 1)[:, 0:k]
+                    if self.params.get("sort_results"):
+                        # partition is not guaranteed to sort the lower half, although it often does
+                        distances.sort(axis=-1)
+                else:
+                    from joblib import Parallel, delayed, effective_n_jobs
+                    from sklearn.utils import gen_even_slices
+
+                    if self.params.get("sort_results"):
+
+                        def func(M):
+                            # Not partitioning in place, because we should not modify the user's array?
+                            r = numpy.partition(M, k - 1)[:, 0:k]
+                            r.sort(axis=-1)
+                            return r
+
+                    else:
+                        func = lambda M: numpy.partition(M, k - 1)[:, 0:k]
+                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
+                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    distances = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
                 return distances
             return None
 
