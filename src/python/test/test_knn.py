@@ -32,6 +32,12 @@ def test_knn_explicit():
         .transform(query)
     )
     assert r == pytest.approx(np.array([[0.0, 1], [1, 1], [1, 2]]))
+    r = (
+        KNearestNeighbors(2, metric="chebyshev", return_distance=True, return_index=False, implementation="keops", enable_autodiff=True)
+        .fit(base)
+        .transform(query)
+    )
+    assert r == pytest.approx(np.array([[0.0, 1], [1, 1], [1, 2]]))
 
     knn = KNearestNeighbors(2, metric="minkowski", p=3, return_distance=False, return_index=True)
     knn.fit(base)
