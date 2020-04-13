@@ -11,6 +11,7 @@ import numpy
 
 # TODO: https://github.com/facebookresearch/faiss
 
+
 class KNearestNeighbors:
     """
     Class wrapping several implementations for computing the k nearest neighbors in a point set.
@@ -82,6 +83,7 @@ class KNearestNeighbors:
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
             import eagerpy as ep
+
             X = ep.astensor(X)
             if self.params["implementation"] != "keops" or not isinstance(X, ep.PyTorchTensor):
                 # I don't know a clever way to reuse a GPU tensor from tensorflow in pytorch
@@ -127,17 +129,19 @@ class KNearestNeighbors:
             # pykeops does not support autodiff for kmin yet, but when it does in the future,
             # we may want a special path.
             import eagerpy as ep
+
             save_return_index = self.return_index
             self.return_index = True
             self.return_distance = False
             self.params["enable_autodiff"] = False
             try:
-                # FIXME: how do we test "X is ref_points" then?
                 newX = ep.astensor(X)
-                if self.params["implementation"] != "keops" or not isinstance(newX, ep.PyTorchTensor):
+                if self.params["implementation"] != "keops" or (
+                    not isinstance(newX, ep.PyTorchTensor) and not isinstance(newX, ep.NumPyTensor)
+                ):
                     newX = newX.numpy()
                 else:
-                    newX = X
+                    newX = newX.raw
                 neighbors = self.transform(newX)
             finally:
                 self.return_index = save_return_index
@@ -158,7 +162,6 @@ class KNearestNeighbors:
                 return neighbors, distances.raw
             else:
                 return distances.raw
-
 
         metric = self.metric
         k = self.k
