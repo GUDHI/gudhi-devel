@@ -10,3 +10,4 @@ tensorflow
 torch
 pykeops
 hnswlib
+eagerpy
