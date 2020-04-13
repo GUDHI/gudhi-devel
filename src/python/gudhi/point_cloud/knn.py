@@ -82,8 +82,11 @@ class KNearestNeighbors:
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
             import eagerpy as ep
+            X = ep.astensor(X)
             if self.params["implementation"] != "keops" or not isinstance(X, ep.PyTorchTensor):
-                X = ep.astensor(X).numpy()
+                # I don't know a clever way to reuse a GPU tensor from tensorflow in pytorch
+                # without copying to/from the CPU.
+                X = X.numpy()
         if self.params["implementation"] == "ckdtree":
             # sklearn could handle this, but it is much slower
             from scipy.spatial import cKDTree
@@ -133,6 +136,8 @@ class KNearestNeighbors:
                 newX = ep.astensor(X)
                 if self.params["implementation"] != "keops" or not isinstance(newX, ep.PyTorchTensor):
                     newX = newX.numpy()
+                else:
+                    newX = X
                 neighbors = self.transform(newX)
             finally:
                 self.return_index = save_return_index
@@ -247,29 +252,13 @@ class KNearestNeighbors:
         if self.params["implementation"] == "keops":
             import torch
             from pykeops.torch import LazyTensor
-            import eagerpy as ep
 
-            queries = X
-            X = ep.astensor(X)
-            if isinstance(X, ep.PyTorchTensor):
-                XX = X.raw
-            else:
-                # I don't know a clever way to reuse a GPU tensor from tensorflow in pytorch
-                # without copying to/from the CPU.
-                XX = X.numpy()
             # 'float64' is slow except on super expensive GPUs. Allow it with some param?
-            XX = torch.as_tensor(XX, dtype=torch.float32)
-            if queries is self.ref_points:
-                Y = X
+            XX = torch.as_tensor(X, dtype=torch.float32)
+            if X is self.ref_points:
                 YY = XX
             else:
-                Y = ep.astensor(self.ref_points)
-                if isinstance(Y, ep.PyTorchTensor):
-                    YY = Y.raw
-                else:
-                    YY = Y.numpy()
-                YY = torch.as_tensor(YY, dtype=torch.float32)
-
+                YY = torch.as_tensor(self.ref_points, dtype=torch.float32)
             p = self.params["p"]
             if p == numpy.inf:
                 # Requires pykeops 1.4 or later
