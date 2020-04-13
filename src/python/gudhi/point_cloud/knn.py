@@ -233,16 +233,17 @@ class KNearestNeighbors:
                 # Another strategy would be to compute the whole distance matrix with torch.cdist
                 # and use neighbors as indices into it.
                 neighbors = ep.astensor(mat.argKmin(k, dim=1)).numpy()
-                neighbor_pts = Y[neighbors]
+                # Work around https://github.com/pytorch/pytorch/issues/34452
+                neighbor_pts = Y[neighbors,]
                 diff = neighbor_pts - X[:, None, :]
                 if p == numpy.inf:
                     distances = diff.abs().max(-1)
                 elif p == 2:
-                    distances = (diff ** 2).sum(-1) ** 0.5
+                    distances = (diff ** 2).sum(-1).sqrt()
                 else:
                     distances = (diff.abs() ** p).sum(-1) ** (1.0 / p)
                 if self.return_index:
-                    return neighbors.raw, distances.raw
+                    return neighbors, distances.raw
                 else:
                     return distances.raw
             if self.return_index:
