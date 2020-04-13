@@ -12,7 +12,6 @@
 #ifndef FLAG_COMPLEX_SPARSE_MATRIX_H_
 #define FLAG_COMPLEX_SPARSE_MATRIX_H_
 
-#include <gudhi/Rips_edge_list.h>
 #include <gudhi/graph_simplicial_complex.h>
 
 #include <boost/functional/hash.hpp>
@@ -25,14 +24,14 @@
 #endif
 
 #include <iostream>
-#include <utility>
+#include <utility>  // for std::pair
 #include <vector>
-#include <queue>
 #include <unordered_map>
-#include <tuple>
-#include <list>
-#include <algorithm>
-
+#include <unordered_set>
+#include <set>
+#include <tuple>  // for std::tie
+#include <algorithm>  // for std::includes
+#include <iterator>  // for std::inserter
 
 namespace Gudhi {
 
@@ -48,28 +47,29 @@ namespace collapse {
  * A class to store the vertices v/s MaxSimplices Sparse Matrix and to perform collapse operations using the N^2()
  * Algorithm.
  *
- * \tparam Vertex_handle type must be a signed integer type. It admits a total order <.
+ * \tparam Vertex type must be a signed integer type. It admits a total order <.
  * \tparam Filtration type for the value of the filtration function. Must be comparable with <.
  */
-template<typename Vertex_handle, typename Filtration>
+template<typename Vertex, typename Filtration>
 class Flag_complex_sparse_matrix {
+ public:
+  using Vertex_handle = Vertex;
+  using Filtration_value = Filtration;
  private:
   using Edge = std::pair<Vertex_handle, Vertex_handle>;  // This is an ordered pair, An edge is stored with convention of the first
                                          // element being the smaller i.e {2,3} not {3,2}. However this is at the level
                                          // of row indices on actual vertex lables
-  using Filtered_edge = std::pair<Edge, Filtration>;
 
   using Row_index = std::size_t;
 
   using Map_vertex_to_index = std::unordered_map<Vertex_handle, Row_index>;
 
-  using Sparse_row_matrix = Eigen::SparseMatrix<Filtration, Eigen::RowMajor>;
+  using Sparse_row_matrix = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor>;
 
   using Row_indices_vector = std::vector<Row_index>;
 
  public:
-  using Filtered_sorted_edge_list = std::vector<std::tuple<Filtration, Vertex_handle, Vertex_handle>>;
-  using Filtration_value = Filtration;
+  using Filtered_edge = std::pair<Edge, Filtration_value>;
   using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_sparse_matrix>;
 
  private:
@@ -113,7 +113,7 @@ class Flag_complex_sparse_matrix {
   //! Stores the Sparse matrix of Filtration values representing the Original Simplicial Complex.
   /*!
     \code
-    Sparse_row_matrix   = Eigen::SparseMatrix<Filtration, Eigen::RowMajor> ;
+    Sparse_row_matrix   = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor> ;
     \endcode
     ;
       */
@@ -206,7 +206,7 @@ class Flag_complex_sparse_matrix {
   }
 
   template<typename FilteredEdgeInsertion>
-  void set_edge_critical(Row_index indx, Filtration filt, FilteredEdgeInsertion filtered_edge_insert) {
+  void set_edge_critical(Row_index indx, Filtration_value filt, FilteredEdgeInsertion filtered_edge_insert) {
 #ifdef DEBUG_TRACES
     std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
     std::endl;
@@ -294,7 +294,7 @@ class Flag_complex_sparse_matrix {
     return common;
   }
 
-  void insert_vertex(Vertex_handle vertex, Filtration filt_val) {
+  void insert_vertex(Vertex_handle vertex, Filtration_value filt_val) {
     auto rw = vertex_to_row_.find(vertex);
     if (rw == vertex_to_row_.end()) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
@@ -306,7 +306,7 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  void insert_new_edges(Vertex_handle u, Vertex_handle v, Filtration filt_val)
+  void insert_new_edges(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
@@ -340,23 +340,16 @@ class Flag_complex_sparse_matrix {
     <B>domination_indicator_</B> are initialised by init() function which is
     called at the begining of this. <br>
   */
-  template<typename DistanceMatrix>
-  Flag_complex_sparse_matrix(const DistanceMatrix& distance_matrix)
-  : rows(0) {
-    Vertex_handle num_vertices = std::distance(std::begin(distance_matrix), std::end(distance_matrix));
-
-    // This one is not part of the loop
-    vertices_.emplace(0);
-    // Only browse the lower part of the distance matrix
-    for (Vertex_handle line_index = 1; line_index < num_vertices; line_index++) {
-      for (Vertex_handle row_index = 0; row_index < line_index; row_index++) {
-#ifdef DEBUG_TRACES
-        std::cout << "Insert edge: fn[" << row_index << ", " << line_index << "] = "
-                  << distance_matrix[line_index][row_index] << std::endl;
-#endif  // DEBUG_TRACES
-        f_edge_vector_.push_back({{row_index, line_index}, distance_matrix[line_index][row_index]});
-      }
-      vertices_.emplace(line_index);
+  template<typename Filtered_edge_range>
+  Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
+  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()),
+    rows(0) {
+    for (Filtered_edge filtered_edge : filtered_edge_range) {
+      Vertex_handle u;
+      Vertex_handle v;
+      std::tie(u,v) = std::get<0>(filtered_edge);
+      vertices_.emplace(u);
+      vertices_.emplace(v);
     }
   }
 
@@ -385,7 +378,6 @@ class Flag_complex_sparse_matrix {
     u_set_dominated_redges_.clear();
     critical_edge_indicator_.clear();
 
-    std::cout << "Sort it - " << f_edge_vector_.size() << std::endl;
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
@@ -397,9 +389,7 @@ class Flag_complex_sparse_matrix {
 #else
     std::stable_sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #endif
-    std::cout << "Sorted" << std::endl;
 
-    std::cout << vertices_.size() << std::endl;
     // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
     sparse_row_adjacency_matrix_ = Sparse_row_matrix(vertices_.size(), vertices_.size());
 
@@ -408,7 +398,7 @@ class Flag_complex_sparse_matrix {
       Edge edge = std::get<0>(fec);
       Vertex_handle u = std::get<0>(edge);
       Vertex_handle v = std::get<1>(edge);
-      Filtration filt = std::get<1>(fec);
+      Filtration_value filt = std::get<1>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
       insert_new_edges(u, v, filt);
