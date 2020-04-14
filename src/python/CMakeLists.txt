@@ -216,7 +216,7 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
@@ -389,6 +389,7 @@ if(PYTHONINTERP_FOUND)
     # Wasserstein
     if(OT_FOUND AND PYBIND11_FOUND)
       add_gudhi_py_test(test_wasserstein_distance)
+      add_gudhi_py_test(test_wasserstein_barycenter)
     endif()
 
     # Representations
