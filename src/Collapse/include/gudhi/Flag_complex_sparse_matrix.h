@@ -53,16 +53,16 @@ namespace collapse {
 template<typename Vertex, typename Filtration>
 class Flag_complex_sparse_matrix {
  public:
-  // Re-define Vertex as Vertex_handle type to ease the interface with compute_proximity_graph
+  /** \brief Re-define Vertex as Vertex_handle type to ease the interface with compute_proximity_graph. */
   using Vertex_handle = Vertex;
-  // Re-define Filtration as Filtration_value type to ease the interface with compute_proximity_graph
+  /** \brief Re-define Filtration as Filtration_value type to ease the interface with compute_proximity_graph. */
   using Filtration_value = Filtration;
- private:
-  // This is an ordered pair, An edge is stored with convention of the first
-  // element being the smaller i.e {2,3} not {3,2}. However this is at the level
-  // of row indices on actual vertex lables
+  /** \brief This is an ordered pair, An edge is stored with convention of the first element being the smaller i.e
+   * {2,3} not {3,2}. However this is at the level of row indices on actual vertex lables.
+   */
   using Edge = std::pair<Vertex_handle, Vertex_handle>;
 
+ private:
   // Row_index type in the sparse matrix
   using Row_index = std::size_t;
 
@@ -73,9 +73,9 @@ class Flag_complex_sparse_matrix {
   using Row_indices_vector = std::vector<Row_index>;
 
  public:
-  // A Filtered_edge is a std::pair<std::pair<Vertex_handle, Vertex_handle>, Filtration_value>
+  /** \brief A Filtered_edge is a std::pair<std::pair<`Vertex_handle`, `Vertex_handle`>, `Filtration_value`>. */
   using Filtered_edge = std::pair<Edge, Filtration_value>;
-  // Proximity_graph is a type that can be used to construct easily a Flag_complex_sparse_matrix
+  /** \brief Proximity_graph is a type that can be used to construct easily a Flag_complex_sparse_matrix. */
   using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_sparse_matrix>;
 
  private:
@@ -319,10 +319,8 @@ class Flag_complex_sparse_matrix {
    * @param[in] filtered_edge_range Range of filtered edges. Filtered edges must be in
    * `Flag_complex_sparse_matrix::Filtered_edge`.
    *
-   * @pre Available if Alpha_complex_3d is not Periodic.
-   *
    * There is no need the range to be sorted, as it will be performed in
-   * `Flag_complex_sparse_matrix::filtered_edge_collapse.
+   * `Flag_complex_sparse_matrix::filtered_edge_collapse`.
    */
   template<typename Filtered_edge_range>
   Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
