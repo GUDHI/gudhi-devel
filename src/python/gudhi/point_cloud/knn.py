@@ -38,9 +38,9 @@ class KNearestNeighbors:
             sort_results (bool): if True, then distances and indices of each point are
                 sorted on return, so that the first column contains the closest points.
                 Otherwise, neighbors are returned in an arbitrary order. Defaults to True.
-            enable_autodiff (bool): if the input is a torch.tensor, jax.numpy.array or similar, this instructs
-                the function to compute distances in a way that works with automatic differentiation.
-                This is experimental and not supported for all implementations.
+            enable_autodiff (bool): if the input is a torch.tensor, jax.numpy.ndarray or tensorflow.Tensor, this
+                instructs the function to compute distances in a way that works with automatic differentiation.
+                This is experimental and not supported for all metrics. Defaults to False.
             kwargs: additional parameters are forwarded to the backends.
         """
         self.k = k
@@ -124,6 +124,11 @@ class KNearestNeighbors:
         """
         Args:
             X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed".
+
+        Returns:
+            numpy.array: if return_index, an array of shape (len(X), k) with the indices (in the argument
+            of :func:`fit`) of the k nearest neighbors to the points of X. If return_distance, an array of the
+            same shape with the distances to those neighbors. If both, a tuple with the two arrays, in this order.
         """
         if self.params.get("enable_autodiff", False):
             # pykeops does not support autodiff for kmin yet, but when it does in the future,

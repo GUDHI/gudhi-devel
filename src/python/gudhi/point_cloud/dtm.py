@@ -20,7 +20,9 @@ class DistanceToMeasure:
         Args:
             k (int): number of neighbors (possibly including the point itself).
             q (float): order used to compute the distance to measure. Defaults to 2.
-            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that
+                metric="neighbors" means that :func:`transform` expects an array with the distances
+                to the k nearest neighbors.
         """
         self.k = k
         self.q = q
@@ -44,7 +46,13 @@ class DistanceToMeasure:
     def transform(self, X):
         """
         Args:
-            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed", or distances to the k nearest neighbors if metric is "neighbors" (if the array has more than k columns, the remaining ones are ignored).
+            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed",
+                or distances to the k nearest neighbors if metric is "neighbors" (if the array has more
+                than k columns, the remaining ones are ignored).
+
+        Returns:
+            numpy.array: a 1-d array with, for each point of X, its distance to the measure defined
+            by the argument of :func:`fit`.
         """
         if self.params["metric"] == "neighbors":
             distances = X[:, : self.k]
