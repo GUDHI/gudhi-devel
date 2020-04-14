@@ -9,6 +9,7 @@
 
 import numpy as np
 import scipy.spatial.distance as sc
+
 try:
     import ot
 except ImportError:
@@ -29,9 +30,9 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param order: exponent for the Wasserstein metric.
     :param internal_p: Ground metric (i.e. norm L^p).
-    :returns: (n+1) x (m+1) np.array encoding the cost matrix C. 
-                For 0 <= i < n, 0 <= j < m, C[i,j] encodes the distance between X[i] and Y[j], 
-                while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j]) 
+    :returns: (n+1) x (m+1) np.array encoding the cost matrix C.
+                For 0 <= i < n, 0 <= j < m, C[i,j] encodes the distance between X[i] and Y[j],
+                while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j])
                 and its orthogonal projection onto the diagonal.
                 note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
     '''
@@ -58,7 +59,7 @@ def _perstot(X, order, internal_p):
     :param X: (n x 2) numpy.array (points of a given diagram).
     :param order: exponent for Wasserstein. Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (Euclidean norm).
-    :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).    
+    :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).
     '''
     Xdiag = _proj_on_diag(X)
     return (np.sum(np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order))**(1./order)
@@ -66,16 +67,16 @@ def _perstot(X, order, internal_p):
 
 def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     '''
-    :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points 
+    :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points
                 (i.e. with infinite coordinate).
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param matching: if True, computes and returns the optimal matching between X and Y, encoded as
                      a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
                      the j-th point in Y, with the convention (-1) represents the diagonal.
     :param order: exponent for Wasserstein; Default value is 2.
-    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); 
+    :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is 2 (Euclidean norm).
-    :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with 
+    :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with
               respect to the internal_p-norm as ground metric.
               If matching is set to True, also returns the optimal matching between X and Y.
     '''
