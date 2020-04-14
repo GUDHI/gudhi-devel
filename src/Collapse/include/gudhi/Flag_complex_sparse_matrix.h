@@ -337,10 +337,12 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  /** \brief Flag_complex_sparse_matrix constructor from a proximity graph.
+  /** \brief Flag_complex_sparse_matrix constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
    *
    * @param[in] one_skeleton_graph The one skeleton graph. The graph must be in
    * `Flag_complex_sparse_matrix::Proximity_graph`.
+   *
+   * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
    */
   Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph)
   : rows_(0) {
@@ -358,7 +360,11 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  // Performs edge collapse in a decreasing sequence of the filtration value.
+  /** \brief Performs edge collapse in a decreasing sequence of the filtration value.
+   *
+   * \tparam FilteredEdgeInsertion is an output iterator that furnishes
+   * `({Vertex_handle u, Vertex_handle v}, Filtration_value f)` that will fill the user defined data structure.
+   */
   template<typename FilteredEdgeInsertion>
   void filtered_edge_collapse(FilteredEdgeInsertion filtered_edge_insert) {
     Row_index endIdx = 0;
