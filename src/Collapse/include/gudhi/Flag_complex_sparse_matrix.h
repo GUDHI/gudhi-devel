@@ -199,10 +199,10 @@ class Flag_complex_sparse_matrix {
         Vertex_handle u = std::get<0>(edge);
         Vertex_handle v = std::get<1>(edge);
         // If idx is not critical so it should be processed, otherwise it stays in the graph
-        if (not critical_edge_indicator_[idx]) {
+        if (!critical_edge_indicator_[idx]) {
           // If idx is affected
           if (effected_indices.find(idx) != effected_indices.end()) {
-            if (not check_edge_domination(edge)) {
+            if (!check_edge_domination(edge)) {
 #ifdef DEBUG_TRACES
               std::cout << "The curent index became critical " << idx  << std::endl;
 #endif  // DEBUG_TRACES
@@ -236,12 +236,12 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
-    if (not domination_indicator_[rw_u]) {
+    if (!domination_indicator_[rw_u]) {
       // Iterate over the non-zero columns
       for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
         Row_index rw_v = it.index();
         // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-        if (not domination_indicator_[rw_v] and u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() and
+        if (!domination_indicator_[rw_v] and u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() and
             u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
           // inner index, here it is equal to it.columns()
           non_zero_indices.push_back(rw_v);
@@ -399,7 +399,7 @@ class Flag_complex_sparse_matrix {
       edge_to_index_map_.emplace(std::minmax(u, v), endIdx);
       critical_edge_indicator_.push_back(false);
 
-      if (not check_edge_domination(edge)) {
+      if (!check_edge_domination(edge)) {
         critical_edge_indicator_[endIdx] = true;
         filtered_edge_insert({u, v}, filt);
         if (endIdx > 1)
