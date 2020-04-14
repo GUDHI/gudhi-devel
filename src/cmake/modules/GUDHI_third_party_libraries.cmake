@@ -181,6 +181,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("pybind11")
   find_python_module("torch")
   find_python_module("pykeops")
+  find_python_module("eagerpy")
   find_python_module_no_version("hnswlib")
 endif()
 
