@@ -46,14 +46,14 @@ def test_dtm_compare_euclidean():
     r6 = dtm.fit_transform(pts2)
     assert r6.detach().numpy() == pytest.approx(r0)
     r6.sum().backward()
-    assert pts2.grad is not None
+    assert pts2.grad is not None and not torch.isnan(pts2.grad).any()
     pts2 = torch.tensor(pts, requires_grad=True)
     assert pts2.grad is None
     dtm = DistanceToMeasure(k, implementation="ckdtree", enable_autodiff=True)
     r7 = dtm.fit_transform(pts2)
     assert r7.detach().numpy() == pytest.approx(r0)
     r7.sum().backward()
-    assert pts2.grad is not None
+    assert pts2.grad is not None and not torch.isnan(pts2.grad).any()
 
 
 def test_dtm_precomputed():
