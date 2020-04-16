@@ -485,7 +485,7 @@ class Simplex_tree {
  public:
   /** \brief Returns the key associated to a simplex.
    *
-   * The filtration must be initialized.
+   * If no key has been assigned, returns `null_key()`.
    * \pre SimplexTreeOptions::store_key
    */
   static Simplex_key key(Simplex_handle sh) {
@@ -495,7 +495,6 @@ class Simplex_tree {
   /** \brief Returns the simplex that has index idx in the filtration.
    *
    * The filtration must be initialized.
-   * \pre SimplexTreeOptions::store_key
    */
   Simplex_handle simplex(Simplex_key idx) const {
     return filtration_vect_[idx];
@@ -531,8 +530,7 @@ class Simplex_tree {
     return Dictionary_it(nullptr);
   }
 
-  /** \brief Returns a key different for all keys associated to the
-   * simplices of the simplicial complex. */
+  /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
   static Simplex_key null_key() {
     return -1;
   }
@@ -878,11 +876,9 @@ class Simplex_tree {
 
  public:
   /** \brief Initializes the filtrations, i.e. sort the
-   * simplices according to their order in the filtration and initializes all Simplex_keys.
+   * simplices according to their order in the filtration.
    *
-   * After calling this method, filtration_simplex_range() becomes valid, and each simplex is
-   * assigned a Simplex_key corresponding to its order in the filtration (from 0 to m-1 for a
-   * simplicial complex with m simplices).
+   * After calling this method, filtration_simplex_range() becomes valid.
    *
    * Will be automatically called when calling filtration_simplex_range()
    * if the filtration has never been initialized yet. */
