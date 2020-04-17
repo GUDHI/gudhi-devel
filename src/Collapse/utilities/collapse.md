@@ -11,7 +11,7 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 
 
 ## point_cloud_edge_collapse_rips_persistence ##
-This program computes the one-skeleton graph defined on a set of input points, using Euclidean distance, and collapse edges.
+This program computes the Rips graph defined on a set of input points, using Euclidean distance, and collapses edges.
 This program finally computes persistent homology with coefficient field *Z/pZ* of the Rips complex built on top of these collapse edges.
 The output diagram contains one bar per line, written with the convention:
 
@@ -59,5 +59,4 @@ Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an
 **Example**
 
 `distance_matrix_edge_collapse_rips_persistence data/distance_matrix/full_square_distance_matrix.csv -r 15 -d 3 -p 3 -m 0`
-
 
