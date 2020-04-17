@@ -197,8 +197,8 @@ The output is:
 
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
+   :filter: docname in docnames
    :style: unsrt

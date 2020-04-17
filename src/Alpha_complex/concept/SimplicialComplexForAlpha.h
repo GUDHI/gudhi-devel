@@ -72,6 +72,24 @@ struct SimplicialComplexForAlpha {
   /** \brief Return type of an insertion of a simplex
    */
   typedef unspecified Insertion_result_type;
+
+  /** \name Map interface
+   * Conceptually a `std::unordered_map<Simplex_handle,std::size_t>`.
+   *  @{ */
+  /** \brief Data stored for each simplex.
+   *
+   * Must be an integer type. */
+  typedef unspecified      Simplex_key;
+  /** \brief Returns a constant dummy number that is either negative,
+   * or at least as large as the number of simplices.  Suggested value: -1.  */
+  Simplex_key              null_key ();
+  /** \brief Returns the number stored for a simplex by `assign_key()`.
+   *
+   * If `assign_key()` has not been called, it must return `null_key()`.  */
+  Simplex_key              key      ( Simplex_handle sh );
+  /** \brief Store a number for a simplex, which can later be retrieved with `key()`.  */
+  void                     assign_key(Simplex_handle sh, Simplex_key n);
+  /** @} */
 };
 
 }  // namespace alpha_complex

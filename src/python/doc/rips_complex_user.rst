@@ -347,3 +347,10 @@ until dimension 1 - one skeleton graph in other words), the output is:
     points in the persistence diagram will be under the diagonal, and
     bottleneck distance and persistence graphical tool will not work properly,
     this is a known issue.
+
+Bibliography
+------------
+
+.. bibliography:: ../../biblio/bibliography.bib
+   :filter: docname in docnames
+   :style: unsrt

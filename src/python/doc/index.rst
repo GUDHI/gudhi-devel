@@ -71,6 +71,7 @@ Wasserstein distance
 
 .. include:: wasserstein_distance_sum.inc
 
+
 Persistence representations
 ===========================
 
@@ -90,5 +91,5 @@ Bibliography
 ************
 
 .. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
+   :filter: docname in docnames
    :style: unsrt
