@@ -75,9 +75,6 @@ int main(int argc, char **argv) {
   std::clog << "Simplicial complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
             << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
-  // Sort the simplices in the order of the filtration
-  simplex.initialize_filtration();
-
   std::clog << "Simplex_tree dim: " << simplex.dimension() << std::endl;
   // Compute the persistence diagram of the complex
   Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Gudhi::persistent_cohomology::Field_Zp> pcoh(

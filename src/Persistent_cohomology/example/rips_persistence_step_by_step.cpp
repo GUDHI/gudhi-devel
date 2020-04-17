@@ -76,9 +76,6 @@ int main(int argc, char * argv[]) {
   std::clog << "The complex contains " << st.num_simplices() << " simplices \n";
   std::clog << "   and has dimension " << st.dimension() << " \n";
 
-  // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
-
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(st);
   // initializes the coefficient field for homology

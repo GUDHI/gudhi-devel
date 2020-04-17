@@ -54,9 +54,6 @@ int main(int argc, char* argv[]) {
   std::clog << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
   std::clog << "   and has dimension " << simplex_tree.dimension() << " \n";
 
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
-
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(simplex_tree);
   // initializes the coefficient field for homology
