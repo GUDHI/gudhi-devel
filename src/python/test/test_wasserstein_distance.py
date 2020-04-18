@@ -73,14 +73,20 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
 
 
 
-def hera_wrap(delta):
+def hera_wrap(**extra):
     def fun(*kargs,**kwargs):
-        return hera(*kargs,**kwargs,delta=delta)
+        return hera(*kargs,**kwargs,**extra)
+    return fun
+
+def pot_wrap(**extra):
+    def fun(*kargs,**kwargs):
+        return pot(*kargs,**kwargs,**extra)
     return fun
 
 def test_wasserstein_distance_pot():
     _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True)
+    _basic_wasserstein(pot_wrap(enable_autodiff=True), 1e-15, test_infinity=False, test_matching=False)
 
 def test_wasserstein_distance_hera():
-    _basic_wasserstein(hera_wrap(1e-12), 1e-12, test_matching=False)
-    _basic_wasserstein(hera_wrap(.1), .1, test_matching=False)
+    _basic_wasserstein(hera_wrap(delta=1e-12), 1e-12, test_matching=False)
+    _basic_wasserstein(hera_wrap(delta=.1), .1, test_matching=False)
