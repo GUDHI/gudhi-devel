@@ -24,6 +24,13 @@ def test_flag_generators():
     assert np.array_equal(g[2], [0, 4])
     assert len(g[3]) == 1
     assert np.array_equal(g[3][0], [[7, 6]])
+    # Compare trivial cases (where the simplex is the generator) with persistence_pairs.
+    # This still makes assumptions on the order of vertices in a simplex and could be more robust.
+    pairs = st.persistence_pairs()
+    assert {tuple(i) for i in g[0]} == {(i[0][0],) + tuple(i[1]) for i in pairs if len(i[0]) == 1 and len(i[1]) != 0}
+    assert {(i[0], i[1]) for i in g[1][0]} == {tuple(i[0]) for i in pairs if len(i[0]) == 2 and len(i[1]) != 0}
+    assert set(g[2]) == {i[0][0] for i in pairs if len(i[0]) == 1 and len(i[1]) == 0}
+    assert {(i[0], i[1]) for i in g[3][0]} == {tuple(i[0]) for i in pairs if len(i[0]) == 2 and len(i[1]) == 0}
 
 
 def test_lower_star_generators():
