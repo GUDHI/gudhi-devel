@@ -11,6 +11,10 @@ import numpy
 
 # TODO: https://github.com/facebookresearch/faiss
 
+__author__ = "Marc Glisse"
+__copyright__ = "Copyright (C) 2020 Inria"
+__license__ = "MIT"
+
 
 class KNearestNeighbors:
     """
@@ -156,7 +160,9 @@ class KNearestNeighbors:
             assert self.metric == "minkowski"
             p = self.params["p"]
             Y = ep.astensor(self.ref_points)
-            neighbor_pts = Y[neighbors,]
+            neighbor_pts = Y[
+                neighbors,
+            ]
             diff = neighbor_pts - X[:, None, :]
             if isinstance(diff, ep.PyTorchTensor):
                 # https://github.com/jonasrauber/eagerpy/issues/6

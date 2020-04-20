@@ -9,6 +9,10 @@
 
 from .knn import KNearestNeighbors
 
+__author__ = "Marc Glisse"
+__copyright__ = "Copyright (C) 2020 Inria"
+__license__ = "MIT"
+
 
 class DistanceToMeasure:
     """
