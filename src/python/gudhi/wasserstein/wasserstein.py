@@ -15,6 +15,8 @@ try:
 except ImportError:
     print("POT (Python Optimal Transport) package is not installed. Try to run $ conda install -c conda-forge pot ; or $ pip install POT")
 
+
+# Currently unused, but Théo says it is likely to be used again.
 def _proj_on_diag(X):
     '''
     :param X: (n x 2) array encoding the points of a persistent diagram.
@@ -24,7 +26,19 @@ def _proj_on_diag(X):
     return np.array([Z , Z]).T
 
 
-def _build_dist_matrix(X, Y, order=2., internal_p=2.):
+def _dist_to_diag(X, internal_p):
+    '''
+    :param X: (n x 2) array encoding the points of a persistent diagram.
+    :param internal_p: Ground metric (i.e. norm L^p).
+    :returns: (n) array encoding the (respective orthogonal) distances of the points to the diagonal
+
+    .. note::
+        Assumes that the points are above the diagonal.
+    '''
+    return (X[:, 1] - X[:, 0]) * 2 ** (1.0 / internal_p - 1)
+
+
+def _build_dist_matrix(X, Y, order, internal_p):
     '''
     :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
     :param Y: (m x 2) numpy.array encoding the second diagram.
@@ -36,16 +50,12 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
                 and its orthogonal projection onto the diagonal.
                 note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
     '''
-    Xdiag = _proj_on_diag(X)
-    Ydiag = _proj_on_diag(Y)
+    Cxd = _dist_to_diag(X, internal_p)**order
+    Cdy = _dist_to_diag(Y, internal_p)**order
     if np.isinf(internal_p):
         C = sc.cdist(X,Y, metric='chebyshev')**order
-        Cxd = np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order
-        Cdy = np.linalg.norm(Y - Ydiag, ord=internal_p, axis=1)**order
     else:
         C = sc.cdist(X,Y, metric='minkowski', p=internal_p)**order
-        Cxd = np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order
-        Cdy = np.linalg.norm(Y - Ydiag, ord=internal_p, axis=1)**order
     Cf = np.hstack((C, Cxd[:,None]))
     Cdy = np.append(Cdy, 0)
 
@@ -61,8 +71,7 @@ def _perstot(X, order, internal_p):
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (Euclidean norm).
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).
     '''
-    Xdiag = _proj_on_diag(X)
-    return (np.sum(np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order))**(1./order)
+    return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
 
 
 def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
