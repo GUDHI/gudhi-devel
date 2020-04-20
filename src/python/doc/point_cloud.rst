@@ -21,10 +21,25 @@ Subsampling
    :special-members:
    :show-inheritance:
 
-TimeDelayEmbedding
-------------------
+Time Delay Embedding
+--------------------
 
 .. autoclass:: gudhi.point_cloud.timedelay.TimeDelayEmbedding
    :members:
    :special-members: __call__
 
+K nearest neighbors
+-------------------
+
+.. automodule:: gudhi.point_cloud.knn
+   :members:
+   :undoc-members:
+   :special-members: __init__
+
+Distance to measure
+-------------------
+
+.. automodule:: gudhi.point_cloud.dtm
+   :members:
+   :undoc-members:
+   :special-members: __init__

@@ -15,6 +15,17 @@ try:
 except ImportError:
     print("POT (Python Optimal Transport) package is not installed. Try to run $ conda install -c conda-forge pot ; or $ pip install POT")
 
+
+# Currently unused, but Théo says it is likely to be used again.
+def _proj_on_diag(X):
+    '''
+    :param X: (n x 2) array encoding the points of a persistent diagram.
+    :returns: (n x 2) array encoding the (respective orthogonal) projections of the points onto the diagonal
+    '''
+    Z = (X[:,0] + X[:,1]) / 2.
+    return np.array([Z , Z]).T
+
+
 def _dist_to_diag(X, internal_p):
     '''
     :param X: (n x 2) array encoding the points of a persistent diagram.
