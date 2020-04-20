@@ -167,7 +167,6 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_a
             dists.append(_perstot_autodiff(Y_orig[diag2], order, internal_p))
         dists = [dist.reshape(1) for dist in dists]
         return ep.concatenate(dists).norms.lp(order).raw
-        # Should just compute the L^order norm manually?
         # We can also concatenate the 3 vectors to compute just one norm.
 
     # Comptuation of the otcost using the ot.emd2 library.
