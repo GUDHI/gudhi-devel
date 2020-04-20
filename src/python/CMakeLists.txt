@@ -401,7 +401,9 @@ if(PYTHONINTERP_FOUND)
 
     # Wasserstein
     if(OT_FOUND AND PYBIND11_FOUND)
-      add_gudhi_py_test(test_wasserstein_distance)
+      if(TORCH_FOUND AND EAGERPY_FOUND)
+        add_gudhi_py_test(test_wasserstein_distance)
+      endif()
       add_gudhi_py_test(test_wasserstein_barycenter)
     endif()
 
