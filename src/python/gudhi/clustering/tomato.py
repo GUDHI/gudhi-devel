@@ -305,7 +305,7 @@ class Tomato:
         if self.__merge_threshold:
             assert not self.__n_clusters
             self.__n_clusters = numpy.count_nonzero(
-                self.diagram_[:, 1] - self.diagram_[:, 0] > self.__merge_threshold
+                self.diagram_[:, 0] - self.diagram_[:, 1] > self.__merge_threshold
             ) + len(self.max_density_per_cc_)
         if self.__n_clusters:
             renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
@@ -364,7 +364,7 @@ class Tomato:
         if merge_threshold == self.__merge_threshold:
             return
         if hasattr(self, "leaf_labels_"):
-            self.n_clusters_ = numpy.count_nonzero(self.diagram_[:, 1] - self.diagram_[:, 0] > merge_threshold) + len(
+            self.n_clusters_ = numpy.count_nonzero(self.diagram_[:, 0] - self.diagram_[:, 1] > merge_threshold) + len(
                 self.max_density_per_cc_
             )
         else:
