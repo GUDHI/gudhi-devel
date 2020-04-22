@@ -45,7 +45,6 @@ jobs:
   python:
     docker:
       - image: gudhi/ci_for_gudhi:latest
-    parallelism: 4
     steps:
       - checkout
       - run:
@@ -62,12 +61,12 @@ jobs:
             cd build;            
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..;
             cd python;
-            python3 setup.py build_ext -j 4 --inplace;
+            python3 setup.py build_ext -j 2 --inplace;
             make sphinx;
             cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
             python3 setup.py clean --all;
-            ctest -j 4 --output-on-failure;
+            ctest -j 2 --output-on-failure;
 
       - store_artifacts:
           path: /tmp/sphinx
