@@ -44,7 +44,8 @@ class KNearestNeighbors:
                 Otherwise, neighbors are returned in an arbitrary order. Defaults to True.
             enable_autodiff (bool): if the input is a torch.tensor, jax.numpy.ndarray or tensorflow.Tensor, this
                 instructs the function to compute distances in a way that works with automatic differentiation.
-                This is experimental and not supported for all metrics. Defaults to False.
+                This is experimental, not supported for all metrics, and requires the package EagerPy.
+                Defaults to False.
             kwargs: additional parameters are forwarded to the backends.
         """
         self.k = k
