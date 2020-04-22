@@ -100,7 +100,8 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_a
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is 2 (Euclidean norm).
     :param enable_autodiff: If X and Y are torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
-        transparent to automatic differentiation. This requires the package EagerPy.
+        transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
+        with `matching=True`.
 
         .. note:: This considers the function defined on the coordinates of the off-diagonal points of X and Y
             and lets the various frameworks compute its gradient. It never pulls new points from the diagonal.
