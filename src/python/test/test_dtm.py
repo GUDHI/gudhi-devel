@@ -16,7 +16,7 @@ import torch
 
 def test_dtm_compare_euclidean():
     pts = numpy.random.rand(1000, 4)
-    k = 3
+    k = 6
     dtm = DistanceToMeasure(k, implementation="ckdtree")
     r0 = dtm.fit_transform(pts)
     dtm = DistanceToMeasure(k, implementation="sklearn")
@@ -27,7 +27,7 @@ def test_dtm_compare_euclidean():
     assert r2 == pytest.approx(r0)
     dtm = DistanceToMeasure(k, implementation="hnsw")
     r3 = dtm.fit_transform(pts)
-    assert r3 == pytest.approx(r0)
+    assert r3 == pytest.approx(r0, rel=0.1)
     from scipy.spatial.distance import cdist
 
     d = cdist(pts, pts)
