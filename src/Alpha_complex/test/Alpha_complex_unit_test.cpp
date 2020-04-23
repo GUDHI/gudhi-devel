@@ -188,9 +188,6 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_from_points) {
   
   // Test after prune_above_filtration
   bool modified = simplex_tree.prune_above_filtration(0.6);
-  if (modified) {
-    simplex_tree.initialize_filtration();
-  }
   BOOST_CHECK(modified);
   
   // Another way to check num_simplices

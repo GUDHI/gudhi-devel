@@ -9,6 +9,7 @@ Below is a list of changes made since GUDHI 3.1.1:
 
 - [Wassertein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html)
      - An another implementation comes from Hera (BSD-3-Clause) which is based on [Geometry Helps to Compare Persistence Diagrams](http://doi.acm.org/10.1145/3064175) by Michael Kerber, Dmitriy Morozov, and Arnur Nigmetov.
+     - `gudhi.wasserstein.wasserstein_distance` has now an option to return the optimal matching that achieves the distance between the two diagrams.
 
 - [Module](link)
      - ...

@@ -90,7 +90,7 @@ cdef class SimplexTree:
             (with more :meth:`assign_filtration` or
             :meth:`make_filtration_non_decreasing` for instance) before calling
             any function that relies on the filtration property, like
-            :meth:`initialize_filtration`.
+            :meth:`persistence`.
         """
         self.get_ptr().assign_simplex_filtration(simplex, filtration)
 
@@ -98,16 +98,7 @@ cdef class SimplexTree:
         """This function initializes and sorts the simplicial complex
         filtration vector.
 
-        .. note::
-
-            This function must be launched before
-            :func:`persistence()<gudhi.SimplexTree.persistence>`,
-            :func:`betti_numbers()<gudhi.SimplexTree.betti_numbers>`,
-            :func:`persistent_betti_numbers()<gudhi.SimplexTree.persistent_betti_numbers>`,
-            or :func:`get_filtration()<gudhi.SimplexTree.get_filtration>`
-            after :func:`inserting<gudhi.SimplexTree.insert>` or
-            :func:`removing<gudhi.SimplexTree.remove_maximal_simplex>`
-            simplices.
+        .. deprecated:: 3.2.0
         """
         self.get_ptr().initialize_filtration()
 
@@ -182,10 +173,7 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        return self.get_ptr().find_simplex(csimplex)
+        return self.get_ptr().find_simplex(simplex)
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
@@ -202,11 +190,7 @@ cdef class SimplexTree:
             otherwise (whatever its original filtration value).
         :rtype:  bool
         """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        return self.get_ptr().insert_simplex_and_subfaces(csimplex,
-                                                        <double>filtration)
+        return self.get_ptr().insert(simplex, <double>filtration)
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
@@ -308,11 +292,6 @@ cdef class SimplexTree:
 
         .. note::
 
-            Be aware that removing is shifting data in a flat_map
-            (:func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>` to be done).
-
-        .. note::
-
             The dimension of the simplicial complex may be lower after calling
             remove_maximal_simplex than it was before. However,
             :func:`upper_bound_dimension`
@@ -331,16 +310,6 @@ cdef class SimplexTree:
         :returns: The filtration modification information.
         :rtype: bool
 
-
-        .. note::
-
-            Some simplex tree functions require the filtration to be valid.
-            prune_above_filtration function is not launching
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            but returns the filtration modification
-            information. If the complex has changed , please call
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            to recompute it.
 
         .. note::
 
@@ -382,17 +351,6 @@ cdef class SimplexTree:
         :returns: True if any filtration value was modified,
             False if the filtration was already non-decreasing.
         :rtype: bool
-
-
-        .. note::
-
-            Some simplex tree functions require the filtration to be valid.
-            make_filtration_non_decreasing function is not launching
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            but returns the filtration modification
-            information. If the complex has changed , please call
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            to recompute it.
         """
         return self.get_ptr().make_filtration_non_decreasing()
 

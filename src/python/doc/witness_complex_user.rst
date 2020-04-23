@@ -128,8 +128,8 @@ Here is an example of constructing a strong witness complex filtration and compu
 * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 Bibliography
-============
+------------
 
 .. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
+   :filter: docname in docnames
    :style: unsrt

@@ -41,16 +41,19 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   Extended_filtration_data efd;
   
-  bool find_simplex(const Simplex& vh) {
-    return (Base::find(vh) != Base::null_simplex());
+  bool find_simplex(const Simplex& simplex) {
+    return (Base::find(simplex) != Base::null_simplex());
   }
 
-  void assign_simplex_filtration(const Simplex& vh, Filtration_value filtration) {
-    Base::assign_filtration(Base::find(vh), filtration);
+  void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration) {
+    Base::assign_filtration(Base::find(simplex), filtration);
+    Base::clear_filtration();
   }
 
   bool insert(const Simplex& simplex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
+    if (result.first != Base::null_simplex())
+      Base::clear_filtration();
     return (result.second);
   }
 
@@ -84,7 +87,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   void remove_maximal_simplex(const Simplex& simplex) {
     Base::remove_maximal_simplex(Base::find(simplex));
-    Base::initialize_filtration();
+    Base::clear_filtration();
   }
 
   Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex) {
@@ -121,7 +124,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   void compute_extended_filtration() {
     this->efd = this->extend_filtration();
-    this->initialize_filtration();
     return;
   }
 
