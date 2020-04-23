@@ -560,7 +560,7 @@ cdef class SimplexTree:
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
-        :param persistence_file: The specific dimension.
+        :param persistence_file: Name of the file.
         :type persistence_file: string.
 
         :note: intervals_in_dim function requires
