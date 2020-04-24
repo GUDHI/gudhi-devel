@@ -5,6 +5,7 @@ import argparse
 import math
 import errno
 import os
+import numpy as np
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
     which is released under MIT.
@@ -56,7 +57,7 @@ with open(args.file, "r") as f:
         message = "Number of simplices=" + repr(rips_stree.num_simplices())
         print(message)
 
-        rips_diag = rips_stree.persistence()
+        rips_stree.compute_persistence()
 
         print("##############################################################")
         print("AlphaComplex creation from points read in a OFF file")
@@ -72,18 +73,13 @@ with open(args.file, "r") as f:
         message = "Number of simplices=" + repr(alpha_stree.num_simplices())
         print(message)
 
-        alpha_diag = alpha_stree.persistence()
+        alpha_stree.compute_persistence()
 
         max_b_distance = 0.0
         for dim in range(args.max_dimension):
             # Alpha persistence values needs to be transform because filtration
             # values are alpha square values
-            funcs = [math.sqrt, math.sqrt]
-            alpha_intervals = []
-            for interval in alpha_stree.persistence_intervals_in_dimension(dim):
-                alpha_intervals.append(
-                    map(lambda func, value: func(value), funcs, interval)
-                )
+            alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
 
             rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
             bottleneck_distance = gudhi.bottleneck_distance(

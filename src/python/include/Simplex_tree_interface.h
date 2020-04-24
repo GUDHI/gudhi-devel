@@ -16,8 +16,6 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
-#include "Persistent_cohomology_interface.h"
-
 #include <iostream>
 #include <vector>
 #include <utility>  // std::pair
@@ -157,10 +155,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       }
     }
     return new_dgm;
-  }
-
-  void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
-    pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
   }
 
   // Iterator over the simplex tree

@@ -570,6 +570,7 @@ class Persistent_cohomology {
 
   void write_output_diagram(std::string diagram_name) {
     std::ofstream diagram_out(diagram_name.c_str());
+    diagram_out.exceptions(diagram_out.failbit);
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
     for (auto pair : persistent_pairs_) {
