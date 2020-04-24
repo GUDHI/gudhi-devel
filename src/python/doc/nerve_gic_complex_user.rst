@@ -313,10 +313,3 @@ the program outputs again SC.dot which gives the following visualization after u
     :alt: Visualization with neato
 
     Visualization with neato
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

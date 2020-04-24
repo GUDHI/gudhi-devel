@@ -164,10 +164,3 @@ The output is:
     [[0.27916667 0.55416667]
      [0.7375     0.7625    ]
      [0.2375     0.2625    ]]
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt
