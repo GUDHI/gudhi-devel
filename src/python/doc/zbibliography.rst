@@ -6,5 +6,5 @@ Bibliography
 ------------
 
 .. bibliography:: ../../biblio/bibliography.bib
-    :style: unsrt
+    :style: plain
 
