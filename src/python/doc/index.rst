@@ -86,10 +86,3 @@ Point cloud utilities
 *********************
 
 .. include:: point_cloud_sum.inc
-
-Bibliography
-************
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

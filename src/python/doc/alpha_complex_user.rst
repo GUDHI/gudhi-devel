@@ -10,7 +10,7 @@ Definition
 .. include:: alpha_complex_sum.inc
 
 `AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
-`Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_ 
+`Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
 :cite:`cgal:hdj-t-19b` from `CGAL <http://www.cgal.org/>`_ (the Computational Geometry Algorithms Library
 :cite:`cgal:eb-19b`).
 
@@ -203,9 +203,3 @@ the program output is:
    [4, 5, 6] -> 22.74
    [3, 6] -> 30.25
 
-CGAL citations
---------------
-
-.. bibliography:: ../../biblio/how_to_cite_cgal.bib
-   :filter: docname in docnames
-   :style: unsrt
