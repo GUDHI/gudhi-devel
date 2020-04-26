@@ -89,7 +89,7 @@ In order to build the alpha complex, first, a Simplex tree is built from the cel
 Filtration value computation algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: bash
+.. code-block:: vim
 
     for i : dimension → 0 do
       for all σ of dimension i
