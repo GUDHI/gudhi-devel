@@ -89,25 +89,28 @@ In order to build the alpha complex, first, a Simplex tree is built from the cel
 Filtration value computation algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  **for** i : dimension :math:`\rightarrow` 0 **do**
-    **for all** :math:`\sigma` of dimension i
-      **if** filtration(:math:`\sigma`) is NaN **then**
-        filtration(:math:`\sigma`) = :math:`\alpha^2(\sigma)`
-      **end if**
+.. code-block:: bash
 
-      *//propagate alpha filtration value*
+    for i : dimension → 0 do
+      for all σ of dimension i
+        if filtration(σ) is NaN then
+          filtration(σ)=α2(σ)
+        end if
+        for all τ face of σ do // propagate alpha filtration value
+          if filtration(τ) is not NaN then
+            filtration(τ) = min( filtration(τ), filtration(σ) )
+          else
+            if τ is not Gabriel for σ then
+              filtration(τ) = filtration(σ)
+            end if
+          end if
+        end for
+      end for
+    end for
+    
+    make_filtration_non_decreasing()
+    prune_above_filtration()
 
-      **for all** :math:`\tau` face of :math:`\sigma`
-        **if** filtration(:math:`\tau`) is not NaN **then**
-          filtration(:math:`\tau`) = filtration(:math:`\sigma`)
-        **end if**
-      **end for**
-    **end for**
-  **end for**
-
-  make_filtration_non_decreasing()
-
-  prune_above_filtration()
 
 Dimension 2
 ^^^^^^^^^^^
