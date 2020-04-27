@@ -94,7 +94,7 @@ Filtration value computation algorithm
     for i : dimension → 0 do
       for all σ of dimension i
         if filtration(σ) is NaN then
-          filtration(σ)=α²(σ)
+          filtration(σ) = α²(σ)
         end if
         for all τ face of σ do // propagate alpha filtration value
           if filtration(τ) is not NaN then
