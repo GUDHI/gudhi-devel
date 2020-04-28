@@ -19,7 +19,7 @@ std::ofstream results_csv("results.csv");
 
 template <typename Kernel>
 void benchmark_points_on_torus_dD(const std::string& msg) {
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"" << msg << "\";" << std::endl;
   results_csv << "\"nb_points\";"
@@ -29,7 +29,7 @@ void benchmark_points_on_torus_dD(const std::string& msg) {
 
   using K = CGAL::Epick_d<CGAL::Dimension_tag<3>>;
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
-    std::cout << "  Alpha complex dD on torus with " << nb_points << " points." << std::endl;
+    std::clog << "  Alpha complex dD on torus with " << nb_points << " points." << std::endl;
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
     std::vector<typename Kernel::Point_d> points;
 
@@ -41,26 +41,26 @@ void benchmark_points_on_torus_dD(const std::string& msg) {
     ac_create_clock.begin();
     Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_points(points);
     ac_create_clock.end();
-    std::cout << ac_create_clock;
+    std::clog << ac_create_clock;
 
     Gudhi::Simplex_tree<> complex;
     Gudhi::Clock st_create_clock("    benchmark_points_on_torus_dD - complex creation");
     st_create_clock.begin();
     alpha_complex_from_points.create_complex(complex);
     st_create_clock.end();
-    std::cout << st_create_clock;
+    std::clog << st_create_clock;
 
     results_csv << nb_points << ";" << complex.num_simplices() << ";" << ac_create_clock.num_seconds() << ";"
                 << st_create_clock.num_seconds() << ";" << std::endl;
 
-    std::cout << "    benchmark_points_on_torus_dD - nb simplices = " << complex.num_simplices() << std::endl;
+    std::clog << "    benchmark_points_on_torus_dD - nb simplices = " << complex.num_simplices() << std::endl;
   }
 }
 
 template <typename Alpha_complex_3d>
 void benchmark_points_on_torus_3D(const std::string& msg) {
   using K = CGAL::Epick_d<CGAL::Dimension_tag<3>>;
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"" << msg << "\";" << std::endl;
   results_csv << "\"nb_points\";"
@@ -69,7 +69,7 @@ void benchmark_points_on_torus_3D(const std::string& msg) {
               << "\"complex_creation_time(sec.)\";" << std::endl;
 
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
-    std::cout << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
+    std::clog << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
     std::vector<typename Alpha_complex_3d::Point_3> points;
 
@@ -81,19 +81,19 @@ void benchmark_points_on_torus_3D(const std::string& msg) {
     ac_create_clock.begin();
     Alpha_complex_3d alpha_complex_from_points(points);
     ac_create_clock.end();
-    std::cout << ac_create_clock;
+    std::clog << ac_create_clock;
 
     Gudhi::Simplex_tree<> complex;
     Gudhi::Clock st_create_clock("    benchmark_points_on_torus_3D - complex creation");
     st_create_clock.begin();
     alpha_complex_from_points.create_complex(complex);
     st_create_clock.end();
-    std::cout << st_create_clock;
+    std::clog << st_create_clock;
 
     results_csv << nb_points << ";" << complex.num_simplices() << ";" << ac_create_clock.num_seconds() << ";"
                 << st_create_clock.num_seconds() << ";" << std::endl;
 
-    std::cout << "    benchmark_points_on_torus_3D - nb simplices = " << complex.num_simplices() << std::endl;
+    std::clog << "    benchmark_points_on_torus_3D - nb simplices = " << complex.num_simplices() << std::endl;
   }
 }
 
@@ -101,7 +101,7 @@ template <typename Weighted_alpha_complex_3d>
 void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
   using K = CGAL::Epick_d<CGAL::Dimension_tag<3>>;
 
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"" << msg << "\";" << std::endl;
   results_csv << "\"nb_points\";"
@@ -112,7 +112,7 @@ void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
   CGAL::Random random(8);
 
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
-    std::cout << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
+    std::clog << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
     std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
 
     using Point = typename Weighted_alpha_complex_3d::Bare_point_3;
@@ -128,25 +128,25 @@ void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
     ac_create_clock.begin();
     Weighted_alpha_complex_3d alpha_complex_from_points(points);
     ac_create_clock.end();
-    std::cout << ac_create_clock;
+    std::clog << ac_create_clock;
 
     Gudhi::Simplex_tree<> complex;
     Gudhi::Clock st_create_clock("    benchmark_weighted_points_on_torus_3D - complex creation");
     st_create_clock.begin();
     alpha_complex_from_points.create_complex(complex);
     st_create_clock.end();
-    std::cout << st_create_clock;
+    std::clog << st_create_clock;
 
     results_csv << nb_points << ";" << complex.num_simplices() << ";" << ac_create_clock.num_seconds() << ";"
                 << st_create_clock.num_seconds() << ";" << std::endl;
 
-    std::cout << "    benchmark_weighted_points_on_torus_3D - nb simplices = " << complex.num_simplices() << std::endl;
+    std::clog << "    benchmark_weighted_points_on_torus_3D - nb simplices = " << complex.num_simplices() << std::endl;
   }
 }
 
 template <typename Periodic_alpha_complex_3d>
 void benchmark_periodic_points(const std::string& msg) {
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"" << msg << "\";" << std::endl;
   results_csv << "\"nb_points\";"
@@ -157,7 +157,7 @@ void benchmark_periodic_points(const std::string& msg) {
   CGAL::Random random(8);
 
   for (double nb_points = 10.; nb_points <= 40.; nb_points += 10.) {
-    std::cout << "  Periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points." << std::endl;
+    std::clog << "  Periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points." << std::endl;
     using Point = typename Periodic_alpha_complex_3d::Point_3;
     std::vector<Point> points;
 
@@ -174,25 +174,25 @@ void benchmark_periodic_points(const std::string& msg) {
     ac_create_clock.begin();
     Periodic_alpha_complex_3d alpha_complex_from_points(points, 0., 0., 0., nb_points, nb_points, nb_points);
     ac_create_clock.end();
-    std::cout << ac_create_clock;
+    std::clog << ac_create_clock;
 
     Gudhi::Simplex_tree<> complex;
     Gudhi::Clock st_create_clock("    benchmark_periodic_points - complex creation");
     st_create_clock.begin();
     alpha_complex_from_points.create_complex(complex);
     st_create_clock.end();
-    std::cout << st_create_clock;
+    std::clog << st_create_clock;
 
     results_csv << nb_points * nb_points * nb_points << ";" << complex.num_simplices() << ";"
                 << ac_create_clock.num_seconds() << ";" << st_create_clock.num_seconds() << ";" << std::endl;
 
-    std::cout << "    benchmark_periodic_points - nb simplices = " << complex.num_simplices() << std::endl;
+    std::clog << "    benchmark_periodic_points - nb simplices = " << complex.num_simplices() << std::endl;
   }
 }
 
 template <typename Weighted_periodic_alpha_complex_3d>
 void benchmark_weighted_periodic_points(const std::string& msg) {
-  std::cout << "+ " << msg << std::endl;
+  std::clog << "+ " << msg << std::endl;
 
   results_csv << "\"" << msg << "\";" << std::endl;
   results_csv << "\"nb_points\";"
@@ -203,7 +203,7 @@ void benchmark_weighted_periodic_points(const std::string& msg) {
   CGAL::Random random(8);
 
   for (double nb_points = 10.; nb_points <= 40.; nb_points += 10.) {
-    std::cout << "  Weighted periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points."
+    std::clog << "  Weighted periodic alpha complex 3d with " << nb_points * nb_points * nb_points << " points."
               << std::endl;
 
     using Point = typename Weighted_periodic_alpha_complex_3d::Bare_point_3;
@@ -224,19 +224,19 @@ void benchmark_weighted_periodic_points(const std::string& msg) {
     ac_create_clock.begin();
     Weighted_periodic_alpha_complex_3d alpha_complex_from_points(points, 0., 0., 0., nb_points, nb_points, nb_points);
     ac_create_clock.end();
-    std::cout << ac_create_clock;
+    std::clog << ac_create_clock;
 
     Gudhi::Simplex_tree<> complex;
     Gudhi::Clock st_create_clock("    benchmark_weighted_periodic_points - complex creation");
     st_create_clock.begin();
     alpha_complex_from_points.create_complex(complex);
     st_create_clock.end();
-    std::cout << st_create_clock;
+    std::clog << st_create_clock;
 
     results_csv << nb_points * nb_points * nb_points << ";" << complex.num_simplices() << ";"
                 << ac_create_clock.num_seconds() << ";" << st_create_clock.num_seconds() << ";" << std::endl;
 
-    std::cout << "    benchmark_weighted_periodic_points - nb simplices = " << complex.num_simplices() << std::endl;
+    std::clog << "    benchmark_weighted_periodic_points - nb simplices = " << complex.num_simplices() << std::endl;
   }
 }
 

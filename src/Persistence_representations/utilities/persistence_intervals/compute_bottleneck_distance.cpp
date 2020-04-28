@@ -18,7 +18,7 @@
 using Persistence_intervals_with_distances = Gudhi::Persistence_representations::Persistence_intervals_with_distances;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes the bottleneck distance of persistence pairs in diagrams provided as "
+  std::clog << "This program computes the bottleneck distance of persistence pairs in diagrams provided as "
             << "an input.\n"
             << "The first parameter is the dimension of persistence to be used to create persistence intervals. "
             << "If your file contains the information about dimension of persistence pairs, please provide here the "
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
             << "The remaining parameters of the program are the names of files with persistence diagrams.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -70,14 +70,14 @@ int main(int argc, char** argv) {
   out.open("distance.itv");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
-      std::cout << distance[i][j] << " ";
+      std::clog << distance[i][j] << " ";
       out << distance[i][j] << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     out << std::endl;
   }
   out.close();
 
-  std::cout << "Distance can be found in 'distance.itv' file\n";
+  std::clog << "Distance can be found in 'distance.itv' file\n";
   return 0;
 }

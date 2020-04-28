@@ -7,11 +7,13 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
+import sys
 import os
 
 import numpy as np
@@ -30,7 +32,8 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
         Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max)
-        vector[pair[int, pair[double, double]]] get_persistence(int homology_coeff_field, double min_persistence)
+        void compute_persistence(int homology_coeff_field, double min_persistence)
+        vector[pair[int, pair[double, double]]] get_persistence()
         vector[vector[int]] cofaces_of_cubical_persistence_pairs()
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
@@ -96,12 +99,12 @@ cdef class PeriodicCubicalComplex:
             if os.path.isfile(perseus_file):
                 self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file.encode('utf-8'))
             else:
-                print("file " + perseus_file + " not found.")
+                print("file " + perseus_file + " not found.", file=sys.stderr)
         else:
             print("CubicalComplex can be constructed from dimensions, "
               "top_dimensional_cells and periodic_dimensions, or from "
               "top_dimensional_cells and periodic_dimensions or from "
-              "a Perseus-style file name.")
+              "a Perseus-style file name.", file=sys.stderr)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -133,8 +136,31 @@ cdef class PeriodicCubicalComplex:
         """
         return self.thisptr.dimension()
 
+    def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
+        """This function computes the persistence of the complex, so it can be
+        accessed through :func:`persistent_betti_numbers`,
+        :func:`persistence_intervals_in_dimension`, etc. This function is
+        equivalent to :func:`persistence` when you do not want the list
+        :func:`persistence` returns.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: Nothing.
+        """
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        assert self.__is_defined()
+        self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
+        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+
     def persistence(self, homology_coeff_field=11, min_persistence=0):
-        """This function returns the persistence of the complex.
+        """This function computes and returns the persistence of the complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number
@@ -147,14 +173,8 @@ cdef class PeriodicCubicalComplex:
         :returns: list of pairs(dimension, pair(birth, death)) -- the
             persistence of the complex.
         """
-        if self.pcohptr != NULL:
-            del self.pcohptr
-        if self.thisptr != NULL:
-            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
-        cdef vector[pair[int, pair[double, double]]] persistence_result
-        if self.pcohptr != NULL:
-            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
-        return persistence_result
+        self.compute_persistence(homology_coeff_field, min_persistence)
+        return self.pcohptr.get_persistence()
 
     def cofaces_of_persistence_pairs(self):
         """A persistence interval is described by a pair of cells, one that creates the 
@@ -190,16 +210,14 @@ cdef class PeriodicCubicalComplex:
 
         :returns: list of int -- The Betti numbers ([B0, B1, ..., Bn]).
 
-        :note: betti_numbers function requires persistence function to be
+        :note: betti_numbers function requires :func:`compute_persistence` function to be
             launched first.
 
-        :note: betti_numbers function always returns [1, 0, 0, ...] as infinity
+        :note: This function always returns the Betti numbers of a torus as infinity
             filtration cubes are not removed from the complex.
         """
-        cdef vector[int] bn_result
-        if self.pcohptr != NULL:
-            bn_result = self.pcohptr.betti_numbers()
-        return bn_result
+        assert self.pcohptr != NULL, "compute_persistence() must be called before betti_numbers()"
+        return self.pcohptr.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the complex.
@@ -214,13 +232,11 @@ cdef class PeriodicCubicalComplex:
         :returns: list of int -- The persistent Betti numbers ([B0, B1, ...,
             Bn]).
 
-        :note: persistent_betti_numbers function requires persistence
+        :note: persistent_betti_numbers function requires :func:`compute_persistence`
             function to be launched first.
         """
-        cdef vector[int] pbn_result
-        if self.pcohptr != NULL:
-            pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
-        return pbn_result
+        assert self.pcohptr != NULL, "compute_persistence() must be called before persistent_betti_numbers()"
+        return self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the complex in a
@@ -231,13 +247,8 @@ cdef class PeriodicCubicalComplex:
         :returns: The persistence intervals.
         :rtype:  numpy array of dimension 2
 
-        :note: intervals_in_dim function requires persistence function to be
+        :note: intervals_in_dim function requires :func:`compute_persistence` function to be
             launched first.
         """
-        cdef vector[pair[double,double]] intervals_result
-        if self.pcohptr != NULL:
-            intervals_result = self.pcohptr.intervals_in_dimension(dimension)
-        else:
-            print("intervals_in_dim function requires persistence function"
-                  " to be launched first.")
-        return np.array(intervals_result)
+        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        return np.array(self.pcohptr.intervals_in_dimension(dimension))

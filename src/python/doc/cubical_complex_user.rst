@@ -8,7 +8,7 @@ Definition
 ----------
 
 =====================================  =====================================  =====================================
-:Author: Pawel Dlotko                  :Introduced in: GUDHI PYTHON 2.0.0     :Copyright: GPL v3
+:Author: Pawel Dlotko                  :Since: GUDHI PYTHON 2.0.0             :License: GPL v3
 =====================================  =====================================  =====================================
 
 +---------------------------------------------+----------------------------------------------------------------------+
@@ -158,10 +158,3 @@ Examples.
 ---------
 
 End user programs are available in python/example/ folder.
-
-Bibliography
-============
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
-   :style: unsrt

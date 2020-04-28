@@ -30,16 +30,16 @@ void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
   // Required before browsing through filtration values
   st.initialize_filtration();
 
-  std::cout << "********************************************************************\n";
-  std::cout << "* " << msg << "\n";
-  std::cout << "* The complex contains " << st.num_simplices() << " simplices";
-  std::cout << "   - dimension " << st.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* " << msg << "\n";
+  std::clog << "* The complex contains " << st.num_simplices() << " simplices";
+  std::clog << "   - dimension " << st.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   "
+    std::clog << "   "
               << "[" << st.filtration(f_simplex) << "] ";
-    for (auto vertex : st.simplex_vertex_range(f_simplex)) std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
 }
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
   print_simplex_filtration(st, "Default Simplex_tree is initialized");
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF COPY CONSTRUCTOR" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF COPY CONSTRUCTOR" << std::endl;
 
   Simplex_tree st1(st);
   Simplex_tree st2(st);
@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st2);
   BOOST_CHECK(st1 == st);
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF COPY ASSIGNMENT" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF COPY ASSIGNMENT" << std::endl;
   Simplex_tree st3;
   // To check there is no memory leak
   st3.insert_simplex_and_subfaces({9, 10, 11}, 200.0);
@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
   BOOST_CHECK(st3 == st);
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF MOVE CONSTRUCTOR" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF MOVE CONSTRUCTOR" << std::endl;
   Simplex_tree st5(std::move(st1));
   print_simplex_filtration(st5, "First move constructor from the default Simplex_tree");
   print_simplex_filtration(st1, "First moved Simplex_tree shall be empty");
@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(empty_st == st2);
   BOOST_CHECK(st1 == empty_st);
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF MOVE ASSIGNMENT" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF MOVE ASSIGNMENT" << std::endl;
 
   Simplex_tree st7;
   // To check there is no memory leak

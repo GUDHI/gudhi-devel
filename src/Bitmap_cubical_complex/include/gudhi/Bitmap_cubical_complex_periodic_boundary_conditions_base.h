@@ -128,7 +128,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
       }
       if (coface_counter[i] != face_counter[i]) {
         if (number_of_position_in_which_counters_do_not_agree != -1) {
-          std::cout << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
+          std::cerr << "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.\n";
           throw std::logic_error(
               "Cells given to compute_incidence_between_cells procedure do not form a pair of coface-face.");
         }
@@ -237,7 +237,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     if (inFiltration.eof()) break;
 
     if (dbg) {
-      std::cerr << "Cell of an index : " << it.compute_index_in_bitmap()
+      std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
                 << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
                 << " get the value : " << filtrationLevel << std::endl;
     }
@@ -278,7 +278,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
     std::size_t cell) const {
   bool dbg = false;
   if (dbg) {
-    std::cerr << "Computations of boundary of a cell : " << cell << std::endl;
+    std::clog << "Computations of boundary of a cell : " << cell << std::endl;
   }
 
   std::vector<std::size_t> boundary_elements;
@@ -292,7 +292,6 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
     if (position % 2 == 1) {
       // if there are no periodic boundary conditions in this direction, we do not have to do anything.
       if (!directions_in_which_periodic_b_cond_are_to_be_imposed[i - 1]) {
-        // std::cerr << "A\n";
         if (sum_of_dimensions % 2) {
           boundary_elements.push_back(cell - this->multipliers[i - 1]);
           boundary_elements.push_back(cell + this->multipliers[i - 1]);
@@ -301,12 +300,11 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
           boundary_elements.push_back(cell - this->multipliers[i - 1]);
         }
         if (dbg) {
-          std::cerr << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+          std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
         }
       } else {
         // in this direction we have to do boundary conditions. Therefore, we need to check if we are not at the end.
         if (position != 2 * this->sizes[i - 1] - 1) {
-          // std::cerr << "B\n";
           if (sum_of_dimensions % 2) {
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
             boundary_elements.push_back(cell + this->multipliers[i - 1]);
@@ -315,10 +313,9 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
           if (dbg) {
-            std::cerr << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+            std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
           }
         } else {
-          // std::cerr << "C\n";
           if (sum_of_dimensions % 2) {
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
             boundary_elements.push_back(cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1]);
@@ -327,7 +324,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
           if (dbg) {
-            std::cerr << cell - this->multipliers[i - 1] << " "
+            std::clog << cell - this->multipliers[i - 1] << " "
                       << cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1] << " ";
           }
         }

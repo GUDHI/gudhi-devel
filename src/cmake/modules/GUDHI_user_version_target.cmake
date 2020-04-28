@@ -26,8 +26,12 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 # Generate bib files for Doxygen - cf. root CMakeLists.txt for explanation
 string(TIMESTAMP GUDHI_VERSION_YEAR "%Y")
 configure_file(${CMAKE_SOURCE_DIR}/biblio/how_to_cite_gudhi.bib.in "${CMAKE_CURRENT_BINARY_DIR}/biblio/how_to_cite_gudhi.bib" @ONLY)
-file(COPY "${CMAKE_SOURCE_DIR}/biblio/how_to_cite_cgal.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
 file(COPY "${CMAKE_SOURCE_DIR}/biblio/bibliography.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
+
+# append cgal citation inside bibliography - sphinx cannot deal with more than one bib file
+file(READ "${CMAKE_SOURCE_DIR}/biblio/how_to_cite_cgal.bib" CGAL_CITATION_CONTENT)
+file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/biblio/bibliography.bib" "${CGAL_CITATION_CONTENT}")
+
 # Copy biblio directory for user version
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_CURRENT_BINARY_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)

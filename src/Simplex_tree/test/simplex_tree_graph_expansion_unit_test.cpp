@@ -55,34 +55,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_with_blockers_3, typeST, li
 
   simplex_tree.expansion_with_blockers(3, [&](Simplex_handle sh){
       bool result = false;
-      std::cout << "Blocker on [";
+      std::clog << "Blocker on [";
       // User can loop on the vertices from the given simplex_handle i.e.
       for (auto vertex : simplex_tree.simplex_vertex_range(sh)) {
         // We block the expansion, if the vertex '6' is in the given list of vertices
         if (vertex == 6)
           result = true;
-        std::cout << vertex << ", ";
+        std::clog << vertex << ", ";
       }
-      std::cout << "] ( " << simplex_tree.filtration(sh);
+      std::clog << "] ( " << simplex_tree.filtration(sh);
       // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
       simplex_tree.assign_filtration(sh, simplex_tree.filtration(sh) + 1.);
 
-      std::cout << " + 1. ) = " << result << std::endl;
+      std::clog << " + 1. ) = " << result << std::endl;
 
       return result;
     });
 
-  std::cout << "********************************************************************\n";
-  std::cout << "simplex_tree_expansion_with_blockers_3\n";
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
-  std::cout << " - dimension " << simplex_tree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "simplex_tree_expansion_with_blockers_3\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
+  std::clog << " - dimension " << simplex_tree.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex))
-      std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+      std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(simplex_tree.num_simplices() == 23);
@@ -117,34 +117,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_with_blockers_2, typeST, li
 
   simplex_tree.expansion_with_blockers(2, [&](Simplex_handle sh){
       bool result = false;
-      std::cout << "Blocker on [";
+      std::clog << "Blocker on [";
       // User can loop on the vertices from the given simplex_handle i.e.
       for (auto vertex : simplex_tree.simplex_vertex_range(sh)) {
         // We block the expansion, if the vertex '6' is in the given list of vertices
         if (vertex == 6)
           result = true;
-        std::cout << vertex << ", ";
+        std::clog << vertex << ", ";
       }
-      std::cout << "] ( " << simplex_tree.filtration(sh);
+      std::clog << "] ( " << simplex_tree.filtration(sh);
       // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
       simplex_tree.assign_filtration(sh, simplex_tree.filtration(sh) + 1.);
 
-      std::cout << " + 1. ) = " << result << std::endl;
+      std::clog << " + 1. ) = " << result << std::endl;
 
       return result;
     });
 
-  std::cout << "********************************************************************\n";
-  std::cout << "simplex_tree_expansion_with_blockers_2\n";
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
-  std::cout << " - dimension " << simplex_tree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "simplex_tree_expansion_with_blockers_2\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
+  std::clog << " - dimension " << simplex_tree.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex))
-      std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+      std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(simplex_tree.num_simplices() == 22);
@@ -176,17 +176,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion, typeST, list_of_tested_var
   simplex_tree.insert_simplex({6}, 10.);
 
   simplex_tree.expansion(3);
-  std::cout << "********************************************************************\n";
-  std::cout << "simplex_tree_expansion_3\n";
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
-  std::cout << " - dimension " << simplex_tree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "simplex_tree_expansion_3\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
+  std::clog << " - dimension " << simplex_tree.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex))
-      std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+      std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(simplex_tree.num_simplices() == 24);
@@ -220,17 +220,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_2, typeST, list_of_tested_v
 
   simplex_tree.expansion(2);
 
-  std::cout << "********************************************************************\n";
-  std::cout << "simplex_tree_expansion_2\n";
-  std::cout << "********************************************************************\n";
-  std::cout << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
-  std::cout << " - dimension " << simplex_tree.dimension() << "\n";
-  std::cout << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "simplex_tree_expansion_2\n";
+  std::clog << "********************************************************************\n";
+  std::clog << "* The complex contains " << simplex_tree.num_simplices() << " simplices";
+  std::clog << " - dimension " << simplex_tree.dimension() << "\n";
+  std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : simplex_tree.filtration_simplex_range()) {
-    std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
     for (auto vertex : simplex_tree.simplex_vertex_range(f_simplex))
-      std::cout << "(" << vertex << ")";
-    std::cout << std::endl;
+      std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(simplex_tree.num_simplices() == 23);

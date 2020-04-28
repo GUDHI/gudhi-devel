@@ -173,9 +173,9 @@ class Hasse_complex {
   }
 
   void display_simplex(Simplex_handle sh) {
-    std::cout << dimension(sh) << "  ";
-    for (auto sh_b : boundary_simplex_range(sh)) std::cout << sh_b << " ";
-    std::cout << "  " << filtration(sh) << "         key=" << key(sh);
+    std::clog << dimension(sh) << "  ";
+    for (auto sh_b : boundary_simplex_range(sh)) std::clog << sh_b << " ";
+    std::clog << "  " << filtration(sh) << "         key=" << key(sh);
   }
 
   void initialize_filtration() {

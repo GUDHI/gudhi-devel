@@ -23,6 +23,7 @@ template<class FilteredComplex>
 class Persistent_cohomology_interface : public
 persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp> {
  private:
+   typedef persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp> Base;
   /*
    * Compare two intervals by dimension, then by length.
    */
@@ -42,26 +43,20 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   };
 
  public:
-  Persistent_cohomology_interface(FilteredComplex* stptr)
-      : persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomology::Field_Zp>(*stptr),
-      stptr_(stptr) { }
-
-  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max)
-      : persistent_cohomology::Persistent_cohomology<FilteredComplex,
-          persistent_cohomology::Field_Zp>(*stptr, persistence_dim_max),
+  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max=false)
+      : Base(*stptr, persistence_dim_max),
         stptr_(stptr) { }
 
-  std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field,
-                                                                         double min_persistence) {
-    persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::init_coefficients(homology_coeff_field);
-    persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::compute_persistent_cohomology(min_persistence);
+  // TODO: move to the constructors?
+  void compute_persistence(int homology_coeff_field, double min_persistence) {
+    Base::init_coefficients(homology_coeff_field);
+    Base::compute_persistent_cohomology(min_persistence);
+  }
 
+  std::vector<std::pair<int, std::pair<double, double>>> get_persistence() {
     // Custom sort and output persistence
     cmp_intervals_by_dim_then_length cmp(stptr_);
-    auto persistent_pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::get_persistent_pairs();
+    auto persistent_pairs = Base::get_persistent_pairs();
     std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
     std::vector<std::pair<int, std::pair<double, double>>> persistence;
     for (auto pair : persistent_pairs) {
@@ -110,8 +105,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   }
 
   std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs() {
-    auto pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
-      persistent_cohomology::Field_Zp>::get_persistent_pairs();
+    auto pairs = Base::get_persistent_pairs();
 
     std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs;
     persistence_pairs.reserve(pairs.size());

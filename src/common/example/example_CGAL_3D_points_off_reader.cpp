@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   int n {};
   for (auto point : point_cloud) {
     ++n;
-    std::cout << "Point[" << n << "] = (" << point[0] << ", " << point[1] << ", " << point[2] << ")\n";
+    std::clog << "Point[" << n << "] = (" << point[0] << ", " << point[1] << ", " << point[2] << ")\n";
   }
   return 0;
 }

@@ -73,11 +73,8 @@ int main(int argc, char * argv[]) {
   // expand the graph until dimension dim_max
   st.expansion(dim_max);
 
-  std::cout << "The complex contains " << st.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << st.dimension() << " \n";
-
-  // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
+  std::clog << "The complex contains " << st.num_simplices() << " simplices \n";
+  std::clog << "   and has dimension " << st.dimension() << " \n";
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(st);
@@ -115,7 +112,7 @@ void program_options(int argc, char * argv[]
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::cout")
+       "Name of file in which the persistence diagram is written. Default print in std::clog")
       ("max-edge-length,r",
        po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")
@@ -138,17 +135,17 @@ void program_options(int argc, char * argv[]
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Rips complex defined on a set of input points.\n \n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a Rips complex defined on a set of input points.\n \n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

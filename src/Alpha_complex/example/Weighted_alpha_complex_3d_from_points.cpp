@@ -34,18 +34,18 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::cout << "Alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+    std::clog << "Alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
               << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
-    std::cout << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+    std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
-      std::cout << "   ( ";
+      std::clog << "   ( ";
       for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
-        std::cout << vertex << " ";
+        std::clog << vertex << " ";
       }
-      std::cout << ") -> "
+      std::clog << ") -> "
                 << "[" << simplex.filtration(f_simplex) << "] ";
-      std::cout << std::endl;
+      std::clog << std::endl;
     }
   }
   return 0;

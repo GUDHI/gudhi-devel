@@ -53,7 +53,6 @@ class Rips_complex_interface {
       rips_complex_->create_complex(*simplex_tree, dim_max);
     else
       sparse_rips_complex_->create_complex(*simplex_tree, dim_max);
-    simplex_tree->initialize_filtration();
   }
 
  private:

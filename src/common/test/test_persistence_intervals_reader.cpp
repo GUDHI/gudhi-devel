@@ -35,18 +35,18 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_without_dimension )
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
       Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_without_dimension.pers");
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - read\n";
   for (auto map_iter : persistence_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
   BOOST_CHECK(persistence_intervals_by_dimension == expected_intervals_by_dimension);
@@ -60,13 +60,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_without_dimension )
   Persistence_intervals persistence_intervals_in_dimension =
       Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_without_dimension.pers");
 
-  std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - read\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -103,18 +103,18 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
       Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_dimension.pers");
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - read\n";
   for (auto map_iter : persistence_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
   BOOST_CHECK(persistence_intervals_by_dimension == expected_intervals_by_dimension);
@@ -128,13 +128,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   Persistence_intervals persistence_intervals_in_dimension =
       Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers");
 
-  std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -143,13 +143,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 0);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 0 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 0 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 0 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 0 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -159,13 +159,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 1);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 1 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 1 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 1 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 1 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -173,13 +173,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 2);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 2 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 2 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 2 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 2 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -188,13 +188,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_dimension )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_dimension.pers", 3);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 3 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 3 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 3 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 3 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -212,18 +212,18 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   Persistence_intervals_by_dimension persistence_intervals_by_dimension =
       Gudhi::read_persistence_intervals_grouped_by_dimension("persistence_intervals_with_field.pers");
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - expected\n";
   for (auto map_iter : expected_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
-  std::cout << "\nread_persistence_intervals_grouped_by_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_grouped_by_dimension - read\n";
   for (auto map_iter : persistence_intervals_by_dimension) {
-    std::cout << "key=" << map_iter.first;
+    std::clog << "key=" << map_iter.first;
     for (auto vec_iter : map_iter.second)
-      std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+      std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
   }
 
   BOOST_CHECK(persistence_intervals_by_dimension == expected_intervals_by_dimension);
@@ -237,13 +237,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   Persistence_intervals persistence_intervals_in_dimension =
       Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers");
 
-  std::cout << "\nread_persistence_intervals_in_dimension - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -252,13 +252,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 0);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 0 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 0 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 0 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 0 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -268,13 +268,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 1);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 1 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 1 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 1 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 1 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -282,13 +282,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 2);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 2 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 2 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 2 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 2 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
@@ -297,13 +297,13 @@ BOOST_AUTO_TEST_CASE( persistence_intervals_with_field )
   persistence_intervals_in_dimension =
         Gudhi::read_persistence_intervals_in_dimension("persistence_intervals_with_field.pers", 3);
 
-  std::cout << "\nread_persistence_intervals_in_dimension 3 - expected\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 3 - expected\n";
   for (auto vec_iter : expected_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
-  std::cout << "\nread_persistence_intervals_in_dimension 3 - read\n";
+  std::clog << "\nread_persistence_intervals_in_dimension 3 - read\n";
   for (auto vec_iter : persistence_intervals_in_dimension)
-    std::cout << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
+    std::clog << " [" << vec_iter.first << " ," << vec_iter.second << "] ";
 
   BOOST_CHECK(persistence_intervals_in_dimension == expected_intervals_in_dimension);
 
