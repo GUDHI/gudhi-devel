@@ -327,9 +327,20 @@ class Tomato:
         """
         import matplotlib.pyplot as plt
 
-        plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "ro")
-        l = self.diagram_[:, 1].min()
-        r = max(self.diagram_[:, 0].max(), self.max_density_per_cc_.max())
+        if self.diagram_.size > 0:
+            plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "ro")
+            l = self.diagram_[:, 1].min()
+            r = max(self.diagram_[:, 0].max(), self.max_density_per_cc_.max())
+        else:
+            l = self.max_density_per_cc_.min()
+            r = self.max_density_per_cc_.max()
+            if l == r:
+                if l > 0:
+                    l, r = .9 * l, 1.1 * r
+                elif l < 0:
+                    l, r = 1.1 * l, .9 * r
+                else:
+                    l, r = -1., 1.
         plt.plot([l, r], [l, r])
         plt.plot(
             self.max_density_per_cc_, numpy.full(self.max_density_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
