@@ -98,6 +98,8 @@ class Tomato:
                 raise ValueError("If density_type is 'manual', you must provide weights to fit()")
 
         input_type = self.input_type_
+        if input_type == "points":
+            self.points_ = X
         if input_type == "points" and self.metric_:
             from sklearn.metrics import pairwise_distances
 
@@ -118,7 +120,6 @@ class Tomato:
             assert density_type == "manual"
 
         if input_type == "points" and self.graph_type_ == "knn" and self.density_type_ in {"DTM", "logDTM"}:
-            self.points_ = X
             q = self.params_.get("p_DTM", len(X[0]))
             p = self.params_.get("p", 2)
             k = self.params_.get("k", 10)
@@ -189,7 +190,6 @@ class Tomato:
                 weights = -numpy.log(weights)
 
         if input_type == "points" and self.graph_type_ == "knn" and self.density_type_ not in {"DTM", "logDTM"}:
-            self.points_ = X
             p = self.params_.get("p", 2)
             k = self.params_.get("k", 10)
             if self.params_.get("gpu"):
@@ -218,7 +218,6 @@ class Tomato:
                 _, self.neighbors_ = kdtree.query(self.points_, k=k, p=p, **qargs)
 
         if input_type == "points" and self.graph_type_ != "knn" and self.density_type_ in {"DTM", "logDTM"}:
-            self.points_ = X
             q = self.params_.get("p_DTM", len(X[0]))
             p = self.params_.get("p", 2)
             k = self.params_.get("k", 10)
@@ -275,7 +274,10 @@ class Tomato:
                 k = self.params_["k"]
             weights = (numpy.partition(X, k - 1)[:, 0:k] ** q).sum(-1)
             if self.density_type_ == "DTM":
-                dim = len(self.points_[0])
+                try:
+                    dim = len(self.points_[0])
+                except AttributeError:
+                    dim = 2
                 weights = weights ** (-dim / q)
             else:
                 weights = -numpy.log(weights)
