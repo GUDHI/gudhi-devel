@@ -242,7 +242,7 @@
  </tr>
 </table>
 
-#### Strong collapse
+#### Edge collapse
 
 <table>
   <tr>

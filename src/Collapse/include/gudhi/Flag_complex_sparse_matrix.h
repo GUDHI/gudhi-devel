@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Siddharth Pritam
  *
- *    Copyright (C) 2018 Inria
+ *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
  *      - 2020/03 Vincent Rouvreau: integration to the gudhi library
@@ -44,8 +44,8 @@ namespace collapse {
  * \ingroup collapse
  *
  * \details
- * A class to store the vertices v/s MaxSimplices Sparse Matrix and to perform collapse operations using the N^2()
- * Algorithm.
+ * This class stores a <a target="_blank" href="https://en.wikipedia.org/wiki/Clique_complex">Flag complex</a>
+ * in an <a target="_blank" href="https://eigen.tuxfamily.org/dox/group__TutorialSparse.html">Eigen sparse matrix</a>.
  *
  * \tparam Vertex type must be a signed integer type. It admits a total order <.
  * \tparam Filtration type for the value of the filtration function. Must be comparable with <.
@@ -73,7 +73,7 @@ class Flag_complex_sparse_matrix {
   using Row_indices_vector = std::vector<Row_index>;
 
  public:
-  /** \brief A Filtered_edge is a std::pair<std::pair<`Vertex_handle`, `Vertex_handle`>, `Filtration_value`>. */
+  /** \brief Filtered_edge is a type to store an edge with its filtration value. */
   using Filtered_edge = std::pair<Edge, Filtration_value>;
   /** \brief Proximity_graph is a type that can be used to construct easily a Flag_complex_sparse_matrix. */
   using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_sparse_matrix>;
@@ -358,7 +358,7 @@ class Flag_complex_sparse_matrix {
     }
   }
 
-  /** \brief Performs edge collapse in a decreasing sequence of the filtration value.
+  /** \brief Performs edge collapse in a increasing sequence of the filtration value.
    *
    * \tparam FilteredEdgeInsertion is an output iterator that furnishes
    * `({Vertex_handle u, Vertex_handle v}, Filtration_value f)` that will fill the user defined data structure.

@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Siddharth Pritam
  *
- *    Copyright (C) 2019 Inria
+ *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification

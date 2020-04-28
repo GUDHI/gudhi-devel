@@ -19,6 +19,9 @@
 #include <tuple>  // for std::tie
 
 namespace Gudhi {
+/** @file
+ * @brief Graph simplicial complex methods
+ */
 
 /* Edge tag for Boost PropertyGraph. */
 struct edge_filtration_t {
@@ -43,8 +46,13 @@ using Proximity_graph = typename boost::adjacency_list < boost::vecS, boost::vec
 
 /** \brief Computes the proximity graph of the points.
  *
+ * \fn Gudhi::Proximity_graph<SimplicialComplexForProximityGraph> compute_proximity_graph(const ForwardPointRange&
+ * points, typename SimplicialComplexForProximityGraph::Filtration_value threshold, Distance distance)
+ *
  * If points contains n elements, the proximity graph is the graph with n vertices, and an edge [u,v] iff the
  * distance function between points u and v is smaller than threshold.
+ *
+ * \tparam SimplicialComplexForProximityGraph furnishes `Filtration_value` and `Vertex_handle` type definitions.
  *
  * \tparam ForwardPointRange furnishes `.begin()` and `.end()` methods.
  *

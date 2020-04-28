@@ -79,9 +79,7 @@ int main(int argc, char* argv[]) {
 
   program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
 
-  Distance_matrix distances;
-
-  distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
+  Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
   std::cout << "Read the distance matrix succesfully, of size: " << distances.size() << std::endl;
 
   Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(boost::irange((size_t)0,
