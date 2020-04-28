@@ -151,4 +151,9 @@ def test_connected_sublevel_sets():
 def test_cubical_generators():
     cub = CubicalComplex(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]])
     cub.persistence()
-    assert np.array_equal(cub.cofaces_of_persistence_pairs(), np.array([[1, 7, 4], [0, 8, -1]]))
+    g = cub.cofaces_of_persistence_pairs()
+    assert len(g[0]) == 2
+    assert len(g[1]) == 1
+    assert np.array_equal(g[0][0], np.empty(shape=[0,2]))
+    assert np.array_equal(g[0][1], np.array([[7, 4]]))
+    assert np.array_equal(g[1][0], np.array([8]))

@@ -110,8 +110,9 @@ class Bitmap_cubical_complex_base {
   virtual inline std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
 
   /**
-   * This function computes the index of one of the top-dimensional cubes (chosen arbitrarily) associated
-   * to a given simplex handle. Note that the input parameter is not necessarily a cube, it might also
+   * This function finds a top-dimensional cell that is incident to the input cell and has 
+   * the same filtration value. In case several cells are suitable, an arbitrary one is 
+   * returned. Note that the input parameter is not necessarily a cube, it might also
    * be an edge or vertex of a cube. On the other hand, the output is always indicating the position of
    * a cube in the data structure. 
    **/

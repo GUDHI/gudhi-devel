@@ -16,6 +16,7 @@
 #include <vector>
 #include <utility>  // for std::pair
 #include <algorithm>  // for sort
+#include <unordered_map>
 
 namespace Gudhi {
 
@@ -80,8 +81,9 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     }
     // Sort these simplex handles and compute the ordering function
     // This function allows to go directly from the simplex handle to the position of the corresponding top-dimensional cell in the input data 
-    std::map<int, int> order; std::sort(max_splx.begin(), max_splx.end()); 
-    for (unsigned int i = 0; i < max_splx.size(); i++)  order.insert(std::make_pair(max_splx[i], i));
+    std::unordered_map<int, int> order;  
+    //std::sort(max_splx.begin(), max_splx.end()); 
+    for (unsigned int i = 0; i < max_splx.size(); i++)  order.emplace(max_splx[i], i);
 
     std::vector<std::vector<int>> persistence_pairs;
     for (auto pair : pairs) {
