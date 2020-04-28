@@ -120,7 +120,6 @@ def test_simple_pick_n_random_points():
     # Go furter than point set on purpose
     for iter in range(1, 10):
         sub_set = gudhi.pick_n_random_points(points=point_set, nb_points=iter)
-        print(5)
         for sub in sub_set:
             found = False
             for point in point_set:

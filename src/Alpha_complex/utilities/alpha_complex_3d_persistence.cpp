@@ -222,10 +222,7 @@ int main(int argc, char **argv) {
       break;
   }
 
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
-
-  std::cout << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
+  std::clog << "Simplex_tree dim: " << simplex_tree.dimension() << std::endl;
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(simplex_tree, true);
   // initializes the coefficient field for homology
@@ -237,7 +234,7 @@ int main(int argc, char **argv) {
   if (output_file_diag.empty()) {
     pcoh.output_diagram();
   } else {
-    std::cout << "Result in file: " << output_file_diag << std::endl;
+    std::clog << "Result in file: " << output_file_diag << std::endl;
     std::ofstream out(output_file_diag);
     pcoh.output_diagram(out);
     out.close();
@@ -266,7 +263,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
       "cuboid-file,c", po::value<std::string>(&cuboid_file),
       "Name of file describing the periodic domain. Format is:\n  min_hx min_hy min_hz\n  max_hx max_hy max_hz")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "Name of file in which the persistence diagram is written. Default print in std::clog")(
       "max-alpha-square-value,r",
       po::value<Filtration_value>(&alpha_square_max_value)
           ->default_value(std::numeric_limits<Filtration_value>::infinity()),
@@ -288,18 +285,18 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file") || !vm.count("weight-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a 3D Alpha complex defined on a set of input points.\n";
-    std::cout << "3D Alpha complex can be safe (by default) exact or fast, weighted and/or periodic\n\n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients.\n\n";
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a 3D Alpha complex defined on a set of input points.\n";
+    std::clog << "3D Alpha complex can be safe (by default) exact or fast, weighted and/or periodic\n\n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients.\n\n";
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file weight-file\n\n";
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file weight-file\n\n";
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

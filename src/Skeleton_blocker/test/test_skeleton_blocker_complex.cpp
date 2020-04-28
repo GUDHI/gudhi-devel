@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE(test_skeleton_num_simplices) {
 BOOST_AUTO_TEST_CASE(test_skeleton_iterator_vertices1) {
   int n = 10;
   Complex complex(10);
-  std::cout << "complex.num_vertices():" << complex.num_vertices() << std::endl;
+  std::clog << "complex.num_vertices():" << complex.num_vertices() << std::endl;
   int num_vertex_seen = 0;
   for (auto vi : complex.vertex_range()) {
-    std::cout << "vertex:" << vi << std::endl;
+    std::clog << "vertex:" << vi << std::endl;
     ++num_vertex_seen;
   }
   BOOST_CHECK(num_vertex_seen == n);
@@ -104,14 +104,14 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_vertices2) {
   int n = 10;
   Complex complex;
   build_complete(10, complex);
-  std::cout << "complex.num_vertices():" << complex.num_vertices() << std::endl;
-  std::cout << "complex.num_edges():" << complex.num_edges() << std::endl;
+  std::clog << "complex.num_vertices():" << complex.num_vertices() << std::endl;
+  std::clog << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_vertex_seen = 0;
   for (auto vi : complex.vertex_range(Vertex_handle(2))) {
-    std::cout << "vertex:" << vi << std::endl;
+    std::clog << "vertex:" << vi << std::endl;
     ++num_vertex_seen;
   }
-  std::cout << "num_vertex_seen:" << num_vertex_seen << std::endl;
+  std::clog << "num_vertex_seen:" << num_vertex_seen << std::endl;
   BOOST_CHECK(num_vertex_seen == (n -1));
 }
 
@@ -123,10 +123,10 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_edge) {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   complex.remove_edge(Vertex_handle(2), Vertex_handle(3));
   complex.remove_edge(Vertex_handle(3), Vertex_handle(5));
-  std::cout << "complex.num_edges():" << complex.num_edges() << std::endl;
+  std::clog << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_edges_seen = 0;
   for (auto edge : complex.edge_range()) {
-    std::cout << "edge :" << complex[edge] << std::endl;
+    std::clog << "edge :" << complex[edge] << std::endl;
     ++num_edges_seen;
   }
 
@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_edge2) {
       complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(j));
   complex.remove_edge(Vertex_handle(2), Vertex_handle(3));
   complex.remove_edge(Vertex_handle(3), Vertex_handle(5));
-  std::cout << "complex.num_edges():" << complex.num_edges() << std::endl;
+  std::clog << "complex.num_edges():" << complex.num_edges() << std::endl;
   int num_neigbors_seen = 0;
   for (auto neighbor : complex.vertex_range(Vertex_handle(2))) {
-    std::cout << "neighbor" << neighbor << std::endl;
+    std::clog << "neighbor" << neighbor << std::endl;
     ++num_neigbors_seen;
   }
   BOOST_CHECK(num_neigbors_seen == 8);
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_triangles) {
     complex.add_edge_without_blockers(Vertex_handle(i), Vertex_handle(i + 1));
   complex.add_edge_without_blockers(Vertex_handle(1), Vertex_handle(6));
 
-  std::cout << complex.to_string() << std::endl;
+  std::clog << complex.to_string() << std::endl;
 
   int num_triangles_seen = 0;
   //for (auto t : complex.triangle_range(5)){
@@ -214,19 +214,19 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_simplices) {
   expected_num_simplices[Vertex_handle(5)] = 7;
 
   for (auto pair : expected_num_simplices) {
-    std::cout << "found list: ";
+    std::clog << "found list: ";
     unsigned num_simplices_around = 0;
     for (const auto& simplex : complex.star_simplex_range(pair.first)) {
       simplex.dimension();
-      std::cout << simplex << " - ";
+      std::clog << simplex << " - ";
       ++num_simplices_around;
     }
 
     BOOST_CHECK(num_simplices_around == pair.second);
 
-    std::cout << std::endl << "current vertex:" << pair.first << " - ";
-    std::cout << "expected_num_simplices:" << pair.second << " - ";
-    std::cout << "found:" << num_simplices_around << std::endl;
+    std::clog << std::endl << "current vertex:" << pair.first << " - ";
+    std::clog << "expected_num_simplices:" << pair.second << " - ";
+    std::clog << "found:" << num_simplices_around << std::endl;
   }
 }
 
@@ -276,19 +276,19 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_simplices3) {
 BOOST_AUTO_TEST_CASE(test_skeleton_iterator_simplices4) {
   Complex empty_complex;
   for (auto v : empty_complex.vertex_range()) {
-    std::cout << v;
+    std::clog << v;
     BOOST_CHECK(false);
   }
   for (auto e : empty_complex.edge_range()) {
-    std::cout << e;
+    std::clog << e;
     BOOST_CHECK(false);
   }
   for (auto t : empty_complex.triangle_range()) {
-    std::cout << t;
+    std::clog << t;
     BOOST_CHECK(false);
   }
   for (auto s : empty_complex.complex_simplex_range()) {
-    std::cout << s;
+    std::clog << s;
     BOOST_CHECK(false);
   }
 }
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_iterator_coboundary) {
   Complex c;
   build_complete(4, c);
   c.remove_edge(Vertex_handle(1), Vertex_handle(3));
-  std::cout << c.to_string();
+  std::clog << c.to_string();
   Simplex s02(Vertex_handle(0), Vertex_handle(2));
   int n = 0;
   std::set<Simplex> expected;
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link0) {
   auto L2 = complex.link(alpha);
   BOOST_CHECK(L == L2);
 
-  std::cout << L.to_string();
+  std::clog << L.to_string();
 
   BOOST_CHECK(L.contains_vertex(*L.get_address(Root_vertex_handle(b))));
   BOOST_CHECK(L.contains_vertex(*L.get_address(Root_vertex_handle(d))));
@@ -432,9 +432,9 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link2) {
   // Complexes built
 
   // Print result
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
-  std::cout << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
+  std::clog << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
 
   auto L2 = complex.link(alpha);
   BOOST_CHECK(L == L2);
@@ -472,9 +472,9 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link3) {
   // Complexes built
 
   // Print result
-  std::cout << "complex complex" << complex.to_string();
-  std::cout << std::endl << std::endl;
-  std::cout << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
+  std::clog << "complex complex" << complex.to_string();
+  std::clog << std::endl << std::endl;
+  std::clog << "L= Link_complex(" << alpha << ") : \n" << L.to_string();
 
   auto L2 = complex.link(alpha);
   BOOST_CHECK(L == L2);
@@ -529,8 +529,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link5) {
   // Complexes built
 
   // Print result
-  std::cout << "Complex: " << complex.to_string()<< std::endl << std::endl;
-  std::cout << "Link: " << L.to_string() << std::endl;
+  std::clog << "Complex: " << complex.to_string()<< std::endl << std::endl;
+  std::clog << "Link: " << L.to_string() << std::endl;
 
   // verification
   BOOST_CHECK(L.num_vertices() == 0);
@@ -549,8 +549,8 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link6) {
   build_link_of_blocker(complex, alpha, link_blocker_alpha);
 
   // Print result
-  std::cout << "Complex: " << complex.to_string()<< std::endl << std::endl;
-  std::cout << "Link: " << link_blocker_alpha.to_string() << std::endl;
+  std::clog << "Complex: " << complex.to_string()<< std::endl << std::endl;
+  std::clog << "Link: " << link_blocker_alpha.to_string() << std::endl;
 
   // verification
   BOOST_CHECK(link_blocker_alpha.num_vertices() == 1);
@@ -579,12 +579,12 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_link7) {
   //the result should be the edge {6,7} plus the blocker {0,1,2}
 
   // Print result
-  std::cout << "Complex: " << complex.to_string()<< std::endl << std::endl;
-  std::cout << "Link: " << link_blocker_alpha.to_string() << std::endl;
+  std::clog << "Complex: " << complex.to_string()<< std::endl << std::endl;
+  std::clog << "Link: " << link_blocker_alpha.to_string() << std::endl;
 
   Skeleton_blocker_link_complex link_blocker_alpha_cpy = link_blocker_alpha;
 
-  std::cout << "Link copy: " << link_blocker_alpha_cpy.to_string() << std::endl;
+  std::clog << "Link copy: " << link_blocker_alpha_cpy.to_string() << std::endl;
 
   BOOST_CHECK(link_blocker_alpha.num_vertices() == link_blocker_alpha_cpy.num_vertices());
   BOOST_CHECK(link_blocker_alpha.num_blockers() == link_blocker_alpha_cpy.num_blockers());
@@ -640,7 +640,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 1:\n" << complex.to_string();
+  std::clog << "Constructor 1:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_vertices() == 6);
   BOOST_CHECK(complex.num_edges() == 10);
@@ -677,10 +677,10 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor2) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 2:\n" << complex.to_string();
+  std::clog << "Constructor 2:\n" << complex.to_string();
 
   for (auto b : complex.const_blocker_range()) {
-    std::cout << "b:" << b << std::endl;
+    std::clog << "b:" << b << std::endl;
   }
 
   BOOST_CHECK(complex.num_vertices() == 5);
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor3) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 3:\n" << complex.to_string();
+  std::clog << "Constructor 3:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_blockers() == 1);
   Sh expected_blocker(Vh(0), Vh(1), Vh(2));
@@ -723,7 +723,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor4) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 4:\n" << complex.to_string();
+  std::clog << "Constructor 4:\n" << complex.to_string();
   BOOST_CHECK(complex.num_blockers() == 1);
   Sh expected_blocker(Vh(0), Vh(1), Vh(4));
   for (auto b : complex.const_blocker_range())
@@ -753,7 +753,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor5) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 5:\n" << complex.to_string();
+  std::clog << "Constructor 5:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_vertices() == 6);
   BOOST_CHECK(complex.num_blockers() == 3);
@@ -773,7 +773,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor6) {
 
   Complex complex(simplices.begin(), simplices.end());
 
-  std::cout << "Constructor 6:\n" << complex.to_string();
+  std::clog << "Constructor 6:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_vertices() == 4);
   BOOST_CHECK(complex.num_blockers() == 1);
@@ -795,7 +795,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor7) {
   //get complex from top faces
   Complex complex(Gudhi::skeleton_blocker::make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
-  std::cout << "Constructor 7:\n" << complex.to_string();
+  std::clog << "Constructor 7:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_vertices() == 4);
   BOOST_CHECK(complex.num_blockers() == 1);
@@ -818,7 +818,7 @@ BOOST_AUTO_TEST_CASE(test_skeleton_blocker_complex_constructor8) {
   //get complex from top faces
   Complex complex(Gudhi::skeleton_blocker::make_complex_from_top_faces<Complex>(simplices.begin(), simplices.end()));
 
-  std::cout << "Constructor 8:\n" << complex.to_string();
+  std::clog << "Constructor 8:\n" << complex.to_string();
 
   BOOST_CHECK(complex.num_vertices() == 4);
   BOOST_CHECK(complex.num_blockers() == 2);

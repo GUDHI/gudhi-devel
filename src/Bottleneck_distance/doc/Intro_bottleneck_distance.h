@@ -52,7 +52,7 @@ int main() {
   diag2.emplace_back(0., 13.);
 
   double b = Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2);
-  std::cout << "Bottleneck distance = " << b << std::endl;
+  std::clog << "Bottleneck distance = " << b << std::endl;
 }
  * \endcode
  *

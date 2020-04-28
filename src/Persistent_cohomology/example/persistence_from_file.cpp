@@ -37,9 +37,9 @@ int main(int argc, char * argv[]) {
 
   program_options(argc, argv, simplex_tree_file, output_file, p, min_persistence);
 
-  std::cout << "Simplex_tree from file=" << simplex_tree_file.c_str() << " - output_file=" << output_file.c_str()
+  std::clog << "Simplex_tree from file=" << simplex_tree_file.c_str() << " - output_file=" << output_file.c_str()
       << std::endl;
-  std::cout << "     - p=" << p << " - min_persistence=" << min_persistence << std::endl;
+  std::clog << "     - p=" << p << " - min_persistence=" << min_persistence << std::endl;
 
   // Read the list of simplices from a file.
   Simplex_tree<> simplex_tree;
@@ -47,20 +47,17 @@ int main(int argc, char * argv[]) {
   std::ifstream simplex_tree_stream(simplex_tree_file);
   simplex_tree_stream >> simplex_tree;
 
-  std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices" << std::endl;
-  std::cout << "   - dimension " << simplex_tree.dimension() << std::endl;
+  std::clog << "The complex contains " << simplex_tree.num_simplices() << " simplices" << std::endl;
+  std::clog << "   - dimension " << simplex_tree.dimension() << std::endl;
 
   /*
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for( auto f_simplex : simplex_tree.filtration_simplex_range() )
-  { std::cout << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
+  { std::clog << "   " << "[" << simplex_tree.filtration(f_simplex) << "] ";
   for( auto vertex : simplex_tree.simplex_vertex_range(f_simplex) )
-  { std::cout << vertex << " "; }
-  std::cout << std::endl;
+  { std::clog << vertex << " "; }
+  std::clog << std::endl;
   }*/
-
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology< Simplex_tree<>, Field_Zp > pcoh(simplex_tree);
@@ -96,7 +93,7 @@ void program_options(int argc, char * argv[]
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&output_file)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::cout")
+       "Name of file in which the persistence diagram is written. Default print in std::clog")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
@@ -114,17 +111,17 @@ void program_options(int argc, char * argv[]
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a Rips complex defined on a set of input points.\n \n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a Rips complex defined on a set of input points.\n \n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

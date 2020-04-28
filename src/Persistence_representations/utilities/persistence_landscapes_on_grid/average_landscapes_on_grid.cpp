@@ -16,12 +16,12 @@
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes average of persistence landscapes on grid stored in files (the files needs to "
+  std::clog << "This program computes average of persistence landscapes on grid stored in files (the files needs to "
             << "be created beforehand).\n"
             << "The parameters of this programs are names of files with persistence landscapes on grid.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -46,6 +46,6 @@ int main(int argc, char** argv) {
     delete lands[i];
   }
 
-  std::cout << "Average can be found in 'average.g_land' file\n";
+  std::clog << "Average can be found in 'average.g_land' file\n";
   return 0;
 }

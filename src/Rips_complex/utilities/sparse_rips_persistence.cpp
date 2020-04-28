@@ -51,11 +51,8 @@ int main(int argc, char* argv[]) {
   Simplex_tree simplex_tree;
 
   sparse_rips.create_complex(simplex_tree, dim_max);
-  std::cout << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
-  std::cout << "   and has dimension " << simplex_tree.dimension() << " \n";
-
-  // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
+  std::clog << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
+  std::clog << "   and has dimension " << simplex_tree.dimension() << " \n";
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology pcoh(simplex_tree);
@@ -87,7 +84,7 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::cout")(
+      "Name of file in which the persistence diagram is written. Default print in std::clog")(
       "max-edge-length,r",
       po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
       "Maximal length of an edge for the Rips complex construction.")(
@@ -112,17 +109,17 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
   po::notify(vm);
 
   if (vm.count("help") || !vm.count("input-file")) {
-    std::cout << std::endl;
-    std::cout << "Compute the persistent homology with coefficient field Z/pZ \n";
-    std::cout << "of a sparse 1/(1-epsilon)-approximation of the Rips complex \ndefined on a set of input points.\n \n";
-    std::cout << "The output diagram contains one bar per line, written with the convention: \n";
-    std::cout << "   p   dim b d \n";
-    std::cout << "where dim is the dimension of the homological feature,\n";
-    std::cout << "b and d are respectively the birth and death of the feature and \n";
-    std::cout << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
+    std::clog << std::endl;
+    std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
+    std::clog << "of a sparse 1/(1-epsilon)-approximation of the Rips complex \ndefined on a set of input points.\n \n";
+    std::clog << "The output diagram contains one bar per line, written with the convention: \n";
+    std::clog << "   p   dim b d \n";
+    std::clog << "where dim is the dimension of the homological feature,\n";
+    std::clog << "b and d are respectively the birth and death of the feature and \n";
+    std::clog << "p is the characteristic of the field Z/pZ used for homology coefficients." << std::endl << std::endl;
 
-    std::cout << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
-    std::cout << visible << std::endl;
+    std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
+    std::clog << visible << std::endl;
     exit(-1);
   }
 }

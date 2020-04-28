@@ -10,6 +10,7 @@
 
 from gudhi import CubicalComplex, PeriodicCubicalComplex
 import numpy as np
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -25,9 +26,8 @@ def test_empty_constructor():
 
 def test_non_existing_perseus_file_constructor():
     # Try to open a non existing file
-    cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
-    assert cub.__is_defined() == False
-    assert cub.__is_persistence_defined() == False
+    with pytest.raises(FileNotFoundError):
+        cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
 
 
 def test_dimension_or_perseus_file_constructor():

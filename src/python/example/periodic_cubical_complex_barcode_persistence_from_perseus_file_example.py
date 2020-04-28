@@ -2,10 +2,14 @@
 
 import argparse
 import matplotlib.pyplot as plot
+import errno
+import os
 import gudhi
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -57,9 +61,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 if is_file_perseus(args.file):
-    print("#####################################################################")
+    print("##################################################################")
     print("PeriodicCubicalComplex creation")
-    periodic_cubical_complex = gudhi.PeriodicCubicalComplex(perseus_file=args.file)
+    periodic_cubical_complex = gudhi.PeriodicCubicalComplex(
+        perseus_file=args.file)
 
     print("persistence(homology_coeff_field=3, min_persistence=0)=")
     diag = periodic_cubical_complex.persistence(
@@ -73,4 +78,5 @@ if is_file_perseus(args.file):
         gudhi.plot_persistence_barcode(diag)
         plot.show()
 else:
-    print(args.file, "is not a valid perseus style file")
+    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                            args.file)

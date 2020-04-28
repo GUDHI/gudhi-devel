@@ -41,7 +41,7 @@ class Points_3D_off_visitor_reader {
    */
   void init(int dim, int num_vertices, int num_faces, int num_edges) {
 #ifdef DEBUG_TRACES
-    std::cout << "Points_3D_off_visitor_reader::init - dim=" << dim << " - num_vertices=" <<
+    std::clog << "Points_3D_off_visitor_reader::init - dim=" << dim << " - num_vertices=" <<
         num_vertices << " - num_faces=" << num_faces << " - num_edges=" << num_edges << std::endl;
 #endif  // DEBUG_TRACES
     if (dim == 3) {
@@ -74,11 +74,11 @@ class Points_3D_off_visitor_reader {
   void point(const std::vector<double>& point) {
     if (valid_) {
 #ifdef DEBUG_TRACES
-      std::cout << "Points_3D_off_visitor_reader::point ";
+      std::clog << "Points_3D_off_visitor_reader::point ";
       for (auto coordinate : point) {
-        std::cout << coordinate << " | ";
+        std::clog << coordinate << " | ";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
 #endif  // DEBUG_TRACES
       // Fill the point cloud
       point_cloud_.push_back(Point_3(point[0], point[1], point[2]));

@@ -18,7 +18,7 @@
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes the range of birth and death times of persistence pairs in diagrams provided as "
+  std::clog << "This program computes the range of birth and death times of persistence pairs in diagrams provided as "
             << "an input.\n"
             << "The first parameter is the dimension of persistence to be used to create persistence intervals. "
             << "If your file contains the information about dimension of persistence pairs, please provide here the "
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
             << "The remaining parameters of the program are the names of files with persistence diagrams.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
+    std::clog << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
 
@@ -45,12 +45,12 @@ int main(int argc, char** argv) {
   double max_ = -std::numeric_limits<double>::max();
 
   for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
-    std::cout << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
+    std::clog << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
     Persistence_intervals p(filenames[file_no], dimension);
     std::pair<double, double> min_max_ = p.get_x_range();
     if (min_max_.first < min_) min_ = min_max_.first;
     if (min_max_.second > max_) max_ = min_max_.second;
   }
-  std::cout << "Birth-death range : min: " << min_ << ", max: " << max_ << std::endl;
+  std::clog << "Birth-death range : min: " << min_ << ", max: " << max_ << std::endl;
   return 0;
 }

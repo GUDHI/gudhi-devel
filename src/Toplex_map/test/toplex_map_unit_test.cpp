@@ -20,31 +20,31 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   using Vertex = Gudhi::Toplex_map::Vertex;
 
   Gudhi::Toplex_map tm;
-  std::cout << "insert_simplex {1, 2, 3, 4}" << std::endl;
+  std::clog << "insert_simplex {1, 2, 3, 4}" << std::endl;
   std::vector<Vertex> sigma1 = {1, 2, 3, 4};
   tm.insert_simplex(sigma1);
-  std::cout << "insert_simplex {5, 2, 3, 6}" << std::endl;
+  std::clog << "insert_simplex {5, 2, 3, 6}" << std::endl;
   std::vector<Vertex> sigma2 = {5, 2, 3, 6};
   tm.insert_simplex(sigma2);
-  std::cout << "insert_simplex {5}" << std::endl;
+  std::clog << "insert_simplex {5}" << std::endl;
   std::vector<Vertex> sigma3 = {5};
   tm.insert_simplex(sigma3);
-  std::cout << "insert_simplex {4, 5, 3}" << std::endl;
+  std::clog << "insert_simplex {4, 5, 3}" << std::endl;
   std::vector<Vertex> sigma6 = {4, 5, 3};
   tm.insert_simplex(sigma6);
-  std::cout << "insert_simplex {4, 5, 9}" << std::endl;
+  std::clog << "insert_simplex {4, 5, 9}" << std::endl;
   std::vector<Vertex> sigma7 = {4, 5, 9};
   tm.insert_simplex(sigma7);
 
-  std::cout << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
+  std::clog << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
   BOOST_CHECK(tm.num_maximal_simplices() == 4);
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     BOOST_CHECK(tm.maximality(*simplex_ptr));
   }
 
@@ -58,37 +58,37 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   std::vector<Vertex> sigma5 = {5, 2, 7};
   BOOST_CHECK(tm.membership(sigma4));
   BOOST_CHECK(!tm.membership(sigma5));
-  std::cout << "insert_simplex {5, 2, 7}" << std::endl;
+  std::clog << "insert_simplex {5, 2, 7}" << std::endl;
   tm.insert_simplex(sigma5);
 
-  std::cout << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
+  std::clog << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
   BOOST_CHECK(tm.num_maximal_simplices() == 5);
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     BOOST_CHECK(tm.maximality(*simplex_ptr));
   }
 
   BOOST_CHECK(tm.membership(sigma5));
 
-  std::cout << "contraction(4,5)" << std::endl;
+  std::clog << "contraction(4,5)" << std::endl;
   auto r = tm.contraction(4, 5);
-  std::cout << "r=" << r << std::endl;
+  std::clog << "r=" << r << std::endl;
   BOOST_CHECK(r == 5);
 
-  std::cout << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
+  std::clog << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
   BOOST_CHECK(tm.num_maximal_simplices() == 4);
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     BOOST_CHECK(tm.maximality(*simplex_ptr));
   }
 
@@ -101,19 +101,19 @@ BOOST_AUTO_TEST_CASE(toplex_map) {
   BOOST_CHECK(tm.membership(sigma8));
   BOOST_CHECK(tm.membership(sigma9));
 
-  std::cout << "remove_simplex({2, 7, r = 5})" << std::endl;
+  std::clog << "remove_simplex({2, 7, r = 5})" << std::endl;
   tm.remove_simplex(sigma9);
   BOOST_CHECK(!tm.membership(sigma9));
 
-  std::cout << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
+  std::clog << "num_maximal_simplices" << tm.num_maximal_simplices() << std::endl;
   BOOST_CHECK(tm.num_maximal_simplices() == 5);
   // Browse maximal simplices
-  std::cout << "Maximal simplices are :" << std::endl;
+  std::clog << "Maximal simplices are :" << std::endl;
   for (auto simplex_ptr : tm.maximal_simplices()) {
     for (auto v : *simplex_ptr) {
-      std::cout << v << ", ";
+      std::clog << v << ", ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     BOOST_CHECK(tm.maximality(*simplex_ptr));
   }
   // {2, 7, 5} is removed, but verify its edges are still there

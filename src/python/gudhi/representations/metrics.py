@@ -246,6 +246,43 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.epsilon)
         return Xfit
 
+class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
+    """
+    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
+    """
+    def __init__(self, bandwidth=1., kernel_approx=None):
+        """
+        Constructor for the PersistenceFisherDistance class.
+
+        Parameters:
+            bandwidth (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions (default 1.).
+            kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+        """
+        self.bandwidth, self.kernel_approx = bandwidth, kernel_approx
+
+    def fit(self, X, y=None):
+        """
+        Fit the PersistenceFisherDistance class on a list of persistence diagrams: persistence diagrams are stored in a numpy array called **diagrams** and the kernel approximation class (if not None) is applied on them.
+
+        Parameters:
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+            y (n x 1 array): persistence diagram labels (unused).
+        """
+        self.diagrams_ = X
+        return self
+
+    def transform(self, X):
+        """
+        Compute all persistence Fisher distances between the persistence diagrams that were stored after calling the fit() method, and a given list of (possibly different) persistence diagrams.
+
+        Parameters:
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+
+        Returns:
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher distances.
+        """
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)
+
 class WassersteinDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the Wasserstein distance matrix from a list of persistence diagrams. 
@@ -290,40 +327,3 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         else:
             Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p)
         return Xfit
-
-class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
-    """
-    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
-    """
-    def __init__(self, bandwidth=1., kernel_approx=None):
-        """
-        Constructor for the PersistenceFisherDistance class.
-
-        Parameters:
-            bandwidth (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions (default 1.).
-            kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
-        """
-        self.bandwidth, self.kernel_approx = bandwidth, kernel_approx
-
-    def fit(self, X, y=None):
-        """
-        Fit the PersistenceFisherDistance class on a list of persistence diagrams: persistence diagrams are stored in a numpy array called **diagrams** and the kernel approximation class (if not None) is applied on them.
-
-        Parameters:
-            X (list of n x 2 numpy arrays): input persistence diagrams.
-            y (n x 1 array): persistence diagram labels (unused).
-        """
-        self.diagrams_ = X
-        return self
-
-    def transform(self, X):
-        """
-        Compute all persistence Fisher distances between the persistence diagrams that were stored after calling the fit() method, and a given list of (possibly different) persistence diagrams.
-
-        Parameters:
-            X (list of n x 2 numpy arrays): input persistence diagrams.
-
-        Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher distances.
-        """
-        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)

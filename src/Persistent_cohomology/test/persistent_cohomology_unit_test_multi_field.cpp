@@ -30,7 +30,7 @@ std::string test_rips_persistence(int min_coefficient, int max_coefficient, doub
   simplex_tree_stream.close();
 
   // Display the Simplex_tree
-  std::cout << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << " - dimension= " << st.dimension()
       << std::endl;
 
   // Check
@@ -68,11 +68,11 @@ void test_rips_persistence_in_dimension(int min_dimension, int max_dimension) {
   std::string value6("  2 0.3 inf");
   std::string value7("  2 0.4 inf");
 
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_MULTI_FIELD MIN_DIM=" << min_dimension << " MAX_DIM=" << max_dimension << " MIN_PERS=0" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_MULTI_FIELD MIN_DIM=" << min_dimension << " MAX_DIM=" << max_dimension << " MIN_PERS=0" << std::endl;
 
   std::string str_rips_persistence = test_rips_persistence(min_dimension, max_dimension, 0.0);
-  std::cout << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found

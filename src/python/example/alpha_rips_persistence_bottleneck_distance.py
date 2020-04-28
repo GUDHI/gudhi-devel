@@ -3,9 +3,14 @@
 import gudhi
 import argparse
 import math
+import errno
+import os
+import numpy as np
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -36,7 +41,7 @@ with open(args.file, "r") as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
         point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
-        print("#####################################################################")
+        print("##############################################################")
         print("RipsComplex creation from points read in a OFF file")
 
         message = "RipsComplex with max_edge_length=" + repr(args.threshold)
@@ -46,14 +51,15 @@ with open(args.file, "r") as f:
             points=point_cloud, max_edge_length=args.threshold
         )
 
-        rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
+        rips_stree = rips_complex.create_simplex_tree(
+            max_dimension=args.max_dimension)
 
         message = "Number of simplices=" + repr(rips_stree.num_simplices())
         print(message)
 
-        rips_diag = rips_stree.persistence()
+        rips_stree.compute_persistence()
 
-        print("#####################################################################")
+        print("##############################################################")
         print("AlphaComplex creation from points read in a OFF file")
 
         message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
@@ -67,18 +73,13 @@ with open(args.file, "r") as f:
         message = "Number of simplices=" + repr(alpha_stree.num_simplices())
         print(message)
 
-        alpha_diag = alpha_stree.persistence()
+        alpha_stree.compute_persistence()
 
         max_b_distance = 0.0
         for dim in range(args.max_dimension):
             # Alpha persistence values needs to be transform because filtration
             # values are alpha square values
-            funcs = [math.sqrt, math.sqrt]
-            alpha_intervals = []
-            for interval in alpha_stree.persistence_intervals_in_dimension(dim):
-                alpha_intervals.append(
-                    map(lambda func, value: func(value), funcs, interval)
-                )
+            alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
 
             rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
             bottleneck_distance = gudhi.bottleneck_distance(
@@ -93,13 +94,13 @@ with open(args.file, "r") as f:
             print(message)
             max_b_distance = max(bottleneck_distance, max_b_distance)
 
-        print(
-            "================================================================================"
-        )
+        print("==============================================================")
         message = "Bottleneck distance is " + repr(max_b_distance)
         print(message)
 
     else:
-        print(args.file, "is not a valid OFF file")
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                args.file)
+
 
     f.close()

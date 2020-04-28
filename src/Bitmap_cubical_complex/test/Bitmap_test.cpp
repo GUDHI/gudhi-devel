@@ -1402,12 +1402,12 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_2d) {
        it != ba.all_cells_iterator_end(); ++it) {    
     int i = 1;
 
-    // std::cout << "Element : " << *it << std::endl;
+    // std::clog << "Element : " << *it << std::endl;
 
     Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
          bd != bdrange.end(); ++bd) {
-      // std::cout <<  *bd << " ";
+      // std::clog <<  *bd << " ";
       Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
       int j = 1;
       for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
@@ -1441,7 +1441,7 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
   std::vector<int> elems_in_boundary(number_of_all_elements, 0);
   for (Bitmap_cubical_complex_periodic_boundary_conditions::All_cells_iterator it = ba.all_cells_iterator_begin();
        it != ba.all_cells_iterator_end(); ++it) {
-    // std::cout << "Element : " << *it << std::endl;
+    // std::clog << "Element : " << *it << std::endl;
     
     int i = 1;
 
@@ -1449,7 +1449,7 @@ BOOST_AUTO_TEST_CASE(check_if_boundary_of_boundary_is_zero_periodic_case_3d) {
     for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
          bd != bdrange.end(); ++bd) {
       Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
-      // std::cout << *bd << " ";
+      // std::clog << *bd << " ";
       int j = 1;
       for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
            bd2 != second_bdrange.end(); ++bd2) {
@@ -1551,7 +1551,7 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_cond
     Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
     for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd = bdrange.begin();
          bd != bdrange.end(); ++bd) {
-      // std::cout <<  *bd << " ";
+      // std::clog <<  *bd << " ";
       Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
       for (Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_iterator bd2 = second_bdrange.begin();
            bd2 != second_bdrange.end(); ++bd2) {
@@ -1571,11 +1571,11 @@ BOOST_AUTO_TEST_CASE(perseus_file_read) {
 
   auto it = increasing.top_dimensional_cells_iterator_begin();
   double value = increasing.get_cell_data(*it);
-  std::cout << "First value of sinusoid.txt is " << value << std::endl;
+  std::clog << "First value of sinusoid.txt is " << value << std::endl;
   BOOST_CHECK(value == 10.);
   // Next value
   ++it;
   value = increasing.get_cell_data(*it);
-  std::cout << "Second value of sinusoid.txt is " << value << std::endl;
+  std::clog << "Second value of sinusoid.txt is " << value << std::endl;
   BOOST_CHECK(value == std::numeric_limits<double>::infinity());
 }

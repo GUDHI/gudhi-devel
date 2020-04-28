@@ -9,7 +9,7 @@ from gudhi.representations import DiagramSelector, Clamping, Landscape, Silhouet
   TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
   PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
-  SlicedWassersteinKernel, BottleneckDistance, WassersteinDistance, PersistenceFisherKernel
+  SlicedWassersteinKernel, BottleneckDistance, PersistenceFisherKernel
 
 D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.], [0., np.inf], [5., np.inf]])
 diags = [D]

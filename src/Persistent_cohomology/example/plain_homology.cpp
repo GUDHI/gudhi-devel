@@ -59,9 +59,6 @@ int main() {
   st.insert_simplex_and_subfaces(edge35);
   st.insert_simplex(vertex4);
 
-  // Sort the simplices in the order of the filtration
-  st.initialize_filtration();
-
   // Class for homology computation
   // By default, since the complex has dimension 1, only 0-dimensional homology would be computed.
   // Here we also want persistent homology to be computed for the maximal dimension in the complex (persistence_dim_max = true)
@@ -83,9 +80,9 @@ int main() {
   pcoh.output_diagram();
 
   // Print the Betti numbers are b0=2 and b1=2.
-  std::cout << std::endl;
-  std::cout << "The Betti numbers are : ";
+  std::clog << std::endl;
+  std::clog << "The Betti numbers are : ";
   for (int i = 0; i < 3; i++)
-    std::cout << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
-  std::cout << std::endl;
+    std::clog << "b" << i << " = " << pcoh.betti_number(i) << " ; ";
+  std::clog << std::endl;
 }

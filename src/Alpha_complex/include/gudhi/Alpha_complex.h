@@ -112,9 +112,6 @@ class Alpha_complex {
   typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
   typedef typename Kernel::Point_dimension_d        Point_Dimension;
 
-  // Type required to compute squared radius, or side of bounded sphere on a vector of points.
-  typedef typename std::vector<Point_d> Vector_of_CGAL_points;
-
   // Vertex_iterator type from CGAL.
   typedef typename Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
 
@@ -124,6 +121,9 @@ class Alpha_complex {
   // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
   typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
 
+  // Numeric type of coordinates in the kernel
+  typedef typename Kernel::FT FT;
+
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
    * Vertex handles are inserted sequentially, starting at 0.*/
@@ -132,6 +132,8 @@ class Alpha_complex {
   Delaunay_triangulation* triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
   Kernel kernel_;
+  /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
+  std::vector<std::pair<Point_d, FT>> cache_, old_cache_;
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
@@ -237,7 +239,7 @@ class Alpha_complex {
       for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
         if (!triangulation_->is_infinite(*vit)) {
 #ifdef DEBUG_TRACES
-          std::cout << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
+          std::clog << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
           vertex_handle_to_iterator_[vit->data()] = vit;
         }
@@ -246,18 +248,66 @@ class Alpha_complex {
     }
   }
 
+  /** \brief get_point_ returns the point corresponding to the vertex given as parameter.
+   * Only for internal use for faster access.
+   *
+   * @param[in] vertex Vertex handle of the point to retrieve.
+   * @return The point found.
+   */
+  const Point_d& get_point_(std::size_t vertex) const {
+    return vertex_handle_to_iterator_[vertex]->point();
+  }
+
+  /// Return a reference to the circumcenter and circumradius, writing them in the cache if necessary.
+  template<class SimplicialComplexForAlpha>
+  auto& get_cache(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
+    auto k = cplx.key(s);
+    if(k==cplx.null_key()){
+      k = cache_.size();
+      cplx.assign_key(s, k);
+      // Using a transform_range is slower, currently.
+      thread_local std::vector<Point_d> v;
+      v.clear();
+      for (auto vertex : cplx.simplex_vertex_range(s))
+        v.push_back(get_point_(vertex));
+      Point_d c = kernel_.construct_circumcenter_d_object()(v.cbegin(), v.cend());
+      FT r = kernel_.squared_distance_d_object()(c, v[0]);
+      cache_.emplace_back(std::move(c), std::move(r));
+    }
+    return cache_[k];
+  }
+
+  /// Return the circumradius, either from the old cache or computed, without writing to the cache.
+  template<class SimplicialComplexForAlpha>
+  auto radius(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
+    auto k = cplx.key(s);
+    if(k!=cplx.null_key())
+      return old_cache_[k].second;
+    // Using a transform_range is slower, currently.
+    thread_local std::vector<Point_d> v;
+    v.clear();
+    for (auto vertex : cplx.simplex_vertex_range(s))
+      v.push_back(get_point_(vertex));
+    return kernel_.compute_squared_radius_d_object()(v.cbegin(), v.cend());
+  }
+
  public:
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
-   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm
+   * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
+   * is not set.
    *
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    * 
    * @param[in] complex SimplicialComplexForAlpha to be created.
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
-   * little point using anything else since it does not save time.
+   * little point using anything else since it does not save time. Useless if `default_filtration_value` is set to
+   * `true`.
    * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
    * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
-   * 
+   * @param[in] default_filtration_value Set this value to `true` if filtration values are not needed to be computed
+   * (will be set to `NaN`).
+   * Default value is `false` (which means compute the filtration values).
+   *
    * @return true if creation succeeds, false otherwise.
    * 
    * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
@@ -269,7 +319,8 @@ class Alpha_complex {
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
                       Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
-                      bool exact = false) {
+                      bool exact = false,
+                      bool default_filtration_value = false) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
     typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
@@ -296,19 +347,19 @@ class Alpha_complex {
            ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-        std::cout << "Simplex_tree insertion ";
+        std::clog << "Simplex_tree insertion ";
 #endif  // DEBUG_TRACES
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           if (*vit != nullptr) {
 #ifdef DEBUG_TRACES
-            std::cout << " " << (*vit)->data();
+            std::clog << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
             // Vector of vertex construction for simplex_tree structure
             vertexVector.push_back((*vit)->data());
           }
         }
 #ifdef DEBUG_TRACES
-        std::cout << std::endl;
+        std::clog << std::endl;
 #endif  // DEBUG_TRACES
         // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
         complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
@@ -316,62 +367,48 @@ class Alpha_complex {
     }
     // --------------------------------------------------------------------------------------------
 
-    // --------------------------------------------------------------------------------------------
-    // Will be re-used many times
-    Vector_of_CGAL_points pointVector;
-    // ### For i : d -> 0
-    for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
-      // ### Foreach Sigma of dim i
-      for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
-        int f_simplex_dim = complex.dimension(f_simplex);
-        if (decr_dim == f_simplex_dim) {
-          pointVector.clear();
-#ifdef DEBUG_TRACES
-          std::cout << "Sigma of dim " << decr_dim << " is";
-#endif  // DEBUG_TRACES
-          for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
-            pointVector.push_back(get_point(vertex));
-#ifdef DEBUG_TRACES
-            std::cout << " " << vertex;
-#endif  // DEBUG_TRACES
-          }
-#ifdef DEBUG_TRACES
-          std::cout << std::endl;
-#endif  // DEBUG_TRACES
-          // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-          if (std::isnan(complex.filtration(f_simplex))) {
-            Filtration_value alpha_complex_filtration = 0.0;
-            // No need to compute squared_radius on a single point - alpha is 0.0
-            if (f_simplex_dim > 0) {
-              // squared_radius function initialization
-              Squared_Radius squared_radius = kernel_.compute_squared_radius_d_object();
-
-              CGAL::NT_converter<typename Geom_traits::FT, Filtration_value> cv;
-              auto sqrad = squared_radius(pointVector.begin(), pointVector.end());
+    if (!default_filtration_value) {
+      // --------------------------------------------------------------------------------------------
+      // ### For i : d -> 0
+      for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
+        // ### Foreach Sigma of dim i
+        for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
+          int f_simplex_dim = complex.dimension(f_simplex);
+          if (decr_dim == f_simplex_dim) {
+            // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
+            if (std::isnan(complex.filtration(f_simplex))) {
+              Filtration_value alpha_complex_filtration = 0.0;
+              // No need to compute squared_radius on a single point - alpha is 0.0
+              if (f_simplex_dim > 0) {
+                auto const& sqrad = radius(complex, f_simplex);
 #if CGAL_VERSION_NR >= 1050000000
-              if(exact) CGAL::exact(sqrad);
+                if(exact) CGAL::exact(sqrad);
 #endif
-              alpha_complex_filtration = cv(sqrad);
-            }
-            complex.assign_filtration(f_simplex, alpha_complex_filtration);
+                CGAL::NT_converter<FT, Filtration_value> cv;
+                alpha_complex_filtration = cv(sqrad);
+              }
+              complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-            std::cout << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
+              std::clog << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
 #endif  // DEBUG_TRACES
+            }
+            // No need to propagate further, unweighted points all have value 0
+            if (decr_dim > 1)
+              propagate_alpha_filtration(complex, f_simplex);
           }
-          // No need to propagate further, unweighted points all have value 0
-          if (decr_dim > 1)
-            propagate_alpha_filtration(complex, f_simplex);
         }
+        old_cache_ = std::move(cache_);
+        cache_.clear();
       }
+      // --------------------------------------------------------------------------------------------
+  
+      // --------------------------------------------------------------------------------------------
+      // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+      complex.make_filtration_non_decreasing();
+      // Remove all simplices that have a filtration value greater than max_alpha_square
+      complex.prune_above_filtration(max_alpha_square);
+      // --------------------------------------------------------------------------------------------
     }
-    // --------------------------------------------------------------------------------------------
-
-    // --------------------------------------------------------------------------------------------
-    // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    complex.make_filtration_non_decreasing();
-    // Remove all simplices that have a filtration value greater than max_alpha_square
-    complex.prune_above_filtration(max_alpha_square);
-    // --------------------------------------------------------------------------------------------
     return true;
   }
 
@@ -380,20 +417,18 @@ class Alpha_complex {
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
-#ifdef DEBUG_TRACES
     typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
-#endif  // DEBUG_TRACES
 
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
 #ifdef DEBUG_TRACES
-      std::cout << " | --------------------------------------------------\n";
-      std::cout << " | Tau ";
+      std::clog << " | --------------------------------------------------\n";
+      std::clog << " | Tau ";
       for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
-        std::cout << vertex << " ";
+        std::clog << vertex << " ";
       }
-      std::cout << "is a face of Sigma\n";
-      std::cout << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
+      std::clog << "is a face of Sigma\n";
+      std::clog << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
       if (!std::isnan(complex.filtration(f_boundary))) {
@@ -402,37 +437,22 @@ class Alpha_complex {
                                                                              complex.filtration(f_simplex));
         complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-        std::cout << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << complex.filtration(f_boundary) << std::endl;
+        std::clog << " | filt(Tau) = fmin(filt(Tau), filt(Sigma)) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
         // ### Else
       } else {
-        // insert the Tau points in a vector for is_gabriel function
-        Vector_of_CGAL_points pointVector;
+        // Find which vertex of f_simplex is missing in f_boundary. We could actually write a variant of boundary_simplex_range that gives pairs (f_boundary, vertex). We rely on the fact that simplex_vertex_range is sorted.
+        auto longlist = complex.simplex_vertex_range(f_simplex);
+        auto shortlist = complex.simplex_vertex_range(f_boundary);
+        auto longiter = std::begin(longlist);
+        auto shortiter = std::begin(shortlist);
+        auto enditer = std::end(shortlist);
+        while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
+        Vertex_handle extra = *longiter;
+        auto const& cache=get_cache(complex, f_boundary);
+        bool is_gab = kernel_.squared_distance_d_object()(cache.first, get_point_(extra)) >= cache.second;
 #ifdef DEBUG_TRACES
-        Vertex_handle vertexForGabriel = Vertex_handle();
-#endif  // DEBUG_TRACES
-        for (auto vertex : complex.simplex_vertex_range(f_boundary)) {
-          pointVector.push_back(get_point(vertex));
-        }
-        // Retrieve the Sigma point that is not part of Tau - parameter for is_gabriel function
-        Point_d point_for_gabriel;
-        for (auto vertex : complex.simplex_vertex_range(f_simplex)) {
-          point_for_gabriel = get_point(vertex);
-          if (std::find(pointVector.begin(), pointVector.end(), point_for_gabriel) == pointVector.end()) {
-#ifdef DEBUG_TRACES
-            // vertex is not found in Tau
-            vertexForGabriel = vertex;
-#endif  // DEBUG_TRACES
-            // No need to continue loop
-            break;
-          }
-        }
-        // is_gabriel function initialization
-        Is_Gabriel is_gabriel = kernel_.side_of_bounded_sphere_d_object();
-        bool is_gab = is_gabriel(pointVector.begin(), pointVector.end(), point_for_gabriel)
-          != CGAL::ON_BOUNDED_SIDE;
-#ifdef DEBUG_TRACES
-        std::cout << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << vertexForGabriel << std::endl;
+        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
 #endif  // DEBUG_TRACES
         // ### If Tau is not Gabriel of Sigma
         if (false == is_gab) {
@@ -440,7 +460,7 @@ class Alpha_complex {
           Filtration_value alpha_complex_filtration = complex.filtration(f_simplex);
           complex.assign_filtration(f_boundary, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
-          std::cout << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
+          std::clog << " | filt(Tau) = filt(Sigma) = " << complex.filtration(f_boundary) << std::endl;
 #endif  // DEBUG_TRACES
         }
       }
