@@ -37,35 +37,35 @@ int main(int argc, char** argv) {
   Persistence_landscape l2(persistence2);
 
   // This is how to compute integral of landscapes:
-  std::cout << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << std::endl;
-  std::cout << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << std::endl;
+  std::clog << "Integral of the first landscape : " << l1.compute_integral_of_landscape() << std::endl;
+  std::clog << "Integral of the second landscape : " << l2.compute_integral_of_landscape() << std::endl;
 
   // And here how to write landscapes to stream:
-  std::cout << "l1 : " << l1 << std::endl;
-  std::cout << "l2 : " << l2 << std::endl;
+  std::clog << "l1 : " << l1 << std::endl;
+  std::clog << "l2 : " << l2 << std::endl;
 
   // Arithmetic operations on landscapes:
   Persistence_landscape sum = l1 + l2;
-  std::cout << "sum : " << sum << std::endl;
+  std::clog << "sum : " << sum << std::endl;
 
   // here are the maxima of the functions:
-  std::cout << "Maximum of l1 : " << l1.compute_maximum() << std::endl;
-  std::cout << "Maximum of l2 : " << l2.compute_maximum() << std::endl;
+  std::clog << "Maximum of l1 : " << l1.compute_maximum() << std::endl;
+  std::clog << "Maximum of l2 : " << l2.compute_maximum() << std::endl;
 
   // here are the norms of landscapes:
-  std::cout << "L^1 Norm of l1 : " << l1.compute_norm_of_landscape(1.) << std::endl;
-  std::cout << "L^1 Norm of l2 : " << l2.compute_norm_of_landscape(1.) << std::endl;
+  std::clog << "L^1 Norm of l1 : " << l1.compute_norm_of_landscape(1.) << std::endl;
+  std::clog << "L^1 Norm of l2 : " << l2.compute_norm_of_landscape(1.) << std::endl;
 
   // here is the average of landscapes:
   Persistence_landscape average;
   average.compute_average({&l1, &l2});
-  std::cout << "average : " << average << std::endl;
+  std::clog << "average : " << average << std::endl;
 
   // here is the distance of landscapes:
-  std::cout << "Distance : " << l1.distance(l2) << std::endl;
+  std::clog << "Distance : " << l1.distance(l2) << std::endl;
 
   // here is the scalar product of landscapes:
-  std::cout << "Scalar product : " << l1.compute_scalar_product(l2) << std::endl;
+  std::clog << "Scalar product : " << l1.compute_scalar_product(l2) << std::endl;
 
   // here is how to create a file which is suitable for visualization via gnuplot:
   average.plot("average_landscape");

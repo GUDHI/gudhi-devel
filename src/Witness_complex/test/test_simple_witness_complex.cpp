@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   Witness_complex witness_complex(nlt);
   BOOST_CHECK(witness_complex.create_complex(stree, 4.1));
 
-  std::cout << "Number of simplices: " << stree.num_simplices() << std::endl;
+  std::clog << "Number of simplices: " << stree.num_simplices() << std::endl;
   BOOST_CHECK(stree.num_simplices() == 31);
 
   // Check when complex not empty
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   BOOST_CHECK(!witness_complex.create_complex(stree2, -0.02));
 
   witness_complex.create_complex(stree2, 4.1, 2);
-  std::cout << "Number of simplices: " << stree2.num_simplices() << std::endl;
+  std::clog << "Number of simplices: " << stree2.num_simplices() << std::endl;
   BOOST_CHECK(stree2.num_simplices() == 25);
 
 }

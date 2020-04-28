@@ -19,7 +19,7 @@ using Persistence_intervals = Gudhi::Persistence_representations::Persistence_in
 
 int main(int argc, char** argv) {
   if ((argc != 3) && (argc != 2)) {
-    std::cout << "This program creates a gnuplot script from a single persistence diagram file (*.pers).\n"
+    std::clog << "This program creates a gnuplot script from a single persistence diagram file (*.pers).\n"
               << "To run this program, please provide the name of a file with persistence diagram.\n"
               << "The second optional parameter of a program is the dimension of the persistence that is to be used. "
               << "If your file contains only birth-death pairs, you can skip this parameter.\n";

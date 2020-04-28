@@ -45,7 +45,7 @@ typedef boost::mpl::list<Fast_weighted_periodic_alpha_complex_3d, Exact_weighted
 #ifdef GUDHI_DEBUG
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_periodic_alpha_complex_3d,
                               wp_variants_type_list) {
-  std::cout << "Weighted periodic alpha complex 3d exception throw" << std::endl;
+  std::clog << "Weighted periodic alpha complex 3d exception throw" << std::endl;
 
   using Creator = CGAL::Creator_uniform_3<double, typename Weighted_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
     p_weights.push_back(random.get_double(0., 0.01));
   }
 
-  std::cout << "Cuboid is not iso exception" << std::endl;
+  std::clog << "Cuboid is not iso exception" << std::endl;
   // Check it throws an exception when the cuboid is not iso
   BOOST_CHECK_THROW(
       Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, -1., -1., -1., 0.9, 1., 1.),
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
       Weighted_periodic_alpha_complex_3d wp_alpha_complex(wp_points, p_weights, -1., -1., -1., 1., 1., 1.1),
       std::invalid_argument);
 
-  std::cout << "0 <= point.weight() < 1/64 * domain_size * domain_size exception" << std::endl;
+  std::clog << "0 <= point.weight() < 1/64 * domain_size * domain_size exception" << std::endl;
   // Weights must be in range ]0, 1/64 = 0.015625[
   double temp = p_weights[25];
   p_weights[25] = 1.0;
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_weighted_periodic_throw, Weighted_pe
                     std::invalid_argument);
   p_weights[14] = temp;
 
-  std::cout << "wp_points and p_weights size exception" << std::endl;
+  std::clog << "wp_points and p_weights size exception" << std::endl;
   // Weights and points must have the same size
   // + 1
   p_weights.push_back(1e-10);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ---------------------
   // Fast weighted periodic version
   // ---------------------
-  std::cout << "Fast weighted periodic alpha complex 3d" << std::endl;
+  std::clog << "Fast weighted periodic alpha complex 3d" << std::endl;
 
   using Creator = CGAL::Creator_uniform_3<double, Fast_weighted_periodic_alpha_complex_3d::Bare_point_3>;
   CGAL::Random random(7);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ----------------------
   // Exact weighted periodic version
   // ----------------------
-  std::cout << "Exact weighted periodic alpha complex 3d" << std::endl;
+  std::clog << "Exact weighted periodic alpha complex 3d" << std::endl;
 
   std::vector<Exact_weighted_periodic_alpha_complex_3d::Bare_point_3> e_p_points;
 
@@ -156,13 +156,13 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ---------------------
   // Compare both versions
   // ---------------------
-  std::cout << "Exact weighted periodic alpha complex 3d is of dimension " << exact_stree.dimension()
+  std::clog << "Exact weighted periodic alpha complex 3d is of dimension " << exact_stree.dimension()
             << " - Non exact is " << stree.dimension() << std::endl;
   BOOST_CHECK(exact_stree.dimension() == stree.dimension());
-  std::cout << "Exact weighted periodic alpha complex 3d num_simplices " << exact_stree.num_simplices()
+  std::clog << "Exact weighted periodic alpha complex 3d num_simplices " << exact_stree.num_simplices()
             << " - Non exact is " << stree.num_simplices() << std::endl;
   BOOST_CHECK(exact_stree.num_simplices() == stree.num_simplices());
-  std::cout << "Exact weighted periodic alpha complex 3d num_vertices " << exact_stree.num_vertices()
+  std::clog << "Exact weighted periodic alpha complex 3d num_vertices " << exact_stree.num_vertices()
             << " - Non exact is " << stree.num_vertices() << std::endl;
   BOOST_CHECK(exact_stree.num_vertices() == stree.num_vertices());
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_weighted_periodic) {
   // ----------------------
   // Safe weighted periodic version
   // ----------------------
-  std::cout << "Safe weighted periodic alpha complex 3d" << std::endl;
+  std::clog << "Safe weighted periodic alpha complex 3d" << std::endl;
 
   std::vector<Safe_weighted_periodic_alpha_complex_3d::Bare_point_3> s_p_points;
 

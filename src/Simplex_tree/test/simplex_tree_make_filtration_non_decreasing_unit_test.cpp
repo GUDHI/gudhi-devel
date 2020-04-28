@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_te
   /*            o          */
   /*            5          */
 
-  std::cout << "Check default insertion ensures the filtration values are non decreasing" << std::endl;
+  std::clog << "Check default insertion ensures the filtration values are non decreasing" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());
 
   // Because of non decreasing property of simplex tree, { 0 } , { 1 } and { 0, 1 } are going to be set from value 2.0
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_te
   //            o
   //            5
   
-  std::cout << "Check default second insertion ensures the filtration values are non decreasing" << std::endl;
+  std::clog << "Check default second insertion ensures the filtration values are non decreasing" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());
   
   // Copy original simplex tree
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_te
   st.assign_filtration(st.find({3,4}), 1.1);
   st.assign_filtration(st.find({4,5}), 1.99);
   
-  std::cout << "Check the simplex_tree is rolled back in case of decreasing filtration values" << std::endl;
+  std::clog << "Check the simplex_tree is rolled back in case of decreasing filtration values" << std::endl;
   BOOST_CHECK(st.make_filtration_non_decreasing());
   BOOST_CHECK(st == st_copy);
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_te
   // By modifying just the simplex {2}
   // {0,1,2}, {1,2} and {0,2} will be modified
   
-  std::cout << "Check the simplex_tree is repaired in case of decreasing filtration values" << std::endl;
+  std::clog << "Check the simplex_tree is repaired in case of decreasing filtration values" << std::endl;
   BOOST_CHECK(st.make_filtration_non_decreasing());
   BOOST_CHECK(st == st_other);
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_te
   // Other copy simplex tree
   typeST st_other_copy = st;
   
-  std::cout << "Check the simplex_tree is not modified in case of non-decreasing filtration values" << std::endl;
+  std::clog << "Check the simplex_tree is not modified in case of non-decreasing filtration values" << std::endl;
   BOOST_CHECK(!st.make_filtration_non_decreasing());
   BOOST_CHECK(st == st_other_copy);
   
@@ -122,11 +122,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing_on_nan_values, type
   /*            o          */
   /*            5          */
 
-  std::cout << "SPECIFIC CASE:" << std::endl;
-  std::cout << "Insertion with NaN values does not ensure the filtration values are non decreasing" << std::endl;
+  std::clog << "SPECIFIC CASE:" << std::endl;
+  std::clog << "Insertion with NaN values does not ensure the filtration values are non decreasing" << std::endl;
   st.make_filtration_non_decreasing();
 
-  std::cout << "Check all filtration values are NaN" << std::endl;
+  std::clog << "Check all filtration values are NaN" << std::endl;
   for (auto f_simplex : st.complex_simplex_range()) {
     BOOST_CHECK(std::isnan(st.filtration(f_simplex)));
   }
@@ -138,10 +138,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing_on_nan_values, type
   st.assign_filtration(st.find({4}), 0.);
   st.assign_filtration(st.find({5}), 0.);
 
-  std::cout << "Check make_filtration_non_decreasing is modifying the simplicial complex" << std::endl;
+  std::clog << "Check make_filtration_non_decreasing is modifying the simplicial complex" << std::endl;
   BOOST_CHECK(st.make_filtration_non_decreasing());
   
-  std::cout << "Check all filtration values are now defined" << std::endl;
+  std::clog << "Check all filtration values are now defined" << std::endl;
   for (auto f_simplex : st.complex_simplex_range()) {
     BOOST_CHECK(!std::isnan(st.filtration(f_simplex)));
   }

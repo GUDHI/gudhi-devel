@@ -29,7 +29,7 @@ and `p` is the characteristic of the field *Z/pZ* used for homology coefficients
 
 * `-h [ --help ]` Produce help message
 * `-l [ --landmarks ]` Number of landmarks to choose from the point cloud.
-* `-o [ --output-file ]` Name of file in which the persistence diagram is written. By default, print in std::cout.
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. By default, print in std::clog.
 * `-a [ --max-sq-alpha ]` (default = inf) Maximal squared relaxation parameter.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
@@ -60,7 +60,7 @@ and `p` is the characteristic of the field *Z/pZ* used for homology coefficients
 
 * `-h [ --help ]` Produce help message
 * `-l [ --landmarks ]` Number of landmarks to choose from the point cloud.
-* `-o [ --output-file ]` Name of file in which the persistence diagram is written. By default, print in std::cout.
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. By default, print in std::clog.
 * `-a [ --max-sq-alpha ]` (default = inf) Maximal squared relaxation parameter.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.

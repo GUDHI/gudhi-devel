@@ -68,24 +68,24 @@ int main(int argc, char* argv[]) {
   Proximity_graph euclidean_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
       off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
 
-  std::cout << euclidean_clock << std::endl;
+  std::clog << euclidean_clock << std::endl;
 
   Gudhi::Clock miniball_clock("Minimal_enclosing_ball_radius");
   // Compute the proximity graph of the points
   Proximity_graph miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
       off_reader.get_point_cloud(), threshold, Minimal_enclosing_ball_radius());
-  std::cout << miniball_clock << std::endl;
+  std::clog << miniball_clock << std::endl;
 
   Gudhi::Clock common_miniball_clock("Gudhi::Minimal_enclosing_ball_radius()");
   // Compute the proximity graph of the points
   Proximity_graph common_miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
       off_reader.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius());
-  std::cout << common_miniball_clock << std::endl;
+  std::clog << common_miniball_clock << std::endl;
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
-  std::cout << "Current path is : " << full_path << std::endl;
+  std::clog << "Current path is : " << full_path << std::endl;
 
-  std::cout << "File name;Radius;Rips time;Cech time; Ratio Rips/Cech time;Rips nb simplices;Cech nb simplices;"
+  std::clog << "File name;Radius;Rips time;Cech time; Ratio Rips/Cech time;Rips nb simplices;Cech nb simplices;"
             << std::endl;
   boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
   for (boost::filesystem::directory_iterator itr(boost::filesystem::current_path()); itr != end_itr; ++itr) {
@@ -96,8 +96,8 @@ int main(int argc, char* argv[]) {
         Point p0 = off_reader.get_point_cloud()[0];
 
         for (Filtration_value radius = 0.1; radius < 0.4; radius += 0.1) {
-          std::cout << itr->path().stem() << ";";
-          std::cout << radius << ";";
+          std::clog << itr->path().stem() << ";";
+          std::clog << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
           Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius,
                                                 Gudhi::Minimal_enclosing_ball_radius());
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
           // Display information about the Rips complex
           // ------------------------------------------
           double rips_sec = rips_clock.num_seconds();
-          std::cout << rips_sec << ";";
+          std::clog << rips_sec << ";";
 
           Gudhi::Clock cech_clock("Cech computation");
           Cech_complex cech_complex_from_points(off_reader.get_point_cloud(), radius);
@@ -117,12 +117,12 @@ int main(int argc, char* argv[]) {
           // Display information about the Cech complex
           // ------------------------------------------
           double cech_sec = cech_clock.num_seconds();
-          std::cout << cech_sec << ";";
-          std::cout << cech_sec / rips_sec << ";";
+          std::clog << cech_sec << ";";
+          std::clog << cech_sec / rips_sec << ";";
 
           assert(rips_stree.num_simplices() >= cech_stree.num_simplices());
-          std::cout << rips_stree.num_simplices() << ";";
-          std::cout << cech_stree.num_simplices() << ";" << std::endl;
+          std::clog << rips_stree.num_simplices() << ";";
+          std::clog << cech_stree.num_simplices() << ";" << std::endl;
         }
       }
     }

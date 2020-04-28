@@ -74,7 +74,7 @@ int main(int argc, char * argv[]) {
   Rips_complex rips_complex_from_file(off_reader.get_point_cloud(), threshold, Gudhi::Euclidean_distance());
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Compute Rips graph in " << elapsed_sec << " ms.\n";
+  std::clog << "Compute Rips graph in " << elapsed_sec << " ms.\n";
 
   // Construct the Rips complex in a Simplex Tree
   Simplex_tree st;
@@ -86,16 +86,16 @@ int main(int argc, char * argv[]) {
 
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Compute Rips complex in " << elapsed_sec << " ms.\n";
-  std::cout << "  - dimension           = " << st.dimension() << std::endl;
-  std::cout << "  - number of simplices = " << st.num_simplices() << std::endl;
+  std::clog << "Compute Rips complex in " << elapsed_sec << " ms.\n";
+  std::clog << "  - dimension           = " << st.dimension() << std::endl;
+  std::clog << "  - number of simplices = " << st.num_simplices() << std::endl;
 
   // Sort the simplices in the order of the filtration
   start = std::chrono::system_clock::now();
   st.initialize_filtration();
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Order the simplices of the filtration in " << elapsed_sec << " ms.\n";
+  std::clog << "Order the simplices of the filtration in " << elapsed_sec << " ms.\n";
 
   // Copy the keys inside the simplices
   start = std::chrono::system_clock::now();
@@ -106,22 +106,22 @@ int main(int argc, char * argv[]) {
   }
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Copied the keys inside the simplices in " << elapsed_sec << " ms.\n";
+  std::clog << "Copied the keys inside the simplices in " << elapsed_sec << " ms.\n";
 
   // Convert the simplex tree into a hasse diagram
   start = std::chrono::system_clock::now();
   Gudhi::Hasse_complex<> hcpx(st);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Convert the simplex tree into a Hasse diagram in " << elapsed_sec << " ms.\n";
+  std::clog << "Convert the simplex tree into a Hasse diagram in " << elapsed_sec << " ms.\n";
 
 
-  std::cout << "Timings when using a simplex tree: \n";
+  std::clog << "Timings when using a simplex tree: \n";
   timing_persistence(st, p);
   timing_persistence(st, q);
   timing_persistence(st, p, q);
 
-  std::cout << "Timings when using a Hasse complex: \n";
+  std::clog << "Timings when using a Hasse complex: \n";
   timing_persistence(hcpx, p);
   timing_persistence(hcpx, q);
   timing_persistence(hcpx, p, q);
@@ -130,7 +130,7 @@ int main(int argc, char * argv[]) {
   }
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Running the complex destructors in " << elapsed_sec << " ms.\n";
+  std::clog << "Running the complex destructors in " << elapsed_sec << " ms.\n";
   return 0;
 }
 
@@ -145,13 +145,13 @@ timing_persistence(FilteredComplex & cpx
   Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, Field_Zp > pcoh(cpx);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Initialize pcoh in " << elapsed_sec << " ms.\n";
+  std::clog << "  Initialize pcoh in " << elapsed_sec << " ms.\n";
   // initializes the coefficient field for homology
   start = std::chrono::system_clock::now();
   pcoh.init_coefficients(p);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Initialize the coefficient field in " << elapsed_sec << " ms.\n";
+  std::clog << "  Initialize the coefficient field in " << elapsed_sec << " ms.\n";
 
   start = std::chrono::system_clock::now();
 
@@ -159,12 +159,12 @@ timing_persistence(FilteredComplex & cpx
 
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Compute persistent homology in Z/" << p << "Z in " << elapsed_sec << " ms.\n";
+  std::clog << "  Compute persistent homology in Z/" << p << "Z in " << elapsed_sec << " ms.\n";
   start = std::chrono::system_clock::now();
   }
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Run the persistence destructors in " << elapsed_sec << " ms.\n";
+  std::clog << "  Run the persistence destructors in " << elapsed_sec << " ms.\n";
 }
 
 template< typename FilteredComplex>
@@ -179,13 +179,13 @@ timing_persistence(FilteredComplex & cpx
   Gudhi::persistent_cohomology::Persistent_cohomology< FilteredComplex, Multi_field > pcoh(cpx);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Initialize pcoh in " << elapsed_sec << " ms.\n";
+  std::clog << "  Initialize pcoh in " << elapsed_sec << " ms.\n";
   // initializes the coefficient field for homology
   start = std::chrono::system_clock::now();
   pcoh.init_coefficients(p, q);
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Initialize the coefficient field in " << elapsed_sec << " ms.\n";
+  std::clog << "  Initialize the coefficient field in " << elapsed_sec << " ms.\n";
   // compute persistent homology, disgarding persistent features of life shorter than min_persistence
 
   start = std::chrono::system_clock::now();
@@ -194,11 +194,11 @@ timing_persistence(FilteredComplex & cpx
 
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Compute multi-field persistent homology in all coefficient fields Z/pZ "
+  std::clog << "  Compute multi-field persistent homology in all coefficient fields Z/pZ "
       << "with p in [" << p << ";" << q << "] in " << elapsed_sec << " ms.\n";
   start = std::chrono::system_clock::now();
   }
   end = std::chrono::system_clock::now();
   elapsed_sec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "  Run the persistence destructors in " << elapsed_sec << " ms.\n";
+  std::clog << "  Run the persistence destructors in " << elapsed_sec << " ms.\n";
 }

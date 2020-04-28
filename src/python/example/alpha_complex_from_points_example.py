@@ -46,9 +46,6 @@ if simplex_tree.find([4]):
 else:
     print("[4] Not found...")
 
-# Some insertions, simplex_tree needs to initialize filtrations
-simplex_tree.initialize_filtration()
-
 print("dimension=", simplex_tree.dimension())
 print("filtrations=")
 for simplex_with_filtration in simplex_tree.get_filtration():

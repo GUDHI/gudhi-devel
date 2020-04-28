@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  std::cout << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
+  std::clog << "Load complex with " << complex.num_vertices() << " vertices" << std::endl;
 
   int num_contractions = atoi(argv[3]);
 
@@ -158,10 +158,10 @@ int main(int argc, char *argv[]) {
                                 Gudhi::contraction::make_link_valid_contraction<EdgeProfile>(),
                                 new GH_visitor(complex));
 
-  std::cout << "Contract " << num_contractions << " edges" << std::endl;
+  std::clog << "Contract " << num_contractions << " edges" << std::endl;
   contractor.contract_edges(num_contractions);
 
-  std::cout << "Final complex has " <<
+  std::clog << "Final complex has " <<
       complex.num_vertices() << " vertices, " <<
       complex.num_edges() << " edges and " <<
       complex.num_triangles() << " triangles." << std::endl;

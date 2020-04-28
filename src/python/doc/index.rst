@@ -71,6 +71,7 @@ Wasserstein distance
 
 .. include:: wasserstein_distance_sum.inc
 
+
 Persistence representations
 ===========================
 
@@ -90,10 +91,3 @@ Point cloud utilities
 *********************
 
 .. include:: point_cloud_sum.inc
-
-Bibliography
-************
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
-   :style: unsrt

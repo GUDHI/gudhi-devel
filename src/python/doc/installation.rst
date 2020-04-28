@@ -175,8 +175,8 @@ Documentation
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
-`Matplotlib`_, `NumPy`_ and `SciPy`_ are also mandatory to build the
-documentation.
+`Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
+also mandatory to build the documentation.
 
 Run the following commands in a terminal:
 
@@ -192,8 +192,8 @@ CGAL
 ====
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require CGAL, a C++ library that provides easy access to efficient and
-reliable geometric algorithms.
+require `CGAL <https://www.cgal.org/>`_, a C++ library that provides easy
+access to efficient and reliable geometric algorithms.
 
 
 The procedure to install this library
@@ -210,6 +210,14 @@ The following examples requires CGAL version â‰¥ 4.11.0:
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+EagerPy
+=======
+
+Some Python functions can handle automatic differentiation (possibly only when
+a flag `enable_autodiff=True` is used). In order to reduce code duplication, we
+use `EagerPy <https://eagerpy.jonasrauber.de/>`_ which wraps arrays from
+PyTorch, TensorFlow and JAX in a common interface.
 
 Eigen
 =====
@@ -228,6 +236,13 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version â‰
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+Hnswlib
+=======
+
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`Hnswlib <https://github.com/nmslib/hnswlib>`_ as a backend if explicitly
+requested, to speed-up queries.
 
 Matplotlib
 ==========
@@ -251,12 +266,25 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+PyKeOps
+=======
+
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`PyKeOps <https://www.kernel-operations.io/keops/python/>`_ as a backend if
+explicitly requested, to speed-up queries using a GPU.
+
 Python Optimal Transport
 ========================
 
 The :doc:`Wasserstein distance </wasserstein_distance_user>`
 module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
+
+PyTorch
+=======
+
+`PyTorch <https://pytorch.org/>`_ is currently only used as a dependency of
+`PyKeOps`_, and in some tests.
 
 Scikit-learn
 ============

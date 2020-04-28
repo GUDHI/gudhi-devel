@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -7,9 +9,11 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+import errno
 import os
 
 __author__ = "Vincent Rouvreau"
@@ -32,6 +36,6 @@ def read_points_from_off_file(off_file=''):
         if os.path.isfile(off_file):
             return read_points_from_OFF_file(off_file.encode('utf-8'))
         else:
-            print("file " + off_file + " not found.")
-            return []
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    off_file)
 

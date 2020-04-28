@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
+import errno
+import os
 import matplotlib.pyplot as plot
 import gudhi
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -42,10 +46,11 @@ args = parser.parse_args()
 with open(args.file, "r") as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
-        print("#####################################################################")
+        print("##############################################################")
         print("RipsComplex creation from points read in a OFF file")
 
-        message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
+        message = "RipsComplex with max_edge_length=" + \
+            repr(args.max_edge_length)
         print(message)
 
         point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
@@ -68,6 +73,7 @@ with open(args.file, "r") as f:
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
-        print(args.file, "is not a valid OFF file")
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                args.file)
 
     f.close()

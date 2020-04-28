@@ -27,14 +27,14 @@
   #define GUDHI_CHECK_code(CODE)
 #endif
 
-#define PRINT(a) std::cerr << #a << ": " << (a) << " (DISP)" << std::endl
+#define PRINT(a) std::clog << #a << ": " << (a) << " (DISP)" << std::endl
 
 // #define DBG_VERBOSE
 #ifdef DBG_VERBOSE
-  #define DBG(a) std::cout << "DBG: " << (a) << std::endl
-  #define DBGMSG(a, b) std::cout << "DBG: " << a << b << std::endl
-  #define DBGVALUE(a) std::cout << "DBG: " <<  #a << ": " << a << std::endl
-  #define DBGCONT(a) std::cout << "DBG: container " << #a << " -> "; for (auto x : a) std::cout << x << ","; std::cout << std::endl
+  #define DBG(a) std::clog << "DBG: " << (a) << std::endl
+  #define DBGMSG(a, b) std::clog << "DBG: " << a << b << std::endl
+  #define DBGVALUE(a) std::clog << "DBG: " <<  #a << ": " << a << std::endl
+  #define DBGCONT(a) std::clog << "DBG: container " << #a << " -> "; for (auto x : a) std::clog << x << ","; std::clog << std::endl
 #else
   #define DBG(a) (void) 0
   #define DBGMSG(a, b) (void) 0
