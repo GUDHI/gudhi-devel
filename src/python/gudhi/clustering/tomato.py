@@ -229,7 +229,6 @@ class Tomato:
                 # 'float64' is slow except on super expensive GPUs. Allow it with some param?
                 XX = torch.tensor(self.points_, dtype=torch.float32)
                 if p == numpy.inf:
-                    assert False  # Not supported???
                     dd = (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs().max(-1).Kmin(k_DTM, dim=1)
                 elif p == 2:  # Any even integer?
                     dd = ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p).sum(-1).Kmin(k_DTM, dim=1)
@@ -284,10 +283,10 @@ class Tomato:
 
         if self.density_type_ in {"KDE", "logKDE"}:
             # FIXME: replace most assert with raise ValueError("blabla")
-            assert input_type == "points"
+            # assert input_type == "points"
             kde_params = self.params_.get("kde_params", dict())
             from sklearn.neighbors import KernelDensity
-            weights = KernelDensity(**kde_params).fit(X).score_samples(X)
+            weights = KernelDensity(**kde_params).fit(self.points_).score_samples(self.points_)
             if self.density_type_ == "KDE":
                 weights = numpy.exp(weights)
 
