@@ -86,9 +86,6 @@ int main(int argc, char **argv) {
         " - " << simplex.num_simplices() << " simplices - " <<
         simplex.num_vertices() << " vertices." << std::endl;
 
-    // Sort the simplices in the order of the filtration
-    simplex.initialize_filtration();
-
     std::clog << "Simplex_tree dim: " << simplex.dimension() << std::endl;
 
     Persistent_cohomology pcoh(simplex);

@@ -42,21 +42,19 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   };
 
  public:
-  Persistent_cohomology_interface(FilteredComplex* stptr)
-      : Base(*stptr),
-      stptr_(stptr) { }
-
-  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max)
+  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max=false)
       : Base(*stptr, persistence_dim_max),
         stptr_(stptr) { }
 
-  std::vector<std::pair<int, std::pair<double, double>>> get_persistence(int homology_coeff_field,
-                                                                         double min_persistence) {
+  // TODO: move to the constructors?
+  void compute_persistence(int homology_coeff_field, double min_persistence) {
     Base::init_coefficients(homology_coeff_field);
     Base::compute_persistent_cohomology(min_persistence);
+  }
 
-    auto const& persistent_pairs = Base::get_persistent_pairs();
+  std::vector<std::pair<int, std::pair<double, double>>> get_persistence() {
     std::vector<std::pair<int, std::pair<double, double>>> persistence;
+    auto const& persistent_pairs = Base::get_persistent_pairs();
     persistence.reserve(persistent_pairs.size());
     for (auto pair : persistent_pairs) {
       persistence.emplace_back(stptr_->dimension(get<0>(pair)),

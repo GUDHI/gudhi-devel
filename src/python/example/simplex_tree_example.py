@@ -42,7 +42,6 @@ print("simplices=")
 for simplex_with_filtration in st.get_simplices():
     print("(%s, %.2f)" % tuple(simplex_with_filtration))
 
-st.initialize_filtration()
 print("filtration=")
 for simplex_with_filtration in st.get_filtration():
     print("(%s, %.2f)" % tuple(simplex_with_filtration))
