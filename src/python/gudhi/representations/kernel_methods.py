@@ -67,7 +67,8 @@ def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein",
     Parameters:    
         X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams. 
         Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise kernel values are computed from the first list only.
-        kernel: kernel to use. It can be either a string ("sliced_wasserstein", "persistence_scale_space", "persistence_weighted_gaussian", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
+        kernel: kernel to use. It can be either a string ("sliced_wasserstein", "persistence_scale_space", "persistence_weighted_gaussian", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric.
+        **kwargs: optional keyword parameters. Any further parameters are passed directly to the kernel function. See the docs of the various kernel classes in this module.
 
     Returns: 
         numpy array of shape (nxm): kernel matrix.

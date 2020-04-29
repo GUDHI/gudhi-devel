@@ -13,7 +13,9 @@ from gudhi.representations import DiagramSelector, Clamping, Landscape, Silhouet
 
 D1 = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.], [0., np.inf], [5., np.inf]])
 
-proc1, proc2, proc3 = DiagramSelector(use=True, point_type="finite"), DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]), DiagramScaler(use=True, scalers=[([1], Clamping(maximum=.9))])
+proc1 = DiagramSelector(use=True, point_type="finite")
+proc2 = DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())])
+proc3 = DiagramScaler(use=True, scalers=[([1], Clamping(maximum=.9))])
 D1 = proc3(proc2(proc1(D1)))
 
 plt.scatter(D1[:,0], D1[:,1])
