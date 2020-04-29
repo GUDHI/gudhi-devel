@@ -29,18 +29,17 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
    * Compare two intervals by dimension, then by length.
    */
   struct cmp_intervals_by_dim_then_length {
-    explicit cmp_intervals_by_dim_then_length(FilteredComplex * sc)
-        : sc_(sc) { }
-
     template<typename Persistent_interval>
     bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
-      if (sc_->dimension(get < 0 > (p1)) == sc_->dimension(get < 0 > (p2)))
-        return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
-                > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
+      if (std::get<0>(p1) == std::get<0>(p2)) {
+        auto& i1 = std::get<1>(p1);
+        auto& i2 = std::get<1>(p2);
+        return std::get<1>(i1) - std::get<0>(i1) > std::get<1>(i2) - std::get<0>(i2);
+      }
       else
-        return (sc_->dimension(get < 0 > (p1)) > sc_->dimension(get < 0 > (p2)));
+        return (std::get<0>(p1) > std::get<0>(p2));
+        // Why does this sort by decreasing dimension?
     }
-    FilteredComplex* sc_;
   };
 
  public:
@@ -55,16 +54,17 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   }
 
   std::vector<std::pair<int, std::pair<double, double>>> get_persistence() {
-    // Custom sort and output persistence
-    cmp_intervals_by_dim_then_length cmp(stptr_);
-    auto persistent_pairs = Base::get_persistent_pairs();
-    std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
     std::vector<std::pair<int, std::pair<double, double>>> persistence;
+    auto const& persistent_pairs = Base::get_persistent_pairs();
+    persistence.reserve(persistent_pairs.size());
     for (auto pair : persistent_pairs) {
-      persistence.push_back(std::make_pair(stptr_->dimension(get<0>(pair)),
-                                           std::make_pair(stptr_->filtration(get<0>(pair)),
-                                                          stptr_->filtration(get<1>(pair)))));
+      persistence.emplace_back(stptr_->dimension(get<0>(pair)),
+                               std::make_pair(stptr_->filtration(get<0>(pair)),
+                                              stptr_->filtration(get<1>(pair))));
     }
+    // Custom sort and output persistence
+    cmp_intervals_by_dim_then_length cmp;
+    std::sort(std::begin(persistence), std::end(persistence), cmp);
     return persistence;
   }
 
@@ -107,28 +107,115 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   }
 
   std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs() {
-    auto pairs = Base::get_persistent_pairs();
-
     std::vector<std::pair<std::vector<int>, std::vector<int>>> persistence_pairs;
+    auto const& pairs = Base::get_persistent_pairs();
     persistence_pairs.reserve(pairs.size());
+    std::vector<int> birth;
+    std::vector<int> death;
     for (auto pair : pairs) {
-      std::vector<int> birth;
+      birth.clear();
       if (get<0>(pair) != stptr_->null_simplex()) {
         for (auto vertex : stptr_->simplex_vertex_range(get<0>(pair))) {
           birth.push_back(vertex);
         }
       }
 
-      std::vector<int> death;
+      death.clear();
       if (get<1>(pair) != stptr_->null_simplex()) {
+        death.reserve(birth.size()+1);
         for (auto vertex : stptr_->simplex_vertex_range(get<1>(pair))) {
           death.push_back(vertex);
         }
       }
 
-      persistence_pairs.push_back(std::make_pair(birth, death));
+      persistence_pairs.emplace_back(birth, death);
     }
     return persistence_pairs;
+  }
+
+  // TODO: (possibly at the python level)
+  // - an option to return only some of those vectors?
+  typedef std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> Generators;
+
+  Generators lower_star_generators() {
+    Generators out;
+    // diags[i] should be interpreted as vector<array<int,2>>
+    auto& diags = out.first;
+    // diagsinf[i] should be interpreted as vector<int>
+    auto& diagsinf = out.second;
+    for (auto pair : Base::get_persistent_pairs()) {
+      auto s = std::get<0>(pair);
+      auto t = std::get<1>(pair);
+      int dim = stptr_->dimension(s);
+      auto v = stptr_->vertex_with_same_filtration(s);
+      if(t == stptr_->null_simplex()) {
+        while(diagsinf.size() < dim+1) diagsinf.emplace_back();
+        diagsinf[dim].push_back(v);
+      } else {
+        while(diags.size() < dim+1) diags.emplace_back();
+        auto w = stptr_->vertex_with_same_filtration(t);
+        auto& d = diags[dim];
+        d.insert(d.end(), { v, w });
+      }
+    }
+    return out;
+  }
+
+  // An alternative, to avoid those different sizes, would be to "pad" vertex generator v as (v, v) or (v, -1). When using it as index, this corresponds to adding the vertex filtration values either on the diagonal of the distance matrix, or as an extra row or column.
+  // We could also merge the vectors for different dimensions into a single one, with an extra column for the dimension (converted to type double).
+  Generators flag_generators() {
+    Generators out;
+    // diags[0] should be interpreted as vector<array<int,3>> and other diags[i] as vector<array<int,4>>
+    auto& diags = out.first;
+    // diagsinf[0] should be interpreted as vector<int> and other diagsinf[i] as vector<array<int,2>>
+    auto& diagsinf = out.second;
+    for (auto pair : Base::get_persistent_pairs()) {
+      auto s = std::get<0>(pair);
+      auto t = std::get<1>(pair);
+      int dim = stptr_->dimension(s);
+      bool infinite = t == stptr_->null_simplex();
+      if(infinite) {
+        if(dim == 0) {
+          auto v = *std::begin(stptr_->simplex_vertex_range(s));
+          if(diagsinf.size()==0)diagsinf.emplace_back();
+          diagsinf[0].push_back(v);
+        } else {
+          auto e = stptr_->edge_with_same_filtration(s);
+          auto&& e_vertices = stptr_->simplex_vertex_range(e);
+          auto i = std::begin(e_vertices);
+          auto v1 = *i;
+          auto v2 = *++i;
+          GUDHI_CHECK(++i==std::end(e_vertices), "must be an edge");
+          while(diagsinf.size() < dim+1) diagsinf.emplace_back();
+          auto& d = diagsinf[dim];
+          d.insert(d.end(), { v1, v2 });
+        }
+      } else {
+        auto et = stptr_->edge_with_same_filtration(t);
+        auto&& et_vertices = stptr_->simplex_vertex_range(et);
+        auto it = std::begin(et_vertices);
+        auto w1 = *it;
+        auto w2 = *++it;
+        GUDHI_CHECK(++it==std::end(et_vertices), "must be an edge");
+        if(dim == 0) {
+          auto v = *std::begin(stptr_->simplex_vertex_range(s));
+          if(diags.size()==0)diags.emplace_back();
+          auto& d = diags[0];
+          d.insert(d.end(), { v, w1, w2 });
+        } else {
+          auto es = stptr_->edge_with_same_filtration(s);
+          auto&& es_vertices = stptr_->simplex_vertex_range(es);
+          auto is = std::begin(es_vertices);
+          auto v1 = *is;
+          auto v2 = *++is;
+          GUDHI_CHECK(++is==std::end(es_vertices), "must be an edge");
+          while(diags.size() < dim+1) diags.emplace_back();
+          auto& d = diags[dim];
+          d.insert(d.end(), { v1, v2, w1, w2 });
+        }
+      }
+    }
+    return out;
   }
 
  private:

@@ -9,6 +9,7 @@
 
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
+import numpy
 from numpy import array as np_array
 cimport simplex_tree
 
@@ -415,7 +416,7 @@ cdef class SimplexTree:
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
             0.0.
-            Sets min_persistence to -1.0 to see all values.
+            Set min_persistence to -1.0 to see all values.
         :type min_persistence: float.
         :param persistence_dim_max: If true, the persistent homology for the
             maximal dimension in the complex is computed. If false, it is
@@ -527,3 +528,49 @@ cdef class SimplexTree:
         """
         assert self.pcohptr != NULL, "compute_persistence() must be called before write_persistence_diagram()"
         self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
+
+    def lower_star_persistence_generators(self):
+        """Assuming this is a lower-star filtration, this function returns the persistence pairs,
+        where each simplex is replaced with the vertex that gave it its filtration value.
+
+        :returns: First the regular persistence pairs, grouped by dimension, with one vertex per extremity,
+            and second the essential features, grouped by dimension, with one vertex each
+        :rtype: Tuple[List[numpy.array[int] of shape (n,2)], List[numpy.array[int] of shape (m,)]]
+
+        :note: lower_star_persistence_generators requires that `persistence()` be called first.
+        """
+        assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.lower_star_generators()
+        normal = [np_array(d).reshape(-1,2) for d in gen.first]
+        infinite = [np_array(d) for d in gen.second]
+        return (normal, infinite)
+
+    def flag_persistence_generators(self):
+        """Assuming this is a flag complex, this function returns the persistence pairs,
+        where each simplex is replaced with the vertices of the edges that gave it its filtration value.
+
+        :returns: First the regular persistence pairs of dimension 0, with one vertex for birth and two for death;
+            then the other regular persistence pairs, grouped by dimension, with 2 vertices per extremity;
+            then the connected components, with one vertex each;
+            finally the other essential features, grouped by dimension, with 2 vertices for birth.
+        :rtype: Tuple[numpy.array[int] of shape (n,3), List[numpy.array[int] of shape (m,4)], numpy.array[int] of shape (l,), List[numpy.array[int] of shape (k,2)]]
+
+        :note: flag_persistence_generators requires that `persistence()` be called first.
+        """
+        assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.flag_generators()
+        if len(gen.first) == 0:
+            normal0 = numpy.empty((0,3))
+            normals = []
+        else:
+            l = iter(gen.first)
+            normal0 = np_array(next(l)).reshape(-1,3)
+            normals = [np_array(d).reshape(-1,4) for d in l]
+        if len(gen.second) == 0:
+            infinite0 = numpy.empty(0)
+            infinites = []
+        else:
+            l = iter(gen.second)
+            infinite0 = np_array(next(l))
+            infinites = [np_array(d).reshape(-1,2) for d in l]
+        return (normal0, normals, infinite0, infinites)
