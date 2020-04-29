@@ -8,6 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
+from gudhi.wasserstein.wasserstein import _proj_on_diag
 from gudhi.wasserstein import wasserstein_distance as pot
 from gudhi.hera import wasserstein_distance as hera
 import numpy as np
@@ -16,6 +17,12 @@ import pytest
 __author__ = "Theo Lacombe"
 __copyright__ = "Copyright (C) 2019 Inria"
 __license__ = "MIT"
+
+def test_proj_on_diag():
+    dgm = np.array([[1., 1.], [1., 2.], [3., 5.]])
+    assert np.array_equal(_proj_on_diag(dgm), [[1., 1.], [1.5, 1.5], [4., 4.]])
+    empty = np.empty((0, 2))
+    assert np.array_equal(_proj_on_diag(empty), empty)
 
 def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):
     diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974]])
@@ -70,7 +77,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         assert np.array_equal(match , [[0, -1], [1, -1]])
         match = wasserstein_distance(diag1, diag2, matching=True, internal_p=2., order=2.)[1]
         assert np.array_equal(match, [[0, 0], [1, 1], [2, -1]])
-        
+
 
 
 def hera_wrap(delta):

@@ -9,6 +9,7 @@
 
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
+import numpy
 from numpy import array as np_array
 cimport simplex_tree
 
@@ -90,7 +91,7 @@ cdef class SimplexTree:
             (with more :meth:`assign_filtration` or
             :meth:`make_filtration_non_decreasing` for instance) before calling
             any function that relies on the filtration property, like
-            :meth:`initialize_filtration`.
+            :meth:`persistence`.
         """
         self.get_ptr().assign_simplex_filtration(simplex, filtration)
 
@@ -98,16 +99,7 @@ cdef class SimplexTree:
         """This function initializes and sorts the simplicial complex
         filtration vector.
 
-        .. note::
-
-            This function must be launched before
-            :func:`persistence()<gudhi.SimplexTree.persistence>`,
-            :func:`betti_numbers()<gudhi.SimplexTree.betti_numbers>`,
-            :func:`persistent_betti_numbers()<gudhi.SimplexTree.persistent_betti_numbers>`,
-            or :func:`get_filtration()<gudhi.SimplexTree.get_filtration>`
-            after :func:`inserting<gudhi.SimplexTree.insert>` or
-            :func:`removing<gudhi.SimplexTree.remove_maximal_simplex>`
-            simplices.
+        .. deprecated:: 3.2.0
         """
         self.get_ptr().initialize_filtration()
 
@@ -139,9 +131,9 @@ cdef class SimplexTree:
 
             This function is not constant time because it can recompute
             dimension if required (can be triggered by
-            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            :func:`remove_maximal_simplex`
             or
-            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            :func:`prune_above_filtration`
             methods).
         """
         return self.get_ptr().dimension()
@@ -166,9 +158,9 @@ cdef class SimplexTree:
             This function must be used with caution because it disables
             dimension recomputation when required
             (this recomputation can be triggered by
-            :func:`remove_maximal_simplex()<gudhi.SimplexTree.remove_maximal_simplex>`
+            :func:`remove_maximal_simplex`
             or
-            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            :func:`prune_above_filtration`
             ).
         """
         self.get_ptr().set_dimension(<int>dimension)
@@ -182,10 +174,7 @@ cdef class SimplexTree:
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        return self.get_ptr().find_simplex(csimplex)
+        return self.get_ptr().find_simplex(simplex)
 
     def insert(self, simplex, filtration=0.0):
         """This function inserts the given N-simplex and its subfaces with the
@@ -202,11 +191,7 @@ cdef class SimplexTree:
             otherwise (whatever its original filtration value).
         :rtype:  bool
         """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        return self.get_ptr().insert_simplex_and_subfaces(csimplex,
-                                                        <double>filtration)
+        return self.get_ptr().insert(simplex, <double>filtration)
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
@@ -308,17 +293,12 @@ cdef class SimplexTree:
 
         .. note::
 
-            Be aware that removing is shifting data in a flat_map
-            (:func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>` to be done).
-
-        .. note::
-
             The dimension of the simplicial complex may be lower after calling
             remove_maximal_simplex than it was before. However,
-            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            :func:`upper_bound_dimension`
             method will return the old value, which
             remains a valid upper bound. If you care, you can call
-            :func:`dimension()<gudhi.SimplexTree.dimension>`
+            :func:`dimension`
             to recompute the exact dimension.
         """
         self.get_ptr().remove_maximal_simplex(simplex)
@@ -334,24 +314,14 @@ cdef class SimplexTree:
 
         .. note::
 
-            Some simplex tree functions require the filtration to be valid.
-            prune_above_filtration function is not launching
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            but returns the filtration modification
-            information. If the complex has changed , please call
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            to recompute it.
-
-        .. note::
-
             Note that the dimension of the simplicial complex may be lower
             after calling
-            :func:`prune_above_filtration()<gudhi.SimplexTree.prune_above_filtration>`
+            :func:`prune_above_filtration`
             than it was before. However,
-            :func:`upper_bound_dimension()<gudhi.SimplexTree.upper_bound_dimension>`
+            :func:`upper_bound_dimension`
             will return the old value, which remains a
             valid upper bound. If you care, you can call
-            :func:`dimension()<gudhi.SimplexTree.dimension>`
+            :func:`dimension`
             method to recompute the exact dimension.
         """
         return self.get_ptr().prune_above_filtration(filtration)
@@ -382,22 +352,86 @@ cdef class SimplexTree:
         :returns: True if any filtration value was modified,
             False if the filtration was already non-decreasing.
         :rtype: bool
-
-
-        .. note::
-
-            Some simplex tree functions require the filtration to be valid.
-            make_filtration_non_decreasing function is not launching
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            but returns the filtration modification
-            information. If the complex has changed , please call
-            :func:`initialize_filtration()<gudhi.SimplexTree.initialize_filtration>`
-            to recompute it.
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
+    def extend_filtration(self):
+        """ Extend filtration for computing extended persistence. This function only uses the 
+        filtration values at the 0-dimensional simplices, and computes the extended persistence 
+        diagram induced by the lower-star filtration computed with these values. 
+
+        .. note::
+
+            Note that after calling this function, the filtration 
+            values are actually modified within the Simplex_tree. 
+            The function :func:`extended_persistence`
+            retrieves the original values.
+
+        .. note::
+
+            Note that this code creates an extra vertex internally, so you should make sure that
+            the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
+        """
+        self.get_ptr().compute_extended_filtration()
+
+    def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
+        """This function retrieves good values for extended persistence, and separate the diagrams 
+        into the Ordinary, Relative, Extended+ and Extended- subdiagrams.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the persistence diagram point coordinates) to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :returns: A list of four persistence diagrams in the format described in :func:`persistence`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+
+        .. note::
+
+            This function should be called only if :func:`extend_filtration` has been called first!
+
+        .. note::
+
+            The coordinates of the persistence diagram points might be a little different than the
+            original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+            performed on these values during the computation of extended persistence.
+        """
+        cdef vector[pair[int, pair[double, double]]] persistence_result
+        if self.pcohptr != NULL:
+            del self.pcohptr
+        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
+        self.pcohptr.compute_persistence(homology_coeff_field, -1.)
+        persistence_result = self.pcohptr.get_persistence()
+        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
+
+
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
-        """This function returns the persistence of the simplicial complex.
+        """This function computes and returns the persistence of the simplicial complex.
+
+        :param homology_coeff_field: The homology coefficient field. Must be a
+            prime number. Default value is 11.
+        :type homology_coeff_field: int.
+        :param min_persistence: The minimum persistence value to take into
+            account (strictly greater than min_persistence). Default value is
+            0.0.
+            Set min_persistence to -1.0 to see all values.
+        :type min_persistence: float.
+        :param persistence_dim_max: If true, the persistent homology for the
+            maximal dimension in the complex is computed. If false, it is
+            ignored. Default is false.
+        :type persistence_dim_max: bool
+        :returns: The persistence of the simplicial complex.
+        :rtype:  list of pairs(dimension, pair(birth, death))
+        """
+        self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
+        return self.pcohptr.get_persistence()
+
+    def compute_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+        """This function computes the persistence of the simplicial complex, so it can be accessed through
+        :func:`persistent_betti_numbers`, :func:`persistence_pairs`, etc. This function is equivalent to :func:`persistence`
+        when you do not want the list :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number. Default value is 11.
@@ -411,16 +445,12 @@ cdef class SimplexTree:
             maximal dimension in the complex is computed. If false, it is
             ignored. Default is false.
         :type persistence_dim_max: bool
-        :returns: The persistence of the simplicial complex.
-        :rtype:  list of pairs(dimension, pair(birth, death))
+        :returns: Nothing.
         """
         if self.pcohptr != NULL:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
-        cdef vector[pair[int, pair[double, double]]] persistence_result
-        if self.pcohptr != NULL:
-            persistence_result = self.pcohptr.get_persistence(homology_coeff_field, min_persistence)
-        return persistence_result
+        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
@@ -429,16 +459,11 @@ cdef class SimplexTree:
         :rtype:  list of int
 
         :note: betti_numbers function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            :func:`compute_persistence`
             function to be launched first.
         """
-        cdef vector[int] bn_result
-        if self.pcohptr != NULL:
-            bn_result = self.pcohptr.betti_numbers()
-        else:
-            print("betti_numbers function requires persistence function"
-                  " to be launched first.")
-        return bn_result
+        assert self.pcohptr != NULL, "compute_persistence() must be called before betti_numbers()"
+        return self.pcohptr.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the
@@ -455,16 +480,11 @@ cdef class SimplexTree:
         :rtype:  list of int
 
         :note: persistent_betti_numbers function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            :func:`compute_persistence`
             function to be launched first.
         """
-        cdef vector[int] pbn_result
-        if self.pcohptr != NULL:
-            pbn_result = self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
-        else:
-            print("persistent_betti_numbers function requires persistence function"
-                  " to be launched first.")
-        return pbn_result
+        assert self.pcohptr != NULL, "compute_persistence() must be called before persistent_betti_numbers()"
+        return self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
@@ -476,16 +496,11 @@ cdef class SimplexTree:
         :rtype:  numpy array of dimension 2
 
         :note: intervals_in_dim function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            :func:`compute_persistence`
             function to be launched first.
         """
-        cdef vector[pair[double,double]] intervals_result
-        if self.pcohptr != NULL:
-            intervals_result = self.pcohptr.intervals_in_dimension(dimension)
-        else:
-            print("intervals_in_dim function requires persistence function"
-                  " to be launched first.")
-        return np_array(intervals_result)
+        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        return np_array(self.pcohptr.intervals_in_dimension(dimension))
 
     def persistence_pairs(self):
         """This function returns a list of persistence birth and death simplices pairs.
@@ -494,33 +509,68 @@ cdef class SimplexTree:
         :rtype:  list of pair of list of int
 
         :note: persistence_pairs function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            :func:`compute_persistence`
             function to be launched first.
         """
-        cdef vector[pair[vector[int],vector[int]]] persistence_pairs_result
-        if self.pcohptr != NULL:
-            persistence_pairs_result = self.pcohptr.persistence_pairs()
-        else:
-            print("persistence_pairs function requires persistence function"
-                  " to be launched first.")
-        return persistence_pairs_result
+        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_pairs()"
+        return self.pcohptr.persistence_pairs()
 
-    def write_persistence_diagram(self, persistence_file=''):
+    def write_persistence_diagram(self, persistence_file):
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
-        :param persistence_file: The specific dimension.
+        :param persistence_file: Name of the file.
         :type persistence_file: string.
 
         :note: intervals_in_dim function requires
-            :func:`persistence()<gudhi.SimplexTree.persistence>`
+            :func:`compute_persistence`
             function to be launched first.
         """
-        if self.pcohptr != NULL:
-            if persistence_file != '':
-                self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
-            else:
-                print("persistence_file must be specified")
+        assert self.pcohptr != NULL, "compute_persistence() must be called before write_persistence_diagram()"
+        self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
+
+    def lower_star_persistence_generators(self):
+        """Assuming this is a lower-star filtration, this function returns the persistence pairs,
+        where each simplex is replaced with the vertex that gave it its filtration value.
+
+        :returns: First the regular persistence pairs, grouped by dimension, with one vertex per extremity,
+            and second the essential features, grouped by dimension, with one vertex each
+        :rtype: Tuple[List[numpy.array[int] of shape (n,2)], List[numpy.array[int] of shape (m,)]]
+
+        :note: lower_star_persistence_generators requires that `persistence()` be called first.
+        """
+        assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.lower_star_generators()
+        normal = [np_array(d).reshape(-1,2) for d in gen.first]
+        infinite = [np_array(d) for d in gen.second]
+        return (normal, infinite)
+
+    def flag_persistence_generators(self):
+        """Assuming this is a flag complex, this function returns the persistence pairs,
+        where each simplex is replaced with the vertices of the edges that gave it its filtration value.
+
+        :returns: First the regular persistence pairs of dimension 0, with one vertex for birth and two for death;
+            then the other regular persistence pairs, grouped by dimension, with 2 vertices per extremity;
+            then the connected components, with one vertex each;
+            finally the other essential features, grouped by dimension, with 2 vertices for birth.
+        :rtype: Tuple[numpy.array[int] of shape (n,3), List[numpy.array[int] of shape (m,4)], numpy.array[int] of shape (l,), List[numpy.array[int] of shape (k,2)]]
+
+        :note: flag_persistence_generators requires that `persistence()` be called first.
+        """
+        assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
+        gen = self.pcohptr.flag_generators()
+        if len(gen.first) == 0:
+            normal0 = numpy.empty((0,3))
+            normals = []
         else:
-            print("intervals_in_dim function requires persistence function"
-                  " to be launched first.")
+            l = iter(gen.first)
+            normal0 = np_array(next(l)).reshape(-1,3)
+            normals = [np_array(d).reshape(-1,4) for d in l]
+        if len(gen.second) == 0:
+            infinite0 = numpy.empty(0)
+            infinites = []
+        else:
+            l = iter(gen.second)
+            infinite0 = np_array(next(l))
+            infinites = [np_array(d).reshape(-1,2) for d in l]
+        return (normal0, normals, infinite0, infinites)

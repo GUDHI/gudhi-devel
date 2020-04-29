@@ -158,10 +158,3 @@ Examples.
 ---------
 
 End user programs are available in python/example/ folder.
-
-Bibliography
-============
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docnames
-   :style: unsrt

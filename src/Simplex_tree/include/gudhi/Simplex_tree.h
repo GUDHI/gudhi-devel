@@ -42,6 +42,20 @@
 
 namespace Gudhi {
 
+/**
+ * \class Extended_simplex_type Simplex_tree.h gudhi/Simplex_tree.h
+ * \brief Extended simplex type data structure for representing the type of simplices in an extended filtration.
+ *
+ * \details The extended simplex type can be either UP (which means
+ * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+ * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+ * EXTRA (which means the simplex is the cone point).
+ *
+ * Details may be found in \cite Cohen-Steiner2009 and section 2.2 in \cite Carriere16.
+ *
+ */
+enum class Extended_simplex_type {UP, DOWN, EXTRA};
+
 struct Simplex_tree_options_full_featured;
 
 /**
@@ -87,6 +101,8 @@ class Simplex_tree {
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
+
+
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
     void assign_key(Simplex_key k) { key_ = k; }
@@ -99,6 +115,12 @@ class Simplex_tree {
     // Undefined so it will not link
     void assign_key(Simplex_key);
     Simplex_key key() const;
+  };
+  struct Extended_filtration_data {
+    Filtration_value minval;
+    Filtration_value maxval;
+    Extended_filtration_data(){}
+    Extended_filtration_data(Filtration_value vmin, Filtration_value vmax): minval(vmin), maxval(vmax) {}
   };
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
@@ -120,7 +142,10 @@ class Simplex_tree {
 
  public:
   /** \brief Handle type to a simplex contained in the simplicial complex represented
-   * by the simplex tree. */
+   * by the simplex tree.
+   *
+   * They are essentially pointers into internal vectors, and any insertion or removal
+   * of a simplex may invalidate any other Simplex_handle in the complex. */
   typedef typename Dictionary::iterator Simplex_handle;
 
  private:
@@ -233,11 +258,9 @@ class Simplex_tree {
    *
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
-   * was initialized, please call `initialize_filtration()` to recompute it. */
+   * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it. */
   Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) {
-    if (filtration_vect_.empty()) {
-      initialize_filtration();
-    }
+    maybe_initialize_filtration();
     return filtration_vect_;
   }
 
@@ -463,7 +486,7 @@ class Simplex_tree {
  public:
   /** \brief Returns the key associated to a simplex.
    *
-   * The filtration must be initialized.
+   * If no key has been assigned, returns `null_key()`.
    * \pre SimplexTreeOptions::store_key
    */
   static Simplex_key key(Simplex_handle sh) {
@@ -473,7 +496,6 @@ class Simplex_tree {
   /** \brief Returns the simplex that has index idx in the filtration.
    *
    * The filtration must be initialized.
-   * \pre SimplexTreeOptions::store_key
    */
   Simplex_handle simplex(Simplex_key idx) const {
     return filtration_vect_[idx];
@@ -509,8 +531,7 @@ class Simplex_tree {
     return Dictionary_it(nullptr);
   }
 
-  /** \brief Returns a key different for all keys associated to the
-   * simplices of the simplicial complex. */
+  /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
   static Simplex_key null_key() {
     return -1;
   }
@@ -855,15 +876,13 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Initializes the filtrations, i.e. sort the
-   * simplices according to their order in the filtration and initializes all Simplex_keys.
+  /** \brief Initializes the filtration cache, i.e. sorts the
+   * simplices according to their order in the filtration.
    *
-   * After calling this method, filtration_simplex_range() becomes valid, and each simplex is
-   * assigned a Simplex_key corresponding to its order in the filtration (from 0 to m-1 for a
-   * simplicial complex with m simplices).
+   * It always recomputes the cache, even if one already exists.
    *
-   * Will be automatically called when calling filtration_simplex_range()
-   * if the filtration has never been initialized yet. */
+   * Any insertion, deletion or change of filtration value invalidates this cache,
+   * which can be cleared with clear_filtration().  */
   void initialize_filtration() {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
@@ -884,6 +903,21 @@ class Simplex_tree {
 #else
     std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
 #endif
+  }
+  /** \brief Initializes the filtration cache if it isn't initialized yet.
+   *
+   * Automatically called by filtration_simplex_range(). */
+  void maybe_initialize_filtration() {
+    if (filtration_vect_.empty()) {
+      initialize_filtration();
+    }
+  }
+  /** \brief Clears the filtration cache produced by initialize_filtration().
+   *
+   * Useful when initialize_filtration() has already been called and we perform an operation
+   * (say an insertion) that invalidates the cache. */
+  void clear_filtration() {
+    filtration_vect_.clear();
   }
 
  private:
@@ -1106,6 +1140,7 @@ class Simplex_tree {
    * 1 when calling the method. */
   void expansion(int max_dim) {
     if (max_dim <= 1) return;
+    clear_filtration(); // Drop the cache.
     dimension_ = max_dim;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
@@ -1316,9 +1351,6 @@ class Simplex_tree {
   /** \brief This function ensures that each simplex has a higher filtration value than its faces by increasing the
    * filtration values.
    * @return True if any filtration value was modified, false if the filtration was already non-decreasing.
-   * \post Some simplex tree functions require the filtration to be valid. `make_filtration_non_decreasing()`
-   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
-   * complex has changed , please call `initialize_filtration()` to recompute it.
    * 
    * If a simplex has a `NaN` filtration value, it is considered lower than any other defined filtration value.
    */
@@ -1330,6 +1362,8 @@ class Simplex_tree {
         modified |= rec_make_filtration_non_decreasing(simplex.second.children());
       }
     }
+    if(modified)
+      clear_filtration(); // Drop the cache.
     return modified;
   }
 
@@ -1369,16 +1403,16 @@ class Simplex_tree {
  public:
   /** \brief Prune above filtration value given as parameter.
    * @param[in] filtration Maximum threshold value.
-   * @return The filtration modification information.
-   * \post Some simplex tree functions require the filtration to be valid. `prune_above_filtration()`
-   * function is not launching `initialize_filtration()` but returns the filtration modification information. If the
-   * complex has changed , please call `initialize_filtration()` to recompute it.
+   * @return True if any simplex was removed, false if all simplices already had a value below the threshold.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
    * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
-    return rec_prune_above_filtration(root(), filtration);
+    bool modified = rec_prune_above_filtration(root(), filtration);
+    if(modified)
+      clear_filtration(); // Drop the cache.
+    return modified;
   }
 
  private:
@@ -1445,7 +1479,6 @@ class Simplex_tree {
    * @param[in] sh Simplex handle on the maximal simplex to remove.
    * \pre Please check the simplex has no coface before removing it.
    * \exception std::invalid_argument In debug mode, if sh has children.
-   * \post Be aware that removing is shifting data in a flat_map (initialize_filtration to be done).
    * \post Note that the dimension of the simplicial complex may be lower after calling `remove_maximal_simplex()`
    * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
@@ -1469,6 +1502,109 @@ class Simplex_tree {
       // dimension may need to be lowered
       dimension_to_be_lowered_ = true;
     }
+  }
+
+  /** \brief Retrieve the original filtration value for a given simplex in the Simplex_tree. Since the 
+   * computation of extended persistence requires modifying the filtration values, this function can be used
+   * to recover the original values. Moreover, computing extended persistence requires adding new simplices
+   * in the Simplex_tree. Hence, this function also outputs the type of each simplex. It can be either UP (which means
+   * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
+   * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
+   * EXTRA (which means the simplex is the cone point). See the definition of Extended_simplex_type. Note that if the simplex type is DOWN, the original filtration value
+   * is set to be the original filtration value of the corresponding (not coned) original simplex. 
+   * \pre This function should be called only if `extend_filtration()` has been called first!
+   * \post The output filtration value is supposed to be the same, but might be a little different, than the
+   * original filtration value, due to the internal transformation (scaling to [-2,-1]) that is 
+   * performed on the original filtration values during the computation of extended persistence.
+   * @param[in] f Filtration value of the simplex in the extended (i.e., modified) filtration.
+   * @param[in] efd Structure containing the minimum and maximum values of the original filtration. This the output of `extend_filtration()`.
+   * @return A pair containing the original filtration value of the simplex as well as the simplex type.
+   */
+  std::pair<Filtration_value, Extended_simplex_type> decode_extended_filtration(Filtration_value f, const Extended_filtration_data& efd){
+    std::pair<Filtration_value, Extended_simplex_type> p;
+    Filtration_value minval = efd.minval;
+    Filtration_value maxval = efd.maxval;
+    if (f >= -2 && f <= -1){
+      p.first = minval + (maxval-minval)*(f + 2); p.second = Extended_simplex_type::UP;
+    }
+    else if (f >= 1 && f <= 2){
+      p.first = minval - (maxval-minval)*(f - 2); p.second = Extended_simplex_type::DOWN;
+    }
+    else{
+      p.first = std::numeric_limits<Filtration_value>::quiet_NaN(); p.second = Extended_simplex_type::EXTRA;
+    }
+    return p;
+  };
+
+  /** \brief Extend filtration for computing extended persistence. 
+   * This function only uses the filtration values at the 0-dimensional simplices, 
+   * and computes the extended persistence diagram induced by the lower-star filtration 
+   * computed with these values. 
+   * \post Note that after calling this function, the filtration 
+   * values are actually modified. The function `decode_extended_filtration()` 
+   * retrieves the original values and outputs the extended simplex type.
+   * \pre Note that this code creates an extra vertex internally, so you should make sure that
+   * the Simplex tree does not contain a vertex with the largest Vertex_handle.
+   * @return A data structure containing the maximum and minimum values of the original filtration.
+   * It is meant to be provided as input to `decode_extended_filtration()` in order to retrieve
+   * the original filtration values for each simplex.
+   */
+  Extended_filtration_data extend_filtration() {
+    clear_filtration(); // Drop the cache.
+
+    // Compute maximum and minimum of filtration values
+    Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
+    Filtration_value minval = std::numeric_limits<Filtration_value>::infinity();
+    Filtration_value maxval = -std::numeric_limits<Filtration_value>::infinity();
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
+      Filtration_value f = this->filtration(sh);
+      minval = std::min(minval, f);
+      maxval = std::max(maxval, f);
+      maxvert = std::max(sh->first, maxvert);
+    }
+    
+    GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
+    maxvert += 1;
+
+    Simplex_tree st_copy = *this;
+
+    // Add point for coning the simplicial complex
+    this->insert_simplex({maxvert}, -3);
+
+    // For each simplex
+    std::vector<Vertex_handle> vr;
+    for (auto sh_copy : st_copy.complex_simplex_range()){
+
+      // Locate simplex
+      vr.clear();
+      for (auto vh : st_copy.simplex_vertex_range(sh_copy)){
+        vr.push_back(vh);
+      }
+      auto sh = this->find(vr);
+
+      // Create cone on simplex
+      vr.push_back(maxvert);
+      if (this->dimension(sh) == 0){
+        Filtration_value v = this->filtration(sh);
+        Filtration_value scaled_v = (v-minval)/(maxval-minval);
+        // Assign ascending value between -2 and -1 to vertex
+        this->assign_filtration(sh, -2 + scaled_v);
+        // Assign descending value between 1 and 2 to cone on vertex
+        this->insert_simplex(vr, 2 - scaled_v);
+      }
+      else{
+        // Assign value -3 to simplex and cone on simplex
+        this->assign_filtration(sh, -3);
+        this->insert_simplex(vr, -3);
+      }
+    }
+
+    // Automatically assign good values for simplices
+    this->make_filtration_non_decreasing();
+
+    // Return the filtration data 
+    Extended_filtration_data efd(minval, maxval);
+    return efd;
   }
 
   /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.

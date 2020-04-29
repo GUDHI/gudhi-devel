@@ -9,8 +9,14 @@
 
 import numpy
 
+# TODO: https://github.com/facebookresearch/faiss
 
-class KNN:
+__author__ = "Marc Glisse"
+__copyright__ = "Copyright (C) 2020 Inria"
+__license__ = "MIT"
+
+
+class KNearestNeighbors:
     """
     Class wrapping several implementations for computing the k nearest neighbors in a point set.
     """
@@ -36,6 +42,10 @@ class KNN:
             sort_results (bool): if True, then distances and indices of each point are
                 sorted on return, so that the first column contains the closest points.
                 Otherwise, neighbors are returned in an arbitrary order. Defaults to True.
+            enable_autodiff (bool): if the input is a torch.tensor, jax.numpy.ndarray or tensorflow.Tensor, this
+                instructs the function to compute distances in a way that works with automatic differentiation.
+                This is experimental, not supported for all metrics, and requires the package EagerPy.
+                Defaults to False.
             kwargs: additional parameters are forwarded to the backends.
         """
         self.k = k
@@ -64,6 +74,8 @@ class KNN:
                 self.params["implementation"] = "ckdtree"
             else:
                 self.params["implementation"] = "sklearn"
+        if not return_distance:
+            self.params["enable_autodiff"] = False
 
     def fit_transform(self, X, y=None):
         return self.fit(X).transform(X)
@@ -74,6 +86,14 @@ class KNN:
             X (numpy.array): coordinates for reference points.
         """
         self.ref_points = X
+        if self.params.get("enable_autodiff", False):
+            import eagerpy as ep
+
+            X = ep.astensor(X)
+            if self.params["implementation"] != "keops" or not isinstance(X, ep.PyTorchTensor):
+                # I don't know a clever way to reuse a GPU tensor from tensorflow in pytorch
+                # without copying to/from the CPU.
+                X = X.numpy()
         if self.params["implementation"] == "ckdtree":
             # sklearn could handle this, but it is much slower
             from scipy.spatial import cKDTree
@@ -109,31 +129,122 @@ class KNN:
         """
         Args:
             X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed".
+
+        Returns:
+            numpy.array: if return_index, an array of shape (len(X), k) with the indices (in the argument
+            of :func:`fit`) of the k nearest neighbors to the points of X. If return_distance, an array of the
+            same shape with the distances to those neighbors. If both, a tuple with the two arrays, in this order.
         """
+        if self.params.get("enable_autodiff", False):
+            # pykeops does not support autodiff for kmin yet, but when it does in the future,
+            # we may want a special path.
+            import eagerpy as ep
+
+            save_return_index = self.return_index
+            self.return_index = True
+            self.return_distance = False
+            self.params["enable_autodiff"] = False
+            try:
+                newX = ep.astensor(X)
+                if self.params["implementation"] != "keops" or (
+                    not isinstance(newX, ep.PyTorchTensor) and not isinstance(newX, ep.NumPyTensor)
+                ):
+                    newX = newX.numpy()
+                else:
+                    newX = newX.raw
+                neighbors = self.transform(newX)
+            finally:
+                self.return_index = save_return_index
+                self.return_distance = True
+                self.params["enable_autodiff"] = True
+            # We can implement more later as needed
+            assert self.metric == "minkowski"
+            p = self.params["p"]
+            Y = ep.astensor(self.ref_points)
+            neighbor_pts = Y[
+                neighbors,
+            ]
+            diff = neighbor_pts - X[:, None, :]
+            if isinstance(diff, ep.PyTorchTensor):
+                # https://github.com/jonasrauber/eagerpy/issues/6
+                distances = ep.astensor(diff.raw.norm(p, -1))
+            else:
+                distances = diff.norms.lp(p, -1)
+            if self.return_index:
+                return neighbors, distances.raw
+            else:
+                return distances.raw
+
         metric = self.metric
         k = self.k
 
         if metric == "precomputed":
             # scikit-learn could handle that, but they insist on calling fit() with an unused square array, which is too unnatural.
-            X = numpy.array(X)
             if self.return_index:
-                neighbors = numpy.argpartition(X, k - 1)[:, 0:k]
-                if self.params.get("sort_results", True):
-                    X = numpy.take_along_axis(X, neighbors, axis=-1)
-                    ngb_order = numpy.argsort(X, axis=-1)
-                    neighbors = numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+                n_jobs = self.params.get("n_jobs", 1)
+                # Supposedly numpy can be compiled with OpenMP and handle this, but nobody does that?!
+                if n_jobs == 1:
+                    neighbors = numpy.argpartition(X, k - 1)[:, 0:k]
+                    if self.params.get("sort_results", True):
+                        X = numpy.take_along_axis(X, neighbors, axis=-1)
+                        ngb_order = numpy.argsort(X, axis=-1)
+                        neighbors = numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+                    else:
+                        ngb_order = neighbors
+                    if self.return_distance:
+                        distances = numpy.take_along_axis(X, ngb_order, axis=-1)
+                        return neighbors, distances
+                    else:
+                        return neighbors
                 else:
-                    ngb_order = neighbors
-                if self.return_distance:
-                    distances = numpy.take_along_axis(X, ngb_order, axis=-1)
-                    return neighbors, distances
-                else:
-                    return neighbors
+                    from joblib import Parallel, delayed, effective_n_jobs
+                    from sklearn.utils import gen_even_slices
+
+                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
+                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    if self.params.get("sort_results", True):
+
+                        def func(M):
+                            neighbors = numpy.argpartition(M, k - 1)[:, 0:k]
+                            Y = numpy.take_along_axis(M, neighbors, axis=-1)
+                            ngb_order = numpy.argsort(Y, axis=-1)
+                            return numpy.take_along_axis(neighbors, ngb_order, axis=-1)
+
+                    else:
+
+                        def func(M):
+                            return numpy.argpartition(M, k - 1)[:, 0:k]
+
+                    neighbors = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
+                    if self.return_distance:
+                        distances = numpy.take_along_axis(X, neighbors, axis=-1)
+                        return neighbors, distances
+                    else:
+                        return neighbors
             if self.return_distance:
-                distances = numpy.partition(X, k - 1)[:, 0:k]
-                if self.params.get("sort_results"):
-                    # partition is not guaranteed to sort the lower half, although it often does
-                    distances.sort(axis=-1)
+                n_jobs = self.params.get("n_jobs", 1)
+                if n_jobs == 1:
+                    distances = numpy.partition(X, k - 1)[:, 0:k]
+                    if self.params.get("sort_results"):
+                        # partition is not guaranteed to sort the lower half, although it often does
+                        distances.sort(axis=-1)
+                else:
+                    from joblib import Parallel, delayed, effective_n_jobs
+                    from sklearn.utils import gen_even_slices
+
+                    if self.params.get("sort_results"):
+
+                        def func(M):
+                            # Not partitioning in place, because we should not modify the user's array?
+                            r = numpy.partition(M, k - 1)[:, 0:k]
+                            r.sort(axis=-1)
+                            return r
+
+                    else:
+                        func = lambda M: numpy.partition(M, k - 1)[:, 0:k]
+                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
+                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    distances = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
                 return distances
             return None
 
@@ -158,12 +269,11 @@ class KNN:
             from pykeops.torch import LazyTensor
 
             # 'float64' is slow except on super expensive GPUs. Allow it with some param?
-            XX = torch.tensor(X, dtype=torch.float32)
+            XX = torch.as_tensor(X, dtype=torch.float32)
             if X is self.ref_points:
                 YY = XX
             else:
-                YY = torch.tensor(self.ref_points, dtype=torch.float32)
-
+                YY = torch.as_tensor(self.ref_points, dtype=torch.float32)
             p = self.params["p"]
             if p == numpy.inf:
                 # Requires pykeops 1.4 or later
@@ -188,7 +298,6 @@ class KNN:
                     distances = distances ** (1.0 / p)
                 return distances
             return None
-        # FIXME: convert everything back to numpy arrays or not?
 
         if self.params["implementation"] == "ckdtree":
             qargs = {key: val for key, val in self.params.items() if key in {"p", "eps", "n_jobs"}}

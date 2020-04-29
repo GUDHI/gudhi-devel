@@ -16,8 +16,6 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
-#include "Persistent_cohomology_interface.h"
-
 #include <iostream>
 #include <vector>
 #include <utility>  // std::pair
@@ -37,18 +35,25 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Filtered_simplices = std::vector<Simplex_and_filtration>;
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
+  using Extended_filtration_data = typename Base::Extended_filtration_data;
 
  public:
-  bool find_simplex(const Simplex& vh) {
-    return (Base::find(vh) != Base::null_simplex());
+
+  Extended_filtration_data efd;
+  
+  bool find_simplex(const Simplex& simplex) {
+    return (Base::find(simplex) != Base::null_simplex());
   }
 
-  void assign_simplex_filtration(const Simplex& vh, Filtration_value filtration) {
-    Base::assign_filtration(Base::find(vh), filtration);
+  void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration) {
+    Base::assign_filtration(Base::find(simplex), filtration);
+    Base::clear_filtration();
   }
 
   bool insert(const Simplex& simplex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
+    if (result.first != Base::null_simplex())
+      Base::clear_filtration();
     return (result.second);
   }
 
@@ -82,7 +87,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   void remove_maximal_simplex(const Simplex& simplex) {
     Base::remove_maximal_simplex(Base::find(simplex));
-    Base::initialize_filtration();
+    Base::clear_filtration();
   }
 
   Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex) {
@@ -117,9 +122,39 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return cofaces;
   }
 
-  void create_persistence(Gudhi::Persistent_cohomology_interface<Base>* pcoh) {
-    Base::initialize_filtration();
-    pcoh = new Gudhi::Persistent_cohomology_interface<Base>(*this);
+  void compute_extended_filtration() {
+    this->efd = this->extend_filtration();
+    return;
+  }
+
+  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm, Filtration_value min_persistence){
+    std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> new_dgm(4);
+    for (unsigned int i = 0; i < dgm.size(); i++){
+      std::pair<Filtration_value, Extended_simplex_type> px = this->decode_extended_filtration(dgm[i].second.first, this->efd);
+      std::pair<Filtration_value, Extended_simplex_type> py = this->decode_extended_filtration(dgm[i].second.second, this->efd);
+      std::pair<int, std::pair<Filtration_value, Filtration_value>> pd_point = std::make_pair(dgm[i].first, std::make_pair(px.first, py.first));
+      if(std::abs(px.first - py.first) > min_persistence){
+        //Ordinary
+        if (px.second == Extended_simplex_type::UP && py.second == Extended_simplex_type::UP){
+          new_dgm[0].push_back(pd_point);
+        }
+        // Relative
+        else if (px.second == Extended_simplex_type::DOWN && py.second == Extended_simplex_type::DOWN){
+          new_dgm[1].push_back(pd_point);
+        }
+        else{
+          // Extended+
+          if (px.first < py.first){
+            new_dgm[2].push_back(pd_point);
+          }
+          //Extended-
+          else{
+            new_dgm[3].push_back(pd_point);
+          }
+        }
+      }
+    }
+    return new_dgm;
   }
 
   // Iterator over the simplex tree

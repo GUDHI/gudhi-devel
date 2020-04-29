@@ -7,11 +7,15 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .knn import KNN
+from .knn import KNearestNeighbors
 import numpy as np
 
+__author__ = "Marc Glisse"
+__copyright__ = "Copyright (C) 2020 Inria"
+__license__ = "MIT"
 
-class DTM:
+
+class DistanceToMeasure:
     """
     Class to compute the distance to the empirical measure defined by a point set, as introduced in :cite:`dtm`.
     """
@@ -21,7 +25,9 @@ class DTM:
         Args:
             k (int): number of neighbors (possibly including the point itself).
             q (float): order used to compute the distance to measure. Defaults to 2.
-            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNN`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that
+                metric="neighbors" means that :func:`transform` expects an array with the distances
+                to the k nearest neighbors.
         """
         self.k = k
         self.q = q
@@ -36,14 +42,22 @@ class DTM:
             X (numpy.array): coordinates for mass points.
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
-            self.knn = KNN(self.k, return_index=False, return_distance=True, sort_results=False, **self.params)
+            self.knn = KNearestNeighbors(
+                self.k, return_index=False, return_distance=True, sort_results=False, **self.params
+            )
             self.knn.fit(X)
         return self
 
     def transform(self, X):
         """
         Args:
-            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed", or distances to the k nearest neighbors if metric is "neighbors" (if the array has more than k columns, the remaining ones are ignored).
+            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed",
+                or distances to the k nearest neighbors if metric is "neighbors" (if the array has more
+                than k columns, the remaining ones are ignored).
+
+        Returns:
+            numpy.array: a 1-d array with, for each point of X, its distance to the measure defined
+            by the argument of :func:`fit`.
         """
         if self.params["metric"] == "neighbors":
             distances = X[:, : self.k]
