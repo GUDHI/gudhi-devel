@@ -68,11 +68,16 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     return persistence;
   }
 
+  // This function computes the top-dimensional cofaces associated to the positive and negative
+  // simplices of a cubical complex. The output format is a vector of vectors of three integers,
+  // which are [homological dimension, index of top-dimensional coface of positive simplex,
+  // index of top-dimensional coface of negative simplex]. If the topological feature is essential,
+  // then the index of top-dimensional coface of negative simplex is arbitrarily set to -1.
   std::vector<std::vector<int>> cofaces_of_cubical_persistence_pairs() {
 
     // Warning: this function is meant to be used with CubicalComplex only!!
 
-    auto pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
+    auto&& pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
       persistent_cohomology::Field_Zp>::get_persistent_pairs();
 
     // Gather all top-dimensional cells and store their simplex handles
