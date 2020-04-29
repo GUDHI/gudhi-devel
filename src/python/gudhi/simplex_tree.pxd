@@ -77,3 +77,5 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[pair[double,double]] intervals_in_dimension(int dimension)
         void write_output_diagram(string diagram_file_name) except +
         vector[pair[vector[int], vector[int]]] persistence_pairs()
+        pair[vector[vector[int]], vector[vector[int]]] lower_star_generators()
+        pair[vector[vector[int]], vector[vector[int]]] flag_generators()
