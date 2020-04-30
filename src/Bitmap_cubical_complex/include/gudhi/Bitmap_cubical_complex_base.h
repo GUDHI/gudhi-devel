@@ -116,7 +116,7 @@ class Bitmap_cubical_complex_base {
    * be an edge or vertex of a cube. On the other hand, the output is always indicating the position of
    * a cube in the data structure. 
    **/
-  inline int get_top_dimensional_coface_of_a_cell(size_t splx);
+  inline size_t get_top_dimensional_coface_of_a_cell(size_t splx);
 
   /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
@@ -612,7 +612,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
 }
 
 template <typename T>
-int Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size_t splx) {
+size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size_t splx) {
   if (this->get_dimension_of_a_cell(splx) == this->dimension()){return splx;}
   else{  
     for (auto v : this->get_coboundary_of_a_cell(splx)){
