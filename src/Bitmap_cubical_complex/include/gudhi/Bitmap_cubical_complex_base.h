@@ -197,7 +197,7 @@ class Bitmap_cubical_complex_base {
   /**
    * Returns number of all cubes in the data structure.
    **/
-  inline unsigned size() const { return this->data.size(); }
+  inline std::size_t size() const { return this->data.size(); }
 
   /**
    * Writing to stream operator. By using it we get the values T of cells in order in which they are stored in the
