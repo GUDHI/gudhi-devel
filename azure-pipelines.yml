@@ -10,10 +10,10 @@ jobs:
       matrix:
         Python36:
           python.version: '3.6'
-        Python37:
-          python.version: '3.7'
-        Python38:
-          python.version: '3.8'
+        #Python37:
+        #  python.version: '3.7'
+        #Python38:
+        #  python.version: '3.8'
 
     steps:
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
@@ -26,11 +26,12 @@ jobs:
         source activate gudhi_build_env
         sudo conda install --yes --quiet --name gudhi_build_env python=$PYTHON_VERSION
         sudo conda install --yes -c conda-forge doxygen eigen boost-cpp=1.70.0 cgal-cpp>=5.0
-        git submodule update --init
         python -m pip install --user -r .github/build-requirements.txt
         python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
     - bash: |
+        source activate gudhi_build_env
+        git submodule update --init
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE:STRING=$(CMakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
