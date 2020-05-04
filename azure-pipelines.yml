@@ -19,7 +19,7 @@ jobs:
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
       displayName: Add conda to PATH
   
-    - bash: conda create --yes --quiet --name gudhi_build_env
+    - bash: sudo conda create --yes --quiet --name gudhi_build_env
       displayName: Create Anaconda environment
   
     - bash: |
