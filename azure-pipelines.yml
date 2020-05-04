@@ -25,6 +25,7 @@ jobs:
     - bash: |
         source activate gudhi_build_env
         sudo conda install --yes --quiet --name gudhi_build_env python=$PYTHON_VERSION
+        sudo conda install --yes -c conda-forge doxygen eigen boost-cpp=1.70.0 cgal-cpp>=5.0
         git submodule update --init
         python -m pip install --user -r .github/build-requirements.txt
         python -m pip install --user -r .github/test-requirements.txt
