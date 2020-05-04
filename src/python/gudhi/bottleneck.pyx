@@ -17,8 +17,8 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Bottleneck_distance_interface.h" namespace "Gudhi::persistence_diagram":
-    double bottleneck(vector[pair[double, double]], vector[pair[double, double]], double)
-    double bottleneck(vector[pair[double, double]], vector[pair[double, double]])
+    double bottleneck(vector[pair[double, double]], vector[pair[double, double]], double) nogil
+    double bottleneck(vector[pair[double, double]], vector[pair[double, double]]) nogil
 
 def bottleneck_distance(diagram_1, diagram_2, e=None):
     """This function returns the point corresponding to a given vertex.
@@ -40,9 +40,17 @@ def bottleneck_distance(diagram_1, diagram_2, e=None):
     :rtype: float
     :returns: the bottleneck distance.
     """
+    cdef vector[pair[double, double]] dgm1 = diagram_1
+    cdef vector[pair[double, double]] dgm2 = diagram_2
+    cdef double eps
+    cdef double ret
     if e is None:
-        # Default value is the smallest double value (not 0, 0 is for exact version)
-        return bottleneck(diagram_1, diagram_2)
+        with nogil:
+            # Default value is the smallest double value (not 0, 0 is for exact version)
+            ret = bottleneck(dgm1, dgm2)
     else:
-        # Can be 0 for exact version
-        return bottleneck(diagram_1, diagram_2, e)
+        eps = e
+        with nogil:
+            # Can be 0 for exact version
+            ret = bottleneck(dgm1, dgm2, eps)
+    return ret

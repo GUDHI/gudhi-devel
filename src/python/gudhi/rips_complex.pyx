@@ -23,12 +23,12 @@ __license__ = "MIT"
 
 cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
     cdef cppclass Rips_complex_interface "Gudhi::rips_complex::Rips_complex_interface":
-        Rips_complex_interface()
-        void init_points(vector[vector[double]] values, double threshold)
-        void init_matrix(vector[vector[double]] values, double threshold)
-        void init_points_sparse(vector[vector[double]] values, double threshold, double sparse)
-        void init_matrix_sparse(vector[vector[double]] values, double threshold, double sparse)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max) except +
+        Rips_complex_interface() nogil
+        void init_points(vector[vector[double]] values, double threshold) nogil
+        void init_matrix(vector[vector[double]] values, double threshold) nogil
+        void init_points_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
+        void init_matrix_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max) nogil except +
 
 # RipsComplex python interface
 cdef class RipsComplex:
@@ -97,6 +97,7 @@ cdef class RipsComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        self.thisref.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
-            max_dimension)
+        cdef int maxdim = max_dimension
+        with nogil:
+            self.thisref.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, maxdim)
         return stree
