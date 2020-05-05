@@ -289,9 +289,13 @@ PyTorch
 Scikit-learn
 ============
 
-The :doc:`persistence representations </representations>` module require
+The :doc:`persistence representations </representations>` module requires
 `scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
+
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
+requested.
 
 SciPy
 =====
@@ -300,6 +304,10 @@ The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
 :doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
 <http://scipy.org>`_, a Python-based ecosystem of open-source software for
 mathematics, science, and engineering.
+
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`SciPy <http://scipy.org>`_ as a backend if explicitly
+requested.
 
 Threading Building Blocks
 =========================
