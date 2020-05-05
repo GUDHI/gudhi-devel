@@ -10,6 +10,8 @@
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
+cimport numpy as np
+import numpy as np
 import os
 
 __author__ = "Vincent Rouvreau"
@@ -17,8 +19,8 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Bottleneck_distance_interface.h" namespace "Gudhi::persistence_diagram":
-    double bottleneck(vector[pair[double, double]], vector[pair[double, double]], double) nogil
-    double bottleneck(vector[pair[double, double]], vector[pair[double, double]]) nogil
+    double bottleneck(void*, int, void*, int, double) nogil
+    double bottleneck(void*, int, void*, int) nogil
 
 def bottleneck_distance(diagram_1, diagram_2, e=None):
     """This function returns the point corresponding to a given vertex.
@@ -40,17 +42,30 @@ def bottleneck_distance(diagram_1, diagram_2, e=None):
     :rtype: float
     :returns: the bottleneck distance.
     """
-    cdef vector[pair[double, double]] dgm1 = diagram_1
-    cdef vector[pair[double, double]] dgm2 = diagram_2
+    diagram_1 = np.asarray(diagram_1, dtype=np.float64)
+    diagram_2 = np.asarray(diagram_2, dtype=np.float64)
+    if diagram_1.size == 0:
+        diagram_1, diagram_2 = diagram_2, diagram_1
+    if diagram_1.size == 0:
+        return 0.
+    if diagram_2.size == 0:
+        return (diagram_1[:,1] - diagram_1[:,0]).max() / 2
+    return _bottleneck_distance(diagram_1, diagram_2, e)
+
+def _bottleneck_distance(np.ndarray[double, ndim=2, mode="c"] diagram_1, np.ndarray[double, ndim=2, mode="c"] diagram_2, e):
+    assert diagram_1.shape[1] == 2
+    assert diagram_2.shape[1] == 2
+    cdef long n1 = diagram_1.shape[0]
+    cdef long n2 = diagram_2.shape[0]
     cdef double eps
     cdef double ret
     if e is None:
         with nogil:
             # Default value is the smallest double value (not 0, 0 is for exact version)
-            ret = bottleneck(dgm1, dgm2)
+            ret = bottleneck(diagram_1.data, n1, diagram_2.data, n2)
     else:
         eps = e
         with nogil:
             # Can be 0 for exact version
-            ret = bottleneck(dgm1, dgm2, eps)
+            ret = bottleneck(diagram_1.data, n1, diagram_2.data, n2, eps)
     return ret
