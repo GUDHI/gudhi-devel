@@ -11,6 +11,7 @@ jobs:
         Python36:
           python.version: '3.6'
           CMakeBuildType: Release
+          customInstallation: 'brew update && brew install graphviz doxygen boost eigen gmp mpfr tbb cgal'
         #Python37:
         #  python.version: '3.7'
         #Python38:
@@ -26,10 +27,9 @@ jobs:
     - bash: |
         source activate gudhi_build_env
         sudo conda install --yes --quiet --name gudhi_build_env python=$PYTHON_VERSION
-        sudo conda update --yes --quiet -n base -c defaults conda
-        sudo conda install --yes -c conda-forge doxygen eigen boost-cpp=1.70.0 cgal-cpp>=5.0
         python -m pip install --user -r .github/build-requirements.txt
         python -m pip install --user -r .github/test-requirements.txt
+        $(customInstallation)
       displayName: 'Install build dependencies'
     - bash: |
         source activate gudhi_build_env
