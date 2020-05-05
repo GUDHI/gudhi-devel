@@ -17,11 +17,18 @@ are measured in norm p, for :math:`1 \leq p \leq \infty`.
 
 Distance Functions
 ------------------
-This first implementation uses the Python Optimal Transport library and is based
-on ideas from "Large Scale Computation of Means and Cluster for Persistence
-Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
+
+Optimal Transport
+*****************
+
+This first implementation uses the :ref:`Python Optimal Transport` library and is based on ideas from
+"Large Scale Computation of Means and Cluster for Persistence Diagrams via Optimal Transport"
+:cite:`10.5555/3327546.3327645`.
 
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
+
+Hera
+****
 
 This other implementation comes from `Hera
 <https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is

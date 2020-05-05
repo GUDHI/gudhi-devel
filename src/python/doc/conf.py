@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinxcontrib.bibtex',
     'sphinx_paramlinks',
+    'sphinx.ext.autosectionlabel',
 ]
 
 todo_include_todos = True

@@ -91,7 +91,7 @@ Currently one input from a text file is used. It uses a format inspired from the
     we allow any filtration values. As a consequence one cannot use ``-1``'s to indicate missing cubes. If you have
     missing cubes in your complex, please set their filtration to :math:`+\infty` (aka. ``inf`` in the file).
 
-The file format is described in details in :ref:`Perseus file format` file format section.
+The file format is described in details in :ref:`Perseus` file format section.
 
 .. testcode::
 
