@@ -109,7 +109,7 @@ class Tomato:
         if input_type == "distance_matrix" and self.graph_type_ == "radius":
             X = numpy.array(X)
             r = self.params_["r"]
-            self.neighbors_ = [numpy.nonzero(l <= r) for l in X]
+            self.neighbors_ = [numpy.flatnonzero(l <= r) for l in X]
 
         if input_type == "distance_matrix" and self.graph_type_ == "knn":
             k = self.params_["k"]
