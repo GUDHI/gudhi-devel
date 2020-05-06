@@ -30,7 +30,7 @@ will be used by default, but you can force it by adding
 GUDHI Python module compilation
 ===============================
 
-After making sure that the :ref:`compilation dependencies` are properly installed,
+After making sure that the :ref:`Compilation dependencies` are properly installed,
 one can build the GUDHI Python module, by running the following commands in a terminal:
 
 .. code-block:: bash
