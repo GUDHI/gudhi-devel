@@ -72,11 +72,11 @@ def plot_persistence_barcode(
     """This function plots the persistence bar code from persistence values list
     , a np.array of shape (N x 2) (representing a diagram 
     in a single homology dimension), 
-    or from a :doc:`persistence file <fileformats>`.
+    or from a :ref:`Persistence Diagram` file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+    :param persistence_file: A :ref:`Persistence Diagram` file style name
         (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: barcode transparency value (0.0 transparent through 1.0
@@ -214,11 +214,11 @@ def plot_persistence_diagram(
 ):
     """This function plots the persistence diagram from persistence values
     list, a np.array of shape (N x 2) representing a diagram in a single
-    homology dimension, or from a :doc:`persistence file <fileformats>`.
+    homology dimension, or from a :ref:`Persistence Diagram` file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+    :param persistence_file: A :ref:`Persistence Diagram` file style name
         (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: plot transparency value (0.0 transparent through 1.0
@@ -368,9 +368,8 @@ def plot_persistence_density(
 ):
     """This function plots the persistence density from persistence
     values list, np.array of shape (N x 2) representing a diagram
-    in a single homology dimension,
-    or from a :doc:`persistence file <fileformats>`. Be
-    aware that this function does not distinguish the dimension, it is
+    in a single homology dimension, or from a :ref:`Persistence Diagram` file.
+    Be aware that this function does not distinguish the dimension, it is
     up to you to select the required one. This function also does not handle
     degenerate data set (scipy correlation matrix inversion can fail).
 
@@ -378,7 +377,7 @@ def plot_persistence_density(
                         Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) 
                         or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>`
+    :param persistence_file: A :ref:`Persistence Diagram` file
         style name (reset persistence if both are set).
     :type persistence_file: string
     :param nbins: Evaluate a gaussian kde on a regular grid of nbins x

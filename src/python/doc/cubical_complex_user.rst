@@ -120,7 +120,7 @@ conditions are imposed in all directions, then complex :math:`\mathcal{K}` becam
 various constructors from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical
 complex with periodic boundary conditions.
 
-One can also use Perseus style input files (see :doc:`Perseus <fileformats>`) for the specific periodic case:
+One can also use Perseus style input files (see :ref:`Perseus`) for the specific periodic case:
 
 .. testcode::
 
