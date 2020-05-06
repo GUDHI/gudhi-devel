@@ -8,7 +8,7 @@
    |                                                                 | Note that these functions return the matplotlib axis, allowing        |                                               |
    |                                                                 | for further modifications (title, aspect, etc.)                       | :License: MIT                                 |
    |                                                                 |                                                                       |                                               |
-   |                                                                 |                                                                       | :Requires: matplotlib, numpy and scipy        |
+   |                                                                 |                                                                       | :Requires: :ref:`Matplotlib`                  |
    +-----------------------------------------------------------------+-----------------------------------------------------------------------+-----------------------------------------------+
    | * :doc:`persistence_graphical_tools_user`                       | * :doc:`persistence_graphical_tools_ref`                                                                              |
    +-----------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+

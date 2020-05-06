@@ -12,9 +12,6 @@ Definition
 Show persistence as a barcode
 -----------------------------
 
-.. note::
-    this function requires matplotlib and numpy to be available
-
 This function can display the persistence result as a barcode:
 
 .. plot::
@@ -35,9 +32,6 @@ This function can display the persistence result as a barcode:
 
 Show persistence as a diagram
 -----------------------------
-
-.. note::
-    this function requires matplotlib and numpy to be available
 
 This function can display the persistence result as a diagram:
 
@@ -73,8 +67,7 @@ of shape (N x 2) encoding a persistence diagram (in a given dimension).
 Persistence density
 -------------------
 
-.. note::
-    this function requires matplotlib, numpy and scipy to be available
+:Requires: :ref:`SciPy`
 
 If you want more information on a specific dimension, for instance:
 

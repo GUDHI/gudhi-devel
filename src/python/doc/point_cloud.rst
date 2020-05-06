@@ -16,6 +16,8 @@ File Readers
 Subsampling
 -----------
 
+:Requires: :ref:`Eigen` :math:`\geq` 3.1.0 and :ref:`CGAL` :math:`\geq` 4.11.0
+
 .. automodule:: gudhi.subsampling
    :members:
    :special-members:
@@ -30,6 +32,8 @@ Time Delay Embedding
 
 K nearest neighbors
 -------------------
+
+:Requires: :ref:`PyKeOps`, :ref:`SciPy`, :ref:`Scikit-learn`, and/or :ref:`Hnswlib` in function of the selected `implementation`.
 
 .. automodule:: gudhi.point_cloud.knn
    :members:
