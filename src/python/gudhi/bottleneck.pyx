@@ -42,8 +42,8 @@ def bottleneck_distance(diagram_1, diagram_2, e=None):
     :rtype: float
     :returns: the bottleneck distance.
     """
-    diagram_1 = np.asarray(diagram_1, dtype=np.float64)
-    diagram_2 = np.asarray(diagram_2, dtype=np.float64)
+    diagram_1 = np.ascontiguousarray(diagram_1, dtype=np.float64)
+    diagram_2 = np.ascontiguousarray(diagram_2, dtype=np.float64)
     if diagram_1.size == 0:
         diagram_1, diagram_2 = diagram_2, diagram_1
     if diagram_1.size == 0:
