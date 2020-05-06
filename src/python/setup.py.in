@@ -18,7 +18,8 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
 __license__ = "MIT"
 
-modules = [@GUDHI_PYTHON_MODULES_TO_COMPILE@]
+cython_modules = [@GUDHI_CYTHON_MODULES@]
+pybind11_modules = [@GUDHI_PYBIND11_MODULES@]
 
 source_dir='@CMAKE_CURRENT_SOURCE_DIR@/gudhi/'
 extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
@@ -30,7 +31,7 @@ runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
 ext_modules = []
-for module in modules:
+for module in cython_modules:
     ext_modules.append(Extension(
         'gudhi.' + module,
         sources = [source_dir + module + '.pyx',],
@@ -54,6 +55,20 @@ ext_modules.append(Extension(
         pybind11.get_include(False), pybind11.get_include(True)],
     extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
     ))
+
+if "bottleneck" in pybind11_modules:
+    ext_modules.append(Extension(
+        'gudhi.bottleneck',
+        sources = [source_dir + 'bottleneck.cc'],
+        language = 'c++',
+        include_dirs = include_dirs +
+            [pybind11.get_include(False), pybind11.get_include(True)],
+        extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
+        extra_link_args=extra_link_args,
+        libraries=libraries,
+        library_dirs=library_dirs,
+        runtime_library_dirs=runtime_library_dirs,
+        ))
 
 setup(
     name = 'gudhi',
