@@ -192,7 +192,7 @@ Compilation dependencies
 ========================
 
 These third party dependencies are detected by `CMake <https://www.cmake.org/>`_.
-They have to be installed before to perform the :ref:`GUDHI Python module compilation`.
+They have to be installed before performing the :ref:`GUDHI Python module compilation`.
 
 CGAL
 ----
