@@ -32,9 +32,9 @@ PYBIND11_MODULE(bottleneck, m) {
     This function returns the point corresponding to a given vertex.
 
     :param diagram_1: The first diagram.
-    :type diagram_1: vector[pair[double, double]]
+    :type diagram_1: numpy array of shape (m,2)
     :param diagram_2: The second diagram.
-    :type diagram_2: vector[pair[double, double]]
+    :type diagram_2: numpy array of shape (n,2)
     :param e: If `e` is 0, this uses an expensive algorithm to compute the
         exact distance.
         If `e` is not 0, it asks for an additive `e`-approximation, and
@@ -42,7 +42,6 @@ PYBIND11_MODULE(bottleneck, m) {
         bits of the mantissa may be wrong). This version of the algorithm takes
         advantage of the limited precision of `double` and is usually a lot
         faster to compute, whatever the value of `e`.
-
         Thus, by default, `e` is the smallest positive double.
     :type e: float
     :rtype: float
