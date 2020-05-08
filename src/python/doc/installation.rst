@@ -175,8 +175,9 @@ Documentation
 
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
-required. As the documentation is auto-tested, all the :ref:`Optional third-party libraries`
-are also mandatory to build the documentation.
+required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
+`Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
+also mandatory to build the documentation.
 
 Run the following commands in a terminal:
 
