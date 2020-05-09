@@ -54,6 +54,18 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
             Xfit.append(new_diag)
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply BirthPersistenceTransform on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            n x 2 numpy array: transformed persistence diagram.
+        """
+        return self.fit_transform([diag])[0]
+
 class Clamping(BaseEstimator, TransformerMixin):
     """
     This is a class for clamping values. It can be used as a parameter for the DiagramScaler class, for instance if you want to clamp abscissae or ordinates of persistence diagrams.
@@ -142,6 +154,18 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
                             Xfit[i][:,I] = np.squeeze(scaler.transform(np.reshape(Xfit[i][:,I], [-1,1])))
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply DiagramScaler on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            n x 2 numpy array: transformed persistence diagram.
+        """
+        return self.fit_transform([diag])[0]
+
 class Padding(BaseEstimator, TransformerMixin):
     """
     This is a class for padding a list of persistence diagrams with dummy points, so that all persistence diagrams end up with the same number of points.
@@ -185,6 +209,18 @@ class Padding(BaseEstimator, TransformerMixin):
         else:
             Xfit = X
         return Xfit
+
+    def __call__(self, diag):
+        """
+        Apply Padding on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            n x 2 numpy array: padded persistence diagram.
+        """
+        return self.fit_transform([diag])[0]
 
 class ProminentPoints(BaseEstimator, TransformerMixin):
     """
@@ -259,6 +295,18 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
             Xfit = X
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply ProminentPoints on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            n x 2 numpy array: thresholded persistence diagram.
+        """
+        return self.fit_transform([diag])[0]
+
 class DiagramSelector(BaseEstimator, TransformerMixin):
     """
     This is a class for extracting finite or essential points in persistence diagrams.
@@ -303,3 +351,15 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
         else:
             Xfit = X
         return Xfit
+
+    def __call__(self, diag):
+        """
+        Apply DiagramSelector on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            n x 2 numpy array: extracted persistence diagram.
+        """
+        return self.fit_transform([diag])[0]
