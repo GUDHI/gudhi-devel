@@ -24,7 +24,7 @@ class DistanceToMeasure:
         Args:
             k (int): number of neighbors (possibly including the point itself).
             q (float): order used to compute the distance to measure. Defaults to 2.
-            kwargs: same parameters as :ref:`K nearest neighbors`, except that
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that
                 metric="neighbors" means that :func:`transform` expects an array with the distances
                 to the k nearest neighbors.
         """
