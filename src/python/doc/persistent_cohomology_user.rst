@@ -21,7 +21,7 @@ Definition
 
 
 Computation of persistent cohomology using the algorithm of :cite:`DBLP:journals/dcg/SilvaMV11` and
-:cite:`DBLP:journals/corr/abs-1208-5018` and the Compressed Annotation Matrix implementation of
+:cite:`DBLP:conf/compgeom/DeyFW14` and the Compressed Annotation Matrix implementation of
 :cite:`DBLP:conf/esa/BoissonnatDM13`.
      
 The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing global
