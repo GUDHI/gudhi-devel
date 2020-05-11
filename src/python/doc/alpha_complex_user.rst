@@ -11,8 +11,8 @@ Definition
 
 `AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
-:cite:`cgal:hdj-t-19b` from `CGAL <http://www.cgal.org/>`_ (the Computational Geometry Algorithms Library
-:cite:`cgal:eb-19b`).
+:cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
+(CGAL Library :cite:`cgal:eb-19b`).
 
 Remarks
 ^^^^^^^
