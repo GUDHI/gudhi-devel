@@ -207,7 +207,7 @@ The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples requires CGAL version :math:`\geq` 4.11.0:
+The following examples require CGAL version :math:`\geq` 4.11.0:
 
 .. only:: builder_html
 
