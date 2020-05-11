@@ -19,6 +19,10 @@ __license__ = "MIT"
 class KNearestNeighbors:
     """
     Class wrapping several implementations for computing the k nearest neighbors in a point set.
+
+    :Requires: `PyKeOps <installation.html#pykeops>`__, `SciPy <installation.html#scipy>`__,
+        `Scikit-learn <installation.html#scikit-learn>`__, and/or `Hnswlib <installation.html#hnswlib>`__
+        in function of the selected `implementation`.
     """
 
     def __init__(self, k, return_index=True, return_distance=False, metric="euclidean", **kwargs):

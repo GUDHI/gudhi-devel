@@ -12,8 +12,8 @@ The easiest way to install the Python version of GUDHI is using
 
 Compiling
 *********
-The library uses c++14 and requires `Boost <https://www.boost.org/>`_ ≥ 1.56.0,
-`CMake <https://www.cmake.org/>`_ ≥ 3.1  to generate makefiles,
+The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
 `NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
@@ -21,7 +21,7 @@ It is a multi-platform library and compiles on Linux, Mac OSX and Visual
 Studio 2017.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
-≥ 3.5 are available because of the required Visual Studio version.
+:math:`\geq` 3.5 are available because of the required Visual Studio version.
 
 On other systems, if you have several Python/python installed, the version 2.X
 will be used by default, but you can force it by adding
@@ -30,7 +30,8 @@ will be used by default, but you can force it by adding
 GUDHI Python module compilation
 ===============================
 
-To build the GUDHI Python module, run the following commands in a terminal:
+After making sure that the `Compilation dependencies`_ are properly installed,
+one can build the GUDHI Python module, by running the following commands in a terminal:
 
 .. code-block:: bash
 
@@ -188,8 +189,14 @@ Run the following commands in a terminal:
 Optional third-party library
 ****************************
 
+Compilation dependencies
+========================
+
+These third party dependencies are detected by `CMake <https://www.cmake.org/>`_.
+They have to be installed before performing the `GUDHI Python module compilation`_.
+
 CGAL
-====
+----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
 require `CGAL <https://www.cgal.org/>`_, a C++ library that provides easy
@@ -200,7 +207,7 @@ The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples requires CGAL version ≥ 4.11.0:
+The following examples requires CGAL version :math:`\geq` 4.11.0:
 
 .. only:: builder_html
 
@@ -211,23 +218,15 @@ The following examples requires CGAL version ≥ 4.11.0:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-EagerPy
-=======
-
-Some Python functions can handle automatic differentiation (possibly only when
-a flag `enable_autodiff=True` is used). In order to reduce code duplication, we
-use `EagerPy <https://eagerpy.jonasrauber.de/>`_ which wraps arrays from
-PyTorch, TensorFlow and JAX in a common interface.
-
 Eigen
-=====
+-----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
 require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version ≥ 3.1.0:
+The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.1.0:
 
 .. only:: builder_html
 
@@ -237,15 +236,39 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version �
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+Threading Building Blocks
+-------------------------
+
+`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
+parallel C++ programs that take full advantage of multicore performance, that
+are portable and composable, and that have future-proof scalability.
+
+Having Intel® TBB installed is recommended to parallelize and accelerate some
+GUDHI computations.
+
+Run time dependencies
+=====================
+
+These third party dependencies are detected by Python `import` mechanism at run time.
+They can be installed when required.
+
+EagerPy
+-------
+
+Some Python functions can handle automatic differentiation (possibly only when
+a flag `enable_autodiff=True` is used). In order to reduce code duplication, we
+use `EagerPy <https://eagerpy.jonasrauber.de/>`_ which wraps arrays from
+PyTorch, TensorFlow and JAX in a common interface.
+
 Hnswlib
-=======
+-------
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `Hnswlib <https://github.com/nmslib/hnswlib>`_ as a backend if explicitly
 requested, to speed-up queries.
 
 Matplotlib
-==========
+----------
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
 module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
@@ -267,49 +290,46 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 PyKeOps
-=======
+-------
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `PyKeOps <https://www.kernel-operations.io/keops/python/>`_ as a backend if
 explicitly requested, to speed-up queries using a GPU.
 
 Python Optimal Transport
-========================
+------------------------
 
 The :doc:`Wasserstein distance </wasserstein_distance_user>`
 module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
 
 PyTorch
-=======
+-------
 
 `PyTorch <https://pytorch.org/>`_ is currently only used as a dependency of
 `PyKeOps`_, and in some tests.
 
 Scikit-learn
-============
+------------
 
 The :doc:`persistence representations </representations>` module require
 `scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
 
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
+requested.
+
 SciPy
-=====
+-----
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
 :doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
 <http://scipy.org>`_, a Python-based ecosystem of open-source software for
 mathematics, science, and engineering.
 
-Threading Building Blocks
-=========================
-
-`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
-parallel C++ programs that take full advantage of multicore performance, that
-are portable and composable, and that have future-proof scalability.
-
-Having Intel® TBB installed is recommended to parallelize and accelerate some
-GUDHI computations.
+:class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
+`SciPy <http://scipy.org>`_ as a backend if explicitly requested.
 
 Bug reports and contributions
 *****************************
