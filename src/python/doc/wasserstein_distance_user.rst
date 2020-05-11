@@ -21,9 +21,9 @@ Distance Functions
 Optimal Transport
 *****************
 
-:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`__ (POT) :math:`\geq` 0.5.1 
+:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`_ (POT) :math:`\geq` 0.5.1 
 
-This first implementation uses the `Python Optimal Transport <installation.html#python-optimal-transport>`__
+This first implementation uses the `Python Optimal Transport <installation.html#python-optimal-transport>`_
 library and is based on ideas from "Large Scale Computation of Means and Cluster for Persistence
 Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
 
@@ -103,7 +103,7 @@ The output is:
 Barycenters
 -----------
 
-:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`__ (POT) :math:`\geq` 0.5.1 
+:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`_ (POT) :math:`\geq` 0.5.1 
 
 A Frechet mean (or barycenter) is a generalization of the arithmetic
 mean in a non linear space such as the one of persistence diagrams.

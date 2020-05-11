@@ -67,7 +67,7 @@ of shape (N x 2) encoding a persistence diagram (in a given dimension).
 Persistence density
 -------------------
 
-:Requires: `SciPy <installation.html#scipy>`__
+:Requires: `SciPy <installation.html#scipy>`_
 
 If you want more information on a specific dimension, for instance:
 

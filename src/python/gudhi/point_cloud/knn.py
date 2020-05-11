@@ -20,8 +20,8 @@ class KNearestNeighbors:
     """
     Class wrapping several implementations for computing the k nearest neighbors in a point set.
 
-    :Requires: `PyKeOps <installation.html#pykeops>`__, `SciPy <installation.html#scipy>`__,
-        `Scikit-learn <installation.html#scikit-learn>`__, and/or `Hnswlib <installation.html#hnswlib>`__
+    :Requires: `PyKeOps <installation.html#pykeops>`_, `SciPy <installation.html#scipy>`_,
+        `Scikit-learn <installation.html#scikit-learn>`_, and/or `Hnswlib <installation.html#hnswlib>`_
         in function of the selected `implementation`.
     """
 

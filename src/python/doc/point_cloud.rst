@@ -16,7 +16,7 @@ File Readers
 Subsampling
 -----------
 
-:Requires: `Eigen <installation.html#eigen>`__ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`__ :math:`\geq` 4.11.0
+:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
 
 .. automodule:: gudhi.subsampling
    :members:
