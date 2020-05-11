@@ -200,8 +200,8 @@ class KNearestNeighbors:
                     from joblib import Parallel, delayed, effective_n_jobs
                     from sklearn.utils import gen_even_slices
 
-                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
-                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    slices = gen_even_slices(len(X), effective_n_jobs(n_jobs))
+                    parallel = Parallel(prefer="threads", n_jobs=n_jobs)
                     if self.params.get("sort_results", True):
 
                         def func(M):
@@ -242,8 +242,8 @@ class KNearestNeighbors:
 
                     else:
                         func = lambda M: numpy.partition(M, k - 1)[:, 0:k]
-                    slices = gen_even_slices(len(X), effective_n_jobs(-1))
-                    parallel = Parallel(backend="threading", n_jobs=-1)
+                    slices = gen_even_slices(len(X), effective_n_jobs(n_jobs))
+                    parallel = Parallel(prefer="threads", n_jobs=n_jobs)
                     distances = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
                 return distances
             return None

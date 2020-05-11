@@ -101,6 +101,8 @@ cdef class SimplexTree:
 
         .. deprecated:: 3.2.0
         """
+        import warnings
+        warnings.warn("Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.", DeprecationWarning)
         self.get_ptr().initialize_filtration()
 
     def num_vertices(self):

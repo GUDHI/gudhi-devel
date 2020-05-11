@@ -17,10 +17,6 @@
 
 #include <boost/program_options.hpp>
 
-#ifdef GUDHI_USE_TBB
-#include <tbb/task_scheduler_init.h>
-#endif
-
 #include <string>
 #include <vector>
 
@@ -67,11 +63,6 @@ int main(int argc, char * argv[]) {
   std::clog << "The complex contains " << st.num_simplices() << " simplices \n";
   std::clog << "   and has dimension " << st.dimension() << " \n";
 
-#ifdef GUDHI_USE_TBB
-  // Unnecessary, but clarifies which operations are parallel.
-  tbb::task_scheduler_init ts;
-#endif
-
   // Sort the simplices in the order of the filtration
   st.initialize_filtration();
   int count = 0;
@@ -80,10 +71,6 @@ int main(int argc, char * argv[]) {
 
   // Convert to a more convenient representation.
   Gudhi::Hasse_complex<> hcpx(st);
-
-#ifdef GUDHI_USE_TBB
-  ts.terminate();
-#endif
 
   // Free some space.
   delete &st;
