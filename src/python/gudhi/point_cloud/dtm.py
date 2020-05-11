@@ -73,7 +73,9 @@ class DistanceToMeasure:
 
 class DTMDensity:
     """
-    Density estimator based on the distance to the empirical measure defined by a point set, as defined in :cite:`dtmdensity`. Note that this implementation does not renormalize so the total measure is not 1, see the reference for suitable normalization factors in the Euclidean case.
+    Density estimator based on the distance to the empirical measure defined by a point set, as defined
+    in :cite:`dtmdensity`. Note that this implementation does not renormalize so the total measure is not 1,
+    see the reference for suitable normalization factors in the Euclidean case.
     """
 
     def __init__(self, k=None, weights=None, q=None, dim=None, **kwargs):
@@ -82,8 +84,10 @@ class DTMDensity:
             k (int): number of neighbors (possibly including the point itself).
             weights (numpy.array): weights of each of the k neighbors, optional.
             q (float): order used to compute the distance to measure. Defaults to dim.
-            dim (float): final exponent representing the dimension. Defaults to the dimension, and must be specified when the dimension cannot be read from the input (metric="neighbors" or metric="precomputed").
-            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNN`, except that metric="neighbors" means that :func:`transform` expects an array with the distances to the k nearest neighbors.
+            dim (float): final exponent representing the dimension. Defaults to the dimension, and must be specified
+                when the dimension cannot be read from the input (metric="neighbors" or metric="precomputed").
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNN`, except that metric="neighbors" means that
+                :func:`transform` expects an array with the distances to the k nearest neighbors.
         """
         if weights is None:
             assert k is not None, "Must specify k or weights"
@@ -113,7 +117,9 @@ class DTMDensity:
     def transform(self, X):
         """
         Args:
-            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed", or distances to the k nearest neighbors if metric is "neighbors" (if the array has more than k columns, the remaining ones are ignored).
+            X (numpy.array): coordinates for query points, or distance matrix if metric is "precomputed",
+                or distances to the k nearest neighbors if metric is "neighbors" (if the array has more
+                than k columns, the remaining ones are ignored).
         """
         q = self.q
         dim = self.dim
