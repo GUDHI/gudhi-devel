@@ -51,7 +51,7 @@ def test_compatibility_with_filtered_rips():
     assert st.num_vertices() == 4
 
 def test_dtm_rips_complex():
-    pts = np.array([[2.0, 2], [0, 1], [3, 4]])
+    pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
     dist = cdist(pts,pts)
     dtm = DistanceToMeasure(2, q=2, metric="precomputed")
     r = dtm.fit_transform(dist)
