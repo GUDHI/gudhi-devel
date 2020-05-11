@@ -109,9 +109,6 @@ def plot_persistence_barcode(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
@@ -125,6 +122,8 @@ def plot_persistence_barcode(
             else:
                 print("file " + persistence_file + " not found.")
                 return None
+
+        persistence = _array_handler(persistence)
 
         if max_barcodes != 1000:
             print("Deprecated parameter. It has been replaced by max_intervals")
@@ -255,8 +254,6 @@ def plot_persistence_diagram(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
@@ -270,6 +267,8 @@ def plot_persistence_diagram(
             else:
                 print("file " + persistence_file + " not found.")
                 return None
+
+        persistence = _array_handler(persistence)
 
         if max_plots != 1000:
             print("Deprecated parameter. It has been replaced by max_intervals")
@@ -427,8 +426,6 @@ def plot_persistence_density(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if dimension is None:
                 # All dimension case
@@ -442,6 +439,7 @@ def plot_persistence_density(
                 return None
 
         if len(persistence) > 0:
+            persistence = _array_handler(persistence)
             persistence_dim = np.array(
                 [
                     (dim_interval[1][0], dim_interval[1][1])
