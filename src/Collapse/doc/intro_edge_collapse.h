@@ -70,7 +70,7 @@ namespace collapse {
  * If an edge \f$e_j, j < i \f$ during the backward search is found to be non-dominated, we include \f$e_j\f$ in to the
  * reduced filtration and we set its new filtration value to be \f$i\f$ that is the index of \f$e_i\f$.
  * The precise mechanism for this reduction has been described in Section 5 \cite edgecollapsesocg2020. 
- * Here we implement this mechanism for a filtration of Rips complex, 
+ * Here we implement this mechanism for a filtration of Rips complex.
  * After perfoming the reduction the filtration reduces to a flag-filtration with the same persistence as the original
  * filtration. 
  * 
