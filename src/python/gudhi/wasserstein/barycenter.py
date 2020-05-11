@@ -52,9 +52,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates that ``pdiagset[k][i]`` is matched to ``Y[j]``
         if ``i = -1`` or ``j = -1``, it means they represent the diagonal.
 
-        - `"energy"`, ``float`` representing the Frechet energy value obtained.
-
-        It is the mean of squared distances of observations to the output.
+        - `"energy"`, ``float`` representing the Frechet energy value obtained. It is the mean of squared distances of observations to the output.
 
         - `"nb_iter"`, ``int`` number of iterations performed before convergence of the algorithm.
     '''
@@ -149,4 +147,3 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         return Y, log
     else:
         return Y
-
