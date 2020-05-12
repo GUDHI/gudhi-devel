@@ -36,7 +36,7 @@ The following example computes the weighted Rips filtration associated with a di
     weights = [1, 100]
     w_rips = WeightedRipsComplex(distance_matrix=dist, weights=weights)
     st = w_rips.create_simplex_tree(max_dimension=2)
-    print(st.get_filtration())
+    print(list(st.get_filtration()))
 
 The output is:
 
