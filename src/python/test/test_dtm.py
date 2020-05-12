@@ -75,3 +75,10 @@ def test_density_normalized():
     expected = numpy.exp(-(queries ** 2).sum(-1) / 2) / (2 * math.pi)
     estimated = DTMDensity(k=150, normalize=True).fit(sample).transform(queries)
     assert estimated == pytest.approx(expected, rel=0.4)
+
+
+def test_density():
+    distances = [[0, 1, 10], [2, 0, 30], [1, 3, 5]]
+    density = DTMDensity(k=2, metric="neighbors", dim=1).fit_transform(distances)
+    expected = numpy.array([2.0, 1.0, 0.5])
+    assert density == pytest.approx(expected)

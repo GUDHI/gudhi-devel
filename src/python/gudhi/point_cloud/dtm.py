@@ -89,7 +89,7 @@ class DTMDensity:
             weights (numpy.array): weights of each of the k neighbors, optional. They are supposed to sum to 1.
             q (float): order used to compute the distance to measure. Defaults to dim.
             dim (float): final exponent representing the dimension. Defaults to the dimension, and must be specified
-                when the dimension cannot be read from the input (metric="neighbors" or metric="precomputed").
+                when the dimension cannot be read from the input (metric is "neighbors" or "precomputed").
             normalize (bool): normalize the density so it corresponds to a probability measure on ℝᵈ.
                 Only available for the Euclidean metric, defaults to False.
             n_samples (int): number of sample points used for fitting. Only needed if `normalize` is True and
@@ -146,7 +146,7 @@ class DTMDensity:
         if q is None:
             q = dim
         if self.params["metric"] == "neighbors":
-            distances = X[:, : self.k]
+            distances = np.asarray(X)[:, : self.k]
         else:
             distances = self.knn.transform(X)
         distances = distances ** q
