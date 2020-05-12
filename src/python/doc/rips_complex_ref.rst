@@ -25,7 +25,7 @@ Weighted Rips complex reference manual
    .. automethod:: gudhi.WeightedRipsComplex.__init__
 
 Basic examples
--------------
+--------------
 
 The following example computes the weighted Rips filtration associated with a distance matrix and weights on vertices.
 
@@ -59,6 +59,8 @@ Combining with DistanceToMeasure, one can compute the DTM-filtration of a point 
     w_rips = WeightedRipsComplex(distance_matrix=dist, weights=r)
     st = w_rips.create_simplex_tree(max_dimension=2)
     print(st.persistence())
+
+The output is:
 
 .. testoutput::
 

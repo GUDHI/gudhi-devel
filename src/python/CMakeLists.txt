@@ -487,7 +487,9 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Weighted Rips
-    add_gudhi_py_test(test_weighted_rips)
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_weighted_rips)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")

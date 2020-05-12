@@ -35,8 +35,8 @@ def test_compatibility_with_rips():
         ([0, 2], 1.0),
         ([1, 3], 1.0),
         ([2, 3], 1.0),
-        ([1, 2], 1.4142135623730951),
-        ([0, 3], 1.4142135623730951),
+        ([1, 2], sqrt(2)),
+        ([0, 3], sqrt(2)),
     ]
 
 def test_compatibility_with_filtered_rips():
