@@ -8,10 +8,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.point_cloud.dtm import DistanceToMeasure
+from gudhi.point_cloud.dtm import DistanceToMeasure, DTMDensity
 import numpy
 import pytest
 import torch
+import math
 
 
 def test_dtm_compare_euclidean():
@@ -66,3 +67,11 @@ def test_dtm_precomputed():
     dtm = DistanceToMeasure(2, q=2, metric="neighbors")
     r = dtm.fit_transform(dist)
     assert r == pytest.approx([2.0, 0.707, 3.5355], rel=0.01)
+
+
+def test_density_normalized():
+    sample = numpy.random.normal(0, 1, (1000000, 2))
+    queries = numpy.array([[0.0, 0.0], [-0.5, 0.7], [0.4, 1.7]])
+    expected = numpy.exp(-(queries ** 2).sum(-1) / 2) / (2 * math.pi)
+    estimated = DTMDensity(k=150, normalize=True).fit(sample).transform(queries)
+    assert estimated == pytest.approx(expected, rel=0.4)

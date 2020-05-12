@@ -108,8 +108,8 @@ class DTMDensity:
         self.q = q
         self.dim = dim
         self.params = kwargs
-        self.normalize=normalize
-        self.n_samples=n_samples
+        self.normalize = normalize
+        self.n_samples = n_samples
 
     def fit_transform(self, X, y=None):
         return self.fit(X).transform(X)
@@ -120,7 +120,9 @@ class DTMDensity:
             X (numpy.array): coordinates for mass points.
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
-            self.knn = KNearestNeighbors(self.k, return_index=False, return_distance=True, sort_results=False, **self.params)
+            self.knn = KNearestNeighbors(
+                self.k, return_index=False, return_distance=True, sort_results=False, **self.params
+            )
             self.knn.fit(X)
             if self.params["metric"] != "precomputed":
                 self.n_samples = len(X)
@@ -154,6 +156,7 @@ class DTMDensity:
         density = dtm ** (-dim / q)
         if self.normalize:
             import math
+
             if self.params["metric"] == "precomputed":
                 self.n_samples = len(X[0])
             # Volume of d-ball
