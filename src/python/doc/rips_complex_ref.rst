@@ -22,7 +22,7 @@ Weighted Rips complex reference manual
    :undoc-members:
    :show-inheritance:
 
-   .. automethod:: gudhi.WeightedRipsComplex.__init__
+   .. automethod:: gudhi.weighted_rips_complex.WeightedRipsComplex.__init__
 
 Basic examples
 --------------
