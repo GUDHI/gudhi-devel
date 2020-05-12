@@ -13,8 +13,8 @@ class WeightedRipsComplex:
     """
     Class to generate a weighted Rips complex from a distance matrix and weights on vertices, 
     in the way described in :cite:`dtmfiltrations`.
-    Remark that all the filtration values of vertices are twice of the given weights for the consistency 
-    with RipsComplex, which is different from the definition in the paper.
+    Remark that all the filtration values are doubled compared to the definition in the paper 
+    for the consistency with RipsComplex.
     """
     def __init__(self, 
                 distance_matrix, 
