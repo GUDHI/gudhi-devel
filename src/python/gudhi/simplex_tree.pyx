@@ -33,7 +33,7 @@ cdef class SimplexTree:
     cdef public intptr_t thisptr
 
     # Get the pointer casted as it should be
-    cdef Simplex_tree_interface_full_featured* get_ptr(self):
+    cdef Simplex_tree_interface_full_featured* get_ptr(self) nogil:
         return <Simplex_tree_interface_full_featured*>(self.thisptr)
 
     cdef Simplex_tree_persistence_interface * pcohptr
@@ -345,7 +345,9 @@ cdef class SimplexTree:
         :param max_dim: The maximal dimension.
         :type max_dim: int.
         """
-        self.get_ptr().expansion(max_dim)
+        cdef int maxdim = max_dim
+        with nogil:
+            self.get_ptr().expansion(maxdim)
 
     def make_filtration_non_decreasing(self):
         """This function ensures that each simplex has a higher filtration
@@ -451,8 +453,12 @@ cdef class SimplexTree:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), persistence_dim_max)
-        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        cdef bool pdm = persistence_dim_max
+        cdef int coef = homology_coeff_field
+        cdef double minp = min_persistence
+        with nogil:
+            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), pdm)
+            self.pcohptr.compute_persistence(coef, minp)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.

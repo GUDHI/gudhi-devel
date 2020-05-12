@@ -17,11 +17,20 @@ are measured in norm p, for :math:`1 \leq p \leq \infty`.
 
 Distance Functions
 ------------------
-This first implementation uses the Python Optimal Transport library and is based
-on ideas from "Large Scale Computation of Means and Cluster for Persistence
+
+Optimal Transport
+*****************
+
+:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`_ (POT) :math:`\geq` 0.5.1 
+
+This first implementation uses the `Python Optimal Transport <installation.html#python-optimal-transport>`_
+library and is based on ideas from "Large Scale Computation of Means and Cluster for Persistence
 Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
 
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
+
+Hera
+****
 
 This other implementation comes from `Hera
 <https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
@@ -93,6 +102,8 @@ The output is:
 
 Barycenters
 -----------
+
+:Requires: `Python Optimal Transport <installation.html#python-optimal-transport>`_ (POT) :math:`\geq` 0.5.1 
 
 A Frechet mean (or barycenter) is a generalization of the arithmetic
 mean in a non linear space such as the one of persistence diagrams.
