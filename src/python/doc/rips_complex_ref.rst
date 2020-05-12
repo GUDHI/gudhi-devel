@@ -17,7 +17,7 @@ Rips complex reference manual
 Weighted Rips complex reference manual
 ======================================
 
-.. autoclass:: gudhi.WeightedRipsComplex
+.. autoclass:: gudhi.weighted_rips_complex.WeightedRipsComplex
    :members:
    :undoc-members:
    :show-inheritance:
