@@ -13,6 +13,8 @@
 
 #include <gudhi/Bitmap_cubical_complex/counter.h>
 
+#include <boost/config.hpp>
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -115,6 +117,7 @@ class Bitmap_cubical_complex_base {
    * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
    * On the other hand, the output is always indicating the position of
    * a top-dimensional cube in the data structure.
+   * \pre The filtration values are assigned as per `impose_lower_star_filtration()`.
    **/
   inline size_t get_top_dimensional_coface_of_a_cell(size_t splx);
 
@@ -621,7 +624,7 @@ size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size
       }
     }  
   }
-  return splx;
+  BOOST_UNREACHABLE_RETURN(-2);
 }
 
 template <typename T>
