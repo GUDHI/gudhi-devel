@@ -200,7 +200,7 @@ cdef class CubicalComplex:
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
 
-        assert self.pcohptr != NULL, "cofaces_of_persistence_pairs function requires persistence function to be launched first."
+        assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
 
         cdef vector[vector[int]] persistence_result
         output = [[],[]]
