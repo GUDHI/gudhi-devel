@@ -112,9 +112,9 @@ class Bitmap_cubical_complex_base {
   /**
    * This function finds a top-dimensional cell that is incident to the input cell and has 
    * the same filtration value. In case several cells are suitable, an arbitrary one is 
-   * returned. Note that the input parameter is not necessarily a cube, it might also
-   * be an edge or vertex of a cube. On the other hand, the output is always indicating the position of
-   * a cube in the data structure. 
+   * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
+   * On the other hand, the output is always indicating the position of
+   * a top-dimensional cube in the data structure.
    **/
   inline size_t get_top_dimensional_coface_of_a_cell(size_t splx);
 
