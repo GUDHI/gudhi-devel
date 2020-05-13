@@ -6,3 +6,8 @@ matplotlib
 scipy
 scikit-learn
 POT
+tensorflow
+torch
+pykeops
+hnswlib
+eagerpy

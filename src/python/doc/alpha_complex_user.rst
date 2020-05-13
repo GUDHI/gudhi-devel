@@ -10,9 +10,9 @@ Definition
 .. include:: alpha_complex_sum.inc
 
 `AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
-`Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_ 
-:cite:`cgal:hdj-t-19b` from `CGAL <http://www.cgal.org/>`_ (the Computational Geometry Algorithms Library
-:cite:`cgal:eb-19b`).
+`Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
+:cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
+:cite:`cgal:eb-19b`.
 
 Remarks
 ^^^^^^^
@@ -89,25 +89,28 @@ In order to build the alpha complex, first, a Simplex tree is built from the cel
 Filtration value computation algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  **for** i : dimension :math:`\rightarrow` 0 **do**
-    **for all** :math:`\sigma` of dimension i
-      **if** filtration(:math:`\sigma`) is NaN **then**
-        filtration(:math:`\sigma`) = :math:`\alpha^2(\sigma)`
-      **end if**
+.. code-block:: vim
 
-      *//propagate alpha filtration value*
+    for i : dimension → 0 do
+      for all σ of dimension i
+        if filtration(σ) is NaN then
+          filtration(σ) = α²(σ)
+        end if
+        for all τ face of σ do // propagate alpha filtration value
+          if filtration(τ) is not NaN then
+            filtration(τ) = min( filtration(τ), filtration(σ) )
+          else
+            if τ is not Gabriel for σ then
+              filtration(τ) = filtration(σ)
+            end if
+          end if
+        end for
+      end for
+    end for
+    
+    make_filtration_non_decreasing()
+    prune_above_filtration()
 
-      **for all** :math:`\tau` face of :math:`\sigma`
-        **if** filtration(:math:`\tau`) is not NaN **then**
-          filtration(:math:`\tau`) = filtration(:math:`\sigma`)
-        **end if**
-      **end for**
-    **end for**
-  **end for**
-
-  make_filtration_non_decreasing()
-
-  prune_above_filtration()
 
 Dimension 2
 ^^^^^^^^^^^
@@ -203,9 +206,3 @@ the program output is:
    [4, 5, 6] -> 22.74
    [3, 6] -> 30.25
 
-CGAL citations
-==============
-
-.. bibliography:: ../../biblio/how_to_cite_cgal.bib
-   :filter: docnames
-   :style: unsrt

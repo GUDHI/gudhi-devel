@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(test_pick_n_random_points)
 
   std::vector<Point_d> results;
   Gudhi::subsampling::pick_n_random_points(vect, 5, std::back_inserter(results));
-  std::cout << "landmark vector contains: ";
+  std::clog << "landmark vector contains: ";
   for (auto l: results)
-    std::cout << l << "\n";
+    std::clog << l << "\n";
   
   BOOST_CHECK(results.size() == 5);
 }

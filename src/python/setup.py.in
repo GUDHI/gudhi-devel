@@ -18,7 +18,8 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
 __license__ = "MIT"
 
-modules = [@GUDHI_PYTHON_MODULES_TO_COMPILE@]
+cython_modules = [@GUDHI_CYTHON_MODULES@]
+pybind11_modules = [@GUDHI_PYBIND11_MODULES@]
 
 source_dir='@CMAKE_CURRENT_SOURCE_DIR@/gudhi/'
 extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
@@ -30,7 +31,7 @@ runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
 ext_modules = []
-for module in modules:
+for module in cython_modules:
     ext_modules.append(Extension(
         'gudhi.' + module,
         sources = [source_dir + module + '.pyx',],
@@ -45,23 +46,21 @@ for module in modules:
 
 ext_modules = cythonize(ext_modules)
 
-ext_modules.append(Extension(
-    'gudhi.hera',
-    sources = [source_dir + 'hera.cc'],
-    language = 'c++',
-    include_dirs = include_dirs +
-        ['@HERA_WASSERSTEIN_INCLUDE_DIR@',
-        pybind11.get_include(False), pybind11.get_include(True)],
-    extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
-    ))
-ext_modules.append(Extension(
-    'gudhi.clustering._tomato',
-    sources = [source_dir + 'clustering/_tomato.cc'],
-    language = 'c++',
-    include_dirs = include_dirs +
-        [pybind11.get_include(False), pybind11.get_include(True)],
-    extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
-    ))
+for module in pybind11_modules:
+    my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
+    if module == 'hera':
+        my_include_dirs = ['@HERA_WASSERSTEIN_INCLUDE_DIR@'] + my_include_dirs
+    ext_modules.append(Extension(
+        'gudhi.' + module.replace('/', '.'),
+        sources = [source_dir + module + '.cc'],
+        language = 'c++',
+        include_dirs = my_include_dirs,
+        extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
+        extra_link_args=extra_link_args,
+        libraries=libraries,
+        library_dirs=library_dirs,
+        runtime_library_dirs=runtime_library_dirs,
+        ))
 
 setup(
     name = 'gudhi',

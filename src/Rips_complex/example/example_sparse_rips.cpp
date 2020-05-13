@@ -25,6 +25,6 @@ int main() {
   // ----------------------------------------------------------------------------
   // Display information about the complex
   // ----------------------------------------------------------------------------
-  std::cout << "Sparse Rips complex is of dimension " << stree.dimension() << " - " << stree.num_simplices()
+  std::clog << "Sparse Rips complex is of dimension " << stree.dimension() << " - " << stree.num_simplices()
             << " simplices - " << stree.num_vertices() << " vertices." << std::endl;
 }

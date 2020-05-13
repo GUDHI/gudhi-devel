@@ -52,13 +52,13 @@ class View_parameter {
   void change_vertex_mode() {
     int current_value = vertex_mode;
     vertex_mode = static_cast<VERTEX_MODE> (++current_value % V_COUNT);
-    std::cout << "Vertex mode : ";
+    std::clog << "Vertex mode : ";
     switch (vertex_mode) {
       case V_NONE:
-        std::cout << "empty\n";
+        std::clog << "empty\n";
         break;
       case V_SIMPLE:
-        std::cout << "simple\n";
+        std::clog << "simple\n";
         break;
       default:
         break;

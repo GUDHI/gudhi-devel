@@ -29,7 +29,6 @@ class Nerve_gic_interface : public Cover_complex<std::vector<double>> {
  public:
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree) {
     create_complex(*simplex_tree);
-    simplex_tree->initialize_filtration();
   }
   void set_cover_from_Euclidean_Voronoi(int m) {
     set_cover_from_Voronoi(Gudhi::Euclidean_distance(), m);

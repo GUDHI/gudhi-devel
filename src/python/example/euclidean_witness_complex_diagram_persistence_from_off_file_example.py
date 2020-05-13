@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
+import errno
+import os
 import matplotlib.pyplot as plot
 import gudhi
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+    which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+    license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -78,6 +82,7 @@ with open(args.file, "r") as f:
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
-        print(args.file, "is not a valid OFF file")
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                args.file)
 
     f.close()

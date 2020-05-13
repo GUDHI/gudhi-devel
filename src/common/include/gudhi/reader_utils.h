@@ -220,7 +220,7 @@ template <typename Filtration_value>
 std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv_file(const std::string& filename,
                                                                                       const char separator = ';') {
 #ifdef DEBUG_TRACES
-  std::cout << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
+  std::clog << "Using procedure read_lower_triangular_matrix_from_csv_file \n";
 #endif  // DEBUG_TRACES
   std::vector<std::vector<Filtration_value>> result;
   std::ifstream in;
@@ -272,12 +272,12 @@ std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv
   in.close();
 
 #ifdef DEBUG_TRACES
-  std::cerr << "Here is the matrix we read : \n";
+  std::clog << "Here is the matrix we read : \n";
   for (size_t i = 0; i != result.size(); ++i) {
     for (size_t j = 0; j != result[i].size(); ++j) {
-      std::cerr << result[i][j] << " ";
+      std::clog << result[i][j] << " ";
     }
-    std::cerr << std::endl;
+    std::clog << std::endl;
   }
 #endif  // DEBUG_TRACES
 
@@ -294,7 +294,7 @@ Note: the function does not check that birth <= death.
 template <typename OutputIterator>
 void read_persistence_intervals_and_dimension(std::string const& filename, OutputIterator out) {
 #ifdef DEBUG_TRACES
-  std::cout << "read_persistence_intervals_and_dimension - " << filename << std::endl;
+  std::clog << "read_persistence_intervals_and_dimension - " << filename << std::endl;
 #endif  // DEBUG_TRACES
   std::ifstream in(filename);
   if (!in.is_open()) {
@@ -311,11 +311,11 @@ void read_persistence_intervals_and_dimension(std::string const& filename, Outpu
       double numbers[4];
       int n = sscanf(line.c_str(), "%lf %lf %lf %lf", &numbers[0], &numbers[1], &numbers[2], &numbers[3]);
 #ifdef DEBUG_TRACES
-      std::cout << "[" << n << "] = ";
+      std::clog << "[" << n << "] = ";
       for (int i = 0; i < n; i++) {
-        std::cout << numbers[i] << ",";
+        std::clog << numbers[i] << ",";
       }
-      std::cout << std::endl;
+      std::clog << std::endl;
 #endif  // DEBUG_TRACES
       if (n >= 2) {
         int dim = (n >= 3 ? static_cast<int>(numbers[n - 3]) : -1);

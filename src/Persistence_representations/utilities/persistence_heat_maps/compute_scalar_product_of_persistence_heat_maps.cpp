@@ -18,12 +18,12 @@ using constant_scaling_function = Gudhi::Persistence_representations::constant_s
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program computes scalar product of persistence heat maps stored in a file (the file needs to be "
+  std::clog << "This program computes scalar product of persistence heat maps stored in a file (the file needs to be "
             << "created beforehand). \n"
             << "The parameters of this programs are names of files with persistence heat maps.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -60,14 +60,14 @@ int main(int argc, char** argv) {
   out.open("scalar_product.mps");
   for (size_t i = 0; i != scalar_product.size(); ++i) {
     for (size_t j = 0; j != scalar_product.size(); ++j) {
-      std::cout << scalar_product[i][j] << " ";
+      std::clog << scalar_product[i][j] << " ";
       out << scalar_product[i][j] << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     out << std::endl;
   }
   out.close();
 
-  std::cout << "Distance can be found in 'scalar_product.mps' file\n";
+  std::clog << "Distance can be found in 'scalar_product.mps' file\n";
   return 0;
 }

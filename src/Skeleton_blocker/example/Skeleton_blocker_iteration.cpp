@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   // more appropriated!
   unsigned num_vertices = 0;
   for (auto v : complex.vertex_range()) {
-    std::cout << "Vertex " << v << std::endl;
+    std::clog << "Vertex " << v << std::endl;
     ++num_vertices;
   }
 
@@ -65,9 +65,9 @@ int main(int argc, char *argv[]) {
     else
       euler -= 1;
   }
-  std::cout << "Saw " << num_vertices << " vertices, " << num_edges << " edges and " << num_simplices << " simplices"
+  std::clog << "Saw " << num_vertices << " vertices, " << num_edges << " edges and " << num_simplices << " simplices"
       << std::endl;
-  std::cout << "The Euler Characteristic is " << euler << std::endl;
-  std::cout << skbl_chrono;
+  std::clog << "The Euler Characteristic is " << euler << std::endl;
+  std::clog << skbl_chrono;
   return EXIT_SUCCESS;
 }

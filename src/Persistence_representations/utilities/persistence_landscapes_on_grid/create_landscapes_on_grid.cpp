@@ -18,7 +18,7 @@
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates persistence landscapes on grid files (*.g_land) of persistence diagrams files "
+  std::clog << "This program creates persistence landscapes on grid files (*.g_land) of persistence diagrams files "
             << "(*.pers) provided as an input.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"
             << "The second and third parameters are min and max of the grid. If you want those numbers to be computed "
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
             << "The remaining parameters are the names of files with persistence diagrams. \n";
 
   if (argc < 6) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
+    std::clog << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
   }
 
   for (size_t i = 0; i != filenames.size(); ++i) {
-    std::cout << "Creating persistence landscape on a grid based on a file : " << filenames[i] << std::endl;
+    std::clog << "Creating persistence landscape on a grid based on a file : " << filenames[i] << std::endl;
     Persistence_landscape_on_grid l;
     if ((min_ != -1) || (max_ != -1)) {
       l = Persistence_landscape_on_grid(filenames[i], min_, max_, size_of_grid, dimension);

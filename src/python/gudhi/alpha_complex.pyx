@@ -1,5 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+# which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+# license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -7,6 +9,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -24,11 +27,11 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points) except +
+        Alpha_complex_interface(vector[vector[double]] points) nogil except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool from_file) except +
-        vector[double] get_point(int vertex) except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
+        Alpha_complex_interface(string off_file, bool from_file) nogil except +
+        vector[double] get_point(int vertex) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -67,16 +70,20 @@ cdef class AlphaComplex:
 
     # The real cython constructor
     def __cinit__(self, points = None, off_file = ''):
+        cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(off_file.encode('utf-8'), True)
+                self.thisptr = new Alpha_complex_interface(
+                    off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:
             if points is None:
                 # Empty Alpha construction
                 points=[]
-            self.thisptr = new Alpha_complex_interface(points)
+            pts = points
+            with nogil:
+                self.thisptr = new Alpha_complex_interface(pts)
                 
 
     def __dealloc__(self):
@@ -109,6 +116,8 @@ cdef class AlphaComplex:
         :rtype: SimplexTree
         """
         stree = SimplexTree()
+        cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, max_alpha_square)
+        with nogil:
+            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
         return stree

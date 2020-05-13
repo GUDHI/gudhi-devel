@@ -32,25 +32,25 @@ int main(int argc, char *argv[]) {
   Simplex tetrahedron(Vertex_handle(0), Vertex_handle(1), Vertex_handle(2), Vertex_handle(3));
   complex.add_simplex(tetrahedron);
 
-  std::cout << "complex:" << complex.to_string() << std::endl;
+  std::clog << "complex:" << complex.to_string() << std::endl;
 
   // build the link of vertex 1, eg a triangle {0,2,3}
   auto link = complex.link(Vertex_handle(1));
-  std::cout << "link:" << link.to_string() << std::endl;
+  std::clog << "link:" << link.to_string() << std::endl;
 
   // Internally link is a subcomplex of 'complex' and its vertices are stored in a vector.
   // They can be accessed via Vertex_handle(x) where x is an index of the vector.
   // In that example, link has three vertices and thus it contains only
   // Vertex_handle(0),Vertex_handle(1) and Vertex_handle(2) are).
   for (int i = 0; i < 5; ++i)
-    std::cout << "link.contains_vertex(Vertex_handle(" << i << ")):" << link.contains_vertex(Vertex_handle(i)) <<
+    std::clog << "link.contains_vertex(Vertex_handle(" << i << ")):" << link.contains_vertex(Vertex_handle(i)) <<
         std::endl;
-  std::cout << std::endl;
+  std::clog << std::endl;
 
   // To access to the initial vertices eg (0,1,2,3,4),  Root_vertex_handle must be used.
   // For instance, to test if the link contains the vertex that was labeled i:
   for (int i = 0; i < 5; ++i)
-    std::cout << "link.contains_vertex(Root_vertex_handle(" << i << ")):" <<
+    std::clog << "link.contains_vertex(Root_vertex_handle(" << i << ")):" <<
       link.contains_vertex(Root_vertex_handle(i)) << std::endl;
 
   return EXIT_SUCCESS;

@@ -34,8 +34,8 @@ typedef boost::mpl::list<Simplex_tree<>,
                         > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_variants) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "SIMPLEX TREE IOSTREAM OPERATOR" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "SIMPLEX TREE IOSTREAM OPERATOR" << std::endl;
 
   Stree_type st;
 
@@ -46,15 +46,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_vari
 
   st.initialize_filtration();
   // Display the Simplex_tree
-  std::cout << "The ORIGINAL complex contains " << st.num_simplices() << " simplices - dimension = "
+  std::clog << "The ORIGINAL complex contains " << st.num_simplices() << " simplices - dimension = "
             << st.dimension() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::clog << (int) vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   // st:
@@ -75,15 +75,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_vari
   simplex_tree_istream >> read_st;
 
   // Display the Simplex_tree
-  std::cout << "The READ complex contains " << read_st.num_simplices() << " simplices - dimension = "
+  std::clog << "The READ complex contains " << read_st.num_simplices() << " simplices - dimension = "
             << read_st.dimension() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : read_st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << read_st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << read_st.filtration(f_simplex) << "] ";
     for (auto vertex : read_st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::clog << (int) vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(st == read_st);
@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_vari
 
 
 BOOST_AUTO_TEST_CASE(mini_iostream_operator) {
-  std::cout << "********************************************************************" << std::endl;
-  std::cout << "MINI SIMPLEX TREE IOSTREAM OPERATOR" << std::endl;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "MINI SIMPLEX TREE IOSTREAM OPERATOR" << std::endl;
 
   Simplex_tree<MyOptions> st;
 
@@ -103,14 +103,14 @@ BOOST_AUTO_TEST_CASE(mini_iostream_operator) {
 
   st.initialize_filtration();
   // Display the Simplex_tree
-  std::cout << "The ORIGINAL complex contains " << st.num_simplices() << " simplices - dimension = "
+  std::clog << "The ORIGINAL complex contains " << st.num_simplices() << " simplices - dimension = "
             << st.dimension() << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::clog << (int) vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   // st:
@@ -131,15 +131,15 @@ BOOST_AUTO_TEST_CASE(mini_iostream_operator) {
   simplex_tree_istream >> read_st;
 
   // Display the Simplex_tree
-  std::cout << "The READ complex contains " << read_st.num_simplices() << " simplices - dimension = "
+  std::clog << "The READ complex contains " << read_st.num_simplices() << " simplices - dimension = "
             << read_st.dimension() << std::endl;
-  std::cout << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : read_st.filtration_simplex_range()) {
-    std::cout << "   " << "[" << read_st.filtration(f_simplex) << "] ";
+    std::clog << "   " << "[" << read_st.filtration(f_simplex) << "] ";
     for (auto vertex : read_st.simplex_vertex_range(f_simplex)) {
-      std::cout << (int) vertex << " ";
+      std::clog << (int) vertex << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   BOOST_CHECK(st == read_st);

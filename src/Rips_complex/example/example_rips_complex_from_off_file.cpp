@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     ouput_file_stream.open(std::string(argv[4]));
     streambuffer = ouput_file_stream.rdbuf();
   } else {
-    streambuffer = std::cout.rdbuf();
+    streambuffer = std::clog.rdbuf();
   }
 
   Simplex_tree stree;

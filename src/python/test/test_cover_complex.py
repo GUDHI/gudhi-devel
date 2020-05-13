@@ -9,6 +9,7 @@
 """
 
 from gudhi import CoverComplex
+import pytest
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2018 Inria"
@@ -24,7 +25,8 @@ def test_empty_constructor():
 def test_non_existing_file_read():
     # Try to open a non existing file
     cover = CoverComplex()
-    assert cover.read_point_cloud("pouetpouettralala.toubiloubabdou") == False
+    with pytest.raises(FileNotFoundError):
+        cover.read_point_cloud("pouetpouettralala.toubiloubabdou")
 
 
 def test_files_creation():

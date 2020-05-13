@@ -80,8 +80,6 @@ Here is a simple sample file in the 3D case::
     1. 1. 1.
 
 
-.. _Perseus file format:
-
 Perseus
 *******
 

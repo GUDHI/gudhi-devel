@@ -18,7 +18,7 @@
 using PSSK = Gudhi::Persistence_representations::PSSK;
 
 int main(int argc, char** argv) {
-  std::cout << "This program creates PSSK files (*.pssk) of persistence diagrams files (*.pers) "
+  std::clog << "This program creates PSSK files (*.pssk) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"
             << "The second and third parameters are min and max of the grid. If you want those numbers to be computed "
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
             << "The remaining parameters are the names of files with persistence diagrams. \n";
 
   if (argc < 7) {
-    std::cout << "Wrong parameter list, the program will now terminate \n";
+    std::clog << "Wrong parameter list, the program will now terminate \n";
     return 1;
   }
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 
   std::vector<std::vector<double> > filter = Gudhi::Persistence_representations::create_Gaussian_filter(stdiv, 1);
   for (size_t i = 0; i != filenames.size(); ++i) {
-    std::cout << "Creating a PSSK based on a file : " << filenames[i] << std::endl;
+    std::clog << "Creating a PSSK based on a file : " << filenames[i] << std::endl;
     PSSK l(filenames[i], filter, size_of_grid, min_, max_, dimension);
 
     std::stringstream ss;

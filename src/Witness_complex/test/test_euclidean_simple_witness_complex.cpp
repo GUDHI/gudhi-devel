@@ -82,12 +82,12 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
                                                witnesses);
   eucl_witness_complex.create_complex(complex, 0);
 
-  std::cout << "complex.num_simplices() = " << complex.num_simplices() << std::endl;
+  std::clog << "complex.num_simplices() = " << complex.num_simplices() << std::endl;
   BOOST_CHECK(complex.num_simplices() == 24);
 
   eucl_witness_complex.create_complex(relaxed_complex, 8.01);
 
-  std::cout << "relaxed_complex.num_simplices() = " << relaxed_complex.num_simplices() << std::endl;
+  std::clog << "relaxed_complex.num_simplices() = " << relaxed_complex.num_simplices() << std::endl;
   BOOST_CHECK(relaxed_complex.num_simplices() == 239);
   // The corner simplex {0,2,5,7} and its cofaces are missing.
 
@@ -95,12 +95,12 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   WitnessComplex witness_complex(nearest_landmark_table);
   witness_complex.create_complex(complex_ne, 0);
 
-  std::cout << "complex.num_simplices() = " << complex_ne.num_simplices() << std::endl;
+  std::clog << "complex.num_simplices() = " << complex_ne.num_simplices() << std::endl;
   BOOST_CHECK(complex_ne.num_simplices() == 24);
 
   witness_complex.create_complex(relaxed_complex_ne, 8.01);
 
-  std::cout << "relaxed_complex.num_simplices() = " << relaxed_complex_ne.num_simplices() << std::endl;
+  std::clog << "relaxed_complex.num_simplices() = " << relaxed_complex_ne.num_simplices() << std::endl;
   BOOST_CHECK(relaxed_complex_ne.num_simplices() == 239);
 
 
@@ -111,10 +111,10 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   eucl_strong_witness_complex.create_complex(strong_relaxed_complex, 9.1);
   eucl_strong_witness_complex.create_complex(strong_relaxed_complex2, 9.1, 2);
 
-  std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex.num_simplices() << std::endl;
+  std::clog << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex.num_simplices() << std::endl;
   BOOST_CHECK(strong_relaxed_complex.num_simplices() == 239);
 
-  std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2.num_simplices() << std::endl;
+  std::clog << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2.num_simplices() << std::endl;
   BOOST_CHECK(strong_relaxed_complex2.num_simplices() == 92);
 
 
@@ -124,10 +124,10 @@ BOOST_AUTO_TEST_CASE(simple_witness_complex) {
   strong_witness_complex.create_complex(strong_relaxed_complex_ne, 9.1);
   strong_witness_complex.create_complex(strong_relaxed_complex2_ne, 9.1, 2);
 
-  std::cout << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex_ne.num_simplices() << std::endl;
+  std::clog << "strong_relaxed_complex.num_simplices() = " << strong_relaxed_complex_ne.num_simplices() << std::endl;
   BOOST_CHECK(strong_relaxed_complex_ne.num_simplices() == 239);
 
-  std::cout << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2_ne.num_simplices() << std::endl;
+  std::clog << "strong_relaxed_complex2.num_simplices() = " << strong_relaxed_complex2_ne.num_simplices() << std::endl;
   BOOST_CHECK(strong_relaxed_complex2_ne.num_simplices() == 92);
 
 

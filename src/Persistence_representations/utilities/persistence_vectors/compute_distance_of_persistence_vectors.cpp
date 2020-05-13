@@ -19,14 +19,14 @@ using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
 int main(int argc, char** argv) {
-  std::cout << "This program compute distance of persistence vectors stored in a file (the file needs to be created "
+  std::clog << "This program compute distance of persistence vectors stored in a file (the file needs to be created "
                "beforehand). \n";
-  std::cout << "The first parameter of a program is an integer p. The program compute l^p distance of the vectors. For "
+  std::clog << "The first parameter of a program is an integer p. The program compute l^p distance of the vectors. For "
                "l^infty distance choose p = -1. \n";
-  std::cout << "The remaining parameters of this programs are names of files with persistence vectors.\n";
+  std::clog << "The remaining parameters of this programs are names of files with persistence vectors.\n";
 
   if (argc < 3) {
-    std::cout << "Wrong number of parameters, the program will now terminate \n";
+    std::clog << "Wrong number of parameters, the program will now terminate \n";
     return 1;
   }
 
@@ -69,14 +69,14 @@ int main(int argc, char** argv) {
   out.open("distance.vect");
   for (size_t i = 0; i != distance.size(); ++i) {
     for (size_t j = 0; j != distance.size(); ++j) {
-      std::cout << distance[i][j] << " ";
+      std::clog << distance[i][j] << " ";
       out << distance[i][j] << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
     out << std::endl;
   }
   out.close();
 
-  std::cout << "Distance can be found in 'distance.vect' file\n";
+  std::clog << "Distance can be found in 'distance.vect' file\n";
   return 0;
 }
