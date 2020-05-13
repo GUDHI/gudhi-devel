@@ -112,8 +112,8 @@ class Bitmap_cubical_complex_base {
   virtual inline std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
 
   /**
-   * This function finds a top-dimensional cell that is incident to the input cell and has 
-   * the same filtration value. In case several cells are suitable, an arbitrary one is 
+   * This function finds a top-dimensional cell that is incident to the input cell and has
+   * the same filtration value. In case several cells are suitable, an arbitrary one is
    * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
    * On the other hand, the output is always indicating the position of
    * a top-dimensional cube in the data structure.
@@ -617,12 +617,12 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
 template <typename T>
 size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size_t splx) {
   if (this->get_dimension_of_a_cell(splx) == this->dimension()){return splx;}
-  else{  
+  else{
     for (auto v : this->get_coboundary_of_a_cell(splx)){
       if(this->get_cell_data(v) == this->get_cell_data(splx)){
         return this->get_top_dimensional_coface_of_a_cell(v);
       }
-    }  
+    }
   }
   BOOST_UNREACHABLE_RETURN(-2);
 }
