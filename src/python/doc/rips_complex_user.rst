@@ -351,6 +351,9 @@ until dimension 1 - one skeleton graph in other words), the output is:
 Weighted Rips Complex
 ---------------------
 
+`WeightedRipsComplex <rips_complex_ref.html#weighted-rips-complex-reference-manual>`_ builds a simplicial complex from a distance matrix and weights on vertices.
+
+
 Example from a distance matrix and weights
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -372,7 +375,7 @@ The output is:
     [([0], 2.0), ([1], 200.0), ([0, 1], 200.0)]
 
 Example from a point cloud combined with DistanceToMeasure
-----------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Combining with DistanceToMeasure, one can compute the DTM-filtration of a point set, as in `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_. 
 

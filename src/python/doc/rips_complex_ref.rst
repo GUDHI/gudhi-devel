@@ -13,6 +13,8 @@ Rips complex reference manual
 
    .. automethod:: gudhi.RipsComplex.__init__
 
+.. _weighted-rips-complex-reference-manual:
+
 ======================================
 Weighted Rips complex reference manual
 ======================================
