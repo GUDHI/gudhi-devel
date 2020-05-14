@@ -6,7 +6,7 @@ jobs:
     cancelTimeoutInMinutes: 60
     pool:
       vmImage: macOS-10.14
-    # Run the pipeline with multiple Python versions
+    # Run the pipeline with multiple Python versions - Thanks to https://github.com/fastai/fastai
     strategy:
       matrix:
         Python36:
@@ -24,9 +24,8 @@ jobs:
       inputs:
         versionSpec: '$(python.version)'
         architecture: 'x64'
-  
-      # XXX: should be fixed in 1.140 release https://github.com/Microsoft/vsts-tasks/issues/8299#issuecomment-427095427
-    - script: sudo install -d -m 0777 /usr/envs
+
+    - script: sudo install -d -m 0777 /usr/local/miniconda/envs/
       displayName: Fix Conda permissions
 
       # Conda setup environment.
@@ -38,8 +37,10 @@ jobs:
         packageSpecs: 'python=$(python.version)'
 
     - script: |
-        source activate gudhi_build_env
-        conda install --yes -c conda-forge doxygen cgal-cpp>=5.0.1
+        conda activate gudhi_build_env
+        conda install -y conda
+        conda install -y pip setuptools
+        conda install -y -c conda-forge doxygen cgal-cpp>=5.0.1
         python -m pip install --user -r .github/build-requirements.txt
         python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
