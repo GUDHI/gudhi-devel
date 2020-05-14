@@ -5,7 +5,7 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: macOS-10.14
+      vmImage: macOS-10.13
     # Run the pipeline with multiple Python versions - Thanks to https://github.com/fastai/fastai
     strategy:
       matrix:
