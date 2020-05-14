@@ -5,47 +5,27 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: macOS-10.15
-    # Run the pipeline with multiple Python versions - Thanks to https://github.com/fastai/fastai
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-          cmakeBuildType: Release
-        Python37:
-          python.version: '3.7'
-          cmakeBuildType: Release
-      # Increase the maxParallel value to simultaneously run the job for all versions in the matrix (max 10 for free open-source)
-      maxParallel: 4
-  
+      vmImage: macOS-10.14
+    variables:
+      pythonVersion: '3.6'
+      cmakeBuildType: Release
+
     steps:
-      # Set the UsePythonVersion task to reference the matrix variable for its Python version
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
-
-    - script: sudo install -d -m 0777 /usr/local/miniconda/envs/
-      displayName: Fix Conda permissions
-
-      # Conda setup environment.
-      # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/package/conda-environment?view=vsts
-      #
-    - task: CondaEnvironment@0
-      inputs:
-        environmentName: 'gudhi_build_env'
-        packageSpecs: 'python=$(python.version)'
-
-    - script: |
-        conda activate gudhi_build_env
-        conda install -y conda
-        conda install -y pip setuptools
-        conda install -y -c conda-forge doxygen cgal-cpp>=5.0.1
+    - bash: echo "##vso[task.prependpath]$CONDA/bin"
+      displayName: Add conda to PATH
+  
+    - bash: sudo conda create --yes --quiet --name gudhi_build_env
+      displayName: Create Anaconda environment
+  
+    - bash: |
+        source activate gudhi_build_env
+        sudo conda install --yes --quiet --name gudhi_build_env python=$(pythonVersion)
+        sudo conda update --yes --quiet -n base -c defaults conda
+        sudo conda install --yes -c conda-forge doxygen cgal-cpp>=5.0.1
         python -m pip install --user -r .github/build-requirements.txt
         python -m pip install --user -r .github/test-requirements.txt
       displayName: 'Install build dependencies'
-
-    - script: |
+    - bash: |
         source activate gudhi_build_env
         git submodule update --init
         mkdir build
