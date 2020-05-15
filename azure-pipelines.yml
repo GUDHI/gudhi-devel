@@ -21,7 +21,6 @@ jobs:
     - bash: |
         source activate gudhi_build_env
         sudo conda install --yes --quiet --name gudhi_build_env python=$(pythonVersion)
-        sudo conda update --yes --quiet -n base -c defaults conda
         sudo conda install --yes -c conda-forge doxygen cgal-cpp>=5.0.1
         ls /usr/local/miniconda/envs/gudhi_build_env/include
         python -m pip install --user -r .github/build-requirements.txt
