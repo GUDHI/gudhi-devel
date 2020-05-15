@@ -37,6 +37,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max)
         void compute_persistence(int homology_coeff_field, double min_persistence)
         vector[pair[int, pair[double, double]]] get_persistence()
+        vector[vector[int]] cofaces_of_cubical_persistence_pairs()
         vector[int] betti_numbers()
         vector[int] persistent_betti_numbers(double from_value, double to_value)
         vector[pair[double,double]] intervals_in_dimension(int dimension)
@@ -169,6 +170,58 @@ cdef class CubicalComplex:
         """
         self.compute_persistence(homology_coeff_field, min_persistence)
         return self.pcohptr.get_persistence()
+
+    def cofaces_of_persistence_pairs(self):
+        """A persistence interval is described by a pair of cells, one that creates the
+        feature and one that kills it. The filtration values of those 2 cells give coordinates
+        for a point in a persistence diagram, or a bar in a barcode. Structurally, in the
+        cubical complexes provided here, the filtration value of any cell is the minimum of the
+        filtration values of the maximal cells that contain it. Connecting persistence diagram
+        coordinates to the corresponding value in the input (i.e. the filtration values of
+        the top-dimensional cells) is useful for differentiation purposes.
+
+        This function returns a list of pairs of top-dimensional cells corresponding to
+        the persistence birth and death cells of the filtration. The cells are represented by
+        their indices in the input list of top-dimensional cells (and not their indices in the
+        internal datastructure that includes non-maximal cells). Note that when two adjacent
+        top-dimensional cells have the same filtration value, we arbitrarily return one of the two
+        when calling the function on one of their common faces.
+
+        :returns: The top-dimensional cells/cofaces of the positive and negative cells,
+            together with the corresponding homological dimension, in two lists of numpy arrays of integers.
+            The first list contains the regular persistence pairs, grouped by dimension.
+            It contains numpy arrays of shape [number_of_persistence_points, 2].
+            The indices of the arrays in the list correspond to the homological dimensions, and the
+            integers of each row in each array correspond to: (index of positive top-dimensional cell,
+            index of negative top-dimensional cell).
+            The second list contains the essential features, grouped by dimension.
+            It contains numpy arrays of shape [number_of_persistence_points, 1].
+            The indices of the arrays in the list correspond to the homological dimensions, and the
+            integers of each row in each array correspond to: (index of positive top-dimensional cell).
+        """
+
+        assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
+
+        cdef vector[vector[int]] persistence_result
+        output = [[],[]]
+        persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+        pr = np.array(persistence_result)
+
+        ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
+        ess = pr[ess_ind]
+        max_h = max(ess[:,0])+1
+        for h in range(max_h):
+            hidxs = np.argwhere(ess[:,0] == h)[:,0]
+            output[1].append(ess[hidxs][:,1])
+
+        reg_ind = np.setdiff1d(np.array(range(len(pr))), ess_ind)
+        reg = pr[reg_ind]
+        max_h = max(reg[:,0])+1
+        for h in range(max_h):
+            hidxs = np.argwhere(reg[:,0] == h)[:,0]
+            output[0].append(reg[hidxs][:,1:])
+
+        return output
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the complex.
