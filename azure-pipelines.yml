@@ -31,7 +31,7 @@ jobs:
         git submodule update --init
         mkdir build
         cd build
-        ls $(eigen3IncludeDir)
+        ls /usr/local/miniconda/envs/gudhi_build_env
         cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DEIGEN3_INCLUDE_DIR=$(eigen3IncludeDir) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
         make -j 4
         make doxygen
