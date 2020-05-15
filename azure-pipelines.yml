@@ -9,7 +9,7 @@ jobs:
     variables:
       pythonVersion: '3.6'
       cmakeBuildType: Release
-      eigen3IncludeDir: /usr/local/miniconda/envs/gudhi_build_env/include/eigen3
+      eigen3IncludeDir: '/usr/local/miniconda/envs/gudhi_build_env/include/eigen3'
 
     steps:
     - bash: echo "##vso[task.prependpath]$CONDA/bin"
