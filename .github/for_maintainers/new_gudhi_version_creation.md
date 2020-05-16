@@ -16,6 +16,7 @@ rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lu
 
 Checkin the modifications, build and test the version:
 ```bash
+git submodule update --init
 mkdir build
 cd build
 cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
