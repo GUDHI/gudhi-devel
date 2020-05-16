@@ -93,7 +93,6 @@ class Tomato:
             density_type = "manual"
         else:
             density_type = self.density_type_
-            assert density_type != "manual"
             if density_type == "manual":
                 raise ValueError("If density_type is 'manual', you must provide weights to fit()")
 
