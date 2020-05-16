@@ -27,20 +27,20 @@ __license__ = "MIT"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
-        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells)
-        Bitmap_cubical_complex_base_interface(string perseus_file)
-        int num_simplices()
-        int dimension()
+        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells) nogil
+        Bitmap_cubical_complex_base_interface(string perseus_file) nogil
+        int num_simplices() nogil
+        int dimension() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
-        Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max)
-        void compute_persistence(int homology_coeff_field, double min_persistence)
-        vector[pair[int, pair[double, double]]] get_persistence()
-        vector[vector[int]] cofaces_of_cubical_persistence_pairs()
-        vector[int] betti_numbers()
-        vector[int] persistent_betti_numbers(double from_value, double to_value)
-        vector[pair[double,double]] intervals_in_dimension(int dimension)
+        Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil
+        vector[pair[int, pair[double, double]]] get_persistence() nogil
+        vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
+        vector[int] betti_numbers() nogil
+        vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
+        vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
 
 # CubicalComplex python interface
 cdef class CubicalComplex:
@@ -151,8 +151,11 @@ cdef class CubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
         assert self.__is_defined()
-        self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, True)
-        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        cdef int field = homology_coeff_field
+        cdef double minp = min_persistence
+        with nogil:
+            self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, 1)
+            self.pcohptr.compute_persistence(field, minp)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
