@@ -81,9 +81,7 @@ cdef class PeriodicCubicalComplex:
                   periodic_dimensions=None, perseus_file=''):
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
-                                                                       top_dimensional_cells,
-                                                                       periodic_dimensions)
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
             top_dimensional_cells = np.array(top_dimensional_cells,
@@ -91,13 +89,11 @@ cdef class PeriodicCubicalComplex:
                                              order = 'F')
             dimensions = top_dimensional_cells.shape
             top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
-                                                                       top_dimensional_cells,
-                                                                       periodic_dimensions)
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file.encode('utf-8'))
+                self._construct_from_file(perseus_file.encode('utf-8'))
             else:
                 print("file " + perseus_file + " not found.", file=sys.stderr)
         else:
@@ -105,6 +101,14 @@ cdef class PeriodicCubicalComplex:
               "top_dimensional_cells and periodic_dimensions, or from "
               "top_dimensional_cells and periodic_dimensions or from "
               "a Perseus-style file name.", file=sys.stderr)
+
+    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions):
+        with nogil:
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
+
+    def _construct_from_file(self, string filename):
+        with nogil:
+            self.thisptr = new Periodic_cubical_complex_base_interface(filename)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
