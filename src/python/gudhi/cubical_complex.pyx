@@ -215,7 +215,8 @@ cdef class CubicalComplex:
 
         cdef vector[vector[int]] persistence_result
         output = [[],[]]
-        persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+        with nogil:
+            persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
         pr = np.array(persistence_result)
 
         ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
