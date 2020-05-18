@@ -82,3 +82,7 @@ def test_density():
     density = DTMDensity(k=2, metric="neighbors", dim=1).fit_transform(distances)
     expected = numpy.array([2.0, 1.0, 0.5])
     assert density == pytest.approx(expected)
+    distances = [[0, 1], [2, 0], [1, 3]]
+    density = DTMDensity(metric="neighbors", dim=1).fit_transform(distances)
+    expected = numpy.array([2.0, 1.0, 0.5])
+    assert density == pytest.approx(expected)
