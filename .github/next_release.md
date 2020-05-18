@@ -41,7 +41,7 @@ Below is a list of changes made since GUDHI 3.1.1:
 
 - [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
      - Use LaTeX style and grey block
-     - (N x 2) numpy arrays as input 
+     - Can now handle (N x 2) numpy arrays as input 
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.2.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.2.0+is%3Aclosed) is available on GitHub.
@@ -56,4 +56,3 @@ We provide [bibtex entries](https://gudhi.inria.fr/doc/latest/_citation.html) fo
 Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any questions or remarks.
 
 For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/latest/installation.html) or [Python](https://gudhi.inria.fr/python/latest/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
-
