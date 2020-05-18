@@ -40,7 +40,7 @@ Below is a list of changes made since GUDHI 3.1.1:
      - Improve computations (cache circumcenters computation and point comparison improvement)
 
 - [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
-     - Use LaTeX style and grey block
+     - New rendering option proposed (use LaTeX style, add grey block, improved positioning of labels, etc.). 
      - Can now handle (N x 2) numpy arrays as input 
 
 - Miscellaneous
