@@ -129,10 +129,10 @@ class Tomato:
             knn = KNearestNeighbors(need_knn, return_index=need_knn_ngb, return_distance=need_knn_dist, **self.params_).fit_transform(X)
             if need_knn_ngb:
                 if need_knn_dist:
-                    knn_ngb = knn[0][:, 0:k_graph]
+                    self.neighbors_ = knn[0][:, 0:k_graph]
                     knn_dist = knn[1]
                 else:
-                    knn_ngb = knn
+                    self.neighbors_ = knn
             if need_knn_dist:
                 knn_dist = knn
         if self.density_type_ in ["DTM", "logDTM"]:
@@ -146,179 +146,14 @@ class Tomato:
                 weights = numpy.log(weights)
 
         if input_type == "distance_matrix" and self.graph_type_ == "radius":
+            # TODO: parallelize
             X = numpy.array(X)
             r = self.params_["r"]
             self.neighbors_ = [numpy.flatnonzero(l <= r) for l in X]
 
-        if input_type == "distance_matrix" and self.graph_type_ == "knn":
-            k = self.params_["k"]
-            self.neighbors_ = numpy.argpartition(X, k - 1)[:, 0:k]
-
         if input_type == "neighbors":
             self.neighbors_ = X
             assert density_type == "manual"
-
-        if input_type == "points" and self.graph_type_ == "knn" and self.density_type_ in {"DTM", "logDTM"}:
-            q = self.params_.get("q", len(X[0]))
-            p = self.params_.get("p", 2)
-            k = self.params_.get("k", 10)
-            k_DTM = self.params_.get("k_DTM", k)
-            kmax = max(k, k_DTM)
-            if self.params_.get("gpu"):
-                import torch
-                from pykeops.torch import LazyTensor
-
-                # 'float64' is slow except on super expensive GPUs. Allow it with some param?
-                XX = torch.tensor(self.points_, dtype=torch.float32)
-                if p == numpy.inf:
-                    # Requires a version of pykeops strictly more recent than 1.3
-                    dd, nn = (
-                        (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :]))
-                        .abs()
-                        .max(-1)
-                        .Kmin_argKmin(kmax, dim=1)
-                    )
-                elif p == 2:  # Any even integer?
-                    dd, nn = (
-                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p)
-                        .sum(-1)
-                        .Kmin_argKmin(kmax, dim=1)
-                    )
-                else:
-                    dd, nn = (
-                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p)
-                        .sum(-1)
-                        .Kmin_argKmin(kmax, dim=1)
-                    )
-                if k < kmax:
-                    nn = nn[:, 0:k]
-                if k_DTM < kmax:
-                    dd = dd[:, 0:k_DTM]
-                assert q != numpy.inf  # for now
-                if p != numpy.inf:
-                    qp = float(q) / p
-                else:
-                    qp = q
-                if qp != 1:
-                    dd = dd ** qp
-                weights = dd.sum(-1)
-
-                # Back to the CPU. Not sure this is necessary, or the right way to do it.
-                weights = numpy.array(weights)
-                self.neighbors_ = numpy.array(nn)
-            else:  # CPU
-                from scipy.spatial import cKDTree
-
-                kdtree = cKDTree(self.points_)
-                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
-                dd, self.neighbors_ = kdtree.query(self.points_, k=kmax, p=p, **qargs)
-                if k < kmax:
-                    self.neighbors_ = self.neighbors_[:, 0:k]
-                if k_DTM < kmax:
-                    dd = dd[:, 0:k_DTM]
-                # weights = numpy.linalg.norm(dd, axis=1, ord=q)
-                weights = (dd ** q).sum(-1)
-
-            if self.density_type_ == "DTM":
-                # We ignore constant factors, which don't matter for
-                # clustering, although they do change thresholds
-                dim = len(self.points_[0])
-                weights = weights ** (-dim / q)
-            else:
-                # We ignore exponents, which become constant factors with log
-                weights = -numpy.log(weights)
-
-        if input_type == "points" and self.graph_type_ == "knn" and self.density_type_ not in {"DTM", "logDTM"}:
-            p = self.params_.get("p", 2)
-            k = self.params_.get("k", 10)
-            if self.params_.get("gpu"):
-                import torch
-                from pykeops.torch import LazyTensor
-
-                # 'float64' is slow except on super expensive GPUs. Allow it with some param?
-                XX = torch.tensor(self.points_, dtype=torch.float32)
-                if p == numpy.inf:
-                    # Requires a version of pykeops strictly more recent than 1.3
-                    nn = (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs().max(-1).argKmin(k, dim=1)
-                elif p == 2:  # Any even integer?
-                    nn = ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p).sum(-1).argKmin(k, dim=1)
-                else:
-                    nn = (
-                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p).sum(-1).argKmin(k, dim=1)
-                    )
-                # Back to the CPU. Not sure this is necessary, or the right way to do it.
-                self.neighbors_ = numpy.array(nn)
-            else:  # CPU
-                from scipy.spatial import cKDTree
-
-                kdtree = cKDTree(self.points_)
-                # FIXME 'p'
-                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
-                _, self.neighbors_ = kdtree.query(self.points_, k=k, p=p, **qargs)
-
-        if input_type == "points" and self.graph_type_ != "knn" and self.density_type_ in {"DTM", "logDTM"}:
-            q = self.params_.get("q", len(X[0]))
-            p = self.params_.get("p", 2)
-            k = self.params_.get("k", 10)
-            k_DTM = self.params_.get("k_DTM", k)
-            if self.params_.get("gpu"):
-                import torch
-                from pykeops.torch import LazyTensor
-
-                # 'float64' is slow except on super expensive GPUs. Allow it with some param?
-                XX = torch.tensor(self.points_, dtype=torch.float32)
-                if p == numpy.inf:
-                    dd = (LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs().max(-1).Kmin(k_DTM, dim=1)
-                elif p == 2:  # Any even integer?
-                    dd = ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])) ** p).sum(-1).Kmin(k_DTM, dim=1)
-                else:
-                    dd = (
-                        ((LazyTensor(XX[:, None, :]) - LazyTensor(XX[None, :, :])).abs() ** p)
-                        .sum(-1)
-                        .Kmin(k_DTM, dim=1)
-                    )
-                assert q != numpy.inf  # for now
-                if p != numpy.inf:
-                    qp = float(q) / p
-                else:
-                    qp = q
-                if qp != 1:
-                    dd = dd ** qp
-                weights = dd.sum(-1)
-                # **1/q is a waste of time, whether we take another **-.25 or a log
-
-                # Back to the CPU. Not sure this is necessary, or the right way to do it.
-                weights = numpy.array(weights)
-            else:  # CPU
-                from scipy.spatial import cKDTree
-
-                kdtree = cKDTree(self.points_)
-                qargs = {k: v for k, v in self.params_.items() if k in {"eps", "n_jobs"}}
-                dd, _ = kdtree.query(self.points_, k=k_DTM, p=p, **qargs)
-                # weights = numpy.linalg.norm(dd, axis=1, ord=q)
-                weights = (dd ** q).sum(-1)
-
-            if self.density_type_ == "DTM":
-                dim = len(self.points_[0])
-                weights = weights ** (-dim / q)
-            else:
-                weights = -numpy.log(weights)
-
-        if input_type == "distance_matrix" and self.density_type_ in {"DTM", "logDTM"}:
-            q = self.params_.get("q", 2)
-            X = numpy.array(X)
-            k = self.params_.get("k_DTM")
-            if not k:
-                k = self.params_["k"]
-            weights = (numpy.partition(X, k - 1)[:, 0:k] ** q).sum(-1)
-            if self.density_type_ == "DTM":
-                try:
-                    dim = len(self.points_[0])
-                except AttributeError:
-                    dim = 2
-                weights = weights ** (-dim / q)
-            else:
-                weights = -numpy.log(weights)
 
         if self.density_type_ in {"KDE", "logKDE"}:
             # FIXME: replace most assert with raise ValueError("blabla")
