@@ -95,8 +95,9 @@ class DTMDensity:
                 Only available for the Euclidean metric, defaults to False.
             n_samples (int): number of sample points used for fitting. Only needed if `normalize` is True and
                 metric is "neighbors".
-            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that metric="neighbors" means that
-                :func:`transform` expects an array with the distances to the k nearest neighbors.
+            kwargs: same parameters as :class:`~gudhi.point_cloud.knn.KNearestNeighbors`, except that
+                metric="neighbors" means that :func:`transform` expects an array with the distances to
+                the k nearest neighbors.
         """
         if weights is None:
             self.k = k
