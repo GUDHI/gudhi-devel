@@ -24,20 +24,20 @@ __license__ = "MIT"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>":
-        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions)
-        Periodic_cubical_complex_base_interface(string perseus_file)
-        int num_simplices()
-        int dimension()
+        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions) nogil
+        Periodic_cubical_complex_base_interface(string perseus_file) nogil
+        int num_simplices() nogil
+        int dimension() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
-        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max)
-        void compute_persistence(int homology_coeff_field, double min_persistence)
-        vector[pair[int, pair[double, double]]] get_persistence()
-        vector[vector[int]] cofaces_of_cubical_persistence_pairs()
-        vector[int] betti_numbers()
-        vector[int] persistent_betti_numbers(double from_value, double to_value)
-        vector[pair[double,double]] intervals_in_dimension(int dimension)
+        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil
+        vector[pair[int, pair[double, double]]] get_persistence() nogil
+        vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
+        vector[int] betti_numbers() nogil
+        vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
+        vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
 
 # PeriodicCubicalComplex python interface
 cdef class PeriodicCubicalComplex:
@@ -81,9 +81,7 @@ cdef class PeriodicCubicalComplex:
                   periodic_dimensions=None, perseus_file=''):
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
-                                                                       top_dimensional_cells,
-                                                                       periodic_dimensions)
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
             top_dimensional_cells = np.array(top_dimensional_cells,
@@ -91,13 +89,11 @@ cdef class PeriodicCubicalComplex:
                                              order = 'F')
             dimensions = top_dimensional_cells.shape
             top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions,
-                                                                       top_dimensional_cells,
-                                                                       periodic_dimensions)
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self.thisptr = new Periodic_cubical_complex_base_interface(perseus_file.encode('utf-8'))
+                self._construct_from_file(perseus_file.encode('utf-8'))
             else:
                 print("file " + perseus_file + " not found.", file=sys.stderr)
         else:
@@ -105,6 +101,14 @@ cdef class PeriodicCubicalComplex:
               "top_dimensional_cells and periodic_dimensions, or from "
               "top_dimensional_cells and periodic_dimensions or from "
               "a Perseus-style file name.", file=sys.stderr)
+
+    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions):
+        with nogil:
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
+
+    def _construct_from_file(self, string filename):
+        with nogil:
+            self.thisptr = new Periodic_cubical_complex_base_interface(filename)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -156,8 +160,11 @@ cdef class PeriodicCubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
         assert self.__is_defined()
-        self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
-        self.pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        cdef int field = homology_coeff_field
+        cdef double minp = min_persistence
+        with nogil:
+            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, 1)
+            self.pcohptr.compute_persistence(field, minp)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
@@ -207,7 +214,8 @@ cdef class PeriodicCubicalComplex:
         cdef vector[vector[int]] persistence_result
         if self.pcohptr != NULL:
             output = [[],[]]
-            persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+            with nogil:
+                persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
             pr = np.array(persistence_result)
 
             ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
