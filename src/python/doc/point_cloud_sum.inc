@@ -3,8 +3,8 @@
 
    +-----------------------------------+---------------------------------------------------------------+-------------------------------------------------------------------+
    | | :math:`(x_1, x_2, \ldots, x_d)` | Utilities to process point clouds: read from file, subsample, | :Authors: Vincent Rouvreau, Marc Glisse, Masatoshi Takenouchi     |
-   | | :math:`(y_1, y_2, \ldots, y_d)` | find neighbors, embed time series in higher dimension, etc.   |                                                                   |
-   |                                   |                                                               | :Since: GUDHI 2.0.0                                               |
+   | | :math:`(y_1, y_2, \ldots, y_d)` | find neighbors, embed time series in higher dimension,        |                                                                   |
+   |                                   | estimate a density, etc.                                      | :Since: GUDHI 2.0.0                                               |
    |                                   |                                                               |                                                                   |
    |                                   |                                                               | :License: MIT (`GPL v3 </licensing/>`_, BSD-3-Clause, Apache-2.0) |
    +-----------------------------------+---------------------------------------------------------------+-------------------------------------------------------------------+
