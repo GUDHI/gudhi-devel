@@ -398,3 +398,23 @@ The output is:
 .. testoutput::
 
     [(0, (3.1622776601683795, inf)), (0, (3.1622776601683795, 5.39834563766817)), (0, (3.1622776601683795, 5.39834563766817))]
+
+DTM Rips Complex
+----------------
+
+`DtmdRipsComplex <rips_complex_ref.html#dtm-rips-complex-reference-manual>`_ builds a simplicial complex from a point set or a full distence matrix (in the form of ndarray), as described in the above example.
+
+.. testcode::
+
+    import numpy as np
+    from dtm_rips_complex import DtmRipsComplex
+    pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
+    dtm_rips = DtmRipsComplex(points=pts, k=2)
+    st = dtm_rips.create_simplex_tree(max_dimension=2)
+    print(st.persistence())
+
+The output is:
+
+.. testoutput::
+
+    [(0, (3.1622776601683795, inf)), (0, (3.1622776601683795, 5.39834563766817)), (0, (3.1622776601683795, 5.39834563766817))]
