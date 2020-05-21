@@ -164,6 +164,7 @@ class Tomato:
             if self.density_type_ == "KDE":
                 weights = numpy.exp(weights)
 
+        # TODO: do it at the C++ level and/or in parallel if this is too slow
         if self.params_.get("symmetrize_graph"):
             self.neighbors_ = [set(line) for line in self.neighbors_]
             for i, line in enumerate(self.neighbors_):
