@@ -23,29 +23,29 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>  // for std::unique_ptr
 
 namespace Gudhi {
 
 namespace alpha_complex {
 
+using Exact_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
+using Inexact_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+
+template <class Kernel>
 class Alpha_complex_interface {
-  using Dynamic_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
-  using Point_d = Dynamic_kernel::Point_d;
+  using Point_d = typename Kernel::Point_d;
 
  public:
   Alpha_complex_interface(const std::vector<std::vector<double>>& points) {
     auto mkpt = [](std::vector<double> const& vec){
       return Point_d(vec.size(), vec.begin(), vec.end());
     };
-    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(boost::adaptors::transform(points, mkpt));
+    alpha_complex_ = std::make_unique<Alpha_complex<Kernel>>(boost::adaptors::transform(points, mkpt));
   }
 
   Alpha_complex_interface(const std::string& off_file_name, bool from_file = true) {
-    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(off_file_name);
-  }
-
-  ~Alpha_complex_interface() {
-    delete alpha_complex_;
+    alpha_complex_ = std::make_unique<Alpha_complex<Kernel>>(off_file_name);
   }
 
   std::vector<double> get_point(int vh) {
@@ -61,7 +61,7 @@ class Alpha_complex_interface {
   }
 
  private:
-  Alpha_complex<Dynamic_kernel>* alpha_complex_;
+  std::unique_ptr<Alpha_complex<Kernel>> alpha_complex_;
 };
 
 }  // namespace alpha_complex

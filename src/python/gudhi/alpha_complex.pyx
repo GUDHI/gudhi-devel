@@ -26,7 +26,7 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
+    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Exact_kernel>":
         Alpha_complex_interface(vector[vector[double]] points) nogil except +
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_interface(string off_file, bool from_file) nogil except +
