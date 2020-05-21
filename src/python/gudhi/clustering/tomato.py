@@ -30,7 +30,7 @@ class Tomato:
     children_: ndarray of shape (n_leaves_-1,2)
         The children of each non-leaf node. Values less than n_leaves_ correspond to leaves of the tree. A node i greater than or equal to n_leaves_ is a non-leaf node and has children children_[i - n_leaves_]. Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node n_leaves_ + i
     params_: dict
-        Parameters like input_type, metric, etc
+        Parameters like metric, etc
     """
 
     # Not documented for now, because I am not sure how useful it is.
@@ -39,9 +39,7 @@ class Tomato:
 
     def __init__(
         self,
-        # FIXME: fold input_type into metric
-        input_type="points",
-        metric=None,
+        metric="minkowski",
         graph_type="knn",
         density_type="logDTM",
         n_clusters=None,
@@ -54,27 +52,25 @@ class Tomato:
         Each parameter has a corresponding attribute, like self.merge_threshold_, that can be changed later.
 
         Args:
-            input_type (str): 'points', 'distance_matrix' or 'neighbors'.
-            metric (None|Callable): If None, use Minkowski of parameter p.
-            graph_type (str): 'manual', 'knn' or 'radius'. Ignored if input_type is 'neighbors'.
+            metric (str|Callable): Describes how to interpret the argument of `fit()`. Defaults to Minkowski of parameter p.
+            graph_type (str): 'manual', 'knn' or 'radius'. Ignored if metric is 'neighbors'.
             density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'.
             kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to sklearn.neighbors.KernelDensity.
             k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
             k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
             r (float): size of a neighborhood if graph_type is 'radius'.
-            eps (float): approximation factor when computing nearest neighbors (currently ignored with a GPU).
-            gpu (bool): enable use of CUDA (through pykeops) to compute k nearest neighbors. This is useful when the dimension becomes large (10+) but the number of points remains low (less than a million).
+            eps (float): approximation factor when computing neighbors with a kd-tree (ignored in many cases).
             n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get the maximal number of clusters.
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
             symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
-            p (float): norm L^p on input points (numpy.inf is supported without gpu). Defaults to 2.
+            p (float): norm L^p on input points. Defaults to 2.
             q (float): order used to compute the distance to measure. Defaults to dim. Beware that when the dimension is large, this can easily cause overflows.
             dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the dimension, or 2 when the dimension cannot be read from the input (metric is "neighbors" or "precomputed").
-            n_jobs (int): Number of jobs to schedule for parallel processing of nearest neighbors on the CPU. If -1 is given all processors are used. Default: 1.
+            n_jobs (int): Number of jobs to schedule for parallel processing on the CPU. If -1 is given all processors are used. Default: 1.
+            params: extra parameters are passed to :class:`~gudhi.point_cloud.knn.KNearestNeighbors` and :class:`~gudhi.point_cloud.dtm.DTMDensity`.
         """
         # Should metric='precomputed' mean input_type='distance_matrix'?
         # Should we be able to pass metric='minkowski' (what None does currently)?
-        self.input_type_ = input_type
         self.metric_ = metric
         self.graph_type_ = graph_type
         self.density_type_ = density_type
@@ -86,9 +82,10 @@ class Tomato:
             raise ValueError("Cannot specify both a merge threshold and a number of clusters")
 
     def fit(self, X, y=None, weights=None):
+        #FIXME: Iterable -> Sequence?
         """
         Args:
-            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance_matrix (full, not just a triangle), or list of neighbors for each point (points are represented by their index, starting from 0), according to input_type.
+            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if metric is "neighbors".
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
@@ -100,22 +97,22 @@ class Tomato:
             if density_type == "manual":
                 raise ValueError("If density_type is 'manual', you must provide weights to fit()")
 
-        input_type = self.input_type_
-        if input_type == "points":
+        metric = self.metric_
+        if metric not in ["precomputed", "neighbors"]:
             self.points_ = X
 
         # FIXME: restrict this strongly
-        if input_type == "points" and self.metric_:
+        if metric not in ["precomputed", "neighbors", "minkowski", "euclidean"]:
             from sklearn.metrics import pairwise_distances
 
-            X = pairwise_distances(X, metric=self.metric_, n_jobs=self.params_.get("n_jobs"))
-            input_type = "distance_matrix"
+            X = pairwise_distances(X, metric=metric, n_jobs=self.params_.get("n_jobs"))
+            metric = "precomputed"
 
         need_knn = 0
         need_knn_ngb = False
         need_knn_dist = False
         if self.graph_type_ == "knn":
-            k_graph = self.params_["k"]
+            k_graph = self.params_.get("k", 10) # FIXME: What if X has fewer than 10 points?
             need_knn = k_graph
             need_knn_ngb = True
         if self.density_type_ in ["DTM", "logDTM"]:
@@ -138,35 +135,53 @@ class Tomato:
             elif need_knn_dist:
                 knn_dist = knn
         if self.density_type_ in ["DTM", "logDTM"]:
-            if self.metric_ in ["neighbors", "precomputed"]:
+            if metric in ["neighbors", "precomputed"]:
                 dim = self.params_.get("dim", 2)
             else:
-                dim = len(X) # FIXME for distance matrix
+                dim = len(X)
             q = self.params_.get("q", dim)
             weights = DTMDensity(k=k_DTM, metric="neighbors", dim=dim, q=q).fit_transform(knn_dist)
             if self.density_type_ == "logDTM":
                 weights = numpy.log(weights)
 
-        if input_type == "distance_matrix" and self.graph_type_ == "radius":
-            # TODO: parallelize
-            X = numpy.array(X)
+        if metric == "precomputed" and self.graph_type_ == "radius":
+            # TODO: parallelize?
+            X = numpy.asarray(X)
             r = self.params_["r"]
             self.neighbors_ = [numpy.flatnonzero(l <= r) for l in X]
 
-        if input_type == "neighbors":
+        if self.graph_type_ == "radius" and metric in ["minkowski", "euclidean", "manhattan", "chebyshev"]:
+            from scipy.spatial import cKDTree
+            tree t = cKDTree(X)
+            # TODO: handle "l1" and "l2" aliases?
+            p = self.params_.get("p")
+            if metric == "euclidean":
+                assert p is None or p == 2, "p=" + str(p) + " is not consistent with metric='euclidean'"
+                p = 2
+            elif metric == "manhattan":
+                assert p is None or p == 1, "p=" + str(p) + " is not consistent with metric='manhattan'"
+                p = 1
+            elif metric == "chebyshev":
+                assert p is None or p == numpy.inf, "p=" + str(p) + " is not consistent with metric='chebyshev'"
+                p = numpy.inf
+            elif p is None:
+                p = 2 # the default
+            eps = self.params_.get("eps", 0)
+            self.neighbors_ = t.query_ball_tree(t, r=self.params_["r"], p=p, eps=eps)
+
+        if metric == "neighbors":
             self.neighbors_ = X
             assert density_type == "manual"
 
         if self.density_type_ in {"KDE", "logKDE"}:
-            # FIXME: replace most assert with raise ValueError("blabla")
-            # assert input_type == "points"
+            assert metric not in ["neighbors", "precomputed"], "Scikit-learn's KernelDensity requires point coordinates"
             kde_params = self.params_.get("kde_params", dict())
             from sklearn.neighbors import KernelDensity
             weights = KernelDensity(**kde_params).fit(self.points_).score_samples(self.points_)
             if self.density_type_ == "KDE":
                 weights = numpy.exp(weights)
 
-        # TODO: do it at the C++ level and/or in parallel if this is too slow
+        # TODO: do it at the C++ level and/or in parallel if this is too slow?
         if self.params_.get("symmetrize_graph"):
             self.neighbors_ = [set(line) for line in self.neighbors_]
             for i, line in enumerate(self.neighbors_):
@@ -267,8 +282,7 @@ if __name__ == "__main__":
     a = [(1, 2), (1.1, 1.9), (0.9, 1.8), (10, 0), (10.1, 0.05), (10.2, -0.1), (5.4, 0)]
     a = numpy.random.rand(500, 2)
     t = Tomato(
-        input_type="points",
-        metric="Euclidean",
+        metric="euclidean",
         graph_type="knn",
         density_type="DTM",
         n_clusters=2,
