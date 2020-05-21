@@ -407,7 +407,7 @@ DTM Rips Complex
 .. testcode::
 
     import numpy as np
-    from dtm_rips_complex import DtmRipsComplex
+    from gudhi.dtm_rips_complex import DtmRipsComplex
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
     dtm_rips = DtmRipsComplex(points=pts, k=2)
     st = dtm_rips.create_simplex_tree(max_dimension=2)
