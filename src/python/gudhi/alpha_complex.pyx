@@ -26,10 +26,18 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Exact_kernel>":
-        Alpha_complex_interface(vector[vector[double]] points) nogil except +
+    cdef cppclass Alpha_complex_exact_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Exact_kernel>":
+        Alpha_complex_exact_interface(vector[vector[double]] points) nogil except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool from_file) nogil except +
+        Alpha_complex_exact_interface(string off_file, bool from_file) nogil except +
+        vector[double] get_point(int vertex) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
+
+cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Alpha_complex_inexact_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Inexact_kernel>":
+        Alpha_complex_inexact_interface(vector[vector[double]] points) nogil except +
+        # bool from_file is a workaround for cython to find the correct signature
+        Alpha_complex_inexact_interface(string off_file, bool from_file) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
 
@@ -53,10 +61,12 @@ cdef class AlphaComplex:
 
     """
 
-    cdef Alpha_complex_interface * thisptr
+    cdef Alpha_complex_exact_interface * exact_ptr
+    cdef Alpha_complex_inexact_interface * inexact_ptr
+    complexity = 'safe'
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file=''):
+    def __init__(self, points=None, off_file='', complexity='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -66,15 +76,23 @@ cdef class AlphaComplex:
 
         :param off_file: An OFF file style name.
         :type off_file: string
+
+        :param complexity: Alpha complex complexity can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :type complexity: string
         """
 
     # The real cython constructor
-    def __cinit__(self, points = None, off_file = ''):
+    def __cinit__(self, points = None, off_file = '', complexity = 'safe'):
+        assert complexity == 'fast' or complexity == 'safe' or complexity == 'exact', "Alpha complex complexity can be 'fast', 'safe' or 'exact'"
+        self.complexity = complexity
+
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(
-                    off_file.encode('utf-8'), True)
+                if complexity == 'fast':
+                    self.inexact_ptr = new Alpha_complex_inexact_interface(off_file.encode('utf-8'), True)
+                else:
+                    self.exact_ptr = new Alpha_complex_exact_interface(off_file.encode('utf-8'), True)
             else:
                 print("file " + off_file + " not found.")
         else:
@@ -82,18 +100,28 @@ cdef class AlphaComplex:
                 # Empty Alpha construction
                 points=[]
             pts = points
-            with nogil:
-                self.thisptr = new Alpha_complex_interface(pts)
-                
+            if complexity == 'fast':
+                with nogil:
+                    self.inexact_ptr = new Alpha_complex_inexact_interface(pts)
+            else:
+                with nogil:
+                    self.exact_ptr = new Alpha_complex_exact_interface(pts)
 
     def __dealloc__(self):
-        if self.thisptr != NULL:
-            del self.thisptr
+        if self.complexity == 'fast':
+            if self.inexact_ptr != NULL:
+                del self.inexact_ptr
+        else:
+            if self.exact_ptr != NULL:
+                del self.exact_ptr
 
     def __is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
-        return self.thisptr != NULL
+        if self.complexity == 'fast':
+            return self.inexact_ptr != NULL
+        else:
+            return self.exact_ptr != NULL
 
     def get_point(self, vertex):
         """This function returns the point corresponding to a given vertex.
@@ -103,7 +131,10 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        return self.thisptr.get_point(vertex)
+        if self.complexity == 'fast':
+            return self.inexact_ptr.get_point(vertex)
+        else:
+            return self.exact_ptr.get_point(vertex)
 
     def create_simplex_tree(self, max_alpha_square = float('inf')):
         """
@@ -118,6 +149,10 @@ cdef class AlphaComplex:
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        with nogil:
-            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
+        if self.complexity == 'fast':
+            with nogil:
+                self.inexact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
+        else:
+            with nogil:
+                self.exact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
         return stree
