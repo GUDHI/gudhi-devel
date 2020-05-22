@@ -157,3 +157,20 @@ def test_cubical_generators():
     assert np.array_equal(g[0][0], np.empty(shape=[0,2]))
     assert np.array_equal(g[0][1], np.array([[7, 4]]))
     assert np.array_equal(g[1][0], np.array([8]))
+
+def test_cubical_cofaces_of_persistence_pairs_when_pd_has_no_paired_birth_and_death():
+    cubCpx = CubicalComplex(dimensions=[1,2], top_dimensional_cells=[0.0, 1.0])
+    Diag = cubCpx.persistence(homology_coeff_field=2, min_persistence=0)
+    pairs = cubCpx.cofaces_of_persistence_pairs()
+    assert pairs[0] == []
+    assert np.array_equal(pairs[1][0], np.array([0]))
+
+def test_periodic_cofaces_of_persistence_pairs_when_pd_has_no_paired_birth_and_death():
+    perCubCpx = PeriodicCubicalComplex(dimensions=[1,2], top_dimensional_cells=[0.0, 1.0],
+                                       periodic_dimensions=[True, True])
+    Diag = perCubCpx.persistence(homology_coeff_field=2, min_persistence=0)
+    pairs = perCubCpx.cofaces_of_persistence_pairs()
+    assert pairs[0] == []
+    assert np.array_equal(pairs[1][0], np.array([0]))
+    assert np.array_equal(pairs[1][1], np.array([0, 1]))
+    assert np.array_equal(pairs[1][2], np.array([1]))
