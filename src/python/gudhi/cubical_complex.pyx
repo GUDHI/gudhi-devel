@@ -221,14 +221,14 @@ cdef class CubicalComplex:
 
         ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
         ess = pr[ess_ind]
-        max_h = max(ess[:,0])+1
+        max_h = max(ess[:,0])+1 if len(ess) > 0 else 0
         for h in range(max_h):
             hidxs = np.argwhere(ess[:,0] == h)[:,0]
             output[1].append(ess[hidxs][:,1])
 
         reg_ind = np.setdiff1d(np.array(range(len(pr))), ess_ind)
         reg = pr[reg_ind]
-        max_h = max(reg[:,0])+1
+        max_h = max(reg[:,0])+1 if len(reg) > 0 else 0
         for h in range(max_h):
             hidxs = np.argwhere(reg[:,0] == h)[:,0]
             output[0].append(reg[hidxs][:,1:])

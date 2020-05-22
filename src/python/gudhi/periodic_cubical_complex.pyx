@@ -211,29 +211,27 @@ cdef class PeriodicCubicalComplex:
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
+        assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
         cdef vector[vector[int]] persistence_result
-        if self.pcohptr != NULL:
-            output = [[],[]]
-            with nogil:
-                persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
-            pr = np.array(persistence_result)
 
-            ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
-            ess = pr[ess_ind]
-            max_h = max(ess[:,0])+1
-            for h in range(max_h):
-                hidxs = np.argwhere(ess[:,0] == h)[:,0]
-                output[1].append(ess[hidxs][:,1])
+        output = [[],[]]
+        with nogil:
+            persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+        pr = np.array(persistence_result)
 
-            reg_ind = np.setdiff1d(np.array(range(len(pr))), ess_ind)
-            reg = pr[reg_ind]
-            max_h = max(reg[:,0])+1
-            for h in range(max_h):
-                hidxs = np.argwhere(reg[:,0] == h)[:,0]
-                output[0].append(reg[hidxs][:,1:])
-        else:
-            print("cofaces_of_persistence_pairs function requires persistence function"
-                  " to be launched first.")
+        ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
+        ess = pr[ess_ind]
+        max_h = max(ess[:,0])+1 if len(ess) > 0 else 0
+        for h in range(max_h):
+            hidxs = np.argwhere(ess[:,0] == h)[:,0]
+            output[1].append(ess[hidxs][:,1])
+
+        reg_ind = np.setdiff1d(np.array(range(len(pr))), ess_ind)
+        reg = pr[reg_ind]
+        max_h = max(reg[:,0])+1 if len(reg) > 0 else 0
+        for h in range(max_h):
+            hidxs = np.argwhere(reg[:,0] == h)[:,0]
+            output[0].append(reg[hidxs][:,1:])
         return output
 
     def betti_numbers(self):
