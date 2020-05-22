@@ -17,8 +17,7 @@ rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lu
 Checkin the modifications, build and test the version:
 ```bash
 git submodule update --init
-mkdir build
-cd build
+rm -rf build; mkdir build; cd build
 cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
 make user_version
 date +"%d-%m-%Y-%T" > gudhi.@GUDHI_VERSION@/timestamp.txt
@@ -27,7 +26,7 @@ md5sum gudhi.@GUDHI_VERSION@.tar.gz > md5sum.txt
 sha256sum gudhi.@GUDHI_VERSION@.tar.gz > sha256sum.txt
 sha512sum gudhi.@GUDHI_VERSION@.tar.gz > sha512sum.txt
 
-make -j all test
+make -j 4 all && ctest -j 4 --output-on-failure
 ```
 
 ***[Check there are no error]***
@@ -43,7 +42,8 @@ make doxygen  2>&1 | tee dox.log && grep warning dox.log
 ```bash
 cp -R gudhi.@GUDHI_VERSION@/doc/html gudhi.doc.@GUDHI_VERSION@/cpp
 cd gudhi.@GUDHI_VERSION@
-rm -rf build; mkdir build; cd build; cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+rm -rf build; mkdir build; cd build
+cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
 export LC_ALL=en_US.UTF-8  # cf. bug
 make sphinx
 ```
@@ -56,7 +56,7 @@ cd ../..
 tar -czvf gudhi.doc.@GUDHI_VERSION@.tar.gz gudhi.doc.@GUDHI_VERSION@
 
 cd gudhi.@GUDHI_VERSION@/build
-make all test
+make -j 4 all && ctest -j 4 --output-on-failure
 ```
 
 ***[Check there are no error]***
