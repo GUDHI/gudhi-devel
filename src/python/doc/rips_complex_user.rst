@@ -378,6 +378,7 @@ Example from a point cloud combined with DistanceToMeasure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Combining with DistanceToMeasure, one can compute the DTM-filtration of a point set, as in `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_. 
+Remark that DTMRipsComplex class provides exactly this function.
 
 .. testcode::
 
@@ -402,14 +403,15 @@ The output is:
 DTM Rips Complex
 ----------------
 
-`DtmdRipsComplex <rips_complex_ref.html#dtm-rips-complex-reference-manual>`_ builds a simplicial complex from a point set or a full distence matrix (in the form of ndarray), as described in the above example.
+`DTMRipsComplex <rips_complex_ref.html#dtm-rips-complex-reference-manual>`_ builds a simplicial complex from a point set or a full distence matrix (in the form of ndarray), as described in the above example.
+This class constructs a weighted Rips complex giving larger weights to outliers, which reduces their impact on the persistence diagram. See `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_ for some experiments.
 
 .. testcode::
 
     import numpy as np
-    from gudhi.dtm_rips_complex import DtmRipsComplex
+    from gudhi.dtm_rips_complex import DTMRipsComplex
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
-    dtm_rips = DtmRipsComplex(points=pts, k=2)
+    dtm_rips = DTMRipsComplex(points=pts, k=2)
     st = dtm_rips.create_simplex_tree(max_dimension=2)
     print(st.persistence())
 

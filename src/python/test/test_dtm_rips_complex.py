@@ -8,14 +8,14 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.dtm_rips_complex import DtmRipsComplex
+from gudhi.dtm_rips_complex import DTMRipsComplex
 import numpy as np
 from math import sqrt
 import pytest
 
 def test_dtm_rips_complex():
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
-    dtm_rips = DtmRipsComplex(points=pts, k=2)
+    dtm_rips = DTMRipsComplex(points=pts, k=2)
     st = dtm_rips.create_simplex_tree(max_dimension=2)
     st.persistence()
     persistence_intervals0 = st.persistence_intervals_in_dimension(0)
@@ -23,7 +23,7 @@ def test_dtm_rips_complex():
     
 def test_compatibility_with_rips():
     distance_matrix = np.array([[0, 1, 1, sqrt(2)], [1, 0, sqrt(2), 1], [1, sqrt(2), 0, 1], [sqrt(2), 1, 1, 0]])
-    dtm_rips = DtmRipsComplex(distance_matrix=distance_matrix, max_filtration=42)
+    dtm_rips = DTMRipsComplex(distance_matrix=distance_matrix, max_filtration=42)
     st = dtm_rips.create_simplex_tree(max_dimension=1)
     assert list(st.get_filtration()) == [
         ([0], 0.0),

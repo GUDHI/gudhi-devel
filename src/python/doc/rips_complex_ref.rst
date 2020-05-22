@@ -32,9 +32,9 @@ Weighted Rips complex reference manual
 DTM Rips complex reference manual
 =================================
 
-.. autoclass:: gudhi.dtm_rips_complex.DtmRipsComplex
+.. autoclass:: gudhi.dtm_rips_complex.DTMRipsComplex
    :members:
    :undoc-members:
    :show-inheritance:
 
-   .. automethod:: gudhi.dtm_rips_complex.DtmRipsComplex.__init__
+   .. automethod:: gudhi.dtm_rips_complex.DTMRipsComplex.__init__
