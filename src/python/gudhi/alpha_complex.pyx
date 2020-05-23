@@ -63,7 +63,8 @@ cdef class AlphaComplex:
 
     cdef Alpha_complex_exact_interface * exact_ptr
     cdef Alpha_complex_inexact_interface * inexact_ptr
-    complexity = 'safe'
+    cdef bool fast
+    cdef bool exact
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points=None, off_file='', complexity='safe'):
@@ -84,12 +85,13 @@ cdef class AlphaComplex:
     # The real cython constructor
     def __cinit__(self, points = None, off_file = '', complexity = 'safe'):
         assert complexity == 'fast' or complexity == 'safe' or complexity == 'exact', "Alpha complex complexity can be 'fast', 'safe' or 'exact'"
-        self.complexity = complexity
+        self.fast = complexity == 'fast'
+        self.exact = complexity == 'safe'
 
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                if complexity == 'fast':
+                if self.fast:
                     self.inexact_ptr = new Alpha_complex_inexact_interface(off_file.encode('utf-8'), True)
                 else:
                     self.exact_ptr = new Alpha_complex_exact_interface(off_file.encode('utf-8'), True)
@@ -100,7 +102,7 @@ cdef class AlphaComplex:
                 # Empty Alpha construction
                 points=[]
             pts = points
-            if complexity == 'fast':
+            if self.fast:
                 with nogil:
                     self.inexact_ptr = new Alpha_complex_inexact_interface(pts)
             else:
@@ -108,7 +110,7 @@ cdef class AlphaComplex:
                     self.exact_ptr = new Alpha_complex_exact_interface(pts)
 
     def __dealloc__(self):
-        if self.complexity == 'fast':
+        if self.fast:
             if self.inexact_ptr != NULL:
                 del self.inexact_ptr
         else:
@@ -118,7 +120,7 @@ cdef class AlphaComplex:
     def __is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
-        if self.complexity == 'fast':
+        if self.fast:
             return self.inexact_ptr != NULL
         else:
             return self.exact_ptr != NULL
@@ -131,7 +133,7 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        if self.complexity == 'fast':
+        if self.fast:
             return self.inexact_ptr.get_point(vertex)
         else:
             return self.exact_ptr.get_point(vertex)
@@ -149,7 +151,7 @@ cdef class AlphaComplex:
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        if self.complexity == 'fast':
+        if self.fast:
             with nogil:
                 self.inexact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
         else:
