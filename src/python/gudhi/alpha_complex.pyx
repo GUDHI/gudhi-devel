@@ -31,7 +31,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_exact_interface(string off_file, bool from_file) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_inexact_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Inexact_kernel>":
@@ -39,7 +39,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         # bool from_file is a workaround for cython to find the correct signature
         Alpha_complex_inexact_interface(string off_file, bool from_file) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -138,23 +138,27 @@ cdef class AlphaComplex:
         else:
             return self.exact_ptr.get_point(vertex)
 
-    def create_simplex_tree(self, max_alpha_square = float('inf')):
+    def create_simplex_tree(self, max_alpha_square = float('inf'), default_filtration_value = False):
         """
-        :param max_alpha_square: The maximum alpha square threshold the
-            simplices shall not exceed. Default is set to infinity, and
-            there is very little point using anything else since it does
-            not save time.
+        :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
+            infinity, and there is very little point using anything else since it does not save time.
         :type max_alpha_square: float
+        :param default_filtration_value: Set this value to `True` if filtration values are not needed to be computed
+            (will be set to `NaN`). Default value is `False` (which means compute the filtration values).
+        :type default_filtration_value: bool
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
+        cdef bool compute_filtration = default_filtration_value == True
         if self.fast:
             with nogil:
-                self.inexact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
+                self.inexact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                    mas, False, compute_filtration)
         else:
             with nogil:
-                self.exact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
+                self.exact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                    mas, self.exact, compute_filtration)
         return stree
