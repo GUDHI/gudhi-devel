@@ -39,9 +39,9 @@ class Tomato:
 
     def __init__(
         self,
-        metric="minkowski",
         graph_type="knn",
         density_type="logDTM",
+        metric="minkowski",
         n_clusters=None,
         merge_threshold=None,
         #       eliminate_threshold=None,
@@ -53,19 +53,19 @@ class Tomato:
 
         Args:
             metric (str|Callable): Describes how to interpret the argument of `fit()`. Defaults to Minkowski of parameter p.
-            graph_type (str): 'manual', 'knn' or 'radius'. Ignored if metric is 'neighbors'.
+            graph_type (str): 'manual', 'knn' or 'radius'.
             density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'.
             kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to sklearn.neighbors.KernelDensity.
             k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
             k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
             r (float): size of a neighborhood if graph_type is 'radius'.
-            eps (float): approximation factor when computing neighbors with a kd-tree (ignored in many cases).
+            eps (float): (1+eps) approximation factor when computing distances (ignored in many cases).
             n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get the maximal number of clusters.
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
             symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points. Defaults to 2.
             q (float): order used to compute the distance to measure. Defaults to dim. Beware that when the dimension is large, this can easily cause overflows.
-            dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the dimension, or 2 when the dimension cannot be read from the input (metric is "neighbors" or "precomputed").
+            dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the dimension, or 2 when the dimension cannot be read from the input (metric is "precomputed").
             n_jobs (int): Number of jobs to schedule for parallel processing on the CPU. If -1 is given all processors are used. Default: 1.
             params: extra parameters are passed to :class:`~gudhi.point_cloud.knn.KNearestNeighbors` and :class:`~gudhi.point_cloud.dtm.DTMDensity`.
         """
@@ -85,7 +85,7 @@ class Tomato:
         #FIXME: Iterable -> Sequence?
         """
         Args:
-            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if metric is "neighbors".
+            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if graph_type is "manual".
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
@@ -97,17 +97,16 @@ class Tomato:
             if density_type == "manual":
                 raise ValueError("If density_type is 'manual', you must provide weights to fit()")
 
-        metric = self.metric_
-        if metric not in ["precomputed", "neighbors"]:
-            self.points_ = X
+        if self.graph_type_ == "manual":
+            self.neighbors_ = X
+            # FIXME: uniformize "message 'option'" vs 'message "option"'
+            assert density_type == "manual", 'If graph_type is "manual", density_type must be as well'
+        else:
+            metric = self.metric_
+            if metric != "precomputed":
+                self.points_ = X
 
-        # FIXME: restrict this strongly
-        if metric not in ["precomputed", "neighbors", "minkowski", "euclidean"]:
-            from sklearn.metrics import pairwise_distances
-
-            X = pairwise_distances(X, metric=metric, n_jobs=self.params_.get("n_jobs"))
-            metric = "precomputed"
-
+        # Slight complication to avoid computing knn twice.
         need_knn = 0
         need_knn_ngb = False
         need_knn_dist = False
@@ -135,7 +134,7 @@ class Tomato:
             elif need_knn_dist:
                 knn_dist = knn
         if self.density_type_ in ["DTM", "logDTM"]:
-            if metric in ["neighbors", "precomputed"]:
+            if metric == "precomputed":
                 dim = self.params_.get("dim", 2)
             else:
                 dim = len(X)
@@ -144,34 +143,37 @@ class Tomato:
             if self.density_type_ == "logDTM":
                 weights = numpy.log(weights)
 
-        if metric == "precomputed" and self.graph_type_ == "radius":
-            # TODO: parallelize?
-            X = numpy.asarray(X)
-            r = self.params_["r"]
-            self.neighbors_ = [numpy.flatnonzero(l <= r) for l in X]
+        if self.graph_type_ == "radius":
+            if metric in ["minkowski", "euclidean", "manhattan", "chebyshev"]:
+                from scipy.spatial import cKDTree
+                tree t = cKDTree(X)
+                # TODO: handle "l1" and "l2" aliases?
+                p = self.params_.get("p")
+                if metric == "euclidean":
+                    assert p is None or p == 2, "p=" + str(p) + " is not consistent with metric='euclidean'"
+                    p = 2
+                elif metric == "manhattan":
+                    assert p is None or p == 1, "p=" + str(p) + " is not consistent with metric='manhattan'"
+                    p = 1
+                elif metric == "chebyshev":
+                    assert p is None or p == numpy.inf, "p=" + str(p) + " is not consistent with metric='chebyshev'"
+                    p = numpy.inf
+                elif p is None:
+                    p = 2 # the default
+                eps = self.params_.get("eps", 0)
+                self.neighbors_ = t.query_ball_tree(t, r=self.params_["r"], p=p, eps=eps)
 
-        if self.graph_type_ == "radius" and metric in ["minkowski", "euclidean", "manhattan", "chebyshev"]:
-            from scipy.spatial import cKDTree
-            tree t = cKDTree(X)
-            # TODO: handle "l1" and "l2" aliases?
-            p = self.params_.get("p")
-            if metric == "euclidean":
-                assert p is None or p == 2, "p=" + str(p) + " is not consistent with metric='euclidean'"
-                p = 2
-            elif metric == "manhattan":
-                assert p is None or p == 1, "p=" + str(p) + " is not consistent with metric='manhattan'"
-                p = 1
-            elif metric == "chebyshev":
-                assert p is None or p == numpy.inf, "p=" + str(p) + " is not consistent with metric='chebyshev'"
-                p = numpy.inf
-            elif p is None:
-                p = 2 # the default
-            eps = self.params_.get("eps", 0)
-            self.neighbors_ = t.query_ball_tree(t, r=self.params_["r"], p=p, eps=eps)
+            elif metric != "precomputed":
+                from sklearn.metrics import pairwise_distances
 
-        if metric == "neighbors":
-            self.neighbors_ = X
-            assert density_type == "manual"
+                X = pairwise_distances(X, metric=metric, n_jobs=self.params_.get("n_jobs"))
+                metric = "precomputed"
+
+            if metric == "precomputed":
+                # TODO: parallelize? May not be worth it.
+                X = numpy.asarray(X)
+                r = self.params_["r"]
+                self.neighbors_ = [numpy.flatnonzero(l <= r) for l in X]
 
         if self.density_type_ in {"KDE", "logKDE"}:
             assert metric not in ["neighbors", "precomputed"], "Scikit-learn's KernelDensity requires point coordinates"
@@ -201,6 +203,7 @@ class Tomato:
                 self.diagram_[:, 0] - self.diagram_[:, 1] > self.__merge_threshold
             ) + len(self.max_density_per_cc_)
         if self.__n_clusters:
+            # TODO: set corresponding merge_threshold?
             renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
         else:
