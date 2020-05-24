@@ -29,40 +29,75 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-using Exact_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
-using Inexact_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
-
-template <class Kernel>
 class Alpha_complex_interface {
-  using Point_d = typename Kernel::Point_d;
+ private:
+  using Exact_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
+  using Inexact_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+  using Point_exact_kernel = typename Exact_kernel::Point_d;
+  using Point_inexact_kernel = typename Inexact_kernel::Point_d;
 
- public:
-  Alpha_complex_interface(const std::vector<std::vector<double>>& points) {
-    auto mkpt = [](std::vector<double> const& vec){
-      return Point_d(vec.size(), vec.begin(), vec.end());
-    };
-    alpha_complex_ = std::make_unique<Alpha_complex<Kernel>>(boost::adaptors::transform(points, mkpt));
-  }
-
-  Alpha_complex_interface(const std::string& off_file_name, bool from_file = true) {
-    alpha_complex_ = std::make_unique<Alpha_complex<Kernel>>(off_file_name);
-  }
-
-  std::vector<double> get_point(int vh) {
+  template <typename CgalPointType>
+  std::vector<double> pt_cgal_to_cython(CgalPointType& ph) {
     std::vector<double> vd;
-    Point_d const& ph = alpha_complex_->get_point(vh);
     for (auto coord = ph.cartesian_begin(); coord != ph.cartesian_end(); coord++)
       vd.push_back(CGAL::to_double(*coord));
     return vd;
   }
 
+  template <typename CgalPointType>
+  CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
+    return CgalPointType(vec.size(), vec.begin(), vec.end());
+  }
+
+ public:
+  Alpha_complex_interface(const std::vector<std::vector<double>>& points, bool fast_version)
+  : fast_version_(fast_version) {
+    auto pt = pt_cython_to_cgal<Point_inexact_kernel>(points[0]);
+    if (fast_version_) {
+      auto mkpt = [](std::vector<double> const& vec) {
+        return Point_inexact_kernel(vec.size(), vec.begin(), vec.end());
+      };
+      ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(boost::adaptors::transform(points, mkpt));
+      //ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(boost::adaptors::transform(points, pt_cython_to_cgal<Point_inexact_kernel>));
+    } else {
+      auto mkpt = [](std::vector<double> const& vec) {
+        return Point_exact_kernel(vec.size(), vec.begin(), vec.end());
+      };
+      ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(boost::adaptors::transform(points, mkpt));
+      //ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(boost::adaptors::transform(points, pt_cython_to_cgal<Point_exact_kernel>));
+    }
+  }
+
+  Alpha_complex_interface(const std::string& off_file_name, bool fast_version, bool from_file = true)
+  : fast_version_(fast_version) {
+    if (fast_version_)
+      ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(off_file_name);
+    else
+      ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(off_file_name);
+  }
+
+  std::vector<double> get_point(int vh) {
+    if (fast_version_) {
+      Point_inexact_kernel const& ph = ac_inexact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(ph);
+    } else {
+      Point_exact_kernel const& ph = ac_exact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(ph);
+    }
+  }
+
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool exact_version, bool default_filtration_value) {
-    alpha_complex_->create_complex(*simplex_tree, max_alpha_square, exact_version, default_filtration_value);
+    if (fast_version_)
+      ac_inexact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version, default_filtration_value);
+    else
+      ac_exact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version, default_filtration_value);
   }
 
  private:
-  std::unique_ptr<Alpha_complex<Kernel>> alpha_complex_;
+  bool fast_version_;
+  std::unique_ptr<Alpha_complex<Exact_kernel>> ac_exact_ptr_;
+  std::unique_ptr<Alpha_complex<Inexact_kernel>> ac_inexact_ptr_;
 };
 
 }  // namespace alpha_complex

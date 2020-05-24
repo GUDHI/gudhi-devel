@@ -26,18 +26,10 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_exact_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Exact_kernel>":
-        Alpha_complex_exact_interface(vector[vector[double]] points) nogil except +
+    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
+        Alpha_complex_interface(vector[vector[double]] points, bool fast_version) nogil except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_exact_interface(string off_file, bool from_file) nogil except +
-        vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
-
-cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_inexact_interface "Gudhi::alpha_complex::Alpha_complex_interface<Gudhi::alpha_complex::Inexact_kernel>":
-        Alpha_complex_inexact_interface(vector[vector[double]] points) nogil except +
-        # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_inexact_interface(string off_file, bool from_file) nogil except +
+        Alpha_complex_interface(string off_file, bool fast_version, bool from_file) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
 
@@ -61,8 +53,7 @@ cdef class AlphaComplex:
 
     """
 
-    cdef Alpha_complex_exact_interface * exact_ptr
-    cdef Alpha_complex_inexact_interface * inexact_ptr
+    cdef Alpha_complex_interface * this_ptr
     cdef bool fast
     cdef bool exact
 
@@ -91,10 +82,7 @@ cdef class AlphaComplex:
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                if self.fast:
-                    self.inexact_ptr = new Alpha_complex_inexact_interface(off_file.encode('utf-8'), True)
-                else:
-                    self.exact_ptr = new Alpha_complex_exact_interface(off_file.encode('utf-8'), True)
+                self.this_ptr = new Alpha_complex_interface(off_file.encode('utf-8'), self.fast, True)
             else:
                 print("file " + off_file + " not found.")
         else:
@@ -102,28 +90,17 @@ cdef class AlphaComplex:
                 # Empty Alpha construction
                 points=[]
             pts = points
-            if self.fast:
-                with nogil:
-                    self.inexact_ptr = new Alpha_complex_inexact_interface(pts)
-            else:
-                with nogil:
-                    self.exact_ptr = new Alpha_complex_exact_interface(pts)
+            with nogil:
+                self.this_ptr = new Alpha_complex_interface(pts, self.fast)
 
     def __dealloc__(self):
-        if self.fast:
-            if self.inexact_ptr != NULL:
-                del self.inexact_ptr
-        else:
-            if self.exact_ptr != NULL:
-                del self.exact_ptr
+        if self.this_ptr != NULL:
+            del self.this_ptr
 
     def __is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
-        if self.fast:
-            return self.inexact_ptr != NULL
-        else:
-            return self.exact_ptr != NULL
+        return self.this_ptr != NULL
 
     def get_point(self, vertex):
         """This function returns the point corresponding to a given vertex.
@@ -133,10 +110,7 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        if self.fast:
-            return self.inexact_ptr.get_point(vertex)
-        else:
-            return self.exact_ptr.get_point(vertex)
+        return self.this_ptr.get_point(vertex)
 
     def create_simplex_tree(self, max_alpha_square = float('inf'), default_filtration_value = False):
         """
@@ -153,12 +127,7 @@ cdef class AlphaComplex:
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
         cdef bool compute_filtration = default_filtration_value == True
-        if self.fast:
-            with nogil:
-                self.inexact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
-                    mas, False, compute_filtration)
-        else:
-            with nogil:
-                self.exact_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
-                    mas, self.exact, compute_filtration)
+        with nogil:
+            self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                                              mas, self.exact, compute_filtration)
         return stree
