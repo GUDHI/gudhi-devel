@@ -6,11 +6,14 @@ from ._tomato import *
 # The fit/predict interface is not so well suited...
 # FIXME: choose if they are called weight, density, filtration, etc and be consistent.
 
+
 class Tomato:
     """
     Clustering
 
-    This clustering algorithm needs a neighborhood graph on the points, and an estimation of the density at each point. A few possible graph constructions and density estimators are provided for convenience, but it is perfectly natural to provide your own. In particular, we do not provide anything specific to cluster pixels on images yet.
+    This clustering algorithm needs a neighborhood graph on the points, and an estimation of the density at each point.
+    A few possible graph constructions and density estimators are provided for convenience, but it is perfectly natural
+    to provide your own. In particular, we do not provide anything specific to cluster pixels on images yet.
 
     Attributes
     ----------
@@ -27,9 +30,12 @@ class Tomato:
     diagram_: ndarray of shape (n_leaves_, 2)
         persistence diagram (only the finite points)
     max_weight_per_cc_: ndarray of shape (n_connected_components,)
-        maximum of the density function on each connected component. This corresponds to the abscissa of infinite points in the diagram
+        maximum of the density function on each connected component. This corresponds to the abscissa of infinite
+        points in the diagram
     children_: ndarray of shape (n_leaves_-n_connected_components, 2)
-        The children of each non-leaf node. Values less than n_leaves_ correspond to leaves of the tree. A node i greater than or equal to n_leaves_ is a non-leaf node and has children children_[i - n_leaves_]. Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node n_leaves_ + i
+        The children of each non-leaf node. Values less than n_leaves_ correspond to leaves of the tree.
+        A node i greater than or equal to n_leaves_ is a non-leaf node and has children children_[i - n_leaves_].
+        Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node n_leaves_ + i
     weights_: ndarray of shape (n_samples,)
         weights of the points, as computed by the density estimator or provided by the user
     params_: dict
@@ -52,20 +58,29 @@ class Tomato:
         Args:
             graph_type (str): 'manual', 'knn' or 'radius'.
             density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'.
-            metric (str|Callable): metric used when calculating the distance between instances in a feature array. Defaults to Minkowski of parameter p.
-            kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to sklearn.neighbors.KernelDensity.
+            metric (str|Callable): metric used when calculating the distance between instances in a feature array.
+                Defaults to Minkowski of parameter p.
+            kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to
+                sklearn.neighbors.KernelDensity.
             k (int): number of neighbors for a knn graph (including the vertex itself). Defaults to 10.
-            k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself). Defaults to k.
+            k_DTM (int): number of neighbors for the DTM density estimation (including the vertex itself).
+                Defaults to k.
             r (float): size of a neighborhood if graph_type is 'radius'. Also used as default bandwidth in kde_params.
             eps (float): (1+eps) approximation factor when computing distances (ignored in many cases).
-            n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get the maximal number of clusters.
+            n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get
+                the maximal number of clusters.
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
-            symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric. This can be useful with k-NN for small k. Defaults to false.
+            symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric.
+                This can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points. Defaults to 2.
-            q (float): order used to compute the distance to measure. Defaults to dim. Beware that when the dimension is large, this can easily cause overflows.
-            dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the dimension, or 2 when the dimension cannot be read from the input (metric is "precomputed").
-            n_jobs (int): Number of jobs to schedule for parallel processing on the CPU. If -1 is given all processors are used. Default: 1.
-            params: extra parameters are passed to :class:`~gudhi.point_cloud.knn.KNearestNeighbors` and :class:`~gudhi.point_cloud.dtm.DTMDensity`.
+            q (float): order used to compute the distance to measure. Defaults to dim.
+                Beware that when the dimension is large, this can easily cause overflows.
+            dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the
+                dimension, or 2 when the dimension cannot be read from the input (metric is "precomputed").
+            n_jobs (int): Number of jobs to schedule for parallel processing on the CPU.
+                If -1 is given all processors are used. Default: 1.
+            params: extra parameters are passed to :class:`~gudhi.point_cloud.knn.KNearestNeighbors` and
+                :class:`~gudhi.point_cloud.dtm.DTMDensity`.
         """
         # Should metric='precomputed' mean input_type='distance_matrix'?
         # Should we be able to pass metric='minkowski' (what None does currently)?
@@ -79,7 +94,7 @@ class Tomato:
             raise ValueError("Cannot specify both a merge threshold and a number of clusters")
 
     def fit(self, X, y=None, weights=None):
-        #FIXME: Iterable -> Sequence?
+        # FIXME: Iterable -> Sequence?
         """
         Args:
             X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if graph_type is "manual".
@@ -127,7 +142,9 @@ class Tomato:
         if need_knn > 0:
             knn_args = dict(self.params_)
             knn_args["k"] = need_knn
-            knn = KNearestNeighbors(return_index=need_knn_ngb, return_distance=need_knn_dist, **knn_args).fit_transform(X)
+            knn = KNearestNeighbors(return_index=need_knn_ngb, return_distance=need_knn_dist, **knn_args).fit_transform(
+                X
+            )
             if need_knn_ngb:
                 if need_knn_dist:
                     self.neighbors_ = knn[0][:, 0:k_graph]
@@ -148,6 +165,7 @@ class Tomato:
         if self.graph_type_ == "radius":
             if metric in ["minkowski", "euclidean", "manhattan", "chebyshev"]:
                 from scipy.spatial import cKDTree
+
                 tree = cKDTree(X)
                 # TODO: handle "l1" and "l2" aliases?
                 p = self.params_.get("p")
@@ -161,11 +179,12 @@ class Tomato:
                     assert p is None or p == numpy.inf, "p=" + str(p) + " is not consistent with metric='chebyshev'"
                     p = numpy.inf
                 elif p is None:
-                    p = 2 # the default
+                    p = 2  # the default
                 eps = self.params_.get("eps", 0)
                 self.neighbors_ = tree.query_ball_tree(tree, r=self.params_["r"], p=p, eps=eps)
 
-            # TODO: sklearn's NearestNeighbors.radius_neighbors can handle more metrics efficiently via its BallTree (don't bother with the _graph variant, it just calls radius_neighbors).
+            # TODO: sklearn's NearestNeighbors.radius_neighbors can handle more metrics efficiently via its BallTree
+            # (don't bother with the _graph variant, it just calls radius_neighbors).
             elif metric != "precomputed":
                 from sklearn.metrics import pairwise_distances
 
@@ -180,7 +199,9 @@ class Tomato:
 
         if self.density_type_ in {"KDE", "logKDE"}:
             # Slow...
-            assert self.graph_type_ != "manual" and metric != "precomputed", "Scikit-learn's KernelDensity requires point coordinates"
+            assert (
+                self.graph_type_ != "manual" and metric != "precomputed"
+            ), "Scikit-learn's KernelDensity requires point coordinates"
             kde_params = dict(self.params_.get("kde_params", dict()))
             kde_params.setdefault("metric", metric)
             r = self.params_.get("r")
@@ -188,6 +209,7 @@ class Tomato:
                 kde_params.setdefault("bandwidth", r)
             # Should we default rtol to eps?
             from sklearn.neighbors import KernelDensity
+
             weights = KernelDensity(**kde_params).fit(self.points_).score_samples(self.points_)
             if self.density_type_ == "KDE":
                 weights = numpy.exp(weights)
@@ -201,9 +223,7 @@ class Tomato:
                     self.neighbors_[j].add(i)
 
         self.weights_ = weights
-        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = doit(
-            list(self.neighbors_), weights
-        )
+        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = doit(list(self.neighbors_), weights)
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
         # TODO: deduplicate this code with the setters below
@@ -244,11 +264,11 @@ class Tomato:
             r = max(r, self.diagram_[:, 0].max())
         if l == r:
             if l > 0:
-                l, r = .9 * l, 1.1 * r
+                l, r = 0.9 * l, 1.1 * r
             elif l < 0:
-                l, r = 1.1 * l, .9 * r
+                l, r = 1.1 * l, 0.9 * r
             else:
-                l, r = -1., 1.
+                l, r = -1.0, 1.0
         plt.plot([l, r], [l, r])
         plt.plot(
             self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
@@ -298,15 +318,7 @@ if __name__ == "__main__":
 
     a = [(1, 2), (1.1, 1.9), (0.9, 1.8), (10, 0), (10.1, 0.05), (10.2, -0.1), (5.4, 0)]
     a = numpy.random.rand(500, 2)
-    t = Tomato(
-        metric="euclidean",
-        graph_type="knn",
-        density_type="DTM",
-        n_clusters=2,
-        k=4,
-        n_jobs=-1,
-        eps=0.05,
-    )
+    t = Tomato(metric="euclidean", graph_type="knn", density_type="DTM", n_clusters=2, k=4, n_jobs=-1, eps=0.05,)
     t.fit(a)
     # print("neighbors\n",t.neighbors_)
     # print()
