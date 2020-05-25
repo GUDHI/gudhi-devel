@@ -82,9 +82,6 @@ class Flag_complex_sparse_matrix {
   // Map from row index to its vertex handle
   std::vector<Vertex_handle> row_to_vertex_;
 
-  // Vertices stored as an unordered_set
-  std::unordered_set<Vertex_handle> vertices_;
-
   // Unordered set of removed edges. (to enforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_removed_edges_;
 
@@ -326,13 +323,17 @@ class Flag_complex_sparse_matrix {
   Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
   : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()),
     rows_(0) {
+    // To get the number of vertices
+    std::unordered_set<Vertex_handle> vertices;
     for (Filtered_edge filtered_edge : filtered_edge_range) {
       Vertex_handle u;
       Vertex_handle v;
       std::tie(u,v) = std::get<0>(filtered_edge);
-      vertices_.emplace(u);
-      vertices_.emplace(v);
+      vertices.emplace(u);
+      vertices.emplace(v);
     }
+    // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
+    sparse_row_adjacency_matrix_ = Sparse_row_matrix(vertices.size(), vertices.size());
   }
 
   /** \brief Flag_complex_sparse_matrix constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
@@ -343,11 +344,9 @@ class Flag_complex_sparse_matrix {
    * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
    */
   Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph)
-  : rows_(0) {
-    // Insert all vertices_
-    for (auto v_it = boost::vertices(one_skeleton_graph); v_it.first != v_it.second; ++v_it.first) {
-      vertices_.emplace(*(v_it.first));
-    }
+  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph), boost::num_vertices(one_skeleton_graph)),
+    rows_(0)
+     {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
@@ -383,9 +382,6 @@ class Flag_complex_sparse_matrix {
     std::sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #endif
 
-    // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
-    sparse_row_adjacency_matrix_ = Sparse_row_matrix(vertices_.size(), vertices_.size());
-
     while (endIdx < f_edge_vector_.size()) {
       Filtered_edge fec = f_edge_vector_[endIdx];
       Edge edge = std::get<0>(fec);
@@ -408,12 +404,6 @@ class Flag_complex_sparse_matrix {
       endIdx++;
     }
   }
-
-  /** \brief Returns the number of vertices in the data structure.
-   *
-   * @return the number of vertices (which is also the number of rows in the Matrix).
-   */
-  std::size_t num_vertices() const { return vertices_.size(); }
 
 };
 
