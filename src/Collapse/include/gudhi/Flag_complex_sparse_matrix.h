@@ -111,7 +111,7 @@ class Flag_complex_sparse_matrix {
   std::vector<Filtered_edge> f_edge_vector_;
 
   // Edge e is the actual edge (u,v). Not the row ids in the matrixs
-  bool check_edge_domination(const Edge& edge) const
+  bool edge_is_dominated(const Edge& edge) const
   {
     Vertex_handle u = std::get<0>(edge);
     Vertex_handle v = std::get<1>(edge);
@@ -194,7 +194,7 @@ class Flag_complex_sparse_matrix {
         if (!critical_edge_indicator_[idx]) {
           // If idx is affected
           if (effected_indices.find(idx) != effected_indices.end()) {
-            if (!check_edge_domination(edge)) {
+            if (!edge_is_dominated(edge)) {
 #ifdef DEBUG_TRACES
               std::cout << "The curent index became critical " << idx  << std::endl;
 #endif  // DEBUG_TRACES
@@ -387,7 +387,7 @@ class Flag_complex_sparse_matrix {
       edge_to_index_map_.emplace(std::minmax(u, v), endIdx);
       critical_edge_indicator_.push_back(false);
 
-      if (!check_edge_domination(edge)) {
+      if (!edge_is_dominated(edge)) {
         critical_edge_indicator_[endIdx] = true;
         filtered_edge_insert({u, v}, filt);
         if (endIdx > 1)
