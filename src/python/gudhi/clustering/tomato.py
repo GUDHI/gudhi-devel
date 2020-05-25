@@ -161,7 +161,7 @@ class Tomato:
                 eps = self.params_.get("eps", 0)
                 self.neighbors_ = t.query_ball_tree(t, r=self.params_["r"], p=p, eps=eps)
 
-            # TODO: sklearn's NearestNeighbors can handle more metrics efficiently via its BallTree
+            # TODO: sklearn's NearestNeighbors.radius_neighbors can handle more metrics efficiently via its BallTree (don't bother with the _graph variant, it just calls radius_neighbors).
             elif metric != "precomputed":
                 from sklearn.metrics import pairwise_distances
 
@@ -230,6 +230,7 @@ class Tomato:
         else:
             l = self.max_density_per_cc_.min()
             r = self.max_density_per_cc_.max()
+            #FIXME: move this out of the else, for diagrams with one point on the diagonal and an infinite point with the same coordinate?
             if l == r:
                 if l > 0:
                     l, r = .9 * l, 1.1 * r
