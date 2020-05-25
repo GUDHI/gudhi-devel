@@ -285,7 +285,7 @@ class Flag_complex_sparse_matrix {
   }
 
   // Insert an edge in the data structure
-  void insert_new_edges(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
+  void insert_new_edge(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
@@ -390,7 +390,7 @@ class Flag_complex_sparse_matrix {
       Filtration_value filt = std::get<1>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
-      insert_new_edges(u, v, filt);
+      insert_new_edge(u, v, filt);
 
       edge_to_index_map_.emplace(std::minmax(u, v), endIdx);
       critical_edge_indicator_.push_back(false);
