@@ -102,11 +102,6 @@ class Flag_complex_sparse_matrix {
   // to elements when traversing the matrix row-wise.
   Sparse_row_matrix sparse_row_adjacency_matrix_;
 
-  // Stores <I>true</I> for dominated rows and <I>false</I> otherwise.
-  // Initialised to a vector of length equal to the length of row_to_vertex_ with all values set to <I>false</I>.
-  // Subsequent removal of dominated vertices is reflected by concerned entries changing to <I>true</I> in this vector.
-  std::vector<bool> domination_indicator_;
-
   // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
   std::vector<Filtered_edge> f_edge_vector_;
 
@@ -226,24 +221,22 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
-    if (!domination_indicator_[rw_u]) {
-      // Iterate over the non-zero columns
-      for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
-        Row_index rw_v = it.index();
-        // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-        if (!domination_indicator_[rw_v] && u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() &&
-            u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
-          // inner index, here it is equal to it.columns()
-          non_zero_indices.push_back(rw_v);
+    // Iterate over the non-zero columns
+    for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
+      Row_index rw_v = it.index();
+      // If the vertex v is not dominated and the edge {u,v} is still in the matrix
+      if (u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() &&
+          u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
+        // inner index, here it is equal to it.columns()
+        non_zero_indices.push_back(rw_v);
 #ifdef DEBUG_TRACES
-          std::cout << row_to_vertex_[rw_v] << ", " ;
+        std::cout << row_to_vertex_[rw_v] << ", " ;
 #endif  // DEBUG_TRACES
-        }
       }
-#ifdef DEBUG_TRACES
-      std::cout << std::endl;
-#endif  // DEBUG_TRACES
     }
+#ifdef DEBUG_TRACES
+    std::cout << std::endl;
+#endif  // DEBUG_TRACES
     return non_zero_indices;
   }
 
@@ -266,7 +259,6 @@ class Flag_complex_sparse_matrix {
     if (result.second) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
       sparse_row_adjacency_matrix_.insert(row_to_vertex_.size(), row_to_vertex_.size()) = filt_val;
-      domination_indicator_.push_back(false);
       // Must be done after sparse_row_adjacency_matrix_ insertion
       row_to_vertex_.push_back(vertex);
     }
