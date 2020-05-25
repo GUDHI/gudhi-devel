@@ -118,11 +118,10 @@ class Flag_complex_sparse_matrix {
 
     const Row_index rw_u = vertex_to_row_.at(u);
     const Row_index rw_v = vertex_to_row_.at(v);
-    auto rw_e = std::make_pair(rw_u, rw_v);
 #ifdef DEBUG_TRACES
     std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
 #endif  // DEBUG_TRACES
-    auto common_neighbours = closed_common_neighbours_row_index(rw_e);
+    auto common_neighbours = closed_common_neighbours_row_index(rw_u, rw_v);
 #ifdef DEBUG_TRACES
     std::cout << "And its common neighbours are." << std::endl;
     for (auto neighbour : common_neighbours) {
@@ -160,9 +159,8 @@ class Flag_complex_sparse_matrix {
 #endif  // DEBUG_TRACES
     auto rw_u = vertex_to_row_[u];
     auto rw_v = vertex_to_row_[v];
-    auto rw_critical_edge = std::make_pair(rw_u, rw_v);
 
-    Row_indices_vector common_neighbours = closed_common_neighbours_row_index(rw_critical_edge);
+    Row_indices_vector common_neighbours = closed_common_neighbours_row_index(rw_u, rw_v);
 
     if (common_neighbours.size() > 2) {
       for (auto rw_c : common_neighbours) {
@@ -250,16 +248,11 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns the list of closed neighbours of the edge :{u,v}.
-  Row_indices_vector closed_common_neighbours_row_index(const std::pair<Row_index, Row_index>& rw_edge) const
+  Row_indices_vector closed_common_neighbours_row_index(Row_index rw_u, Row_index rw_v) const
   {
+    Row_indices_vector non_zero_indices_u = closed_neighbours_row_index(rw_u);
+    Row_indices_vector non_zero_indices_v = closed_neighbours_row_index(rw_v);
     Row_indices_vector common;
-    Row_indices_vector non_zero_indices_u;
-    Row_indices_vector non_zero_indices_v;
-    Row_index rw_u = std::get<0>(rw_edge);
-    Row_index rw_v = std::get<1>(rw_edge);
-
-    non_zero_indices_u = closed_neighbours_row_index(rw_u);
-    non_zero_indices_v = closed_neighbours_row_index(rw_v);
     std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
                           non_zero_indices_v.end(), std::inserter(common, common.begin()));
 
