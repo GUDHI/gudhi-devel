@@ -141,6 +141,7 @@ class Flag_complex_sparse_matrix {
     return false;
   }
 
+  // Returns the edges connecting u and v (extremities of crit) to their common neighbors (not themselves)
   std::set<Row_index> three_clique_indices(Row_index crit) {
     std::set<Row_index> edge_indices;
 
