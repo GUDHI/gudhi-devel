@@ -210,7 +210,6 @@ class Flag_complex_sparse_matrix {
         }
       }
     }
-    effected_indices.clear();
     u_set_dominated_edges_.clear();
   }
 
