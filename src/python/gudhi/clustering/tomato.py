@@ -9,11 +9,9 @@ from ._tomato import *
 
 class Tomato:
     """
-    Clustering
-
     This clustering algorithm needs a neighborhood graph on the points, and an estimation of the density at each point.
     A few possible graph constructions and density estimators are provided for convenience, but it is perfectly natural
-    to provide your own. In particular, we do not provide anything specific to cluster pixels on images yet.
+    to provide your own.
 
     Attributes
     ----------
@@ -92,10 +90,9 @@ class Tomato:
             raise ValueError("Cannot specify both a merge threshold and a number of clusters")
 
     def fit(self, X, y=None, weights=None):
-        # FIXME: Iterable -> Sequence?
         """
         Args:
-            X ((n,d)-array of float|(n,n)-array of float|Iterable[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if graph_type is "manual".
+            X ((n,d)-array of float|(n,n)-array of float|Sequence[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if graph_type is "manual".
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
