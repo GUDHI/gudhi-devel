@@ -109,12 +109,18 @@ class Tomato:
         need_knn_ngb = False
         need_knn_dist = False
         if self.graph_type_ == "knn":
-            k_graph = self.params_.get("k", 10) # FIXME: What if X has fewer than 10 points?
+            k_graph = self.params_.get("k", 10)
+            # If X has fewer than k points...
+            if k_graph > len(X):
+                k_graph = len(X)
             need_knn = k_graph
             need_knn_ngb = True
         if self.density_type_ in ["DTM", "logDTM"]:
-            k = self.params_.get("k", 10) # FIXME: What if X has fewer than 10 points?
+            k = self.params_.get("k", 10)
             k_DTM = self.params_.get("k_DTM", k)
+            # If X has fewer than k points...
+            if k_DTM > len(X):
+                k_DTM = len(X)
             need_knn = max(need_knn, k_DTM)
             need_knn_dist = True
             # if we ask for more neighbors for the graph than the DTM, getting the distances is a slight waste,
