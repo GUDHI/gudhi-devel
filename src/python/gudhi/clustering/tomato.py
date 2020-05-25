@@ -26,6 +26,8 @@ class Tomato:
         cluster labels for each point, after merging
     diagram_: ndarray of shape (n_leaves_,2)
         persistence diagram (only the finite points)
+    max_weight_per_cc_: ndarray of shape (n_connected_components,)
+        maximum of the density function on each connected component. This corresponds to the abscissa of infinite points in the diagram
     children_: ndarray of shape (n_leaves_-1,2)
         The children of each non-leaf node. Values less than n_leaves_ correspond to leaves of the tree. A node i greater than or equal to n_leaves_ is a non-leaf node and has children children_[i - n_leaves_]. Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node n_leaves_ + i
     weights_: ndarray of shape (n_samples,)
@@ -33,10 +35,6 @@ class Tomato:
     params_: dict
         Parameters like metric, etc
     """
-
-    # Not documented for now, because I am not sure how useful it is.
-    #    max_density_per_cc_: ndarray of shape (n_connected_components)
-    #        maximum of the density function on each connected component
 
     def __init__(
         self,
@@ -203,16 +201,16 @@ class Tomato:
                     self.neighbors_[j].add(i)
 
         self.weights_ = weights
-        self.leaf_labels_, self.children_, self.diagram_, self.max_density_per_cc_ = doit(
+        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = doit(
             list(self.neighbors_), weights
         )
-        self.n_leaves_ = len(self.max_density_per_cc_) + len(self.children_)
-        assert self.leaf_labels_.max() + 1 == len(self.max_density_per_cc_) + len(self.children_)
+        self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
+        assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
         if self.__merge_threshold:
             assert not self.__n_clusters
             self.__n_clusters = numpy.count_nonzero(
                 self.diagram_[:, 0] - self.diagram_[:, 1] > self.__merge_threshold
-            ) + len(self.max_density_per_cc_)
+            ) + len(self.max_weight_per_cc_)
         if self.__n_clusters:
             # TODO: set corresponding merge_threshold?
             renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
@@ -234,8 +232,8 @@ class Tomato:
         """
         import matplotlib.pyplot as plt
 
-        l = self.max_density_per_cc_.min()
-        r = self.max_density_per_cc_.max()
+        l = self.max_weight_per_cc_.min()
+        r = self.max_weight_per_cc_.max()
         if self.diagram_.size > 0:
             plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "ro")
             l = min(l, self.diagram_[:, 1].min())
@@ -249,7 +247,7 @@ class Tomato:
                 l, r = -1., 1.
         plt.plot([l, r], [l, r])
         plt.plot(
-            self.max_density_per_cc_, numpy.full(self.max_density_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
+            self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
         )
         plt.show()
 
@@ -282,7 +280,7 @@ class Tomato:
             return
         if hasattr(self, "leaf_labels_"):
             self.n_clusters_ = numpy.count_nonzero(self.diagram_[:, 0] - self.diagram_[:, 1] > merge_threshold) + len(
-                self.max_density_per_cc_
+                self.max_weight_per_cc_
             )
         else:
             self.__n_clusters = None
@@ -310,7 +308,7 @@ if __name__ == "__main__":
     # print()
     # print("diagram\n",t.diagram_)
     # print()
-    print("max\n", t.max_density_per_cc_, file=sys.stderr)
+    print("max\n", t.max_weight_per_cc_, file=sys.stderr)
     # print()
     print("leaf labels\n", t.leaf_labels_)
     # print()
