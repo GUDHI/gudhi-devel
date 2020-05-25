@@ -198,7 +198,6 @@ class Flag_complex_sparse_matrix {
               for (auto inr_idx = inner_effected_indcs.rbegin(); inr_idx != inner_effected_indcs.rend(); inr_idx++) {
                 if (*inr_idx < idx) effected_indices.emplace(*inr_idx);
               }
-              inner_effected_indcs.clear();
 #ifdef DEBUG_TRACES
               std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
                         << filt << std::endl;
