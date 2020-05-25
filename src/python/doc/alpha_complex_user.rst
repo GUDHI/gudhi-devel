@@ -16,8 +16,25 @@ Definition
 
 Remarks
 ^^^^^^^
-When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha^2`,
-the complex is a Delaunay complex (with special filtration values).
+* When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha^2`, the complex is a Delaunay
+  complex (with special filtration values). The Delaunay complex without filtration values is also available by
+  passing :code:`default_filtration_value = True` to :func:`~gudhi.AlphaComplex.create_simplex_tree`.
+* For people only interested in the topology of the Alpha complex (for instance persistence), Alpha complex is
+  equivalent to the `Čech complex <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_ and much smaller if
+  you do not bound the radii. `Čech complex <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_ can still
+  make sense in higher dimension precisely because you can bound the radii.
+* Using the default :code:`complexity = 'safe'` makes the construction safe.
+  If you pass :code:`complexity = 'exact'` to :func:`~gudhi.AlphaComplex.__init__`, the filtration values are the exact
+  ones converted to the filtration value type of the simplicial complex. This can be very slow.
+  If you pass :code:`complexity = 'safe'` (the default) or :code:`complexity = 'fast'`, the filtration values are only
+  guaranteed to have a small multiplicative error compared to the exact value, see
+  `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
+  for details. A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
+  non-empty approximate interval [10^12,10^12+10^6].
+  Using :code:`complexity = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
+  the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
+  output is a valid filtration (faces have a filtration value no larger than their cofaces).
+* For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
 
 Example from points
 -------------------
