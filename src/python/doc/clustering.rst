@@ -55,7 +55,7 @@ Makes the number of clusters clearer, and changes a bit the shape of the cluster
 
 .. image:: img/spiral-diag2.png
 
-A quick look at the corresponding density estimate (`weights_` is not officially supported)
+A quick look at the corresponding density estimate
 
 .. code-block::
 
