@@ -380,7 +380,7 @@ class Flag_complex_sparse_matrix {
 #ifdef GUDHI_USE_TBB
     tbb::parallel_sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #else
-    std::stable_sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
+    std::sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #endif
 
     // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
