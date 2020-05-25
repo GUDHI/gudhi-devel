@@ -140,7 +140,7 @@ class Flag_complex_sparse_matrix {
         return true;
       else
         for (auto rw_c : common_neighbours) {
-          if (rw_c != rw_u and rw_c != rw_v) {
+          if (rw_c != rw_u && rw_c != rw_v) {
             auto neighbours_c = closed_neighbours_row_index(rw_c);
             // If neighbours_c contains the common neighbours.
             if (std::includes(neighbours_c.begin(), neighbours_c.end(), common_neighbours.begin(),
@@ -171,7 +171,7 @@ class Flag_complex_sparse_matrix {
 
     if (common_neighbours.size() > 2) {
       for (auto rw_c : common_neighbours) {
-        if (rw_c != rw_u and rw_c != rw_v) {
+        if (rw_c != rw_u && rw_c != rw_v) {
           auto e_with_new_nbhr_v = std::minmax(u, row_to_vertex_[rw_c]);
           auto e_with_new_nbhr_u = std::minmax(v, row_to_vertex_[rw_c]);
           edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_v]);
@@ -238,7 +238,7 @@ class Flag_complex_sparse_matrix {
       for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
         Row_index rw_v = it.index();
         // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-        if (!domination_indicator_[rw_v] and u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() and
+        if (!domination_indicator_[rw_v] && u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() &&
             u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
           // inner index, here it is equal to it.columns()
           non_zero_indices.push_back(rw_v);
