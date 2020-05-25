@@ -273,12 +273,12 @@ class Flag_complex_sparse_matrix {
 
   // Insert a vertex in the data structure
   void insert_vertex(Vertex_handle vertex, Filtration_value filt_val) {
-    auto rw = vertex_to_row_.find(vertex);
-    if (rw == vertex_to_row_.end()) {
+    auto result = vertex_to_row_.emplace(std::make_pair(vertex, rows_));
+    // If it was not already inserted - Value won't be updated by emplace if it is already present
+    if (result.second) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
       sparse_row_adjacency_matrix_.insert(rows_, rows_) = filt_val;
       domination_indicator_.push_back(false);
-      vertex_to_row_.insert(std::make_pair(vertex, rows_));
       row_to_vertex_.push_back(vertex);
       rows_++;
     }
