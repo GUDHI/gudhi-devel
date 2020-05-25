@@ -80,7 +80,7 @@ class Flag_complex_sparse_matrix {
 
  private:
   // Map from row index to its vertex handle
-  std::unordered_map<Row_index, Vertex_handle> row_to_vertex_;
+  std::vector<Vertex_handle> row_to_vertex_;
 
   // Vertices stored as an unordered_set
   std::unordered_set<Vertex_handle> vertices_;
@@ -282,7 +282,7 @@ class Flag_complex_sparse_matrix {
       sparse_row_adjacency_matrix_.insert(rows_, rows_) = filt_val;
       domination_indicator_.push_back(false);
       vertex_to_row_.insert(std::make_pair(vertex, rows_));
-      row_to_vertex_.insert(std::make_pair(rows_, vertex));
+      row_to_vertex_.push_back(vertex);
       rows_++;
     }
   }
