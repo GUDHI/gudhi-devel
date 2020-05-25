@@ -103,17 +103,12 @@ class Flag_complex_sparse_matrix {
   Sparse_row_matrix sparse_row_adjacency_matrix_;
 
   // Stores <I>true</I> for dominated rows and <I>false</I> otherwise.
-  // Initialised to a vector of length equal to the value of the variable <B>rows_</B> with all <I>false</I> values.
-  // Subsequent removal of dominated vertices is reflected by concerned entries changing to <I>true</I>
-  // in this vector.
+  // Initialised to a vector of length equal to the length of row_to_vertex_ with all values set to <I>false</I>.
+  // Subsequent removal of dominated vertices is reflected by concerned entries changing to <I>true</I> in this vector.
   std::vector<bool> domination_indicator_;
 
   // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
   std::vector<Filtered_edge> f_edge_vector_;
-
-
-  //! Stores the number of vertices in the original graph (which is also the number of rows in the Matrix).
-  Row_index rows_;
 
   // Edge e is the actual edge (u,v). Not the row ids in the matrixs
   bool check_edge_domination(const Edge& edge) const
@@ -273,14 +268,14 @@ class Flag_complex_sparse_matrix {
 
   // Insert a vertex in the data structure
   void insert_vertex(Vertex_handle vertex, Filtration_value filt_val) {
-    auto result = vertex_to_row_.emplace(vertex, rows_);
+    auto result = vertex_to_row_.emplace(vertex, row_to_vertex_.size());
     // If it was not already inserted - Value won't be updated by emplace if it is already present
     if (result.second) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
-      sparse_row_adjacency_matrix_.insert(rows_, rows_) = filt_val;
+      sparse_row_adjacency_matrix_.insert(row_to_vertex_.size(), row_to_vertex_.size()) = filt_val;
       domination_indicator_.push_back(false);
+      // Must be done after sparse_row_adjacency_matrix_ insertion
       row_to_vertex_.push_back(vertex);
-      rows_++;
     }
   }
 
@@ -321,8 +316,7 @@ class Flag_complex_sparse_matrix {
    */
   template<typename Filtered_edge_range>
   Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
-  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()),
-    rows_(0) {
+  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()) {
     // To get the number of vertices
     std::unordered_set<Vertex_handle> vertices;
     for (Filtered_edge filtered_edge : filtered_edge_range) {
@@ -344,9 +338,7 @@ class Flag_complex_sparse_matrix {
    * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
    */
   Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph)
-  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph), boost::num_vertices(one_skeleton_graph)),
-    rows_(0)
-     {
+  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph), boost::num_vertices(one_skeleton_graph)) {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
