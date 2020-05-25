@@ -195,21 +195,19 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
 }
 
 auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_index n_leaves, Cluster_index n_final) {
-  // Should this really be an error?
-  if (n_final > n_leaves)
-    throw std::runtime_error("The number of clusters required is larger than the number of mini-clusters");
+  if (n_final > n_leaves) {
+    std::cerr << "The number of clusters required " << n_final << " is larger than the number of mini-clusters " << n_leaves << '\n';
+    n_final = n_leaves; // or return something special and let Tomato use leaf_labels_?
+  }
   py::buffer_info cbuf = children.request();
   if ((cbuf.ndim != 2 || cbuf.shape[1] != 2) && (cbuf.ndim != 1 || cbuf.shape[0] != 0))
     throw std::runtime_error("internal error: children have to be (n,2) or empty");
   const int n_merges = cbuf.shape[0];
   Cluster_index* d = (Cluster_index*)cbuf.ptr;
-  // Should this really be an error?
-  // std::cerr << "n_merges: " << n_merges << ", n_final: " << n_final << ", n_leaves: " << n_leaves << '\n';
-  if (n_merges + n_final < n_leaves)
-    throw std::runtime_error(std::string("The number of clusters required ") + std::to_string(n_final) +
-                             " is smaller than the number of connected components " +
-                             std::to_string(n_leaves - n_merges));
-
+  if (n_merges + n_final < n_leaves) {
+    std::cerr << "The number of clusters required " << n_final << " is smaller than the number of connected components " << n_leaves - n_merges << '\n';
+    n_final = n_leaves - n_merges;
+  }
   struct Dat {
     Cluster_index parent;
     int rank;
