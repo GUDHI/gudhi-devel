@@ -81,6 +81,18 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply PersistenceImage on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (number of pixels = **resolution[0]** x **resolution[1]**):: output persistence image.
+        """
+        return self.fit_transform([diag])[0,:]
+
 class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
@@ -170,6 +182,18 @@ class Landscape(BaseEstimator, TransformerMixin):
 
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply Landscape on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (number of samples = **num_landscapes** x **resolution**): output persistence landscape.
+        """
+        return self.fit_transform([diag])[0,:]
+
 class Silhouette(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence silhouettes from a list of persistence diagrams. A persistence silhouette is computed by taking a weighted average of the collection of 1D piecewise-linear functions given by the persistence landscapes, and then by evenly sampling this average on a given range. Finally, the corresponding vector of samples is returned. See https://arxiv.org/abs/1312.0308 for more details.
@@ -248,6 +272,18 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
         return Xfit 
 
+    def __call__(self, diag):
+        """
+        Apply Silhouette on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (**resolution**): output persistence silhouette.
+        """
+        return self.fit_transform([diag])[0,:]
+
 class BettiCurve(BaseEstimator, TransformerMixin):
     """
     This is a class for computing Betti curves from a list of persistence diagrams. A Betti curve is a 1D piecewise-constant function obtained from the rank function. It is sampled evenly on a given range and the vector of samples is returned. See https://www.researchgate.net/publication/316604237_Time_Series_Classification_via_Topological_Data_Analysis for more details.
@@ -307,6 +343,18 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         Xfit = np.concatenate(Xfit, 0)
 
         return Xfit
+
+    def __call__(self, diag):
+        """
+        Apply BettiCurve on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (**resolution**): output Betti curve.
+        """
+        return self.fit_transform([diag])[0,:]
 
 class Entropy(BaseEstimator, TransformerMixin):
     """
@@ -378,6 +426,18 @@ class Entropy(BaseEstimator, TransformerMixin):
 
         return Xfit
 
+    def __call__(self, diag):
+        """
+        Apply Entropy on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (1 if **mode** = "scalar" else **resolution**): output entropy.
+        """
+        return self.fit_transform([diag])[0,:]
+
 class TopologicalVector(BaseEstimator, TransformerMixin):
     """
     This is a class for computing topological vectors from a list of persistence diagrams. The topological vector associated to a persistence diagram is the sorted vector of a slight modification of the pairwise distances between the persistence diagram points. See https://diglib.eg.org/handle/10.1111/cgf12692 for more details.
@@ -430,6 +490,18 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
             Xfit[i, :dim] = vect[:dim]
 
         return Xfit
+
+    def __call__(self, diag):
+        """
+        Apply TopologicalVector on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (**threshold**): output topological vector.
+        """
+        return self.fit_transform([diag])[0,:]
 
 class ComplexPolynomial(BaseEstimator, TransformerMixin):
     """
@@ -490,3 +562,15 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
             coeff = np.array(coeff[::-1])[1:]
             Xfit[d, :min(thresh, coeff.shape[0])] = coeff[:min(thresh, coeff.shape[0])]
         return Xfit
+
+    def __call__(self, diag):
+        """
+        Apply ComplexPolynomial on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy array with shape (**threshold**): output complex vector of coefficients.
+        """
+        return self.fit_transform([diag])[0,:]

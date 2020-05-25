@@ -71,9 +71,6 @@ int main(int argc, char * argv[]) {
   std::clog << "The Rips complex contains " << rips_stree.num_simplices() << " simplices and has dimension "
             << rips_stree.dimension() << " \n";
 
-  // Sort the simplices in the order of the filtration
-  rips_stree.initialize_filtration();
-
   // Compute the persistence diagram of the complex
   Persistent_cohomology rips_pcoh(rips_stree);
   // initializes the coefficient field for homology
@@ -91,9 +88,6 @@ int main(int argc, char * argv[]) {
   alpha_complex.create_complex(alpha_stree, threshold * threshold);
   std::clog << "The Alpha complex contains " << alpha_stree.num_simplices() << " simplices and has dimension "
             << alpha_stree.dimension() << " \n";
-
-  // Sort the simplices in the order of the filtration
-  alpha_stree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
   Persistent_cohomology alpha_pcoh(alpha_stree);

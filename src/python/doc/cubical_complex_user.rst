@@ -91,7 +91,7 @@ Currently one input from a text file is used. It uses a format inspired from the
     we allow any filtration values. As a consequence one cannot use ``-1``'s to indicate missing cubes. If you have
     missing cubes in your complex, please set their filtration to :math:`+\infty` (aka. ``inf`` in the file).
 
-The file format is described in details in :ref:`Perseus file format` file format section.
+The file format is described in details in `Perseus file format <fileformats.html#perseus>`_ section.
 
 .. testcode::
 
@@ -120,7 +120,7 @@ conditions are imposed in all directions, then complex :math:`\mathcal{K}` becam
 various constructors from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical
 complex with periodic boundary conditions.
 
-One can also use Perseus style input files (see :doc:`Perseus <fileformats>`) for the specific periodic case:
+One can also use Perseus style input files (see `Perseus file format <fileformats.html#perseus>`_) for the specific periodic case:
 
 .. testcode::
 
@@ -158,10 +158,3 @@ Examples.
 ---------
 
 End user programs are available in python/example/ folder.
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

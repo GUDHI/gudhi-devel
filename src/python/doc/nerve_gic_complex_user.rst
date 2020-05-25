@@ -13,7 +13,7 @@ Visualizations of the simplicial complexes can be done with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/MLWave/kepler-mapper>`_.
-Input point clouds are assumed to be OFF files (cf. :doc:`fileformats`).
+Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
 
 Covers
 ------
@@ -313,10 +313,3 @@ the program outputs again SC.dot which gives the following visualization after u
     :alt: Visualization with neato
 
     Visualization with neato
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

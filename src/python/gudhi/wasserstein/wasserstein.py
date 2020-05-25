@@ -15,6 +15,8 @@ try:
 except ImportError:
     print("POT (Python Optimal Transport) package is not installed. Try to run $ conda install -c conda-forge pot ; or $ pip install POT")
 
+
+# Currently unused, but Théo says it is likely to be used again.
 def _proj_on_diag(X):
     '''
     :param X: (n x 2) array encoding the points of a persistent diagram.
@@ -24,7 +26,19 @@ def _proj_on_diag(X):
     return np.array([Z , Z]).T
 
 
-def _build_dist_matrix(X, Y, order=2., internal_p=2.):
+def _dist_to_diag(X, internal_p):
+    '''
+    :param X: (n x 2) array encoding the points of a persistent diagram.
+    :param internal_p: Ground metric (i.e. norm L^p).
+    :returns: (n) array encoding the (respective orthogonal) distances of the points to the diagonal
+
+    .. note::
+        Assumes that the points are above the diagonal.
+    '''
+    return (X[:, 1] - X[:, 0]) * 2 ** (1.0 / internal_p - 1)
+
+
+def _build_dist_matrix(X, Y, order, internal_p):
     '''
     :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
     :param Y: (m x 2) numpy.array encoding the second diagram.
@@ -36,16 +50,12 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
                 and its orthogonal projection onto the diagonal.
                 note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
     '''
-    Xdiag = _proj_on_diag(X)
-    Ydiag = _proj_on_diag(Y)
+    Cxd = _dist_to_diag(X, internal_p)**order
+    Cdy = _dist_to_diag(Y, internal_p)**order
     if np.isinf(internal_p):
         C = sc.cdist(X,Y, metric='chebyshev')**order
-        Cxd = np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order
-        Cdy = np.linalg.norm(Y - Ydiag, ord=internal_p, axis=1)**order
     else:
         C = sc.cdist(X,Y, metric='minkowski', p=internal_p)**order
-        Cxd = np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order
-        Cdy = np.linalg.norm(Y - Ydiag, ord=internal_p, axis=1)**order
     Cf = np.hstack((C, Cxd[:,None]))
     Cdy = np.append(Cdy, 0)
 
@@ -54,18 +64,31 @@ def _build_dist_matrix(X, Y, order=2., internal_p=2.):
     return Cf
 
 
-def _perstot(X, order, internal_p):
+def _perstot_autodiff(X, order, internal_p):
+    '''
+    Version of _perstot that works on eagerpy tensors.
+    '''
+    return _dist_to_diag(X, internal_p).norms.lp(order)
+
+def _perstot(X, order, internal_p, enable_autodiff):
     '''
     :param X: (n x 2) numpy.array (points of a given diagram).
     :param order: exponent for Wasserstein. Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2); Default value is 2 (Euclidean norm).
+    :param enable_autodiff: If X is torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
+        transparent to automatic differentiation.
+    :type enable_autodiff: bool
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).
     '''
-    Xdiag = _proj_on_diag(X)
-    return (np.sum(np.linalg.norm(X - Xdiag, ord=internal_p, axis=1)**order))**(1./order)
+    if enable_autodiff:
+        import eagerpy as ep
+
+        return _perstot_autodiff(ep.astensor(X), order, internal_p).raw
+    else:
+        return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
 
 
-def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
+def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_autodiff=False):
     '''
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points
                 (i.e. with infinite coordinate).
@@ -76,6 +99,13 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     :param order: exponent for Wasserstein; Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is 2 (Euclidean norm).
+    :param enable_autodiff: If X and Y are torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
+        transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
+        with `matching=True`.
+
+        .. note:: This considers the function defined on the coordinates of the off-diagonal points of X and Y
+            and lets the various frameworks compute its gradient. It never pulls new points from the diagonal.
+    :type enable_autodiff: bool
     :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with
               respect to the internal_p-norm as ground metric.
               If matching is set to True, also returns the optimal matching between X and Y.
@@ -84,23 +114,31 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     m = len(Y)
 
     # handle empty diagrams
-    if X.size == 0:
-        if Y.size == 0:
+    if n == 0:
+        if m == 0:
             if not matching:
+                # What if enable_autodiff?
                 return 0.
             else:
                 return 0., np.array([])
         else:
             if not matching:
-                return _perstot(Y, order, internal_p)
+                return _perstot(Y, order, internal_p, enable_autodiff)
             else:
-                return _perstot(Y, order, internal_p), np.array([[-1, j] for j in range(m)])
-    elif Y.size == 0:
+                return _perstot(Y, order, internal_p, enable_autodiff), np.array([[-1, j] for j in range(m)])
+    elif m == 0:
         if not matching:
-            return _perstot(X, order, internal_p)
+            return _perstot(X, order, internal_p, enable_autodiff)
         else:
-            return _perstot(X, order, internal_p), np.array([[i, -1] for i in range(n)])
+            return _perstot(X, order, internal_p, enable_autodiff), np.array([[i, -1] for i in range(n)])
 
+    if enable_autodiff:
+        import eagerpy as ep
+
+        X_orig = ep.astensor(X)
+        Y_orig = ep.astensor(Y)
+        X = X_orig.numpy()
+        Y = Y_orig.numpy()
     M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
     a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
     a[-1] = m
@@ -108,6 +146,7 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
     b[-1] = n
 
     if matching:
+        assert not enable_autodiff, "matching and enable_autodiff are currently incompatible"
         P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
         ot_cost = np.sum(np.multiply(P,M))
         P[-1, -1] = 0  # Remove matching corresponding to the diagonal
@@ -116,6 +155,23 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2.):
         match[:,0][match[:,0] >= n] = -1
         match[:,1][match[:,1] >= m] = -1
         return ot_cost ** (1./order) , match
+
+    if enable_autodiff:
+        P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
+        pairs_X_Y = np.argwhere(P[:-1, :-1])
+        pairs_X_diag = np.nonzero(P[:-1, -1])
+        pairs_Y_diag = np.nonzero(P[-1, :-1])
+        dists = []
+        # empty arrays are not handled properly by the helpers, so we avoid calling them
+        if len(pairs_X_Y):
+            dists.append((Y_orig[pairs_X_Y[:, 1]] - X_orig[pairs_X_Y[:, 0]]).norms.lp(internal_p, axis=-1).norms.lp(order))
+        if len(pairs_X_diag):
+            dists.append(_perstot_autodiff(X_orig[pairs_X_diag], order, internal_p))
+        if len(pairs_Y_diag):
+            dists.append(_perstot_autodiff(Y_orig[pairs_Y_diag], order, internal_p))
+        dists = [dist.reshape(1) for dist in dists]
+        return ep.concatenate(dists).norms.lp(order).raw
+        # We can also concatenate the 3 vectors to compute just one norm.
 
     # Comptuation of the otcost using the ot.emd2 library.
     # Note: it is the Wasserstein distance to the power q.

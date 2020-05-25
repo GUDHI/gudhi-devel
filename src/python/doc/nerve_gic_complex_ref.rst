@@ -12,10 +12,3 @@ Cover complexes reference manual
    :show-inheritance:
 
    .. automethod:: gudhi.CoverComplex.__init__
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

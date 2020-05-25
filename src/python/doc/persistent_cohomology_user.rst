@@ -21,7 +21,7 @@ Definition
 
 
 Computation of persistent cohomology using the algorithm of :cite:`DBLP:journals/dcg/SilvaMV11` and
-:cite:`DBLP:journals/corr/abs-1208-5018` and the Compressed Annotation Matrix implementation of
+:cite:`DBLP:conf/compgeom/DeyFW14` and the Compressed Annotation Matrix implementation of
 :cite:`DBLP:conf/esa/BoissonnatDM13`.
      
 The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing global
@@ -111,10 +111,3 @@ We provide several example files: run these examples with -h for details on thei
     * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
     * :download:`random_cubical_complex_persistence_example.py <../example/random_cubical_complex_persistence_example.py>`
     * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
-
-Bibliography
-------------
-
-.. bibliography:: ../../biblio/bibliography.bib
-   :filter: docname in docnames
-   :style: unsrt

@@ -72,11 +72,11 @@ def plot_persistence_barcode(
     """This function plots the persistence bar code from persistence values list
     , a np.array of shape (N x 2) (representing a diagram 
     in a single homology dimension), 
-    or from a :doc:`persistence file <fileformats>`.
+    or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: barcode transparency value (0.0 transparent through 1.0
@@ -109,9 +109,6 @@ def plot_persistence_barcode(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
@@ -125,6 +122,8 @@ def plot_persistence_barcode(
             else:
                 print("file " + persistence_file + " not found.")
                 return None
+
+        persistence = _array_handler(persistence)
 
         if max_barcodes != 1000:
             print("Deprecated parameter. It has been replaced by max_intervals")
@@ -214,11 +213,11 @@ def plot_persistence_diagram(
 ):
     """This function plots the persistence diagram from persistence values
     list, a np.array of shape (N x 2) representing a diagram in a single
-    homology dimension, or from a :doc:`persistence file <fileformats>`.
+    homology dimension, or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file`.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>` style name
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
     :param alpha: plot transparency value (0.0 transparent through 1.0
@@ -255,8 +254,6 @@ def plot_persistence_diagram(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
@@ -270,6 +267,8 @@ def plot_persistence_diagram(
             else:
                 print("file " + persistence_file + " not found.")
                 return None
+
+        persistence = _array_handler(persistence)
 
         if max_plots != 1000:
             print("Deprecated parameter. It has been replaced by max_intervals")
@@ -369,17 +368,19 @@ def plot_persistence_density(
     """This function plots the persistence density from persistence
     values list, np.array of shape (N x 2) representing a diagram
     in a single homology dimension,
-    or from a :doc:`persistence file <fileformats>`. Be
-    aware that this function does not distinguish the dimension, it is
+    or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
+    Be aware that this function does not distinguish the dimension, it is
     up to you to select the required one. This function also does not handle
     degenerate data set (scipy correlation matrix inversion can fail).
+
+    :Requires: `SciPy <installation.html#scipy>`_
 
     :param persistence: Persistence intervals values list. 
                         Can be grouped by dimension or not.
     :type persistence: an array of (dimension, array of (birth, death)) 
                         or an array of (birth, death).
-    :param persistence_file: A :doc:`persistence file <fileformats>`
-        style name (reset persistence if both are set).
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_
+        file style name (reset persistence if both are set).
     :type persistence_file: string
     :param nbins: Evaluate a gaussian kde on a regular grid of nbins x
         nbins over data extents (default is 300)
@@ -425,8 +426,6 @@ def plot_persistence_density(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-        persistence = _array_handler(persistence)
-
         if persistence_file != "":
             if dimension is None:
                 # All dimension case
@@ -440,6 +439,7 @@ def plot_persistence_density(
                 return None
 
         if len(persistence) > 0:
+            persistence = _array_handler(persistence)
             persistence_dim = np.array(
                 [
                     (dim_interval[1][0], dim_interval[1][1])

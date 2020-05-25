@@ -13,6 +13,8 @@
 
 #include <gudhi/Bitmap_cubical_complex/counter.h>
 
+#include <boost/config.hpp>
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -110,6 +112,16 @@ class Bitmap_cubical_complex_base {
   virtual inline std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
 
   /**
+   * This function finds a top-dimensional cell that is incident to the input cell and has
+   * the same filtration value. In case several cells are suitable, an arbitrary one is
+   * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
+   * On the other hand, the output is always indicating the position of
+   * a top-dimensional cube in the data structure.
+   * \pre The filtration values are assigned as per `impose_lower_star_filtration()`.
+   **/
+  inline size_t get_top_dimensional_coface_of_a_cell(size_t splx);
+
+  /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
   * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
   * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
@@ -197,7 +209,7 @@ class Bitmap_cubical_complex_base {
   /**
    * Returns number of all cubes in the data structure.
    **/
-  inline unsigned size() const { return this->data.size(); }
+  inline std::size_t size() const { return this->data.size(); }
 
   /**
    * Writing to stream operator. By using it we get the values T of cells in order in which they are stored in the
@@ -600,6 +612,19 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     ++index;
   }
   this->impose_lower_star_filtration();
+}
+
+template <typename T>
+size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size_t splx) {
+  if (this->get_dimension_of_a_cell(splx) == this->dimension()){return splx;}
+  else{
+    for (auto v : this->get_coboundary_of_a_cell(splx)){
+      if(this->get_cell_data(v) == this->get_cell_data(splx)){
+        return this->get_top_dimensional_coface_of_a_cell(v);
+      }
+    }
+  }
+  BOOST_UNREACHABLE_RETURN(-2);
 }
 
 template <typename T>

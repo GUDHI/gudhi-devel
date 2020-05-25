@@ -46,7 +46,6 @@ def test_insertion():
     assert st.find([2, 3]) == False
 
     # filtration test
-    st.initialize_filtration()
     assert st.filtration([0, 1, 2]) == 4.0
     assert st.filtration([0, 2]) == 4.0
     assert st.filtration([1, 2]) == 4.0
@@ -93,7 +92,6 @@ def test_insertion():
     assert st.find([1]) == True
     assert st.find([2]) == True
 
-    st.initialize_filtration()
     assert st.persistence(persistence_dim_max=True) == [
         (1, (4.0, float("inf"))),
         (0, (0.0, float("inf"))),
@@ -151,7 +149,6 @@ def test_expansion():
     st.expansion(3)
     assert st.num_vertices() == 7
     assert st.num_simplices() == 22
-    st.initialize_filtration()
 
     assert list(st.get_filtration()) == [
         ([2], 0.1),

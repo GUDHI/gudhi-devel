@@ -13,7 +13,9 @@ pages = {1--39},
 publisher = {JMLR.org},
 title = {{Statistical analysis and parameter selection for Mapper}},
 volume = {19},
-year = {2018}
+year = {2018},
+url = {http://jmlr.org/papers/v19/17-291.html},
+doi = {10.5555/3291125.3291137}
 }
 
 @inproceedings{Dey13,
@@ -22,6 +24,7 @@ year = {2018}
  booktitle = {Proceedings of the Twenty-ninth Annual Symposium on Computational Geometry},
  year = {2013},
  pages = {107--116},
+ doi = {10.1145/2462356.2462387}
 }
 
 @article{Carriere16,
@@ -30,6 +33,7 @@ journal = {Foundations of Computational Mathematics},
 number = {6},
 pages = {1333--1396},
 publisher = {Springer-Verlag},
+doi = {10.1007/s10208-017-9370-z},
 title = {{Structure and stability of the one-dimensional Mapper}},
 volume = {18},
 year = {2017}
@@ -47,6 +51,7 @@ journal = {Foundations of Computational Mathematics},
 number = {1},
 pages = {79--103},
 publisher = {Springer-Verlag},
+doi = {10.1007/s10208-008-9027-z},
 title = {{Extending persistence using Poincar{\'{e}} and Lefschetz duality}},
 volume = {9},
 year = {2009}
@@ -830,6 +835,7 @@ book{hatcher2002algebraic,
   number    = {4},
   year      = {2010},
   pages     = {367-405},
+  doi       = {10.1007/s10208-010-9066-0},
   ee        = {http://dx.doi.org/10.1007/s10208-010-9066-0},
   bibsource = {DBLP, http://dblp.uni-trier.de}
 }
@@ -925,6 +931,7 @@ language={English}
   booktitle = {Symposium on Computational Geometry},
   year      = {2014},
   pages     = {345},
+  doi       = {10.1145/2582112.2582165},
   ee        = {http://doi.acm.org/10.1145/2582112.2582165},
   bibsource = {DBLP, http://dblp.uni-trier.de}
 }
@@ -1208,16 +1215,68 @@ numpages = {11},
 location = {Montr\'{e}al, Canada},
 series = {NIPS’18}
 }
-
+@Article{dtm,
+author={Chazal, Fr{\'e}d{\'e}ric
+and Cohen-Steiner, David
+and M{\'e}rigot, Quentin},
+title={Geometric Inference for Probability Measures},
+journal={Foundations of Computational Mathematics},
+year={2011},
+volume={11},
+number={6},
+pages={733-751},
+abstract={Data often comes in the form of a point cloud sampled from an unknown compact subset of Euclidean space. The general goal of geometric inference is then to recover geometric and topological features (e.g., Betti numbers, normals) of this subset from the approximating point cloud data. It appears that the study of distance functions allows one to address many of these questions successfully. However, one of the main limitations of this framework is that it does not cope well with outliers or with background noise. In this paper, we show how to extend the framework of distance functions to overcome this problem. Replacing compact subsets by measures, we introduce a notion of distance function to a probability distribution in Rd. These functions share many properties with classical distance functions, which make them suitable for inference purposes. In particular, by considering appropriate level sets of these distance functions, we show that it is possible to reconstruct offsets of sampled shapes with topological guarantees even in the presence of outliers. Moreover, in settings where empirical measures are considered, these functions can be easily evaluated, making them of particular practical interest.},
+issn={1615-3383},
+doi={10.1007/s10208-011-9098-0},
+url={https://doi.org/10.1007/s10208-011-9098-0}
+}
+@article{dtmdensity,
+author = "Biau, Gérard and Chazal, Frédéric and Cohen-Steiner, David and Devroye, Luc and Rodríguez, Carlos",
+doi = "10.1214/11-EJS606",
+fjournal = "Electronic Journal of Statistics",
+journal = "Electron. J. Statist.",
+pages = "204--237",
+publisher = "The Institute of Mathematical Statistics and the Bernoulli Society",
+title = "A weighted k-nearest neighbor density estimate for geometric inference",
+url = "https://doi.org/10.1214/11-EJS606",
+volume = "5",
+year = "2011"
+}
 @article{turner2014frechet,
   title={Fr{\'e}chet means for distributions of persistence diagrams},
   author={Turner, Katharine and Mileyko, Yuriy and Mukherjee, Sayan and Harer, John},
   journal={Discrete \& Computational Geometry},
+  doi={10.1007/s00454-014-9604-7},
   volume={52},
   number={1},
   pages={44--70},
   year={2014},
   publisher={Springer}
+}
+
+@inproceedings{dtmfiltrations,
+  author    = {Hirokazu Anai and
+               Fr{\'{e}}d{\'{e}}ric Chazal and
+               Marc Glisse and
+               Yuichi Ike and
+               Hiroya Inakoshi and
+               Rapha{\"{e}}l Tinarrage and
+               Yuhei Umeda},
+  editor    = {Gill Barequet and
+               Yusu Wang},
+  title     = {DTM-Based Filtrations},
+  booktitle = {35th International Symposium on Computational Geometry, SoCG 2019,
+               June 18-21, 2019, Portland, Oregon, {USA}},
+  series    = {LIPIcs},
+  volume    = {129},
+  pages     = {58:1--58:15},
+  publisher = {Schloss Dagstuhl - Leibniz-Zentrum f{\"{u}}r Informatik},
+  year      = {2019},
+  url       = {https://doi.org/10.4230/LIPIcs.SoCG.2019.58},
+  doi       = {10.4230/LIPIcs.SoCG.2019.58},
+  timestamp = {Tue, 11 Feb 2020 15:52:14 +0100},
+  biburl    = {https://dblp.org/rec/conf/compgeom/AnaiCGIITU19.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 @unpublished{edgecollapsesocg2020,
