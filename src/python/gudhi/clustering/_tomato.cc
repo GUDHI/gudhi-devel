@@ -144,21 +144,12 @@ auto hierarchy(Point_index num_points, Neighbors const& neighbors, Density const
   }
   // Maximum for each connected component
   std::vector<double> max_cc;
-  // for(Point_index i = 0; i < num_points; ++i){
-  //  if(ds_base[ds_base[raw_cluster[i]].parent].max == i)
-  //    max_cc.push_back(density[order[i]]);
-  //}
   for (Cluster_index i = 0; i < n_raw_clusters; ++i) {
     if (ds_base[i].parent == i) max_cc.push_back(density[order[ds_base[i].max]]);
   }
   assert((Cluster_index)(merges.size() + max_cc.size()) == n_raw_clusters);
 
   // TODO: create a "noise" cluster, merging all those not prominent enough?
-  // int nb_clusters=0;
-  // for(int i=0;i<(int)ds_base.size();++i){
-  //  if(ds_parent[i]!=i) continue;
-  //  ds_data[i].rank=nb_clusters++;
-  //}
 
   // Replay the merges, in increasing order of prominence, to build the hierarchy
   std::sort(merges.begin(), merges.end(), [](Merge const& a, Merge const& b) { return a.persist < b.persist; });
@@ -278,31 +269,7 @@ auto plouf(py::handle ngb, py::array_t<double, py::array::c_style | py::array::f
   // output)
   return tomato(n, ngb, d, order, rorder);
 }
-#if 0
-struct Vec {
-  int const* base;
-  int k;
-  int const* begin()const{return base;}
-  int const* end()const{return base+k;}
-  Vec operator*()const{return *this;}
-};
-auto plaf(py::array_t<int, py::array::c_style | py::array::forcecast> ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density, double threshold){
-  py::buffer_info nbuf = ngb.request();
-  if(nbuf.ndim!=2)
-    throw std::runtime_error("neighbors must be 2D");
-  const int n=nbuf.shape[0];
-  const int k=nbuf.shape[1];
-  int*nptr=(int*)nbuf.ptr;
-  auto neighbors=boost::adaptors::transform(boost::irange(0,n),[=](int i){return Vec{nptr+i*k,k};});
-  py::buffer_info wbuf = density.request();
-  if(wbuf.ndim!=1)
-    throw std::runtime_error("density must be 1D");
-  if(n!=wbuf.shape[0])
-    throw std::runtime_error("incompatible sizes");
-  double*d=(double*)wbuf.ptr;
-  return tomato(n,neighbors,d);
-}
-#endif
+
 PYBIND11_MODULE(_tomato, m) {
   m.doc() = "Internals of tomato clustering";
   m.def("hierarchy", &hierarchy, "does the clustering");
