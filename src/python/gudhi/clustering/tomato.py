@@ -21,6 +21,9 @@ class Tomato:
     A few possible graph constructions and density estimators are provided for convenience, but it is perfectly natural
     to provide your own.
 
+    :Requires: `SciPy <installation.html#scipy>`_, `Scikit-learn <installation.html#scikit-learn>`_ or others
+        (see :class:`~gudhi.point_cloud.knn.KNearestNeighbors`) in function of the options.
+
     Attributes
     ----------
     n_clusters_: int
