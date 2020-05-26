@@ -9,6 +9,7 @@
 """
 
 from gudhi.dtm_rips_complex import DTMRipsComplex
+from gudhi import RipsComplex
 import numpy as np
 from math import sqrt
 import pytest
@@ -25,16 +26,7 @@ def test_compatibility_with_rips():
     distance_matrix = np.array([[0, 1, 1, sqrt(2)], [1, 0, sqrt(2), 1], [1, sqrt(2), 0, 1], [sqrt(2), 1, 1, 0]])
     dtm_rips = DTMRipsComplex(distance_matrix=distance_matrix, max_filtration=42)
     st = dtm_rips.create_simplex_tree(max_dimension=1)
-    assert list(st.get_filtration()) == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([3], 0.0),
-        ([0, 1], 1.0),
-        ([0, 2], 1.0),
-        ([1, 3], 1.0),
-        ([2, 3], 1.0),
-        ([1, 2], sqrt(2)),
-        ([0, 3], sqrt(2)),
-    ]
+    rips_complex = RipsComplex(distance_matrix=distance_matrix, max_edge_length=42)
+    st_from_rips = rips_complex.create_simplex_tree(max_dimension=1)
+    assert list(st.get_filtration()) == list(st_from_rips.get_filtration())
 

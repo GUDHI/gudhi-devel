@@ -18,6 +18,7 @@ class DTMRipsComplex(WeightedRipsComplex):
     in the way described in :cite:`dtmfiltrations`.
     Remark that all the filtration values are doubled compared to the definition in the paper 
     for the consistency with RipsComplex.
+    :Requires: `SciPy <installation.html#scipy>`_
     """
     def __init__(self, 
                  points=None, 
