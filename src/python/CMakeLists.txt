@@ -491,6 +491,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm)
     endif()
 
+    # Tomato
+    if(SCIPY_FOUND AND PYBIND11_FOUND)
+      add_gudhi_py_test(test_tomato)
+    endif()
+
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
   else(CYTHON_FOUND)
