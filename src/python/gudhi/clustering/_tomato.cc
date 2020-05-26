@@ -47,8 +47,8 @@ struct Merge {
 };
 
 template <class Neighbors, class Density, class Order, class ROrder>
-auto hierarchy(Point_index num_points, Neighbors const& neighbors, Density const& density, Order const& order,
-               ROrder const& rorder) {
+auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& density, Order const& order,
+            ROrder const& rorder) {
   // point index --> index of raw cluster it belongs to
   std::vector<Cluster_index> raw_cluster;
   raw_cluster.reserve(num_points);
@@ -247,7 +247,7 @@ auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_inde
 // py::isinstance<py::array_t<std::int32_t>> (ou py::isinstance<py::array> et tester dtype) et flags&c_style
 // ou overload (en virant forcecast?)
 // aussi le faire au cas où on n'aurait pas un tableau, mais où chaque liste de voisins serait un tableau ?
-auto plouf(py::handle ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density) {
+auto hierarchy(py::handle ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density) {
   // used to be py::iterable ngb, but that's inconvenient if it doesn't come pre-sorted
   // use py::handle and check if [] (aka __getitem__) works? But then we need to build an object to pass it to []
   // (I _think_ handle is ok and we don't need object here)
@@ -273,6 +273,5 @@ auto plouf(py::handle ngb, py::array_t<double, py::array::c_style | py::array::f
 PYBIND11_MODULE(_tomato, m) {
   m.doc() = "Internals of tomato clustering";
   m.def("hierarchy", &hierarchy, "does the clustering");
-  // m.def("doit2", &plaf, "does the clustering faster");
   m.def("merge", &merge, "merge clusters");
 }
