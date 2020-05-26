@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 plt.show = lambda: None
 
 
-def test_tomato_something():
+def test_tomato_1():
     a = [(1, 2), (1.1, 1.9), (0.9, 1.8), (10, 0), (10.1, 0.05), (10.2, -0.1), (5.4, 0)]
     t = Tomato(metric="euclidean", n_clusters=2, k=4, n_jobs=-1, eps=0.05)
     assert np.array_equal(t.fit_predict(a), [1, 1, 1, 0, 0, 0, 0])  # or with swapped 0 and 1
@@ -30,6 +30,9 @@ def test_tomato_something():
     t.merge_threshold_ = 10
     assert t.n_clusters_ == 1
     assert (t.labels_ == 0).all()
+
+    t = Tomato(graph_type="radius", r=0.1, metric="cosine", k=3)
+    assert np.array_equal(t.fit_predict(a), [1, 1, 1, 0, 0, 0, 0])  # or with swapped 0 and 1
 
     t = Tomato(metric="euclidean", graph_type="radius", r=4.7, k=4)
     t.fit(a)
