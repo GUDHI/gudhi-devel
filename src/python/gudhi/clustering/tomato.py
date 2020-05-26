@@ -306,29 +306,3 @@ class Tomato:
         else:
             self.__n_clusters = None
         self.__merge_threshold = merge_threshold
-
-
-if __name__ == "__main__":
-    import sys
-
-    a = [(1, 2), (1.1, 1.9), (0.9, 1.8), (10, 0), (10.1, 0.05), (10.2, -0.1), (5.4, 0)]
-    a = numpy.random.rand(500, 2)
-    t = Tomato(metric="euclidean", graph_type="knn", density_type="DTM", n_clusters=2, k=4, n_jobs=-1, eps=0.05,)
-    t.fit(a)
-    # print("neighbors\n",t.neighbors_)
-    # print()
-    # print("weights\n",t.weights_)
-    # print()
-    # print("diagram\n",t.diagram_)
-    # print()
-    print("max\n", t.max_weight_per_cc_, file=sys.stderr)
-    # print()
-    print("leaf labels\n", t.leaf_labels_)
-    # print()
-    print("labels\n", t.labels_)
-    # print()
-    print("children\n", t.children_)
-    # print()
-    t.n_clusters_ = 2
-    print("labels\n", t.labels_)
-    t.plot_diagram()
