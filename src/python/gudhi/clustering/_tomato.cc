@@ -47,8 +47,8 @@ struct Merge {
 };
 
 template <class Neighbors, class Density, class Order, class ROrder>
-auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& density, Order const& order,
-            ROrder const& rorder) {
+auto hierarchy(Point_index num_points, Neighbors const& neighbors, Density const& density, Order const& order,
+               ROrder const& rorder) {
   // point index --> index of raw cluster it belongs to
   std::vector<Cluster_index> raw_cluster;
   raw_cluster.reserve(num_points);
@@ -302,7 +302,7 @@ auto plaf(py::array_t<int, py::array::c_style | py::array::forcecast> ngb, py::a
 #endif
 PYBIND11_MODULE(_tomato, m) {
   m.doc() = "Internals of tomato clustering";
-  m.def("doit", &plouf, "does the clustering");
+  m.def("hierarchy", &hierarchy, "does the clustering");
   // m.def("doit2", &plaf, "does the clustering faster");
   m.def("merge", &merge, "merge clusters");
 }

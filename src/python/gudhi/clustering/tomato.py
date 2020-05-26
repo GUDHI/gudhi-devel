@@ -229,7 +229,7 @@ class Tomato:
                     self.neighbors_[j].add(i)
 
         self.weights_ = weights
-        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = doit(self.neighbors_, weights)
+        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = hierarchy(self.neighbors_, weights)
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
         # TODO: deduplicate this code with the setters below
