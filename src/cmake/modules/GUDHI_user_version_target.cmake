@@ -55,7 +55,6 @@ foreach(PYTHON_FILE ${PYTHON_FILES})
   get_filename_component(PYTHON_FILE_EXT ${PYTHON_FILE} EXT)
   if (NOT "${PYTHON_FILE_EXT}" STREQUAL ".cpp")
     string(REPLACE "${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/" "" RELATIVE_PYTHON_FILE ${PYTHON_FILE})
-    message("# # # ${RELATIVE_PYTHON_FILE}")
     add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${PYTHON_FILE} ${GUDHI_USER_VERSION_DIR}/python/${RELATIVE_PYTHON_FILE})
   endif()
