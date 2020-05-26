@@ -1,4 +1,13 @@
-// g++ -O3 -Wall -shared -fPIC `python3 -m pybind11 --includes` XXX.cpp -o tomato`python3-config --extension-suffix`
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Marc Glisse
+ *
+ *    Copyright (C) 2020 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #include <boost/container/flat_map.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/property_map/property_map.hpp>

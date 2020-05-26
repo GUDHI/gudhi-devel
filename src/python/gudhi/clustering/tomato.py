@@ -1,10 +1,18 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Marc Glisse
+#
+# Copyright (C) 2020 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 import numpy
 from ..point_cloud.knn import KNearestNeighbors
 from ..point_cloud.dtm import DTMDensity
 from ._tomato import *
 
 # The fit/predict interface is not so well suited...
-# FIXME: choose if they are called weight, density, filtration, etc and be consistent.
 
 
 class Tomato:
