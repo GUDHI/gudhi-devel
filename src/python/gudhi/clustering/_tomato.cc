@@ -252,7 +252,10 @@ auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_inde
   return py::array(ret.size(), ret.data());
 }
 
-// Do a special version when ngb is a numpy array, where we can cast to int[k][n] ?
+// TODO: Do a special version when ngb is a numpy array, where we can cast to int[k][n] ?
+// py::isinstance<py::array_t<std::int32_t>> (ou py::isinstance<py::array> et tester dtype) et flags&c_style
+// ou overload (en virant forcecast?)
+// aussi le faire au cas où on n'aurait pas un tableau, mais où chaque liste de voisins serait un tableau ?
 auto plouf(py::handle ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density) {
   // used to be py::iterable ngb, but that's inconvenient if it doesn't come pre-sorted
   // use py::handle and check if [] (aka __getitem__) works? But then we need to build an object to pass it to []
@@ -306,9 +309,3 @@ PYBIND11_MODULE(_tomato, m) {
   // m.def("doit2", &plaf, "does the clustering faster");
   m.def("merge", &merge, "merge clusters");
 }
-
-// https://github.com/pybind/pybind11/issues/1042 pour convertir vector en numpy array
-//
-// py::isinstance<py::array_t<std::int32_t>> (ou py::isinstance<py::array> et tester dtype) et flags&c_style
-// ou overload (en virant forcecast?)
-// aussi le faire au cas où on n'aurait pas un tableau, mais où chaque liste de voisins serait un tableau ?
