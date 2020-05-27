@@ -494,7 +494,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Tomato
-    if(SCIPY_FOUND AND PYBIND11_FOUND)
+    if(SCIPY_FOUND AND SKLEARN_FOUND AND PYBIND11_FOUND)
       add_gudhi_py_test(test_tomato)
     endif()
 
