@@ -49,7 +49,8 @@ install:
   - pip --version
   - python -m pip install --upgrade pip
   - python -m pip install --user -r .github/build-requirements.txt
-  - python -m pip install --user -r .github/test-requirements.txt
+  # No PyKeOps on windows, let's workaround this one.
+  - for /F "tokens=*" %%A in (.github/test-requirements.txt) do python -m pip install --user  %%A
 
 build_script:
   - mkdir build
