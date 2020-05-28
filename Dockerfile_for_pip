@@ -1,0 +1,48 @@
+FROM quay.io/pypa/manylinux2014_x86_64
+
+RUN yum -y update && yum -y install \
+    wget \
+    zlib-devel \
+    eigen3-devel \
+    mpfr-devel \
+    gmp-devel \
+    tbb-devel \
+    && yum clean all
+
+RUN mkdir -p /opt/cmake \
+    && wget https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2-Linux-x86_64.sh \
+    && sh cmake-3.16.2-Linux-x86_64.sh  --skip-license --prefix=/opt/cmake \
+    && rm -f cmake-3.16.2-Linux-x86_64.sh
+
+RUN mkdir -p /opt/boost \
+    && wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz \
+    && tar xf boost_1_64_0.tar.gz \
+    && cd boost_1_64_0 \
+    && ./bootstrap.sh --prefix=/opt/boost --with-libraries=filesystem,program_options,system,thread,test \
+    && ./b2 install --prefix=/opt/boost \
+    && cd .. \
+    && rm -rf boost_1_64_0
+
+RUN wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.2/CGAL-5.0.2.tar.xz \
+    && tar xf CGAL-5.0.2.tar.xz \
+    && mkdir build \
+    && cd build \
+    && /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/opt/boost ../CGAL-5.0.2/ \
+    && make install \
+    && cd .. \
+    && rm -rf build CGAL-5.0.2
+
+ADD .github/build-requirements.txt /
+
+RUN /opt/python/cp35-cp35m/bin/pip install -r build-requirements.txt \
+    && /opt/python/cp36-cp36m/bin/pip install -r build-requirements.txt\
+    && /opt/python/cp37-cp37m/bin/pip install -r build-requirements.txt\
+    && /opt/python/cp38-cp38/bin/pip install -r build-requirements.txt\
+    && /opt/python/cp38-cp38/bin/pip install twine
+
+ENV PYTHON35="/opt/python/cp35-cp35m/"
+ENV PYTHON36="/opt/python/cp36-cp36m/"
+ENV PYTHON37="/opt/python/cp37-cp37m/"
+ENV PYTHON38="/opt/python/cp38-cp38/"
+
+ENV PATH="/opt/cmake/bin:${PATH}"
