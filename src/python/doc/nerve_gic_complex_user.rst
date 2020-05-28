@@ -99,9 +99,6 @@ the program output is:
       [-0.171433, 0.367393]
       [-0.909111, 0.745853]
     0 interval(s) in dimension 1:
-
-.. testoutput::
-
     Nerve is of dimension 1 - 41 simplices - 21 vertices.
     [0]
     [1]
