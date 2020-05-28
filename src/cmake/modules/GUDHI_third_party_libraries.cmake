@@ -199,7 +199,7 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(NOT SPHINX_PATH)
       if(PYTHON_VERSION_MAJOR EQUAL 3)
         # In Python3, just hack sphinx-build if it does not exist
-        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/doc/python3-sphinx-build.py")
+        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "-m sphinx.cmd.build")
       endif(PYTHON_VERSION_MAJOR EQUAL 3)
     endif(NOT SPHINX_PATH)
   endif(SPHINX_FOUND)
