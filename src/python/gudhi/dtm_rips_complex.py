@@ -28,7 +28,7 @@ class DTMRipsComplex(WeightedRipsComplex):
                  max_filtration=float('inf')):
         """
         Args:
-            points (Sequence[Sequence[float]]): list of points.
+            points (numpy.ndarray): array of points.
             distance_matrix (numpy.ndarray): full distance matrix.
             k (int): number of neighbors for the computation of DTM. Defaults to 1, which is equivalent to the usual Rips complex.
             q (float): order used to compute the distance to measure. Defaults to 2.
