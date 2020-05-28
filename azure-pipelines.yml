@@ -33,5 +33,5 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
         make -j 4
         make doxygen
-        ctest -j 4 --output-on-failure # -E sphinx remove sphinx build as it fails
+        ctest -j 4 --output-on-failure -E sphinx # remove sphinx build as it fails
       displayName: 'Build, test and documentation generation'
