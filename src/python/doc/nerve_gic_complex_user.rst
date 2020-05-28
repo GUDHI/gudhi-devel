@@ -50,7 +50,7 @@ The cover C comes from the preimages of intervals (10 intervals with gain 0.3)
 covering the height function (coordinate 2),
 which are then refined into their connected components using the triangulation of the .OFF file.
 
-.. testcode::
+.. code-block:: python
 
     import gudhi
     nerve_complex = gudhi.CoverComplex()
