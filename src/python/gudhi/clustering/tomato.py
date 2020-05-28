@@ -103,8 +103,11 @@ class Tomato:
     def fit(self, X, y=None, weights=None):
         """
         Args:
-            X ((n,d)-array of float|(n,n)-array of float|Sequence[Iterable[int]]): coordinates of the points, or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors for each point (points are represented by their index, starting from 0) if graph_type is "manual".
+            X ((n,d)-array of float|(n,n)-array of float|Sequence[Iterable[int]]): coordinates of the points,
+                or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors
+                for each point (points are represented by their index, starting from 0) if graph_type is "manual".
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
+            y: Not used, present here for API consistency with scikit-learn by convention.
         """
         # TODO: First detect if this is a new call with the same data (only threshold changed?)
         # TODO: less code duplication (subroutines?), less spaghetti, but don't compute neighbors twice if not needed. Clear error message for missing or contradictory parameters.
@@ -229,6 +232,7 @@ class Tomato:
                     self.neighbors_[j].add(i)
 
         self.weights_ = weights
+        # This is where the main computation happens
         self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = hierarchy(self.neighbors_, weights)
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
@@ -280,10 +284,6 @@ class Tomato:
             self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
         )
         plt.show()
-
-    #    def predict(self, X):
-    #        # X had better be the same as in fit()
-    #        return self.labels_
 
     # Use set_params instead?
     @property
