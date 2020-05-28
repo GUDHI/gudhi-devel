@@ -18,11 +18,13 @@ __author__ = "Theo Lacombe"
 __copyright__ = "Copyright (C) 2019 Inria"
 __license__ = "MIT"
 
+
 def test_proj_on_diag():
     dgm = np.array([[1., 1.], [1., 2.], [3., 5.]])
     assert np.array_equal(_proj_on_diag(dgm), [[1., 1.], [1.5, 1.5], [4., 4.]])
     empty = np.empty((0, 2))
     assert np.array_equal(_proj_on_diag(empty), empty)
+
 
 def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):
     diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974]])
@@ -77,6 +79,23 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         assert np.array_equal(match , [[0, -1], [1, -1]])
         match = wasserstein_distance(diag1, diag2, matching=True, internal_p=2., order=2.)[1]
         assert np.array_equal(match, [[0, 0], [1, 1], [2, -1]])
+
+    if test_entropy:
+        assert wasserstein_distance(diag1, diag2, internal_p=2., order=2., reg=1) == approx(1.2251725975696444)
+        with pytest.raises(FloatingPointError):
+            wasserstein_distance(diag1, diag2, internal_p=2., order=2., reg=1E-20)
+        res1 = wasserstein_distance(diag1, diag3, internal_p=2., order=2.)
+        res2 = wasserstein_distance(diag1, diag3, internal_p=2., order=2., reg=0)
+        assert res1 == res2  # these two should be very much the same.
+        with pytest.raises(ValueError):
+            wasserstein_distance(diag1, diag2, reg=-1)
+
+        cost_res, P_res = 3.4637979748620684, np.array([[0.46505399, 0.0042368 , 0.53070921],
+                                                        [0.03878662, 0.47330083, 0.48791255],
+                                                        [0.49615939, 0.52246237, 0.98137825]])
+        cost, P = wasserstein_distance(diag3, diag4, internal_p=2., order=2., reg = 10, matching=True)
+        assert cost == approx(cost_res)
+        assert np.linalg.norm(P - P_res) < 1E-5
 
 
 

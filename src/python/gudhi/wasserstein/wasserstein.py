@@ -88,7 +88,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
         return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
 
 
-def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_autodiff=False):
+def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., reg=0., enable_autodiff=False):
     '''
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points
                 (i.e. with infinite coordinate).
@@ -99,6 +99,10 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_a
     :param order: exponent for Wasserstein; Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is 2 (Euclidean norm).
+    :param reg: entropic regularization paramter. If 0. (default), exact distance is computed. Beware that low
+                values of ``reg`` might lead to numerical instability.
+                Note that using ``reg>0`` is incompatible with ``enable_autodiff=True`` for now.
+                Using ``reg>0`` with ``matching=True`` returns a transport plan, that is a (n+1)x(m+1) matrix.
     :param enable_autodiff: If X and Y are torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
         transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
         with `matching=True`.
@@ -139,24 +143,20 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_a
         Y_orig = ep.astensor(Y)
         X = X_orig.numpy()
         Y = Y_orig.numpy()
+
+
     M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
     a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
     a[-1] = m
     b = np.ones(m+1) # weight vector of the input diagram. Uniform here.
     b[-1] = n
 
-    if matching:
-        assert not enable_autodiff, "matching and enable_autodiff are currently incompatible"
-        P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
-        ot_cost = np.sum(np.multiply(P,M))
-        P[-1, -1] = 0  # Remove matching corresponding to the diagonal
-        match = np.argwhere(P)
-        # Now we turn to -1 points encoding the diagonal
-        match[:,0][match[:,0] >= n] = -1
-        match[:,1][match[:,1] >= m] = -1
-        return ot_cost ** (1./order) , match
 
     if enable_autodiff:
+        assert not matching, "matching and enable_autodiff are currently incompatible"
+        assert reg==0., "enable_autodiff and entropic regularization are currently incompatible"
+        # Could probably make them compatible by hardcoding the transport cost sum P_ij C_ij
+        # as a function of X, Y.
         P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
         pairs_X_Y = np.argwhere(P[:-1, :-1])
         pairs_X_diag = np.nonzero(P[:-1, -1])
@@ -173,9 +173,40 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_a
         return ep.concatenate(dists).norms.lp(order).raw
         # We can also concatenate the 3 vectors to compute just one norm.
 
-    # Comptuation of the otcost using the ot.emd2 library.
+    # Comptuation of the otcost using the ot.emd2 library, and matching/transport plan using ot.emd.
     # Note: it is the Wasserstein distance to the power q.
     # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value?
-    ot_cost = ot.emd2(a, b, M, numItermax=2000000)
+    if reg == 0.:
+        if matching:
+            P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
+            ot_cost = np.sum(np.multiply(P,M))
+            P[-1, -1] = 0  # Remove matching corresponding to the diagonal
+            match = np.argwhere(P)
+            # Now we turn to -1 points encoding the diagonal
+            match[:,0][match[:,0] >= n] = -1
+            match[:,1][match[:,1] >= m] = -1
+            return ot_cost ** (1./order) , match
+        else:
+            ot_cost = ot.emd2(a, b, M, numItermax=2000000)
+
+    elif reg > 0:
+        np.seterr(divide='raise')  # For a better handling of numerical issues due to reg being too low
+        try:
+            if matching:
+                P = ot.sinkhorn(a=a, b=b, M=M, reg=reg)
+                ot_cost = np.sum(np.multiply(P, M))
+                return ot_cost ** (1./order), P
+            else:
+                ot_cost = ot.sinkhorn2(a, b, M, reg=reg)[0]
+                return ot_cost ** (1. / order)
+        except FloatingPointError:
+            raise FloatingPointError('Error when computing regularized wasserstein distance (Sinkhorn loop).' \
+                                     'This is probably due to reg being too low. Try' \
+                                     'to increase reg or set it to 0 for exact computation')
+    else:
+        raise ValueError('Negative value for reg')
+        # It seems ot.sinkhorn2 returns something when reg<0, which is reasonnable but probably unexpected
+        # by the user. We prevent this for now.
+
 
     return ot_cost ** (1./order)
