@@ -59,6 +59,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
@@ -237,6 +238,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     add_custom_command(
         OUTPUT gudhi.so
@@ -500,8 +502,14 @@ if(PYTHONINTERP_FOUND)
 
     # Weighted Rips
     if(SCIPY_FOUND)
-      add_gudhi_py_test(test_weighted_rips)
+      add_gudhi_py_test(test_weighted_rips_complex)
     endif()
+
+    # DTM Rips
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_dtm_rips_complex)
+    endif()
+
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
