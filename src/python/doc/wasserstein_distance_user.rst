@@ -148,7 +148,7 @@ Note however that taking too low values for ``reg`` can run into numerical issue
    Mass located in the first point of dgm1 transported to the first point of dgm2:
    0.995
    Mass located in the first point of dgm1 transported to the diagonal:
-   0.004
+   0.005
 
 
 Barycenters

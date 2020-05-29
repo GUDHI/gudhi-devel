@@ -26,7 +26,7 @@ def test_proj_on_diag():
     assert np.array_equal(_proj_on_diag(empty), empty)
 
 
-def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):
+def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True, test_entropy=True):
     diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974]])
     diag2 = np.array([[2.8, 4.45], [9.5, 14.1]])
     diag3 = np.array([[0, 2], [4, 6]])
@@ -110,7 +110,7 @@ def pot_wrap(**extra):
     return fun
 
 def test_wasserstein_distance_pot():
-    _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True)
+    _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True, test_entropy=True)
     _basic_wasserstein(pot_wrap(enable_autodiff=True), 1e-15, test_infinity=False, test_matching=False)
 
 def test_wasserstein_distance_hera():
