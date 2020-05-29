@@ -92,7 +92,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity, test_matching
 
         cost_res, P_res = 3.4637979754199804, np.array([[0.46505399, 0.0042368 , 0.53070921],
                                                         [0.03878662, 0.47330083, 0.48791255],
-                                                        [0.49615939, 0.52246237, 0.98137825]])
+                                                        [0.49615939, 0.52246237, 0.98137824]])
         cost, P = wasserstein_distance(diag3, diag4, internal_p=2., order=2., reg = 10, matching=True)
         assert cost == approx(cost_res)
         assert np.linalg.norm(P - P_res) < 1E-5
