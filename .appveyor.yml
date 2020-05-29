@@ -48,8 +48,9 @@ install:
   - python --version
   - pip --version
   - python -m pip install --upgrade pip
-  - pip install -U setuptools numpy matplotlib scipy Cython pytest
-  - pip install -U POT pybind11
+  - python -m pip install --user -r .github/build-requirements.txt
+  # No PyKeOps on windows, let's workaround this one.
+  - for /F "tokens=*" %%A in (.github/test-requirements.txt) do python -m pip install --user  %%A
 
 build_script:
   - mkdir build
