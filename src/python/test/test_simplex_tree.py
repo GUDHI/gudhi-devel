@@ -10,6 +10,7 @@
 
 from gudhi import SimplexTree
 import pytest
+import numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -340,3 +341,9 @@ def test_simplices_iterator():
         assert st.find(simplex[0]) == True
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
+
+def test_insert_array():
+    st = SimplexTree()
+    a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
+    st.insert_array(a, max_filtration=5)
+    assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
