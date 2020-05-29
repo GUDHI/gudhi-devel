@@ -26,7 +26,7 @@ def test_proj_on_diag():
     assert np.array_equal(_proj_on_diag(empty), empty)
 
 
-def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True, test_entropy=True):
+def _basic_wasserstein(wasserstein_distance, delta, test_infinity, test_matching, test_entropy):
     diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974]])
     diag2 = np.array([[2.8, 4.45], [9.5, 14.1]])
     diag3 = np.array([[0, 2], [4, 6]])
@@ -81,7 +81,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         assert np.array_equal(match, [[0, 0], [1, 1], [2, -1]])
 
     if test_entropy:
-        assert wasserstein_distance(diag1, diag2, internal_p=2., order=2., reg=1) == approx(1.2251725975696444)
+        assert wasserstein_distance(diag1, diag2, internal_p=2., order=2., reg=1) == approx(1.2251655537043005)
         with pytest.raises(FloatingPointError):
             wasserstein_distance(diag1, diag2, internal_p=2., order=2., reg=1E-20)
         res1 = wasserstein_distance(diag1, diag3, internal_p=2., order=2.)
@@ -90,7 +90,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
         with pytest.raises(ValueError):
             wasserstein_distance(diag1, diag2, reg=-1)
 
-        cost_res, P_res = 3.4637979748620684, np.array([[0.46505399, 0.0042368 , 0.53070921],
+        cost_res, P_res = 3.4637979754199804, np.array([[0.46505399, 0.0042368 , 0.53070921],
                                                         [0.03878662, 0.47330083, 0.48791255],
                                                         [0.49615939, 0.52246237, 0.98137825]])
         cost, P = wasserstein_distance(diag3, diag4, internal_p=2., order=2., reg = 10, matching=True)
@@ -111,11 +111,12 @@ def pot_wrap(**extra):
 
 def test_wasserstein_distance_pot():
     _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True, test_entropy=True)
-    _basic_wasserstein(pot_wrap(enable_autodiff=True), 1e-15, test_infinity=False, test_matching=False)
+    _basic_wasserstein(pot_wrap(enable_autodiff=True), 1e-15, test_infinity=False, test_matching=False,
+                       test_entropy=False)
 
 def test_wasserstein_distance_hera():
-    _basic_wasserstein(hera_wrap(delta=1e-12), 1e-12, test_matching=False)
-    _basic_wasserstein(hera_wrap(delta=.1), .1, test_matching=False)
+    _basic_wasserstein(hera_wrap(delta=1e-12), 1e-12, test_infinity=True, test_matching=False, test_entropy=False)
+    _basic_wasserstein(hera_wrap(delta=.1), .1, test_infinity=True, test_matching=False, test_entropy=False)
 
 def test_wasserstein_distance_grad():
     import torch
