@@ -6,7 +6,6 @@ RUN yum -y update && yum -y install \
     eigen3-devel \
     mpfr-devel \
     gmp-devel \
-    tbb-devel \
     && yum clean all
 
 RUN mkdir -p /opt/cmake \
@@ -14,12 +13,11 @@ RUN mkdir -p /opt/cmake \
     && sh cmake-3.16.2-Linux-x86_64.sh  --skip-license --prefix=/opt/cmake \
     && rm -f cmake-3.16.2-Linux-x86_64.sh
 
-RUN mkdir -p /opt/boost \
-    && wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz \
+RUN wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz \
     && tar xf boost_1_64_0.tar.gz \
     && cd boost_1_64_0 \
-    && ./bootstrap.sh --prefix=/opt/boost --with-libraries=filesystem,program_options,system,thread,test \
-    && ./b2 install --prefix=/opt/boost \
+    && ./bootstrap.sh --with-libraries=filesystem,program_options,system,thread,test \
+    && ./b2 install \
     && cd .. \
     && rm -rf boost_1_64_0
 
@@ -27,7 +25,7 @@ RUN wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.2/CG
     && tar xf CGAL-5.0.2.tar.xz \
     && mkdir build \
     && cd build \
-    && /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/opt/boost ../CGAL-5.0.2/ \
+    && /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../CGAL-5.0.2/ \
     && make install \
     && cd .. \
     && rm -rf build CGAL-5.0.2

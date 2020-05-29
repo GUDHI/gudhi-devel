@@ -1,0 +1,43 @@
+name: pip packaging osx
+
+on:
+  push: {}
+  pull_request: {}
+# on:
+#   release:
+#     types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.5', '3.6', '3.7', '3.8']
+    name: Build wheels for Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Install dependencies
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+        run: |
+          vcpkg install tbb:x64-windows boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
+          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user twine
+      - name: Build python wheel
+        run: |
+          python --version
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cd src/python
+          python setup.py bdist_wheel
+      - name: Publish on PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: twine upload dist/*
