@@ -107,7 +107,7 @@ Entropic regularization
 When using the Optimal Transport based version of wasserstein distances, 
 we also allow for the use of entropic regularization of optimal transport distance via the parameter ``reg``.
 If ``reg > 0``, we solve 
-:math:`\argmin_P \sum P_{ij} M_{ij} + reg * h(P)`
+:math:`\min_P \sum P_{ij} M_{ij} + reg * h(P)`
 under marginal constraints on :math:`P` , which can be understood as a generalized matching between the diagrams.
 :math:`P_{ij}` denotes the quantity of mass from the :math:`i`-th points in the first diagram that is
 transported to the :math:`j`-th point in the second diagram. Last row and column of :math:`P` denotes the diagonal
@@ -115,7 +115,7 @@ by convention.
 Here :math:`M` is a matrix encoding the pairwises distances between the points of the two diagrams along with
 distances from points to the diagonal, and :math:`h(P) = \sum P_{ij} \log(P_{ij})` is the entropic regularization term.
 
-If ``matching=True``, we return both the estimated transport cost :math:`sum P_{ij} C_{ij}` and the computed :math:`P`, 
+If ``matching=True``, we return both the estimated transport cost :math:`\sum P_{ij} C_{ij}` and the computed :math:`P`, 
 otherwise we simply return the estimated transport cost.
 
 The closer ``reg`` is to 0, the closer the transport cost will be from the exact distance between the diagrams.
@@ -139,7 +139,7 @@ Note however that taking too low values for ``reg`` can run into numerical issue
     print("Mass located in the first point of dgm1 transported to the first point of dgm2:")
     print("%.3f" %P[0,0]) 
     print("Mass located in the first point of dgm1 transported to the diagonal:")
-    print("%.3f" %P[0,1]) 
+    print("%.3f" %P[0,-1]) 
 
 
 .. testoutput::

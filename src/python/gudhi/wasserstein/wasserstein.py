@@ -99,13 +99,13 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., reg=0., 
     :param order: exponent for Wasserstein; Default value is 2.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is 2 (Euclidean norm).
-    :param reg: entropic regularization paramter. If 0. (default), exact distance is computed. Beware that low
-                values of ``reg`` might lead to numerical instability.
-                Note that using ``reg>0`` is incompatible with ``enable_autodiff=True`` for now.
-                Using ``reg>0`` with ``matching=True`` returns a transport plan, that is a (n+1)x(m+1) matrix.
+    :param reg: entropic regularization parameter. If 0. (default), exact distance is computed. Beware that low
+                values of `reg` might lead to numerical instability.
+                Note that using `reg>0` is incompatible with `enable_autodiff=True` for now.
+                Using `reg>0` with `matching=True` returns a transport plan, that is a (n+1)x(m+1) matrix.
     :param enable_autodiff: If X and Y are torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
         transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
-        with `matching=True`.
+        with `matching=True` or `reg > 0`.
 
         .. note:: This considers the function defined on the coordinates of the off-diagonal points of X and Y
             and lets the various frameworks compute its gradient. It never pulls new points from the diagonal.
