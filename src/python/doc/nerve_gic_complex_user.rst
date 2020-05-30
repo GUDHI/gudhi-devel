@@ -50,7 +50,7 @@ The cover C comes from the preimages of intervals (10 intervals with gain 0.3)
 covering the height function (coordinate 2),
 which are then refined into their connected components using the triangulation of the .OFF file.
 
-.. testcode::
+.. code-block:: python
 
     import gudhi
     nerve_complex = gudhi.CoverComplex()
@@ -99,9 +99,6 @@ the program output is:
       [-0.171433, 0.367393]
       [-0.909111, 0.745853]
     0 interval(s) in dimension 1:
-
-.. testoutput::
-
     Nerve is of dimension 1 - 41 simplices - 21 vertices.
     [0]
     [1]
