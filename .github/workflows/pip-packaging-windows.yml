@@ -1,4 +1,4 @@
-name: pip packaging osx
+name: pip packaging windows
 
 on:
   push: {}
