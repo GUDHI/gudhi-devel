@@ -33,7 +33,7 @@ jobs:
           python --version
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           python setup.py bdist_wheel
       - name: Publish on PyPi
