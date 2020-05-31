@@ -68,7 +68,17 @@ setup(
     author='GUDHI Editorial Board',
     author_email='gudhi-contact@lists.gforge.inria.fr',
     version='@GUDHI_VERSION@',
-    url='http://gudhi.gforge.inria.fr/',
+    url='https://gudhi.inria.fr/',
+    project_urls={
+        'Bug Tracker': 'https://github.com/GUDHI/gudhi-devel/issues',
+        'Documentation': 'https://gudhi.inria.fr/python/latest/',
+        'Source Code': 'https://github.com/GUDHI/gudhi-devel',
+        'License': 'https://gudhi.inria.fr/licensing/'
+        },
+    description='The Gudhi library is an open source library for Computational Topology and Topological Data ' \
+        'Analysis (TDA). It offers state-of-the-art algorithms to construct various types of simplicial complexes, ' \
+        'data structures to represent them, and algorithms to compute geometric approximations of shapes and ' \
+        'persistent homology.',
     ext_modules = ext_modules,
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9','pybind11',],

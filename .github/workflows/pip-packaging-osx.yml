@@ -36,11 +36,9 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           python setup.py bdist_wheel
-          pwd
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          pwd
           python -m twine upload --repository-url https://test.pypi.org/legacy/ build/src/python/dist/*
