@@ -13,6 +13,7 @@ from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import sys
 import pybind11
+from os import path
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
@@ -62,6 +63,11 @@ for module in pybind11_modules:
         runtime_library_dirs=runtime_library_dirs,
         ))
 
+# read the contents of introduction.md
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'introduction.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
@@ -75,10 +81,10 @@ setup(
         'Source Code': 'https://github.com/GUDHI/gudhi-devel',
         'License': 'https://gudhi.inria.fr/licensing/'
         },
-    description='The Gudhi library is an open source library for Computational Topology and Topological Data ' \
-        'Analysis (TDA). It offers state-of-the-art algorithms to construct various types of simplicial complexes, ' \
-        'data structures to represent them, and algorithms to compute geometric approximations of shapes and ' \
-        'persistent homology.',
+    description='The Gudhi library is an open source library for ' \
+        'Computational Topology and Topological Data Analysis (TDA).',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     ext_modules = ext_modules,
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9','pybind11',],

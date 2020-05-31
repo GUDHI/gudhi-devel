@@ -235,6 +235,9 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
+    # Other .py files
+    file(COPY "introduction.md" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+
     add_custom_command(
         OUTPUT gudhi.so
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
