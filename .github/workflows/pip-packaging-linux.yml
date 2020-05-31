@@ -53,7 +53,7 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          $PYTHON38/bin/python -m twine upload build_35/src/python/wheelhouse/*
-          $PYTHON38/bin/python -m twine upload build_36/src/python/wheelhouse/*
-          $PYTHON38/bin/python -m twine upload build_37/src/python/wheelhouse/*
-          $PYTHON38/bin/python -m twine upload build_38/src/python/wheelhouse/*
+          $PYTHON38/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ build_35/src/python/wheelhouse/*
+          $PYTHON38/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ build_36/src/python/wheelhouse/*
+          $PYTHON38/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ build_37/src/python/wheelhouse/*
+          $PYTHON38/bin/python -m twine upload --repository-url https://test.pypi.org/legacy/ build_38/src/python/wheelhouse/*
