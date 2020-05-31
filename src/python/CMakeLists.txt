@@ -236,7 +236,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
     # Other .py files
-    file(COPY "introduction.md" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+    file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
     add_custom_command(
         OUTPUT gudhi.so

@@ -65,7 +65,7 @@ for module in pybind11_modules:
 
 # read the contents of introduction.md
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'introduction.md'), encoding='utf-8') as f:
+with open(path.join(this_directory, 'introduction.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
