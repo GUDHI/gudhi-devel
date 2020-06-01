@@ -1,4 +1,4 @@
-.. figure::
+.. image::
     https://gudhi.inria.fr/images/gudhi_architecture.png
     :figclass: align-center
     :width: 100 %
