@@ -1,7 +1,4 @@
-.. image::
-    https://gudhi.inria.fr/images/gudhi_architecture.png
-    :width: 100 %
-    :alt: GUDHI
+.. image:: https://gudhi.inria.fr/images/gudhi_architecture.png
 
 Introduction
 ============
