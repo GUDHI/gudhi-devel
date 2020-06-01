@@ -13,7 +13,6 @@ from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import sys
 import pybind11
-from os import path
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016  Inria"
@@ -64,9 +63,8 @@ for module in pybind11_modules:
         ))
 
 # read the contents of introduction.rst
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'introduction.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+with open("introduction.rst", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name = 'gudhi',
