@@ -63,7 +63,7 @@ for module in pybind11_modules:
         runtime_library_dirs=runtime_library_dirs,
         ))
 
-# read the contents of introduction.md
+# read the contents of introduction.rst
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'introduction.rst'), encoding='utf-8') as f:
     long_description = f.read()
@@ -83,8 +83,8 @@ setup(
         },
     description='The Gudhi library is an open source library for ' \
         'Computational Topology and Topological Data Analysis (TDA).',
+    long_description_content_type='text/x-rst',
     long_description=long_description,
-    long_description_content_type='text/markdown',
     ext_modules = ext_modules,
     install_requires = ['cython','numpy >= 1.9',],
     setup_requires = ['numpy >= 1.9','pybind11',],
