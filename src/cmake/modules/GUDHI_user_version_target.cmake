@@ -68,7 +68,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
 
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include ${GUDHI_USER_VERSION_DIR}/ext/hera/wasserstein/include)
+                   copy_directory ${CMAKE_SOURCE_DIR}/ext/hera ${GUDHI_USER_VERSION_DIR}/ext/hera)
 
 set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
 
