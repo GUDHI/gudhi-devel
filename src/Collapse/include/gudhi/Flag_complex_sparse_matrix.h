@@ -13,6 +13,7 @@
 #define FLAG_COMPLEX_SPARSE_MATRIX_H_
 
 #include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/Debug_utils.h>
 
 #include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -264,29 +265,26 @@ class Flag_complex_sparse_matrix {
   }
 
   // Insert an edge in the data structure
+  // @exception std::invalid_argument In debug mode, if u == v
   void insert_new_edge(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u, filt_val);
-    if (u != v) {
-      insert_vertex(v, filt_val);
+    GUDHI_CHECK((u != v),
+            std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
+
+    insert_vertex(v, filt_val);
 #ifdef DEBUG_TRACES
-      std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
+    std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
 
-      auto rw_u = vertex_to_row_.find(u);
-      auto rw_v = vertex_to_row_.find(v);
+    auto rw_u = vertex_to_row_.find(u);
+    auto rw_v = vertex_to_row_.find(v);
 #ifdef DEBUG_TRACES
-      std::cout << "Inserting the edge " << u <<", " << v << std::endl;
+    std::cout << "Inserting the edge " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
-      sparse_row_adjacency_matrix_.insert(rw_u->second, rw_v->second) = filt_val;
-      sparse_row_adjacency_matrix_.insert(rw_v->second, rw_u->second) = filt_val;
-    }
-#ifdef DEBUG_TRACES
-    else {
-     	std::cout << "Already a member simplex,  skipping..." << std::endl;
-    }
-#endif  // DEBUG_TRACES
+    sparse_row_adjacency_matrix_.insert(rw_u->second, rw_v->second) = filt_val;
+    sparse_row_adjacency_matrix_.insert(rw_v->second, rw_u->second) = filt_val;
   }
 
  public:
