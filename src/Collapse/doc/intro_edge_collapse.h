@@ -21,6 +21,10 @@ namespace collapse {
  * 
  * @{
  * 
+ * This module implements edge collapse of a filtered flag complex, in particular it reduces a filtration of
+ * Vietoris-Rips complex from its graph to another smaller flag filtration with same persistence.
+ * Where a filtration is a sequence of simplicial (here Rips) complexes connected with inclusions.
+ * 
  * \section edge_collapse_definition Edge collapse definition
  * 
  * An edge \f$e\f$ in a simplicial complex \f$K\f$ is called a <b>dominated edge</b> if the link of \f$e\f$ in
@@ -48,15 +52,11 @@ namespace collapse {
  * -- For a flag complex: An edge \f$e \in K\f$ is dominated by another vertex \f$v^{\prime} \in K\f$, <i>if and only
  * if</i> all the vertices in \f$K\f$ that has an edge with both vertices of \f$e\f$  also has an edge with
  * \f$v^{\prime}\f$.
-
- * This module implements edge collapse of a filtered flag complex, in particular  it reduces a filtration of
- * Vietoris-Rips complex from its graph 
- * to another smaller flag filtration with same persistence. Where a filtration is a sequence of simplicial
- * (here Rips) complexes connected with inclusions. The algorithm to compute the smaller induced filtration is
- * described in Section 5 \cite edgecollapsesocg2020.
+ * 
+ * The algorithm to compute the smaller induced filtration is described in Section 5 \cite edgecollapsesocg2020.
  * Edge collapse can be successfully employed to reduce any given filtration of flag complexes to a smaller induced
- * filtration which preserves the persistent homology of the original filtration and is a flag complex as well. 
-
+ * filtration which preserves the persistent homology of the original filtration and is a flag complex as well.
+ * 
  * The general idea is that we consider edges in the filtered graph and sort them according to their filtration value
  * giving them a total order.
  * Each edge gets a unique index denoted as \f$i\f$ in this order.  To reduce the filtration, we move forward with
