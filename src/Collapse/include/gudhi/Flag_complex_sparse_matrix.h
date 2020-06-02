@@ -341,11 +341,6 @@ class Flag_complex_sparse_matrix {
   template<typename FilteredEdgeOutput>
   void filtered_edge_collapse(FilteredEdgeOutput filtered_edge_output) {
     Row_index endIdx = 0;
-
-    u_set_removed_edges_.clear();
-    u_set_dominated_edges_.clear();
-    critical_edge_indicator_.clear();
-
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
