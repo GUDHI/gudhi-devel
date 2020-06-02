@@ -217,32 +217,7 @@
  </tr>
 </table>
 
-### Witness complex
-
-<table>
-  <tr>
-    <td width="35%" rowspan=2>
-      \image html "Witness_complex_representation.png"
-    </td>
-    <td width="50%">
-    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
-    The data structure is described in \cite boissonnatmariasimplextreealgorithmica .
-    </td>
-    <td width="15%">
-      <b>Author:</b> Siargey Kachanovich<br>
-      <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
-      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
-    </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref witness_complex
-    </td>
- </tr>
-</table>
-
-#### Edge collapse
+### Edge collapse
 
 <table>
   <tr>
@@ -268,6 +243,31 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref edge_collapse
+    </td>
+ </tr>
+</table>
+
+### Witness complex
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "Witness_complex_representation.png"
+    </td>
+    <td width="50%">
+    Witness complex \f$ Wit(W,L) \f$  is a simplicial complex defined on two sets of points in \f$\mathbb{R}^D\f$.
+    The data structure is described in \cite boissonnatmariasimplextreealgorithmica .
+    </td>
+    <td width="15%">
+      <b>Author:</b> Siargey Kachanovich<br>
+      <b>Introduced in:</b> GUDHI 1.3.0<br>
+      <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
+      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref witness_complex
     </td>
  </tr>
 </table>
