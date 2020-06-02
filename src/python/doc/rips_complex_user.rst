@@ -378,7 +378,7 @@ Example from a point cloud combined with DistanceToMeasure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Combining with DistanceToMeasure, one can compute the DTM-filtration of a point set, as in `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_. 
-Remark that `DTMRipsComplex <rips_complex_user.html#dtm-rips-complex>`_ class provides exactly this function.
+Remark that `DTM Rips Complex (user manual) <rips_complex_user.html#dtm-rips-complex>`_ class provides exactly this function.
 
 .. testcode::
 
@@ -400,12 +400,10 @@ The output is:
 
     [(0, (3.1622776601683795, inf)), (0, (3.1622776601683795, 5.39834563766817)), (0, (3.1622776601683795, 5.39834563766817))]
 
-.. _dtm-rips-complex:
-
 DTM Rips Complex
 ----------------
 
-`DTMRipsComplex <rips_complex_ref.html#dtm-rips-complex-reference-manual>`_ builds a simplicial complex from a point set or a full distance matrix (in the form of ndarray), as described in the above example.
+`DTMRipsComplex (reference manual) <rips_complex_ref.html#dtm-rips-complex-reference-manual>`_ builds a simplicial complex from a point set or a full distance matrix (in the form of ndarray), as described in the above example.
 This class constructs a weighted Rips complex giving larger weights to outliers, which reduces their impact on the persistence diagram. See `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_ for some experiments.
 
 .. testcode::
