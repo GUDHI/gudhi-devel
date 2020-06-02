@@ -75,7 +75,7 @@ def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein",
         numpy array of shape (nxm): kernel matrix.
     """    
     XX = np.reshape(np.arange(len(X)), [-1,1])
-    YY = None if Y is None else np.reshape(np.arange(len(Y)), [-1,1])
+    YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1,1])
     if kernel == "sliced_wasserstein":
         return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="sliced_wasserstein", num_directions=kwargs["num_directions"], n_jobs=n_jobs) / kwargs["bandwidth"])
     elif kernel == "persistence_fisher":

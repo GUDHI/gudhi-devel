@@ -164,7 +164,7 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
         numpy array of shape (nxm): distance matrix
     """
     XX = np.reshape(np.arange(len(X)), [-1,1])
-    YY = None if Y is None else np.reshape(np.arange(len(Y)), [-1,1]) 
+    YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1,1])
     if metric == "bottleneck":
         try: 
             from .. import bottleneck_distance
