@@ -9,7 +9,7 @@ Definition
 
 .. include:: alpha_complex_sum.inc
 
-`AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
+:doc:`AlphaComplex <alpha_complex_ref>` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
@@ -18,6 +18,8 @@ Remarks
 ^^^^^^^
 When an :math:`\alpha`-complex is constructed with an infinite value of :math:`\alpha^2`,
 the complex is a Delaunay complex (with special filtration values).
+
+For performances reasons, it is advised to use CGAL :math:`\geq` 5.0.0.
 
 Example from points
 -------------------
