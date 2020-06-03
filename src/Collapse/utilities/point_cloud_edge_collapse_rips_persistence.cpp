@@ -33,7 +33,6 @@ using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
-using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
                      Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
@@ -53,8 +52,6 @@ int main(int argc, char* argv[]) {
             << std::endl;
   std::cout << min_persistence << ", " << threshold << ", " << dim_max
             << ", " << off_file_points << ", " << filediag << std::endl;
-
-  Distance_matrix sparse_distances;
 
   Gudhi::Points_off_reader<Point> off_reader(off_file_points);
   if (!off_reader.is_valid()) {
