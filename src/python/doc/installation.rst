@@ -260,6 +260,13 @@ a flag `enable_autodiff=True` is used). In order to reduce code duplication, we
 use `EagerPy <https://eagerpy.jonasrauber.de/>`_ which wraps arrays from
 PyTorch, TensorFlow and JAX in a common interface.
 
+Joblib
+------
+
+`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of `Scikit-learn`_,
+and directly for parallelism in some modules (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
+:func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
+
 Hnswlib
 -------
 
