@@ -196,8 +196,8 @@ class Flag_complex_sparse_matrix {
               critical_edge_indicator_[idx] = true;
               filtered_edge_output({u, v}, filt);
               std::set<Row_index> inner_effected_indcs = three_clique_indices(idx);
-              for (auto inr_idx = inner_effected_indcs.rbegin(); inr_idx != inner_effected_indcs.rend(); inr_idx++) {
-                if (*inr_idx < idx) effected_indices.emplace(*inr_idx);
+              for (auto inr_idx : inner_effected_indcs) {
+                effected_indices.emplace(inr_idx);
               }
 #ifdef DEBUG_TRACES
               std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
