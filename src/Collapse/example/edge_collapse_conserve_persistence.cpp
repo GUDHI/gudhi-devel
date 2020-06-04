@@ -147,10 +147,6 @@ int main(int argc, char* argv[]) {
                 << " - With collapse: "
                 << std::get<0>(ppfc) << " " << std::get<1>(ppfc) << " " << std::get<2>(ppfc) << std::endl;
     }
-      std::clog << " ** Without collapse: "
-                << std::get<0>(*ppwoc_ptr) << " " << std::get<1>(*ppwoc_ptr) << " " << std::get<2>(*ppwoc_ptr)
-                << " - With collapse: "
-                << std::get<0>(ppfc) << " " << std::get<1>(ppfc) << " " << std::get<2>(ppfc) << std::endl;
     ppwoc_ptr++;
   }
   return return_value;
