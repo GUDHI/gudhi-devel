@@ -339,7 +339,6 @@ class Flag_complex_sparse_matrix {
    */
   template<typename FilteredEdgeOutput>
   void filtered_edge_collapse(FilteredEdgeOutput filtered_edge_output) {
-    Row_index endIdx = 0;
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
@@ -352,7 +351,7 @@ class Flag_complex_sparse_matrix {
     std::sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #endif
 
-    while (endIdx < f_edge_vector_.size()) {
+    for (Row_index endIdx = 0; endIdx < f_edge_vector_.size(); endIdx++) {
       Filtered_edge fec = f_edge_vector_[endIdx];
       Edge edge = std::get<0>(fec);
       Vertex_handle u = std::get<0>(edge);
@@ -371,7 +370,6 @@ class Flag_complex_sparse_matrix {
         if (endIdx > 1)
           set_edge_critical(endIdx, filt, filtered_edge_output);
       }
-      endIdx++;
     }
   }
 
