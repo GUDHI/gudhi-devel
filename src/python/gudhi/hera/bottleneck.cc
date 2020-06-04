@@ -8,6 +8,14 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+// https://github.com/grey-narn/hera/issues/3
+// ssize_t is a non-standard type (well, posix)
+// BaseTsd.h provides SSIZE_T on windows, this one should be the same there.
+#ifdef _MSC_VER
+#include <cstddef>
+typedef std::ptrdiff_t ssize_t;
+#endif
+
 #include <bottleneck.h> // Hera
 
 #include <pybind11_diagram_utils.h>
