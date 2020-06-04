@@ -109,28 +109,31 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
+  int ambient_dim = point_vector[0].size();
+
   // ***** Simplex tree from a flag complex built after collapse *****
   Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
 
   Simplex_tree stree_from_collapse;
+  for (Vertex_handle vertex = 0; vertex < point_vector.size(); vertex++) {
+        // insert the vertex with a 0. filtration value just like a Rips
+        stree_from_collapse.insert_simplex({vertex}, 0.);
+  }
   mat_filt_edge_coll.filtered_edge_collapse(
     [&stree_from_collapse](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
-        // insert the 2 vertices with a 0. filtration value just like a Rips
-        stree_from_collapse.insert_simplex({edge[0]}, 0.);
-        stree_from_collapse.insert_simplex({edge[1]}, 0.);
         // insert the edge
         stree_from_collapse.insert_simplex(edge, filtration);
       });
+
+  std::vector<Persistence_pair> ppairs_from_collapse = get_persistence_pairs(stree_from_collapse, ambient_dim);
 
   // ***** Simplex tree from the complete flag complex *****
   Simplex_tree stree_wo_collapse;
   stree_wo_collapse.insert_graph(proximity_graph);
 
-  int ambient_dim = point_vector[0].size();
-
-  std::vector<Persistence_pair> ppairs_from_collapse = get_persistence_pairs(stree_from_collapse, ambient_dim);
   std::vector<Persistence_pair> ppairs_wo_collapse = get_persistence_pairs(stree_wo_collapse, ambient_dim);
 
+  // ***** Comparison *****
   if (ppairs_wo_collapse.size() != ppairs_from_collapse.size()) {
     std::cerr << "Number of persistence pairs with    collapse is " << ppairs_from_collapse.size() << std::endl;
     std::cerr << "Number of persistence pairs without collapse is " << ppairs_wo_collapse.size()   << std::endl;

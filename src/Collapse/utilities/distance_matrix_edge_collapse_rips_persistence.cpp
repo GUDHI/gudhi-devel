@@ -93,6 +93,10 @@ int main(int argc, char* argv[]) {
   Flag_complex_sparse_matrix flag_complex(proximity_graph);
 
   Simplex_tree stree;
+  for (Vertex_handle vertex = 0; vertex < distances.size(); vertex++) {
+    // insert the vertex with a 0. filtration value just like a Rips
+    stree.insert_simplex({vertex}, 0.);
+  }
   flag_complex.filtered_edge_collapse(
     [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips

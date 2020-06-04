@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Successfully read " << point_vector.size() << " point_vector.\n";
   std::cout << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
-  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(),
+  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplex_tree>(point_vector,
                                                                                  threshold,
                                                                                  Gudhi::Euclidean_distance());
 
@@ -80,6 +80,10 @@ int main(int argc, char* argv[]) {
   Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
 
   Simplex_tree stree;
+  for (Vertex_handle vertex = 0; vertex < point_vector.size(); vertex++) {
+    // insert the vertex with a 0. filtration value just like a Rips
+    stree.insert_simplex({vertex}, 0.);
+  }
   mat_filt_edge_coll.filtered_edge_collapse(
     [&stree](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips

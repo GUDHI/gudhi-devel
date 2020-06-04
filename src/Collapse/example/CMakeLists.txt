@@ -17,7 +17,7 @@ if (TBB_FOUND)
 endif()
 
 add_test(NAME Edge_collapse_conserve_persistence_1 COMMAND $<TARGET_FILE:Edge_collapse_conserve_persistence>
-         "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "1.")
+         "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "0.2")
 
-         add_test(NAME Edge_collapse_conserve_persistence_2 COMMAND $<TARGET_FILE:Edge_collapse_conserve_persistence>
-         "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "2.")
+add_test(NAME Edge_collapse_conserve_persistence_2 COMMAND $<TARGET_FILE:Edge_collapse_conserve_persistence>
+         "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "1.8")
