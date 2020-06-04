@@ -86,6 +86,9 @@ class Flag_complex_sparse_matrix {
   // Unordered set of removed edges. (to enforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_removed_edges_;
 
+  // Unordered set of dominated edges. (to inforce removal from the matrix)
+  std::unordered_set<Edge, boost::hash<Edge>> u_set_dominated_edges_;
+
   // Map from edge to its index
   std::unordered_map<Edge, Row_index, boost::hash<Edge>> edge_to_index_map_;
 
@@ -200,11 +203,17 @@ class Flag_complex_sparse_matrix {
               std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
                         << filt << std::endl;
 #endif  // DEBUG_TRACES
+            } else {
+              u_set_dominated_edges_.emplace(std::minmax(vertex_to_row_[u], vertex_to_row_[v]));
             }
+          } else {
+            // Idx is not affected hence dominated.
+            u_set_dominated_edges_.emplace(std::minmax(vertex_to_row_[u], vertex_to_row_[v]));
           }
         }
       }
     }
+    u_set_dominated_edges_.clear();
   }
 
   // Returns list of non-zero columns of a particular indx.
@@ -217,17 +226,9 @@ class Flag_complex_sparse_matrix {
     // Iterate over the non-zero columns
     for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
       Row_index rw_v = it.index();
-
-      bool dominated_edge_not_found = false;
-      try {
-        edge_to_index_map_.at(std::minmax(row_to_vertex_[rw_u], row_to_vertex_[rw_v]));
-      } catch (const std::out_of_range& oor) {
-        dominated_edge_not_found = true;
-      }
-
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
       if (u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() &&
-          dominated_edge_not_found) {
+          u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
         // inner index, here it is equal to it.columns()
         non_zero_indices.push_back(rw_v);
 #ifdef DEBUG_TRACES
