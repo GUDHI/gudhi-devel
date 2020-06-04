@@ -12,6 +12,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
 from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
 from .preprocessing import Padding
+from joblib import Parallel, delayed
 
 #############################################
 # Metrics ###################################
@@ -116,6 +117,20 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
             vectorj = vectorj/vectorj_sum
         return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
 
+def _pairwise(fallback, skipdiag, X, Y, metric, n_jobs):
+    if Y is not None:
+        return fallback(X, Y, metric=metric, n_jobs=n_jobs)
+    triu = np.triu_indices(len(X), k=skipdiag)
+    tril = (triu[1], triu[0])
+    par = Parallel(n_jobs=n_jobs, prefer="threads")
+    d = par(delayed(metric)([triu[0][i]], [triu[1][i]]) for i in range(len(triu[0])))
+    m = np.empty((len(X), len(X)))
+    m[triu] = d
+    m[tril] = d
+    if skipdiag:
+        np.fill_diagonal(m, 0)
+    return m
+
 def _sklearn_wrapper(metric, X, Y, **kwargs):
     """
     This function is a wrapper for any metric between two persistence diagrams that takes two numpy arrays of shapes (nx2) and (mx2) as arguments.
@@ -134,7 +149,7 @@ PAIRWISE_DISTANCE_FUNCTIONS = {
     "persistence_fisher": _persistence_fisher_distance,
 }
 
-def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", **kwargs):
+def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_jobs=None, **kwargs):
     """
     This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
 
@@ -142,48 +157,51 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", **kwa
         X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams. 
         Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
         metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays. 
+        n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so metrics that do not release the GIL may not scale unless run inside a `joblib.parallel_backend <https://joblib.readthedocs.io/en/latest/parallel.html#joblib.parallel_backend>`_ block.
         **kwargs: optional keyword parameters. Any further parameters are passed directly to the distance function. See the docs of the various distance classes in this module.
 
     Returns: 
         numpy array of shape (nxm): distance matrix
     """
     XX = np.reshape(np.arange(len(X)), [-1,1])
-    YY = None if Y is None else np.reshape(np.arange(len(Y)), [-1,1]) 
+    YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1,1])
     if metric == "bottleneck":
         try: 
             from .. import bottleneck_distance
-            return pairwise_distances(XX, YY, metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs))
+            return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs), n_jobs=n_jobs)
         except ImportError:
             print("Gudhi built without CGAL")
             raise
     elif metric == "pot_wasserstein":
         try:
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
-            return pairwise_distances(XX, YY, metric=_sklearn_wrapper(pot_wasserstein_distance,  X, Y, **kwargs))
+            return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(pot_wasserstein_distance,  X, Y, **kwargs), n_jobs=n_jobs)
         except ImportError:
             print("POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
             raise
     elif metric == "sliced_wasserstein":
         Xproj = _compute_persistence_diagram_projections(X, **kwargs)
         Yproj = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
-        return pairwise_distances(XX, YY, metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj))
+        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj), n_jobs=n_jobs)
     elif type(metric) == str:
-        return pairwise_distances(XX, YY, metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs))
+        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs), n_jobs=n_jobs)
     else:
-        return pairwise_distances(XX, YY, metric=_sklearn_wrapper(metric, X, Y, **kwargs))
+        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(metric, X, Y, **kwargs), n_jobs=n_jobs)
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the sliced Wasserstein distance matrix from a list of persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally integrating over all possible lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details. 
     """
-    def __init__(self, num_directions=10):
+    def __init__(self, num_directions=10, n_jobs=None):
         """
         Constructor for the SlicedWassersteinDistance class.
 
         Parameters:
             num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10). 
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.num_directions = num_directions
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
@@ -206,7 +224,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise sliced Wasserstein distances.
         """
-        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="sliced_wasserstein", num_directions=self.num_directions)
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="sliced_wasserstein", num_directions=self.num_directions, n_jobs=self.n_jobs)
 
     def __call__(self, diag1, diag2):
         """
@@ -227,14 +245,16 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
     :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
     """
-    def __init__(self, epsilon=None):
+    def __init__(self, epsilon=None, n_jobs=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
             epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.epsilon = epsilon
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
@@ -257,7 +277,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
         """
-        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.epsilon)
+        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.epsilon, n_jobs=self.n_jobs)
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -282,15 +302,17 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
     """
-    def __init__(self, bandwidth=1., kernel_approx=None):
+    def __init__(self, bandwidth=1., kernel_approx=None, n_jobs=None):
         """
         Constructor for the PersistenceFisherDistance class.
 
         Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions (default 1.).
             kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.bandwidth, self.kernel_approx = bandwidth, kernel_approx
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
@@ -313,7 +335,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher distances.
         """
-        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)
+        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx, n_jobs=self.n_jobs)
 
     def __call__(self, diag1, diag2):
         """
@@ -332,7 +354,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the Wasserstein distance matrix from a list of persistence diagrams. 
     """
-    def __init__(self, order=2, internal_p=2, mode="pot", delta=0.01):
+    def __init__(self, order=2, internal_p=2, mode="pot", delta=0.01, n_jobs=None):
         """
         Constructor for the WassersteinDistance class.
 
@@ -341,10 +363,12 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is 2 (euclidean norm), see :func:`gudhi.wasserstein.wasserstein_distance`.
             mode (str): method for computing Wasserstein distance. Either "pot" or "hera".
             delta (float): relative error 1+delta. Used only if mode == "hera".
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.order, self.internal_p, self.mode = order, internal_p, mode
         self.metric = "pot_wasserstein" if mode == "pot" else "hera_wasserstein"
         self.delta = delta
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
@@ -368,9 +392,9 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise Wasserstein distances.
         """
         if self.metric == "hera_wasserstein":
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, delta=self.delta)
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
         else:
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, matching=False)
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
         return Xfit
 
     def __call__(self, diag1, diag2):
