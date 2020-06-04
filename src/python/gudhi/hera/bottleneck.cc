@@ -8,17 +8,15 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <pybind11_diagram_utils.h>
+
+#ifdef _MSC_VER
 // https://github.com/grey-narn/hera/issues/3
 // ssize_t is a non-standard type (well, posix)
-// BaseTsd.h provides SSIZE_T on windows, this one should be the same there.
-#ifdef _MSC_VER
-#include <cstddef>
-typedef std::ptrdiff_t ssize_t;
+using py::ssize_t;
 #endif
 
 #include <bottleneck.h> // Hera
-
-#include <pybind11_diagram_utils.h>
 
 double bottleneck_distance(Dgm d1, Dgm d2, double delta)
 {
