@@ -21,3 +21,10 @@ add_test(NAME Edge_collapse_conserve_persistence_1 COMMAND $<TARGET_FILE:Edge_co
 
          add_test(NAME Edge_collapse_conserve_persistence_2 COMMAND $<TARGET_FILE:Edge_collapse_conserve_persistence>
          "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "2.")
+
+# Tests
+add_executable ( inf edge_collapse_conserve_persistence_with_inf.cpp )
+
+if (TBB_FOUND)
+  target_link_libraries(inf ${TBB_LIBRARIES})
+endif()
