@@ -76,7 +76,7 @@ cdef class AlphaComplex:
     def __cinit__(self, points = None, off_file = '', precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
-        self.exact = precision == 'safe'
+        self.exact = precision == 'exact'
 
         cdef vector[vector[double]] pts
         if off_file:
