@@ -25,7 +25,7 @@ Remarks
   make sense in higher dimension precisely because you can bound the radii.
 * Using the default :code:`complexity = 'safe'` makes the construction safe.
   If you pass :code:`complexity = 'exact'` to :func:`~gudhi.AlphaComplex.__init__`, the filtration values are the exact
-  ones converted to the filtration value type of the simplicial complex. This can be very slow.
+  ones converted to float. This can be very slow.
   If you pass :code:`complexity = 'safe'` (the default) or :code:`complexity = 'fast'`, the filtration values are only
   guaranteed to have a small multiplicative error compared to the exact value, see
   `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
