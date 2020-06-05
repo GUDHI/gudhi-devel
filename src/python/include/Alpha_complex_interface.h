@@ -37,9 +37,9 @@ class Alpha_complex_interface {
   using Point_inexact_kernel = typename Inexact_kernel::Point_d;
 
   template <typename CgalPointType>
-  std::vector<double> pt_cgal_to_cython(CgalPointType& ph) {
+  std::vector<double> pt_cgal_to_cython(CgalPointType& point) {
     std::vector<double> vd;
-    for (auto coord = ph.cartesian_begin(); coord != ph.cartesian_end(); coord++)
+    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
       vd.push_back(CGAL::to_double(*coord));
     return vd;
   }
@@ -71,11 +71,11 @@ class Alpha_complex_interface {
 
   std::vector<double> get_point(int vh) {
     if (fast_version_) {
-      Point_inexact_kernel const& ph = ac_inexact_ptr_->get_point(vh);
-      return pt_cgal_to_cython(ph);
+      Point_inexact_kernel const& point = ac_inexact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(point);
     } else {
-      Point_exact_kernel const& ph = ac_exact_ptr_->get_point(vh);
-      return pt_cgal_to_cython(ph);
+      Point_exact_kernel const& point = ac_exact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(point);
     }
   }
 
