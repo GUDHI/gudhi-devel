@@ -75,7 +75,7 @@ cdef class AlphaComplex:
 
     # The real cython constructor
     def __cinit__(self, points = None, off_file = '', complexity = 'safe'):
-        assert complexity == 'fast' or complexity == 'safe' or complexity == 'exact', "Alpha complex complexity can be 'fast', 'safe' or 'exact'"
+        assert complexity in ['fast', 'safe', 'exact'], "Alpha complex complexity can only be 'fast', 'safe' or 'exact'"
         self.fast = complexity == 'fast'
         self.exact = complexity == 'safe'
 
