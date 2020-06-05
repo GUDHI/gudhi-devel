@@ -24,8 +24,8 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-def _empty_alpha(complexity):
-    alpha_complex = AlphaComplex(points=[[0, 0]], complexity = complexity)
+def _empty_alpha(precision):
+    alpha_complex = AlphaComplex(points=[[0, 0]], precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def test_empty_alpha():
@@ -33,9 +33,9 @@ def test_empty_alpha():
     _empty_alpha('safe')
     _empty_alpha('exact')
 
-def _infinite_alpha(complexity):
+def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    alpha_complex = AlphaComplex(points=point_list, complexity = complexity)
+    alpha_complex = AlphaComplex(points=point_list, precision = precision)
     assert alpha_complex.__is_defined() == True
 
     simplex_tree = alpha_complex.create_simplex_tree()
@@ -88,9 +88,9 @@ def test_infinite_alpha():
     _infinite_alpha('safe')
     _infinite_alpha('exact')
 
-def _filtered_alpha(complexity):
+def _filtered_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = AlphaComplex(points=point_list, complexity = complexity)
+    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(max_alpha_square=0.25)
 
@@ -132,7 +132,7 @@ def test_filtered_alpha():
     _filtered_alpha('safe')
     _filtered_alpha('exact')
 
-def _safe_alpha_persistence_comparison(complexity):
+def _safe_alpha_persistence_comparison(precision):
     #generate periodic signal
     time = np.arange(0, 10, 1)
     signal = [math.sin(x) for x in time]
@@ -144,10 +144,10 @@ def _safe_alpha_persistence_comparison(complexity):
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
     
     #build alpha complex and simplex tree
-    alpha_complex1 = AlphaComplex(points=embedding1, complexity = complexity)
+    alpha_complex1 = AlphaComplex(points=embedding1, precision = precision)
     simplex_tree1 = alpha_complex1.create_simplex_tree()
     
-    alpha_complex2 = AlphaComplex(points=embedding2, complexity = complexity)
+    alpha_complex2 = AlphaComplex(points=embedding2, precision = precision)
     simplex_tree2 = alpha_complex2.create_simplex_tree()
     
     diag1 = simplex_tree1.persistence()
@@ -163,9 +163,9 @@ def test_safe_alpha_persistence_comparison():
     _safe_alpha_persistence_comparison('safe')
     _safe_alpha_persistence_comparison('exact')
 
-def _delaunay_complex(complexity):
+def _delaunay_complex(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = AlphaComplex(points=point_list, complexity = complexity)
+    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(default_filtration_value = True)
 

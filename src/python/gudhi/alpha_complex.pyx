@@ -57,7 +57,7 @@ cdef class AlphaComplex:
     cdef bool exact
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file='', complexity='safe'):
+    def __init__(self, points=None, off_file='', precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -68,15 +68,15 @@ cdef class AlphaComplex:
         :param off_file: An OFF file style name.
         :type off_file: string
 
-        :param complexity: Alpha complex complexity can be 'fast', 'safe' or 'exact'. Default is 'safe'.
-        :type complexity: string
+        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :type precision: string
         """
 
     # The real cython constructor
-    def __cinit__(self, points = None, off_file = '', complexity = 'safe'):
-        assert complexity in ['fast', 'safe', 'exact'], "Alpha complex complexity can only be 'fast', 'safe' or 'exact'"
-        cdef bool fast = complexity == 'fast'
-        self.exact = complexity == 'safe'
+    def __cinit__(self, points = None, off_file = '', precision = 'safe'):
+        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+        cdef bool fast = precision == 'fast'
+        self.exact = precision == 'safe'
 
         cdef vector[vector[double]] pts
         if off_file:
