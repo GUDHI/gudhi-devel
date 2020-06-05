@@ -26,10 +26,9 @@ Remarks
 * Using the default :code:`complexity = 'safe'` makes the construction safe.
   If you pass :code:`complexity = 'exact'` to :func:`~gudhi.AlphaComplex.__init__`, the filtration values are the exact
   ones converted to float. This can be very slow.
-  If you pass :code:`complexity = 'safe'` (the default) or :code:`complexity = 'fast'`, the filtration values are only
-  guaranteed to have a small multiplicative error compared to the exact value, see
-  `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
-  for details. A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
+  If you pass :code:`complexity = 'safe'` (the default), the filtration values are only
+  guaranteed to have a small multiplicative error compared to the exact value.
+  A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
   non-empty approximate interval [10^12,10^12+10^6].
   Using :code:`complexity = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
