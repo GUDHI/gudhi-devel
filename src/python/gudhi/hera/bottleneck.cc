@@ -40,6 +40,9 @@ PYBIND11_MODULE(bottleneck, m) {
         Compute the Bottleneck distance between two diagrams.
         Points at infinity are supported.
 
+        .. note::
+           Points on the diagonal are not supported and must be filtered out before calling this function.
+
         Parameters:
             X (n x 2 numpy array): First diagram
             Y (n x 2 numpy array): Second diagram
