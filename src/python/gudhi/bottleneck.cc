@@ -46,7 +46,7 @@ PYBIND11_MODULE(bottleneck, m) {
         bits of the mantissa may be wrong). This version of the algorithm takes
         advantage of the limited precision of `double` and is usually a lot
         faster to compute, whatever the value of `e`.
-        Thus, by default, `e` is the smallest positive double.
+        Thus, by default (`e=None`), `e` is the smallest positive double.
     :type e: float
     :rtype: float
     :returns: the bottleneck distance.
