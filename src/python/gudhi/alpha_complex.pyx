@@ -54,7 +54,6 @@ cdef class AlphaComplex:
     """
 
     cdef Alpha_complex_interface * this_ptr
-    cdef bool fast
     cdef bool exact
 
     # Fake constructor that does nothing but documenting the constructor
@@ -76,13 +75,13 @@ cdef class AlphaComplex:
     # The real cython constructor
     def __cinit__(self, points = None, off_file = '', complexity = 'safe'):
         assert complexity in ['fast', 'safe', 'exact'], "Alpha complex complexity can only be 'fast', 'safe' or 'exact'"
-        self.fast = complexity == 'fast'
+        cdef bool fast = complexity == 'fast'
         self.exact = complexity == 'safe'
 
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                self.this_ptr = new Alpha_complex_interface(off_file.encode('utf-8'), self.fast, True)
+                self.this_ptr = new Alpha_complex_interface(off_file.encode('utf-8'), fast, True)
             else:
                 print("file " + off_file + " not found.")
         else:
@@ -91,7 +90,7 @@ cdef class AlphaComplex:
                 points=[]
             pts = points
             with nogil:
-                self.this_ptr = new Alpha_complex_interface(pts, self.fast)
+                self.this_ptr = new Alpha_complex_interface(pts, fast)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
