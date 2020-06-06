@@ -6,6 +6,7 @@ RUN yum -y update && yum -y install \
     eigen3-devel \
     mpfr-devel \
     gmp-devel \
+    devtoolset-8 \
     && yum clean all
 
 RUN mkdir -p /opt/cmake \
@@ -13,13 +14,14 @@ RUN mkdir -p /opt/cmake \
     && sh cmake-3.16.2-Linux-x86_64.sh  --skip-license --prefix=/opt/cmake \
     && rm -f cmake-3.16.2-Linux-x86_64.sh
 
-RUN wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz \
-    && tar xf boost_1_64_0.tar.gz \
-    && cd boost_1_64_0 \
+RUN git clone -b boost-1.73.0 --depth 1 https://github.com/boostorg/boost.git \
+    && cd boost \
+    && git submodule update --init \
     && ./bootstrap.sh --with-libraries=filesystem,program_options,system,thread,test \
+    && ./b2 headers \
     && ./b2 install \
     && cd .. \
-    && rm -rf boost_1_64_0
+    && rm -rf boost
 
 RUN wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.2/CGAL-5.0.2.tar.xz \
     && tar xf CGAL-5.0.2.tar.xz \
@@ -44,3 +46,4 @@ ENV PYTHON37="/opt/python/cp37-cp37m/"
 ENV PYTHON38="/opt/python/cp38-cp38/"
 
 ENV PATH="/opt/cmake/bin:${PATH}"
+ENV PATH="/opt/rh/devtoolset-8/root/usr/bin:${PATH}"
