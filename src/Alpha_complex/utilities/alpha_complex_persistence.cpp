@@ -11,6 +11,7 @@
 #include <boost/program_options.hpp>
 
 #include <CGAL/Epick_d.h>
+#include <CGAL/Epeck_d.h>
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Persistent_cohomology.h>
