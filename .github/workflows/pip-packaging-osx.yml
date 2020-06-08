@@ -42,8 +42,6 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           mkdir wheelhouse
-          type delocate-listdeps
-          type delocate-wheel
-          delocate-listdeps build/src/python/dist/*
-          delocate-wheel --require-archs x86_64 -w wheelhouse build/src/python/dist/*
+          /Users/runner/.local/bin/delocate-listdeps build/src/python/dist/*
+          /Users/runner/.local/bin/delocate-wheel --require-archs x86_64 -w wheelhouse build/src/python/dist/*
           python -m twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
