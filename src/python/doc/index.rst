@@ -53,8 +53,8 @@ Tangential complex
 Topological descriptors computation
 ***********************************
 
-Persistence cohomology
-======================
+Persistent cohomology
+=====================
 
 .. include:: persistent_cohomology_sum.inc
 

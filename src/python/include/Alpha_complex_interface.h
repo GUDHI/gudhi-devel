@@ -23,45 +23,74 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <memory>  // for std::unique_ptr
 
 namespace Gudhi {
 
 namespace alpha_complex {
 
 class Alpha_complex_interface {
-  using Dynamic_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
-  using Point_d = Dynamic_kernel::Point_d;
+ private:
+  using Exact_kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+  using Inexact_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  using Point_exact_kernel = typename Exact_kernel::Point_d;
+  using Point_inexact_kernel = typename Inexact_kernel::Point_d;
 
- public:
-  Alpha_complex_interface(const std::vector<std::vector<double>>& points) {
-    auto mkpt = [](std::vector<double> const& vec){
-      return Point_d(vec.size(), vec.begin(), vec.end());
-    };
-    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(boost::adaptors::transform(points, mkpt));
-  }
-
-  Alpha_complex_interface(const std::string& off_file_name, bool from_file = true) {
-    alpha_complex_ = new Alpha_complex<Dynamic_kernel>(off_file_name);
-  }
-
-  ~Alpha_complex_interface() {
-    delete alpha_complex_;
-  }
-
-  std::vector<double> get_point(int vh) {
+  template <typename CgalPointType>
+  std::vector<double> pt_cgal_to_cython(CgalPointType& point) {
     std::vector<double> vd;
-    Point_d const& ph = alpha_complex_->get_point(vh);
-    for (auto coord = ph.cartesian_begin(); coord != ph.cartesian_end(); coord++)
+    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
       vd.push_back(CGAL::to_double(*coord));
     return vd;
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square) {
-    alpha_complex_->create_complex(*simplex_tree, max_alpha_square);
+  template <typename CgalPointType>
+  static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
+    return CgalPointType(vec.size(), vec.begin(), vec.end());
+  }
+
+ public:
+  Alpha_complex_interface(const std::vector<std::vector<double>>& points, bool fast_version)
+      : fast_version_(fast_version) {
+    if (fast_version_) {
+      ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(
+          boost::adaptors::transform(points, pt_cython_to_cgal<Point_inexact_kernel>));
+    } else {
+      ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(
+          boost::adaptors::transform(points, pt_cython_to_cgal<Point_exact_kernel>));
+    }
+  }
+
+  Alpha_complex_interface(const std::string& off_file_name, bool fast_version, bool from_file = true)
+      : fast_version_(fast_version) {
+    if (fast_version_)
+      ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(off_file_name);
+    else
+      ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(off_file_name);
+  }
+
+  std::vector<double> get_point(int vh) {
+    if (fast_version_) {
+      Point_inexact_kernel const& point = ac_inexact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(point);
+    } else {
+      Point_exact_kernel const& point = ac_exact_ptr_->get_point(vh);
+      return pt_cgal_to_cython(point);
+    }
+  }
+
+  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square, bool exact_version,
+                           bool default_filtration_value) {
+    if (fast_version_)
+      ac_inexact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version, default_filtration_value);
+    else
+      ac_exact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version, default_filtration_value);
   }
 
  private:
-  Alpha_complex<Dynamic_kernel>* alpha_complex_;
+  bool fast_version_;
+  std::unique_ptr<Alpha_complex<Exact_kernel>> ac_exact_ptr_;
+  std::unique_ptr<Alpha_complex<Inexact_kernel>> ac_inexact_ptr_;
 };
 
 }  // namespace alpha_complex
