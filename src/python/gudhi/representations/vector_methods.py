@@ -626,7 +626,7 @@ class Atol(BaseEstimator, TransformerMixin):
            [1.04696684, 0.56203292],
            [1.02816136, 0.23559623]])
     """
-    def __init__(self, quantiser, weighting_method="cloud", contrast="gaus"):
+    def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
         """
         Constructor for the Atol measure vectorisation class.
 
@@ -639,7 +639,7 @@ class Atol(BaseEstimator, TransformerMixin):
                 This will have no impact if weights are provided along with measures all the way: `fit` and `transform`.
             contrast (string): constant function for evaluating proximity of a measure with respect to centers
 			    choose from {"gaussian", "laplacian", "indicator"}
-                (default: laplacian contrast function, see page 3 in the ATOL paper).
+                (default: gaussian contrast function, see page 3 in the ATOL paper).
         """
         self.quantiser = quantiser
         self.contrast = {
