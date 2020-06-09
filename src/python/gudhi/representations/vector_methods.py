@@ -641,7 +641,7 @@ class Atol(BaseEstimator, TransformerMixin):
             contrast (string): constant function for evaluating proximity of a measure with respect to centers
 			    choose from {"gaussian", "laplacian", "indicator"}
                 (default: laplacian contrast function, see page 3 in the ATOL paper).
-	"""
+        """
         self.quantiser = quantiser
         self.contrast = {
             "gaussian": _gaus_contrast,
