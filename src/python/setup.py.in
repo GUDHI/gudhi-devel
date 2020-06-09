@@ -84,6 +84,6 @@ setup(
     long_description_content_type='text/x-rst',
     long_description=long_description,
     ext_modules = ext_modules,
-    install_requires = ['cython','numpy >= 1.9',],
-    setup_requires = ['numpy >= 1.9','pybind11',],
+    install_requires = ['numpy >= 1.9',],
+    setup_requires = ['cython','numpy >= 1.9','pybind11',],
 )
