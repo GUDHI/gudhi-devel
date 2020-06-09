@@ -33,7 +33,8 @@ PYBIND11_MODULE(bottleneck, m) {
           py::arg("diagram_1"), py::arg("diagram_2"),
           py::arg("e") = py::none(),
           R"pbdoc(
-    This function returns the point corresponding to a given vertex.
+    Compute the Bottleneck distance between two diagrams.
+    Points at infinity and on the diagonal are supported.
 
     :param diagram_1: The first diagram.
     :type diagram_1: numpy array of shape (m,2)

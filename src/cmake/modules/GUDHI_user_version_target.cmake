@@ -67,8 +67,11 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
 
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include ${GUDHI_USER_VERSION_DIR}/ext/hera/wasserstein/include)
+if(HERA_WASSERSTEIN_INCLUDE_DIR STREQUAL HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR OR
+    HERA_BOTTLENECK_INCLUDE_DIR STREQUAL HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR)
+  add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                     copy_directory ${CMAKE_SOURCE_DIR}/ext/hera ${GUDHI_USER_VERSION_DIR}/ext/hera)
+endif()
 
 set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
 
