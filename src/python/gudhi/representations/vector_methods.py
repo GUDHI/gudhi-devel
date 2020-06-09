@@ -604,25 +604,11 @@ class Atol(BaseEstimator, TransformerMixin):
     This class allows to vectorise measures (e.g. point clouds, persistence diagrams, etc) after a quantisation step.
 
     ATOL paper: https://arxiv.org/abs/1909.13472
-    """
-    def __init__(self, quantiser, weighting_method="cloud", contrast="gaus"):
-        """
-        Constructor for the Atol measure vectorisation class.
-
-        Parameters:
-            quantiser (Object): Object with `fit` (sklearn API consistent) and `cluster_centers` and `n_clusters`
-                attributes. This object will be fitted by the function `fit`.
-            weighting_method (string): constant generic function for weighting the measure points
-			    choose from {"cloud", "iidproba"}
-                (default: constant function, i.e. the measure is seen as a point cloud by default).
-                This will have no impact if weights are provided along with measures all the way: `fit` and `transform`.
-            contrast (string): constant function for evaluating proximity of a measure with respect to centers
-			    choose from {"gaussian", "laplacian", "indicator"}
-                (default: laplacian contrast function, see page 3 in the ATOL paper).
 
     Example
     --------
     >>> from sklearn.cluster import KMeans
+    >>> from gudhi.representations.vector_methods import Atol
     >>> import numpy as np
     >>> a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
     >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
@@ -641,6 +627,21 @@ class Atol(BaseEstimator, TransformerMixin):
        [1.04696684, 0.56203292],
        [1.02816136, 0.23559623]])
     """
+    def __init__(self, quantiser, weighting_method="cloud", contrast="gaus"):
+        """
+        Constructor for the Atol measure vectorisation class.
+
+        Parameters:
+            quantiser (Object): Object with `fit` (sklearn API consistent) and `cluster_centers` and `n_clusters`
+                attributes. This object will be fitted by the function `fit`.
+            weighting_method (string): constant generic function for weighting the measure points
+			    choose from {"cloud", "iidproba"}
+                (default: constant function, i.e. the measure is seen as a point cloud by default).
+                This will have no impact if weights are provided along with measures all the way: `fit` and `transform`.
+            contrast (string): constant function for evaluating proximity of a measure with respect to centers
+			    choose from {"gaussian", "laplacian", "indicator"}
+                (default: laplacian contrast function, see page 3 in the ATOL paper).
+	"""
         self.quantiser = quantiser
         self.contrast = {
             "gaussian": _gaus_contrast,
