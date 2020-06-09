@@ -63,8 +63,9 @@ class Tomato:
     ):
         """
         Args:
-            graph_type (str): 'manual', 'knn' or 'radius'.
-            density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'.
+            graph_type (str): 'manual', 'knn' or 'radius'. Default is 'knn'.
+            density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'. When you have many points,
+                'KDE' and 'logKDE' tend to be slower. Default is 'logDTM'.
             metric (str|Callable): metric used when calculating the distance between instances in a feature array.
                 Defaults to Minkowski of parameter p.
             kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to
