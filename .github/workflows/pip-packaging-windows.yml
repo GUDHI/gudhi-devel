@@ -45,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: dependencies
-          path: c:/vcpkg/installed/x64-windows/lib/
+          path: c:/vcpkg/installed/x64-windows/bin/
