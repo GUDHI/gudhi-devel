@@ -576,19 +576,19 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         """
         return self.fit_transform([diag])[0,:]
 
-def _lapl_contrast(measure, centers, inertias, eps=1e-8):
+def _lapl_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / (inertias + eps))
+    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / inertias)
 
-def _gaus_contrast(measure, centers, inertias, eps=1e-8):
+def _gaus_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers)**2 / (inertias**2 + eps))
+    return np.exp(-pairwise.pairwise_distances(measure, Y=centers)**2 / inertias**2)
 
-def _indicator_contrast(diags, centers, inertias, eps=1e-8):
+def _indicator_contrast(diags, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
     pair_dist = pairwise.pairwise_distances(diags, Y=centers)
-    flat_circ = (pair_dist < (inertias+eps)).astype(int)
-    robe_curve = np.clip(2-pair_dist/(inertias+eps), 0, 1)
+    flat_circ = (pair_dist < inertias).astype(int)
+    robe_curve = np.clip(2-pair_dist/inertias, 0, 1)
     return flat_circ + robe_curve
 
 def _cloud_weighting(measure):
