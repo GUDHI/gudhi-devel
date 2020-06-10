@@ -153,6 +153,28 @@ Morozov, and Arnur Nigmetov.
 
 .. autofunction:: gudhi.hera.wasserstein_distance
 
+This example computes the 1-Wasserstein distance with infinity-norm as ground metric
+between 2 persistence diagrams with Euclidean ground metric.
+Note that persistence diagrams must be submitted as (n x 2) numpy arrays and can contain inf values.
+
+.. testcode::
+
+    import gudhi.hera
+    import numpy as np
+
+    dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [1, np.inf]])
+    dgm2 = np.array([[2.8, 4.45],[9.5, 14.1], [2, np.inf]])
+
+    message = "Wasserstein distance value (hera) = " + '%.2f' % gudhi.hera.wasserstein_distance(dgm1, dgm2, order=1., internal_p=2.)
+    print(message)
+
+The output is:
+
+.. testoutput::
+
+    Wasserstein distance value (hera) = 2.45
+
+
 
 Barycenters
 -----------
