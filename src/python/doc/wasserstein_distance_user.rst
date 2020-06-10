@@ -29,17 +29,6 @@ Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
 
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
 
-Hera
-****
-
-This other implementation comes from `Hera
-<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
-based on "Geometry Helps to Compare Persistence Diagrams"
-:cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
-Morozov, and Arnur Nigmetov.
-
-.. autofunction:: gudhi.hera.wasserstein_distance
-
 Basic example
 *************
 
@@ -106,7 +95,7 @@ Entropic regularization
 
 When using the Optimal Transport based version of wasserstein distances, 
 we also allow for the use of entropic regularization of optimal transport distance via the parameter ``reg``.
-If ``reg > 0``, we solve 
+If ``reg > 0``, we solve
 :math:`\min_P \sum P_{ij} M_{ij} + reg * h(P)`
 under marginal constraints on :math:`P` , which can be understood as a generalized matching between the diagrams.
 :math:`P_{ij}` denotes the quantity of mass from the :math:`i`-th points in the first diagram that is
@@ -122,6 +111,7 @@ The closer ``reg`` is to 0, the closer the transport cost will be from the exact
 The larger the regularization parameter, the faster the computation.
 Note however that taking too low values for ``reg`` can run into numerical issues.
 
+This optimization problem is solved using the Python Optimal Transport library and relies on the Sinkhorn algorithm.
 .. testcode::
 
     import gudhi.wasserstein
@@ -149,6 +139,19 @@ Note however that taking too low values for ``reg`` can run into numerical issue
    0.995
    Mass located in the first point of dgm1 transported to the diagonal:
    0.005
+
+
+Hera
+****
+
+We provide an alternative implementation to estimate Wasserstein distance between persistence diagrams.
+This one comes from `Hera
+<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
+based on "Geometry Helps to Compare Persistence Diagrams"
+:cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
+Morozov, and Arnur Nigmetov.
+
+.. autofunction:: gudhi.hera.wasserstein_distance
 
 
 Barycenters
