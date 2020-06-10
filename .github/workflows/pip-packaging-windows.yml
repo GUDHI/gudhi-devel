@@ -41,3 +41,8 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: python -m twine upload --repository-url https://test.pypi.org/legacy/ build/src/python/dist/*
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: dependencies
+          path: c:/vcpkg/installed/x64-windows/lib/
