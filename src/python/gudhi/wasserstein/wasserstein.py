@@ -173,7 +173,7 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., reg=0., 
         return ep.concatenate(dists).norms.lp(order).raw
         # We can also concatenate the 3 vectors to compute just one norm.
 
-    # Comptuation of the otcost using the ot.emd2 library, and matching/transport plan using ot.emd.
+    # Computation of the otcost using the ot.emd2 library, and matching/transport plan using ot.emd.
     # Note: it is the Wasserstein distance to the power q.
     # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value?
     if reg == 0.:
@@ -190,19 +190,19 @@ def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., reg=0., 
             ot_cost = ot.emd2(a, b, M, numItermax=2000000)
 
     elif reg > 0:
-        np.seterr(divide='raise')  # For a better handling of numerical issues due to reg being too low
-        try:
-            if matching:
-                P = ot.sinkhorn(a=a, b=b, M=M, reg=reg)
-                ot_cost = np.sum(np.multiply(P, M))
-                return ot_cost ** (1./order), P
-            else:
-                ot_cost = ot.sinkhorn2(a, b, M, reg=reg)[0]
-                return ot_cost ** (1. / order)
-        except FloatingPointError:
-            raise FloatingPointError('Error when computing regularized wasserstein distance (Sinkhorn loop).' \
-                                     'This is probably due to reg being too low. Try' \
-                                     'to increase reg or set it to 0 for exact computation')
+        with np.errstate(divide='raise'):  # For a better handling of numerical issues due to reg being too low
+            try:
+                if matching:
+                    P = ot.sinkhorn(a=a, b=b, M=M, reg=reg)
+                    ot_cost = np.sum(np.multiply(P, M))
+                    return ot_cost ** (1./order), P
+                else:
+                    ot_cost = ot.sinkhorn2(a, b, M, reg=reg)[0]
+                    return ot_cost ** (1. / order)
+            except FloatingPointError:
+                raise FloatingPointError('Error when computing regularized wasserstein distance (Sinkhorn loop).'
+                                         'This is probably due to reg being too low. Try'
+                                         'to increase reg or set it to 0 for exact computation')
     else:
         raise ValueError('Negative value for reg')
         # It seems ot.sinkhorn2 returns something when reg<0, which is reasonnable but probably unexpected
