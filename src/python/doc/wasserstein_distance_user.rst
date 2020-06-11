@@ -112,6 +112,8 @@ The larger the regularization parameter, the faster the computation.
 Note however that taking too low values for ``reg`` can run into numerical issues.
 
 This optimization problem is solved using the Python Optimal Transport library and relies on the Sinkhorn algorithm.
+
+
 .. testcode::
 
     import gudhi.wasserstein
