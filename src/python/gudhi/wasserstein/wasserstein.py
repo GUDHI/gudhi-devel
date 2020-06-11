@@ -88,7 +88,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
         return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
 
 
-def wasserstein_distance(X, Y, matching=False, order=2., internal_p=2., enable_autodiff=False):
+def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enable_autodiff=False):
     '''
     :param X: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points
                 (i.e. with infinite coordinate).
