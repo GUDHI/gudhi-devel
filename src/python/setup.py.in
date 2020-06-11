@@ -86,4 +86,5 @@ setup(
     ext_modules = ext_modules,
     install_requires = ['numpy >= 1.9',],
     setup_requires = ['cython','numpy >= 1.9','pybind11',],
+    package_data={"": ["*.dll"], },
 )
