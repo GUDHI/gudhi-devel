@@ -616,13 +616,13 @@ class Atol(BaseEstimator, TransformerMixin):
     array([[ 2.        ,  0.66666667,  3.33333333],
            [ 2.6       ,  2.8       , -0.4       ]])
     >>> atol_vectoriser(a)
-    array([1.0769395 , 0.58394704])
+    array([1.18168665, 0.42375966])
     >>> atol_vectoriser(c)
-    array([0.23559623, 1.02816136])
+    array([0.02062512, 1.25157463])
     >>> atol_vectoriser.transform(X=[a, b, c])
-    array([[1.0769395 , 0.58394704],
-           [0.56203292, 1.04696684],
-           [0.23559623, 1.02816136]])
+    array([[1.18168665, 0.42375966],
+           [0.29861028, 1.06330156],
+           [0.02062512, 1.25157463]])
     """
     def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
         """
