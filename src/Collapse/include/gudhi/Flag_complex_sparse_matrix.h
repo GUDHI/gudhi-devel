@@ -117,7 +117,7 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
 #endif  // DEBUG_TRACES
-    auto common_neighbours = closed_common_neighbours_row_index(rw_u, rw_v);
+    auto common_neighbours = open_common_neighbours_row_index(rw_u, rw_v);
 #ifdef DEBUG_TRACES
     std::cout << "And its common neighbours are." << std::endl;
     for (auto neighbour : common_neighbours) {
@@ -125,20 +125,16 @@ class Flag_complex_sparse_matrix {
     }
     std::cout<< std::endl;
 #endif  // DEBUG_TRACES
-    if (common_neighbours.size() > 2) {
-      if (common_neighbours.size() == 3)
-        return true;
-      else
-        for (auto rw_c : common_neighbours) {
-          if (rw_c != rw_u && rw_c != rw_v) {
-            auto neighbours_c = closed_neighbours_row_index(rw_c);
-            // If neighbours_c contains the common neighbours.
-            if (std::includes(neighbours_c.begin(), neighbours_c.end(), common_neighbours.begin(),
-                              common_neighbours.end()))
-              return true;
-          }
-        }
-    }
+    if (common_neighbours.size() == 1)
+      return true;
+    else
+      for (auto rw_c : common_neighbours) {
+        auto neighbours_c = neighbours_row_index(rw_c, true);
+        // If neighbours_c contains the common neighbours.
+        if (std::includes(neighbours_c.begin(), neighbours_c.end(),
+                          common_neighbours.begin(), common_neighbours.end()))
+          return true;
+      }
     return false;
   }
 
@@ -157,17 +153,13 @@ class Flag_complex_sparse_matrix {
     auto rw_u = vertex_to_row_[u];
     auto rw_v = vertex_to_row_[v];
 
-    Row_indices_vector common_neighbours = closed_common_neighbours_row_index(rw_u, rw_v);
+    Row_indices_vector common_neighbours = open_common_neighbours_row_index(rw_u, rw_v);
 
-    if (common_neighbours.size() > 2) {
-      for (auto rw_c : common_neighbours) {
-        if (rw_c != rw_u && rw_c != rw_v) {
-          auto e_with_new_nbhr_v = std::minmax(u, row_to_vertex_[rw_c]);
-          auto e_with_new_nbhr_u = std::minmax(v, row_to_vertex_[rw_c]);
-          edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_v]);
-          edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_u]);
-        }
-      }
+    for (auto rw_c : common_neighbours) {
+      auto e_with_new_nbhr_v = std::minmax(u, row_to_vertex_[rw_c]);
+      auto e_with_new_nbhr_u = std::minmax(v, row_to_vertex_[rw_c]);
+      edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_v]);
+      edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_u]);
     }
     return edge_indices;
   }
@@ -210,23 +202,25 @@ class Flag_complex_sparse_matrix {
     current_backward = -1;
   }
 
-  // Returns list of non-zero columns of a particular indx.
-  Row_indices_vector closed_neighbours_row_index(Row_index rw_u) const
+  // Returns list of neighbors of a particular indx.
+  Row_indices_vector neighbours_row_index(Row_index rw_u, bool closed) const
   {
-    Row_indices_vector non_zero_indices;
+    Row_indices_vector neighbors;
+    neighbors.reserve(sparse_row_adjacency_matrix_[rw_u].nonZeros()); // too much, but who cares
 #ifdef DEBUG_TRACES
     std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
     // Iterate over the non-zero columns
     for (typename Sparse_vector::InnerIterator it(sparse_row_adjacency_matrix_[rw_u]); it; ++it) {
       Row_index rw_v = it.index();
-      // If the vertex v is not dominated and the edge {u,v} is still in the matrix
+      if (!closed && rw_u == rw_v) continue;
       Row_index ei;
-      if (rw_u == rw_v ||
+      // If the vertex v is not dominated and the edge {u,v} is still in the matrix
+      if ((closed && rw_u == rw_v) ||
           (ei = it.value()) <= current_backward ||
           critical_edge_indicator_[ei]) {
         // inner index, here it is equal to it.columns()
-        non_zero_indices.push_back(rw_v);
+        neighbors.push_back(rw_v);
 #ifdef DEBUG_TRACES
         std::cout << row_to_vertex_[rw_v] << ", " ;
 #endif  // DEBUG_TRACES
@@ -235,17 +229,18 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << std::endl;
 #endif  // DEBUG_TRACES
-    return non_zero_indices;
+    return neighbors;
   }
 
-  // Returns the list of closed neighbours of the edge :{u,v}.
-  Row_indices_vector closed_common_neighbours_row_index(Row_index rw_u, Row_index rw_v) const
+  // Returns the list of open neighbours of the edge :{u,v}.
+  Row_indices_vector open_common_neighbours_row_index(Row_index rw_u, Row_index rw_v) const
   {
-    Row_indices_vector non_zero_indices_u = closed_neighbours_row_index(rw_u);
-    Row_indices_vector non_zero_indices_v = closed_neighbours_row_index(rw_v);
+    Row_indices_vector non_zero_indices_u = neighbours_row_index(rw_u, false);
+    Row_indices_vector non_zero_indices_v = neighbours_row_index(rw_v, false);
     Row_indices_vector common;
+    common.reserve(std::min(non_zero_indices_u.size(), non_zero_indices_v.size()));
     std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
-                          non_zero_indices_v.end(), std::inserter(common, common.begin()));
+                          non_zero_indices_v.end(), std::back_inserter(common));
 
     return common;
   }
