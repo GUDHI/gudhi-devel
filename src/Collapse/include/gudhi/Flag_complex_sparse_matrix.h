@@ -83,8 +83,9 @@ class Flag_complex_sparse_matrix {
   // Map from row index to its vertex handle
   std::vector<Vertex_handle> row_to_vertex_;
 
-  // Unordered set of dominated edges. (to inforce removal from the matrix)
-  std::unordered_set<Edge, boost::hash<Edge>> u_set_dominated_edges_;
+  // Index of the current edge in the backwards walk. Edges <= current_backward are part of the temporary graph,
+  // while edges > current_backward are removed unless critical_edge_indicator_.
+  Row_index current_backward = -1;
 
   // Map from edge to its index
   std::unordered_map<Edge, Row_index, boost::hash<Edge>> edge_to_index_map_;
@@ -177,40 +178,34 @@ class Flag_complex_sparse_matrix {
     std::endl;
 #endif  // DEBUG_TRACES
     std::set<Row_index> effected_indices = three_clique_indices(indx);
-    if (effected_indices.size() > 0) {
-      for (auto idx = indx - 1; idx > 0; idx--) {
-        Edge edge = std::get<0>(f_edge_vector_[idx]);
-        Vertex_handle u = std::get<0>(edge);
-        Vertex_handle v = std::get<1>(edge);
-        // If idx is not critical so it should be processed, otherwise it stays in the graph
-        if (!critical_edge_indicator_[idx]) {
-          // If idx is affected
-          if (effected_indices.find(idx) != effected_indices.end()) {
-            if (!edge_is_dominated(edge)) {
+    // Cannot use boost::adaptors::reverse in such dynamic cases apparently
+    for (auto it = effected_indices.rbegin(); it != effected_indices.rend(); ++it) {
+      current_backward = *it;
+      Edge edge = std::get<0>(f_edge_vector_[current_backward]);
+      Vertex_handle u = std::get<0>(edge);
+      Vertex_handle v = std::get<1>(edge);
+      // If current_backward is not critical so it should be processed, otherwise it stays in the graph
+      if (!critical_edge_indicator_[current_backward]) {
+        if (!edge_is_dominated(edge)) {
 #ifdef DEBUG_TRACES
-              std::cout << "The curent index became critical " << idx  << std::endl;
+          std::cout << "The curent index became critical " << current_backward  << std::endl;
 #endif  // DEBUG_TRACES
-              critical_edge_indicator_[idx] = true;
-              filtered_edge_output({u, v}, filt);
-              std::set<Row_index> inner_effected_indcs = three_clique_indices(idx);
-              for (auto inr_idx : inner_effected_indcs) {
-                effected_indices.emplace(inr_idx);
-              }
-#ifdef DEBUG_TRACES
-              std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
-                        << filt << std::endl;
-#endif  // DEBUG_TRACES
-            } else {
-              u_set_dominated_edges_.emplace(std::minmax(vertex_to_row_[u], vertex_to_row_[v]));
-            }
-          } else {
-            // Idx is not affected hence dominated.
-            u_set_dominated_edges_.emplace(std::minmax(vertex_to_row_[u], vertex_to_row_[v]));
+          critical_edge_indicator_[current_backward] = true;
+          filtered_edge_output({u, v}, filt);
+          std::set<Row_index> inner_effected_indcs = three_clique_indices(current_backward);
+          for (auto inr_idx : inner_effected_indcs) {
+            if(inr_idx < current_backward) // && !critical_edge_indicator_[inr_idx]
+              effected_indices.emplace(inr_idx);
           }
+#ifdef DEBUG_TRACES
+          std::cout << "The following edge is critical with filt value: {" << u << "," << v << "}; "
+            << filt << std::endl;
+#endif  // DEBUG_TRACES
         }
       }
     }
-    u_set_dominated_edges_.clear();
+    // Clear the implicit "removed from graph" data structure
+    current_backward = -1;
   }
 
   // Returns list of non-zero columns of a particular indx.
@@ -224,7 +219,10 @@ class Flag_complex_sparse_matrix {
     for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
       Row_index rw_v = it.index();
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-      if (u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
+      Row_index ei;
+      if (rw_u == rw_v ||
+          (ei = edge_to_index_map_.at(std::minmax(row_to_vertex_[rw_u], row_to_vertex_[rw_v]))) <= current_backward ||
+          critical_edge_indicator_[ei]) {
         // inner index, here it is equal to it.columns()
         non_zero_indices.push_back(rw_v);
 #ifdef DEBUG_TRACES
