@@ -83,9 +83,6 @@ class Flag_complex_sparse_matrix {
   // Map from row index to its vertex handle
   std::vector<Vertex_handle> row_to_vertex_;
 
-  // Unordered set of removed edges. (to enforce removal from the matrix)
-  std::unordered_set<Edge, boost::hash<Edge>> u_set_removed_edges_;
-
   // Unordered set of dominated edges. (to inforce removal from the matrix)
   std::unordered_set<Edge, boost::hash<Edge>> u_set_dominated_edges_;
 
@@ -227,8 +224,7 @@ class Flag_complex_sparse_matrix {
     for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
       Row_index rw_v = it.index();
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-      if (u_set_removed_edges_.find(std::minmax(rw_u, rw_v)) == u_set_removed_edges_.end() &&
-          u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
+      if (u_set_dominated_edges_.find(std::minmax(rw_u, rw_v)) == u_set_dominated_edges_.end()) {
         // inner index, here it is equal to it.columns()
         non_zero_indices.push_back(rw_v);
 #ifdef DEBUG_TRACES
