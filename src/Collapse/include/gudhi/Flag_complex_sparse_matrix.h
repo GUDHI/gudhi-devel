@@ -68,7 +68,9 @@ class Flag_complex_sparse_matrix {
   using Row_index = std::size_t;
 
   // The sparse matrix data type
-  using Sparse_row_matrix = Eigen::SparseMatrix<Row_index, Eigen::RowMajor>;
+  // (Eigen::SparseMatrix<Row_index, Eigen::RowMajor> has slow insertions)
+  using Sparse_vector = Eigen::SparseVector<Row_index>;
+  using Sparse_row_matrix = std::vector<Sparse_vector>;
 
   // A range of row indices
   using Row_indices_vector = std::vector<Row_index>;
@@ -216,7 +218,7 @@ class Flag_complex_sparse_matrix {
     std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
     // Iterate over the non-zero columns
-    for (typename Sparse_row_matrix::InnerIterator it(sparse_row_adjacency_matrix_, rw_u); it; ++it) {
+    for (typename Sparse_vector::InnerIterator it(sparse_row_adjacency_matrix_[rw_u]); it; ++it) {
       Row_index rw_v = it.index();
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
       Row_index ei;
@@ -255,7 +257,7 @@ class Flag_complex_sparse_matrix {
     // If it was not already inserted - Value won't be updated by emplace if it is already present
     if (result.second) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
-      sparse_row_adjacency_matrix_.insert(n, n) = -1; // not an edge
+      sparse_row_adjacency_matrix_[n].insert(n) = -1; // not an edge
       // Must be done after reading its size()
       row_to_vertex_.push_back(vertex);
     }
@@ -280,8 +282,8 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << "Inserting the edge " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
-    sparse_row_adjacency_matrix_.insert(rw_u->second, rw_v->second) = idx;
-    sparse_row_adjacency_matrix_.insert(rw_v->second, rw_u->second) = idx;
+    sparse_row_adjacency_matrix_[rw_u->second].insert(rw_v->second) = idx;
+    sparse_row_adjacency_matrix_[rw_v->second].insert(rw_u->second) = idx;
   }
 
  public:
@@ -306,7 +308,7 @@ class Flag_complex_sparse_matrix {
       vertices.emplace(v);
     }
     // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
-    sparse_row_adjacency_matrix_ = Sparse_row_matrix(vertices.size(), vertices.size());
+    sparse_row_adjacency_matrix_.resize(vertices.size(), Sparse_vector(vertices.size()));
   }
 
   /** \brief Flag_complex_sparse_matrix constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
@@ -317,7 +319,8 @@ class Flag_complex_sparse_matrix {
    * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
    */
   Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph)
-  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph), boost::num_vertices(one_skeleton_graph)) {
+  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph),
+                                 Sparse_vector(boost::num_vertices(one_skeleton_graph))) {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
