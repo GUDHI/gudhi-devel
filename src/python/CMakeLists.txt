@@ -235,8 +235,11 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
-    # Other .py files
+    # Some files for pip package
     file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+    file(COPY "gudhi/_distributor_init.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi/.libs")
+    message(" o o o ${CMAKE_CURRENT_BINARY_DIR}/gudhi/.libs")
 
     add_custom_command(
         OUTPUT gudhi.so

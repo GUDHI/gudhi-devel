@@ -10,6 +10,9 @@
 from importlib import import_module
 from sys import exc_info
 
+# Allow distributors to run custom init code
+from . import _distributor_init
+
 __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "https://gudhi.inria.fr/licensing/"

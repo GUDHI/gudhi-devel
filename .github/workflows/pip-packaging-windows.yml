@@ -35,14 +35,11 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DGMP_INCLUDE_DIR="c:/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
+          cp c:/vcpkg/installed/x64-windows/bin/mpfr.dll .libs/
+          cp c:/vcpkg/installed/x64-windows/bin/mpir.dll .libs/
           python setup.py bdist_wheel
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: python -m twine upload --repository-url https://test.pypi.org/legacy/ build/src/python/dist/*
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: dependencies
-          path: c:/vcpkg/installed/x64-windows/bin/
