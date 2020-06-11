@@ -131,6 +131,7 @@ This optimization problem is solved using the Python Optimal Transport library a
     print("Mass located in the first point of dgm1 transported to the diagonal:")
     print("%.3f" %P[0,-1]) 
 
+The output is
 
 .. testoutput::
 
