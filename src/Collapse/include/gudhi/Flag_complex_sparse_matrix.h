@@ -68,7 +68,7 @@ class Flag_complex_sparse_matrix {
   using Row_index = std::size_t;
 
   // The sparse matrix data type
-  using Sparse_row_matrix = Eigen::SparseMatrix<Filtration_value, Eigen::RowMajor>;
+  using Sparse_row_matrix = Eigen::SparseMatrix<Row_index, Eigen::RowMajor>;
 
   // A range of row indices
   using Row_indices_vector = std::vector<Row_index>;
@@ -221,7 +221,7 @@ class Flag_complex_sparse_matrix {
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
       Row_index ei;
       if (rw_u == rw_v ||
-          (ei = edge_to_index_map_.at(std::minmax(row_to_vertex_[rw_u], row_to_vertex_[rw_v]))) <= current_backward ||
+          (ei = it.value()) <= current_backward ||
           critical_edge_indicator_[ei]) {
         // inner index, here it is equal to it.columns()
         non_zero_indices.push_back(rw_v);
@@ -249,27 +249,28 @@ class Flag_complex_sparse_matrix {
   }
 
   // Insert a vertex in the data structure
-  void insert_vertex(Vertex_handle vertex, Filtration_value filt_val) {
-    auto result = vertex_to_row_.emplace(vertex, row_to_vertex_.size());
+  void insert_vertex(Vertex_handle vertex) {
+    auto n = row_to_vertex_.size();
+    auto result = vertex_to_row_.emplace(vertex, n);
     // If it was not already inserted - Value won't be updated by emplace if it is already present
     if (result.second) {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
-      sparse_row_adjacency_matrix_.insert(row_to_vertex_.size(), row_to_vertex_.size()) = filt_val;
-      // Must be done after sparse_row_adjacency_matrix_ insertion
+      sparse_row_adjacency_matrix_.insert(n, n) = -1; // not an edge
+      // Must be done after reading its size()
       row_to_vertex_.push_back(vertex);
     }
   }
 
   // Insert an edge in the data structure
   // @exception std::invalid_argument In debug mode, if u == v
-  void insert_new_edge(Vertex_handle u, Vertex_handle v, Filtration_value filt_val)
+  void insert_new_edge(Vertex_handle u, Vertex_handle v, Row_index idx)
   {
     // The edge must not be added before, it should be a new edge.
-    insert_vertex(u, filt_val);
+    insert_vertex(u);
     GUDHI_CHECK((u != v),
             std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
 
-    insert_vertex(v, filt_val);
+    insert_vertex(v);
 #ifdef DEBUG_TRACES
     std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
@@ -279,8 +280,8 @@ class Flag_complex_sparse_matrix {
 #ifdef DEBUG_TRACES
     std::cout << "Inserting the edge " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
-    sparse_row_adjacency_matrix_.insert(rw_u->second, rw_v->second) = filt_val;
-    sparse_row_adjacency_matrix_.insert(rw_v->second, rw_u->second) = filt_val;
+    sparse_row_adjacency_matrix_.insert(rw_u->second, rw_v->second) = idx;
+    sparse_row_adjacency_matrix_.insert(rw_v->second, rw_u->second) = idx;
   }
 
  public:
@@ -354,7 +355,7 @@ class Flag_complex_sparse_matrix {
       Filtration_value filt = std::get<1>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
-      insert_new_edge(u, v, filt);
+      insert_new_edge(u, v, endIdx);
 
       edge_to_index_map_.emplace(std::minmax(u, v), endIdx);
       critical_edge_indicator_.push_back(false);
