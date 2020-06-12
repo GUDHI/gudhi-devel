@@ -1,11 +1,8 @@
 name: pip packaging windows
 
 on:
-  push: {}
-  pull_request: {}
-# on:
-#   release:
-#     types: [published]
+  release:
+    types: [published]
 
 jobs:
   build:
