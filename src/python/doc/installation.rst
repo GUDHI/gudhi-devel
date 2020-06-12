@@ -5,20 +5,47 @@
 Installation
 ############
 
-Conda
-*****
-The easiest way to install the Python version of GUDHI is using
-`conda <https://gudhi.inria.fr/conda/>`_.
+Packages
+********
+The easiest way to install the Python version of GUDHI is using pre-built packages.
+We recommend `conda <https://gudhi.inria.fr/conda/>`_
+
+.. code-block:: bash
+
+    conda install -c conda-forge gudhi
+
+Gudhi is also available on `PyPI <https://pypi.org/project/gudhi/>`_
+
+.. code-block:: bash
+
+    pip install gudhi
+
+Third party packages are also available, for instance on Debian or Ubuntu
+
+.. code-block:: bash
+
+    apt install python3-gudhi
+
+In all cases, you may still want to install some of the optional `run time dependencies`_.
 
 Compiling
 *********
+These instructions are for people who want to compile gudhi from source, they are
+unnecessary if you installed a binary package of Gudhi as above. They assume that
+you have downloaded a `release <https://github.com/GUDHI/gudhi-devel/releases>`_,
+with a name like `gudhi.3.2.0.tar.gz`, then run `tar xf gudhi.3.2.0.tar.gz`, which
+created a directory `gudhi.3.2.0`, hereinafter referred to as `/path-to-gudhi/`.
+If you are instead using a git checkout, beware that the paths are a bit
+different, and in particular the `python/` subdirectory is actually `src/python/`
+there.
+
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
 `NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
-Studio 2017.
+Studio 2017 or later.
 
 On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
 :math:`\geq` 3.5 are available because of the required Visual Studio version.
