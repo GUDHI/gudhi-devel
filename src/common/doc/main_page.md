@@ -222,7 +222,7 @@
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "edge_collapse_representation.png"
+      \image html "dominated_edge.png"
     </td>
     <td width="50%">
     Edge collapse is able to reduce any flag filtration to a smaller flag filtration with the same persistence, using
