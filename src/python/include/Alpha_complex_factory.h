@@ -34,6 +34,7 @@ namespace alpha_complex {
 template <typename CgalPointType>
 std::vector<double> pt_cgal_to_cython(CgalPointType const& point) {
   std::vector<double> vd;
+  vd.reserve(point.dimension());
   for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
     vd.push_back(CGAL::to_double(*coord));
   return vd;
@@ -53,87 +54,84 @@ class Abstract_alpha_complex {
 
 class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
  private:
-  using Exact_kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-  using Point_exact_kernel = typename Exact_kernel::Point_d;
+  using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+  using Point = typename Kernel::Point_d;
 
  public:
   Exact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
-      : exact_version_(exact_version) {
-    ac_exact_ptr_ = std::make_unique<Alpha_complex<Exact_kernel>>(
-      boost::adaptors::transform(points, pt_cython_to_cgal<Point_exact_kernel>));
+    : exact_version_(exact_version),
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
 
   std::vector<double> get_point(int vh) {
-    Point_exact_kernel const& point = ac_exact_ptr_->get_point(vh);
+    Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    ac_exact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
  private:
   bool exact_version_;
-  std::unique_ptr<Alpha_complex<Exact_kernel>> ac_exact_ptr_;
+  Alpha_complex<Kernel> alpha_complex_;
 };
 
 class Inexact_Alphacomplex_dD : public Abstract_alpha_complex {
  private:
-  using Inexact_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-  using Point_inexact_kernel = typename Inexact_kernel::Point_d;
+  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  using Point = typename Kernel::Point_d;
 
  public:
   Inexact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
-      : exact_version_(exact_version) {
-    ac_inexact_ptr_ = std::make_unique<Alpha_complex<Inexact_kernel>>(
-      boost::adaptors::transform(points, pt_cython_to_cgal<Point_inexact_kernel>));
+    : exact_version_(exact_version),
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
 
   std::vector<double> get_point(int vh) {
-    Point_inexact_kernel const& point = ac_inexact_ptr_->get_point(vh);
+    Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    ac_inexact_ptr_->create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
  private:
   bool exact_version_;
-  std::unique_ptr<Alpha_complex<Inexact_kernel>> ac_inexact_ptr_;
+  Alpha_complex<Kernel> alpha_complex_;
 };
 
 template <complexity Complexity>
 class Alphacomplex_3D : public Abstract_alpha_complex {
  private:
-  using Point_3 = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
+  using Point = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
 
-  static Point_3 pt_cython_to_cgal_3(std::vector<double> const& vec) {
-    return Point_3(vec[0], vec[1], vec[2]);
+  static Point pt_cython_to_cgal_3(std::vector<double> const& vec) {
+    return Point(vec[0], vec[1], vec[2]);
   }
 
  public:
-  Alphacomplex_3D(const std::vector<std::vector<double>>& points) {
-    alpha3d_ptr_ = std::make_unique<Alpha_complex_3d<Complexity, false, false>>(
-      boost::adaptors::transform(points, pt_cython_to_cgal_3));
+  Alphacomplex_3D(const std::vector<std::vector<double>>& points)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
   }
 
   std::vector<double> get_point(int vh) {
-    Point_3 const& point = alpha3d_ptr_->get_point(vh);
+    Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    alpha3d_ptr_->create_complex(*simplex_tree, max_alpha_square);
+    alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
     if (default_filtration_value) {
       // TODO
     }
   }
 
  private:
-  std::unique_ptr<Alpha_complex_3d<Complexity, false, false>> alpha3d_ptr_;
+  Alpha_complex_3d<Complexity, false, false> alpha_complex_;
 };
 
 

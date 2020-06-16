@@ -28,7 +28,7 @@ namespace alpha_complex {
 class Alpha_complex_interface {
  public:
   Alpha_complex_interface(const std::vector<std::vector<double>>& points, bool fast_version, bool exact_version) {
-    if (points[0].size() == 3) {
+    if (points.size() > 0 && points[0].size() == 3) {
       if (fast_version)
         alpha_ptr_ = std::make_unique<Alphacomplex_3D<Gudhi::alpha_complex::complexity::FAST>>(points);
       else if (exact_version)
