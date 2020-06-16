@@ -68,7 +68,10 @@ if(CGAL_FOUND)
 endif()
 
 # For those who dislike bundled dependencies, this indicates where to find a preinstalled Hera.
-set(HERA_WASSERSTEIN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include CACHE PATH "Directory where one can find Hera's wasserstein.h")
+set(HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include)
+set(HERA_WASSERSTEIN_INCLUDE_DIR ${HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's wasserstein.h")
+set(HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/bottleneck/include)
+set(HERA_BOTTLENECK_INCLUDE_DIR ${HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's bottleneck.h")
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
@@ -199,7 +202,7 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(NOT SPHINX_PATH)
       if(PYTHON_VERSION_MAJOR EQUAL 3)
         # In Python3, just hack sphinx-build if it does not exist
-        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/doc/python3-sphinx-build.py")
+        set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "-m" "sphinx.cmd.build")
       endif(PYTHON_VERSION_MAJOR EQUAL 3)
     endif(NOT SPHINX_PATH)
   endif(SPHINX_FOUND)

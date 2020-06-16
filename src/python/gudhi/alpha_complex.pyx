@@ -27,11 +27,11 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points) nogil except +
+        Alpha_complex_interface(vector[vector[double]] points, bool fast_version) nogil except +
         # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool from_file) nogil except +
+        Alpha_complex_interface(string off_file, bool fast_version, bool from_file) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -53,10 +53,11 @@ cdef class AlphaComplex:
 
     """
 
-    cdef Alpha_complex_interface * thisptr
+    cdef Alpha_complex_interface * this_ptr
+    cdef bool exact
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file=''):
+    def __init__(self, points=None, off_file='', precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -66,15 +67,21 @@ cdef class AlphaComplex:
 
         :param off_file: An OFF file style name.
         :type off_file: string
+
+        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :type precision: string
         """
 
     # The real cython constructor
-    def __cinit__(self, points = None, off_file = ''):
+    def __cinit__(self, points = None, off_file = '', precision = 'safe'):
+        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+        cdef bool fast = precision == 'fast'
+        self.exact = precision == 'exact'
+
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                self.thisptr = new Alpha_complex_interface(
-                    off_file.encode('utf-8'), True)
+                self.this_ptr = new Alpha_complex_interface(off_file.encode('utf-8'), fast, True)
             else:
                 print("file " + off_file + " not found.")
         else:
@@ -83,17 +90,16 @@ cdef class AlphaComplex:
                 points=[]
             pts = points
             with nogil:
-                self.thisptr = new Alpha_complex_interface(pts)
-                
+                self.this_ptr = new Alpha_complex_interface(pts, fast)
 
     def __dealloc__(self):
-        if self.thisptr != NULL:
-            del self.thisptr
+        if self.this_ptr != NULL:
+            del self.this_ptr
 
     def __is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
-        return self.thisptr != NULL
+        return self.this_ptr != NULL
 
     def get_point(self, vertex):
         """This function returns the point corresponding to a given vertex.
@@ -103,21 +109,24 @@ cdef class AlphaComplex:
         :rtype: list of float
         :returns: the point.
         """
-        return self.thisptr.get_point(vertex)
+        return self.this_ptr.get_point(vertex)
 
-    def create_simplex_tree(self, max_alpha_square = float('inf')):
+    def create_simplex_tree(self, max_alpha_square = float('inf'), default_filtration_value = False):
         """
-        :param max_alpha_square: The maximum alpha square threshold the
-            simplices shall not exceed. Default is set to infinity, and
-            there is very little point using anything else since it does
-            not save time.
+        :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
+            infinity, and there is very little point using anything else since it does not save time.
         :type max_alpha_square: float
+        :param default_filtration_value: Set this value to `True` if filtration values are not needed to be computed
+            (will be set to `NaN`). Default value is `False` (which means compute the filtration values).
+        :type default_filtration_value: bool
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
+        cdef bool compute_filtration = default_filtration_value == True
         with nogil:
-            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, mas)
+            self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+                                              mas, self.exact, compute_filtration)
         return stree

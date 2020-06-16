@@ -1,0 +1,42 @@
+name: pip packaging windows
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.5', '3.6', '3.7', '3.8']
+    name: Build wheels for Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Install dependencies
+        run: |
+          vcpkg install boost-graph:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
+          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user twine
+      - name: Build python wheel
+        run: |
+          python --version
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DGMP_INCLUDE_DIR="c:/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DPython_ADDITIONAL_VERSIONS=3 ..
+          cd src/python
+          cp c:/vcpkg/installed/x64-windows/bin/mpfr.dll gudhi/
+          cp c:/vcpkg/installed/x64-windows/bin/mpir.dll gudhi/
+          python setup.py bdist_wheel
+      - name: Publish on PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: python -m twine upload build/src/python/dist/*

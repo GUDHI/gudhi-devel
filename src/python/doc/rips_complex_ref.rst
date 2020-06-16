@@ -13,8 +13,6 @@ Rips complex reference manual
 
    .. automethod:: gudhi.RipsComplex.__init__
 
-.. _weighted-rips-complex-reference-manual:
-
 ======================================
 Weighted Rips complex reference manual
 ======================================
@@ -25,3 +23,14 @@ Weighted Rips complex reference manual
    :show-inheritance:
 
    .. automethod:: gudhi.weighted_rips_complex.WeightedRipsComplex.__init__
+
+=================================
+DTM Rips complex reference manual
+=================================
+
+.. autoclass:: gudhi.dtm_rips_complex.DTMRipsComplex
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: gudhi.dtm_rips_complex.DTMRipsComplex.__init__

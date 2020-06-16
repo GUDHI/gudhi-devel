@@ -49,8 +49,17 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/CMakeGUDHIVersion.txt ${GUDHI_USER_VERSION_DIR}/CMakeGUDHIVersion.txt)
 
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH} ${GUDHI_USER_VERSION_DIR}/python)
+# As cython generates .cpp files in source, we have to copy all except cpp files from python directory
+file(GLOB_RECURSE PYTHON_FILES ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/*)
+foreach(PYTHON_FILE ${PYTHON_FILES})
+  get_filename_component(PYTHON_FILE_EXT ${PYTHON_FILE} EXT)
+  if (NOT "${PYTHON_FILE_EXT}" STREQUAL ".cpp")
+    string(REPLACE "${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/" "" RELATIVE_PYTHON_FILE ${PYTHON_FILE})
+    add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                   copy ${PYTHON_FILE} ${GUDHI_USER_VERSION_DIR}/python/${RELATIVE_PYTHON_FILE})
+  endif()
+endforeach()
+
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/data ${GUDHI_USER_VERSION_DIR}/data)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
@@ -58,8 +67,11 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
 
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include ${GUDHI_USER_VERSION_DIR}/ext/hera/wasserstein/include)
+if(HERA_WASSERSTEIN_INCLUDE_DIR STREQUAL HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR OR
+    HERA_BOTTLENECK_INCLUDE_DIR STREQUAL HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR)
+  add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                     copy_directory ${CMAKE_SOURCE_DIR}/ext/hera ${GUDHI_USER_VERSION_DIR}/ext/hera)
+endif()
 
 set(GUDHI_DIRECTORIES "doc;example;concept;utilities")
 
