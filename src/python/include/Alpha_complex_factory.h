@@ -32,7 +32,7 @@ namespace Gudhi {
 namespace alpha_complex {
 
 template <typename CgalPointType>
-std::vector<double> pt_cgal_to_cython(CgalPointType& point) {
+std::vector<double> pt_cgal_to_cython(CgalPointType const& point) {
   std::vector<double> vd;
   for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
     vd.push_back(CGAL::to_double(*coord));
