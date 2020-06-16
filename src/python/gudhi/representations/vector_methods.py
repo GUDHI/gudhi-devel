@@ -675,7 +675,7 @@ class Atol(BaseEstimator, TransformerMixin):
         if self.quantiser.n_clusters == 1:
             dist_centers = pairwise.pairwise_distances(measures_concat)
             np.fill_diagonal(dist_centers, 0)
-            self.inertias = np.max(dist_centers)/2
+            self.inertias = np.array([np.max(dist_centers)/2])
         else:
             dist_centers = pairwise.pairwise_distances(self.centers)
             np.fill_diagonal(dist_centers, np.inf)
