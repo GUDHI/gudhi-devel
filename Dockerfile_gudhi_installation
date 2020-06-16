@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:20.04
 
 # Update and upgrade distribution
 RUN apt-get update && \
