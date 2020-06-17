@@ -67,6 +67,7 @@ class Flag_complex_sparse_matrix {
   // internal numbering of vertices and edges
   using IVertex = std::size_t;
   using Edge_index = std::size_t;
+  using IEdge = std::pair<IVertex, IVertex>;
 
   // The sparse matrix data type
   // (Eigen::SparseMatrix<Edge_index, Eigen::RowMajor> has slow insertions)
@@ -90,8 +91,8 @@ class Flag_complex_sparse_matrix {
   // while edges > current_backward are removed unless critical_edge_indicator_.
   Edge_index current_backward = -1;
 
-  // Map from edge to its index
-  std::unordered_map<Edge, Edge_index, boost::hash<Edge>> edge_to_index_map_;
+  // Map from IEdge to its index
+  std::unordered_map<IEdge, Edge_index, boost::hash<IEdge>> iedge_to_index_map_;
 
   // Boolean vector to indicate if the edge is critical.
   std::vector<bool> critical_edge_indicator_;
@@ -156,10 +157,10 @@ class Flag_complex_sparse_matrix {
     IVertex_vector common_neighbours = open_common_neighbours_row_index(rw_u, rw_v);
 
     for (auto rw_c : common_neighbours) {
-      auto e_with_new_nbhr_v = std::minmax(u, row_to_vertex_[rw_c]);
-      auto e_with_new_nbhr_u = std::minmax(v, row_to_vertex_[rw_c]);
-      edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_v]);
-      edge_indices.emplace(edge_to_index_map_[e_with_new_nbhr_u]);
+      IEdge e_with_new_nbhr_v = std::minmax(rw_u, rw_c);
+      IEdge e_with_new_nbhr_u = std::minmax(rw_v, rw_c);
+      edge_indices.emplace(iedge_to_index_map_[e_with_new_nbhr_v]);
+      edge_indices.emplace(iedge_to_index_map_[e_with_new_nbhr_u]);
     }
     return edge_indices;
   }
@@ -262,7 +263,7 @@ class Flag_complex_sparse_matrix {
 
   // Insert an edge in the data structure
   // @exception std::invalid_argument In debug mode, if u == v
-  void insert_new_edge(Vertex_handle u, Vertex_handle v, Edge_index idx)
+  IEdge insert_new_edge(Vertex_handle u, Vertex_handle v, Edge_index idx)
   {
     GUDHI_CHECK((u != v), std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
     // The edge must not be added before, it should be a new edge.
@@ -273,6 +274,7 @@ class Flag_complex_sparse_matrix {
 #endif  // DEBUG_TRACES
     sparse_row_adjacency_matrix_[rw_u].insert(rw_v) = idx;
     sparse_row_adjacency_matrix_[rw_v].insert(rw_u) = idx;
+    return std::minmax(rw_u, rw_v);
   }
 
  public:
@@ -333,9 +335,9 @@ class Flag_complex_sparse_matrix {
       Filtration_value filt = std::get<1>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
-      insert_new_edge(u, v, endIdx);
+      IEdge ie = insert_new_edge(u, v, endIdx);
 
-      edge_to_index_map_.emplace(std::minmax(u, v), endIdx);
+      iedge_to_index_map_.emplace(ie, endIdx);
       critical_edge_indicator_.push_back(false);
 
       if (!edge_is_dominated(edge)) {
