@@ -64,16 +64,17 @@ class Flag_complex_sparse_matrix {
   using Edge = std::pair<Vertex_handle, Vertex_handle>;
 
  private:
-  // Row_index type in the sparse matrix
-  using Row_index = std::size_t;
+  // internal numbering of vertices and edges
+  using IVertex = std::size_t;
+  using Edge_index = std::size_t;
 
   // The sparse matrix data type
-  // (Eigen::SparseMatrix<Row_index, Eigen::RowMajor> has slow insertions)
-  using Sparse_vector = Eigen::SparseVector<Row_index>;
+  // (Eigen::SparseMatrix<Edge_index, Eigen::RowMajor> has slow insertions)
+  using Sparse_vector = Eigen::SparseVector<Edge_index>;
   using Sparse_row_matrix = std::vector<Sparse_vector>;
 
   // A range of row indices
-  using Row_indices_vector = std::vector<Row_index>;
+  using IVertex_vector = std::vector<IVertex>;
 
  public:
   /** \brief Filtered_edge is a type to store an edge with its filtration value. */
@@ -87,33 +88,32 @@ class Flag_complex_sparse_matrix {
 
   // Index of the current edge in the backwards walk. Edges <= current_backward are part of the temporary graph,
   // while edges > current_backward are removed unless critical_edge_indicator_.
-  Row_index current_backward = -1;
+  Edge_index current_backward = -1;
 
   // Map from edge to its index
-  std::unordered_map<Edge, Row_index, boost::hash<Edge>> edge_to_index_map_;
+  std::unordered_map<Edge, Edge_index, boost::hash<Edge>> edge_to_index_map_;
 
-  // Boolean vector to indicate if the index is critical or not.
+  // Boolean vector to indicate if the edge is critical.
   std::vector<bool> critical_edge_indicator_;
 
   // Map from vertex handle to its row index
-  std::unordered_map<Vertex_handle, Row_index> vertex_to_row_;
+  std::unordered_map<Vertex_handle, IVertex> vertex_to_row_;
 
   // Stores the Sparse matrix of Filtration values representing the original graph.
-  // This is row-major version of the same sparse-matrix, to facilitate easy access
-  // to elements when traversing the matrix row-wise.
+  // The matrix rows and columns are indexed by IVertex.
   Sparse_row_matrix sparse_row_adjacency_matrix_;
 
-  // Vector of filtered edges, for edge-collapse, the indices of the edges are the row-indices.
+  // The input, a vector of filtered edges.
   std::vector<Filtered_edge> f_edge_vector_;
 
-  // Edge e is the actual edge (u,v). Not the row ids in the matrixs
+  // Edge e is the actual edge (u,v), with Vertex_handle u and v, not IVertex.
   bool edge_is_dominated(const Edge& edge) const
   {
     Vertex_handle u = std::get<0>(edge);
     Vertex_handle v = std::get<1>(edge);
 
-    const Row_index rw_u = vertex_to_row_.at(u);
-    const Row_index rw_v = vertex_to_row_.at(v);
+    const IVertex rw_u = vertex_to_row_.at(u);
+    const IVertex rw_v = vertex_to_row_.at(v);
 #ifdef DEBUG_TRACES
     std::cout << "The edge {" << u << ", " << v <<  "} is going for domination check." << std::endl;
 #endif  // DEBUG_TRACES
@@ -139,8 +139,8 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns the edges connecting u and v (extremities of crit) to their common neighbors (not themselves)
-  std::set<Row_index> three_clique_indices(Row_index crit) {
-    std::set<Row_index> edge_indices;
+  std::set<Edge_index> three_clique_indices(Edge_index crit) {
+    std::set<Edge_index> edge_indices;
 
     Edge edge = std::get<0>(f_edge_vector_[crit]);
     Vertex_handle u = std::get<0>(edge);
@@ -153,7 +153,7 @@ class Flag_complex_sparse_matrix {
     auto rw_u = vertex_to_row_[u];
     auto rw_v = vertex_to_row_[v];
 
-    Row_indices_vector common_neighbours = open_common_neighbours_row_index(rw_u, rw_v);
+    IVertex_vector common_neighbours = open_common_neighbours_row_index(rw_u, rw_v);
 
     for (auto rw_c : common_neighbours) {
       auto e_with_new_nbhr_v = std::minmax(u, row_to_vertex_[rw_c]);
@@ -164,14 +164,14 @@ class Flag_complex_sparse_matrix {
     return edge_indices;
   }
 
-  // Detect and set all indices that are becoming critical
+  // Detect and set all edges that are becoming critical
   template<typename FilteredEdgeOutput>
-  void set_edge_critical(Row_index indx, Filtration_value filt, FilteredEdgeOutput filtered_edge_output) {
+  void set_edge_critical(Edge_index indx, Filtration_value filt, FilteredEdgeOutput filtered_edge_output) {
 #ifdef DEBUG_TRACES
     std::cout << "The curent index  with filtration value " << indx << ", " << filt << " is primary critical" <<
     std::endl;
 #endif  // DEBUG_TRACES
-    std::set<Row_index> effected_indices = three_clique_indices(indx);
+    std::set<Edge_index> effected_indices = three_clique_indices(indx);
     // Cannot use boost::adaptors::reverse in such dynamic cases apparently
     for (auto it = effected_indices.rbegin(); it != effected_indices.rend(); ++it) {
       current_backward = *it;
@@ -186,7 +186,7 @@ class Flag_complex_sparse_matrix {
 #endif  // DEBUG_TRACES
           critical_edge_indicator_[current_backward] = true;
           filtered_edge_output({u, v}, filt);
-          std::set<Row_index> inner_effected_indcs = three_clique_indices(current_backward);
+          std::set<Edge_index> inner_effected_indcs = three_clique_indices(current_backward);
           for (auto inr_idx : inner_effected_indcs) {
             if(inr_idx < current_backward) // && !critical_edge_indicator_[inr_idx]
               effected_indices.emplace(inr_idx);
@@ -202,24 +202,23 @@ class Flag_complex_sparse_matrix {
     current_backward = -1;
   }
 
-  // Returns list of neighbors of a particular indx.
-  Row_indices_vector neighbours_row_index(Row_index rw_u, bool closed) const
+  // Returns list of neighbors of a particular vertex.
+  IVertex_vector neighbours_row_index(IVertex rw_u, bool closed) const
   {
-    Row_indices_vector neighbors;
+    IVertex_vector neighbors;
     neighbors.reserve(sparse_row_adjacency_matrix_[rw_u].nonZeros()); // too much, but who cares
 #ifdef DEBUG_TRACES
     std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
 #endif  // DEBUG_TRACES
-    // Iterate over the non-zero columns
+    // Iterate over the neighbors
     for (typename Sparse_vector::InnerIterator it(sparse_row_adjacency_matrix_[rw_u]); it; ++it) {
-      Row_index rw_v = it.index();
+      IVertex rw_v = it.index();
       if (!closed && rw_u == rw_v) continue;
-      Row_index ei;
+      Edge_index ei;
       // If the vertex v is not dominated and the edge {u,v} is still in the matrix
       if ((closed && rw_u == rw_v) ||
           (ei = it.value()) <= current_backward ||
           critical_edge_indicator_[ei]) {
-        // inner index, here it is equal to it.columns()
         neighbors.push_back(rw_v);
 #ifdef DEBUG_TRACES
         std::cout << row_to_vertex_[rw_v] << ", " ;
@@ -233,11 +232,11 @@ class Flag_complex_sparse_matrix {
   }
 
   // Returns the list of open neighbours of the edge :{u,v}.
-  Row_indices_vector open_common_neighbours_row_index(Row_index rw_u, Row_index rw_v) const
+  IVertex_vector open_common_neighbours_row_index(IVertex rw_u, IVertex rw_v) const
   {
-    Row_indices_vector non_zero_indices_u = neighbours_row_index(rw_u, false);
-    Row_indices_vector non_zero_indices_v = neighbours_row_index(rw_v, false);
-    Row_indices_vector common;
+    IVertex_vector non_zero_indices_u = neighbours_row_index(rw_u, false);
+    IVertex_vector non_zero_indices_v = neighbours_row_index(rw_v, false);
+    IVertex_vector common;
     common.reserve(std::min(non_zero_indices_u.size(), non_zero_indices_v.size()));
     std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
                           non_zero_indices_v.end(), std::back_inserter(common));
@@ -260,7 +259,7 @@ class Flag_complex_sparse_matrix {
 
   // Insert an edge in the data structure
   // @exception std::invalid_argument In debug mode, if u == v
-  void insert_new_edge(Vertex_handle u, Vertex_handle v, Row_index idx)
+  void insert_new_edge(Vertex_handle u, Vertex_handle v, Edge_index idx)
   {
     // The edge must not be added before, it should be a new edge.
     insert_vertex(u);
@@ -345,7 +344,7 @@ class Flag_complex_sparse_matrix {
     std::sort(f_edge_vector_.begin(), f_edge_vector_.end(), sort_by_filtration);
 #endif
 
-    for (Row_index endIdx = 0; endIdx < f_edge_vector_.size(); endIdx++) {
+    for (Edge_index endIdx = 0; endIdx < f_edge_vector_.size(); endIdx++) {
       Filtered_edge fec = f_edge_vector_[endIdx];
       Edge edge = std::get<0>(fec);
       Vertex_handle u = std::get<0>(edge);
