@@ -250,6 +250,8 @@ class Flag_complex_sparse_matrix {
     auto result = vertex_to_row_.emplace(vertex, n);
     // If it was not already inserted - Value won't be updated by emplace if it is already present
     if (result.second) {
+      // Expand the matrix. The size of rows is irrelevant.
+      sparse_row_adjacency_matrix_.emplace_back((std::numeric_limits<Eigen::Index>::max)());
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
       sparse_row_adjacency_matrix_[n].insert(n) = -1; // not an edge
       // Must be done after reading its size()
@@ -291,19 +293,7 @@ class Flag_complex_sparse_matrix {
    */
   template<typename Filtered_edge_range>
   Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
-  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()) {
-    // To get the number of vertices
-    std::unordered_set<Vertex_handle> vertices;
-    for (Filtered_edge filtered_edge : filtered_edge_range) {
-      Vertex_handle u;
-      Vertex_handle v;
-      std::tie(u,v) = std::get<0>(filtered_edge);
-      vertices.emplace(u);
-      vertices.emplace(v);
-    }
-    // Initializing sparse_row_adjacency_matrix_, This is a row-major sparse matrix.
-    sparse_row_adjacency_matrix_.resize(vertices.size(), Sparse_vector(vertices.size()));
-  }
+  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()) { }
 
   /** \brief Flag_complex_sparse_matrix constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
    *
@@ -312,9 +302,7 @@ class Flag_complex_sparse_matrix {
    *
    * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
    */
-  Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph)
-  : sparse_row_adjacency_matrix_(boost::num_vertices(one_skeleton_graph),
-                                 Sparse_vector(boost::num_vertices(one_skeleton_graph))) {
+  Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph) {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
