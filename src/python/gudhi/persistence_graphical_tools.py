@@ -105,9 +105,11 @@ def plot_persistence_barcode(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        from matplotlib import rc
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        from matplotlib import checkdep_usetex
+        if matplotlib.checkdep_usetex(True):
+            from matplotlib import rc
+            plt.rc('text', usetex=True)
+            plt.rc('font', family='serif')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -250,9 +252,11 @@ def plot_persistence_diagram(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        from matplotlib import rc
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        from matplotlib import checkdep_usetex
+        if matplotlib.checkdep_usetex(True):
+            from matplotlib import rc
+            plt.rc('text', usetex=True)
+            plt.rc('font', family='serif')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -422,9 +426,11 @@ def plot_persistence_density(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from scipy.stats import kde
-        from matplotlib import rc
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        from matplotlib import checkdep_usetex
+        if matplotlib.checkdep_usetex(True):
+            from matplotlib import rc
+            plt.rc('text', usetex=True)
+            plt.rc('font', family='serif')
 
         if persistence_file != "":
             if dimension is None:
