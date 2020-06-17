@@ -106,7 +106,7 @@ def plot_persistence_barcode(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from matplotlib import checkdep_usetex
-        if matplotlib.checkdep_usetex(True):
+        if checkdep_usetex(True):
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
@@ -253,7 +253,7 @@ def plot_persistence_diagram(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from matplotlib import checkdep_usetex
-        if matplotlib.checkdep_usetex(True):
+        if checkdep_usetex(True):
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
@@ -427,7 +427,7 @@ def plot_persistence_density(
         import matplotlib.patches as mpatches
         from scipy.stats import kde
         from matplotlib import checkdep_usetex
-        if matplotlib.checkdep_usetex(True):
+        if checkdep_usetex(True):
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
