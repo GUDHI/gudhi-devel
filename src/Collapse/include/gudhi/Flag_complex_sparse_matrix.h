@@ -245,7 +245,7 @@ class Flag_complex_sparse_matrix {
   }
 
   // Insert a vertex in the data structure
-  void insert_vertex(Vertex_handle vertex) {
+  IVertex insert_vertex(Vertex_handle vertex) {
     auto n = row_to_vertex_.size();
     auto result = vertex_to_row_.emplace(vertex, n);
     // If it was not already inserted - Value won't be updated by emplace if it is already present
@@ -257,29 +257,22 @@ class Flag_complex_sparse_matrix {
       // Must be done after reading its size()
       row_to_vertex_.push_back(vertex);
     }
+    return result.first->second;
   }
 
   // Insert an edge in the data structure
   // @exception std::invalid_argument In debug mode, if u == v
   void insert_new_edge(Vertex_handle u, Vertex_handle v, Edge_index idx)
   {
+    GUDHI_CHECK((u != v), std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
     // The edge must not be added before, it should be a new edge.
-    insert_vertex(u);
-    GUDHI_CHECK((u != v),
-            std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
-
-    insert_vertex(v);
-#ifdef DEBUG_TRACES
-    std::cout << "Insertion of the edge begins " << u <<", " << v << std::endl;
-#endif  // DEBUG_TRACES
-
-    auto rw_u = vertex_to_row_.find(u);
-    auto rw_v = vertex_to_row_.find(v);
+    IVertex rw_u = insert_vertex(u);
+    IVertex rw_v = insert_vertex(v);
 #ifdef DEBUG_TRACES
     std::cout << "Inserting the edge " << u <<", " << v << std::endl;
 #endif  // DEBUG_TRACES
-    sparse_row_adjacency_matrix_[rw_u->second].insert(rw_v->second) = idx;
-    sparse_row_adjacency_matrix_[rw_v->second].insert(rw_u->second) = idx;
+    sparse_row_adjacency_matrix_[rw_u].insert(rw_v) = idx;
+    sparse_row_adjacency_matrix_[rw_v].insert(rw_u) = idx;
   }
 
  public:
