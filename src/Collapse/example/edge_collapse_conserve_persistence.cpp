@@ -71,9 +71,9 @@ std::vector<Persistence_pair> get_persistence_pairs(Simplex_tree& st, int ambien
   auto persistent_pairs = pcoh.get_persistent_pairs();
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
   for (auto pair : persistent_pairs) {
-    ppairs.push_back({st.dimension(get<0>(pair)),
-                      st.filtration(get<0>(pair)),
-                      st.filtration(get<1>(pair)) });
+    ppairs.emplace_back(Persistence_pair(st.dimension(get<0>(pair)),
+                                         st.filtration(get<0>(pair)),
+                                         st.filtration(get<1>(pair)) ));
   }
   return ppairs;
 }

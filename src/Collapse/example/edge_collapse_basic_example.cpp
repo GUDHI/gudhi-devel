@@ -32,7 +32,7 @@ int main() {
   // Retrieve collapse edges from the output iterator
   edge_collapser.process_edges(
     [&remaining_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
-        remaining_edges.push_back({edge, filtration});
+        remaining_edges.emplace_back(Filtered_edge(edge, filtration));
       });
 
   for (Filtered_edge filtered_edge_from_collapse : remaining_edges) {
