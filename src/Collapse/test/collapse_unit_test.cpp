@@ -49,7 +49,7 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Flag_complex_edge_collapser edge_collapser(filtered_edges);
+  Flag_complex_edge_collapser edge_collapser(filtered_edges.begin(), filtered_edges.end());
   Filtered_edge_list collapse_edges;
   edge_collapser.process_edges(
     [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
                                                  {1., 1.} };
 
   Filtration_value threshold = std::numeric_limits<Filtration_value>::infinity();
-  using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
+  using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
   Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Flag_complex_edge_collapser>(point_cloud,
                                                                                                threshold,
                                                                                                Gudhi::Euclidean_distance());

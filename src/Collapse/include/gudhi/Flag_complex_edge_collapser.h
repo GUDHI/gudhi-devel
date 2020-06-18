@@ -54,9 +54,9 @@ namespace collapse {
 template<typename Vertex, typename Filtration>
 class Flag_complex_edge_collapser {
  public:
-  /** \brief Re-define Vertex as Vertex_handle type to ease the interface with compute_proximity_graph. */
+  /** \brief Re-define Vertex as Vertex_handle type to ease the interface with `Gudhi::Proximity_graph`. */
   using Vertex_handle = Vertex;
-  /** \brief Re-define Filtration as Filtration_value type to ease the interface with compute_proximity_graph. */
+  /** \brief Re-define Filtration as Filtration_value type to ease the interface with `Gudhi::Proximity_graph`. */
   using Filtration_value = Filtration;
   /** \brief This is an ordered pair, An edge is stored with convention of the first element being the smaller i.e
    * {2,3} not {3,2}. However this is at the level of row indices on actual vertex lables.
@@ -80,8 +80,6 @@ class Flag_complex_edge_collapser {
  public:
   /** \brief Filtered_edge is a type to store an edge with its filtration value. */
   using Filtered_edge = std::pair<Edge, Filtration_value>;
-  /** \brief Proximity_graph is a type that can be used to construct easily a Flag_complex_edge_collapser. */
-  using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
  private:
   // Map from row index to its vertex handle
@@ -280,24 +278,41 @@ class Flag_complex_edge_collapser {
  public:
   /** \brief Flag_complex_edge_collapser constructor from a range of filtered edges.
    *
-   * @param[in] filtered_edge_range Range of filtered edges. Filtered edges must be in
+   * @param[in] begin Iterator on the first element of a filtered edges range. Filtered edges must be in
+   * `Flag_complex_edge_collapser::Filtered_edge`.
+   *
+   * @param[in] end Iterator on the last element of a filtered edges range. Filtered edges must be in
    * `Flag_complex_edge_collapser::Filtered_edge`.
    *
    * There is no need the range to be sorted, as it will be performed in
    * `Flag_complex_edge_collapser::process_edges`.
    */
-  template<typename Filtered_edge_range>
-  Flag_complex_edge_collapser(const Filtered_edge_range& filtered_edge_range)
-  : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()) { }
+  template<typename Filtered_edge_iterator>
+  Flag_complex_edge_collapser(Filtered_edge_iterator begin, Filtered_edge_iterator end)
+  : f_edge_vector_(begin, end) { }
 
-  /** \brief Flag_complex_edge_collapser constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
+  /** \brief Inserts all edges given by a OneSkeletonGraph into a vector of
+   * `Flag_complex_edge_collapser::Filtered_edge`.
+   * OneSkeletonGraph must be a model of
+   * <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
+   * and <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
-   * @param[in] one_skeleton_graph The one skeleton graph. The graph must be in
-   * `Flag_complex_edge_collapser::Proximity_graph`.
+   * The edge filtration value is accessible through the property tag
+   * edge_filtration_t.
    *
-   * The constructor is computing and filling a vector of `Flag_complex_edge_collapser::Filtered_edge`
+   * boost::graph_traits<OneSkeletonGraph>::vertex_descriptor
+   *                                    must be Vertex_handle.
+   * boost::graph_traits<OneSkeletonGraph>::directed_category
+   *                                    can be directed_tag (the fastest, the least RAM use), undirected_tag or even
+   *                                    bidirected_tag.
+   *
+   * If an edge appears with multiplicity, the function will arbitrarily pick one representative to read the filtration
+   * value.
+   * 
+   * `Gudhi::Proximity_graph<Flag_complex_edge_collapser>` is a good candidate for OneSkeletonGraph.
    */
-  Flag_complex_edge_collapser(const Proximity_graph& one_skeleton_graph) {
+  template<class OneSkeletonGraph>
+  Flag_complex_edge_collapser(const OneSkeletonGraph& one_skeleton_graph) {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {

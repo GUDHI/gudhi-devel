@@ -28,7 +28,7 @@ using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
 using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
-using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
+using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;

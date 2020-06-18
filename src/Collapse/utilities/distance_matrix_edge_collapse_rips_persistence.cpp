@@ -21,7 +21,7 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 
 using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
-using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
+using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
