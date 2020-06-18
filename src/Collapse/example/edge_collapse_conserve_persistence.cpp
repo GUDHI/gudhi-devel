@@ -33,7 +33,7 @@ using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
-using Persistence_pair = std::tuple<int, Filtration_value, Filtration_value>;
+using Persistence_interval = std::tuple<int, Filtration_value, Filtration_value>;
 /*
  * Compare two intervals by dimension, then by length.
  */
@@ -49,8 +49,8 @@ struct cmp_intervals_by_length {
   Simplex_tree* sc_;
 };
 
-std::vector<Persistence_pair> get_persistence_pairs(Simplex_tree& st, int ambient_dim) {
-  std::vector<Persistence_pair> ppairs;
+std::vector<Persistence_interval> get_persistence_intervals(Simplex_tree& st, int ambient_dim) {
+  std::vector<Persistence_interval> persistence_intervals;
   st.expansion(ambient_dim);
   
   // Sort the simplices in the order of the filtration
@@ -68,11 +68,11 @@ std::vector<Persistence_pair> get_persistence_pairs(Simplex_tree& st, int ambien
   auto persistent_pairs = pcoh.get_persistent_pairs();
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
   for (auto pair : persistent_pairs) {
-    ppairs.emplace_back(Persistence_pair(st.dimension(get<0>(pair)),
-                                         st.filtration(get<0>(pair)),
-                                         st.filtration(get<1>(pair)) ));
+    persistence_intervals.emplace_back(Persistence_interval(st.dimension(get<0>(pair)),
+                                             st.filtration(get<0>(pair)),
+                                             st.filtration(get<1>(pair)) ));
   }
-  return ppairs;
+  return persistence_intervals;
 }
 
 int main(int argc, char* argv[]) {
@@ -113,8 +113,8 @@ int main(int argc, char* argv[]) {
 
   Simplex_tree stree_from_collapse;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < point_vector.size(); vertex++) {
-        // insert the vertex with a 0. filtration value just like a Rips
-        stree_from_collapse.insert_simplex({vertex}, 0.);
+    // insert the vertex with a 0. filtration value just like a Rips
+    stree_from_collapse.insert_simplex({vertex}, 0.);
   }
   edge_collapser.process_edges(
     [&stree_from_collapse](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
@@ -122,24 +122,24 @@ int main(int argc, char* argv[]) {
         stree_from_collapse.insert_simplex(edge, filtration);
       });
 
-  std::vector<Persistence_pair> ppairs_from_collapse = get_persistence_pairs(stree_from_collapse, ambient_dim);
+  std::vector<Persistence_interval> persistence_intervals_from_collapse = get_persistence_intervals(stree_from_collapse, ambient_dim);
 
   // ***** Simplex tree from the complete flag complex *****
   Simplex_tree stree_wo_collapse;
   stree_wo_collapse.insert_graph(proximity_graph);
 
-  std::vector<Persistence_pair> ppairs_wo_collapse = get_persistence_pairs(stree_wo_collapse, ambient_dim);
+  std::vector<Persistence_interval> persistence_intervals_wo_collapse = get_persistence_intervals(stree_wo_collapse, ambient_dim);
 
   // ***** Comparison *****
-  if (ppairs_wo_collapse.size() != ppairs_from_collapse.size()) {
-    std::cerr << "Number of persistence pairs with    collapse is " << ppairs_from_collapse.size() << std::endl;
-    std::cerr << "Number of persistence pairs without collapse is " << ppairs_wo_collapse.size()   << std::endl;
+  if (persistence_intervals_wo_collapse.size() != persistence_intervals_from_collapse.size()) {
+    std::cerr << "Number of persistence pairs with    collapse is " << persistence_intervals_from_collapse.size() << std::endl;
+    std::cerr << "Number of persistence pairs without collapse is " << persistence_intervals_wo_collapse.size()   << std::endl;
     exit(-1);
   }
 
   int return_value = 0;
-  auto ppwoc_ptr = ppairs_wo_collapse.begin();
-  for (auto ppfc: ppairs_from_collapse) {
+  auto ppwoc_ptr = persistence_intervals_wo_collapse.begin();
+  for (auto ppfc: persistence_intervals_from_collapse) {
     if (ppfc != *ppwoc_ptr) {
       return_value++;
       std::cerr << "Without collapse: "
