@@ -28,14 +28,14 @@ int main() {
 
   Flag_complex_edge_collapser edge_collapser(graph.begin(), graph.end());
 
-  Filtered_edge_list collapse_edges;
+  Filtered_edge_list remaining_edges;
   // Retrieve collapse edges from the output iterator
   edge_collapser.process_edges(
-    [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
-        collapse_edges.push_back({edge, filtration});
+    [&remaining_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
+        remaining_edges.push_back({edge, filtration});
       });
 
-  for (Filtered_edge filtered_edge_from_collapse : collapse_edges) {
+  for (Filtered_edge filtered_edge_from_collapse : remaining_edges) {
     Edge edge_from_collapse = std::get<0>(filtered_edge_from_collapse);
     std::cout << "fn[" << std::get<0>(edge_from_collapse) << ", " << std::get<1>(edge_from_collapse) << "] = "
               << std::get<1>(filtered_edge_from_collapse) << std::endl;

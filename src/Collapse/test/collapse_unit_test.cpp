@@ -50,15 +50,15 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
   Flag_complex_edge_collapser edge_collapser(filtered_edges.begin(), filtered_edges.end());
-  Filtered_edge_list collapse_edges;
+  Filtered_edge_list remaining_edges;
   edge_collapser.process_edges(
-    [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
+    [&remaining_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
       std::cout << "f[" << std::get<0>(edge) << ", " << std::get<1>(edge) << "] = " << filtration << std::endl;
-        collapse_edges.push_back({edge, filtration});
+        remaining_edges.push_back({edge, filtration});
       });
-  std::cout << "AFTER COLLAPSE - Total number of edges: " << collapse_edges.size() << std::endl;
-  BOOST_CHECK(collapse_edges.size() <= filtered_edges.size());
-  for (auto filtered_edge_from_collapse : collapse_edges) {
+  std::cout << "AFTER COLLAPSE - Total number of edges: " << remaining_edges.size() << std::endl;
+  BOOST_CHECK(remaining_edges.size() <= filtered_edges.size());
+  for (auto filtered_edge_from_collapse : remaining_edges) {
     auto edge_from_collapse = std::get<0>(filtered_edge_from_collapse);
     std::cout << "f[" << std::get<0>(edge_from_collapse) << ", " << std::get<1>(edge_from_collapse) << "] = "
               << std::get<1>(filtered_edge_from_collapse) << std::endl;
@@ -72,7 +72,7 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
     std::cout << "f[" << std::get<0>(removed_edge) << ", " << std::get<1>(removed_edge) << "] = "
               << std::get<1>(removed_filtered_edge) << std::endl;
     // Check each removed edge from collapse is in the input
-    BOOST_CHECK(!find_edge_in_list(removed_filtered_edge, collapse_edges));
+    BOOST_CHECK(!find_edge_in_list(removed_filtered_edge, remaining_edges));
   }
 
 }
@@ -169,18 +169,18 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
                                                                                                threshold,
                                                                                                Gudhi::Euclidean_distance());
   Flag_complex_edge_collapser edge_collapser(proximity_graph);
-  Filtered_edge_list collapse_edges;
+  Filtered_edge_list remaining_edges;
   edge_collapser.process_edges(
-    [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
+    [&remaining_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
       std::cout << "f[" << std::get<0>(edge) << ", " << std::get<1>(edge) << "] = " << filtration << std::endl;
-        collapse_edges.push_back({edge, filtration});
+        remaining_edges.push_back({edge, filtration});
       });
-  BOOST_CHECK(collapse_edges.size() == 5);
+  BOOST_CHECK(remaining_edges.size() == 5);
 
   std::size_t filtration_is_edge_length_nb = 0;
   std::size_t filtration_is_diagonal_length_nb = 0;
   float epsilon = std::numeric_limits<Filtration_value>::epsilon();
-  for (auto filtered_edge : collapse_edges) {
+  for (auto filtered_edge : remaining_edges) {
     if (std::get<1>(filtered_edge) == 1.)
       filtration_is_edge_length_nb++;
     if (std::fabs(std::get<1>(filtered_edge) - std::sqrt(2.)) <= epsilon)
