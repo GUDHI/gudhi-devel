@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/reader_utils.h>
@@ -20,8 +20,8 @@ using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persis
 using Filtration_value = Simplex_tree::Filtration_value;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 
-using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
-using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
+using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -90,14 +90,14 @@ int main(int argc, char* argv[]) {
                                                                                  });
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-  Flag_complex_sparse_matrix flag_complex(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(proximity_graph);
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < distances.size(); vertex++) {
     // insert the vertex with a 0. filtration value just like a Rips
     stree.insert_simplex({vertex}, 0.);
   }
-  flag_complex.filtered_edge_collapse(
+  edge_collapser.process_edges(
     [&stree](std::vector<Vertex_handle> edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);

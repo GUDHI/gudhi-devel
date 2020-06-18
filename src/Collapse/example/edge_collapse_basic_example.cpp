@@ -1,4 +1,4 @@
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
 
 #include <iostream>
 #include <vector>
@@ -7,10 +7,10 @@ int main() {
   // Type definitions
   using Filtration_value = float;
   using Vertex_handle = short;
-  using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
-  using Filtered_edge = Flag_complex_sparse_matrix::Filtered_edge;
+  using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+  using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
   using Filtered_edge_list = std::vector<Filtered_edge>;
-  using Edge = Flag_complex_sparse_matrix::Edge;
+  using Edge = Flag_complex_edge_collapser::Edge;
 
   //  1   2
   //  o---o
@@ -26,11 +26,11 @@ int main() {
                               {{0, 2}, 2.},
                               {{1, 3}, 2.}};
 
-  Flag_complex_sparse_matrix flag_complex_sparse_matrix(graph);
+  Flag_complex_edge_collapser edge_collapser(graph);
 
   Filtered_edge_list collapse_edges;
   // Retrieve collapse edges from the output iterator
-  flag_complex_sparse_matrix.filtered_edge_collapse(
+  edge_collapser.process_edges(
     [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
         collapse_edges.push_back({edge, filtration});
       });

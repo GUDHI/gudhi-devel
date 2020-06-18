@@ -14,7 +14,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/graph_simplicial_complex.h>
 
@@ -26,8 +26,8 @@
 
 using Filtration_value = float;
 using Vertex_handle = short;
-using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
-using Filtered_edge = Flag_complex_sparse_matrix::Filtered_edge;
+using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
 using Filtered_edge_list = std::vector<Filtered_edge>;
 
 template<typename Filtered_edge_range>
@@ -49,9 +49,9 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Flag_complex_sparse_matrix flag_complex_sparse_matrix(filtered_edges);
+  Flag_complex_edge_collapser edge_collapser(filtered_edges);
   Filtered_edge_list collapse_edges;
-  flag_complex_sparse_matrix.filtered_edge_collapse(
+  edge_collapser.process_edges(
     [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
       std::cout << "f[" << std::get<0>(edge) << ", " << std::get<1>(edge) << "] = " << filtration << std::endl;
         collapse_edges.push_back({edge, filtration});
@@ -164,13 +164,13 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
                                                  {1., 1.} };
 
   Filtration_value threshold = std::numeric_limits<Filtration_value>::infinity();
-  using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
-  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Flag_complex_sparse_matrix>(point_cloud,
+  using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
+  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Flag_complex_edge_collapser>(point_cloud,
                                                                                                threshold,
                                                                                                Gudhi::Euclidean_distance());
-  Flag_complex_sparse_matrix flag_complex_sparse_matrix(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(proximity_graph);
   Filtered_edge_list collapse_edges;
-  flag_complex_sparse_matrix.filtered_edge_collapse(
+  edge_collapser.process_edges(
     [&collapse_edges](std::pair<Vertex_handle, Vertex_handle> edge, Filtration_value filtration) {
       std::cout << "f[" << std::get<0>(edge) << ", " << std::get<1>(edge) << "] = " << filtration << std::endl;
         collapse_edges.push_back({edge, filtration});

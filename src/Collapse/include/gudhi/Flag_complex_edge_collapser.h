@@ -9,8 +9,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef FLAG_COMPLEX_SPARSE_MATRIX_H_
-#define FLAG_COMPLEX_SPARSE_MATRIX_H_
+#ifndef FLAG_COMPLEX_EDGE_COLLAPSER_H_
+#define FLAG_COMPLEX_EDGE_COLLAPSER_H_
 
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
@@ -39,7 +39,7 @@ namespace Gudhi {
 namespace collapse {
 
 /**
- * \class Flag_complex_sparse_matrix
+ * \class Flag_complex_edge_collapser
  * \brief Flag complex sparse matrix data structure.
  *
  * \ingroup collapse
@@ -52,7 +52,7 @@ namespace collapse {
  * \tparam Filtration type for the value of the filtration function. Must be comparable with <.
  */
 template<typename Vertex, typename Filtration>
-class Flag_complex_sparse_matrix {
+class Flag_complex_edge_collapser {
  public:
   /** \brief Re-define Vertex as Vertex_handle type to ease the interface with compute_proximity_graph. */
   using Vertex_handle = Vertex;
@@ -80,8 +80,8 @@ class Flag_complex_sparse_matrix {
  public:
   /** \brief Filtered_edge is a type to store an edge with its filtration value. */
   using Filtered_edge = std::pair<Edge, Filtration_value>;
-  /** \brief Proximity_graph is a type that can be used to construct easily a Flag_complex_sparse_matrix. */
-  using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_sparse_matrix>;
+  /** \brief Proximity_graph is a type that can be used to construct easily a Flag_complex_edge_collapser. */
+  using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
  private:
   // Map from row index to its vertex handle
@@ -265,7 +265,7 @@ class Flag_complex_sparse_matrix {
   // @exception std::invalid_argument In debug mode, if u == v
   IEdge insert_new_edge(Vertex_handle u, Vertex_handle v, Edge_index idx)
   {
-    GUDHI_CHECK((u != v), std::invalid_argument("Flag_complex_sparse_matrix::insert_new_edge with u == v"));
+    GUDHI_CHECK((u != v), std::invalid_argument("Flag_complex_edge_collapser::insert_new_edge with u == v"));
     // The edge must not be added before, it should be a new edge.
     IVertex rw_u = insert_vertex(u);
     IVertex rw_v = insert_vertex(v);
@@ -278,26 +278,26 @@ class Flag_complex_sparse_matrix {
   }
 
  public:
-  /** \brief Flag_complex_sparse_matrix constructor from a range of filtered edges.
+  /** \brief Flag_complex_edge_collapser constructor from a range of filtered edges.
    *
    * @param[in] filtered_edge_range Range of filtered edges. Filtered edges must be in
-   * `Flag_complex_sparse_matrix::Filtered_edge`.
+   * `Flag_complex_edge_collapser::Filtered_edge`.
    *
    * There is no need the range to be sorted, as it will be performed in
-   * `Flag_complex_sparse_matrix::filtered_edge_collapse`.
+   * `Flag_complex_edge_collapser::process_edges`.
    */
   template<typename Filtered_edge_range>
-  Flag_complex_sparse_matrix(const Filtered_edge_range& filtered_edge_range)
+  Flag_complex_edge_collapser(const Filtered_edge_range& filtered_edge_range)
   : f_edge_vector_(filtered_edge_range.begin(), filtered_edge_range.end()) { }
 
-  /** \brief Flag_complex_sparse_matrix constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
+  /** \brief Flag_complex_edge_collapser constructor from a proximity graph, cf. `Gudhi::compute_proximity_graph`.
    *
    * @param[in] one_skeleton_graph The one skeleton graph. The graph must be in
-   * `Flag_complex_sparse_matrix::Proximity_graph`.
+   * `Flag_complex_edge_collapser::Proximity_graph`.
    *
-   * The constructor is computing and filling a vector of `Flag_complex_sparse_matrix::Filtered_edge`
+   * The constructor is computing and filling a vector of `Flag_complex_edge_collapser::Filtered_edge`
    */
-  Flag_complex_sparse_matrix(const Proximity_graph& one_skeleton_graph) {
+  Flag_complex_edge_collapser(const Proximity_graph& one_skeleton_graph) {
     // Insert all edges
     for (auto edge_it = boost::edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
@@ -314,7 +314,7 @@ class Flag_complex_sparse_matrix {
    * that will get called on the output edges, in non-decreasing order of filtration.
    */
   template<typename FilteredEdgeOutput>
-  void filtered_edge_collapse(FilteredEdgeOutput filtered_edge_output) {
+  void process_edges(FilteredEdgeOutput filtered_edge_output) {
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
@@ -355,4 +355,4 @@ class Flag_complex_sparse_matrix {
 
 }  // namespace Gudhi
 
-#endif  // FLAG_COMPLEX_SPARSE_MATRIX_H_
+#endif  // FLAG_COMPLEX_EDGE_COLLAPSER_H_

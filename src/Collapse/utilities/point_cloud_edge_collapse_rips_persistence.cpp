@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Flag_complex_sparse_matrix.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/distance_functions.h>
@@ -28,8 +28,8 @@ using Vertex_handle = Simplex_tree::Vertex_handle;
 using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
-using Flag_complex_sparse_matrix = Gudhi::collapse::Flag_complex_sparse_matrix<Vertex_handle, Filtration_value>;
-using Proximity_graph = Flag_complex_sparse_matrix::Proximity_graph;
+using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+using Proximity_graph = Flag_complex_edge_collapser::Proximity_graph;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -77,14 +77,14 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-  Flag_complex_sparse_matrix mat_filt_edge_coll(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(proximity_graph);
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < point_vector.size(); vertex++) {
     // insert the vertex with a 0. filtration value just like a Rips
     stree.insert_simplex({vertex}, 0.);
   }
-  mat_filt_edge_coll.filtered_edge_collapse(
+  edge_collapser.process_edges(
     [&stree](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
         // insert the 2 vertices with a 0. filtration value just like a Rips
         stree.insert_simplex({edge[0]}, 0.);

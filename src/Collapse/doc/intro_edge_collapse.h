@@ -76,9 +76,9 @@ namespace collapse {
  * 
  * \subsection edgecollapseexample Basic edge collapse
  * 
- * This example builds the `Flag_complex_sparse_matrix` from a proximity graph represented as a list of
- * `Flag_complex_sparse_matrix::Filtered_edge`.
- * Then it collapses edges and displays a new list of `Flag_complex_sparse_matrix::Filtered_edge` (with less edges)
+ * This example builds the `Flag_complex_edge_collapser` from a proximity graph represented as a list of
+ * `Flag_complex_edge_collapser::Filtered_edge`.
+ * Then it collapses edges and displays a new list of `Flag_complex_edge_collapser::Filtered_edge` (with less edges)
  * that will preserve the persistence homology computation.
  * 
  * \include Collapse/edge_collapse_basic_example.cpp
