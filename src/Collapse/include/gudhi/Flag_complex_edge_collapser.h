@@ -269,11 +269,11 @@ class Flag_complex_edge_collapser {
  public:
   /** \brief Flag_complex_edge_collapser constructor from a range of filtered edges.
    *
-   * @param[in] begin Iterator on the first element of a filtered edges range. Filtered edges must be in
-   * `Flag_complex_edge_collapser::Filtered_edge`.
+   * @param[in] begin Iterator on the first element of a filtered edges range, aka. `std::begin`. Filtered edges must
+   * be in `Flag_complex_edge_collapser::Filtered_edge`.
    *
-   * @param[in] end Iterator on the last element of a filtered edges range. Filtered edges must be in
-   * `Flag_complex_edge_collapser::Filtered_edge`.
+   * @param[in] end Iterator on the final element of a filtered edges range, aka. `std::end`. Filtered edges must be
+   * in `Flag_complex_edge_collapser::Filtered_edge`.
    *
    * There is no need the range to be sorted, as it will be performed in
    * `Flag_complex_edge_collapser::process_edges`.
