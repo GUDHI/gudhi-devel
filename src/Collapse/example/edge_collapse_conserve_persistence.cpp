@@ -117,9 +117,9 @@ int main(int argc, char* argv[]) {
     stree_from_collapse.insert_simplex({vertex}, 0.);
   }
   edge_collapser.process_edges(
-    [&stree_from_collapse](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
+    [&stree_from_collapse](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
         // insert the edge
-        stree_from_collapse.insert_simplex(edge, filtration);
+        stree_from_collapse.insert_simplex({u, v}, filtration);
       });
 
   std::vector<Persistence_interval> persistence_intervals_from_collapse = get_persistence_intervals(stree_from_collapse, ambient_dim);

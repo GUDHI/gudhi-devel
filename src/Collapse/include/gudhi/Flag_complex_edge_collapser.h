@@ -58,10 +58,6 @@ class Flag_complex_edge_collapser {
   using Vertex_handle = Vertex;
   /** \brief Re-define Filtration as Filtration_value type to ease the interface with `Gudhi::Proximity_graph`. */
   using Filtration_value = Filtration;
-  /** \brief This is an ordered pair, An edge is stored with convention of the first element being the smaller i.e
-   * {2,3} not {3,2}. However this is at the level of row indices on actual vertex lables.
-   */
-  using Edge = std::pair<Vertex_handle, Vertex_handle>;
 
  private:
   // internal numbering of vertices and edges
@@ -79,7 +75,7 @@ class Flag_complex_edge_collapser {
 
  public:
   /** \brief Filtered_edge is a type to store an edge with its filtration value. */
-  using Filtered_edge = std::pair<Edge, Filtration_value>;
+  using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
 
  private:
   // Map from row index to its vertex handle
@@ -105,12 +101,9 @@ class Flag_complex_edge_collapser {
   // The input, a vector of filtered edges.
   std::vector<Filtered_edge> f_edge_vector_;
 
-  // Edge e is the actual edge (u,v), with Vertex_handle u and v, not IVertex.
-  bool edge_is_dominated(const Edge& edge) const
+  // Edge is the actual edge (u,v), with Vertex_handle u and v, not IVertex.
+  bool edge_is_dominated(Vertex_handle u, Vertex_handle v) const
   {
-    Vertex_handle u = std::get<0>(edge);
-    Vertex_handle v = std::get<1>(edge);
-
     const IVertex rw_u = vertex_to_row_.at(u);
     const IVertex rw_v = vertex_to_row_.at(v);
 #ifdef DEBUG_TRACES
@@ -141,13 +134,12 @@ class Flag_complex_edge_collapser {
   std::set<Edge_index> three_clique_indices(Edge_index crit) {
     std::set<Edge_index> edge_indices;
 
-    Edge edge = std::get<0>(f_edge_vector_[crit]);
-    Vertex_handle u = std::get<0>(edge);
-    Vertex_handle v = std::get<1>(edge);
+    Vertex_handle u = std::get<0>(f_edge_vector_[crit]);
+    Vertex_handle v = std::get<1>(f_edge_vector_[crit]);
 
 #ifdef DEBUG_TRACES
     std::cout << "The  current critical edge to re-check criticality with filt value is : f {" << u << "," << v
-              << "} = " << std::get<1>(f_edge_vector_[crit]) << std::endl;
+              << "} = " << std::get<2>(f_edge_vector_[crit]) << std::endl;
 #endif  // DEBUG_TRACES
     auto rw_u = vertex_to_row_[u];
     auto rw_v = vertex_to_row_[v];
@@ -174,17 +166,16 @@ class Flag_complex_edge_collapser {
     // Cannot use boost::adaptors::reverse in such dynamic cases apparently
     for (auto it = effected_indices.rbegin(); it != effected_indices.rend(); ++it) {
       current_backward = *it;
-      Edge edge = std::get<0>(f_edge_vector_[current_backward]);
-      Vertex_handle u = std::get<0>(edge);
-      Vertex_handle v = std::get<1>(edge);
+      Vertex_handle u = std::get<0>(f_edge_vector_[current_backward]);
+      Vertex_handle v = std::get<1>(f_edge_vector_[current_backward]);
       // If current_backward is not critical so it should be processed, otherwise it stays in the graph
       if (!critical_edge_indicator_[current_backward]) {
-        if (!edge_is_dominated(edge)) {
+        if (!edge_is_dominated(u, v)) {
 #ifdef DEBUG_TRACES
           std::cout << "The curent index became critical " << current_backward  << std::endl;
 #endif  // DEBUG_TRACES
           critical_edge_indicator_[current_backward] = true;
-          filtered_edge_output({u, v}, filt);
+          filtered_edge_output(u, v, filt);
           std::set<Edge_index> inner_effected_indcs = three_clique_indices(current_backward);
           for (auto inr_idx : inner_effected_indcs) {
             if(inr_idx < current_backward) // && !critical_edge_indicator_[inr_idx]
@@ -319,21 +310,22 @@ class Flag_complex_edge_collapser {
       auto edge = *(edge_it.first);
       Vertex_handle u = source(edge, one_skeleton_graph);
       Vertex_handle v = target(edge, one_skeleton_graph);
-      f_edge_vector_.emplace_back(Filtered_edge({u, v}, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
+      f_edge_vector_.emplace_back(Filtered_edge(u, v, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
     }
   }
 
   /** \brief Performs edge collapse in a increasing sequence of the filtration value.
    *
-   * \tparam FilteredEdgeOutput is a functor that furnishes `({Vertex_handle u, Vertex_handle v}, Filtration_value f)`
-   * that will get called on the output edges, in non-decreasing order of filtration.
+   * \tparam filtered_edge_output is a functor that is called on the output edges, in non-decreasing order of
+   * filtration, as filtered_edge_output(u, v, f) where u and v are Vertex_handle representing the extremities of the
+   * edge, and f is its new Filtration_value.
    */
   template<typename FilteredEdgeOutput>
   void process_edges(FilteredEdgeOutput filtered_edge_output) {
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
-      return (get<1>(edge_a) < get<1>(edge_b)); 
+      return (get<2>(edge_a) < get<2>(edge_b)); 
     };
 
 #ifdef GUDHI_USE_TBB
@@ -344,10 +336,9 @@ class Flag_complex_edge_collapser {
 
     for (Edge_index endIdx = 0; endIdx < f_edge_vector_.size(); endIdx++) {
       Filtered_edge fec = f_edge_vector_[endIdx];
-      Edge edge = std::get<0>(fec);
-      Vertex_handle u = std::get<0>(edge);
-      Vertex_handle v = std::get<1>(edge);
-      Filtration_value filt = std::get<1>(fec);
+      Vertex_handle u = std::get<0>(fec);
+      Vertex_handle v = std::get<1>(fec);
+      Filtration_value filt = std::get<2>(fec);
 
       // Inserts the edge in the sparse matrix to update the graph (G_i)
       IEdge ie = insert_new_edge(u, v, endIdx);
@@ -355,9 +346,9 @@ class Flag_complex_edge_collapser {
       iedge_to_index_map_.emplace(ie, endIdx);
       critical_edge_indicator_.emplace_back(false);
 
-      if (!edge_is_dominated(edge)) {
+      if (!edge_is_dominated(u, v)) {
         critical_edge_indicator_[endIdx] = true;
-        filtered_edge_output({u, v}, filt);
+        filtered_edge_output(u, v, filt);
         if (endIdx > 1)
           set_edge_critical(endIdx, filt, filtered_edge_output);
       }

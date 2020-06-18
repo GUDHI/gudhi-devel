@@ -85,12 +85,9 @@ int main(int argc, char* argv[]) {
     stree.insert_simplex({vertex}, 0.);
   }
   edge_collapser.process_edges(
-    [&stree](const std::vector<Vertex_handle>& edge, Filtration_value filtration) {
-        // insert the 2 vertices with a 0. filtration value just like a Rips
-        stree.insert_simplex({edge[0]}, 0.);
-        stree.insert_simplex({edge[1]}, 0.);
+    [&stree](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
         // insert the edge
-        stree.insert_simplex(edge, filtration);
+        stree.insert_simplex({u, v}, filtration);
       });
 
   stree.expansion(dim_max);
