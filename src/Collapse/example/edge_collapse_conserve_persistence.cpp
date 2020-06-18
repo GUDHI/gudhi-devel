@@ -37,17 +37,14 @@ using Persistence_pair = std::tuple<int, Filtration_value, Filtration_value>;
 /*
  * Compare two intervals by dimension, then by length.
  */
-struct cmp_intervals_by_dim_then_length {
-  explicit cmp_intervals_by_dim_then_length(Simplex_tree * sc)
+struct cmp_intervals_by_length {
+  explicit cmp_intervals_by_length(Simplex_tree * sc)
       : sc_(sc) { }
 
   template<typename Persistent_interval>
   bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
-    if (sc_->dimension(get < 0 > (p1)) == sc_->dimension(get < 0 > (p2)))
-      return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
-              > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
-    else
-      return (sc_->dimension(get < 0 > (p1)) > sc_->dimension(get < 0 > (p2)));
+    return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
+            > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
   }
   Simplex_tree* sc_;
 };
@@ -67,7 +64,7 @@ std::vector<Persistence_pair> get_persistence_pairs(Simplex_tree& st, int ambien
   // Default min_interval_length = 0.
   pcoh.compute_persistent_cohomology();
   // Custom sort and output persistence
-  cmp_intervals_by_dim_then_length cmp(&st);
+  cmp_intervals_by_length cmp(&st);
   auto persistent_pairs = pcoh.get_persistent_pairs();
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
   for (auto pair : persistent_pairs) {
