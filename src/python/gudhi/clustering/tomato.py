@@ -107,6 +107,7 @@ class Tomato:
             X ((n,d)-array of float|(n,n)-array of float|Sequence[Iterable[int]]): coordinates of the points,
                 or distance matrix (full, not just a triangle) if metric is "precomputed", or list of neighbors
                 for each point (points are represented by their index, starting from 0) if graph_type is "manual".
+                The number of points is currently limited to about 2 billion.
             weights (ndarray of shape (n_samples)): if density_type is 'manual', a density estimate at each point
             y: Not used, present here for API consistency with scikit-learn by convention.
         """
