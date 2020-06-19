@@ -471,6 +471,10 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
 #ifdef DEBUG_TRACES
     std::clog << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
+    if (objects.size() == 0) {
+      std::cerr << "Alpha_complex_3d create_complex - no triangulation as points are on a 2d plane\n";
+      return false;  // ----- >>
+    }
 
     using Alpha_value_iterator = typename std::vector<FT>::const_iterator;
     Alpha_value_iterator alpha_value_iterator = alpha_values.begin();

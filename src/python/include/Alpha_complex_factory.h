@@ -48,7 +48,7 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
 class Abstract_alpha_complex {
  public:
   virtual std::vector<double> get_point(int vh) = 0;
-  virtual void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) = 0;
 };
 
@@ -68,9 +68,9 @@ class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
     return pt_cgal_to_cython(point);
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
  private:
@@ -93,9 +93,9 @@ class Inexact_Alphacomplex_dD : public Abstract_alpha_complex {
     Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
  private:
@@ -122,12 +122,9 @@ class Alphacomplex_3D : public Abstract_alpha_complex {
     return pt_cgal_to_cython(point);
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value){
-    alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
-    if (default_filtration_value) {
-      // TODO
-    }
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
   }
 
  private:
