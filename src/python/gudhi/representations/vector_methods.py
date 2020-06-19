@@ -678,7 +678,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.array([np.max(dist_centers)/2])
         else:
             dist_centers = pairwise.pairwise_distances(self.centers)
-            np.fill_diagonal(dist_centers, np.inf)
+            dist_centers[dist_centers == 0] = np.inf
             self.inertias = np.min(dist_centers, axis=0)/2
         return self
 
