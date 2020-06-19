@@ -242,6 +242,9 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
 
+    # Some files for pip package
+    file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+
     add_custom_command(
         OUTPUT gudhi.so
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
