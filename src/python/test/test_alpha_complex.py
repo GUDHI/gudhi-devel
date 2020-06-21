@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import AlphaComplex, SimplexTree
+import gudhi
 import math
 import numpy as np
 import pytest
@@ -25,17 +25,16 @@ __license__ = "MIT"
 
 
 def _empty_alpha(precision):
-    alpha_complex = AlphaComplex(points=[[0, 0]], precision = precision)
+    alpha_complex = gudhi.AlphaComplex(points=[[0, 0]], precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def test_empty_alpha():
-    _empty_alpha('fast')
-    _empty_alpha('safe')
-    _empty_alpha('exact')
+    for precision in ['fast', 'safe', 'exact']:
+        _empty_alpha(precision)
 
 def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    alpha_complex = AlphaComplex(points=point_list, precision = precision)
+    alpha_complex = gudhi.AlphaComplex(points=point_list, precision = precision)
     assert alpha_complex.__is_defined() == True
 
     simplex_tree = alpha_complex.create_simplex_tree()
@@ -84,13 +83,12 @@ def _infinite_alpha(precision):
         assert False
 
 def test_infinite_alpha():
-    _infinite_alpha('fast')
-    _infinite_alpha('safe')
-    _infinite_alpha('exact')
+    for precision in ['fast', 'safe', 'exact']:
+        _infinite_alpha(precision)
 
 def _filtered_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = gudhi.AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(max_alpha_square=0.25)
 
@@ -128,9 +126,8 @@ def _filtered_alpha(precision):
     assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.25), ([0, 2], 0.25)]
 
 def test_filtered_alpha():
-    _filtered_alpha('fast')
-    _filtered_alpha('safe')
-    _filtered_alpha('exact')
+    for precision in ['fast', 'safe', 'exact']:
+        _filtered_alpha(precision)
 
 def _safe_alpha_persistence_comparison(precision):
     #generate periodic signal
@@ -144,10 +141,10 @@ def _safe_alpha_persistence_comparison(precision):
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
     
     #build alpha complex and simplex tree
-    alpha_complex1 = AlphaComplex(points=embedding1, precision = precision)
+    alpha_complex1 = gudhi.AlphaComplex(points=embedding1, precision = precision)
     simplex_tree1 = alpha_complex1.create_simplex_tree()
     
-    alpha_complex2 = AlphaComplex(points=embedding2, precision = precision)
+    alpha_complex2 = gudhi.AlphaComplex(points=embedding2, precision = precision)
     simplex_tree2 = alpha_complex2.create_simplex_tree()
     
     diag1 = simplex_tree1.persistence()
@@ -165,7 +162,7 @@ def test_safe_alpha_persistence_comparison():
 
 def _delaunay_complex(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = gudhi.AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(default_filtration_value = True)
 
@@ -197,6 +194,19 @@ def _delaunay_complex(precision):
         assert math.isnan(filtered_value[1])
 
 def test_delaunay_complex():
-    _delaunay_complex('fast')
-    _delaunay_complex('safe')
-    _delaunay_complex('exact')
+    for precision in ['fast', 'safe', 'exact']:
+        _delaunay_complex(precision)
+
+def _3d_points_on_a_plane(precision, default_filtration_value):
+    alpha = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off',
+                         precision = precision)
+
+    simplex_tree = alpha.create_simplex_tree(default_filtration_value = default_filtration_value)
+    assert simplex_tree.dimension() == 2
+    assert simplex_tree.num_vertices() == 7
+    assert simplex_tree.num_simplices() == 25
+
+def test_3d_points_on_a_plane():
+    for default_filtration_value in [True, False]:
+        for precision in ['fast', 'safe', 'exact']:
+            _3d_points_on_a_plane(precision, default_filtration_value)
