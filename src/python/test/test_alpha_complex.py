@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi
+import gudhi as gd
 import math
 import numpy as np
 import pytest
@@ -25,7 +25,7 @@ __license__ = "MIT"
 
 
 def _empty_alpha(precision):
-    alpha_complex = gudhi.AlphaComplex(points=[[0, 0]], precision = precision)
+    alpha_complex = gd.AlphaComplex(points=[[0, 0]], precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def test_empty_alpha():
@@ -34,7 +34,7 @@ def test_empty_alpha():
 
 def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    alpha_complex = gudhi.AlphaComplex(points=point_list, precision = precision)
+    alpha_complex = gd.AlphaComplex(points=point_list, precision = precision)
     assert alpha_complex.__is_defined() == True
 
     simplex_tree = alpha_complex.create_simplex_tree()
@@ -88,7 +88,7 @@ def test_infinite_alpha():
 
 def _filtered_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = gudhi.AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = gd.AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(max_alpha_square=0.25)
 
@@ -141,10 +141,10 @@ def _safe_alpha_persistence_comparison(precision):
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
     
     #build alpha complex and simplex tree
-    alpha_complex1 = gudhi.AlphaComplex(points=embedding1, precision = precision)
+    alpha_complex1 = gd.AlphaComplex(points=embedding1, precision = precision)
     simplex_tree1 = alpha_complex1.create_simplex_tree()
     
-    alpha_complex2 = gudhi.AlphaComplex(points=embedding2, precision = precision)
+    alpha_complex2 = gd.AlphaComplex(points=embedding2, precision = precision)
     simplex_tree2 = alpha_complex2.create_simplex_tree()
     
     diag1 = simplex_tree1.persistence()
@@ -162,7 +162,7 @@ def test_safe_alpha_persistence_comparison():
 
 def _delaunay_complex(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = gudhi.AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = gd.AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(default_filtration_value = True)
 
@@ -198,7 +198,7 @@ def test_delaunay_complex():
         _delaunay_complex(precision)
 
 def _3d_points_on_a_plane(precision, default_filtration_value):
-    alpha = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off',
+    alpha = gd.AlphaComplex(off_file=gd.__root_source_dir__ + '/data/points/alphacomplexdoc.off',
                          precision = precision)
 
     simplex_tree = alpha.create_simplex_tree(default_filtration_value = default_filtration_value)
@@ -210,3 +210,38 @@ def test_3d_points_on_a_plane():
     for default_filtration_value in [True, False]:
         for precision in ['fast', 'safe', 'exact']:
             _3d_points_on_a_plane(precision, default_filtration_value)
+
+def _3d_tetrahedrons(precision):
+    points = 10*np.random.rand(10, 3)
+    alpha = gd.AlphaComplex(points=points, precision = precision)
+    st_alpha = alpha.create_simplex_tree(default_filtration_value = False)
+    # New AlphaComplex for get_point to work
+    delaunay = gd.AlphaComplex(points=points, precision = precision)
+    st_delaunay = delaunay.create_simplex_tree(default_filtration_value = True)
+
+    delaunay_tetra = []
+    for sk in st_delaunay.get_skeleton(4):
+        if len(sk[0]) == 4:
+            tetra = [delaunay.get_point(sk[0][0]),
+                     delaunay.get_point(sk[0][1]),
+                     delaunay.get_point(sk[0][2]),
+                     delaunay.get_point(sk[0][3]) ]
+            delaunay_tetra.append(sorted(tetra, key=lambda tup: tup[0]))
+
+    alpha_tetra = []
+    for sk in st_alpha.get_skeleton(4):
+        if len(sk[0]) == 4:
+            tetra = [alpha.get_point(sk[0][0]),
+                     alpha.get_point(sk[0][1]),
+                     alpha.get_point(sk[0][2]),
+                     alpha.get_point(sk[0][3]) ]
+            alpha_tetra.append(sorted(tetra, key=lambda tup: tup[0]))
+
+    # Check the tetrahedrons from one list are in the second one
+    assert len(alpha_tetra) == len(delaunay_tetra)
+    for tetra_from_del in delaunay_tetra:
+        assert tetra_from_del in alpha_tetra
+
+def test_3d_tetrahedrons():
+    for precision in ['fast', 'safe', 'exact']:
+        _3d_tetrahedrons(precision)
