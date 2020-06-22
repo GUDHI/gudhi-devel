@@ -30,9 +30,9 @@ environment:
         PYTHON: "C:\\Python37-x64"
 
 
-cache:
-  - c:\Tools\vcpkg\installed
-  - '%LOCALAPPDATA%\pip\Cache'
+# cache:
+#   - c:\Tools\vcpkg\installed
+#   - '%LOCALAPPDATA%\pip\Cache'
 
 init:
   - echo %target%
@@ -57,7 +57,8 @@ build_script:
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib" -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
-      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
+      cd src/python &
+      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
