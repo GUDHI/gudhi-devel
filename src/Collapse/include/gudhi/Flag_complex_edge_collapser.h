@@ -265,7 +265,7 @@ class Flag_complex_edge_collapser {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
       sparse_row_adjacency_matrix_[n].insert(n) = -1; // not an edge
       // Must be done after reading its size()
-      row_to_vertex_.emplace_back(vertex);
+      row_to_vertex_.push_back(vertex);
     }
     return result.first->second;
   }
@@ -330,7 +330,7 @@ class Flag_complex_edge_collapser {
       auto edge = *(edge_it.first);
       Vertex_handle u = source(edge, one_skeleton_graph);
       Vertex_handle v = target(edge, one_skeleton_graph);
-      f_edge_vector_.emplace_back(Filtered_edge(u, v, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
+      f_edge_vector_.emplace_back(u, v, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge));
     }
   }
 
@@ -364,7 +364,7 @@ class Flag_complex_edge_collapser {
       IEdge ie = insert_new_edge(u, v, endIdx);
 
       iedge_to_index_map_.emplace(ie, endIdx);
-      critical_edge_indicator_.emplace_back(false);
+      critical_edge_indicator_.push_back(false);
 
       if (!edge_is_dominated(u, v)) {
         critical_edge_indicator_[endIdx] = true;

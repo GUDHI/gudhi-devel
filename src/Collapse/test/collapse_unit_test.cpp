@@ -54,7 +54,7 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
   edge_collapser.process_edges(
     [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
       std::cout << "f[" << u << ", " << v << "] = " << filtration << std::endl;
-        remaining_edges.emplace_back(Filtered_edge(u, v, filtration));
+        remaining_edges.emplace_back(u, v, filtration);
       });
   std::cout << "AFTER COLLAPSE - Total number of edges: " << remaining_edges.size() << std::endl;
   BOOST_CHECK(remaining_edges.size() <= filtered_edges.size());
@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  |/ \|
   //  o---o
   //  0   3
-  edges.emplace_back(Filtered_edge(0, 2, 2.));
-  edges.emplace_back(Filtered_edge(1, 3, 2.));
+  edges.emplace_back(0, 2, 2.);
+  edges.emplace_back(1, 3, 2.);
   trace_and_check_collapse(edges, {{1, 3, 2.}});
 
   //  1   2   4
@@ -108,9 +108,9 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  |/ \|   |
   //  o---o---o
   //  0   3   5
-  edges.emplace_back(Filtered_edge(2, 4, 3.));
-  edges.emplace_back(Filtered_edge(4, 5, 3.));
-  edges.emplace_back(Filtered_edge(5, 3, 3.));
+  edges.emplace_back(2, 4, 3.);
+  edges.emplace_back(4, 5, 3.);
+  edges.emplace_back(5, 3, 3.);
   trace_and_check_collapse(edges, {{1, 3, 2.}});
 
   //  1   2   4
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  |/ \|/ \|
   //  o---o---o
   //  0   3   5
-  edges.emplace_back(Filtered_edge(2, 5, 4.));
-  edges.emplace_back(Filtered_edge(4, 3, 4.));
+  edges.emplace_back(2, 5, 4.);
+  edges.emplace_back(4, 3, 4.);
   trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.}});
 
   //  1   2   4
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  |/ \|/ \|
   //  o---o---o
   //  0   3   5
-  edges.emplace_back(Filtered_edge(1, 5, 5.));
-  edges.emplace_back(Filtered_edge(0, 4, 5.));
+  edges.emplace_back(1, 5, 5.);
+  edges.emplace_back(0, 4, 5.);
   trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.}, {0, 4, 5.}});
 }
 
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
   edge_collapser.process_edges(
     [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
       std::cout << "f[" << u << ", " << v << "] = " << filtration << std::endl;
-        remaining_edges.emplace_back(Filtered_edge(u, v, filtration));
+        remaining_edges.emplace_back(u, v, filtration);
       });
   BOOST_CHECK(remaining_edges.size() == 5);
 

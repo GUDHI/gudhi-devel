@@ -31,7 +31,7 @@ int main() {
   // Retrieve collapse edges from the output iterator
   edge_collapser.process_edges(
     [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-        remaining_edges.emplace_back(Filtered_edge(u, v, filtration));
+        remaining_edges.emplace_back(u, v, filtration);
       });
 
   for (Filtered_edge filtered_edge_from_collapse : remaining_edges) {
