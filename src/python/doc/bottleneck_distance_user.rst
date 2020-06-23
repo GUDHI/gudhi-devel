@@ -9,13 +9,22 @@ Definition
 
 .. include:: bottleneck_distance_sum.inc
 
-This implementation is based on ideas from "Geometry Helps in Bottleneck Matching and Related Problems"
-:cite:`DBLP:journals/algorithmica/EfratIK01`. Another relevant publication, although it was not used is
-"Geometry Helps to Compare Persistence Diagrams" :cite:`Kerber:2017:GHC:3047249.3064175`.
+This implementation by François Godi is based on ideas from "Geometry Helps in Bottleneck Matching and Related Problems"
+:cite:`DBLP:journals/algorithmica/EfratIK01` and requires `CGAL <installation.html#cgal>`_ (`GPL v3 </licensing/>`_).
 
-Function
---------
 .. autofunction:: gudhi.bottleneck_distance
+
+This other implementation comes from `Hera
+<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
+based on "Geometry Helps to Compare Persistence Diagrams"
+:cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
+Morozov, and Arnur Nigmetov.
+
+.. warning::
+   Beware that its approximation allows for a multiplicative error, while the function above uses an additive error.
+
+.. autofunction:: gudhi.hera.bottleneck_distance
+
 
 Distance computation
 --------------------

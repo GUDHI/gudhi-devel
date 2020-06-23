@@ -12,24 +12,29 @@
 
 #include <pybind11_diagram_utils.h>
 
-double bottleneck(Dgm d1, Dgm d2, double epsilon)
+// For compatibility with older versions, we want to support e=None.
+// In C++17, the recommended way is std::optional<double>.
+double bottleneck(Dgm d1, Dgm d2, py::object epsilon)
 {
+  double e = (std::numeric_limits<double>::min)();
+  if (!epsilon.is_none()) e = epsilon.cast<double>();
   // I *think* the call to request() has to be before releasing the GIL.
   auto diag1 = numpy_to_range_of_pairs(d1);
   auto diag2 = numpy_to_range_of_pairs(d2);
 
   py::gil_scoped_release release;
 
-  return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, epsilon);
+  return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, e);
 }
 
 PYBIND11_MODULE(bottleneck, m) {
       m.attr("__license__") = "GPL v3";
       m.def("bottleneck_distance", &bottleneck,
           py::arg("diagram_1"), py::arg("diagram_2"),
-          py::arg("e") = (std::numeric_limits<double>::min)(),
+          py::arg("e") = py::none(),
           R"pbdoc(
-    This function returns the point corresponding to a given vertex.
+    Compute the Bottleneck distance between two diagrams.
+    Points at infinity and on the diagonal are supported.
 
     :param diagram_1: The first diagram.
     :type diagram_1: numpy array of shape (m,2)
@@ -42,7 +47,7 @@ PYBIND11_MODULE(bottleneck, m) {
         bits of the mantissa may be wrong). This version of the algorithm takes
         advantage of the limited precision of `double` and is usually a lot
         faster to compute, whatever the value of `e`.
-        Thus, by default, `e` is the smallest positive double.
+        Thus, by default (`e=None`), `e` is the smallest positive double.
     :type e: float
     :rtype: float
     :returns: the bottleneck distance.
