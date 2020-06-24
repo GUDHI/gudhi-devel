@@ -47,7 +47,7 @@ install:
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   - python --version
   - pip --version
-  - python -m pip install --upgrade pip
+  - python -m pip install --user --upgrade pip
   - python -m pip install --user -r .github/build-requirements.txt
   # No PyKeOps on windows, let's workaround this one.
   - for /F "tokens=*" %%A in (.github/test-requirements.txt) do python -m pip install --user  %%A
@@ -58,6 +58,7 @@ build_script:
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib" -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib" -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake ..
   - if [%target%]==[Python] (
       cd src/python &
+      type setup.py &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release
     ) else (
