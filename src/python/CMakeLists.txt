@@ -16,11 +16,9 @@ endfunction( add_GUDHI_PYTHON_lib )
 
 function( add_GUDHI_PYTHON_lib_dir THE_LIB_DIR )
   # deals when it is not set - error on windows
-  foreach(LIB_DIR ${THE_LIB_DIR})
   if(EXISTS ${LIB_DIR})
     set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${LIB_DIR}', ")
   endif(EXISTS ${LIB_DIR})
-  endforeach()
 endfunction( add_GUDHI_PYTHON_lib_dir )
 
 # THE_TEST is the python test file name (without .py extension) containing tests functions
@@ -192,7 +190,9 @@ if(PYTHONINTERP_FOUND)
       if(MPFR_FOUND)
         add_gudhi_debug_info("MPFR_LIBRARIES = ${MPFR_LIBRARIES}")
         set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_MPFR', ")
-        add_GUDHI_PYTHON_lib("${MPFR_LIBRARIES}")
+        foreach(MPFR_LIB ${MPFR_LIBRARIES})
+          add_GUDHI_PYTHON_lib("${MPFR_LIB}")
+        endforeach()
         # In case CGAL is not header only, all MPFR variables are set except MPFR_LIBRARIES_DIR - Just set it
         if(NOT MPFR_LIBRARIES_DIR)
           get_filename_component(MPFR_LIBRARIES_DIR ${MPFR_LIBRARIES} PATH)
