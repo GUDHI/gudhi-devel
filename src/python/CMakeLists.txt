@@ -198,7 +198,7 @@ if(PYTHONINTERP_FOUND)
           get_filename_component(MPFR_LIBRARIES_DIR ${MPFR_LIBRARIES} PATH)
         endif(NOT MPFR_LIBRARIES_DIR)
         add_GUDHI_PYTHON_lib_dir("${MPFR_LIBRARIES_DIR}")
-        message("** Add mpfr ${MPFR_LIBRARIES}")
+        message("** Add mpfr ${MPFR_LIBRARIES} - release ${MPFR_LIBRARIES_RELEASE} - debug ${MPFR_LIBRARIES_DEBUG}")
       endif(MPFR_FOUND)
     endif(CGAL_FOUND)
 
