@@ -16,9 +16,11 @@ endfunction( add_GUDHI_PYTHON_lib )
 
 function( add_GUDHI_PYTHON_lib_dir THE_LIB_DIR )
   # deals when it is not set - error on windows
-  if(EXISTS ${LIB_DIR})
-    set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${LIB_DIR}', ")
-  endif(EXISTS ${LIB_DIR})
+  if(EXISTS ${THE_LIB_DIR})
+    set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${THE_LIB_DIR}', ")
+  else()
+    message("add_GUDHI_PYTHON_lib_dir - '${THE_LIB_DIR}' does not exist")
+  endif()
 endfunction( add_GUDHI_PYTHON_lib_dir )
 
 # THE_TEST is the python test file name (without .py extension) containing tests functions
@@ -201,7 +203,7 @@ if(PYTHONINTERP_FOUND)
           message("MPFR_LIBRARIES_DIR from MPFR_LIBRARIES set to ${MPFR_LIBRARIES_DIR}")
         endif(NOT MPFR_LIBRARIES_DIR)
         add_GUDHI_PYTHON_lib_dir("${MPFR_LIBRARIES_DIR}")
-        message("** Add mpfr ${MPFR_LIBRARIES_DIR} - release ${MPFR_LIBRARIES_DIR_RELEASE} - debug ${MPFR_LIBRARIES_DIR_DEBUG}")
+        message("** Add mpfr ${MPFR_LIBRARIES_DIR}")
       endif(MPFR_FOUND)
     endif(CGAL_FOUND)
 
