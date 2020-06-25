@@ -18,6 +18,7 @@ function( add_GUDHI_PYTHON_lib_dir THE_LIB_DIR )
   # deals when it is not set - error on windows
   if(EXISTS ${THE_LIB_DIR})
     set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${THE_LIB_DIR}', ")
+    message("add_GUDHI_PYTHON_lib_dir '${THE_LIB_DIR}'")
   else()
     message("add_GUDHI_PYTHON_lib_dir - '${THE_LIB_DIR}' does not exist")
   endif()
