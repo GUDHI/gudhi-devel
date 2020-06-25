@@ -305,8 +305,8 @@ class Flag_complex_edge_collapser {
   /** \brief Inserts all edges given by a OneSkeletonGraph into a vector of
    * `Flag_complex_edge_collapser::Filtered_edge`.
    * OneSkeletonGraph must be a model of
-   * <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
-   * and <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
+   * <a href="http://www.boost.org/doc/libs/1_73_0/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
+   * and <a href="http://www.boost.org/doc/libs/1_73_0/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
    * The edge filtration value is accessible through the property tag
    * edge_filtration_t.
