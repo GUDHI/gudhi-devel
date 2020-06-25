@@ -11,6 +11,7 @@
 from os import path
 from math import isfinite
 import numpy as np
+from functools import lru_cache
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -55,6 +56,17 @@ def _array_handler(a):
         return [[0, x] for x in a]
     else:
         return a
+
+@lru_cache(maxsize=1)
+def _matplotlib_can_use_tex():
+    """This function returns True if matplotlib can deal with LaTeX, False otherwise.
+    The returned value is cached.
+    """
+    try:
+        from matplotlib import checkdep_usetex
+        return checkdep_usetex(True)
+    except ImportError:
+        print("This function is not available, you may be missing matplotlib.")
 
 
 def plot_persistence_barcode(
@@ -105,8 +117,7 @@ def plot_persistence_barcode(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        from matplotlib import checkdep_usetex
-        if checkdep_usetex(True):
+        if _matplotlib_can_use_tex():
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
@@ -252,8 +263,7 @@ def plot_persistence_diagram(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        from matplotlib import checkdep_usetex
-        if checkdep_usetex(True):
+        if _matplotlib_can_use_tex():
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
@@ -426,8 +436,7 @@ def plot_persistence_density(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from scipy.stats import kde
-        from matplotlib import checkdep_usetex
-        if checkdep_usetex(True):
+        if _matplotlib_can_use_tex():
             from matplotlib import rc
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
