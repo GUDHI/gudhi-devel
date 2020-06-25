@@ -305,12 +305,12 @@ class Flag_complex_edge_collapser {
   template<class OneSkeletonGraph>
   Flag_complex_edge_collapser(const OneSkeletonGraph& one_skeleton_graph) {
     // Insert all edges
-    for (auto edge_it = boost::edges(one_skeleton_graph);
+    for (auto edge_it = edges(one_skeleton_graph);
          edge_it.first != edge_it.second; ++edge_it.first) {
       auto edge = *(edge_it.first);
       Vertex_handle u = source(edge, one_skeleton_graph);
       Vertex_handle v = target(edge, one_skeleton_graph);
-      f_edge_vector_.emplace_back(Filtered_edge(u, v, boost::get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
+      f_edge_vector_.emplace_back(Filtered_edge(u, v, get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
     }
   }
 
