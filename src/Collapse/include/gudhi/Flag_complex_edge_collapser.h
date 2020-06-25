@@ -317,8 +317,7 @@ class Flag_complex_edge_collapser {
    *                                    can be directed_tag (the fastest, the least RAM use), undirected_tag or even
    *                                    bidirected_tag.
    *
-   * If an edge appears with multiplicity, the function will arbitrarily pick one representative to read the filtration
-   * value.
+   * It is required to have no duplicated edges in the graph.
    * 
    * `Gudhi::Proximity_graph<Flag_complex_edge_collapser>` is a good candidate for OneSkeletonGraph.
    */
