@@ -13,7 +13,7 @@ environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python37-x64"
   CMAKE_GMP_FLAGS: -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
-  CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib" -DMPFR_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib/"
+  CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib"
   CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
   matrix:
