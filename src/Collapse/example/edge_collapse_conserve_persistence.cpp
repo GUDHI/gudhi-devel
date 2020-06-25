@@ -68,9 +68,9 @@ std::vector<Persistence_interval> get_persistence_intervals(Simplex_tree& st, in
   auto persistent_pairs = pcoh.get_persistent_pairs();
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
   for (auto pair : persistent_pairs) {
-    persistence_intervals.emplace_back(Persistence_interval(st.dimension(get<0>(pair)),
-                                             st.filtration(get<0>(pair)),
-                                             st.filtration(get<1>(pair)) ));
+    persistence_intervals.emplace_back(st.dimension(get<0>(pair)),
+                                       st.filtration(get<0>(pair)),
+                                       st.filtration(get<1>(pair)));
   }
   return persistence_intervals;
 }

@@ -17,6 +17,7 @@
 
 #include <boost/functional/hash.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 
 #include <Eigen/Sparse>
 
@@ -70,6 +71,48 @@ class Flag_complex_edge_collapser {
   using Sparse_vector = Eigen::SparseVector<Edge_index>;
   using Sparse_row_matrix = std::vector<Sparse_vector>;
 
+  // Range of neighbors of a vertex
+  template<bool closed>
+  struct Neighbours {
+    class iterator : public boost::iterator_facade<iterator,
+      IVertex, /* value_type */
+      std::input_iterator_tag, // or boost::single_pass_traversal_tag
+      IVertex /* reference */ >
+    {
+      public:
+        iterator():ptr(nullptr){}
+        iterator(Neighbours const*p):ptr(p){find_valid();}
+      private:
+        friend class boost::iterator_core_access;
+        Neighbours const*ptr;
+        void increment(){
+          ++ptr->it;
+          find_valid();
+        }
+        void find_valid(){
+          auto& it = ptr->it;
+          do {
+            if(!it) { ptr=nullptr; break; }
+            if(IVertex(it.index()) == ptr->u) {
+              if(closed) break;
+              else continue;
+            }
+            Edge_index e = it.value();
+            if(e <= ptr->ec->current_backward || ptr->ec->critical_edge_indicator_[e]) break;
+          } while(++it, true);
+        }
+        bool equal(iterator const& other) const { return ptr == other.ptr; }
+        IVertex dereference() const { return ptr->it.index(); }
+    };
+    typedef iterator const_iterator;
+    mutable typename Sparse_vector::InnerIterator it;
+    Flag_complex_edge_collapser const*ec;
+    IVertex u;
+    iterator begin() const { return this; }
+    iterator end() const { return {}; }
+    explicit Neighbours(Flag_complex_edge_collapser const*p,IVertex u):it(p->sparse_row_adjacency_matrix_[u]),ec(p),u(u){}
+  };
+
   // A range of row indices
   using IVertex_vector = std::vector<IVertex>;
 
@@ -121,7 +164,7 @@ class Flag_complex_edge_collapser {
       return true;
     else
       for (auto rw_c : common_neighbours) {
-        auto neighbours_c = neighbours_row_index(rw_c, true);
+        auto neighbours_c = neighbours_row_index<true>(rw_c);
         // If neighbours_c contains the common neighbours.
         if (std::includes(neighbours_c.begin(), neighbours_c.end(),
                           common_neighbours.begin(), common_neighbours.end()))
@@ -193,41 +236,18 @@ class Flag_complex_edge_collapser {
   }
 
   // Returns list of neighbors of a particular vertex.
-  IVertex_vector neighbours_row_index(IVertex rw_u, bool closed) const
+  template<bool closed>
+  auto neighbours_row_index(IVertex rw_u) const
   {
-    IVertex_vector neighbors;
-    neighbors.reserve(sparse_row_adjacency_matrix_[rw_u].nonZeros()); // too much, but who cares
-#ifdef DEBUG_TRACES
-    std::cout << "The neighbours of the vertex: " << row_to_vertex_[rw_u] << " are. " << std::endl;
-#endif  // DEBUG_TRACES
-    // Iterate over the neighbors
-    for (typename Sparse_vector::InnerIterator it(sparse_row_adjacency_matrix_[rw_u]); it; ++it) {
-      IVertex rw_v = it.index();
-      if (!closed && rw_u == rw_v) continue;
-      Edge_index ei;
-      // If the vertex v is not dominated and the edge {u,v} is still in the matrix
-      if ((closed && rw_u == rw_v) ||
-          (ei = it.value()) <= current_backward ||
-          critical_edge_indicator_[ei]) {
-        neighbors.emplace_back(rw_v);
-#ifdef DEBUG_TRACES
-        std::cout << row_to_vertex_[rw_v] << ", " ;
-#endif  // DEBUG_TRACES
-      }
-    }
-#ifdef DEBUG_TRACES
-    std::cout << std::endl;
-#endif  // DEBUG_TRACES
-    return neighbors;
+    return Neighbours<closed>(this, rw_u);
   }
 
   // Returns the list of open neighbours of the edge :{u,v}.
   IVertex_vector open_common_neighbours_row_index(IVertex rw_u, IVertex rw_v) const
   {
-    IVertex_vector non_zero_indices_u = neighbours_row_index(rw_u, false);
-    IVertex_vector non_zero_indices_v = neighbours_row_index(rw_v, false);
+    auto non_zero_indices_u = neighbours_row_index<false>(rw_u);
+    auto non_zero_indices_v = neighbours_row_index<false>(rw_v);
     IVertex_vector common;
-    common.reserve(std::min(non_zero_indices_u.size(), non_zero_indices_v.size()));
     std::set_intersection(non_zero_indices_u.begin(), non_zero_indices_u.end(), non_zero_indices_v.begin(),
                           non_zero_indices_v.end(), std::back_inserter(common));
 
@@ -245,7 +265,7 @@ class Flag_complex_edge_collapser {
       // Initializing the diagonal element of the adjency matrix corresponding to rw_b.
       sparse_row_adjacency_matrix_[n].insert(n) = -1; // not an edge
       // Must be done after reading its size()
-      row_to_vertex_.emplace_back(vertex);
+      row_to_vertex_.push_back(vertex);
     }
     return result.first->second;
   }
@@ -310,7 +330,7 @@ class Flag_complex_edge_collapser {
       auto edge = *(edge_it.first);
       Vertex_handle u = source(edge, one_skeleton_graph);
       Vertex_handle v = target(edge, one_skeleton_graph);
-      f_edge_vector_.emplace_back(Filtered_edge(u, v, get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge)));
+      f_edge_vector_.emplace_back(u, v, get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge));
     }
   }
 
@@ -344,7 +364,7 @@ class Flag_complex_edge_collapser {
       IEdge ie = insert_new_edge(u, v, endIdx);
 
       iedge_to_index_map_.emplace(ie, endIdx);
-      critical_edge_indicator_.emplace_back(false);
+      critical_edge_indicator_.push_back(false);
 
       if (!edge_is_dominated(u, v)) {
         critical_edge_indicator_[endIdx] = true;
