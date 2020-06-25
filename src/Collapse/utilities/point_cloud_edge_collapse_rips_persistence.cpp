@@ -30,13 +30,15 @@ using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
 using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
 using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
+                     Filtration_value& threshold, int& dim_max, int& p, int& edge_collapse_iter_nb,
+                     Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
   std::string off_file_points;
@@ -44,9 +46,10 @@ int main(int argc, char* argv[]) {
   double threshold;
   int dim_max;
   int p;
+  int edge_collapse_iter_nb;
   double min_persistence;
 
-  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, filediag, threshold, dim_max, p, edge_collapse_iter_nb, min_persistence);
 
   std::cout << "The current input values to run the program is: " << std::endl;
   std::cout << "min_persistence, threshold, max_complex_dimension, off_file_points, filediag"
@@ -78,24 +81,37 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-  Flag_complex_edge_collapser edge_collapser(
-    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
-      return std::make_tuple(source(edge, proximity_graph),
-                             target(edge, proximity_graph),
-                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
-      })
-  );
+  auto edges_from_graph = boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+        return std::make_tuple(source(edge, proximity_graph),
+                               target(edge, proximity_graph),
+                               get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      });
+  std::vector<Filtered_edge> edges_list(edges_from_graph.begin(), edges_from_graph.end());
+  
+  std::vector<Filtered_edge> remaining_edges;
+  for (int iter = 0; iter < edge_collapse_iter_nb; iter++) {
+    Flag_complex_edge_collapser edge_collapser(edges_list);
+    edge_collapser.process_edges(
+      [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
+          // insert the edge
+          remaining_edges.emplace_back(u, v, filtration);
+        });
+    if ((iter + 1) < edge_collapse_iter_nb) {
+      edges_list.clear();
+      std::copy(remaining_edges.begin(), remaining_edges.end(), std::back_inserter(edges_list));
+      remaining_edges.clear();
+    }
+  }
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < point_vector.size(); vertex++) {
     // insert the vertex with a 0. filtration value just like a Rips
     stree.insert_simplex({vertex}, 0.);
   }
-  edge_collapser.process_edges(
-    [&stree](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-        // insert the edge
-        stree.insert_simplex({u, v}, filtration);
-      });
+
+  for (auto filtered_edge : remaining_edges) {
+    stree.insert_simplex({std::get<0>(filtered_edge), std::get<1>(filtered_edge)}, std::get<2>(filtered_edge));
+  }
 
   stree.expansion(dim_max);
   
@@ -122,7 +138,8 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
+                     Filtration_value& threshold, int& dim_max, int& p, int& edge_collapse_iter_nb,
+                     Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -139,6 +156,8 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
       "Maximal dimension of the Rips complex we want to compute.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),
       "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "edge-collapse-iterations,i", po::value<int>(&edge_collapse_iter_nb)->default_value(1),
+      "Number of iterations edge collapse is performed.")(
       "min-persistence,m", po::value<Filtration_value>(&min_persistence),
       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
       "intervals");

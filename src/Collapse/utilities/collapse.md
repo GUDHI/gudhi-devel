@@ -31,6 +31,7 @@ where `dim` is the dimension of the homological feature, `birth` and `death` are
 * `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Rips complex we want to compute.
 * `-p [ --field-charac ]` (default = 11)     Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
+* `-i [ --edge-collapse-iterations ]` (default = 1) Number of iterations edge collapse is performed.
 
 Beware: this program may use a lot of RAM and take a lot of time if `max-edge-length` is set to a large value.
 
