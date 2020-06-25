@@ -15,6 +15,8 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/graph_simplicial_complex.h>
 
+#include <boost/range/adaptor/transformed.hpp>
+
 #include<utility>  // for std::pair
 #include<vector>
 #include<tuple>
@@ -109,7 +111,13 @@ int main(int argc, char* argv[]) {
   int ambient_dim = point_vector[0].size();
 
   // ***** Simplex tree from a flag complex built after collapse *****
-  Flag_complex_edge_collapser edge_collapser(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(
+    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+      return std::make_tuple(source(edge, proximity_graph),
+                             target(edge, proximity_graph),
+                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      })
+  );
 
   Simplex_tree stree_from_collapse;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < point_vector.size(); vertex++) {

@@ -13,6 +13,7 @@
 #define BOOST_TEST_MODULE "collapse"
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include <gudhi/Flag_complex_edge_collapser.h>
 #include <gudhi/distance_functions.h>
@@ -49,7 +50,7 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Flag_complex_edge_collapser edge_collapser(filtered_edges.begin(), filtered_edges.end());
+  Flag_complex_edge_collapser edge_collapser(filtered_edges);
   Filtered_edge_list remaining_edges;
   edge_collapser.process_edges(
     [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
@@ -174,7 +175,15 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
   Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Flag_complex_edge_collapser>(point_cloud,
                                                                                                threshold,
                                                                                                Gudhi::Euclidean_distance());
-  Flag_complex_edge_collapser edge_collapser(proximity_graph);
+  
+  Flag_complex_edge_collapser edge_collapser(
+    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+      return std::make_tuple(source(edge, proximity_graph),
+                             target(edge, proximity_graph),
+                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      })
+  );
+
   Filtered_edge_list remaining_edges;
   edge_collapser.process_edges(
     [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {

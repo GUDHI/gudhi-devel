@@ -16,6 +16,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 
 #include <boost/program_options.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include<utility>  // for std::pair
 #include<vector>
@@ -77,7 +78,13 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
-  Flag_complex_edge_collapser edge_collapser(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(
+    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+      return std::make_tuple(source(edge, proximity_graph),
+                             target(edge, proximity_graph),
+                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      })
+  );
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < point_vector.size(); vertex++) {

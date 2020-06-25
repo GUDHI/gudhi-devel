@@ -289,49 +289,15 @@ class Flag_complex_edge_collapser {
  public:
   /** \brief Flag_complex_edge_collapser constructor from a range of filtered edges.
    *
-   * @param[in] begin Iterator on the first element of a filtered edges range, aka. `std::begin`. Filtered edges must
-   * be in `Flag_complex_edge_collapser::Filtered_edge`.
-   *
-   * @param[in] end Iterator on the final element of a filtered edges range, aka. `std::end`. Filtered edges must be
-   * in `Flag_complex_edge_collapser::Filtered_edge`.
-   *
-   * There is no need the range to be sorted, as it will be performed in
+   * @param[in] edges Range of Filtered edges range.There is no need the range to be sorted, as it will be performed in
    * `Flag_complex_edge_collapser::process_edges`.
-   */
-  template<typename Filtered_edge_iterator>
-  Flag_complex_edge_collapser(Filtered_edge_iterator begin, Filtered_edge_iterator end)
-  : f_edge_vector_(begin, end) { }
-
-  /** \brief Inserts all edges given by a OneSkeletonGraph into a vector of
+   *
+   * \tparam FilteredEdgeRange must be a range for which std::begin and std::end return iterators on a
    * `Flag_complex_edge_collapser::Filtered_edge`.
-   * OneSkeletonGraph must be a model of
-   * <a href="http://www.boost.org/doc/libs/1_73_0/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
-   * and <a href="http://www.boost.org/doc/libs/1_73_0/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
-   *
-   * The edge filtration value is accessible through the property tag
-   * edge_filtration_t.
-   *
-   * boost::graph_traits<OneSkeletonGraph>::vertex_descriptor
-   *                                    must be Vertex_handle.
-   * boost::graph_traits<OneSkeletonGraph>::directed_category
-   *                                    can be directed_tag (the fastest, the least RAM use), undirected_tag or even
-   *                                    bidirected_tag.
-   *
-   * It is required to have no duplicated edges in the graph.
-   * 
-   * `Gudhi::Proximity_graph<Flag_complex_edge_collapser>` is a good candidate for OneSkeletonGraph.
    */
-  template<class OneSkeletonGraph>
-  Flag_complex_edge_collapser(const OneSkeletonGraph& one_skeleton_graph) {
-    // Insert all edges
-    for (auto edge_it = edges(one_skeleton_graph);
-         edge_it.first != edge_it.second; ++edge_it.first) {
-      auto edge = *(edge_it.first);
-      Vertex_handle u = source(edge, one_skeleton_graph);
-      Vertex_handle v = target(edge, one_skeleton_graph);
-      f_edge_vector_.emplace_back(u, v, get(Gudhi::edge_filtration_t(), one_skeleton_graph, edge));
-    }
-  }
+  template<typename FilteredEdgeRange>
+  Flag_complex_edge_collapser(FilteredEdgeRange edges)
+  : f_edge_vector_(std::begin(edges), std::end(edges)) { }
 
   /** \brief Performs edge collapse in a increasing sequence of the filtration value.
    *

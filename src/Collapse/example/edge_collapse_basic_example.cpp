@@ -25,7 +25,7 @@ int main() {
                               {0, 2, 2.},
                               {1, 3, 2.}};
 
-  Flag_complex_edge_collapser edge_collapser(graph.begin(), graph.end());
+  Flag_complex_edge_collapser edge_collapser(graph);
 
   Filtered_edge_list remaining_edges;
   // Retrieve collapse edges from the output iterator

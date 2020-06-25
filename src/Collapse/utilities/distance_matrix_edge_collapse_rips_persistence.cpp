@@ -15,6 +15,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 
 #include <boost/program_options.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = Simplex_tree::Filtration_value;
@@ -90,7 +91,13 @@ int main(int argc, char* argv[]) {
                                                                                  });
 
   // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-  Flag_complex_edge_collapser edge_collapser(proximity_graph);
+  Flag_complex_edge_collapser edge_collapser(
+    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+      return std::make_tuple(source(edge, proximity_graph),
+                             target(edge, proximity_graph),
+                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      })
+  );
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < distances.size(); vertex++) {
