@@ -96,11 +96,8 @@ int main(int argc, char* argv[]) {
           // insert the edge
           remaining_edges.emplace_back(u, v, filtration);
         });
-    if ((iter + 1) < edge_collapse_iter_nb) {
-      edges_list.clear();
-      std::copy(remaining_edges.begin(), remaining_edges.end(), std::back_inserter(edges_list));
-      remaining_edges.clear();
-    }
+    edges_list = std::move(remaining_edges);
+    remaining_edges.clear();
   }
 
   Simplex_tree stree;
