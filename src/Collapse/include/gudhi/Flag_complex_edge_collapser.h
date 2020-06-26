@@ -12,11 +12,9 @@
 #ifndef FLAG_COMPLEX_EDGE_COLLAPSER_H_
 #define FLAG_COMPLEX_EDGE_COLLAPSER_H_
 
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
 #include <boost/functional/hash.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <Eigen/Sparse>
@@ -39,11 +37,10 @@ namespace Gudhi {
 
 namespace collapse {
 
-/**
+/** \private
+ * 
  * \class Flag_complex_edge_collapser
  * \brief Flag complex sparse matrix data structure.
- *
- * \ingroup collapse
  *
  * \details
  * This class stores a <a target="_blank" href="https://en.wikipedia.org/wiki/Clique_complex">Flag complex</a>
@@ -296,7 +293,7 @@ class Flag_complex_edge_collapser {
    * `Flag_complex_edge_collapser::Filtered_edge`.
    */
   template<typename FilteredEdgeRange>
-  Flag_complex_edge_collapser(FilteredEdgeRange edges)
+  Flag_complex_edge_collapser(const FilteredEdgeRange& edges)
   : f_edge_vector_(std::begin(edges), std::end(edges)) { }
 
   /** \brief Performs edge collapse in a increasing sequence of the filtration value.
@@ -310,7 +307,7 @@ class Flag_complex_edge_collapser {
     // Sort edges
     auto sort_by_filtration = [](const Filtered_edge& edge_a, const Filtered_edge& edge_b) -> bool
     {
-      return (get<2>(edge_a) < get<2>(edge_b)); 
+      return (std::get<2>(edge_a) < std::get<2>(edge_b)); 
     };
 
 #ifdef GUDHI_USE_TBB
@@ -341,6 +338,35 @@ class Flag_complex_edge_collapser {
   }
 
 };
+
+/** \brief Constructs a Flag complex from edges as an input, collapse edges and returns remaining edges.
+ *
+ * \fn auto Gudhi::collapse::flag_complex_collapse_edges(FilteredEdgeRange const& edges)
+ *
+ * \tparam FilteredEdgeRange furnishes `std::begin` and `std::end` methods and returns an iterator on a
+ * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`
+ *
+ * \ingroup edge_collapse
+ * 
+ */
+template<class FilteredEdgeRange> auto flag_complex_collapse_edges(const FilteredEdgeRange& edges) {
+  auto first_edge_itr = std::begin(edges);
+  auto first_vertex = std::get<0>(*first_edge_itr);
+  auto first_filt = std::get<2>(*first_edge_itr);
+  using Vertex_handle = decltype(first_vertex);
+  using Filtration_value = decltype(first_filt);
+  using Edge_collapser = Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+  std::vector<typename Edge_collapser::Filtered_edge> remaining_edges;
+  if (first_edge_itr != std::end(edges)) {
+    Edge_collapser edge_collapser(edges);
+    edge_collapser.process_edges(
+      [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
+          // insert the edge
+          remaining_edges.emplace_back(u, v, filtration);
+        });
+  }
+  return remaining_edges;
+}
 
 }  // namespace collapse
 
