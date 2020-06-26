@@ -20,6 +20,7 @@
 
 #include<utility>  // for std::pair
 #include<vector>
+#include<tuple>
 
 // Types definition
 
@@ -29,9 +30,8 @@ using Vertex_handle = Simplex_tree::Vertex_handle;
 using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
-using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
-using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
-using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
+using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
+using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -90,12 +90,7 @@ int main(int argc, char* argv[]) {
   
   std::vector<Filtered_edge> remaining_edges;
   for (int iter = 0; iter < edge_collapse_iter_nb; iter++) {
-    Flag_complex_edge_collapser edge_collapser(edges_list);
-    edge_collapser.process_edges(
-      [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-          // insert the edge
-          remaining_edges.emplace_back(u, v, filtration);
-        });
+    auto remaining_edges = Gudhi::collapse::flag_complex_collapse_edges(edges_list);
     edges_list = std::move(remaining_edges);
     remaining_edges.clear();
   }
