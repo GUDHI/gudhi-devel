@@ -22,53 +22,16 @@ using Filtration_value = Simplex_tree::Filtration_value;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 
 using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
+using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
 using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 using Distance_matrix = std::vector<std::vector<Filtration_value>>;
 
-void program_options(int argc, char* const argv[], double& min_persistence, double& end_thresold,
-                     int& dimension, int& dim_max, std::string& csv_matrix_file, std::string& filediag) {
-  namespace po = boost::program_options;
-  po::options_description visible("Allowed options", 100);
-      visible.add_options()
-        ("help,h", "produce help message")
-      	("min_persistence,m", po::value<double>(&min_persistence)->default_value(0.1),
-         "Minimum persistence interval length")
-        ("end_thresold,e", po::value<double>(&end_thresold)->default_value(1),
-         "Final threshold for rips complex.")
-        ("dimensions,D", po::value<int>(&dimension)->default_value(2),
-         "Dimension of the manifold.")
-        ("dim_max,k ", po::value<int>(&dim_max)->default_value(2),
-         "Maximum allowed dimension of the Rips complex.")
-        ("input_file_name,i", po::value<std::string>(&csv_matrix_file),
-         "The input file.")
-        ("filediag,o", po::value<std::string>(&filediag),
-         "The output file.");
-
-  po::options_description all;
-  all.add(visible);
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(all).run(), vm);
-  po::notify(vm);
-  if (vm.count("help")) {
-    std::cout << std::endl;
-    std::cout << "Computes rips complexes of different threshold values, to 'end_thresold' from a n random uniform "
-                 "point_vector on a selected manifold, . \n";
-    std::cout << "Strongly collapses all the rips complexes and output the results in out_file. \n";
-    std::cout << "The experiments are repeted 'repete' num of times for each threshold value. \n";
-    std::cout << "type -m for manifold options, 's' for uni sphere, 'b' for unit ball, 'f' for file. \n";
-    std::cout << "type -i 'filename' for Input file option for exported point sample. \n";
-    std::cout << std::endl << std::endl;
-    std::cout << "Usage: " << argv[0] << " [options]" << std::endl << std::endl;
-    std::cout << visible << std::endl;
-    std::abort();
-  }
-}
-
 void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence);
+                     Filtration_value& threshold, int& dim_max, int& p, int& edge_collapse_iter_nb,
+                     Filtration_value& min_persistence);
 
 int main(int argc, char* argv[]) {
   std::string csv_matrix_file;
@@ -76,9 +39,11 @@ int main(int argc, char* argv[]) {
   Filtration_value threshold;
   int dim_max = 2;
   int p;
+  int edge_collapse_iter_nb;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, min_persistence);
+  program_options(argc, argv, csv_matrix_file, filediag, threshold, dim_max, p, edge_collapse_iter_nb,
+                  min_persistence);
 
   Distance_matrix distances = Gudhi::read_lower_triangular_matrix_from_csv_file<Filtration_value>(csv_matrix_file);
   std::cout << "Read the distance matrix succesfully, of size: " << distances.size() << std::endl;
@@ -90,25 +55,32 @@ int main(int argc, char* argv[]) {
                                                                                    return distances[j][i];
                                                                                  });
 
-  // Now we will perform filtered edge collapse to sparsify the edge list edge_t.
-  Flag_complex_edge_collapser edge_collapser(
-    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
-      return std::make_tuple(source(edge, proximity_graph),
-                             target(edge, proximity_graph),
-                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
-      })
-  );
+  auto edges_from_graph = boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+        return std::make_tuple(source(edge, proximity_graph),
+                               target(edge, proximity_graph),
+                               get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      });
+  std::vector<Filtered_edge> edges_list(edges_from_graph.begin(), edges_from_graph.end());
+  std::vector<Filtered_edge> remaining_edges;
+  for (int iter = 0; iter < edge_collapse_iter_nb; iter++) {
+    Flag_complex_edge_collapser edge_collapser(edges_list);
+    edge_collapser.process_edges(
+      [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
+          // insert the edge
+          remaining_edges.emplace_back(u, v, filtration);
+        });
+    edges_list = std::move(remaining_edges);
+    remaining_edges.clear();
+  }
 
   Simplex_tree stree;
   for (Vertex_handle vertex = 0; static_cast<std::size_t>(vertex) < distances.size(); vertex++) {
     // insert the vertex with a 0. filtration value just like a Rips
     stree.insert_simplex({vertex}, 0.);
   }
-  edge_collapser.process_edges(
-    [&stree](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-        // insert the edge
-        stree.insert_simplex({u, v}, filtration);
-      });
+  for (auto filtered_edge : edges_list) {
+    stree.insert_simplex({std::get<0>(filtered_edge), std::get<1>(filtered_edge)}, std::get<2>(filtered_edge));
+  }
 
   stree.expansion(dim_max);
 
@@ -134,7 +106,8 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::string& filediag,
-                     Filtration_value& threshold, int& dim_max, int& p, Filtration_value& min_persistence) {
+                     Filtration_value& threshold, int& dim_max, int& p, int& edge_collapse_iter_nb,
+                     Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()(
@@ -152,6 +125,8 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
       "Maximal dimension of the Rips complex we want to compute.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),
       "Characteristic p of the coefficient field Z/pZ for computing homology.")(
+      "edge-collapse-iterations,i", po::value<int>(&edge_collapse_iter_nb)->default_value(1),
+      "Number of iterations edge collapse is performed.")(
       "min-persistence,m", po::value<Filtration_value>(&min_persistence),
       "Minimal lifetime of homology feature to be recorded. Default is 0. Enter a negative value to see zero length "
       "intervals");

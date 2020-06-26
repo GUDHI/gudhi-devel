@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
     stree.insert_simplex({vertex}, 0.);
   }
 
-  for (auto filtered_edge : remaining_edges) {
+  for (auto filtered_edge : edges_list) {
     stree.insert_simplex({std::get<0>(filtered_edge), std::get<1>(filtered_edge)}, std::get<2>(filtered_edge));
   }
 
