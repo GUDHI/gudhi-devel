@@ -29,8 +29,7 @@ using Vertex_handle = Simplex_tree::Vertex_handle;
 using Point = std::vector<Filtration_value>;
 using Vector_of_points = std::vector<Point>;
 
-using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
-using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
+using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
@@ -111,10 +110,10 @@ int main(int argc, char* argv[]) {
   int ambient_dim = point_vector[0].size();
 
   // ***** Simplex tree from a flag complex built after collapse *****
-  Flag_complex_edge_collapser edge_collapser(
+  auto remaining_edges = Gudhi::collapse::flag_complex_collapse_edges(
     boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
-      return std::make_tuple(source(edge, proximity_graph),
-                             target(edge, proximity_graph),
+      return std::make_tuple(static_cast<Vertex_handle>(source(edge, proximity_graph)),
+                             static_cast<Vertex_handle>(target(edge, proximity_graph)),
                              get(Gudhi::edge_filtration_t(), proximity_graph, edge));
       })
   );
@@ -124,11 +123,10 @@ int main(int argc, char* argv[]) {
     // insert the vertex with a 0. filtration value just like a Rips
     stree_from_collapse.insert_simplex({vertex}, 0.);
   }
-  edge_collapser.process_edges(
-    [&stree_from_collapse](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-        // insert the edge
-        stree_from_collapse.insert_simplex({u, v}, filtration);
-      });
+  for (auto remaining_edge : remaining_edges) {
+    stree_from_collapse.insert_simplex({std::get<0>(remaining_edge), std::get<1>(remaining_edge)},
+                                       std::get<2>(remaining_edge));
+  }
 
   std::vector<Persistence_interval> persistence_intervals_from_collapse = get_persistence_intervals(stree_from_collapse, ambient_dim);
 

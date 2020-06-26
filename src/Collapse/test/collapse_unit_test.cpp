@@ -25,10 +25,14 @@
 #include <array>
 #include <cmath>
 
-using Filtration_value = float;
-using Vertex_handle = short;
-using Flag_complex_edge_collapser = Gudhi::collapse::Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
-using Filtered_edge = Flag_complex_edge_collapser::Filtered_edge;
+struct Simplicial_complex {
+  using Vertex_handle = short;
+  using Filtration_value = float;
+};
+
+using Vertex_handle = Simplicial_complex::Vertex_handle;
+using Filtration_value = Simplicial_complex::Filtration_value;
+using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
 using Filtered_edge_list = std::vector<Filtered_edge>;
 
 template<typename Filtered_edge_range>
@@ -50,13 +54,8 @@ void trace_and_check_collapse(const Filtered_edge_range& filtered_edges, const F
   }
 
   std::cout << "COLLAPSE - keep edges: " << std::endl;
-  Flag_complex_edge_collapser edge_collapser(filtered_edges);
-  Filtered_edge_list remaining_edges;
-  edge_collapser.process_edges(
-    [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-      std::cout << "f[" << u << ", " << v << "] = " << filtration << std::endl;
-        remaining_edges.emplace_back(u, v, filtration);
-      });
+  auto remaining_edges = Gudhi::collapse::flag_complex_collapse_edges(filtered_edges);
+
   std::cout << "AFTER COLLAPSE - Total number of edges: " << remaining_edges.size() << std::endl;
   BOOST_CHECK(remaining_edges.size() <= filtered_edges.size());
   for (auto filtered_edge_from_collapse : remaining_edges) {
@@ -155,7 +154,6 @@ BOOST_AUTO_TEST_CASE(collapse_from_array) {
   trace_and_check_collapse(f_edge_array, {{1, 3, 2.}});
 }
 
-
 BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
   std::cout << "***** COLLAPSE FROM PROXIMITY GRAPH *****" << std::endl;
   //  1   2
@@ -166,30 +164,24 @@ BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {
   //  o---o
   //  0   3
   std::vector<std::vector<Filtration_value>> point_cloud = {{0., 0.},
-                                                 {0., 1.},
-                                                 {1., 0.},
-                                                 {1., 1.} };
+                                                            {0., 1.},
+                                                            {1., 0.},
+                                                            {1., 1.} };
 
   Filtration_value threshold = std::numeric_limits<Filtration_value>::infinity();
-  using Proximity_graph = Gudhi::Proximity_graph<Flag_complex_edge_collapser>;
-  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Flag_complex_edge_collapser>(point_cloud,
-                                                                                               threshold,
-                                                                                               Gudhi::Euclidean_distance());
-  
-  Flag_complex_edge_collapser edge_collapser(
-    boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
-      return std::make_tuple(source(edge, proximity_graph),
-                             target(edge, proximity_graph),
-                             get(Gudhi::edge_filtration_t(), proximity_graph, edge));
-      })
-  );
+  using Proximity_graph = Gudhi::Proximity_graph<Simplicial_complex>;
+  Proximity_graph proximity_graph = Gudhi::compute_proximity_graph<Simplicial_complex>(point_cloud,
+                                                                                       threshold,
+                                                                                       Gudhi::Euclidean_distance());
 
-  Filtered_edge_list remaining_edges;
-  edge_collapser.process_edges(
-    [&remaining_edges](Vertex_handle u, Vertex_handle v, Filtration_value filtration) {
-      std::cout << "f[" << u << ", " << v << "] = " << filtration << std::endl;
-        remaining_edges.emplace_back(u, v, filtration);
-      });
+  auto remaining_edges = Gudhi::collapse::flag_complex_collapse_edges(
+      boost::adaptors::transform(edges(proximity_graph), [&](auto&&edge){
+        return std::make_tuple(static_cast<Vertex_handle>(source(edge, proximity_graph)),
+                               static_cast<Vertex_handle>(target(edge, proximity_graph)),
+                               get(Gudhi::edge_filtration_t(), proximity_graph, edge));
+      })
+    );
+
   BOOST_CHECK(remaining_edges.size() == 5);
 
   std::size_t filtration_is_edge_length_nb = 0;
