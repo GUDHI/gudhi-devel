@@ -278,8 +278,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
   Alpha_complex_3d(const InputPointRange& points) {
     static_assert(!Periodic, "This constructor is not available for periodic versions of Alpha_complex_3d");
 
-    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(
-        new Alpha_shape_3(std::begin(points), std::end(points), 0, Alpha_shape_3::GENERAL));
+    alpha_shape_3_ptr_ = std::make_unique<Alpha_shape_3>(
+        std::begin(points), std::end(points), 0, Alpha_shape_3::GENERAL);
   }
 
   /** \brief Alpha_complex constructor from a list of points and associated weights.
@@ -312,8 +312,8 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
       index++;
     }
 
-    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(
-        new Alpha_shape_3(std::begin(weighted_points_3), std::end(weighted_points_3), 0, Alpha_shape_3::GENERAL));
+    alpha_shape_3_ptr_ = std::make_unique<Alpha_shape_3>(
+        std::begin(weighted_points_3), std::end(weighted_points_3), 0, Alpha_shape_3::GENERAL);
   }
 
   /** \brief Alpha_complex constructor from a list of points and an iso-cuboid coordinates.
@@ -357,7 +357,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
     // Maybe need to set it to GENERAL mode
-    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0, Alpha_shape_3::GENERAL));
+    alpha_shape_3_ptr_ = std::make_unique<Alpha_shape_3>(pdt, 0, Alpha_shape_3::GENERAL);
   }
 
   /** \brief Alpha_complex constructor from a list of points, associated weights and an iso-cuboid coordinates.
@@ -427,7 +427,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
 
     // alpha shape construction from points. CGAL has a strange behavior in REGULARIZED mode. This is the default mode
     // Maybe need to set it to GENERAL mode
-    alpha_shape_3_ptr_ = std::unique_ptr<Alpha_shape_3>(new Alpha_shape_3(pdt, 0, Alpha_shape_3::GENERAL));
+    alpha_shape_3_ptr_ = std::make_unique<Alpha_shape_3>(pdt, 0, Alpha_shape_3::GENERAL);
   }
 
   /** \brief Inserts all Delaunay triangulation into the simplicial complex.
