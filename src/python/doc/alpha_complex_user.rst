@@ -35,8 +35,6 @@ Remarks
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 * For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
 
-For performances reasons, it is advised to use CGAL :math:`\geq` 5.0.0.
-
 Example from points
 -------------------
 
