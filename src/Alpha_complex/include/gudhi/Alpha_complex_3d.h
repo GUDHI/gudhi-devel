@@ -308,7 +308,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
     std::size_t index = 0;
     weighted_points_3.reserve(boost::size(points));
     while ((index < boost::size(weights)) && (index < boost::size(points))) {
-      weighted_points_3.push_back(Weighted_point_3(points[index], weights[index]));
+      weighted_points_3.emplace_back(points[index], weights[index]);
       index++;
     }
 
@@ -411,7 +411,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
                   std::invalid_argument("Invalid weight at index " + std::to_string(index + 1) +
                                         ". Must be positive and less than maximal possible weight = 1/64*cuboid length "
                                         "squared, which is not an acceptable input."));
-      weighted_points_3.push_back(Weighted_point_3(points[index], weights[index]));
+      weighted_points_3.emplace_back(points[index], weights[index]);
       index++;
     }
 
