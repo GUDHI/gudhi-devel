@@ -15,6 +15,8 @@
 #include <boost/version.hpp>
 #include <boost/variant.hpp>
 #include <boost/range/size.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Alpha_complex_options.h>
@@ -300,17 +302,12 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
   Alpha_complex_3d(const InputPointRange& points, WeightRange weights) {
     static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex_3d");
     static_assert(!Periodic, "This constructor is not available for periodic versions of Alpha_complex_3d");
+    // FIXME: this test is only valid if we have a forward range
     GUDHI_CHECK(boost::size(weights) == boost::size(points),
                 std::invalid_argument("Points number in range different from weights range number"));
 
-    std::vector<Weighted_point_3> weighted_points_3;
-
-    std::size_t index = 0;
-    weighted_points_3.reserve(boost::size(points));
-    while ((index < boost::size(weights)) && (index < boost::size(points))) {
-      weighted_points_3.emplace_back(points[index], weights[index]);
-      index++;
-    }
+    auto weighted_points_3 = boost::range::combine(points, weights)
+      | boost::adaptors::transformed([](auto const&t){return Weighted_point_3(boost::get<0>(t), boost::get<1>(t));});
 
     alpha_shape_3_ptr_ = std::make_unique<Alpha_shape_3>(
         std::begin(weighted_points_3), std::end(weighted_points_3), 0, Alpha_shape_3::GENERAL);
@@ -389,6 +386,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
                    FT z_min, FT x_max, FT y_max, FT z_max) {
     static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex_3d");
     static_assert(Periodic, "This constructor is not available for non-periodic versions of Alpha_complex_3d");
+    // FIXME: this test is only valid if we have a forward range
     GUDHI_CHECK(boost::size(weights) == boost::size(points),
                 std::invalid_argument("Points number in range different from weights range number"));
     // Checking if the cuboid is the same in x,y and z direction. If not, CGAL will not process it.
@@ -396,24 +394,19 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
         (x_max - x_min == y_max - y_min) && (x_max - x_min == z_max - z_min) && (z_max - z_min == y_max - y_min),
         std::invalid_argument("The size of the cuboid in every directions is not the same."));
 
-    std::vector<Weighted_point_3> weighted_points_3;
-
-    std::size_t index = 0;
-    weighted_points_3.reserve(boost::size(points));
-
 #ifdef GUDHI_DEBUG
     // Defined in GUDHI_DEBUG to avoid unused variable warning for GUDHI_CHECK
     FT maximal_possible_weight = 0.015625 * (x_max - x_min) * (x_max - x_min);
 #endif
 
-    while ((index < boost::size(weights)) && (index < boost::size(points))) {
-      GUDHI_CHECK((weights[index] < maximal_possible_weight) && (weights[index] >= 0),
-                  std::invalid_argument("Invalid weight at index " + std::to_string(index + 1) +
-                                        ". Must be positive and less than maximal possible weight = 1/64*cuboid length "
-                                        "squared, which is not an acceptable input."));
-      weighted_points_3.emplace_back(points[index], weights[index]);
-      index++;
-    }
+    auto weighted_points_3 = boost::range::combine(points, weights)
+      | boost::adaptors::transformed([=](auto const&t){
+          auto w = boost::get<1>(t);
+          GUDHI_CHECK((w < maximal_possible_weight) && (w >= 0),
+              std::invalid_argument("Invalid weight " + std::to_string(w) +
+                ". Must be non-negative and less than maximal possible weight = 1/64*cuboid length squared."));
+          return Weighted_point_3(boost::get<0>(t), w);
+          });
 
     // Define the periodic cube
     Dt pdt(typename Kernel::Iso_cuboid_3(x_min, y_min, z_min, x_max, y_max, z_max));
