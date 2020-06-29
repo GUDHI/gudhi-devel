@@ -28,7 +28,7 @@ namespace alpha_complex {
 class Alpha_complex_interface {
  public:
   Alpha_complex_interface(const std::vector<std::vector<double>>& points, bool fast_version, bool exact_version)
-  : points_(points.begin(), points.end()),
+  : points_(points),
     fast_version_(fast_version),
     exact_version_(exact_version) {
   }
