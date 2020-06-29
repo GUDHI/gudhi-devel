@@ -63,7 +63,7 @@ class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
       alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
 
-  std::vector<double> get_point(int vh) {
+  std::vector<double> get_point(int vh) override {
     Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
