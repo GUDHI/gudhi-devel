@@ -33,7 +33,7 @@ double wasserstein_distance(
   return hera::wasserstein_dist(diag1, diag2, params);
 }
 
-PYBIND11_MODULE(hera, m) {
+PYBIND11_MODULE(wasserstein, m) {
       m.def("wasserstein_distance", &wasserstein_distance,
           py::arg("X"), py::arg("Y"),
           py::arg("order") = 1,

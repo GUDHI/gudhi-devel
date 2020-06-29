@@ -6,9 +6,7 @@
    |      ../../doc/Persistent_cohomology/3DTorus_poch.png           | a sequence of (homology) groups, capturing global topological         |                                               |
    |      :figclass: align-center                                    | features like connected components, holes, cavities, etc. Persistent  | :Since: GUDHI 2.0.0                           |
    |                                                                 | homology studies the evolution -- birth, life and death -- of these   |                                               |
-   |      Rips Persistent Cohomology on a 3D                         | features when the topological space is changing. Consequently, the    | :License: MIT                                 |
-   |      Torus                                                      | theory is essentially composed of three elements: topological spaces, |                                               |
-   |                                                                 | their homology groups and an evolution scheme.                        |                                               |
+   |      Rips Persistent Cohomology on a 3D Torus                   | features when the topological space is changing.                      | :License: MIT                                 |
    |                                                                 |                                                                       |                                               |
    |                                                                 | Computation of persistent cohomology using the algorithm of           |                                               |
    |                                                                 | :cite:`DBLP:journals/dcg/SilvaMV11` and                               |                                               |
