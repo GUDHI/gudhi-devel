@@ -40,7 +40,6 @@ namespace collapse {
 
 /** \private
  * 
- * \class Flag_complex_edge_collapser
  * \brief Flag complex sparse matrix data structure.
  *
  * \details
