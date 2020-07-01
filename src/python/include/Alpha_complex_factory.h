@@ -63,13 +63,13 @@ class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
       alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
 
-  std::vector<double> get_point(int vh) override {
+  virtual std::vector<double> get_point(int vh) override {
     Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
 
-  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value){
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+                                   bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
@@ -89,12 +89,12 @@ class Inexact_Alphacomplex_dD : public Abstract_alpha_complex {
       alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
 
-  std::vector<double> get_point(int vh) {
+  virtual std::vector<double> get_point(int vh) override {
     Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
-  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value){
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+                                   bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
@@ -117,13 +117,13 @@ class Alphacomplex_3D : public Abstract_alpha_complex {
     : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
   }
 
-  std::vector<double> get_point(int vh) {
+  virtual std::vector<double> get_point(int vh) override {
     Point const& point = alpha_complex_.get_point(vh);
     return pt_cgal_to_cython(point);
   }
 
-  bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value){
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+                           bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
   }
 
