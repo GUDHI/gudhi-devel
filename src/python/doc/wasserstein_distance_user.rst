@@ -29,17 +29,6 @@ Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
 
 .. autofunction:: gudhi.wasserstein.wasserstein_distance
 
-Hera
-****
-
-This other implementation comes from `Hera
-<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
-based on "Geometry Helps to Compare Persistence Diagrams"
-:cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
-Morozov, and Arnur Nigmetov.
-
-.. autofunction:: gudhi.hera.wasserstein_distance
-
 Basic example
 *************
 
@@ -99,6 +88,96 @@ The output is:
     point 1 in dgm1 is matched to point 2 in dgm2
     point 2 in dgm1 is matched to the diagonal
     point 1 in dgm2 is matched to the diagonal
+
+
+Entropic regularization
+***********************
+
+When using the Optimal Transport based version of wasserstein distances, 
+we also allow for the use of entropic regularization of optimal transport distance via the parameter ``reg``.
+If ``reg > 0``, we solve
+:math:`\min_P \sum P_{ij} M_{ij} + reg * h(P)`
+under marginal constraints on :math:`P` , which can be understood as a generalized matching between the diagrams.
+:math:`P_{ij}` denotes the quantity of mass from the :math:`i`-th points in the first diagram that is
+transported to the :math:`j`-th point in the second diagram. Last row and column of :math:`P` denotes the diagonal
+by convention.
+Here :math:`M` is a matrix encoding the pairwises distances between the points of the two diagrams along with
+distances from points to the diagonal, and :math:`h(P) = \sum P_{ij} \log(P_{ij})` is the entropic regularization term.
+
+If ``matching=True``, we return both the estimated transport cost :math:`\sum P_{ij} C_{ij}` and the computed :math:`P`, 
+otherwise we simply return the estimated transport cost.
+
+The closer ``reg`` is to 0, the closer the transport cost will be from the exact distance between the diagrams.
+The larger the regularization parameter, the faster the computation.
+Note however that taking too low values for ``reg`` can run into numerical issues.
+
+This optimization problem is solved using the Python Optimal Transport library and relies on the Sinkhorn algorithm.
+
+
+.. testcode::
+
+    import gudhi.wasserstein
+    import numpy as np
+
+    # regularization parameter
+    reg = 0.1
+
+    dgm1 = np.array([[2.7, 3.7], [4., 4.1]])
+    dgm2 = np.array([[2.8, 4.45]])
+    cost, P = gudhi.wasserstein.wasserstein_distance(dgm1, dgm2, matching=True, order=1, internal_p=2, reg=reg)
+
+    message_cost = "Regularized Wasserstein distance value = %.2f" %cost
+    print(message_cost)
+    print("Mass located in the first point of dgm1 transported to the first point of dgm2:")
+    print("%.3f" %P[0,0]) 
+    print("Mass located in the first point of dgm1 transported to the diagonal:")
+    print("%.3f" %P[0,-1]) 
+
+The output is
+
+.. testoutput::
+
+   Regularized Wasserstein distance value = 0.83
+   Mass located in the first point of dgm1 transported to the first point of dgm2:
+   0.995
+   Mass located in the first point of dgm1 transported to the diagonal:
+   0.005
+
+
+Hera
+****
+
+We provide an alternative implementation to estimate Wasserstein distance between persistence diagrams.
+This one comes from `Hera
+<https://bitbucket.org/grey_narn/hera/src/master/>`_ (BSD-3-Clause) which is
+based on "Geometry Helps to Compare Persistence Diagrams"
+:cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
+Morozov, and Arnur Nigmetov.
+
+.. autofunction:: gudhi.hera.wasserstein_distance
+
+This example computes the 1-Wasserstein distance with infinity-norm as ground metric
+between 2 persistence diagrams with Euclidean ground metric.
+Note that persistence diagrams must be submitted as (n x 2) numpy arrays and can contain inf values.
+
+.. testcode::
+
+    import gudhi.hera
+    import numpy as np
+
+    dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [1, np.inf]])
+    dgm2 = np.array([[2.8, 4.45],[9.5, 14.1], [2, np.inf]])
+
+    message = "Wasserstein distance value (hera) = " + '%.2f' % gudhi.hera.wasserstein_distance(dgm1, dgm2, order=1., internal_p=2.)
+    print(message)
+
+The output is:
+
+.. testoutput::
+
+    Wasserstein distance value (hera) = 2.45
+
+
 
 Barycenters
 -----------
