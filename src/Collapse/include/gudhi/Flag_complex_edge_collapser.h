@@ -340,13 +340,20 @@ class Flag_complex_edge_collapser {
 
 };
 
-/** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent homology and returns the remaining edges as a range.
+/** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent
+ * homology and returns the remaining edges as a range.
  *
  * \fn auto Gudhi::collapse::flag_complex_collapse_edges(FilteredEdgeRange const& edges)
+ * 
+ * \param[in] edges Range of Filtered edges.There is no need the range to be sorted, as it will be performed.
  *
  * \tparam FilteredEdgeRange furnishes `std::begin` and `std::end` methods and returns an iterator on a
- * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>` where Vertex_handle is the index of a vertex.
+ * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>` where `Vertex_handle` is the type
+ * of a vertex index and `Filtration_value` is the type of an edge filtration value.
  *
+ * \return Remaining edges after collapse of type
+ * `std::vector<std::tuple<Vertex_handle, Vertex_handle, Filtration_value>>`.
+ * 
  * \ingroup edge_collapse
  * 
  */
