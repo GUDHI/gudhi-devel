@@ -34,6 +34,8 @@ Remarks
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 * For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
+* The vertices in the output simplex tree are not guaranteed to match the order of the input points. One can use
+  :func:`~gudhi.AlphaComplex.get_point` to get the initial point back.
 
 Example from points
 -------------------

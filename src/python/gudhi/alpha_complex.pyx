@@ -99,7 +99,7 @@ cdef class AlphaComplex:
         return self.this_ptr != NULL
 
     def get_point(self, vertex):
-        """This function returns the point corresponding to a given vertex.
+        """This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree`.
 
         :param vertex: The vertex.
         :type vertex: int
