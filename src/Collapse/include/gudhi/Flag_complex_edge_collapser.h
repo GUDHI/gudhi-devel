@@ -349,7 +349,7 @@ class Flag_complex_edge_collapser {
  * of a vertex index and `Filtration_value` is the type of an edge filtration value.
  *
  * \return Remaining edges after collapse as a range of
- * `<std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`.
+ * `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`.
  * 
  * \ingroup edge_collapse
  * 
