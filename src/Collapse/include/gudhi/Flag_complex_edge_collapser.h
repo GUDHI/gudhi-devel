@@ -340,7 +340,7 @@ class Flag_complex_edge_collapser {
 
 };
 
-/** \brief Constructs a Flag complex from edges as an input, collapse edges and returns remaining edges.
+/** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent homology and returns the remaining edges as a range.
  *
  * \fn auto Gudhi::collapse::flag_complex_collapse_edges(FilteredEdgeRange const& edges)
  *
