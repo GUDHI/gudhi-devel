@@ -345,7 +345,7 @@ class Flag_complex_edge_collapser {
  * \fn auto Gudhi::collapse::flag_complex_collapse_edges(FilteredEdgeRange const& edges)
  *
  * \tparam FilteredEdgeRange furnishes `std::begin` and `std::end` methods and returns an iterator on a
- * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`
+ * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>` where Vertex_handle is the index of a vertex.
  *
  * \ingroup edge_collapse
  * 
