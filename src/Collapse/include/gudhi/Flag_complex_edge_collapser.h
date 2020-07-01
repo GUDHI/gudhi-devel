@@ -32,6 +32,7 @@
 #include <tuple>  // for std::tie
 #include <algorithm>  // for std::includes
 #include <iterator>  // for std::inserter
+#include <type_traits>  // for std::decay
 
 namespace Gudhi {
 
@@ -351,10 +352,8 @@ class Flag_complex_edge_collapser {
  */
 template<class FilteredEdgeRange> auto flag_complex_collapse_edges(const FilteredEdgeRange& edges) {
   auto first_edge_itr = std::begin(edges);
-  auto first_vertex = std::get<0>(*first_edge_itr);
-  auto first_filt = std::get<2>(*first_edge_itr);
-  using Vertex_handle = decltype(first_vertex);
-  using Filtration_value = decltype(first_filt);
+  using Vertex_handle = std::decay_t<decltype(std::get<0>(*first_edge_itr))>;
+  using Filtration_value = std::decay_t<decltype(std::get<2>(*first_edge_itr))>;
   using Edge_collapser = Flag_complex_edge_collapser<Vertex_handle, Filtration_value>;
   std::vector<typename Edge_collapser::Filtered_edge> remaining_edges;
   if (first_edge_itr != std::end(edges)) {
