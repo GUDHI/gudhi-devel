@@ -1,8 +1,10 @@
 We are pleased to announce the release 3.3.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers a persistence-based clustering algorithm and weighted Rips complex using DTM.
+As a major new feature, the GUDHI library now offers a persistence-based clustering algorithm, weighted Rips complex using DTM
+and edge collapse.
 
-We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.3.0.tar.gz).
+The GUDHI library is hosted on GitHub, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
+From a user point of view, we recommend to download GUDHI user version (gudhi.3.3.0.tar.gz).
 
 Below is a list of changes made since GUDHI 3.2.0:
 
@@ -20,6 +22,10 @@ Below is a list of changes made since GUDHI 3.2.0:
 
 - [Clustering](https://gudhi.inria.fr/python/latest/clustering.html)
      - Python implementation of [ToMATo](https://doi.org/10.1145/2535927), a persistence-based clustering algorithm
+
+- [Edge Collapse](https://gudhi.inria.fr/doc/latest/group__edge__collapse.html) of a filtered flag complex
+     - This C++ implementation reduces a filtration of Vietoris-Rips complex from its graph to another smaller
+     flag filtration with the same persistence.
 
 - [Bottleneck distance](https://gudhi.inria.fr/python/latest/bottleneck_distance_user.html)
      - Python interface to [hera](https://github.com/grey-narn/hera)'s bottleneck distance
