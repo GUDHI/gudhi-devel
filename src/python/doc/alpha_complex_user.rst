@@ -34,8 +34,8 @@ Remarks
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 * For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
-
-For performances reasons, it is advised to use CGAL :math:`\geq` 5.0.0.
+* The vertices in the output simplex tree are not guaranteed to match the order of the input points. One can use
+  :func:`~gudhi.AlphaComplex.get_point` to get the initial point back.
 
 Example from points
 -------------------
@@ -178,49 +178,22 @@ In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the Delaunay triangulation from the points given by an OFF file, and initializes the alpha complex
-with it.
+This example builds the alpha complex from 300 random points on a 2-torus.
 
+Then, it computes the persistence diagram and displays it:
 
-Then, it is asked to display information about the alpha complex:
+.. plot::
+   :include-source:
 
-.. testcode::
-
+    import matplotlib.pyplot as plt
     import gudhi
     alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
-        '/data/points/alphacomplexdoc.off')
-    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=32.0)
+        '/data/points/tore3D_300.off')
+    simplex_tree = alpha_complex.create_simplex_tree()
     result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
         repr(simplex_tree.num_simplices()) + ' simplices - ' + \
         repr(simplex_tree.num_vertices()) + ' vertices.'
     print(result_str)
-    fmt = '%s -> %.2f'
-    for filtered_value in simplex_tree.get_filtration():
-        print(fmt % tuple(filtered_value))
-
-the program output is:
-
-.. testoutput::
-
-   Alpha complex is of dimension 2 - 20 simplices - 7 vertices.
-   [0] -> 0.00
-   [1] -> 0.00
-   [2] -> 0.00
-   [3] -> 0.00
-   [4] -> 0.00
-   [5] -> 0.00
-   [6] -> 0.00
-   [2, 3] -> 6.25
-   [4, 5] -> 7.25
-   [0, 2] -> 8.50
-   [0, 1] -> 9.25
-   [1, 3] -> 10.00
-   [1, 2] -> 11.25
-   [1, 2, 3] -> 12.50
-   [0, 1, 2] -> 13.00
-   [5, 6] -> 13.25
-   [2, 4] -> 20.00
-   [4, 6] -> 22.74
-   [4, 5, 6] -> 22.74
-   [3, 6] -> 30.25
-
+    diag = simplex_tree.persistence()
+    gudhi.plot_persistence_diagram(diag)
+    plt.show()

@@ -20,6 +20,7 @@ import os
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
+from gudhi import read_points_from_off_file
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -27,11 +28,9 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, bool fast_version) nogil except +
-        # bool from_file is a workaround for cython to find the correct signature
-        Alpha_complex_interface(string off_file, bool fast_version, bool from_file) nogil except +
+        Alpha_complex_interface(vector[vector[double]] points, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool exact_version, bool default_filtration_value) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -54,7 +53,6 @@ cdef class AlphaComplex:
     """
 
     cdef Alpha_complex_interface * this_ptr
-    cdef bool exact
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points=None, off_file='', precision='safe'):
@@ -76,21 +74,20 @@ cdef class AlphaComplex:
     def __cinit__(self, points = None, off_file = '', precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
-        self.exact = precision == 'exact'
+        cdef bool exact = precision == 'exact'
 
         cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
-                self.this_ptr = new Alpha_complex_interface(off_file.encode('utf-8'), fast, True)
+                points = read_points_from_off_file(off_file = off_file)
             else:
                 print("file " + off_file + " not found.")
-        else:
-            if points is None:
-                # Empty Alpha construction
-                points=[]
-            pts = points
-            with nogil:
-                self.this_ptr = new Alpha_complex_interface(pts, fast)
+        if points is None:
+            # Empty Alpha construction
+            points=[]
+        pts = points
+        with nogil:
+            self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
@@ -102,7 +99,7 @@ cdef class AlphaComplex:
         return self.this_ptr != NULL
 
     def get_point(self, vertex):
-        """This function returns the point corresponding to a given vertex.
+        """This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree`.
 
         :param vertex: The vertex.
         :type vertex: int
@@ -128,5 +125,5 @@ cdef class AlphaComplex:
         cdef bool compute_filtration = default_filtration_value == True
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
-                                              mas, self.exact, compute_filtration)
+                                              mas, compute_filtration)
         return stree
