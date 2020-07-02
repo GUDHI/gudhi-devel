@@ -180,7 +180,7 @@ Example from OFF file
 
 This example builds the alpha complex from 300 random points on a 2-torus.
 
-Then, it computes the persistence diagram and diplays it:
+Then, it computes the persistence diagram and displays it:
 
 .. plot::
    :include-source:
