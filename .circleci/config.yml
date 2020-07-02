@@ -61,7 +61,7 @@ jobs:
             cd build;            
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..;
             cd python;
-            python3 setup.py build_ext -j 2 --inplace;
+            python3 setup.py build_ext --inplace;
             make sphinx;
             cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
