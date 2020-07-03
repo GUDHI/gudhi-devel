@@ -36,6 +36,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
   using Extended_filtration_data = typename Base::Extended_filtration_data;
+  using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
 
  public:
 
@@ -187,6 +188,16 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::skeleton_simplex_range(dimension).end();
+  }
+
+  Boundary_simplex_iterator get_boundary_iterator_begin(const Simplex& simplex) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::boundary_simplex_range(Base::find(simplex)).begin();
+  }
+
+  Boundary_simplex_iterator get_boundary_iterator_end(const Simplex& simplex) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::boundary_simplex_range(Base::find(simplex)).end();
   }
 };
 

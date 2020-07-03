@@ -285,6 +285,22 @@ cdef class SimplexTree:
             ct.append((v, filtered_simplex.second))
         return ct
 
+    def get_boundaries(self, simplex):
+        """This function returns a generator with the boundaries of a given N-simplex.
+
+        :param simplex: The N-simplex, represented by a list of vertex.
+        :type simplex: list of int.
+        :returns:  The (simplices of the) boundaries of a simplex
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef Simplex_tree_boundary_iterator it =  self.get_ptr().get_boundary_iterator_begin(simplex)
+        cdef Simplex_tree_boundary_iterator end = self.get_ptr().get_boundary_iterator_end(simplex)
+
+        while it != end:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
+            preincrement(it)
+
+
     def remove_maximal_simplex(self, simplex):
         """This function removes a given maximal N-simplex from the simplicial
         complex.

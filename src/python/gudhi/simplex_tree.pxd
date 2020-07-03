@@ -36,6 +36,12 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_skeleton_iterator operator++() nogil
         bint operator!=(Simplex_tree_skeleton_iterator) nogil
 
+    cdef cppclass Simplex_tree_boundary_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Boundary_simplex_iterator":
+        Simplex_tree_boundary_iterator() nogil
+        Simplex_tree_simplex_handle& operator*() nogil
+        Simplex_tree_boundary_iterator operator++() nogil
+        bint operator!=(Simplex_tree_boundary_iterator) nogil
+
 
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree() nogil
@@ -65,6 +71,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end() nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension) nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
+        Simplex_tree_boundary_iterator get_boundary_iterator_begin(vector[int] simplex) nogil
+        Simplex_tree_boundary_iterator get_boundary_iterator_end(vector[int] simplex) nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":

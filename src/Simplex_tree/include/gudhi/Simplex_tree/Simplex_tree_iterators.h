@@ -85,6 +85,11 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
   typedef typename SimplexTree::Siblings Siblings;
 
+  Simplex_tree_boundary_simplex_iterator()
+      : sib_(nullptr),
+        st_(nullptr)  {
+  }
+
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
       : last_(st->null_vertex()),

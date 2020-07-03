@@ -340,3 +340,12 @@ def test_simplices_iterator():
         assert st.find(simplex[0]) == True
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
+
+def test_boundaries_iterator():
+    st = SimplexTree()
+
+    assert st.insert([0, 1, 2, 3], filtration=1.0) == True
+    assert st.insert([1, 2, 3, 4], filtration=2.0) == True
+
+    assert list(st.get_boundaries([1, 2, 3])) == [([1, 2], 1.0), ([1, 3], 1.0), ([2, 3], 1.0)]
+    assert list(st.get_boundaries([2, 3, 4])) == [([2, 3], 1.0), ([2, 4], 2.0), ([3, 4], 2.0)]
