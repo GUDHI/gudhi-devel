@@ -54,6 +54,7 @@ def test_dummy_atol():
     for weighting_method in ["cloud", "iidproba"]:
         for contrast in ["gaussian", "laplacian", "indicator"]:
             atol_vectoriser = Atol(quantiser=KMeans(n_clusters=1, random_state=202006), weighting_method=weighting_method, contrast=contrast)
+            atol_vectoriser.fit([a, b, c])
             atol_vectoriser(a)
             atol_vectoriser.transform(X=[a, b, c])
 
