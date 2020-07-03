@@ -582,7 +582,7 @@ def _lapl_contrast(measure, centers, inertias):
 
 def _gaus_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers)**2 / inertias**2)
+    return np.exp(-pairwise.pairwise_distances(measure, Y=centers, squared=True) / inertias**2)
 
 def _indicator_contrast(diags, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
