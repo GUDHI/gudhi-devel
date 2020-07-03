@@ -340,3 +340,25 @@ def test_simplices_iterator():
         assert st.find(simplex[0]) == True
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
+
+def test_reset_filtration():
+    st = SimplexTree()
+    
+    assert st.insert([0, 1, 2], 3.) == True
+    assert st.insert([0, 3], 2.) == True
+    assert st.insert([3, 4, 5], 3.) == True
+    assert st.insert([0, 1, 6, 7], 4.) == True
+
+    for simplex in st.get_simplices():
+        assert st.filtration(simplex[0]) >= 0.
+    
+    # dimension until 5 even if simplex tree is of dimension 3 to test the limits
+    for dimension in range(0, 6):
+        st.reset_filtration(0., dimension)
+        for simplex in st.get_skeleton(3):
+            print(simplex)
+            if len(simplex[0]) > (dimension + 1):
+                assert st.filtration(simplex[0]) >= 1.
+            else:
+                assert st.filtration(simplex[0]) == 0.
+

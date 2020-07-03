@@ -1667,6 +1667,36 @@ class Simplex_tree {
     return sh; // None of its faces has the same filtration.
   }
 
+ public:
+  /** \brief This function resets filtration value until a given dimension.
+   * @param[in] filt_value The new filtration value.
+   * @param[in] max_dim The maximal dimension.
+   */
+  void reset_filtration(Filtration_value filt_value, int max_dim) {
+    for (auto& simplex : root_.members()) {
+      simplex.second.assign_filtration(filt_value);
+      if (has_children(&simplex) && max_dim > 0) {
+        rec_reset_filtration(simplex.second.children(), filt_value, (max_dim - 1));
+      }
+    }
+    clear_filtration(); // Drop the cache.
+  }
+
+ private:
+  /** \brief Recursively resets filtration value until a given dimension.
+   * @param[in] sib Siblings to be parsed.
+   * @param[in] filt_value The new filtration value.
+   * @param[in] max_dim The maximal dimension.
+   */
+  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int max_dim) {
+    for (auto& simplex : sib->members()) {
+      simplex.second.assign_filtration(filt_value);
+      if (has_children(&simplex) && max_dim > 0) {
+        rec_reset_filtration(simplex.second.children(), filt_value, (max_dim - 1));
+      }
+    }
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/

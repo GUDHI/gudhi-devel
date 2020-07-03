@@ -358,6 +358,16 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
+    def reset_filtration(self, filtration, max_dim):
+        """This function resets filtration value until a given dimension.
+
+        :param filtration: New threshold value.
+        :type filtration: float.
+        :param max_dim: The maximal dimension.
+        :type max_dim: int.
+        """
+        self.get_ptr().reset_filtration(filtration, max_dim)
+
     def extend_filtration(self):
         """ Extend filtration for computing extended persistence. This function only uses the 
         filtration values at the 0-dimensional simplices, and computes the extended persistence 
