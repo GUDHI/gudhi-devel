@@ -44,7 +44,7 @@ Basic example
 *************
 
 This example computes the 1-Wasserstein distance from 2 persistence diagrams with Euclidean ground metric.
-Note that persistence diagrams must be submitted as (n x 2) numpy arrays and must not contain inf values.
+Note that persistence diagrams must be submitted as (n x 2) numpy arrays.
 
 .. testcode::
 
@@ -67,14 +67,16 @@ We can also have access to the optimal matching by letting `matching=True`.
 It is encoded as a list of indices (i,j), meaning that the i-th point in X
 is mapped to the j-th point in Y.
 An index of -1 represents the diagonal.
+It handles essential parts (points with infinite coordinates). However if the cardinalities of the essential parts differ, 
+any matching has a cost +inf and thus can be considered to be optimal. In such a case, the function returns `(np.inf, None)`.
 
 .. testcode::
 
     import gudhi.wasserstein
     import numpy as np
 
-    dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
-    dgm2 = np.array([[2.8, 4.45], [5, 6], [9.5, 14.1]])
+    dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3, np.inf]])
+    dgm2 = np.array([[2.8, 4.45], [5, 6], [9.5, 14.1], [4, np.inf]])
     cost, matchings = gudhi.wasserstein.wasserstein_distance(dgm1, dgm2, matching=True, order=1, internal_p=2)
 
     message_cost = "Wasserstein distance value = %.2f" %cost
@@ -90,15 +92,29 @@ An index of -1 represents the diagonal.
     for j in dgm2_to_diagonal:
         print("point %s in dgm2 is matched to the diagonal" %j)
 
+    dgm3 = np.array([[1, 2], [0, np.inf]])
+    dgm4 = np.array([[1, 2], [0, np.inf], [1, np.inf]])
+    cost, matchings = gudhi.wasserstein.wasserstein_distance(dgm3, dgm4, matching=True, order=1, internal_p=2)
+    print("\nSecond example:")
+    print("cost:", cost)
+    print("matchings:", matchings)
+
+
 The output is:
 
 .. testoutput::
 
-    Wasserstein distance value = 2.15
+    Wasserstein distance value = 3.15
     point 0 in dgm1 is matched to point 0 in dgm2
     point 1 in dgm1 is matched to point 2 in dgm2
+    point 3 in dgm1 is matched to point 3 in dgm2
     point 2 in dgm1 is matched to the diagonal
     point 1 in dgm2 is matched to the diagonal
+
+    Second example:
+    cost: inf
+    matchings: None
+
 
 Barycenters
 -----------
