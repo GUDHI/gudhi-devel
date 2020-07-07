@@ -55,10 +55,10 @@ def test_handle_essential_parts():
                       [np.inf, np.inf],
                       [-np.inf, np.inf], [-np.inf, np.inf]])
 
-    c, m = _handle_essential_parts(diag1, diag2, matching=True, order=1)
+    c, m = _handle_essential_parts(diag1, diag2, order=1)
     assert c == pytest.approx(3, 0.0001)
     assert np.array_equal(m, [[0,0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9]])
-    c, m = _handle_essential_parts(diag1, diag3, matching=True, order=1)
+    c, m = _handle_essential_parts(diag1, diag3, order=1)
     assert c == np.inf
     assert (m is None)
 
@@ -68,11 +68,11 @@ def test_get_essential_parts():
                      [np.inf, np.inf], [-np.inf, np.inf], [-np.inf, np.inf]])
 
     res = _get_essential_parts(diag)
-    assert res[0] = [4, 5]
-    assert res[1] = [2, 3]
-    assert res[2] = [8, 9]
-    assert res[3] = [6]
-    assert res[4] = [7]
+    assert res[0] == [4, 5]
+    assert res[1] == [2, 3]
+    assert res[2] == [8, 9]
+    assert res[3] == [6]
+    assert res[4] == [7]
 
 
 def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):

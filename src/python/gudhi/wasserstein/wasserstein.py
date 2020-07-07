@@ -245,7 +245,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
             if cost == np.inf:
                 return cost, None
             else:
-                return np.array([[i, -1] for i in range(n)])
+                return cost, np.array([[i, -1] for i in range(n)])
 
 
     # Second step: handle essential parts
