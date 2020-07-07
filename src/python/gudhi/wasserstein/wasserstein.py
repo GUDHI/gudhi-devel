@@ -214,7 +214,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     # Zeroth step: check compatibility of arguments
     if keep_essential_parts and enable_autodiff:
         import warnings
-        warnings.warn("enable_autodiff does not handle essential parts yet. These will be ignored in the following computations")
+        warnings.warn("enable_autodiff does not handle essential parts yet. keep_essential_parts set to False.")
         keep_essential_parts = False
 
     # First step: handle empty diagrams
@@ -256,11 +256,11 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
                 return np.inf, None
             else:
                 return np.inf  # avoid computing off-diagonal transport cost if essential parts do not match (saves time)
-
     else:
         essential_cost = 0
         essential_matching = None
 
+    # Extract off-diaognal points of the diagrams.
     X, Y = _offdiag(X), _offdiag(Y)
     n = len(X)
     m = len(Y)
