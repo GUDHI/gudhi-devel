@@ -62,7 +62,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) {
     // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,
     // and this is a bit more efficient.
-    assert(this->num_simplices() == 0);
     auto& rm = this->root()->members_;
     for(int i=0; i<n; ++i) {
       char* p = (char*)filtrations + i * stride0;
