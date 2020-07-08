@@ -196,7 +196,7 @@ cdef class SimplexTree:
         return self.get_ptr().insert(simplex, <double>filtration)
 
     def insert_array(self, filtrations, double max_filtration=numpy.inf):
-        """Inserts edges in an empty complex. The vertices are numbered from 0 to n, and the filtration values are
+        """Inserts edges in an empty complex. The vertices are numbered from 0 to n-1, and the filtration values are
         encoded in the array, with the diagonal representing the vertices. It is the caller's responsibility to
         ensure that this defines a filtration, which can be achieved with either::
 
@@ -208,7 +208,7 @@ cdef class SimplexTree:
             filtrations = np.fmax(np.fmax(filtrations, diag[:, None]), diag[None, :])
 
         :param filtrations: the filtration values of the vertices and edges to insert. The matrix is assumed to be symmetric.
-        :type filtrations: numpy.ndarray of shape (n,n)
+        :type filtrations: symmetric numpy.ndarray of shape (n,n)
         :param max_filtration: only insert vertices and edges with filtration values no larger than max_filtration
         :type max_filtration: float
         """
