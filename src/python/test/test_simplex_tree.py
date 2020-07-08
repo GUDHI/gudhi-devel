@@ -249,6 +249,7 @@ def test_make_filtration_non_decreasing():
     assert st.filtration([3, 4]) == 2.0
     assert st.filtration([4, 5]) == 2.0
 
+
 def test_extend_filtration():
 
     # Inserted simplex:
@@ -257,82 +258,83 @@ def test_extend_filtration():
     #     / \ /
     #    o   o
     #   /2\ /3
-    #  o   o        
-    #  1   0        
+    #  o   o
+    #  1   0
 
-    st = SimplexTree()                                                                                                                     
-    st.insert([0,2])
-    st.insert([1,2])
-    st.insert([0,3])
-    st.insert([2,5])
-    st.insert([3,4])
-    st.insert([3,5])                                                                                                         
-    st.assign_filtration([0], 1.)                                                                                                                
-    st.assign_filtration([1], 2.)                                                                                                                
-    st.assign_filtration([2], 3.)                                                                                                                
-    st.assign_filtration([3], 4.)                                                                                                                
-    st.assign_filtration([4], 5.)                                                                                                                
-    st.assign_filtration([5], 6.)                                                                                                                
+    st = SimplexTree()
+    st.insert([0, 2])
+    st.insert([1, 2])
+    st.insert([0, 3])
+    st.insert([2, 5])
+    st.insert([3, 4])
+    st.insert([3, 5])
+    st.assign_filtration([0], 1.0)
+    st.assign_filtration([1], 2.0)
+    st.assign_filtration([2], 3.0)
+    st.assign_filtration([3], 4.0)
+    st.assign_filtration([4], 5.0)
+    st.assign_filtration([5], 6.0)
 
-    assert list(st.get_filtration()) == [                                                                                                                         
-        ([0, 2], 0.0), 
-        ([1, 2], 0.0), 
-        ([0, 3], 0.0), 
-        ([3, 4], 0.0), 
-        ([2, 5], 0.0), 
-        ([3, 5], 0.0), 
-        ([0], 1.0), 
-        ([1], 2.0), 
-        ([2], 3.0), 
-        ([3], 4.0), 
-        ([4], 5.0), 
-        ([5], 6.0)
+    assert list(st.get_filtration()) == [
+        ([0, 2], 0.0),
+        ([1, 2], 0.0),
+        ([0, 3], 0.0),
+        ([3, 4], 0.0),
+        ([2, 5], 0.0),
+        ([3, 5], 0.0),
+        ([0], 1.0),
+        ([1], 2.0),
+        ([2], 3.0),
+        ([3], 4.0),
+        ([4], 5.0),
+        ([5], 6.0),
     ]
-        
+
     st.extend_filtration()
-    
-    assert list(st.get_filtration()) == [                                                                                                                         
-        ([6], -3.0), 
-        ([0], -2.0), 
-        ([1], -1.8), 
-        ([2], -1.6), 
-        ([0, 2], -1.6), 
-        ([1, 2], -1.6), 
-        ([3], -1.4), 
-        ([0, 3], -1.4), 
-        ([4], -1.2), 
-        ([3, 4], -1.2), 
-        ([5], -1.0), 
-        ([2, 5], -1.0), 
-        ([3, 5], -1.0), 
-        ([5, 6], 1.0), 
-        ([4, 6], 1.2), 
-        ([3, 6], 1.4), 
+
+    assert list(st.get_filtration()) == [
+        ([6], -3.0),
+        ([0], -2.0),
+        ([1], -1.8),
+        ([2], -1.6),
+        ([0, 2], -1.6),
+        ([1, 2], -1.6),
+        ([3], -1.4),
+        ([0, 3], -1.4),
+        ([4], -1.2),
+        ([3, 4], -1.2),
+        ([5], -1.0),
+        ([2, 5], -1.0),
+        ([3, 5], -1.0),
+        ([5, 6], 1.0),
+        ([4, 6], 1.2),
+        ([3, 6], 1.4),
         ([3, 4, 6], 1.4),
-        ([3, 5, 6], 1.4), 
-        ([2, 6], 1.6), 
-        ([2, 5, 6], 1.6), 
-        ([1, 6], 1.8), 
-        ([1, 2, 6], 1.8), 
-        ([0, 6], 2.0), 
-        ([0, 2, 6], 2.0), 
-        ([0, 3, 6], 2.0)
+        ([3, 5, 6], 1.4),
+        ([2, 6], 1.6),
+        ([2, 5, 6], 1.6),
+        ([1, 6], 1.8),
+        ([1, 2, 6], 1.8),
+        ([0, 6], 2.0),
+        ([0, 2, 6], 2.0),
+        ([0, 3, 6], 2.0),
     ]
 
-    dgms = st.extended_persistence(min_persistence=-1.)
+    dgms = st.extended_persistence(min_persistence=-1.0)
 
-    assert dgms[0][0][1][0] == pytest.approx(2.)
-    assert dgms[0][0][1][1] == pytest.approx(3.)
-    assert dgms[1][0][1][0] == pytest.approx(5.)
-    assert dgms[1][0][1][1] == pytest.approx(4.)
-    assert dgms[2][0][1][0] == pytest.approx(1.)
-    assert dgms[2][0][1][1] == pytest.approx(6.)
-    assert dgms[3][0][1][0] == pytest.approx(6.)
-    assert dgms[3][0][1][1] == pytest.approx(1.) 
+    assert dgms[0][0][1][0] == pytest.approx(2.0)
+    assert dgms[0][0][1][1] == pytest.approx(3.0)
+    assert dgms[1][0][1][0] == pytest.approx(5.0)
+    assert dgms[1][0][1][1] == pytest.approx(4.0)
+    assert dgms[2][0][1][0] == pytest.approx(1.0)
+    assert dgms[2][0][1][1] == pytest.approx(6.0)
+    assert dgms[3][0][1][0] == pytest.approx(6.0)
+    assert dgms[3][0][1][1] == pytest.approx(1.0)
+
 
 def test_simplices_iterator():
     st = SimplexTree()
-    
+
     assert st.insert([0, 1, 2], filtration=4.0) == True
     assert st.insert([2, 3, 4], filtration=2.0) == True
 
@@ -342,8 +344,48 @@ def test_simplices_iterator():
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
 
+
 def test_insert_edges_from_array():
     st = SimplexTree()
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
     st.insert_edges_from_array(a, max_filtration=5)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
+
+
+def test_insert_edges_from_coo_matrix():
+    try:
+        from scipy.sparse import coo_matrix
+        from scipy.spatial import cKDTree
+    except ImportError:
+        print("Skipping, no SciPy")
+        return
+
+    st = SimplexTree()
+    st.insert([1, 2, 7], 7)
+    row = np.array([2, 5, 3])
+    col = np.array([1, 4, 6])
+    dat = np.array([1, 2, 3])
+    edges = coo_matrix((dat, (row, col)))
+    st.insert_edges_from_coo_matrix(edges)
+    assert list(st.get_filtration()) == [
+        ([1], 1.0),
+        ([2], 1.0),
+        ([1, 2], 1.0),
+        ([4], 2.0),
+        ([5], 2.0),
+        ([4, 5], 2.0),
+        ([3], 3.0),
+        ([6], 3.0),
+        ([3, 6], 3.0),
+        ([7], 7.0),
+        ([1, 7], 7.0),
+        ([2, 7], 7.0),
+        ([1, 2, 7], 7.0),
+    ]
+
+    pts = np.random.rand(100, 2)
+    tree = cKDTree(pts)
+    edges = tree.sparse_distance_matrix(tree, max_distance=0.15, output_type="coo_matrix")
+    st = SimplexTree()
+    st.insert_edges_from_coo_matrix(edges)
+    assert 100 < st.num_simplices() < 1000
