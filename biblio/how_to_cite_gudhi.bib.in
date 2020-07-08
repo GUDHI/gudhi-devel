@@ -156,3 +156,13 @@
 , url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group___persistence__representations.html"
 , year =        @GUDHI_VERSION_YEAR@
 }
+
+@incollection{gudhi:Collapse
+, author =  "Siddharth Pritam"
+, title =   "Edge collapse"
+, publisher =  "{GUDHI Editorial Board}"
+, edition =     "{@GUDHI_VERSION@}"
+, booktitle =   "{GUDHI} User and Reference Manual"
+, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__edge__collapse.html"
+, year =        @GUDHI_VERSION_YEAR@
+}

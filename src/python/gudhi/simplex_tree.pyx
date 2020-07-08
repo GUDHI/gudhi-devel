@@ -250,13 +250,12 @@ cdef class SimplexTree:
             preincrement(it)
 
     def get_skeleton(self, dimension):
-        """This function returns the (simplices of the) skeleton of a maximum
-        given dimension.
+        """This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
 
         :param dimension: The skeleton dimension value.
         :type dimension: int.
         :returns:  The (simplices of the) skeleton of a maximum dimension.
-        :rtype:  list of tuples(simplex, filtration)
+        :rtype:  generator with tuples(simplex, filtration)
         """
         cdef Simplex_tree_skeleton_iterator it = self.get_ptr().get_skeleton_iterator_begin(dimension)
         cdef Simplex_tree_skeleton_iterator end = self.get_ptr().get_skeleton_iterator_end(dimension)

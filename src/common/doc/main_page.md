@@ -217,6 +217,36 @@
  </tr>
 </table>
 
+### Edge collapse
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "dominated_edge.png"
+    </td>
+    <td width="50%">
+    Edge collapse is able to reduce any flag filtration to a smaller flag filtration with the same persistence, using
+    only the 1-skeletons of a simplicial complex.
+    The reduction is exact and the persistence homology of the reduced sequence is identical to the persistence
+    homology of the input sequence. The resulting method is simple and extremely efficient.
+
+    Computation of edge collapse and persistent homology of a filtered flag complex via edge collapse as described in
+    \cite edgecollapsesocg2020.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Siddharth Pritam<br>
+      <b>Introduced in:</b> GUDHI 3.3.0<br>
+      <b>Copyright:</b> MIT<br>
+      <b>Requires:</b> \ref eigen
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref edge_collapse
+    </td>
+ </tr>
+</table>
+
 ### Witness complex
 
 <table>
