@@ -195,7 +195,7 @@ cdef class SimplexTree:
         """
         return self.get_ptr().insert(simplex, <double>filtration)
 
-    def insert_array(self, filtrations, double max_filtration=numpy.inf):
+    def insert_edges_from_array(self, filtrations, double max_filtration=numpy.inf):
         """Inserts edges in an empty complex. The vertices are numbered from 0 to n-1, and the filtration values are
         encoded in the array, with the diagonal representing the vertices. It is the caller's responsibility to
         ensure that this defines a filtration, which can be achieved with either::
@@ -214,7 +214,7 @@ cdef class SimplexTree:
         """
         filtrations = numpy.asanyarray(filtrations, dtype=float)
         cdef double[:,:] F = filtrations
-        assert self.num_vertices() == 0, "insert_array requires an empty SimplexTree"
+        assert self.num_vertices() == 0, "insert_edges_from_array requires an empty SimplexTree"
         cdef int n = F.shape[0]
         assert n == F.shape[1]
         with nogil:
