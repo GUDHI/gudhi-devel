@@ -178,13 +178,13 @@ def _handle_essential_parts(X, Y, order):
 def _offdiag(X, enable_autodiff):
     '''
     :param X: (n x 2) numpy array encoding a persistence diagram.
+    :param enable_autodiff: boolean, to handle the case where X is a eagerpy tensor.
     :returns: The off-diagonal part of a diagram `X` (points with finite coordinates).
     '''
     if enable_autodiff:
-        import eagerpy as ep
-
-        return ep.astensor(X[np.where(np.isfinite(X[:,0]) & np.isfinite(X[:,1]))])
-
+        # Assumes the diagrams only have finite coordinates. Thus, return X directly.
+        # TODO improve this to get rid of essential parts if there are any.
+        return X
     else:
         return X[np.where(np.isfinite(X[:,0]) & np.isfinite(X[:,1]))]
 
@@ -218,11 +218,6 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
               If matching is set to True, also returns the optimal matching between X and Y.
               If cost is +inf, any matching is optimal and thus it returns `None` instead.
     '''
-    # Zeroth step: check compatibility of arguments
-    if keep_essential_parts and enable_autodiff:
-        import warnings
-        warnings.warn("enable_autodiff does not handle essential parts yet. keep_essential_parts set to False.")
-        keep_essential_parts = False
 
     # First step: handle empty diagrams
     n = len(X)
@@ -267,7 +262,8 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         essential_cost = 0
         essential_matching = None
 
-    # Extract off-diaognal points of the diagrams.
+    # Extract off-diaognal points of the diagrams. Note that if enable_autodiff is True, nothing is done here (X,Y are
+    # assumed to be tensors with only finite coordinates).
     X, Y = _offdiag(X, enable_autodiff), _offdiag(Y, enable_autodiff)
     n = len(X)
     m = len(Y)
