@@ -11,6 +11,7 @@
 from os import path
 from math import isfinite
 import numpy as np
+from functools import lru_cache
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -57,6 +58,7 @@ def _array_handler(a):
     else:
         return a
 
+@lru_cache(maxsize=1)
 def _matplotlib_can_use_tex():
     """This function returns True if matplotlib can deal with LaTeX, False otherwise.
     The returned value is cached.
