@@ -56,10 +56,6 @@
 # error Alpha_complex_3d is only available for CGAL >= 4.11
 #endif
 
-#if !EIGEN_VERSION_AT_LEAST(3,1,0)
-# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
-#endif
-
 namespace Gudhi {
 
 namespace alpha_complex {
