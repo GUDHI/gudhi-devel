@@ -20,6 +20,20 @@ __author__ = "Vincent Rouvreau, Bertrand Michel, Theo Lacombe"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+@lru_cache(maxsize=1)
+def _matplotlib_can_use_tex():
+    """This function returns True if matplotlib can deal with LaTeX, False otherwise.
+    The returned value is cached.
+    """
+    try:
+        from matplotlib import checkdep_usetex
+        return checkdep_usetex(True)
+    except ImportError:
+        print("This function is not available, you may be missing matplotlib.")
+
+
+_gudhi_matplotlib_use_tex = _matplotlib_can_use_tex()
+
 
 def __min_birth_max_death(persistence, band=0.0):
     """This function returns (min_birth, max_death) from the persistence.
@@ -56,17 +70,6 @@ def _array_handler(a):
         return [[0, x] for x in a]
     else:
         return a
-
-@lru_cache(maxsize=1)
-def _matplotlib_can_use_tex():
-    """This function returns True if matplotlib can deal with LaTeX, False otherwise.
-    The returned value is cached.
-    """
-    try:
-        from matplotlib import checkdep_usetex
-        return checkdep_usetex(True)
-    except ImportError:
-        print("This function is not available, you may be missing matplotlib.")
 
 
 def plot_persistence_barcode(
@@ -117,10 +120,13 @@ def plot_persistence_barcode(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -263,10 +269,13 @@ def plot_persistence_diagram(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -436,10 +445,13 @@ def plot_persistence_density(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from scipy.stats import kde
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if dimension is None:
