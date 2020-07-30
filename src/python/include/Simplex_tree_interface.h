@@ -64,14 +64,14 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     // and this is a bit more efficient.
     auto& rm = this->root()->members_;
     for(int i=0; i<n; ++i) {
-      char* p = (char*)filtrations + i * stride0;
-      double fv = *(double*)(p + i * stride1);
+      char* p = reinterpret_cast<char*>(filtrations) + i * stride0;
+      double fv = *reinterpret_cast<double*>(p + i * stride1);
       if(fv > max_filtration) continue;
       auto sh = rm.emplace_hint(rm.end(), i, Node(this->root(), fv));
       Siblings* children = nullptr;
       // Should we make a first pass to count the number of edges so we can reserve the right space?
       for(int j=i+1; j<n; ++j) {
-        double fe = *(double*)(p + j * stride1);
+        double fe = *reinterpret_cast<double*>(p + j * stride1);
         if(fe > max_filtration) continue;
         if(!children) {
           children = new Siblings(this->root(), i);

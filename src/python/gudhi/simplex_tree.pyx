@@ -233,10 +233,7 @@ cdef class SimplexTree:
         """
         # TODO: optimize this
         for edge in zip(edges.row, edges.col, edges.data):
-            if edge[0] == edge[1]:
-                self.get_ptr().insert((edge[0],), edge[2])
-            else:
-                self.get_ptr().insert((edge[0], edge[1]), edge[2])
+            self.get_ptr().insert((edge[0], edge[1]), edge[2])
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
