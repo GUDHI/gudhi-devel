@@ -172,11 +172,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       }
     }
 
-    std::vector<Filtered_edge> remaining_edges;
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
-      remaining_edges = Gudhi::collapse::flag_complex_collapse_edges(edges);
-      edges = std::move(remaining_edges);
-      remaining_edges.clear();
+      edges = Gudhi::collapse::flag_complex_collapse_edges(edges);
     }
     Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface();
     for (auto remaining_edge : edges) {
