@@ -583,10 +583,12 @@ cdef class SimplexTree:
         return (normal0, normals, infinite0, infinites)
 
     def collapse_edges(self, nb_iterations = 1):
-        """Assuming the simplex tree is a 1-skeleton graph, this function collapse edges and resets the simplex tree
-        from the remaining edges.
+        """Assuming the simplex tree is a 1-skeleton graph, this method collapse edges (simplices of higher dimension
+        are ignored) and resets the simplex tree from the remaining edges.
         A good candidate is to build a simplex tree on top of a :class:`~gudhi.RipsComplex` of dimension 1 before
-        collapsing edges.
+        collapsing edges
+        (cf. :download:`rips_complex_edge_collapse_example.py <../example/rips_complex_edge_collapse_example.py>`).
+        For implementation details, please refer to :cite:`edgecollapsesocg2020`.
 
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
