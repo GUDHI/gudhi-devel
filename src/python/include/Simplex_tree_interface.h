@@ -21,6 +21,7 @@
 #include <vector>
 #include <utility>  // std::pair
 #include <tuple>
+#include <iterator>  // for std::distance
 
 namespace Gudhi {
 
@@ -163,10 +164,11 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
     for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
-      if (Base::dimension(sh) == 1) {
-        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
-        std::vector<Vertex_handle> rips_edge(rg.begin(), rg.end());
-        edges.push_back(std::make_tuple(rips_edge[0], rips_edge[1], Base::filtration(sh)));
+      typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
+      auto rg_begin = rg.begin();
+      // We take only edges into account
+      if (std::distance(rg_begin, rg.end()) == 2) {
+        edges.emplace_back(*rg_begin, *std::next(rg_begin), Base::filtration(sh));
       }
     }
 
