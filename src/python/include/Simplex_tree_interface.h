@@ -184,7 +184,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       collapsed_stree_ptr->insert({std::get<1>(remaining_edge)}, 0.);
       collapsed_stree_ptr->insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
     }
-    collapsed_stree_ptr->initialize_filtration();
     return collapsed_stree_ptr;
   }
 
