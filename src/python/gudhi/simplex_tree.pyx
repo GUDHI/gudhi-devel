@@ -593,8 +593,10 @@ cdef class SimplexTree:
         """
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
-        # New pointer is a new collapsed simplex tree
-        self.thisptr = <intptr_t>(self.get_ptr().collapse_edges(nb_iterations))
-        # Delete old pointer
-        if ptr != NULL:
-            del ptr
+        cdef int nb_iter = nb_iterations
+        with nogil:
+            # New pointer is a new collapsed simplex tree
+            self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
+            # Delete old pointer
+            if ptr != NULL:
+                del ptr
