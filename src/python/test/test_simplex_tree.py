@@ -356,3 +356,5 @@ def test_collapse_edges():
     st.collapse_edges()
     assert st.num_simplices() == 9
     assert st.find([1, 3]) == False
+    for simplex in st.get_skeleton(0): 
+        assert simplex[1] == 1. 
