@@ -195,10 +195,11 @@ cdef class SimplexTree:
         """
         return self.get_ptr().insert(simplex, <double>filtration)
 
-    def insert_edges_from_array(self, filtrations, double max_filtration=numpy.inf):
-        """Inserts edges in an empty complex. The vertices are numbered from 0 to n-1, and the filtration values are
-        encoded in the array, with the diagonal representing the vertices. It is the caller's responsibility to
-        ensure that this defines a filtration, which can be achieved with either::
+    @staticmethod
+    def create_from_array(filtrations, double max_filtration=numpy.inf):
+        """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
+        the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
+        caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
 
             filtrations[np.diag_indices_from(filtrations)] = filtrations.min(1)
 
@@ -211,15 +212,18 @@ cdef class SimplexTree:
         :type filtrations: numpy.ndarray of shape (n,n)
         :param max_filtration: only insert vertices and edges with filtration values no larger than max_filtration
         :type max_filtration: float
+        :returns: the new complex
+        :rtype: SimplexTree
         """
         # TODO: document which half of the matrix is actually read?
         filtrations = numpy.asanyarray(filtrations, dtype=float)
         cdef double[:,:] F = filtrations
-        assert self.num_vertices() == 0, "insert_edges_from_array requires an empty SimplexTree"
+        ret = SimplexTree()
         cdef int n = F.shape[0]
         assert n == F.shape[1]
         with nogil:
-            self.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
+            ret.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
+        return ret
 
     def insert_edges_from_coo_matrix(self, edges):
         """Inserts edges given by a sparse matrix in `COOrdinate format

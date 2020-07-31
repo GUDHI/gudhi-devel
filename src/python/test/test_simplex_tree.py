@@ -345,10 +345,9 @@ def test_simplices_iterator():
         assert st.filtration(simplex[0]) == simplex[1]
 
 
-def test_insert_edges_from_array():
-    st = SimplexTree()
+def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
-    st.insert_edges_from_array(a, max_filtration=5)
+    st = SimplexTree.create_from_array(a, max_filtration=5)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
 
 
