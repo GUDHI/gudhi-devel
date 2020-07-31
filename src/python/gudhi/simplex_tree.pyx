@@ -195,6 +195,50 @@ cdef class SimplexTree:
         """
         return self.get_ptr().insert(simplex, <double>filtration)
 
+    @staticmethod
+    def create_from_array(filtrations, double max_filtration=numpy.inf):
+        """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
+        the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
+        caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
+
+            filtrations[np.diag_indices_from(filtrations)] = filtrations.min(1)
+
+        or::
+
+            diag = filtrations.diagonal()
+            filtrations = np.fmax(np.fmax(filtrations, diag[:, None]), diag[None, :])
+
+        :param filtrations: the filtration values of the vertices and edges to insert. The matrix is assumed to be symmetric.
+        :type filtrations: numpy.ndarray of shape (n,n)
+        :param max_filtration: only insert vertices and edges with filtration values no larger than max_filtration
+        :type max_filtration: float
+        :returns: the new complex
+        :rtype: SimplexTree
+        """
+        # TODO: document which half of the matrix is actually read?
+        filtrations = numpy.asanyarray(filtrations, dtype=float)
+        cdef double[:,:] F = filtrations
+        ret = SimplexTree()
+        cdef int n = F.shape[0]
+        assert n == F.shape[1]
+        with nogil:
+            ret.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
+        return ret
+
+    def insert_edges_from_coo_matrix(self, edges):
+        """Inserts edges given by a sparse matrix in `COOrdinate format
+        <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
+        Duplicate entries are not allowed. Missing entries are not inserted. Diagonal entries are interpreted as
+        vertices, although this is only useful if you want to insert vertices with a smaller filtration value than
+        the smallest edge containing it, since vertices are implicitly inserted together with the edges.
+
+        :param edges: the edges to insert and their filtration values.
+        :type edges: scipy.sparse.coo_matrix of shape (n,n)
+        """
+        # TODO: optimize this
+        for edge in zip(edges.row, edges.col, edges.data):
+            self.get_ptr().insert((edge[0], edge[1]), edge[2])
+
     def get_simplices(self):
         """This function returns a generator with simplices and their given
         filtration values.

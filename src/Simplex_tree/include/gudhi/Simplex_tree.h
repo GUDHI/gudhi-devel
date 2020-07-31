@@ -24,6 +24,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/size.hpp>
 #include <boost/container/static_vector.hpp>
 
 #ifdef GUDHI_USE_TBB
@@ -676,10 +677,10 @@ class Simplex_tree {
     return true;
   }
 
- private:
-  /** \brief Inserts a simplex represented by a vector of vertex.
-   * @param[in]  simplex    vector of Vertex_handles, representing the vertices of the new simplex. The vector must be
-   * sorted by increasing vertex handle order.
+ protected:
+  /** \brief Inserts a simplex represented by a range of vertex.
+   * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex. The range must be
+   * sorted by increasing vertex handle order, and not empty.
    * @param[in]  filtration the filtration value assigned to the new simplex.
    * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
@@ -691,12 +692,13 @@ class Simplex_tree {
    * null_simplex.
    * 
   */
-  std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
+  template <class RandomVertexHandleRange = std::initializer_list<Vertex_handle>>
+  std::pair<Simplex_handle, bool> insert_simplex_raw(const RandomVertexHandleRange& simplex,
                                                      Filtration_value filtration) {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
-    for (; vi != simplex.end() - 1; ++vi) {
+    for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
@@ -717,9 +719,10 @@ class Simplex_tree {
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
     // otherwise the insertion has succeeded - size is a size_type
-    if (static_cast<int>(simplex.size()) - 1 > dimension_) {
+    int dim = static_cast<int>(boost::size(simplex)) - 1;
+    if (dim > dimension_) {
       // Update dimension if needed
-      dimension_ = static_cast<int>(simplex.size()) - 1;
+      dimension_ = dim;
     }
     return res_insert;
   }
@@ -760,7 +763,7 @@ class Simplex_tree {
     // Copy before sorting
     std::vector<Vertex_handle> copy(first, last);
     std::sort(std::begin(copy), std::end(copy));
-    return insert_vertex_vector(copy, filtration);
+    return insert_simplex_raw(copy, filtration);
   }
 
     /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
@@ -1569,7 +1572,7 @@ class Simplex_tree {
     Simplex_tree st_copy = *this;
 
     // Add point for coning the simplicial complex
-    this->insert_simplex({maxvert}, -3);
+    this->insert_simplex_raw({maxvert}, -3);
 
     // For each simplex
     std::vector<Vertex_handle> vr;
