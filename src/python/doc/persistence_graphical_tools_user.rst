@@ -98,7 +98,21 @@ By default, persistence graphical tools are using LaTeX support for matplotlib i
 `matplotlib text rendering with LaTeX <https://matplotlib.org/3.3.0/tutorials/text/usetex.html>`_).
 It also requires `type1cm` LaTeX package (not detected by matplotlib).
 
-If you are facing issues with LaTeX rendering, you can still deactivate LaTeX rendering by saying:
+If you are facing issues with LaTeX rendering, like this one:
+
+.. code-block:: none
+
+    Traceback (most recent call last):
+      File "/usr/lib/python3/dist-packages/matplotlib/texmanager.py", line 302, in _run_checked_subprocess
+        report = subprocess.check_output(command,
+    ...
+    ! LaTeX Error: File `type1cm.sty' not found.
+    ...
+
+This is because the LaTeX package is not installed on your system. On Ubuntu systems you can install texlive-full
+(for all LaTeX packages), or more specific packages like texlive-latex-extra, cm-super.
+
+You can still deactivate LaTeX rendering by saying:
 
 .. code-block:: python
 
