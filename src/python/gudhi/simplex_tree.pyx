@@ -600,5 +600,4 @@ cdef class SimplexTree:
             # New pointer is a new collapsed simplex tree
             self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
             # Delete old pointer
-            if ptr != NULL:
-                del ptr
+            del ptr
