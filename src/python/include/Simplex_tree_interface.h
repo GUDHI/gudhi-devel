@@ -164,11 +164,12 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
     for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
-      typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
-      auto rg_begin = rg.begin();
-      // We take only edges into account
-      if (std::distance(rg_begin, rg.end()) == 2) {
-        edges.emplace_back(*rg_begin, *std::next(rg_begin), Base::filtration(sh));
+      if (Base::dimension(sh) == 1) {
+        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
+        auto vit = rg.begin();
+        Vertex_handle v = *vit;
+        Vertex_handle w = *++vit;
+        edges.emplace_back(v, w, Base::filtration(sh));
       }
     }
 
