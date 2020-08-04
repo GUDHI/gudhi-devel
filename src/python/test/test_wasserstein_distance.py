@@ -121,3 +121,16 @@ def test_wasserstein_distance_grad():
     pot(diag6, diag6, internal_p=2, order=2, enable_autodiff=True).backward()
     # https://github.com/jonasrauber/eagerpy/issues/6
     # assert np.array_equal(diag6.grad, [[0., 0.]])
+
+def test_wasserstein_distance_grad_tensorflow():
+    import tensorflow as tf
+
+    with tf.GradientTape() as tape:
+        diag4 = tf.convert_to_tensor(tf.Variable(initial_value=np.array([[0., 10.]]),           trainable=True))
+        diag5 = tf.convert_to_tensor(tf.Variable(initial_value=np.array([[1., 11.], [3., 4.]]), trainable=True))
+        dist45 = pot(diag4, diag5, internal_p=1, order=1, enable_autodiff=True)
+        assert dist45 == 3.
+
+    grads = tape.gradient(dist45, [diag4, diag5])
+    assert np.array_equal(grads[0].values, [[-1., -1.]])
+    assert np.array_equal(grads[1].values, [[1., 1.], [-1., 1.]])
