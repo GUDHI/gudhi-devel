@@ -23,29 +23,16 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-          # Restore from cache the previously built ports. If cache-miss, download, build vcpkg.
-      - name: Restore from cache and install vcpkg
-      # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
-      uses: lukka/run-vcpkg@v3
-      with:
-        setupOnly: true
-      # Now that vcpkg is installed, it is being used to run desired arguments.
-      - run: |
-        $VCPKG_ROOT/vcpkg @$vcpkgResponseFile
-        $VCPKG_ROOT/vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-test boost-thread boost-program-options eigen3 mpfr mpir cgal --triplet x64-windows
-      shell: bash
       - uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
       - name: Install dependencies
         run: |
+          vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-test boost-thread boost-program-options eigen3 mpfr mpir cgal --triplet x64-windows
+          vcpkg list
           python -m pip install --user -r .github/build-requirements.txt
           python -m pip install --user twine
-          python -m pip list
-      - name: Build python wheel
-        run: |
-          python --version
           python -m pip list
           mkdir build
           cd build
