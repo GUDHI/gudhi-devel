@@ -99,7 +99,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     :param order: exponent for Wasserstein; Default value is 1.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2);
                        Default value is `np.inf`.
-    :param enable_autodiff: If X and Y are torch.tensor, tensorflow.Tensor or jax.numpy.ndarray, make the computation
+    :param enable_autodiff: If X and Y are torch.tensor or tensorflow.Tensor, make the computation
         transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
         with `matching=True`.
 
