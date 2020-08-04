@@ -30,8 +30,13 @@ Below is a list of changes made since GUDHI 3.2.0:
 - [Bottleneck distance](https://gudhi.inria.fr/python/latest/bottleneck_distance_user.html)
      - Python interface to [hera](https://github.com/grey-narn/hera)'s bottleneck distance
 
-- Representations - Python interface change
-     - [Wasserstein metrics](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.metrics.WassersteinDistance)
+- Persistence representations
+     - [Atol](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.Atol)
+     is integrated in finite vectorisation methods. This
+     [article](https://www.fujitsu.com/global/about/resources/news/press-releases/2020/0316-01.html) talks about
+     applications using Atol. This module was originally available at
+     [https://github.com/martinroyer/atol](https://github.com/martinroyer/atol)
+     - Python interface change: [Wasserstein metrics](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.metrics.WassersteinDistance)
      is now [hera](https://github.com/grey-narn/hera) by default
 
 - Miscellaneous
