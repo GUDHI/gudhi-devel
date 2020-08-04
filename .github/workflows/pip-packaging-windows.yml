@@ -35,7 +35,7 @@ jobs:
       - name: Build python wheel
         run: |
           python --version
-          vcpkg search boost
+          vcpkg list
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DGMP_INCLUDE_DIR="c:/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DPython_ADDITIONAL_VERSIONS=3 ..
