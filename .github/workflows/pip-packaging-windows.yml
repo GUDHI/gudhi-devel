@@ -4,12 +4,11 @@ name: pip packaging windows
 #  release:
 #    types: [published]
 
-on:
-  push:
-    branches:
-      - '*'
-      - '*/*'
-      - '**'
+on: [push, pull_request]
+  branches:
+    - '*'
+    - '*/*'
+    - '**'
 
 jobs:
   build:
