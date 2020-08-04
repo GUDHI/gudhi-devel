@@ -10,12 +10,6 @@ on:
       - '*'
       - '*/*'
       - '**'
-on: 
-  pull_request:
-    branches:
-      - '*'
-      - '*/*'
-      - '**'
 
 jobs:
   build:
