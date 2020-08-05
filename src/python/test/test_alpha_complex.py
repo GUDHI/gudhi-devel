@@ -198,8 +198,7 @@ def test_delaunay_complex():
         _delaunay_complex(precision)
 
 def _3d_points_on_a_plane(precision, default_filtration_value):
-    alpha = gd.AlphaComplex(off_file=gd.__root_source_dir__ + '/data/points/alphacomplexdoc.off',
-                         precision = precision)
+    alpha = gd.AlphaComplex(off_file='alphacomplexdoc.off', precision = precision)
 
     simplex_tree = alpha.create_simplex_tree(default_filtration_value = default_filtration_value)
     assert simplex_tree.dimension() == 2
@@ -207,6 +206,18 @@ def _3d_points_on_a_plane(precision, default_filtration_value):
     assert simplex_tree.num_simplices() == 25
 
 def test_3d_points_on_a_plane():
+    off_file = open("alphacomplexdoc.off", "w")
+    off_file.write("OFF         \n" \
+                   "7 0 0       \n" \
+                   "1.0 1.0  0.0\n" \
+                   "7.0 0.0  0.0\n" \
+                   "4.0 6.0  0.0\n" \
+                   "9.0 6.0  0.0\n" \
+                   "0.0 14.0 0.0\n" \
+                   "2.0 19.0 0.0\n" \
+                   "9.0 17.0 0.0\n"  )
+    off_file.close()
+
     for default_filtration_value in [True, False]:
         for precision in ['fast', 'safe', 'exact']:
             _3d_points_on_a_plane(precision, default_filtration_value)
