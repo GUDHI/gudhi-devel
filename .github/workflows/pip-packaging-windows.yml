@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           vcpkg update
+          vcpkg upgrade --no-dry-run
           vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 mpfr mpir cgal --triplet x64-windows
           vcpkg list
           python -m pip install --user -r .github/build-requirements.txt
