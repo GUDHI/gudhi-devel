@@ -27,8 +27,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
+      - name: Patch
+        run: |
+          (new-object System.Net.WebClient).DownloadFile('https://github.com/microsoft/vcpkg/files/4978792/vcpkg_fixup_pkgconfig.cmake.txt','c:\vcpkg\scripts\cmake\vcpkg_fixup_pkgconfig.cmake')
+          (new-object System.Net.WebClient).DownloadFile('https://github.com/microsoft/vcpkg/files/4978796/vcpkg_acquire_msys.cmake.txt','c:\vcpkg\scripts\cmake\vcpkg_acquire_msys.cmake')
+        shell: powershell
       - name: Install dependencies
         run: |
+          deltree "c:\vcpkg\downloads\tools\msys2"
           vcpkg update
           vcpkg upgrade --no-dry-run
           vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 mpfr mpir cgal --triplet x64-windows
