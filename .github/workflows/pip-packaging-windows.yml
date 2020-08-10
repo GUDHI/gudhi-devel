@@ -1,15 +1,8 @@
 name: pip packaging windows
 
-#on:
-#  release:
-#    types: [published]
-
-on: 
-  push:
-    branches:
-      - '*'
-      - '*/*'
-      - '**'
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -40,7 +33,7 @@ jobs:
           python -m pip install --user -r .github/build-requirements.txt
           python -m pip install --user twine
           python -m pip list
-      - name: Build wheels
+      - name: Build python wheel
         run: |
           mkdir build
           cd build
@@ -49,8 +42,8 @@ jobs:
           cp c:/vcpkg/installed/x64-windows/bin/mpfr.dll gudhi/
           cp c:/vcpkg/installed/x64-windows/bin/mpir.dll gudhi/
           python setup.py bdist_wheel
-#      - name: Publish on PyPi
-#        env:
-#          TWINE_USERNAME: __token__
-#          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-#        run: python -m twine upload build/src/python/dist/*
+      - name: Publish on PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: python -m twine upload build/src/python/dist/*
