@@ -1,0 +1,42 @@
+name: pip build windows
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.5', '3.6', '3.7', '3.8']
+    name: Build wheels for Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Patch
+        run: |
+          (new-object System.Net.WebClient).DownloadFile('https://github.com/microsoft/vcpkg/files/4978792/vcpkg_fixup_pkgconfig.cmake.txt','c:\vcpkg\scripts\cmake\vcpkg_fixup_pkgconfig.cmake')
+          (new-object System.Net.WebClient).DownloadFile('https://github.com/microsoft/vcpkg/files/4978796/vcpkg_acquire_msys.cmake.txt','c:\vcpkg\scripts\cmake\vcpkg_acquire_msys.cmake')
+        shell: powershell
+      - name: Install dependencies
+        run: |
+          vcpkg update
+          vcpkg upgrade --no-dry-run
+          vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 mpfr mpir cgal --triplet x64-windows
+          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user twine
+          python -m pip list
+      - name: Build python wheel
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DGMP_INCLUDE_DIR="c:/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DPython_ADDITIONAL_VERSIONS=3 ..
+          cd src/python
+          cp c:/vcpkg/installed/x64-windows/bin/mpfr.dll gudhi/
+          cp c:/vcpkg/installed/x64-windows/bin/mpir.dll gudhi/
+          python setup.py bdist_wheel

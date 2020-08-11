@@ -1,0 +1,45 @@
+name: pip build linux
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build pip wheels
+    runs-on: ubuntu-latest
+    container: gudhi/pip_for_gudhi
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Build wheels for Python 3.5
+        run: |
+          mkdir build_35
+          cd build_35
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON35/bin/python ..
+          cd src/python
+          $PYTHON35/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
+      - name: Build wheels for Python 3.6
+        run: |
+          mkdir build_36
+          cd build_36
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON36/bin/python ..
+          cd src/python
+          $PYTHON36/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
+      - name: Build wheels for Python 3.7
+        run: |
+          mkdir build_37
+          cd build_37
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON37/bin/python ..
+          cd src/python
+          $PYTHON37/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
+      - name: Build wheels for Python 3.8
+        run: |
+          mkdir build_38
+          cd build_38
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          cd src/python
+          $PYTHON38/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
