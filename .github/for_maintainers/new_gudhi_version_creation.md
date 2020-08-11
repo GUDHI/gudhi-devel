@@ -18,7 +18,7 @@ Checkin the modifications, build and test the version:
 ```bash
 git submodule update --init
 rm -rf build; mkdir build; cd build
-cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
 make user_version
 date +"%d-%m-%Y-%T" > gudhi.@GUDHI_VERSION@/timestamp.txt
 tar -czvf gudhi.@GUDHI_VERSION@.tar.gz gudhi.@GUDHI_VERSION@
@@ -43,8 +43,8 @@ make doxygen  2>&1 | tee dox.log && grep warning dox.log
 cp -R gudhi.@GUDHI_VERSION@/doc/html gudhi.doc.@GUDHI_VERSION@/cpp
 cd gudhi.@GUDHI_VERSION@
 rm -rf build; mkdir build; cd build
-cmake -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
-export LC_ALL=en_US.UTF-8  # cf. bug
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+export LC_ALL=en_US.UTF-8  # cf. bug https://github.com/GUDHI/gudhi-devel/issues/111
 make sphinx
 ```
 
@@ -82,7 +82,7 @@ ln -s @GUDHI_VERSION@ latest
 
 * Go on page https://github.com/GUDHI/gudhi-devel/releases/new
 * Name the tag: tags/gudhi-release-@GUDHI_VERSION@
-* Name the release GUDHI @GUDHI_VERSION@
+* Name the release GUDHI @GUDHI_VERSION@ release
 * Write the release note
 * Drag'n drop *gudhi.@GUDHI_VERSION@.tar.gz*, *md5sum.txt*, *sha256sum.txt*, *sha512sum.txt* files
 * Tick the *This is a pre-release* check button if this is a release candidate (untick if this is an official version)
