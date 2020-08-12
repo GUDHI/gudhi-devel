@@ -85,6 +85,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
   typedef typename SimplexTree::Siblings Siblings;
 
+  // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is overwritten.
   Simplex_tree_boundary_simplex_iterator()
       : sib_(nullptr),
         st_(nullptr)  {
