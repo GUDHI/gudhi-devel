@@ -349,3 +349,4 @@ def test_boundaries_iterator():
 
     assert list(st.get_boundaries([1, 2, 3])) == [([1, 2], 1.0), ([1, 3], 1.0), ([2, 3], 1.0)]
     assert list(st.get_boundaries([2, 3, 4])) == [([2, 3], 1.0), ([2, 4], 2.0), ([3, 4], 2.0)]
+    assert list(st.get_boundaries([2])) == []
