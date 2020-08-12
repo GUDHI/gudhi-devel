@@ -293,12 +293,14 @@ cdef class SimplexTree:
         :returns:  The (simplices of the) boundary of a simplex
         :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef Simplex_tree_boundary_iterator it =  self.get_ptr().get_boundary_iterator_begin(simplex)
-        cdef Simplex_tree_boundary_iterator end = self.get_ptr().get_boundary_iterator_end(simplex)
+        cdef pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] it =  self.get_ptr().get_boundary_iterators(simplex)
 
-        while it != end:
-            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
-            preincrement(it)
+        try:
+            while it.first != it.second:
+                yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
+                preincrement(it.first)
+        except RuntimeError:
+            print("simplex not found - cannot find boundaries")
 
 
     def remove_maximal_simplex(self, simplex):

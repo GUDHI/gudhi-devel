@@ -350,3 +350,12 @@ def test_boundaries_iterator():
     assert list(st.get_boundaries([1, 2, 3])) == [([1, 2], 1.0), ([1, 3], 1.0), ([2, 3], 1.0)]
     assert list(st.get_boundaries([2, 3, 4])) == [([2, 3], 1.0), ([2, 4], 2.0), ([3, 4], 2.0)]
     assert list(st.get_boundaries([2])) == []
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([]))
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([0, 4])) # (0, 4) does not exist
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([6])) # (6) does not exist
