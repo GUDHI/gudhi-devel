@@ -290,7 +290,7 @@ cdef class SimplexTree:
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
-        :returns:  The (simplices of the) boundaries of a simplex
+        :returns:  The (simplices of the) boundary of a simplex
         :rtype:  generator with tuples(simplex, filtration)
         """
         cdef Simplex_tree_boundary_iterator it =  self.get_ptr().get_boundary_iterator_begin(simplex)
