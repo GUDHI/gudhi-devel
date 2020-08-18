@@ -22,7 +22,8 @@ jobs:
           architecture: x64
       - name: Install dependencies
         run: |
-          brew update && brew install boost eigen gmp mpfr cgal
+          brew update || true
+          brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r .github/build-requirements.txt
           python -m pip install --user twine delocate
       - name: Build python wheel

@@ -15,10 +15,13 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
 
 #include <iostream>
 #include <vector>
 #include <utility>  // std::pair
+#include <tuple>
+#include <iterator>  // for std::distance
 
 namespace Gudhi {
 
@@ -156,6 +159,34 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       }
     }
     return new_dgm;
+  }
+
+  Simplex_tree_interface* collapse_edges(int nb_collapse_iteration) {
+    using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
+    std::vector<Filtered_edge> edges;
+    for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
+      if (Base::dimension(sh) == 1) {
+        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
+        auto vit = rg.begin();
+        Vertex_handle v = *vit;
+        Vertex_handle w = *++vit;
+        edges.emplace_back(v, w, Base::filtration(sh));
+      }
+    }
+
+    for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
+      edges = Gudhi::collapse::flag_complex_collapse_edges(edges);
+    }
+    Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface();
+    // Copy the original 0-skeleton
+    for (Simplex_handle sh : Base::skeleton_simplex_range(0)) {
+      collapsed_stree_ptr->insert({*(Base::simplex_vertex_range(sh).begin())}, Base::filtration(sh));
+    }
+    // Insert remaining edges
+    for (auto remaining_edge : edges) {
+      collapsed_stree_ptr->insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+    }
+    return collapsed_stree_ptr;
   }
 
   // Iterator over the simplex tree
