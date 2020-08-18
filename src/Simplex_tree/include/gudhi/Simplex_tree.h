@@ -1668,31 +1668,36 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief This function resets filtration value until a given dimension.
+  /** \brief This function resets filtration value from a given dimension. Resets all the Simplex_tree when
+   * `min_dim = 0`.
    * @param[in] filt_value The new filtration value.
-   * @param[in] max_dim The maximal dimension.
+   * @param[in] min_dim The minimal dimension.
    */
-  void reset_filtration(Filtration_value filt_value, int max_dim) {
+  void reset_filtration(Filtration_value filt_value, int min_dim) {
     for (auto& simplex : root_.members()) {
-      simplex.second.assign_filtration(filt_value);
-      if (has_children(&simplex) && max_dim > 0) {
-        rec_reset_filtration(simplex.second.children(), filt_value, (max_dim - 1));
+      if (min_dim <= 0) {
+        simplex.second.assign_filtration(filt_value);
+      }
+      if (has_children(&simplex)) {
+        rec_reset_filtration(simplex.second.children(), filt_value, min_dim);
       }
     }
     clear_filtration(); // Drop the cache.
   }
 
  private:
-  /** \brief Recursively resets filtration value until a given dimension.
+  /** \brief Recursively resets filtration value from a given dimension.
    * @param[in] sib Siblings to be parsed.
    * @param[in] filt_value The new filtration value.
-   * @param[in] max_dim The maximal dimension.
+   * @param[in] min_dim The maximal dimension.
    */
-  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int max_dim) {
-    for (auto& simplex : sib->members()) {
-      simplex.second.assign_filtration(filt_value);
-      if (has_children(&simplex) && max_dim > 0) {
-        rec_reset_filtration(simplex.second.children(), filt_value, (max_dim - 1));
+  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int min_dim) {
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      if (min_dim <= dimension(sh)) {
+        sh->second.assign_filtration(filt_value);
+      }
+      if (has_children(sh)) {
+        rec_reset_filtration(sh->second.children(), filt_value, min_dim);
       }
     }
   }

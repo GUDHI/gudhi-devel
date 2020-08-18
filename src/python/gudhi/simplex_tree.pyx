@@ -328,7 +328,7 @@ cdef class SimplexTree:
         return self.get_ptr().prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
-        """Expands the Simplex_tree containing only its one skeleton
+        """Expands the simplex tree containing only its one skeleton
         until dimension max_dim.
 
         The expanded simplicial complex until dimension :math:`d`
@@ -338,7 +338,7 @@ cdef class SimplexTree:
         The filtration value assigned to a simplex is the maximal filtration
         value of one of its edges.
 
-        The Simplex_tree must contain no simplex of dimension bigger than
+        The simplex tree must contain no simplex of dimension bigger than
         1 when calling the method.
 
         :param max_dim: The maximal dimension.
@@ -358,15 +358,16 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
-    def reset_filtration(self, filtration, max_dim):
-        """This function resets filtration value until a given dimension.
+    def reset_filtration(self, filtration, min_dim):
+        """This function resets filtration value from a given dimension.
+        Resets all the simplex tree when `min_dim = 0`.
 
         :param filtration: New threshold value.
         :type filtration: float.
-        :param max_dim: The maximal dimension.
+        :param max_dim: The minimal dimension.
         :type max_dim: int.
         """
-        self.get_ptr().reset_filtration(filtration, max_dim)
+        self.get_ptr().reset_filtration(filtration, min_dim)
 
     def extend_filtration(self):
         """ Extend filtration for computing extended persistence. This function only uses the 
@@ -376,14 +377,14 @@ cdef class SimplexTree:
         .. note::
 
             Note that after calling this function, the filtration 
-            values are actually modified within the Simplex_tree. 
+            values are actually modified within the simplex tree. 
             The function :func:`extended_persistence`
             retrieves the original values.
 
         .. note::
 
             Note that this code creates an extra vertex internally, so you should make sure that
-            the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
+            the simplex tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
         """
         self.get_ptr().compute_extended_filtration()
 

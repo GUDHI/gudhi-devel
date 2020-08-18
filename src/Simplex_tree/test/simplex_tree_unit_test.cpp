@@ -965,21 +965,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
       std::clog << vertex << ",";
     }
-    std::clog << ") - filtration =" << st.filtration(f_simplex) << std::endl;
+    std::clog << ") - filtration = " << st.filtration(f_simplex);
+    std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+    // Guaranteed by construction
     BOOST_CHECK(st.filtration(f_simplex) >= 2.);
   }
 
   // dimension until 5 even if simplex tree is of dimension 3 to test the limits
-  for(int dimension = 0; dimension < 6; dimension ++) {
+  for(int dimension = 5; dimension >= 0; dimension --) {
+    std::clog << "### reset_filtration - dimension = " << dimension << "\n";
     st.reset_filtration(0., dimension);
     for (auto f_simplex : st.skeleton_simplex_range(3)) {
       std::clog << "vertex = (";
       for (auto vertex : st.simplex_vertex_range(f_simplex)) {
         std::clog << vertex << ",";
       }
-      std::clog << ") - filtration =" << st.filtration(f_simplex) << std::endl;
-      if (st.dimension(f_simplex) > dimension)
-        BOOST_CHECK(st.filtration(f_simplex) >= 1.);
+      std::clog << ") - filtration = " << st.filtration(f_simplex);
+      std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+      if (st.dimension(f_simplex) < dimension)
+        BOOST_CHECK(st.filtration(f_simplex) >= 2.);
       else
         BOOST_CHECK(st.filtration(f_simplex) == 0.);
     }

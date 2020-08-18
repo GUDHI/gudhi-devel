@@ -367,15 +367,16 @@ def test_reset_filtration():
     assert st.insert([3, 4, 5], 3.) == True
     assert st.insert([0, 1, 6, 7], 4.) == True
 
+    # Guaranteed by construction
     for simplex in st.get_simplices():
-        assert st.filtration(simplex[0]) >= 0.
+        assert st.filtration(simplex[0]) >= 2.
     
     # dimension until 5 even if simplex tree is of dimension 3 to test the limits
-    for dimension in range(0, 6):
+    for dimension in range(5, -1, -1):
         st.reset_filtration(0., dimension)
         for simplex in st.get_skeleton(3):
             print(simplex)
-            if len(simplex[0]) > (dimension + 1):
-                assert st.filtration(simplex[0]) >= 1.
+            if len(simplex[0]) < (dimension) + 1:
+                assert st.filtration(simplex[0]) >= 2.
             else:
                 assert st.filtration(simplex[0]) == 0.
