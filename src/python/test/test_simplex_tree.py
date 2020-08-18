@@ -341,6 +341,24 @@ def test_simplices_iterator():
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
 
+def test_collapse_edges():
+    st = SimplexTree()
+    
+    assert st.insert([0, 1], filtration=1.0) == True
+    assert st.insert([1, 2], filtration=1.0) == True
+    assert st.insert([2, 3], filtration=1.0) == True
+    assert st.insert([0, 3], filtration=1.0) == True
+    assert st.insert([0, 2], filtration=2.0) == True
+    assert st.insert([1, 3], filtration=2.0) == True
+
+    assert st.num_simplices() == 10
+
+    st.collapse_edges()
+    assert st.num_simplices() == 9
+    assert st.find([1, 3]) == False
+    for simplex in st.get_skeleton(0):
+        assert simplex[1] == 1.
+
 def test_reset_filtration():
     st = SimplexTree()
     
@@ -361,4 +379,3 @@ def test_reset_filtration():
                 assert st.filtration(simplex[0]) >= 1.
             else:
                 assert st.filtration(simplex[0]) == 0.
-

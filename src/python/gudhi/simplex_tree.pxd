@@ -57,6 +57,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool make_filtration_non_decreasing() nogil
         void compute_extended_filtration() nogil
         vector[vector[pair[int, pair[double, double]]]] compute_extended_persistence_subdiagrams(vector[pair[int, pair[double, double]]] dgm, double min_persistence) nogil
+        Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil
         void reset_filtration(double filtration, int dimension) nogil
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex) nogil

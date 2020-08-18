@@ -1,3 +1,13 @@
+---
+layout: page
+title: "Čech complex"
+meta_title: "Čech complex"
+teaser: ""
+permalink: /cechcomplex/
+---
+{::comment}
+Leave the lines above as it is required by the web site generator 'Jekyll'
+{:/comment}
 
 
 # Čech complex #
