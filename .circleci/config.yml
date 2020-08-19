@@ -57,14 +57,16 @@ jobs:
             cmake -DUSER_VERSION_DIR=version ..;
             make user_version;
             cd version;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .;
+            mkdir build;
+            cd build;
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..;
             cd python;
             python3 setup.py build_ext --inplace;
             make sphinx;
             cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
             python3 setup.py clean --all;
-            python3 -B -m pytest test/*.py --cov-report html --cov=gudhi;
+            python3 -B -m pytest ../../python/test/*.py --cov-report html --cov=gudhi;
             cp -R htmlcov /tmp/htmlcov;
 
       - store_artifacts:
