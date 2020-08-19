@@ -43,6 +43,7 @@ for module in cython_modules:
         include_dirs=include_dirs,
         runtime_library_dirs=runtime_library_dirs,)
     extension.cython_directives = {'language_level': str(sys.version_info[0])}
+    ext_modules.append(extension)
 
 ext_modules = cythonize(ext_modules)
 
