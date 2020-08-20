@@ -64,6 +64,7 @@ jobs:
             cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
             python3 setup.py clean --all || true;
+            python3 -m pip list
             python3 -B -m pytest test/*.py --cov-report html --cov=gudhi;
             cp -R htmlcov /tmp/htmlcov;
       - store_artifacts:
