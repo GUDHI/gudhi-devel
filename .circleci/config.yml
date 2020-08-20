@@ -8,11 +8,11 @@ jobs:
       - run:
           name: Build and test examples
           command: |
-            mkdir build;
-            cd build;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
-            make all;
-            ctest --output-on-failure;
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
 
   tests:
     docker:
@@ -22,11 +22,11 @@ jobs:
       - run:
           name: Build and test unitary tests
           command: |
-            mkdir build;
-            cd build;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..;
-            make all;
-            ctest --output-on-failure;
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
 
   utils:
     docker:
@@ -36,11 +36,11 @@ jobs:
       - run:
           name: Build and test utilities
           command: |
-            mkdir build;
-            cd build;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..;
-            make all;
-            ctest --output-on-failure;
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
 
   python:
     docker:
@@ -52,25 +52,26 @@ jobs:
           command: |
             git submodule init
             git submodule update
-            mkdir build;
-            cd build;
-            cmake -DUSER_VERSION_DIR=version ..;
-            make user_version;
-            cd version;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .;
-            cd python;
-            python3 setup.py build_ext --inplace;
-            make sphinx;
-            cp -R sphinx /tmp/sphinx;
-            python3 setup.py install;
-            python3 setup.py clean --all || true;
-            python3 -m pip list
-            python3 -B -m pytest test/*.py --cov-report html --cov=gudhi;
-            cp -R htmlcov /tmp/htmlcov;
+            mkdir build
+            cd build
+            cmake -DUSER_VERSION_DIR=version ..
+            make user_version
+            cd version
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cd python
+            python3 setup.py build_ext --inplace
+            make sphinx
+            cp -R sphinx /tmp/sphinx
+            python3 setup.py install
+            python3 setup.py clean --all
+            python3 -B -m pytest test/*.py --cov-report html --cov=gudhi
+            cp -R htmlcov /tmp/htmlcov
       - store_artifacts:
           path: /tmp/sphinx
+          destination: sphinx
       - store_artifacts:
           path: /tmp/htmlcov
+          destination: htmlcov
 
   doxygen:
     docker:
@@ -82,16 +83,17 @@ jobs:
           command: |
             git submodule init
             git submodule update
-            mkdir build;
-            cd build;
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..;
-            make doxygen 2>&1 | tee dox.log;
-            grep warning dox.log;
-            cp dox.log version/doc/html/;
-            cp -R version/doc/html /tmp/doxygen;
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..
+            make doxygen 2>&1 | tee dox.log
+            grep warning dox.log
+            cp dox.log version/doc/html/
+            cp -R version/doc/html /tmp/doxygen
 
       - store_artifacts:
           path: /tmp/doxygen
+          destination: doxygen
 
 workflows:
   version: 2
