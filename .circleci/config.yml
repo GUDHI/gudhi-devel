@@ -66,14 +66,10 @@ jobs:
             cp -R sphinx /tmp/sphinx;
             python3 setup.py install;
             python3 setup.py clean --all;
-            python3 -B -m pytest ../../python/test/*.py --cov-report html --cov=gudhi;
-            cp -R htmlcov /tmp/htmlcov;
+            ctest -j 2 --output-on-failure;
 
       - store_artifacts:
           path: /tmp/sphinx
-
-      - store_artifacts:
-          path: /tmp/htmlcov
 
   doxygen:
     docker:
