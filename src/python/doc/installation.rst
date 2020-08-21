@@ -65,7 +65,7 @@ one can build the GUDHI Python module, by running the following commands in a te
     cd /path-to-gudhi/
     mkdir build
     cd build/
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
     cd python
     make
 
