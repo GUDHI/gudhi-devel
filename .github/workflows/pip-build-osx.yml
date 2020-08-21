@@ -1,8 +1,6 @@
-name: pip packaging osx
+name: pip build osx
 
-on:
-  release:
-    types: [published]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -10,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8']
+        python-version: ['3.8']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v1
@@ -34,12 +32,3 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           python setup.py bdist_wheel
-      - name: Publish on PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          mkdir wheelhouse
-          /Users/runner/.local/bin/delocate-listdeps build/src/python/dist/*
-          /Users/runner/.local/bin/delocate-wheel --require-archs x86_64 -w wheelhouse build/src/python/dist/*
-          python -m twine upload wheelhouse/*
