@@ -38,8 +38,6 @@
 #include <CGAL/iterator.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
-#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
-
 #include <boost/container/static_vector.hpp>
 
 #include <iostream>
