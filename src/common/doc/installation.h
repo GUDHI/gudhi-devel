@@ -14,13 +14,13 @@
 \verbatim  cd /path-to-gudhi/
 mkdir build
 cd build/
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make \endverbatim
  * By default, examples are disabled. You can activate their compilation with
  * <a href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
  * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or by modifying the
  * cmake command as follows :
-\verbatim  cmake -DWITH_GUDHI_EXAMPLE=ON ..
+\verbatim  cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON ..
 make \endverbatim
  * A list of utilities and examples is available <a href="examples.html">here</a>.
  * 
@@ -66,9 +66,9 @@ make doxygen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require CGAL, a C++ library that provides
  * easy access to efficient and reliable geometric algorithms.
  *
- * \note There is no need to install CGAL, you can just <CODE>cmake . && make</CODE> CGAL (or even
- * <CODE>cmake -DCGAL_HEADER_ONLY=ON .</CODE>), thereafter you will be able to compile
- * GUDHI by calling <CODE>cmake -DCGAL_DIR=/your/path/to/CGAL-X.Y .. && make</CODE>
+ * \note There is no need to install CGAL, you can just <CODE>cmake -DCMAKE_BUILD_TYPE=Release . && make</CODE> CGAL
+ * (or even <CODE>cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_HEADER_ONLY=ON .</CODE>), thereafter you will be able to
+ * compile GUDHI by calling <CODE>cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL-X.Y .. && make</CODE>
  * 
  * The procedure to install this library according to
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
