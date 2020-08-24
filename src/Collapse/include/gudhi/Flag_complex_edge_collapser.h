@@ -37,7 +37,7 @@
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if !EIGEN_VERSION_AT_LEAST(3,1,0)
-# error Alpha_complex is only available for Eigen3 >= 3.1.0 installed with CGAL
+# error Edge Collapse is only available for Eigen3 >= 3.1.0
 #endif
 
 namespace Gudhi {
