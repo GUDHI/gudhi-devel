@@ -83,7 +83,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * The boundary elements are guaranteed to be returned so that the
    * incidence coefficients are alternating.
    */
-  virtual inline std::vector<std::size_t> get_boundary_of_a_cell(std::size_t cell) const;
+  virtual std::vector<std::size_t> get_boundary_of_a_cell(std::size_t cell) const override;
 
   /**
    * A version of a function that return coboundary of a given cell for an object of
@@ -93,7 +93,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * To compute incidence between cells use compute_incidence_between_cells
    * procedure
    */
-  virtual inline std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const;
+  virtual std::vector<std::size_t> get_coboundary_of_a_cell(std::size_t cell) const override;
 
   /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
@@ -114,7 +114,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   * @exception std::logic_error In case when the cube \f$B\f$ is not n-1
   * dimensional face of a cube \f$A\f$.
   **/
-  virtual int compute_incidence_between_cells(std::size_t coface, std::size_t face) const {
+  virtual int compute_incidence_between_cells(std::size_t coface, std::size_t face) const override {
     // first get the counters for coface and face:
     std::vector<unsigned> coface_counter = this->compute_counter_for_given_cell(coface);
     std::vector<unsigned> face_counter = this->compute_counter_for_given_cell(face);
