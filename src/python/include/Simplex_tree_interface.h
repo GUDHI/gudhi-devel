@@ -226,7 +226,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     if (bd_sh == Base::null_simplex())
       throw std::runtime_error("simplex not found - cannot find boundaries");
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-    return std::make_pair(Base::boundary_simplex_range(bd_sh).begin(), Base::boundary_simplex_range(bd_sh).end());
+    auto boundary_srange = Base::boundary_simplex_range(bd_sh);
+    return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
 };
 
