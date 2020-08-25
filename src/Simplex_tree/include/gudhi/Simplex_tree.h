@@ -1682,25 +1682,25 @@ class Simplex_tree {
         simplex.second.assign_filtration(filt_value);
       }
       if (has_children(&simplex)) {
-        rec_reset_filtration(simplex.second.children(), filt_value, min_dim);
+        rec_reset_filtration(simplex.second.children(), filt_value, min_dim - 1);
       }
     }
     clear_filtration(); // Drop the cache.
   }
 
  private:
-  /** \brief Recursively resets filtration value from a given dimension.
+  /** \brief Recursively resets filtration value when minimal depth <= 0.
    * @param[in] sib Siblings to be parsed.
    * @param[in] filt_value The new filtration value.
-   * @param[in] min_dim The minimal dimension.
+   * @param[in] min_depth The minimal depth.
    */
-  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int min_dim) {
+  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int min_depth) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
-      if (min_dim <= dimension(sh)) {
+      if (min_depth <= 0) {
         sh->second.assign_filtration(filt_value);
       }
       if (has_children(sh)) {
-        rec_reset_filtration(sh->second.children(), filt_value, min_dim);
+        rec_reset_filtration(sh->second.children(), filt_value, min_depth - 1);
       }
     }
   }
