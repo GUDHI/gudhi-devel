@@ -358,14 +358,17 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
-    def reset_filtration(self, filtration, min_dim):
-        """This function resets filtration value from a given dimension.
-        Resets all the simplex tree when `min_dim = 0`.
+    def reset_filtration(self, filtration, min_dim = 0):
+        """This function resets filtration value from a given dimension. Resets all the simplex tree when
+        `min_dim = 0`.
+        `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
+        make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+        afterwards for instance).
 
         :param filtration: New threshold value.
         :type filtration: float.
-        :param max_dim: The minimal dimension.
-        :type max_dim: int.
+        :param min_dim: The minimal dimension. Default value is 0.
+        :type min_dim: int.
         """
         self.get_ptr().reset_filtration(filtration, min_dim)
 

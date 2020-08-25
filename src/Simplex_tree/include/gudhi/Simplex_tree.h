@@ -1670,10 +1670,13 @@ class Simplex_tree {
  public:
   /** \brief This function resets filtration value from a given dimension. Resets all the Simplex_tree when
    * `min_dim = 0`.
+   * `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
+   * make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+   * afterwards for instance).
    * @param[in] filt_value The new filtration value.
-   * @param[in] min_dim The minimal dimension.
+   * @param[in] min_dim The minimal dimension. Default value is 0.
    */
-  void reset_filtration(Filtration_value filt_value, int min_dim) {
+  void reset_filtration(Filtration_value filt_value, int min_dim = 0) {
     for (auto& simplex : root_.members()) {
       if (min_dim <= 0) {
         simplex.second.assign_filtration(filt_value);
@@ -1689,7 +1692,7 @@ class Simplex_tree {
   /** \brief Recursively resets filtration value from a given dimension.
    * @param[in] sib Siblings to be parsed.
    * @param[in] filt_value The new filtration value.
-   * @param[in] min_dim The maximal dimension.
+   * @param[in] min_dim The minimal dimension.
    */
   void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int min_dim) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
