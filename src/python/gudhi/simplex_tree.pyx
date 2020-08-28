@@ -17,6 +17,9 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+cdef bool callback(vector[int] simplex, void *blocker_func):
+    return (<object>blocker_func)(simplex)
+
 # SimplexTree python interface
 cdef class SimplexTree:
     """The simplex tree is an efficient and flexible data structure for
@@ -409,6 +412,24 @@ cdef class SimplexTree:
         persistence_result = self.pcohptr.get_persistence()
         return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
 
+    def expansion_with_blocker(self, max_dim, blocker_func):
+        """Expands the Simplex_tree containing only its one skeleton
+        until dimension max_dim.
+
+        The expanded simplicial complex until dimension :math:`d`
+        attached to a graph :math:`G` is the maximal simplicial complex of
+        dimension at most :math:`d` admitting the graph :math:`G` as
+        :math:`1`-skeleton.
+        The filtration value assigned to a simplex is the maximal filtration
+        value of one of its edges.
+
+        The Simplex_tree must contain no simplex of dimension bigger than
+        1 when calling the method.
+
+        :param max_dim: The maximal dimension.
+        :type max_dim: int
+        """
+        self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.

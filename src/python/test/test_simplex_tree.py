@@ -358,3 +358,47 @@ def test_collapse_edges():
     assert st.find([1, 3]) == False
     for simplex in st.get_skeleton(0): 
         assert simplex[1] == 1. 
+
+def blocker(simplex):
+    try:
+        # Block all simplices that countains vertex 6
+        simplex.index(6)
+        print(simplex, ' is blocked')
+        return True
+    except ValueError:
+        print(simplex, ' is accepted')
+        return False
+
+def test_expansion_with_blocker():
+    st=SimplexTree()
+    st.insert([0,1],0)
+    st.insert([0,2],1)
+    st.insert([0,3],2)
+    st.insert([1,2],3)
+    st.insert([1,3],4)
+    st.insert([2,3],5)
+    st.insert([2,4],6)
+    st.insert([3,6],7)
+    st.insert([4,5],8)
+    st.insert([4,6],9)
+    st.insert([5,6],10)
+    st.insert([6],10)
+
+    st.expansion_with_blocker(2, blocker)
+    assert st.num_simplices() == 22
+    assert st.dimension() == 2
+    assert st.find([4,5,6]) == False
+    assert st.filtration([0,1,2]) == 3.
+    assert st.filtration([0,1,3]) == 4.
+    assert st.filtration([0,2,3]) == 5.
+    assert st.filtration([1,2,3]) == 5.
+
+    st.expansion_with_blocker(3, blocker)
+    assert st.num_simplices() == 23
+    assert st.dimension() == 3
+    assert st.find([4,5,6]) == False
+    assert st.filtration([0,1,2]) == 3.
+    assert st.filtration([0,1,3]) == 4.
+    assert st.filtration([0,2,3]) == 5.
+    assert st.filtration([1,2,3]) == 5.
+    assert st.filtration([0,1,2,3]) == 5.

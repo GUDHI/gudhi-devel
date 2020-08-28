@@ -66,6 +66,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end() nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension) nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
+        #
+        ctypedef bool (*blocker_func)(vector[int], void *user_data)
+        void expansion_with_blockers_callback(int dimension, blocker_func user_func, void *user_data)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
