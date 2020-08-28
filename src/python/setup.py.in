@@ -42,7 +42,7 @@ for module in cython_modules:
         library_dirs=library_dirs,
         include_dirs=include_dirs,
         runtime_library_dirs=runtime_library_dirs,
-	cython_directives = {'language_level': str(sys.version_info[0])},))
+        cython_directives = {'language_level': str(sys.version_info[0])},))
 
 ext_modules = cythonize(ext_modules)
 
