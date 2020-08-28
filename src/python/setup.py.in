@@ -32,7 +32,7 @@ runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 # Create ext_modules list from module list
 ext_modules = []
 for module in cython_modules:
-    extension = Extension(
+    ext_modules.append(Extension(
         'gudhi.' + module,
         sources = [source_dir + module + '.pyx',],
         language = 'c++',
@@ -41,9 +41,8 @@ for module in cython_modules:
         libraries=libraries,
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        runtime_library_dirs=runtime_library_dirs,)
-    extension.cython_directives = {'language_level': str(sys.version_info[0])}
-    ext_modules.append(extension)
+        runtime_library_dirs=runtime_library_dirs,
+	cython_directives = {'language_level': str(sys.version_info[0])},))
 
 ext_modules = cythonize(ext_modules)
 
