@@ -359,16 +359,6 @@ def test_collapse_edges():
     for simplex in st.get_skeleton(0): 
         assert simplex[1] == 1. 
 
-def blocker(simplex):
-    try:
-        # Block all simplices that countains vertex 6
-        simplex.index(6)
-        print(simplex, ' is blocked')
-        return True
-    except ValueError:
-        print(simplex, ' is accepted')
-        return False
-
 def test_expansion_with_blocker():
     st=SimplexTree()
     st.insert([0,1],0)
@@ -384,21 +374,39 @@ def test_expansion_with_blocker():
     st.insert([5,6],10)
     st.insert([6],10)
 
+    # One cannot modify filtration inside blocker - segfault - Let's record accepted simplices
+    accepted_simp = []
+    def blocker(simplex):
+        try:
+            # Block all simplices that countains vertex 6
+            simplex.index(6)
+            print(simplex, ' is blocked')
+            return True
+        except ValueError:
+            print(simplex, ' is accepted')
+            accepted_simp.append(simplex)
+            return False
+
     st.expansion_with_blocker(2, blocker)
+    for simplex in accepted_simp:
+        st.assign_filtration(simplex, st.filtration(simplex) + 1.)
     assert st.num_simplices() == 22
     assert st.dimension() == 2
     assert st.find([4,5,6]) == False
-    assert st.filtration([0,1,2]) == 3.
-    assert st.filtration([0,1,3]) == 4.
-    assert st.filtration([0,2,3]) == 5.
-    assert st.filtration([1,2,3]) == 5.
+    assert st.filtration([0,1,2]) == 4.
+    assert st.filtration([0,1,3]) == 5.
+    assert st.filtration([0,2,3]) == 6.
+    assert st.filtration([1,2,3]) == 6.
 
+    accepted_simp = []
     st.expansion_with_blocker(3, blocker)
+    for simplex in accepted_simp:
+        st.assign_filtration(simplex, st.filtration(simplex) + 1.)
     assert st.num_simplices() == 23
     assert st.dimension() == 3
     assert st.find([4,5,6]) == False
-    assert st.filtration([0,1,2]) == 3.
-    assert st.filtration([0,1,3]) == 4.
-    assert st.filtration([0,2,3]) == 5.
-    assert st.filtration([1,2,3]) == 5.
-    assert st.filtration([0,1,2,3]) == 5.
+    assert st.filtration([0,1,2]) == 4.
+    assert st.filtration([0,1,3]) == 5.
+    assert st.filtration([0,2,3]) == 6.
+    assert st.filtration([1,2,3]) == 6.
+    assert st.filtration([0,1,2,3]) == 6.

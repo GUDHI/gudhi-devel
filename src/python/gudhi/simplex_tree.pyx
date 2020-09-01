@@ -413,21 +413,22 @@ cdef class SimplexTree:
         return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
 
     def expansion_with_blocker(self, max_dim, blocker_func):
-        """Expands the Simplex_tree containing only its one skeleton
-        until dimension max_dim.
+        """Expands the Simplex_tree containing only a graph. Simplices corresponding to cliques in the graph are added
+        incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `blocker_func`
+        returns `True` for this simplex.
 
-        The expanded simplicial complex until dimension :math:`d`
-        attached to a graph :math:`G` is the maximal simplicial complex of
-        dimension at most :math:`d` admitting the graph :math:`G` as
-        :math:`1`-skeleton.
-        The filtration value assigned to a simplex is the maximal filtration
-        value of one of its edges.
+        The function identifies a candidate simplex whose faces are all already in the complex, inserts it with a
+        filtration value corresponding to the maximum of the filtration values of the faces, then calls `blocker_func`
+        with this new simplex (represented as a list of int). If `blocker_func` returns `True`, the simplex is removed,
+        otherwise it is kept. The algorithm then proceeds with the next candidate.
 
-        The Simplex_tree must contain no simplex of dimension bigger than
-        1 when calling the method.
+        Note that you cannot update the filtration value of the simplex during the evaluation of `blocker_func`, as it
+        would segfault. 
 
-        :param max_dim: The maximal dimension.
+        :param max_dim: Expansion maximal dimension value.
         :type max_dim: int
+        :param blocker_func: Blocker oracle.
+        :type blocker_func: Its concept is `Boolean blocker_func(list of int)`
         """
         self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 
