@@ -38,8 +38,6 @@
 #include <CGAL/iterator.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
-#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
-
 #include <boost/container/static_vector.hpp>
 
 #include <iostream>
@@ -54,10 +52,6 @@
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
 # error Alpha_complex_3d is only available for CGAL >= 4.11
-#endif
-
-#if !EIGEN_VERSION_AT_LEAST(3,1,0)
-# error Alpha_complex_3d is only available for Eigen3 >= 3.1.0 installed with CGAL
 #endif
 
 namespace Gudhi {

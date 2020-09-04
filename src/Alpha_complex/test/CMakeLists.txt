@@ -22,6 +22,10 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   gudhi_add_boost_test(Delaunay_complex_test_unit)
   gudhi_add_boost_test(Alpha_kernel_d_test_unit)
 
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+
   add_executable ( Alpha_complex_3d_test_unit Alpha_complex_3d_unit_test.cpp )
   target_link_libraries(Alpha_complex_3d_test_unit ${CGAL_LIBRARY})
   add_executable ( Weighted_alpha_complex_3d_test_unit Weighted_alpha_complex_3d_unit_test.cpp )
@@ -42,4 +46,4 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   gudhi_add_boost_test(Periodic_alpha_complex_3d_test_unit)
   gudhi_add_boost_test(Weighted_periodic_alpha_complex_3d_test_unit)
 
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)

@@ -28,7 +28,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_test(NAME Alpha_complex_example_fast_from_off_32 COMMAND $<TARGET_FILE:Alpha_complex_example_fast_from_off>
       "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" "32.0" "${CMAKE_CURRENT_BINARY_DIR}/fastalphaoffreader_result_32.txt")
 
-if (DIFF_PATH)
+  if (DIFF_PATH)
     # Do not forget to copy test results files in current binary dir
     file(COPY "alphaoffreader_for_doc_32.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
     file(COPY "alphaoffreader_for_doc_60.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -46,8 +46,10 @@ if (DIFF_PATH)
     add_test(Alpha_complex_example_fast_from_off_32_diff_files ${DIFF_PATH}
         ${CMAKE_CURRENT_BINARY_DIR}/fastalphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
     set_tests_properties(Alpha_complex_example_fast_from_off_32_diff_files PROPERTIES DEPENDS Alpha_complex_example_fast_from_off_32) 
-endif()
+  endif()
+ endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
+if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
   target_link_libraries(Alpha_complex_example_weighted_3d_from_points  ${CGAL_LIBRARY})
   if (TBB_FOUND)
@@ -64,4 +66,4 @@ endif()
   add_test(NAME Alpha_complex_example_3d_from_points
           COMMAND $<TARGET_FILE:Alpha_complex_example_3d_from_points>)
 
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif(NOT CGAL_VERSION VERSION_LESS 4.11.0)
