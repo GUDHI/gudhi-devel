@@ -71,8 +71,7 @@ class Alpha_kernel_d<Kernel, false> {
     return sph.second;
   }
 
-  template<class Point>
-  Point get_circumcenter(const Sphere& sph) const {
+  auto get_circumcenter(const Sphere& sph) const {
     return sph.first;
   }
 
@@ -117,13 +116,11 @@ class Alpha_kernel_d<Kernel, true> {
     return sph.weight();
   }
 
-  template<class Point>
-  Point get_circumcenter(const Sphere& sph) const {
-    return sph.point();
+  auto get_circumcenter(const Sphere& sph) const {
+    return sph;
   }
 
-  template<class Point>
-  FT get_squared_distance(const Point& first, const Point& second) const {
+  FT get_squared_distance(const Weighted_point_d& first, const Weighted_point_d& second) const {
     return kernel_.power_distance_d_object()(first, second);
   }
 };

@@ -18,13 +18,13 @@ int main() {
   // Init of a list of points
   // ----------------------------------------------------------------------------
   Vector_of_points points;
-  points.push_back(Weighted_point(Bare_point(1.0, 1.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(7.0, 0.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(4.0, 6.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(9.0, 6.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(0.0, 14.0), 1.));
-  points.push_back(Weighted_point(Bare_point(2.0, 19.0), 1.));
-  points.push_back(Weighted_point(Bare_point(9.0, 17.0), 1.));
+  points.push_back(Weighted_point(Bare_point(1.0, 1.0) , 0.));
+  points.push_back(Weighted_point(Bare_point(7.0, 0.0) , 0.));
+  points.push_back(Weighted_point(Bare_point(4.0, 6.0) , 0.));
+  points.push_back(Weighted_point(Bare_point(9.0, 6.0) , 0.));
+  points.push_back(Weighted_point(Bare_point(0.0, 14.0), 0.));
+  points.push_back(Weighted_point(Bare_point(2.0, 19.0), 0.));
+  points.push_back(Weighted_point(Bare_point(9.0, 17.0), 0.));
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
