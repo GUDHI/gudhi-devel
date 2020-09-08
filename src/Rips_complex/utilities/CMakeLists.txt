@@ -24,7 +24,7 @@ endif()
 
 if(TARGET Boost::program_options)
   add_executable(rips_correlation_matrix_persistence rips_correlation_matrix_persistence.cpp)
-  target_link_libraries(rips_correlation_matrix_persistence Boost::system Boost::program_options)
+  target_link_libraries(rips_correlation_matrix_persistence Boost::program_options)
   if (TBB_FOUND)
     target_link_libraries(rips_correlation_matrix_persistence ${TBB_LIBRARIES})
   endif()
