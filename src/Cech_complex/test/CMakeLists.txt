@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-project(Cech_complex_tests)
-
 include(GUDHI_boost_test)
 
 add_executable ( Cech_complex_test_unit test_cech_complex.cpp )
