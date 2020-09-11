@@ -82,6 +82,7 @@ class Alpha_kernel_d<Kernel, true> {
  private:
   // Kernel for functions access.
   Kernel kernel_;
+
  public:
   // Fake type for compilation to succeed (cf. std::conditional in Alpha_complex.h)
   using Point_d = void;
@@ -98,7 +99,13 @@ class Alpha_kernel_d<Kernel, true> {
 
   template<class PointIterator>
   Sphere get_sphere(PointIterator begin, PointIterator end) const {
+    // power_center_d_object has been renamed between CGAL 5.1 and 5.2
+#if defined CGAL_VERSION_NR >= 1050101000 && defined CGAL_VERSION_NR < 1050201000
     return kernel_.power_center_d_object()(begin, end);
+#endif
+#if CGAL_VERSION_NR >= 1050201000
+    return kernel_.construct_power_sphere_d_object()(begin, end);
+#endif
   }
 
   template<class PointIterator>
@@ -112,7 +119,13 @@ class Alpha_kernel_d<Kernel, true> {
   }
 
   bool is_gabriel(const Sphere& circumcenter, const Weighted_point_d& point) {
+    // power_center_d_object has been renamed between CGAL 5.1 and 5.2
+#if defined CGAL_VERSION_NR >= 1050101000 && defined CGAL_VERSION_NR < 1050201000
     return kernel_.power_distance_d_object()(circumcenter, point) >= 0;
+#endif
+#if CGAL_VERSION_NR >= 1050201000
+    return kernel_.compute_power_product_d_object()(circumcenter, point) >= 0;
+#endif
   }
 };
 
