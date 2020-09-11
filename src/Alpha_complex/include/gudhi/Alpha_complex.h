@@ -31,6 +31,10 @@
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
+#include <boost/range/size.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -177,6 +181,28 @@ class Alpha_complex {
   Alpha_complex(const InputPointRange& points)
       : triangulation_(nullptr) {
     init_from_range(points);
+  }
+
+  /** \brief Alpha_complex constructor from a list of points and weights.
+   *
+   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+   * 
+   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
+   * 
+   * @param[in] weights Range of points weights. Weights must be in Kernel::FT.
+   * 
+   * The type InputPointRange must be a range for which std::begin and
+   * std::end return input iterators on a Kernel::Point_d.
+   */
+  template <typename InputPointRange, typename WeightRange>
+  Alpha_complex(const InputPointRange& points, WeightRange weights) {
+    static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex_3d");
+    // FIXME: this test is only valid if we have a forward range
+    GUDHI_CHECK(boost::size(weights) == boost::size(points),
+                std::invalid_argument("Points number in range different from weights range number"));
+    auto weighted_points = boost::range::combine(points, weights)
+      | boost::adaptors::transformed([](auto const&t){return Point_d(boost::get<0>(t), boost::get<1>(t));});
+    init_from_range(weighted_points);
   }
 
   /** \brief Alpha_complex destructor deletes the Delaunay triangulation.
