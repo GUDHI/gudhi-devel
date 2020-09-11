@@ -71,13 +71,8 @@ class Alpha_kernel_d<Kernel, false> {
     return sph.second;
   }
 
-  auto get_circumcenter(const Sphere& sph) const {
-    return sph.first;
-  }
-
-  template<class Point>
-  FT get_squared_distance(const Point& first, const Point& second) const {
-    return kernel_.squared_distance_d_object()(first, second);
+  bool is_gabriel(const Sphere& circumcenter, const Point_d& point) {
+    return kernel_.squared_distance_d_object()(circumcenter.first, point) >= circumcenter.second;
   }
 };
 
@@ -116,12 +111,8 @@ class Alpha_kernel_d<Kernel, true> {
     return sph.weight();
   }
 
-  auto get_circumcenter(const Sphere& sph) const {
-    return sph;
-  }
-
-  FT get_squared_distance(const Weighted_point_d& first, const Weighted_point_d& second) const {
-    return kernel_.power_distance_d_object()(first, second);
+  bool is_gabriel(const Sphere& circumcenter, const Weighted_point_d& point) {
+    return kernel_.power_distance_d_object()(circumcenter, point) >= 0;
   }
 };
 

@@ -210,6 +210,11 @@ class Alpha_complex {
                 << std::endl;
     #endif
 
+#if CGAL_VERSION_NR < 1050101000
+    // Make compilation fail if weighted and CGAL < 5.1
+    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1");
+#endif
+
     auto first = std::begin(points);
     auto last = std::end(points);
 
@@ -457,8 +462,7 @@ class Alpha_complex {
         while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
         Vertex_handle extra = *longiter;
         auto const& cache=get_cache(complex, f_boundary);
-        bool is_gab = kernel_.get_squared_distance(kernel_.get_circumcenter(cache), get_point_(extra)) >=
-                      kernel_.get_squared_radius(cache);
+        bool is_gab = kernel_.is_gabriel(cache, get_point_(extra));
 #ifdef DEBUG_TRACES
         std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
 #endif  // DEBUG_TRACES
