@@ -21,6 +21,7 @@
 #include <random>
 
 #include <gudhi/Alpha_complex.h>
+#include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
 
@@ -32,7 +33,6 @@ typedef CGAL::Epeck_d< CGAL::Dimension_tag<4> > Exact_kernel_s;
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
 // Use static dimension_tag for the user not to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Inexact_kernel_s;
-// The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
 typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 

@@ -102,31 +102,3 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kerne
   std::clog << "Squared radius is " << w_sq_rd << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(cast_to_double(w_sphere.weight()), cast_to_double(w_sq_rd));
 }
-
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_distance, TestedKernel, list_of_kernel_variants) {
-  using Unweighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, false>;
-
-  std::vector<double> p0 {1., 0., 0., 0.};
-  std::vector<double> p1 {0., 1., 0., 0.};
-
-  using Point_d = typename Unweighted_kernel::Point_d;
-  Unweighted_kernel kernel;
-  auto dist_01 = kernel.get_squared_distance(Point_d(p0.begin(), p0.end()), Point_d(p1.begin(), p1.end()));
-  std::clog << "Distance is " << dist_01 << std::endl;
-
-  using Weighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, true>;
-
-  using Weighted_point_d = typename Weighted_kernel::Weighted_point_d;
-  using Bare_point_d = typename Weighted_kernel::Bare_point_d;
-  std::vector<Weighted_point_d> w_pts;
-
-  Weighted_kernel w_kernel;
-  auto w_dist_01 = w_kernel.get_squared_distance(Weighted_point_d(Bare_point_d(p0.begin(), p0.end()), 0.),
-                                                 Weighted_point_d(Bare_point_d(p1.begin(), p1.end()), 0.));
-  std::clog << "Distance is " << w_dist_01 << std::endl;
-
-  CGAL::NT_converter<typename Weighted_kernel::FT, double> cast_to_double;
-  // The results shall be the same with weights = 0.
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(cast_to_double(dist_01), cast_to_double(w_dist_01));
-}
