@@ -267,8 +267,6 @@ class Alpha_complex {
           // Save index value as data to retrieve it after insertion
           pos->data() = index;
           hint = pos->full_cell();
-        } else {
-          std::cout << "NULLPTR" << std::endl;
         }
       }
       // --------------------------------------------------------------------------------------------
