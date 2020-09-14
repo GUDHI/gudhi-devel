@@ -60,6 +60,27 @@ namespace alpha_complex {
 template<typename D> struct Is_Epeck_D { static const bool value = false; };
 template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool value = true; };
 
+template<class Kernel, bool Weighted>
+struct Weight;
+
+template<class Kernel>
+struct Weight<Kernel, true>
+{
+  typename Kernel::FT operator()(const typename Kernel::Weighted_point_d& p) const 
+  {
+    return p.weight();
+  }
+};
+
+template<class Kernel>
+struct Weight<Kernel, false>
+{
+  typename Kernel::FT operator()(const typename Kernel::Point_d& p) const 
+  {
+    return 0.;
+  }
+};
+
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
  * \brief Alpha complex data structure.
@@ -404,6 +425,7 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
 
     if (!default_filtration_value) {
+      CGAL::NT_converter<FT, Filtration_value> cgal_converter;
       // --------------------------------------------------------------------------------------------
       // ### For i : d -> 0
       for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
@@ -420,8 +442,7 @@ class Alpha_complex {
 #if CGAL_VERSION_NR >= 1050000000
                 if(exact) CGAL::exact(sqrad);
 #endif
-                CGAL::NT_converter<FT, Filtration_value> cv;
-                alpha_complex_filtration = cv(sqrad);
+                alpha_complex_filtration = cgal_converter(sqrad);
               }
               complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
@@ -431,6 +452,12 @@ class Alpha_complex {
             // No need to propagate further, unweighted points all have value 0
             if (decr_dim > 1)
               propagate_alpha_filtration(complex, f_simplex);
+            // For weighted points, assign point weight as filtration value
+            if (Weighted && decr_dim == 0) {
+              Vertex_handle vertex = *(complex.simplex_vertex_range(f_simplex).begin());
+              FT wght = Weight<Kernel, Weighted>()(get_point(vertex));
+              complex.assign_filtration(f_simplex, cgal_converter(wght)*(-1.));
+            }
           }
         }
         old_cache_ = std::move(cache_);
