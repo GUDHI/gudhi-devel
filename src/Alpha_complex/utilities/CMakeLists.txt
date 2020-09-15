@@ -1,6 +1,6 @@
 project(Alpha_complex_utilities)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
   add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
   target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} Boost::program_options)
 
@@ -27,7 +27,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   endif()
   
   install(TARGETS alpha_complex_persistence DESTINATION bin)
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
 
 if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
