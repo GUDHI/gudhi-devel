@@ -19,6 +19,8 @@
 #include <cmath>  // float comparison
 #include <vector>
 #include <random>
+#include <array>
+#include <cmath> // for std::fabs
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Alpha_complex_3d.h>
@@ -90,7 +92,7 @@ bool cgal_3d_point_sort (Point_d a,Point_d b) {
   return a[2] < b[2];
 }
 
-/*BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
+BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   // Random points construction
   using Kernel_dD = CGAL::Epeck_d< CGAL::Dimension_tag<3> >;
   using Bare_point_d = typename Kernel_dD::Point_d;
@@ -114,6 +116,12 @@ bool cgal_3d_point_sort (Point_d a,Point_d b) {
     w_points_3.emplace_back(Weighted_point_3(Bare_point_3(point[0], point[1], point[2]), weight));
   }
 
+  // Structures necessary for comparison
+  using Points = std::vector<std::array<double,3>>;
+  using Points_and_filtrations = std::map<Points, double>;
+  Points_and_filtrations pts_fltr_dD;
+  Points_and_filtrations pts_fltr_3d;
+
   // Weighted alpha complex for dD version
   Gudhi::alpha_complex::Alpha_complex<Kernel_dD, true> alpha_complex_dD_from_weighted_points(w_points_d);
   Gudhi::Simplex_tree<> w_simplex_d;
@@ -121,17 +129,20 @@ bool cgal_3d_point_sort (Point_d a,Point_d b) {
 
   std::clog << "Iterator on weighted alpha complex dD simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : w_simplex_d.filtration_simplex_range()) {
-    std::clog << "   ( ";
-    std::vector<Bare_point_d> points;
+    Points points;
     for (auto vertex : w_simplex_d.simplex_vertex_range(f_simplex)) {
-      points.emplace_back(alpha_complex_dD_from_weighted_points.get_point(vertex).point());
+      CGAL::NT_converter<Kernel_dD::RT, double> cgal_converter;
+      Bare_point_d pt = alpha_complex_dD_from_weighted_points.get_point(vertex).point();
+      points.push_back({cgal_converter(pt[0]), cgal_converter(pt[1]), cgal_converter(pt[2])});
     }
-    std::sort (points.begin(), points.end(), cgal_3d_point_sort<Bare_point_d>);
+    std::clog << "   ( ";
+    std::sort (points.begin(), points.end());
     for (auto point : points) {
       std::clog << point[0] << " " << point[1] << " " << point[2] << " | ";
     }
     std::clog << ") -> " << "[" << w_simplex_d.filtration(f_simplex) << "] ";
     std::clog << std::endl;
+    pts_fltr_dD[points] = w_simplex_d.filtration(f_simplex);
   }
 
   // Weighted alpha complex for 3D version
@@ -141,19 +152,40 @@ bool cgal_3d_point_sort (Point_d a,Point_d b) {
 
   std::clog << "Iterator on weighted alpha complex 3D simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : w_simplex_3.filtration_simplex_range()) {
-    std::clog << "   ( ";
-    std::vector<Bare_point_3> points;
+    Points points;
     for (auto vertex : w_simplex_3.simplex_vertex_range(f_simplex)) {
-      points.emplace_back(alpha_complex_3D_from_weighted_points.get_point(vertex).point());
+      Bare_point_3 pt = alpha_complex_3D_from_weighted_points.get_point(vertex).point();
+      CGAL::NT_converter<Exact_weighted_alpha_complex_3d::Kernel::RT, double> cgal_converter;
+      points.push_back({cgal_converter(pt[0]), cgal_converter(pt[1]), cgal_converter(pt[2])});
     }
+    std::clog << "   ( ";
     std::sort (points.begin(), points.end());
     for (auto point : points) {
       std::clog << point[0] << " " << point[1] << " " << point[2] << " | ";
     }
     std::clog << ") -> " << "[" << w_simplex_3.filtration(f_simplex) << "] ";
     std::clog << std::endl;
+    pts_fltr_3d[points] = w_simplex_d.filtration(f_simplex);
   }
 
-  BOOST_CHECK(w_simplex_d == w_simplex_3);
-
-}*/
+  // Compares structures
+  auto d3_itr = pts_fltr_3d.begin();
+  auto dD_itr = pts_fltr_dD.begin();
+  for (; d3_itr != pts_fltr_3d.end() && dD_itr != pts_fltr_dD.end(); ++d3_itr) {
+    if (d3_itr->first != dD_itr->first) {
+      for(auto point : d3_itr->first)
+        std::clog << point[0] << " " << point[1] << " " << point[2] << " | ";
+      std::clog << " versus ";
+      for(auto point : dD_itr->first)
+        std::clog << point[0] << " " << point[1] << " " << point[2] << " | ";
+      std::clog << std::endl;
+      BOOST_CHECK(false);
+    }
+    // I had to make a hard limit as it is converted from Kernel::FT
+    if (std::fabs(d3_itr->second - dD_itr->second) > 1e-5) {
+      std::clog << d3_itr->second << " versus " << dD_itr->second << " diff " << std::fabs(d3_itr->second - dD_itr->second) << std::endl;
+      BOOST_CHECK(false);
+    }
+    ++dD_itr;
+  }
+}
