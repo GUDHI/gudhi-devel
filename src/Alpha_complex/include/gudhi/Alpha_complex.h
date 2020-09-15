@@ -436,8 +436,8 @@ class Alpha_complex {
             // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
             if (std::isnan(complex.filtration(f_simplex))) {
               Filtration_value alpha_complex_filtration = 0.0;
-              // No need to compute squared_radius on a single point - alpha is 0.0
-              if (f_simplex_dim > 0) {
+              // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
+              if (Weighted || f_simplex_dim > 0) {
                 auto const& sqrad = radius(complex, f_simplex);
 #if CGAL_VERSION_NR >= 1050000000
                 if(exact) CGAL::exact(sqrad);
@@ -450,14 +450,8 @@ class Alpha_complex {
 #endif  // DEBUG_TRACES
             }
             // No need to propagate further, unweighted points all have value 0
-            if (decr_dim > 1)
+            if (decr_dim > !Weighted)
               propagate_alpha_filtration(complex, f_simplex);
-            // For weighted points, assign point weight as filtration value
-            if (Weighted && decr_dim == 0) {
-              Vertex_handle vertex = *(complex.simplex_vertex_range(f_simplex).begin());
-              FT wght = Weight<Kernel, Weighted>()(get_point(vertex));
-              complex.assign_filtration(f_simplex, cgal_converter(wght)*(-1.));
-            }
           }
         }
         old_cache_ = std::move(cache_);
