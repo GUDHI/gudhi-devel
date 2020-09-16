@@ -28,6 +28,7 @@ Table of Contents
 <li class="level1"><a href="#definition">Definition</a></li>
 <li class="level1"><a href="#pointsexample">Example from points</a></li>
 <li class="level1"><a href="#createcomplexalgorithm">Create complex algorithm</a></li>
+<li class="level1"><a href="#weightedversion">Weighted specific version</a></li>
 <li class="level1"><a href="#offexample">Example from OFF file</a></li>
 <li class="level1"><a href="#weighted3dexample">3d specific version</a></li>
 </ul>
@@ -214,14 +215,7 @@ Table of Contents
  *
  * \include Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
  *
- * When launching:
- *
- * \code $> ./Alpha_complex_example_weighted_3d_from_points
- * \endcode
- *
- * the program output is:
- *
- * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ * The results will be the same as in \ref weightedversion .
  *
  */
 /** @} */  // end defgroup alpha_complex
