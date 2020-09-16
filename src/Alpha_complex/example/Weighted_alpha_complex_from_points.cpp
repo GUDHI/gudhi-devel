@@ -8,23 +8,21 @@
 #include <vector>
 
 // Explicit dimension 2 Epeck_d kernel
-using Kernel = CGAL::Epeck_d< CGAL::Dimension_tag<2> >;
+using Kernel = CGAL::Epeck_d< CGAL::Dimension_tag<3> >;
 using Bare_point = Kernel::Point_d;
 using Weighted_point = Kernel::Weighted_point_d;
 using Vector_of_points = std::vector<Weighted_point>;
 
 int main() {
   // ----------------------------------------------------------------------------
-  // Init of a list of points
+  // Init of a list of points and weights from a small molecule
   // ----------------------------------------------------------------------------
   Vector_of_points points;
-  points.push_back(Weighted_point(Bare_point(1.0, 1.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(7.0, 0.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(4.0, 6.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(9.0, 6.0) , 1.));
-  points.push_back(Weighted_point(Bare_point(0.0, 14.0), 1.));
-  points.push_back(Weighted_point(Bare_point(2.0, 19.0), 1.));
-  points.push_back(Weighted_point(Bare_point(9.0, 17.0), 1.));
+  points.push_back(Weighted_point(Bare_point(1, -1, -1), 4.));
+  points.push_back(Weighted_point(Bare_point(-1, 1, -1), 4.));
+  points.push_back(Weighted_point(Bare_point(-1, -1, 1), 4.));
+  points.push_back(Weighted_point(Bare_point(1, 1, 1),   4.));
+  points.push_back(Weighted_point(Bare_point(2, 2, 2),   1.));
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points

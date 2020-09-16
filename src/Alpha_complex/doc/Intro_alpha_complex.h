@@ -22,6 +22,17 @@ namespace alpha_complex {
  *
  * @{
  *
+<div class="toc">
+Table of Contents
+<ul>
+<li class="level1"><a href="#definition">Definition</a></li>
+<li class="level1"><a href="#pointsexample">Example from points</a></li>
+<li class="level1"><a href="#createcomplexalgorithm">Create complex algorithm</a></li>
+<li class="level1"><a href="#offexample">Example from OFF file</a></li>
+<li class="level1"><a href="#weighted3dexample">3d specific version</a></li>
+</ul>
+</div>
+
  * \section definition Definition
  *
  * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
@@ -146,6 +157,28 @@ namespace alpha_complex {
  * `SimplicialComplexForAlpha::prune_above_filtration()`).
  * In the following example, the value is given by the user as argument of the program.
  *
+ * \section weightedversion Weighted specific version
+ * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
+ * For performances reasons, it is advised to use \ref eigen &ge; 3.5.8 and \ref cgal &ge; 5.2.0
+ * A weighted version for Alpha complex is available (cf. Alpha_complex). 
+ *
+ * This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
+ * weighted alpha shapes</a>.
+ *
+ * Then, it is asked to display information about the alpha complex.
+ *
+ * \include Alpha_complex/Weighted_alpha_complex_from_points.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./Weighted_alpha_complex_example_from_points
+ * \endcode
+ *
+ * the program output is:
+ *
+ * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ *
  *
  * \section offexample Example from OFF file
  *
@@ -166,7 +199,7 @@ namespace alpha_complex {
  * \include Alpha_complex/alphaoffreader_for_doc_32.txt
  *
  *
- * \section weighted3dexample 3d specific example
+ * \section weighted3dexample 3d specific version
  *
  * A specific module for Alpha complex is available in 3d (cf. Alpha_complex_3d) and allows to construct standard,
  * weighted, periodic or weighted and periodic versions of alpha complexes. Alpha values computation can be
