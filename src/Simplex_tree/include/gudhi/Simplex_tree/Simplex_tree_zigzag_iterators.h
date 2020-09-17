@@ -418,3 +418,287 @@ private:
   }
 }
 
+
+
+
+
+//CHECK
+//to do model for FlagZigzagFilteredComplex
+//constructor with points.
+
+/** 
+  * Iterator over a flag zigzag filtration implicitly 
+  * represented by a list of Zigzag_edges. 
+  *
+  * Given an empty FlagZigzagFiltrationComplex and a range of insertions and 
+  * deletion of vertices and edges, the iterator adds/removes on the fly the range 
+  * of edges and 
+  * expand the complex in consequence to maintain the d-skeleton of the induced 
+  * flag complexes filtration. It traverses all the newly added/removed 
+  * simplices (induced by the new edge) before doing further modifications.
+  */
+template< class FlagZigzagFilteredComplex >
+class Flagzigzag_simplex_iterator 
+: public boost::iterator_facade<
+            Flagzigzag_simplex_iterator<FlagZigzagFilteredComplex>
+          , typename FlagZigzagFilteredComplex::Simplex_handle
+          , boost::forward_traversal_tag >
+{
+  public:
+  typedef typename FlagZigzagFilteredComplex::Simplex_handle   Simplex_handle;
+  typedef typename FlagZigzagFilteredComplex::Edge_type        Edge_type;
+  typedef typename FlagZigzagFilteredComplex::Filtration_value Filtration_value;
+
+/** Default constructor also encodes the end() iterator for any 
+  * Flagzigzag_simplex_range.
+  */
+  Flagzigzag_simplex_iterator() 
+  : cpx_(NULL) //checking for end() <=> checking for cpx_ == NULL
+  // , zigzag_edge_filtration_(NULL)
+  , counter_insert(0) 
+  {}
+
+/** Constructor from a point cloud and a distance function. 
+  * Constructs the d-skeleton of the oscillating Rips zigzag filtration on the 
+  * ordered set of points with paramters mu and nu.
+  */
+  template< typename Kernel,
+            typename Point_container,
+            typename Distance >
+  Flagzigzag_simplex_iterator(  FlagZigzagFilteredComplex    * cpx
+                                Point_container const        & points,
+                                Distance        const          distance,
+                                FiltrationValue const          nu,
+                                FiltrationValue const          mu,
+                                int                            dim_max ) 
+  {
+    //check that the model of FlagZigzagFilteredComplex is empty
+    GUDHI_CHECK(cpx->empty(), "complex must be empty");
+
+    progress_edges_         = 0;
+    //compute the filtration of the 1-skeleton for the oRzz filtration
+    std::vector<Filtration_value> filtration_values;
+    ordered_points_to_one_skeleton_zigzag_filtration(points, distance, mu, nu, 
+                                        filtration_values, zigzag_edge_filtration_);
+    dim_max_                = dim_max;
+    are_we_done             = false;
+    cpx_                    = cpx;
+    counter_insert          = 0;
+    partial_zzfil_          = std::vector< Simplex_handle >(); //TODO?
+    edge_it_                = zigzag_edge_filtration_->begin();
+
+    //if 1-skeleton filtration is empty, set the iterator to end() by cpx_<-NULL    
+    if(edge_it_ == zigzag_edge_filtration_->end()) { cpx_ = NULL; return; }
+    //otherwise, add the first edge and expand the Rips complex
+    arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
+    GUDHI_CHECK(arrow_direction_, "cannot remove a simplex from an empty complex");
+    
+    cpx_->flag_add_edge( edge_it_->u(), edge_it_->v(), edge_it_->fil()
+                       , dim_max_, partial_zzfil_);
+    fil_ = edge_it_->fil();
+    sh_it_ = partial_zzfil_.begin();
+    ++edge_it_;
+    for(auto & sh : partial_zzfil_) 
+    { sh->second.assign_key(counter_insert); ++counter_insert; } 
+  }
+
+/** Constructor from a pre-computed 1-skeleton zigzag filtration.
+  */
+  Flagzigzag_simplex_iterator( FlagZigzagFilteredComplex * cpx 
+                             , std::vector< Edge_type >  * zz_edge_fil_ptr
+                             , int                         dim_max )
+  {
+    GUDHI_CHECK(cpx->empty(), "complex must be empty");
+    progress_edges_         = 0;
+    zigzag_edge_filtration_ = zz_edge_fil_ptr;
+    dim_max_                = dim_max;
+    are_we_done             = false;
+    cpx_                    = cpx;
+    counter_insert          = 0;
+    partial_zzfil_          = std::vector< Simplex_handle >(); //TODO?
+    edge_it_                = zigzag_edge_filtration_->begin();
+    if(edge_it_ == zigzag_edge_filtration_->end()) 
+    { cpx_ = NULL; return; } //end() iterator
+    
+    //add the first edge
+    arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
+    GUDHI_CHECK(arrow_direction_, "cannot remove a simplex from an empty complex");
+    cpx_->flag_add_edge( edge_it_->u(), edge_it_->v(), edge_it_->fil()
+                       , dim_max_, partial_zzfil_);
+    fil_ = edge_it_->fil();
+    sh_it_ = partial_zzfil_.begin();
+    ++edge_it_;
+    for(auto & sh : partial_zzfil_) 
+    { sh->second.assign_key(counter_insert); ++counter_insert; } 
+  }
+
+  //because the iterator modifies a complex represented by pointer, the iterator 
+  //must be non-copiable.
+  Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & ) = delete;
+
+  //User-defined copy constructor DANGEROUS
+    // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other )
+    // : progress_edges_(0)
+    // , cpx_(other.cpx_)
+    // , zigzag_edge_filtration_(other.zigzag_edge_filtration_)
+    // , dim_max_(other.dim_max_)
+    // , partial_zzfil_(other.partial_zzfil_)
+    // , sh_it_(partial_zzfil_.begin())
+    // , edge_it_(other.edge_it_)
+    // , arrow_direction_(other.arrow_direction_)
+    // , counter_insert(other.counter_insert)
+    // , are_we_done(other.are_we_done)
+    // , fil_(other.fil_) {}
+
+/** Returns true if the Simplex_handle pointed to is an insertion, false if it is a
+  * deletion.*/
+    bool arrow_direction() { return arrow_direction_; }
+/** Returns the filtration value of the simplex pointed to.*/
+    Filtration_value filtration() { return fil_; } 
+/** Returns an upper bound on the dimension of the simplices of the flag complexes.
+  * Flag complexes are expanded up to dimension dim_max().
+  */
+    int dim_max() { return dim_max_; }
+
+  private:
+    friend class boost::iterator_core_access;
+
+    bool equal(Flagzigzag_simplex_iterator const& other) const {
+      if(cpx_ == NULL) { return (other.cpx_ == NULL); }      
+      return ( cpx_     == other.cpx_     && 
+               edge_it_ == other.edge_it_ &&
+               sh_it_   == other.sh_it_ );
+    }
+
+    Simplex_handle & dereference() const { return *sh_it_; }
+
+    void increment() 
+    {
+      ++sh_it_;
+      if(sh_it_ == partial_zzfil_.end()) //add or remove the next edge
+      { //check if we have reached the end of a sequence of backward arrows, 
+        //associated to the removal of an edge. If so, we remove effectively 
+        //the simplices from the complex.
+        if(!arrow_direction_) //need to effectively remove the simplices we have just considered.
+        { 
+          //effectively remove all simplices from partial_zzfil_; must be sorted 
+          cpx_->remove_maximal_simplices(partial_zzfil_);
+
+          counter_insert += partial_zzfil_.size();
+
+          //The simplices in partial_zzfil_ come by decreasing keys, hence they
+          //are all maximal when removing from left to right (it's a filtration 
+          //read in reverse).  
+          //FlagZigzagFilteredComplex::Dictionary must not invalidate iterators
+          //when inserting and removing (e.g., std::map<,>).
+          //We want to maintain the validity of Simplex_handle (i.e. map 
+          //iterators) during removals, even when using boost::flat_map. To do 
+          //so, we add a sorting procedure, maintaining the maximality 
+          //property, so as we remove Nodes in a Siblings::members() from 
+          //right to left.
+          // sort( partial_zzfil_.begin(), partial_zzfil_.end()
+          //     , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
+          //       if(sh1->first != sh2->first) {return sh1->first > sh2->first;}
+          //       return sh1->second.key() > sh2->second.key();
+          //     });
+
+        //   for( auto sh_it = partial_zzfil_.begin();
+        //             sh_it != partial_zzfil_.end(); ++sh_it) 
+        //   { 
+        //     // (*sh_it)->second.unlink_hooks();
+        //     // (*sh_it)->second.assign_key(-21);
+        //     cpx_->remove_maximal_simplex(*sh_it); //modify the complex 
+        //   } 
+        // }
+        }
+        partial_zzfil_.clear();//<- empty the chunk of the filtration
+        //if all edges have been considered:
+        if(edge_it_ == zigzag_edge_filtration_->end()) 
+        { 
+          if(are_we_done) { cpx_ = NULL; return; } //set iterator to end() 
+          else {//no edge left, remove the simplices remaining in the complex 
+            fil_ = - std::numeric_limits<Filtration_value>::infinity();
+            are_we_done = true;//happens once
+            //fills up zz_partial with the remaining simplices in complex, but 
+            //does not actually remove them from the complex.
+            cpx_->flag_lazy_empty_complex(partial_zzfil_); 
+            arrow_direction_ = false; //only backward arrows now, these are removals
+            
+            //sort by decreasing key values. Because keys increase with order of 
+            //insertion, this ensures that only maximal simplices are considered 
+            //when removing simplices read from left to right in partial_zz_fil_
+            sort( partial_zzfil_.begin(), partial_zzfil_.end()
+                , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
+                    return sh1->second.key() > sh2->second.key();
+                });
+            sh_it_ = partial_zzfil_.begin();
+            return;
+          }
+        }
+        //partial_zzfil_ is empty
+        if( edge_it_->type() ) { //forward arrow //modify the complex
+          //add the new edge and expand the flag complex. partial_zz_fil_ points to
+          //all the newly inserted simplices, in filtration order.
+          cpx_->flag_add_edge( edge_it_->u(), edge_it_->v()
+                             , edge_it_->fil()
+                             , dim_max_, partial_zzfil_ );
+          arrow_direction_ = true; //the arrow is forward, these are insertions
+
+          //flag_add_edge output a SORTED sequence of simplices
+          for(auto & sh : partial_zzfil_) //set key values
+          { sh->second.assign_key(counter_insert); ++counter_insert; }
+        }
+        else { //backward arrow
+          //record all simplices to remove, due to the removal of an edge, 
+          //but do not actually remove them from the complex.
+          cpx_->flag_lazy_remove_edge( edge_it_->u(), edge_it_->v()
+                                     , partial_zzfil_ ); //does not modify cpx
+          arrow_direction_ = false; //the arrow is backward, these are removals
+          //sort the simplices to remove by decreasing key values.
+          sort( partial_zzfil_.begin(), partial_zzfil_.end()
+              , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
+                  return sh1->second.key() > sh2->second.key();
+              });
+        }
+       //partial_zzfil_ contains at least the new edge, i.e., is non-empty
+        fil_ = edge_it_->fil();
+        sh_it_ = partial_zzfil_.begin(); 
+        ++edge_it_;
+      }
+    }
+  
+
+/* Complex getting modified by the iterator, must be model of 
+ * FlagZigzagFilteredComplex.*/
+  FlagZigzagFilteredComplex                      * cpx_; 
+/* List of insertion and deletion of vertices and edges representing the 
+ * zigzag filtration of the 1-skeleton.*/
+  std::vector< Edge_type >                       * zigzag_edge_filtration_;
+/* Maximal dimension d of the flag complex, i.e., the iterator gives the flag 
+ * zigzag filtration induced by the insertion and deletion of vertices and edges 
+ * in zigzag_edge_filtration_, restricted to the d-skeleton. */
+  int                                              dim_max_;
+/* A chunk of of the zz filtration, which we have already computed. 
+ * ..constructed by the last edge insertion. 
+ * When reaching the end of it, clear it, insert a new edge via the edge_it_++ 
+ * and compute a new bunch of simplices of the zz filtration. */
+  typename std::vector< Simplex_handle >           partial_zzfil_;
+  //current simplex in partial_zzfil_, returned by *()
+  typename std::vector< Simplex_handle >::iterator sh_it_;
+  //iterator in the range of edges; points to the next edge to insert or remove
+  typename std::vector< Edge_type >::iterator      edge_it_;
+  //true if the simplices in partial_zzfil_ are insertions, and false if deletions
+  bool                                             arrow_direction_;
+  //counts the total number of insertions in the zigzag, used to assign keys
+  int                                              counter_insert;
+  //true iff we are finishing emptying the complex
+  bool                                             are_we_done;
+  //filtration value attached to the arrow
+  Filtration_value                                 fil_;
+
+};
+
+
+
+
+
