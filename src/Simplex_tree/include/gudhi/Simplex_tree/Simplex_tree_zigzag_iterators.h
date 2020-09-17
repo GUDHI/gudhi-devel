@@ -418,14 +418,6 @@ private:
   }
 }
 
-
-
-
-
-//CHECK
-//to do model for FlagZigzagFilteredComplex
-//constructor with points.
-
 /** 
   * Iterator over a flag zigzag filtration implicitly 
   * represented by a list of Zigzag_edges. 
@@ -446,7 +438,8 @@ class Flagzigzag_simplex_iterator
 {
   public:
   typedef typename FlagZigzagFilteredComplex::Simplex_handle   Simplex_handle;
-  typedef typename FlagZigzagFilteredComplex::Edge_type        Edge_type;
+  // typedef typename FlagZigzagFilteredComplex::Edge_type        Edge_type;
+  typedef Zigzag_edge<FlagZigzagFilteredComplex>               Edge_type;
   typedef typename FlagZigzagFilteredComplex::Filtration_value Filtration_value;
 
 /** Default constructor also encodes the end() iterator for any 
@@ -454,7 +447,6 @@ class Flagzigzag_simplex_iterator
   */
   Flagzigzag_simplex_iterator() 
   : cpx_(NULL) //checking for end() <=> checking for cpx_ == NULL
-  // , zigzag_edge_filtration_(NULL)
   , counter_insert(0) 
   {}
 
@@ -499,7 +491,7 @@ class Flagzigzag_simplex_iterator
     sh_it_ = partial_zzfil_.begin();
     ++edge_it_;
     for(auto & sh : partial_zzfil_) 
-    { sh->second.assign_key(counter_insert); ++counter_insert; } 
+    { cpx_->assign_key(sh,counter_insert); ++counter_insert; } 
   }
 
 /** Constructor from a pre-computed 1-skeleton zigzag filtration.
@@ -529,7 +521,7 @@ class Flagzigzag_simplex_iterator
     sh_it_ = partial_zzfil_.begin();
     ++edge_it_;
     for(auto & sh : partial_zzfil_) 
-    { sh->second.assign_key(counter_insert); ++counter_insert; } 
+    { cpx_->assign_key(sh,counter_insert); ++counter_insert; } 
   }
 
   //because the iterator modifies a complex represented by pointer, the iterator 
@@ -581,11 +573,6 @@ class Flagzigzag_simplex_iterator
         //the simplices from the complex.
         if(!arrow_direction_) //need to effectively remove the simplices we have just considered.
         { 
-          //effectively remove all simplices from partial_zzfil_; must be sorted 
-          cpx_->remove_maximal_simplices(partial_zzfil_);
-
-          counter_insert += partial_zzfil_.size();
-
           //The simplices in partial_zzfil_ come by decreasing keys, hence they
           //are all maximal when removing from left to right (it's a filtration 
           //read in reverse).  
@@ -610,6 +597,9 @@ class Flagzigzag_simplex_iterator
         //     cpx_->remove_maximal_simplex(*sh_it); //modify the complex 
         //   } 
         // }
+          //effectively remove all simplices from partial_zzfil_; must be sorted 
+          for(auto sh : partial_zzfil_) { cpx_->remove_maximal_simplex(sh); } 
+          counter_insert += partial_zzfil_.size();
         }
         partial_zzfil_.clear();//<- empty the chunk of the filtration
         //if all edges have been considered:
@@ -646,7 +636,7 @@ class Flagzigzag_simplex_iterator
 
           //flag_add_edge output a SORTED sequence of simplices
           for(auto & sh : partial_zzfil_) //set key values
-          { sh->second.assign_key(counter_insert); ++counter_insert; }
+          { cpx_->assign_key(sh,counter_insert); ++counter_insert; }
         }
         else { //backward arrow
           //record all simplices to remove, due to the removal of an edge, 
