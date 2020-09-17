@@ -14,12 +14,14 @@
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
+#include <gudhi/Simplex_tree/Simplex_tree_zigzag_iterators.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
+#include <boost/container/map.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -95,9 +97,13 @@ class Simplex_tree {
   // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a
   // flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and
   // Simplex_key next to each other).
-  typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
+  // typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  /* \brief Set of nodes sharing a same parent in the simplex tree. */
+  typedef typename boost::container::flat_map<Vertex_handle, Node> flat_map;
+  //Dictionary::iterator remain valid under insertions and deletions
+  typedef typename boost::container::map<Vertex_handle, Node> map;
+  typedef typename std::conditional<Options::simplex_handle_strong_validity, map, flat_map>::type Dictionary;
+
   /* \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
@@ -201,12 +207,29 @@ class Simplex_tree {
   /** \brief Range over the simplices of the skeleton of the simplicial complex, for a given 
    * dimension. */
   typedef boost::iterator_range<Skeleton_simplex_iterator> Skeleton_simplex_range;
-  /** \brief Range over the simplices of the simplicial complex, ordered by the filtration. */
-  typedef std::vector<Simplex_handle> Filtration_simplex_range;
-  /** \brief Iterator over the simplices of the simplicial complex, ordered by the filtration.
-   *
-   * 'value_type' is Simplex_handle. */
-  typedef typename Filtration_simplex_range::const_iterator Filtration_simplex_iterator;
+    /** Forward iterator on the simplices (insertion and deletion) of a zigzag
+      * filtration.
+      *
+      * 'value_type' is Simplex_handle.
+      */
+    typedef Flagzigzag_simplex_iterator< Simplex_tree >
+                                                  Zigzagfiltration_simplex_iterator;
+    /** Range for the flag zigzag filtration.*/
+    typedef boost::iterator_range< Zigzagfiltration_simplex_iterator >
+                                                     Zigzagfiltration_simplex_range;
+    /** \brief Range over the simplices of the simplicial complex, ordered by the 
+      * filtration. */
+    typedef typename std::conditional< Options::is_zigzag, 
+    Zigzagfiltration_simplex_range,
+    std::vector<Simplex_handle> >::type                    Filtration_simplex_range;
+    /** \brief Iterator over the simplices of the simplicial complex, ordered by 
+      * the filtration.
+      *
+      * 'value_type' is Simplex_handle. */
+    typedef typename std::conditional< Options::is_zigzag,
+    Zigzagfiltration_simplex_iterator,
+    typename std::vector<Simplex_handle>::const_iterator >::type
+    Filtration_simplex_iterator;
 
   /* @} */  // end name range and iterator types
   /** \name Range and iterator methods
@@ -1726,6 +1749,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
+  static const bool simplex_handle_strong_validity = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -1733,7 +1757,6 @@ struct Simplex_tree_options_full_featured {
  * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
  * (about 4 billions of simplices). */
-
 struct Simplex_tree_options_fast_persistence {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
@@ -1742,6 +1765,23 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
+  static const bool simplex_handle_strong_validity = false;
+};
+
+/** Model of SimplexTreeOptions.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+struct Simplex_tree_options_zigzag_persistence {
+  typedef zigzag_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  //allows deletion without invalidating iterators (Simplex_handles)
+  static const bool simplex_handle_strong_validity = true;
 };
 
 /** @} */  // end defgroup simplex_tree
