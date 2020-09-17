@@ -32,6 +32,14 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
+/**
+ * \class Alpha_kernel_d
+ * \brief Alpha complex kernel container.
+ * 
+ * \details
+ * The Alpha complex kernel container stores CGAL Kernel and dispatch basics computations in function of the weighted
+ * or not version of the Alpha complex.
+ */
 template < typename Kernel, bool Weighted = false >
 class Alpha_kernel_d {
 };

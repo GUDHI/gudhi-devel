@@ -132,17 +132,18 @@ class Alpha_complex {
   using Triangulation = typename std::conditional<Weighted, CGAL::Regular_triangulation<Kernel, TDS>,
                                                             CGAL::Delaunay_triangulation<Kernel, TDS>>::type;
 
+  /** \brief CGAL kernel container for computations in function of the weighted or not characteristics.*/
   using A_kernel_d = Alpha_kernel_d<Kernel, Weighted>;
 
   // Numeric type of coordinates in the kernel
   using FT = typename A_kernel_d::FT;
 
-  /** \brief If Weighted, the weighted point is cached (point + weight [= squared radius]),
-   * else a pair of point and squared radius is cached.
+  /** \brief Sphere is a std::pair<Kernel::Point_d, Kernel::FT> (aka. circurmcenter and squared radius).
+   * If Weighted, Sphere is a Kernel::Weighted_point_d (aka. circurmcenter and the weight value is the squared radius).
   */
   using Sphere = typename A_kernel_d::Sphere;
 
-  /** \brief A point in Euclidean space.*/
+  /** \brief A point, or a weighted point in Euclidean space.*/
   using Point_d = typename std::conditional<Weighted, typename A_kernel_d::Weighted_point_d,
                                                       typename A_kernel_d::Point_d>::type;
 
