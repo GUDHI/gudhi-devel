@@ -60,27 +60,6 @@ namespace alpha_complex {
 template<typename D> struct Is_Epeck_D { static const bool value = false; };
 template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool value = true; };
 
-template<class Kernel, bool Weighted>
-struct Weight;
-
-template<class Kernel>
-struct Weight<Kernel, true>
-{
-  typename Kernel::FT operator()(const typename Kernel::Weighted_point_d& p) const 
-  {
-    return p.weight();
-  }
-};
-
-template<class Kernel>
-struct Weight<Kernel, false>
-{
-  typename Kernel::FT operator()(const typename Kernel::Point_d& p) const 
-  {
-    return 0.;
-  }
-};
-
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
  * \brief Alpha complex data structure.
