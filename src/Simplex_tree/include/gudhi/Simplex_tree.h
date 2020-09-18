@@ -528,6 +528,9 @@ class Simplex_tree {
    *
    * The filtration must be initialized.
    */
+  Simplex_handle simplex(Simplex_key idx) const {
+    simplex(idx, Indexing_tag());
+  }
   Simplex_handle simplex(Simplex_key idx, linear_indexing_tag) const {
     return filtration_vect_[idx];
   }
@@ -1762,8 +1765,8 @@ public:
   Zigzagfiltration_simplex_range
   zigzag_simplex_range( Point_container const        & points,
                         Distance        const          distance,
-                        FiltrationValue const          nu,
-                        FiltrationValue const          mu,
+                        Filtration_value const          nu,
+                        Filtration_value const          mu,
                         int                            dim_max )
   {
     return
@@ -1789,11 +1792,11 @@ public:
     // #endif
   }
 
-
+  template<typename Point_container, typename Distance>
   void initialize_filtration( Point_container const        & points,
                               Distance        const          distance,
-                              FiltrationValue const          nu,
-                              FiltrationValue const          mu,
+                              Filtration_value const          nu,
+                              Filtration_value const          mu,
                               int                            dim_max ) 
   {
     zigzag_simplex_range_ = zigzag_simplex_range(points, distance, nu, mu, dim_max);
