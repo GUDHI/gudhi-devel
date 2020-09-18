@@ -79,7 +79,7 @@ public:
              (e.fil_ == fil_) && (e.type_ == type_) );
   }
 
-  void assign_fil(typename FilteredComplex::Filtration_value fil) { fil_ = fil; }
+  void assign_filtration(typename FilteredComplex::Filtration_value fil) { fil_ = fil; }
 
 private:
   typename FilteredComplex::Vertex_handle    u_;
@@ -99,7 +99,7 @@ private:
   *
   * The method ordered_points_to_one_skeleton_zigzag_filtration computes the 
   * eps_i = d_H(P_i,P) in 
-  * filtration_value[i] = eps_i. A simplex appearing in the inclusion  
+  * filtration_values[i] = eps_i. A simplex appearing in the inclusion  
   * R({p_0, ... , p_{i}}, nu * eps_i) -> R({p_1, ... , p_i, p_{i+1}}, mu * eps_i)
   * is given filtration value eps_i.
   *
@@ -134,30 +134,30 @@ void ordered_points_to_one_skeleton_zigzag_filtration(
   //compute all \f$\varepsilon_i\f$ values, such that filtration_values[i] == 
   //eps_i, for i=0 ... n-1:
   for(size_t i=0; i<n; ++i) {
-    //entering step i, maintain filtration_value[j] = eps_j for j<i, and
-    //filtration_value[k] = d(p_k, P_{i-1}) for k >= i.
+    //entering step i, maintain filtration_values[j] = eps_j for j<i, and
+    //filtration_values[k] = d(p_k, P_{i-1}) for k >= i.
 #ifdef GUDHI_USE_TBB
     tbb::parallel_for(size_t(i+1), n, [&](size_t k) {
-      //set filtration_value[k] <- d(p_k, P_i) == 
+      //set filtration_values[k] <- d(p_k, P_i) == 
       //                           min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
       double dist_i_k = distance(points[i],points[k]); 
-      if(dist_i_k < filtration_value[k]) { filtration_value[k] = dist_i_k; }
+      if(dist_i_k < filtration_values[k]) { filtration_values[k] = dist_i_k; }
     } );
 #else
     for(size_t k=i+1; k<n; ++k) {
-      //set filtration_value[k] <- d(p_k, P_i) == 
+      //set filtration_values[k] <- d(p_k, P_i) == 
       //                           min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
       double dist_i_k = distance(points[i],points[k]); 
-      if(dist_i_k < filtration_value[k]) { filtration_value[k] = dist_i_k; }
+      if(dist_i_k < filtration_values[k]) { filtration_values[k] = dist_i_k; }
     }
 #endif
 //to do: implement parallel version by dividing the vector
-    //set filtration_value[i] <- eps_i = d_h(P_i,P) = max_{k>i} d(p_k, P_i) 
+    //set filtration_values[i] <- eps_i = d_h(P_i,P) = max_{k>i} d(p_k, P_i) 
     double eps_i = 0.;
     for(size_t k=i+1; k<n; ++k) {
-      if(filtration_value[k] > eps_i) { eps_i = filtration_value[k]; }
+      if(filtration_values[k] > eps_i) { eps_i = filtration_values[k]; }
     }
-    filtration_value[i] = eps_i;
+    filtration_values[i] = eps_i;
   }
 
   //pre-compute distances (in parallel if possible). Used to accelerate computation
@@ -202,7 +202,7 @@ void ordered_points_to_one_skeleton_zigzag_filtration(
         return p1.first < p2.first; 
       }
     }
-  };  point_distance_cmp<FiltrationValue> cmp;
+  };    point_distance_cmp cmp;
   //dist_matrix[i] is now sorted by (j, d(p_i,p_j)) < (k, d(p_i,p_k)) iff 
   //d(p_i,p_j) < d(p_i,p_k) or (j<k in case d(p_i,p_j) == d(p_i,p_k)).
 #ifdef GUDHI_USE_TBB
@@ -385,7 +385,7 @@ private:
   Distance          distance_;
 };
 //sort insertions and deletion by edge length, then lexicographic order
-  edge_cmp<Point_container, Distance, FiltrationValue, Edge_t > e_cmp(points, distance);
+  edge_cmp e_cmp(points, distance);
 
 #ifdef GUDHI_USE_TBB
   tbb::parallel_for(size_t(0), n-1, [&](size_t i) {
@@ -457,17 +457,16 @@ class Flagzigzag_simplex_iterator
   template< typename Kernel,
             typename Point_container,
             typename Distance >
-  Flagzigzag_simplex_iterator(  FlagZigzagFilteredComplex    * cpx
-                                Point_container const        & points,
-                                Distance        const          distance,
-                                FiltrationValue const          nu,
-                                FiltrationValue const          mu,
+  Flagzigzag_simplex_iterator(  FlagZigzagFilteredComplex    * cpx,
+                                Point_container  const       & points,
+                                Distance         const         distance,
+                                Filtration_value const         nu,
+                                Filtration_value const         mu,
                                 int                            dim_max ) 
   {
     //check that the model of FlagZigzagFilteredComplex is empty
     GUDHI_CHECK(cpx->empty(), "complex must be empty");
 
-    progress_edges_         = 0;
     //compute the filtration of the 1-skeleton for the oRzz filtration
     std::vector<Filtration_value> filtration_values;
     ordered_points_to_one_skeleton_zigzag_filtration(points, distance, mu, nu, 
@@ -501,7 +500,6 @@ class Flagzigzag_simplex_iterator
                              , int                         dim_max )
   {
     GUDHI_CHECK(cpx->empty(), "complex must be empty");
-    progress_edges_         = 0;
     zigzag_edge_filtration_ = zz_edge_fil_ptr;
     dim_max_                = dim_max;
     are_we_done             = false;
@@ -530,7 +528,6 @@ class Flagzigzag_simplex_iterator
 
   //User-defined copy constructor DANGEROUS
     // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other )
-    // : progress_edges_(0)
     // , cpx_(other.cpx_)
     // , zigzag_edge_filtration_(other.zigzag_edge_filtration_)
     // , dim_max_(other.dim_max_)
