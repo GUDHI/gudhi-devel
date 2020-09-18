@@ -1811,7 +1811,70 @@ public:
     return zigzag_simplex_range_;
   }
 
-//CONTINUE FROM HERE
+
+public:
+/** Data structure to put all simplex tree nodes with same label into a list. Allows
+  * to access all subtrees of the simplex tree rooted at a node with a given label.
+  * Used in particular for fast cofaces location, and fast insertion and deletion 
+  * of edges in a flag complex.
+  *
+  * Only if SimplexTreeOptions::link_simplices_through_max_vertex is true, otherwise
+  * store nothing.
+  */
+
+  typedef boost::intrusive::list_member_hook<  // allows .unlink()
+  boost::intrusive::link_mode<boost::intrusive::auto_unlink>>   Member_hook_t;
+  struct Hooks_simplex_base_dummy {};
+  // todo on Hooks_simplex_base_link_nodes:
+  // make the class movable but not copiable
+  // translate the boost macros into C++11 syntax (boost independent)
+  // update the Node concept and the doc
+  struct Hooks_simplex_base_link_nodes {
+  private:
+    BOOST_COPYABLE_AND_MOVABLE(Hooks_simplex_base_link_nodes)
+  public:
+    Hooks_simplex_base_link_nodes() {}
+    // the copy constructor, inherited by the Node class, exchanges hooks,
+    // and make the ones of this invalid.
+    // this is used when stored in a map like DS, using copies when
+    // performing insertions and rebalancing of the rbtree
+    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other) {
+        list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+    }
+    // copy assignment
+    Hooks_simplex_base_link_nodes& operator=(BOOST_COPY_ASSIGN_REF(Hooks_simplex_base_link_nodes) other) {
+        list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+        return *this;
+    }
+    // move constructor
+    Hooks_simplex_base_link_nodes(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+    }
+    // move assignment
+    Hooks_simplex_base_link_nodes& operator=(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+      return *this;
+    }
+    void unlink_hooks() { list_max_vertex_hook_.unlink(); }
+    ~Hooks_simplex_base_link_nodes() { unlink_hooks(); }
+
+    mutable Member_hook_t list_max_vertex_hook_;
+  };
+
+  // intrusive list of Nodes using the hooks
+  typedef boost::intrusive::member_hook< Hooks_simplex_base_link_nodes, 
+                          Member_hook_t, 
+                          &Hooks_simplex_base_link_nodes::list_max_vertex_hook_>
+                                                                 List_member_hook_t;
+  typedef boost::intrusive::list<Hooks_simplex_base_link_nodes, 
+                                 List_member_hook_t,
+                                 boost::intrusive::constant_time_size<false>>
+                                                                    List_max_vertex;
+  // type of hooks stored in each Node
+  typedef typename std::conditional<Options::link_simplices_through_max_vertex,
+                                    Hooks_simplex_base_link_nodes,
+                                    Hooks_simplex_base_dummy>::type 
+                                                                 Hooks_simplex_base;
 
 public:
 
@@ -1852,21 +1915,13 @@ public:
                     , int                             dim_max
                     , std::vector< Simplex_handle > & zz_filtration )
   {
-// #ifdef COMPLEX_TIME
-//   start_ = std::chrono::system_clock::now();
-// #endif
   if(u == v) { // Are we inserting a vertex?
-      auto res_ins = root_.members().emplace(u,Node(&root_,fil));
-      if(res_ins.second) { //if the vertex was not in the complex
-    update_simplex_tree_after_node_insertion(res_ins.first);
-    zz_filtration.push_back(res_ins.first); //no more insert in root_.members()
-      }
-// #ifdef COMPLEX_TIME
-//       end_ = std::chrono::system_clock::now();
-//       enlapsed_sec_ = end_ - start_;
-//       complexOperationTime_ += enlapsed_sec_.count();
-// #endif
-      return; //because the vertex is isolated, no more insertions.
+    auto res_ins = root_.members().emplace(u,Node(&root_,fil));
+    if(res_ins.second) { //if the vertex was not in the complex
+      update_simplex_tree_after_node_insertion(res_ins.first);
+      zz_filtration.push_back(res_ins.first); //no more insert in root_.members()
+    }
+    return; //because the vertex is isolated, no more insertions.
   }
   // else, we are inserting an edge: ensure that u < v
   if(v < u) { std::swap(u,v); }
@@ -1880,51 +1935,41 @@ public:
   auto res_ins_v = root_.members().emplace(v,Node(&root_,fil));
   auto res_ins_u = root_.members().emplace(u,Node(&root_,fil));
   if(res_ins_v.second) {
-      // update_simplex_tree_after_node_insertion(res_ins_v.first);
-      zz_filtration.push_back(res_ins_v.first); //no more inserts in root_.members()
+    zz_filtration.push_back(res_ins_v.first); //no more inserts in root_.members()
   }
   if(res_ins_u.second) {
-      // update_simplex_tree_after_node_insertion(res_ins_u.first);
-      zz_filtration.push_back(res_ins_u.first); //no more inserts in root_.members()
-  } //check if the edge {u,v} is already in the complex, if true, nothing to do.
-  if(has_children(res_ins_u.first) && res_ins_u.first->second.children()->members().find(v) != res_ins_u.first->second.children()->members().end()) {
-// #ifdef COMPLEX_TIME
-//       end_ = std::chrono::system_clock::now();
-//       enlapsed_sec_ = end_ - start_;
-//       complexOperationTime_ += enlapsed_sec_.count();
-// #endif
-      return;
-  }
+    zz_filtration.push_back(res_ins_u.first); //no more inserts in root_.members()
+  } 
+  //check if the edge {u,v} is already in the complex, if true, nothing to do.
+  if( has_children(res_ins_u.first) && 
+      res_ins_u.first->second.children()->members().find(v) != res_ins_u.first->second.children()->members().end()) { return; }
 
   //upper bound on dimension
   dimension_ = dim_max; dimension_to_be_lowered_ = true;
 
   //for all siblings containing a Node labeled with u (including the root), run
-  //a zz_punctual_expansion       //todo parallelise
+  //a zz_punctual_expansion       
+  //todo parallelise
   auto list_u_ptr = cofaces_data_structure_.access(u);//list of all u Nodes
   for( auto hook_u_it =  list_u_ptr->begin();
        hook_u_it != list_u_ptr->end();    ++hook_u_it )
   {
-      Node & node_u    = static_cast<Node&>(*hook_u_it);//corresponding node
-      Siblings * sib_u = self_siblings(node_u, u);//Siblings containing node
-      if(sib_u->members().find(v) != sib_u->members().end()) {
-    int curr_dim = dimension(node_u,u);
-    if(curr_dim < dim_max)
-    {
-        if(!has_children(node_u, u)) //now has a new child Node labeled v
-        { node_u.assign_children(new Siblings(sib_u, u)); }
-        zz_punctual_expansion( v
-             , node_u.children()
-             , fil
-             , dim_max - curr_dim -1 //>= 0
-             , zz_filtration ); //u on top
-    }
+    Node & node_u    = static_cast<Node&>(*hook_u_it);//corresponding node
+    Siblings * sib_u = self_siblings(node_u, u);//Siblings containing node
+    if(sib_u->members().find(v) != sib_u->members().end()) {
+      int curr_dim = dimension(node_u,u);
+      if(curr_dim < dim_max)
+      {
+        if(!has_children(node_u, u)) {//now has a new child Node labeled v
+          node_u.assign_children(new Siblings(sib_u, u)); 
+        }
+        zz_punctual_expansion( v, node_u.children(), fil, 
+                               dim_max - curr_dim -1, //>= 0
+                               zz_filtration ); //u on top
       }
+    }
   }
-  //todo sort zz_filtration appropriately
-  // sort( zz_filtration.begin(), zz_filtration.end(),
-  //       is_before_in_filtration(this)
-  //       );
+//sort zz_filtration appropriately
 #ifdef GUDHI_USE_TBB
   tbb::parallel_sort(zz_filtration.begin(), zz_filtration.end(), is_before_in_filtration(this));
 #else
@@ -1932,12 +1977,7 @@ public:
 #endif
   //update cofaces data structures
   for(auto sh : zz_filtration) { update_simplex_tree_after_node_insertion(sh); }
-// #ifdef COMPLEX_TIME
-//   end_ = std::chrono::system_clock::now();
-//   enlapsed_sec_ = end_ - start_;
-//   complexOperationTime_ += enlapsed_sec_.count();
-// #endif
-    }
+}
 
 private:
     /*
@@ -2276,6 +2316,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool simplex_handle_strong_validity = false;
+  static const bool link_simplices_through_max_vertex = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2293,6 +2334,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool simplex_handle_strong_validity = false;
+  static const bool link_simplices_through_max_vertex = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -2310,6 +2352,8 @@ struct Simplex_tree_options_zigzag_persistence {
   static const bool contiguous_vertices = false;
   //allows deletion without invalidating iterators (Simplex_handles)
   static const bool simplex_handle_strong_validity = true;
+  //add a pointer to each Node. All Nodes with a same label u are linked this way in an intrinsic list. Require to call a function after each insertion.
+  static const bool link_simplices_through_max_vertex = true;
 };
 
 /** @} */  // end defgroup simplex_tree
