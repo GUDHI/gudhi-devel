@@ -72,7 +72,6 @@ struct Negation : public Function {
  * \brief Static constructor of the negative function.
  *
  * @param[in] function The function to be translated.
- * @param[in] off The offset vector. The dimension should correspond to the 
  * domain (ambient) dimension of 'function'.
  *
  * \tparam Function_ The function template parameter. Should be a model of 

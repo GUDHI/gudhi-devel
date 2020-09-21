@@ -82,6 +82,8 @@ private:
  *
  * \tparam Function_ The function template parameter. Should be a model of 
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_>
 Linear_transformation<Function_> make_linear_transformation(const Function_& function,
