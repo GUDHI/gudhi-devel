@@ -110,20 +110,20 @@ struct Cartesian_product : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     Eigen::VectorXd result(cod_d_);
     get_value(function_tuple_, p, result, 0, 0);
     return result;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  std::size_t amb_d() const {return amb_d_;}
+  virtual std::size_t amb_d() const override {return amb_d_;}
 
   /** \brief Returns the codomain dimension. */
-  std::size_t cod_d() const {return cod_d_;}
+  virtual std::size_t cod_d() const override {return cod_d_;}
 
   /** \brief Returns a point on the zero-set. */
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     Eigen::VectorXd result(amb_d_);
     get_seed(function_tuple_, result, 0);
     return result;

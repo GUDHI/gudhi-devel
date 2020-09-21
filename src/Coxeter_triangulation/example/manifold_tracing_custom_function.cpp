@@ -21,7 +21,7 @@ using namespace Gudhi::coxeter_triangulation;
  */
 struct Function_surface_on_CP2_in_R4 : public Function {
 
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     // The real and imaginary parts of the variables x and y
     double xr = p(0), xi = p(1), yr = p(2), yi = p(3);
     Eigen::VectorXd result(cod_d());
@@ -42,10 +42,10 @@ struct Function_surface_on_CP2_in_R4 : public Function {
     return result;
   }
 
-  std::size_t amb_d() const {return 4;};
-  std::size_t cod_d() const {return 2;};
+  virtual std::size_t amb_d() const override {return 4;};
+  virtual std::size_t cod_d() const override {return 2;};
 
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     Eigen::VectorXd result = Eigen::VectorXd::Zero(4);
     return result;
   }

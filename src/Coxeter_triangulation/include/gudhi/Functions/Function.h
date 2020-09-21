@@ -31,16 +31,16 @@ struct Function {
   /** \brief Virtual method for the value of the function at a specified point.
    * @param[in] p The input point.
    */
-  virtual Eigen::VectorXd evaluate(const Eigen::VectorXd& p) const {return Eigen::VectorXd(0);}
-  
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const = 0;
+
   /** \brief Virtual method for the domain dimension. */
-  virtual std::size_t amb_d() const {return 0;};
+  virtual std::size_t amb_d() const = 0;
 
   /** \brief Virtual method for the codomain dimension. */
-  virtual std::size_t cod_d() const {return 0;};
+  virtual std::size_t cod_d() const = 0;
 
   /** \brief Virtual method for the seed point. */
-  virtual Eigen::VectorXd seed() const {return Eigen::VectorXd(0);}
+  virtual Eigen::VectorXd seed() const = 0;
 
   /** \brief Virtual destructor. */
   virtual ~Function() {}

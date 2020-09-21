@@ -40,7 +40,7 @@ struct Embed_in_Rd : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     Eigen::VectorXd x = p;
     Eigen::VectorXd x_k(fun_.amb_d()), x_rest(d_ - fun_.amb_d());
     for (std::size_t i = 0; i < fun_.amb_d(); ++i)
@@ -55,13 +55,13 @@ struct Embed_in_Rd : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  std::size_t amb_d() const {return d_;}
+  virtual std::size_t amb_d() const override {return d_;}
 
   /** \brief Returns the codomain dimension. */
-  std::size_t cod_d() const {return d_-(fun_.amb_d() - fun_.cod_d());}
+  virtual std::size_t cod_d() const override {return d_-(fun_.amb_d() - fun_.cod_d());}
 
   /** \brief Returns a point on the zero-set of the embedded function. */
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     Eigen::VectorXd result = fun_.seed();
     result.conservativeResize(d_);
     for (std::size_t l = fun_.amb_d(); l < d_; ++l)

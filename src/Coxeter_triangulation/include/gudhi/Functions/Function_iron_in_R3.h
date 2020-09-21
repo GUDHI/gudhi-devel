@@ -33,7 +33,7 @@ struct Function_iron_in_R3 : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     double x = p(0), y = p(1), z = p(2);
     Eigen::VectorXd result(cod_d());
     result(0) = - std::pow(x,6)/300. - std::pow(y,6)/300. - std::pow(z,6)/300. + x*y*y*z/2.1 + y*y + std::pow(z-2, 4) - 1;
@@ -41,13 +41,13 @@ struct Function_iron_in_R3 : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  std::size_t amb_d() const {return 3;};
+  virtual std::size_t amb_d() const override {return 3;};
 
   /** \brief Returns the codomain dimension. */
-  std::size_t cod_d() const {return 1;};
+  virtual std::size_t cod_d() const override {return 1;};
 
   /** \brief Returns a point on the surface. */
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     Eigen::Vector3d result(std::pow(4500, 1./6), 0, 0);
     return result;
   }

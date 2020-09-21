@@ -42,7 +42,7 @@ struct PL_approximation : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     std::size_t cod_d = this->cod_d();
     std::size_t amb_d = this->amb_d();
     auto s = tr_.locate_point(p);
@@ -71,13 +71,13 @@ struct PL_approximation : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  std::size_t amb_d() const {return fun_.amb_d();}
+  virtual std::size_t amb_d() const override {return fun_.amb_d();}
 
   /** \brief Returns the codomain dimension. */
-  std::size_t cod_d() const {return fun_.cod_d();}
+  virtual std::size_t cod_d() const override {return fun_.cod_d();}
 
   /** \brief Returns a point on the zero-set. */
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     // TODO: not finished. Should use an oracle.
     return Eigen::VectorXd(amb_d());
   }

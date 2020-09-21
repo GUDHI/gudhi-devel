@@ -33,19 +33,19 @@ struct Function_affine_plane_in_Rd : public Function {
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
+  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
     Eigen::VectorXd result = normal_matrix_.transpose() * (p - off_);
     return result;
   }
   
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
-  std::size_t amb_d() const {return d_;};
+  virtual std::size_t amb_d() const override {return d_;};
 
   /** \brief Returns the codomain dimension. Same as the codimension of the sphere. */
-  std::size_t cod_d() const {return k_;};
+  virtual std::size_t cod_d() const override {return k_;};
 
   /** \brief Returns a point on the affine plane. */
-  Eigen::VectorXd seed() const {
+  virtual Eigen::VectorXd seed() const override {
     Eigen::VectorXd result = off_;
     return result;
   }
