@@ -1,7 +1,7 @@
 // workaround for the annoying boost message in boost 1.69
 #define BOOST_PENDING_INTEGER_LOG2_HPP
 #include <boost/integer/integer_log2.hpp>
-// end workaround 
+// end workaround
 
 #include <iostream>
 
@@ -21,7 +21,6 @@
 using namespace Gudhi::coxeter_triangulation;
 
 int main(int argc, char** argv) {
-  
   // Creating a circle S1 in R2 of specified radius
   double radius = 1.0;
   Function_Sm_in_Rd fun_circle(radius, 1);
@@ -34,14 +33,14 @@ int main(int argc, char** argv) {
   auto fun_flat_torus_rotated = make_linear_transformation(fun_flat_torus, matrix);
 
   // Computing the seed of the function fun_flat_torus
-  Eigen::VectorXd seed = fun_flat_torus_rotated.seed();    
-  
-  // Defining a domain function that defines the boundary, which is a hyperplane passing by the origin and orthogonal to x.
+  Eigen::VectorXd seed = fun_flat_torus_rotated.seed();
+
+  // Defining a domain function that defines the boundary, which is a hyperplane passing by the origin and orthogonal to
+  // x.
   Eigen::MatrixXd normal_matrix = Eigen::MatrixXd::Zero(4, 1);
-  for (std::size_t i = 0; i < 4; i++)
-    normal_matrix(i,0) = -seed(i);
-  Function_affine_plane_in_Rd fun_bound(normal_matrix, -seed/2);
-    
+  for (std::size_t i = 0; i < 4; i++) normal_matrix(i, 0) = -seed(i);
+  Function_affine_plane_in_Rd fun_bound(normal_matrix, -seed / 2);
+
   // Defining the intersection oracle
   auto oracle = make_oracle(fun_flat_torus_rotated, fun_bound);
 
@@ -65,11 +64,9 @@ int main(int argc, char** argv) {
   cell_complex.construct_complex(interior_simplex_map, boundary_simplex_map);
 
   // Output the cell complex to a file readable by medit
-  output_meshes_to_medit(3,
-			 "flat_torus_with_boundary",
-			 build_mesh_from_cell_complex(cell_complex,
-						      Configuration(true, true, true, 1, 5, 3),
-						      Configuration(true, true, true, 2, 13, 14)));
+  output_meshes_to_medit(3, "flat_torus_with_boundary",
+                         build_mesh_from_cell_complex(cell_complex, Configuration(true, true, true, 1, 5, 3),
+                                                      Configuration(true, true, true, 2, 13, 14)));
 
   return 0;
 }

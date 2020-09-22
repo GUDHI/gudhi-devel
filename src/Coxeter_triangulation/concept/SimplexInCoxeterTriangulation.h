@@ -11,19 +11,22 @@
 #ifndef CONCEPT_COXETER_TRIANGULATION_SIMPLEX_IN_COXETER_TRIANGULATION_H_
 #define CONCEPT_COXETER_TRIANGULATION_SIMPLEX_IN_COXETER_TRIANGULATION_H_
 
+#include <cstdlib>  // for std::size_t
+
+#include <gudhi/Permutahedral_representation.h>
+
 namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** \brief The concept SimplexInCoxeterTriangulation describes the requirements 
+/** \brief The concept SimplexInCoxeterTriangulation describes the requirements
  * for a type to implement a representation of simplices in Freudenthal_triangulation
  * or in Coxeter_triangulation.
  */
 struct SimplexInCoxeterTriangulation {
-
   /** \brief Type of the vertex. */
   typedef Vertex_ Vertex;
-  
+
   /** \brief Type of the ordered partition. */
   typedef Ordered_set_partition_ OrderedSetPartition;
 
@@ -32,13 +35,13 @@ struct SimplexInCoxeterTriangulation {
 
   /** \brief Type of a range of vertices, each of type Vertex. */
   typedef Vertex_range;
-  
+
   /** \brief Returns a range of vertices of the simplex.
    */
   Vertex_range vertex_range() const;
 
-  /** \brief Type of a range of faces, each of type that 
-   *  is a model of the concept SimplexInCoxeterTriangulation. 
+  /** \brief Type of a range of faces, each of type that
+   *  is a model of the concept SimplexInCoxeterTriangulation.
    */
   typedef Face_range;
 
@@ -52,8 +55,8 @@ struct SimplexInCoxeterTriangulation {
    */
   Face_range facet_range() const;
 
-  /** \brief Type of a range of cofaces, each of type that 
-   *  is a model of the concept SimplexInCoxeterTriangulation. 
+  /** \brief Type of a range of cofaces, each of type that
+   *  is a model of the concept SimplexInCoxeterTriangulation.
    */
   typedef Coface_range;
 
@@ -69,12 +72,10 @@ struct SimplexInCoxeterTriangulation {
 
   /** \brief Returns true, if the simplex is a face of other simplex. */
   bool is_face_of(const Permutahedral_representation& other) const;
-  
 };
 
 }  // namespace coxeter_triangulation
 
 }  // namespace Gudhi
-
 
 #endif

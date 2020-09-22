@@ -17,7 +17,7 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** 
+/**
  * \class Function
  * \brief The parent class for all functions implemented in the module.
  *  Contains virtual methods needed to be a model of the concept FunctionForImplicitManifold.
@@ -25,7 +25,6 @@ namespace coxeter_triangulation {
  * \ingroup coxeter_triangulation
  */
 struct Function {
-  
   /** \brief Virtual method for the value of the function at a specified point.
    * @param[in] p The input point.
    */
@@ -44,9 +43,8 @@ struct Function {
   virtual ~Function() {}
 };
 
-} // namespace coxeter_triangulation
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
-
+}  // namespace Gudhi
 
 #endif

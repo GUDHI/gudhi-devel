@@ -21,16 +21,15 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** 
- * \class Function_affine_plane_in_Rd 
- * \brief A class for the function that defines an m-dimensional implicit affine plane 
+/**
+ * \class Function_affine_plane_in_Rd
+ * \brief A class for the function that defines an m-dimensional implicit affine plane
  * embedded in d-dimensional Euclidean space.
  *
  * \ingroup coxeter_triangulation
  */
 struct Function_affine_plane_in_Rd : public Function {
-  
-  /** 
+  /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
@@ -38,65 +37,59 @@ struct Function_affine_plane_in_Rd : public Function {
     Eigen::VectorXd result = normal_matrix_.transpose() * (p - off_);
     return result;
   }
-  
+
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
-  virtual std::size_t amb_d() const override {return d_;};
+  virtual std::size_t amb_d() const override { return d_; };
 
   /** \brief Returns the codomain dimension. Same as the codimension of the sphere. */
-  virtual std::size_t cod_d() const override {return k_;};
+  virtual std::size_t cod_d() const override { return k_; };
 
   /** \brief Returns a point on the affine plane. */
   virtual Eigen::VectorXd seed() const override {
     Eigen::VectorXd result = off_;
     return result;
   }
-  
-  /** 
+
+  /**
    * \brief Constructor of the function that defines an m-dimensional implicit affine
    * plane in the d-dimensional Euclidean space.
    *
    * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
-   * correspond to the ambient dimension, the number of columns should corespond to 
-   * the size of the normal basis (codimension). 
+   * correspond to the ambient dimension, the number of columns should corespond to
+   * the size of the normal basis (codimension).
    * @param[in] offset The offset vector of the affine plane.
    * The dimension of the vector should be the ambient dimension of the manifold.
    */
-  Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix,
-			      const Eigen::VectorXd& offset)
-    : normal_matrix_(normal_matrix),
-      d_(normal_matrix.rows()),
-      k_(normal_matrix.cols()),
-      m_(d_ - k_),
-      off_(offset) {
+  Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix, const Eigen::VectorXd& offset)
+      : normal_matrix_(normal_matrix), d_(normal_matrix.rows()), k_(normal_matrix.cols()), m_(d_ - k_), off_(offset) {
     normal_matrix_.colwise().normalize();
   }
 
-  /** 
+  /**
    * \brief Constructor of the function that defines an m-dimensional implicit affine
    * plane in the d-dimensional Euclidean space that passes through origin.
    *
    * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
-   * correspond to the ambient dimension, the number of columns should corespond to 
-   * the size of the normal basis (codimension). 
+   * correspond to the ambient dimension, the number of columns should corespond to
+   * the size of the normal basis (codimension).
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix)
-    : normal_matrix_(normal_matrix),
-      d_(normal_matrix.rows()),
-      k_(normal_matrix.cols()),
-      m_(d_ - k_),
-      off_(Eigen::VectorXd::Zero(d_)) {
+      : normal_matrix_(normal_matrix),
+        d_(normal_matrix.rows()),
+        k_(normal_matrix.cols()),
+        m_(d_ - k_),
+        off_(Eigen::VectorXd::Zero(d_)) {
     normal_matrix_.colwise().normalize();
   }
 
-private:
+ private:
   Eigen::MatrixXd normal_matrix_;
   std::size_t d_, k_, m_;
-  Eigen::VectorXd off_;  
+  Eigen::VectorXd off_;
 };
 
-} // namespace coxeter_triangulation
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
-
+}  // namespace Gudhi
 
 #endif

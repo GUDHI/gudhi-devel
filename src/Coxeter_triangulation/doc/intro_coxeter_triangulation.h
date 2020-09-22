@@ -13,7 +13,7 @@
 
 // needs namespaces for Doxygen to link on classes
 namespace Gudhi {
-namespace tangential_complex {
+namespace coxeter_triangulation {
 
 /**  \defgroup coxeter_triangulation Coxeter triangulation
 
@@ -42,13 +42,11 @@ manifold.
 There are two methods that execute the manifold tracing algorithm: the method
 \ref Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm() "Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map)"
 for manifolds without boundary and
-\ref Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm() "Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map)"
-for manifolds with boundary.
-The algorithm functions as follows.
-It starts at the specified seed points and inserts a \f$(d-m)\f$-dimensional simplices nearby each seed point that
-intersect the manifold into the output.
-Starting from this simplex, the algorithm propagates the search for other \f$(d-m)\f$-dimensional simplices that
-intersect the manifold by marching from a simplex to neighbouring simplices via their common cofaces.
+\ref Gudhi::coxeter_triangulation::Manifold_tracing::manifold_tracing_algorithm() "Manifold_tracing::manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map,boundary_simplex_map)"
+for manifolds with boundary. The algorithm functions as follows. It starts at the specified seed points and inserts a
+\f$(d-m)\f$-dimensional simplices nearby each seed point that intersect the manifold into the output. Starting from
+this simplex, the algorithm propagates the search for other \f$(d-m)\f$-dimensional simplices that intersect the
+manifold by marching from a simplex to neighbouring simplices via their common cofaces.
 
 This class \ref Gudhi::coxeter_triangulation::Manifold_tracing "Manifold_tracing" has one template parameter
 `Triangulation_` which specifies the ambient triangulation which is used by the algorithm.
@@ -59,16 +57,15 @@ The module also provides two static methods:
 \ref Gudhi::coxeter_triangulation::manifold_tracing_algorithm() "manifold_tracing_algorithm(seed_points, triangulation, oracle, out_simplex_map)"
 for manifolds without boundary and
 \ref manifold_tracing_algorithm() "manifold_tracing_algorithm(seed_points, triangulation, oracle, interior_simplex_map, boundary_simplex_map)"
-for manifolds with boundary.
-For these static methods it is not necessary to specify any template arguments.
+for manifolds with boundary. For these static methods it is not necessary to specify any template arguments.
 
 \section ambienttriangulations Ambient triangulations
 
 The ambient triangulations supported by the manifold tracing algorithm have to be models of the concept
-\ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing". 
+\ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing".
 This module offers two such models: the class
 \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" and the derived class
-\ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation". 
+\ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation".
 
 Both these classes encode affine transformations of the so-called Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
 The Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ is defined as the simplicial subdivision of the unit cubic
@@ -77,13 +74,13 @@ Each simplex is encoded using the permutahedral representation, which consists o
 positions the simplex in a specific cube in the cubical partition and an ordered partition \f$\omega\f$ of the set
 \f$\{1,\ldots,d+1\}\f$, which positions the simplex in the simplicial subdivision of the cube.
 The default constructor
-\ref Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(std::size_t) "Freudenthal_triangulation(d)"
-the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$.
-The class \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" can also encode any
-affine transformation of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ using an invertible matrix
-\f$\Lambda\f$ and an offset vector \f$b\f$ that can be specified in the constructor and which can be changed using the
-methods change_matrix and change_offset.
-The class \ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation" is derived from
+\ref Gudhi::coxeter_triangulation::Freudenthal_triangulation::Freudenthal_triangulation(std::size_t)
+"Freudenthal_triangulation(d)" the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$. The class
+\ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" can also encode any affine
+transformation of the Freudenthal-Kuhn triangulation of \f$\mathbb{R}^d\f$ using an invertible matrix \f$\Lambda\f$ and
+an offset vector \f$b\f$ that can be specified in the constructor and which can be changed using the methods
+change_matrix and change_offset. The class
+\ref Gudhi::coxeter_triangulation::Coxeter_triangulation "Coxeter_triangulation" is derived from
 \ref Gudhi::coxeter_triangulation::Freudenthal_triangulation "Freudenthal_triangulation" and its default constructor
 \ref Gudhi::coxeter_triangulation::Coxeter_triangulation::Coxeter_triangulation(std::size_t) "Coxeter_triangulation(d)"
 builds a Coxeter triangulation of type \f$\tilde{A}_d\f$, which has the best simplex quality of all linear
@@ -108,8 +105,8 @@ The function \f$F\f$ is given by a class which is a model of the concept
 \ref Gudhi::coxeter_triangulation::FunctionForImplicitManifold "FunctionForImplicitManifold".
 There are multiple function classes that are already implemented in this module.
 
-\li \ref Gudhi::coxeter_triangulation::Constant_function(std::size_t, std::size_t, Eigen::VectorXd) "Constant_function(d,k,v)"
-  defines a constant function \f$F\f$ such that for all \f$x \in \mathbb{R}^d\f$, we have
+\li \ref Gudhi::coxeter_triangulation::Constant_function(std::size_t, std::size_t, Eigen::VectorXd)
+"Constant_function(d,k,v)" defines a constant function \f$F\f$ such that for all \f$x \in \mathbb{R}^d\f$, we have
   \f$F(x) = v \in \mathbb{R}^k\f$.
   The class Constant_function does not define an implicit manifold, but is useful as the domain function when defining
   boundaryless implicit manifolds.

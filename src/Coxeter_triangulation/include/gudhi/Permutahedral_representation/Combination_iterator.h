@@ -20,25 +20,20 @@ namespace coxeter_triangulation {
 
 typedef unsigned uint;
 
-/** \brief Class that allows the user to generate combinations of 
+/** \brief Class that allows the user to generate combinations of
  *   k elements in a set of n elements.
  *  Based on the algorithm by Mifsud.
-*/
-class Combination_iterator : public boost::iterator_facade< Combination_iterator,
-							    std::vector<uint> const,
-							    boost::forward_traversal_tag> {
+ */
+class Combination_iterator
+    : public boost::iterator_facade<Combination_iterator, std::vector<uint> const, boost::forward_traversal_tag> {
   typedef std::vector<uint> value_t;
-  
-protected:
-  friend class boost::iterator_core_access;
-  
-  bool equal(Combination_iterator const& other) const {
-    return (is_end_ && other.is_end_);
-  }
 
-  value_t const& dereference() const {
-    return value_;
-  }
+ protected:
+  friend class boost::iterator_core_access;
+
+  bool equal(Combination_iterator const& other) const { return (is_end_ && other.is_end_); }
+
+  value_t const& dereference() const { return value_; }
 
   void increment() {
     if (value_[0] == n_ - k_) {
@@ -51,25 +46,16 @@ protected:
       return;
     }
     for (; j > 0; --j)
-      if (value_[j-1] < n_ - k_ + j-1) {
-	value_[j-1]++;
-	for (uint s = j; s < k_; s++)
-	  value_[s] = value_[j-1] + s - (j-1);
-	return;
+      if (value_[j - 1] < n_ - k_ + j - 1) {
+        value_[j - 1]++;
+        for (uint s = j; s < k_; s++) value_[s] = value_[j - 1] + s - (j - 1);
+        return;
       }
   }
 
-public:
-  
-  Combination_iterator(const uint& n, const uint& k)
-    :
-    value_(k),
-    is_end_(n == 0),
-    n_(n),
-    k_(k)
-  {
-    for (uint i = 0; i < k; ++i)
-      value_[i] = i;
+ public:
+  Combination_iterator(const uint& n, const uint& k) : value_(k), is_end_(n == 0), n_(n), k_(k) {
+    for (uint i = 0; i < k; ++i) value_[i] = i;
   }
 
   // Used for the creating an end iterator
@@ -78,22 +64,20 @@ public:
   void reinitialize() {
     if (n_ > 0) {
       is_end_ = false;
-      for (uint i = 0; i < n_; ++i)
-      value_[i] = i;
+      for (uint i = 0; i < n_; ++i) value_[i] = i;
     }
   }
-  
+
  private:
-  value_t value_; // the dereference value
-  bool is_end_;   // is true when the current permutation is the final one 
+  value_t value_;  // the dereference value
+  bool is_end_;    // is true when the current permutation is the final one
 
   uint n_;
   uint k_;
 };
 
-} // namespace coxeter_triangulation
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
-
+}  // namespace Gudhi
 
 #endif

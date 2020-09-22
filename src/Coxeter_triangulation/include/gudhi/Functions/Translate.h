@@ -21,20 +21,19 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** 
+/**
  * \class Translate
  * \brief Translates the zero-set of the function by a vector.
  * The underlying function corresponds to f(x-off), where off is the offset vector.
  *
- * \tparam Function_ The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
  */
 template <class Function_>
 struct Translate : public Function {
-  
-  /** 
+  /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
@@ -44,10 +43,10 @@ struct Translate : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  virtual std::size_t amb_d() const override {return fun_.amb_d();}
+  virtual std::size_t amb_d() const override { return fun_.amb_d(); }
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override {return fun_.cod_d();}
+  virtual std::size_t cod_d() const override { return fun_.cod_d(); }
 
   /** \brief Returns a point on the zero-set. */
   virtual Eigen::VectorXd seed() const override {
@@ -56,31 +55,28 @@ struct Translate : public Function {
     return result;
   }
 
-  /** 
+  /**
    * \brief Constructor of the translated function.
    *
    * @param[in] function The function to be translated.
-   * @param[in] off The offset vector. The dimension should correspond to the 
+   * @param[in] off The offset vector. The dimension should correspond to the
    * domain (ambient) dimension of 'function'.
    */
-  Translate(const Function_& function, const Eigen::VectorXd& off) :
-    fun_(function), off_(off) {
-  }
+  Translate(const Function_& function, const Eigen::VectorXd& off) : fun_(function), off_(off) {}
 
  private:
   Function_ fun_;
   Eigen::VectorXd off_;
 };
 
-
-/** 
+/**
  * \brief Static constructor of a translated function.
  *
  * @param[in] function The function to be translated.
- * @param[in] off The offset vector. The dimension should correspond to the 
+ * @param[in] off The offset vector. The dimension should correspond to the
  * domain (ambient) dimension of 'function'.
  *
- * \tparam Function_ The function template parameter. Should be a model of 
+ * \tparam Function_ The function template parameter. Should be a model of
  * the concept FunctionForImplicitManifold.
  *
  * \ingroup coxeter_triangulation
@@ -90,8 +86,8 @@ Translate<Function_> translate(const Function_& function, Eigen::VectorXd off) {
   return Translate<Function_>(function, off);
 }
 
-} // namespace coxeter_triangulation
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif

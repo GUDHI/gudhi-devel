@@ -36,9 +36,9 @@ namespace coxeter_triangulation {
  *
  * Forward iterator, 'value_type' is Permutahedral_representation::Vertex.*/
 template <class Permutahedral_representation>
-class Vertex_iterator : public boost::iterator_facade< Vertex_iterator<Permutahedral_representation>,
-                                                       typename Permutahedral_representation::Vertex const,
-                                                       boost::forward_traversal_tag> {
+class Vertex_iterator
+    : public boost::iterator_facade<Vertex_iterator<Permutahedral_representation>,
+                                    typename Permutahedral_representation::Vertex const, boost::forward_traversal_tag> {
  private:
   friend class boost::iterator_core_access;
 
@@ -47,50 +47,40 @@ class Vertex_iterator : public boost::iterator_facade< Vertex_iterator<Permutahe
 
   using value_t = Vertex;
 
-  
-  bool equal(Vertex_iterator const& other) const {
-    return (is_end_ && other.is_end_);
-  }
+  bool equal(Vertex_iterator const& other) const { return (is_end_ && other.is_end_); }
 
-  value_t const& dereference() const {
-    return value_;
-  }
+  value_t const& dereference() const { return value_; }
 
   void update_value() {
     std::size_t d = value_.size();
-    for (auto i: *o_it_)
+    for (auto i : *o_it_)
       if (i != d)
         value_[i]++;
       else
-        for (std::size_t j = 0; j < d; j++)
-          value_[j]--;
-  }
-                       
-  void increment() {
-    if (is_end_)
-      return;
-    update_value();
-    if (++o_it_ == o_end_)
-      is_end_ = true;
+        for (std::size_t j = 0; j < d; j++) value_[j]--;
   }
 
-public:  
+  void increment() {
+    if (is_end_) return;
+    update_value();
+    if (++o_it_ == o_end_) is_end_ = true;
+  }
+
+ public:
   Vertex_iterator(const Permutahedral_representation& simplex)
-    :
-    o_it_(simplex.partition().begin()),
-    o_end_(simplex.partition().end()),
-    value_(simplex.vertex()),
-    is_end_(o_it_ == o_end_)
-  {}
+      : o_it_(simplex.partition().begin()),
+        o_end_(simplex.partition().end()),
+        value_(simplex.vertex()),
+        is_end_(o_it_ == o_end_) {}
 
   Vertex_iterator() : is_end_(true) {}
 
  private:
-  typename Ordered_partition::const_iterator o_it_, o_end_; 
+  typename Ordered_partition::const_iterator o_it_, o_end_;
   value_t value_;
   bool is_end_;
 
-}; // Vertex_iterator
+};  // Vertex_iterator
 
 /*---------------------------------------------------------------------------*/
 /* \brief Iterator over the k-faces of a simplex
@@ -98,24 +88,19 @@ public:
  *
  * Forward iterator, value_type is Permutahedral_representation. */
 template <class Permutahedral_representation>
-class Face_iterator : public boost::iterator_facade< Face_iterator<Permutahedral_representation>,
-                                                     Permutahedral_representation const,
-                                                     boost::forward_traversal_tag> {
+class Face_iterator : public boost::iterator_facade<Face_iterator<Permutahedral_representation>,
+                                                    Permutahedral_representation const, boost::forward_traversal_tag> {
   using value_t = Permutahedral_representation;
-  
+
  private:
   friend class boost::iterator_core_access;
 
   using Vertex = typename Permutahedral_representation::Vertex;
   using Ordered_partition = typename Permutahedral_representation::OrderedSetPartition;
 
-  bool equal(Face_iterator const& other) const {
-    return (is_end_ && other.is_end_);
-  }
+  bool equal(Face_iterator const& other) const { return (is_end_ && other.is_end_); }
 
-  value_t const& dereference() const {
-    return value_;
-  }
+  value_t const& dereference() const { return value_; }
 
   void increment() {
     if (++c_it_ == c_end_) {
@@ -130,31 +115,30 @@ class Face_iterator : public boost::iterator_facade< Face_iterator<Permutahedral
     value_ = face_from_indices<Permutahedral_representation>(simplex_, *c_it_);
   }
 
-public:
+ public:
   Face_iterator(const Permutahedral_representation& simplex, const uint& k)
-    : simplex_(simplex),
-      k_(k),
-      l_(simplex.dimension()),
-      c_it_(l_+1, k_+1),
-      is_end_(k_ > l_),
-      value_({Vertex(simplex.vertex().size()), Ordered_partition(k+1)})
-  {
+      : simplex_(simplex),
+        k_(k),
+        l_(simplex.dimension()),
+        c_it_(l_ + 1, k_ + 1),
+        is_end_(k_ > l_),
+        value_({Vertex(simplex.vertex().size()), Ordered_partition(k + 1)}) {
     update_value();
   }
 
   // Used for the creating an end iterator
   Face_iterator() : is_end_(true) {}
-  
+
  private:
-  Permutahedral_representation simplex_; // Input simplex
+  Permutahedral_representation simplex_;  // Input simplex
   uint k_;
-  uint l_; // Dimension of the input simplex
-  Combination_iterator c_it_, c_end_; // indicates the vertices in the current face
+  uint l_;                             // Dimension of the input simplex
+  Combination_iterator c_it_, c_end_;  // indicates the vertices in the current face
 
-  bool is_end_;   // is true when the current permutation is the final one
-  value_t value_; // the dereference value
+  bool is_end_;    // is true when the current permutation is the final one
+  value_t value_;  // the dereference value
 
-}; // Face_iterator
+};  // Face_iterator
 
 /*---------------------------------------------------------------------------*/
 /* \brief Iterator over the k-cofaces of a simplex
@@ -162,9 +146,9 @@ public:
  *
  * Forward iterator, value_type is Permutahedral_representation. */
 template <class Permutahedral_representation>
-class Coface_iterator : public boost::iterator_facade< Coface_iterator<Permutahedral_representation>,
-                                                       Permutahedral_representation const,
-                                                       boost::forward_traversal_tag> {
+class Coface_iterator
+    : public boost::iterator_facade<Coface_iterator<Permutahedral_representation>, Permutahedral_representation const,
+                                    boost::forward_traversal_tag> {
   using value_t = Permutahedral_representation;
 
  private:
@@ -173,75 +157,62 @@ class Coface_iterator : public boost::iterator_facade< Coface_iterator<Permutahe
   using Vertex = typename Permutahedral_representation::Vertex;
   using Ordered_partition = typename Permutahedral_representation::OrderedSetPartition;
 
-  bool equal(Coface_iterator const& other) const {
-    return (is_end_ && other.is_end_);
-  }
+  bool equal(Coface_iterator const& other) const { return (is_end_ && other.is_end_); }
 
-  value_t const& dereference() const {
-    return value_;
-  }
+  value_t const& dereference() const { return value_; }
 
   void increment() {
     uint i = 0;
-    for (; i < k_+1; i++) {
-      if (++(o_its_[i]) != o_end_)
-        break;
+    for (; i < k_ + 1; i++) {
+      if (++(o_its_[i]) != o_end_) break;
     }
-    if (i == k_+1) {
+    if (i == k_ + 1) {
       if (++i_it_ == i_end_) {
         is_end_ = true;
         return;
       }
       o_its_.clear();
       for (uint j = 0; j < k_ + 1; j++)
-        o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j]+1));
-    }
-    else
-      for (uint j = 0; j < i; j++)
-        o_its_[j].reinitialize();
+        o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j] + 1));
+    } else
+      for (uint j = 0; j < i; j++) o_its_[j].reinitialize();
     update_value();
   }
 
   void update_value() {
     value_.vertex() = simplex_.vertex();
-    for (auto& p: value_.partition())
-      p.clear();
-    uint u_ = 0; // the part in o_its_[k_] that contains t_
+    for (auto& p : value_.partition()) p.clear();
+    uint u_ = 0;  // the part in o_its_[k_] that contains t_
     for (; u_ <= (*i_it_)[k_]; u_++) {
       auto range = (*o_its_[k_])[u_];
-      if (std::find(range.begin(), range.end(), t_) != range.end())
-        break;
+      if (std::find(range.begin(), range.end(), t_) != range.end()) break;
     }
     uint i = 0;
-    for (uint j = u_+1; j <= (*i_it_)[k_]; j++, i++)
-      for (uint b: (*o_its_[k_])[j]) {
+    for (uint j = u_ + 1; j <= (*i_it_)[k_]; j++, i++)
+      for (uint b : (*o_its_[k_])[j]) {
         uint c = simplex_.partition()[k_][b];
         value_.partition()[i].push_back(c);
         value_.vertex()[c]--;
       }
     for (uint h = 0; h < k_; h++)
       for (uint j = 0; j <= (*i_it_)[h]; j++, i++) {
-        for (uint b: (*o_its_[h])[j])
-          value_.partition()[i].push_back(simplex_.partition()[h][b]);
+        for (uint b : (*o_its_[h])[j]) value_.partition()[i].push_back(simplex_.partition()[h][b]);
       }
     for (uint j = 0; j <= u_; j++, i++)
-      for (uint b: (*o_its_[k_])[j])
-        value_.partition()[i].push_back(simplex_.partition()[k_][b]);
+      for (uint b : (*o_its_[k_])[j]) value_.partition()[i].push_back(simplex_.partition()[k_][b]);
     // sort the values in each part (probably not needed)
-    for (auto& part: value_.partition())
-      std::sort(part.begin(), part.end());
+    for (auto& part : value_.partition()) std::sort(part.begin(), part.end());
   }
 
  public:
   Coface_iterator(const Permutahedral_representation& simplex, const uint& l)
-    : simplex_(simplex),
-      d_(simplex.vertex().size()),
-      l_(l),
-      k_(simplex.dimension()),
-      i_it_(l_-k_ , k_+1, Size_range<Ordered_partition>(simplex.partition())),
-      is_end_(k_ > l_),
-      value_({Vertex(d_), Ordered_partition(l_+1)})
-  {
+      : simplex_(simplex),
+        d_(simplex.vertex().size()),
+        l_(l),
+        k_(simplex.dimension()),
+        i_it_(l_ - k_, k_ + 1, Size_range<Ordered_partition>(simplex.partition())),
+        is_end_(k_ > l_),
+        value_({Vertex(d_), Ordered_partition(l_ + 1)}) {
     uint j = 0;
     for (; j < simplex_.partition()[k_].size(); j++)
       if (simplex_.partition()[k_][j] == d_) {
@@ -253,8 +224,8 @@ class Coface_iterator : public boost::iterator_facade< Coface_iterator<Permutahe
       is_end_ = true;
       return;
     }
-    for (uint i = 0; i < k_+1; i++)
-      o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[i].size(), (*i_it_)[i]+1));
+    for (uint i = 0; i < k_ + 1; i++)
+      o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[i].size(), (*i_it_)[i] + 1));
     update_value();
   }
 
@@ -262,22 +233,22 @@ class Coface_iterator : public boost::iterator_facade< Coface_iterator<Permutahe
   Coface_iterator() : is_end_(true) {}
 
  private:
-  Permutahedral_representation simplex_; // Input simplex
-  uint d_; // Ambient dimension
-  uint l_; // Dimension of the coface
-  uint k_; // Dimension of the input simplex
-  uint t_; // The position of d in simplex_.partition()[k_]
-  Integer_combination_iterator i_it_, i_end_; // indicates in how many parts each simplex_[i] is subdivided
-  std::vector<Ordered_set_partition_iterator> o_its_; // indicates subdivision for each simplex_[i]
-  Ordered_set_partition_iterator o_end_;      // one end for all o_its_
+  Permutahedral_representation simplex_;               // Input simplex
+  uint d_;                                             // Ambient dimension
+  uint l_;                                             // Dimension of the coface
+  uint k_;                                             // Dimension of the input simplex
+  uint t_;                                             // The position of d in simplex_.partition()[k_]
+  Integer_combination_iterator i_it_, i_end_;          // indicates in how many parts each simplex_[i] is subdivided
+  std::vector<Ordered_set_partition_iterator> o_its_;  // indicates subdivision for each simplex_[i]
+  Ordered_set_partition_iterator o_end_;               // one end for all o_its_
 
-  bool is_end_;   // is true when the current permutation is the final one
-  value_t value_; // the dereference value
+  bool is_end_;    // is true when the current permutation is the final one
+  value_t value_;  // the dereference value
 
-}; // Coface_iterator
+};  // Coface_iterator
 
-} // namespace coxeter_triangulation
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
-  
+}  // namespace Gudhi
+
 #endif

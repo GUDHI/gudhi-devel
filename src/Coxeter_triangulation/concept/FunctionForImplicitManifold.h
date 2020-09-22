@@ -11,16 +11,19 @@
 #ifndef CONCEPT_COXETER_TRIANGULATION_FUNCTION_FOR_IMPLICIT_MANIFOLD_H_
 #define CONCEPT_COXETER_TRIANGULATION_FUNCTION_FOR_IMPLICIT_MANIFOLD_H_
 
+#include <cstdlib>  // for std::size_t
+
+#include <Eigen/Dense>
+
 namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** \brief The concept FunctionForImplicitManifold describes the requirements 
+/** \brief The concept FunctionForImplicitManifold describes the requirements
  * for a type to implement an implicit function class used for example in Manifold_tracing.
  */
 struct FunctionForImplicitManifold {
-
-  /** \brief Value of the function at a specified point 'p'. 
+  /** \brief Value of the function at a specified point 'p'.
    *  @param[in] p The input point given by its Cartesian coordinates.
    *  Its size needs to be equal to amb_d().
    */
@@ -28,7 +31,7 @@ struct FunctionForImplicitManifold {
 
   /** \brief Returns the domain (ambient) dimension. */
   std::size_t amb_d() const;
-  
+
   /** \brief Returns the codomain dimension. */
   std::size_t cod_d() const;
 
@@ -39,6 +42,5 @@ struct FunctionForImplicitManifold {
 }  // namespace coxeter_triangulation
 
 }  // namespace Gudhi
-
 
 #endif

@@ -16,7 +16,7 @@ namespace Gudhi {
 namespace coxeter_triangulation {
 
 /** \class Query_result
- *  \brief The result of a query by an oracle such as Implicit_manifold_intersection_oracle. 
+ *  \brief The result of a query by an oracle such as Implicit_manifold_intersection_oracle.
  *
  *  \tparam Simplex_handle The class of the query simplex.
  *
@@ -33,8 +33,8 @@ struct Query_result {
   bool success;
 };
 
-} // namespace coxeter_triangulation 
+}  // namespace coxeter_triangulation
 
-} // namespace Gudhi
+}  // namespace Gudhi
 
 #endif
