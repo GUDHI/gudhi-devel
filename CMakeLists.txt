@@ -51,7 +51,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-add_subdirectory(src/GudhUI)
+# add_subdirectory(src/GudhUI)
 
 if (WITH_GUDHI_PYTHON)
   # specific for cython module

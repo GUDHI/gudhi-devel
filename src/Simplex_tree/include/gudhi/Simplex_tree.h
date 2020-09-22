@@ -5,7 +5,10 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - YYYY/MM Author: Description of the modification
+ *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same 
+ *        label in an intrinsic list. Add and remove 
+ *        an edge in a flag complex, to implement zigzag filtrations.
+ *         
  */
 
 #ifndef SIMPLEX_TREE_H_
@@ -27,6 +30,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/container/static_vector.hpp>
+#include <boost/intrusive/list.hpp>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -1763,8 +1767,8 @@ public:
   */
   template< typename Kernel, typename Point_container, typename Distance >
   Zigzagfiltration_simplex_range
-  zigzag_simplex_range( Point_container const        & points,
-                        Distance        const          distance,
+  zigzag_simplex_range( Point_container  const        & points,
+                        Distance         const          distance,
                         Filtration_value const          nu,
                         Filtration_value const          mu,
                         int                            dim_max )
@@ -1779,24 +1783,15 @@ public:
   template< class ZigzagEdgeRange >
   void initialize_filtration( ZigzagEdgeRange & zz_edge_fil, int dim_max )
   { //empty complex
-    //todo
-    // #ifdef COMPLEX_TIME
-    //   start_ = std::chrono::system_clock::now();
-    // #endif
     zigzag_simplex_range_ = zigzag_simplex_range(zz_edge_fil, dim_max);
     zigzag_simplex_range_initialized_ = true;
-    // #ifdef COMPLEX_TIME
-    //   end_ = std::chrono::system_clock::now();
-    //   enlapsed_sec_ = end_ - start_;
-    //   complexOperationTime_ += enlapsed_sec_.count();
-    // #endif
   }
 
   template<typename Point_container, typename Distance>
-  void initialize_filtration( Point_container const        & points,
-                              Distance        const          distance,
-                              Filtration_value const          nu,
-                              Filtration_value const          mu,
+  void initialize_filtration( Point_container  const       & points,
+                              Distance         const         distance,
+                              Filtration_value const         nu,
+                              Filtration_value const         mu,
                               int                            dim_max ) 
   {
     zigzag_simplex_range_ = zigzag_simplex_range(points, distance, nu, mu, dim_max);
@@ -1821,9 +1816,9 @@ public:
   * Only if SimplexTreeOptions::link_simplices_through_max_vertex is true, otherwise
   * store nothing.
   */
-
   typedef boost::intrusive::list_member_hook<  // allows .unlink()
-  boost::intrusive::link_mode<boost::intrusive::auto_unlink>>   Member_hook_t;
+          boost::intrusive::link_mode<boost::intrusive::auto_unlink>> Member_hook_t;
+  //no hook
   struct Hooks_simplex_base_dummy {};
   // todo on Hooks_simplex_base_link_nodes:
   // make the class movable but not copiable
@@ -1839,19 +1834,22 @@ public:
     // this is used when stored in a map like DS, using copies when
     // performing insertions and rebalancing of the rbtree
     Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other) {
-        list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
     }
     // copy assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_COPY_ASSIGN_REF(Hooks_simplex_base_link_nodes) other) {
-        list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
-        return *this;
+    Hooks_simplex_base_link_nodes& operator=(BOOST_COPY_ASSIGN_REF(
+                                             Hooks_simplex_base_link_nodes) other) {
+      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
+      return *this;
     }
     // move constructor
-    Hooks_simplex_base_link_nodes(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes(BOOST_RV_REF(
+                                             Hooks_simplex_base_link_nodes) other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
     }
     // move assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes& operator=(BOOST_RV_REF(
+                                             Hooks_simplex_base_link_nodes) other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
       return *this;
     }
@@ -1861,7 +1859,7 @@ public:
     mutable Member_hook_t list_max_vertex_hook_;
   };
 
-  // intrusive list of Nodes using the hooks
+  // intrusive list of Nodes with same label using the hooks
   typedef boost::intrusive::member_hook< Hooks_simplex_base_link_nodes, 
                           Member_hook_t, 
                           &Hooks_simplex_base_link_nodes::list_max_vertex_hook_>
@@ -1870,45 +1868,93 @@ public:
                                  List_member_hook_t,
                                  boost::intrusive::constant_time_size<false>>
                                                                     List_max_vertex;
-  // type of hooks stored in each Node
-  typedef typename std::conditional<Options::link_simplices_through_max_vertex,
+  // type of hooks stored in each Node, Node inherits from Hooks_simplex_base
+  typedef typename std::conditional<Options::link_nodes_by_label,
                                     Hooks_simplex_base_link_nodes,
                                     Hooks_simplex_base_dummy>::type 
                                                                  Hooks_simplex_base;
+/** Data structure to access all Nodes with a given label u. Can be used for faster 
+  * computation. */
+private: 
+  //trivial data structure, in case the option is disallowed.
+  template <typename SimplexTree>
+  struct nodes_by_label_dummy {
+    nodes_by_label_dummy(){};
+    void insert(typename SimplexTree::Simplex_handle sh) {}
+  };
+
+  //use the Node hooks Hooks_simplex_base to put all Nodes with same label u in an 
+  //intrusive list.
+  template <typename SimplexTree>
+  struct nodes_by_label_intrinsic_list {
+    nodes_by_label_intrinsic_list(){};
+    // insert a Node in the hook list corresponding to its label
+    void insert(typename SimplexTree::Simplex_handle sh) {
+      auto it = nodes_label_to_list_.find(sh->first);
+      if(it == nodes_label_to_list_.end()) {//create a new list
+        it = (nodes_label_to_list_.emplace(std::make_pair(sh->first, new typename SimplexTree::List_max_vertex()))).first;
+      }
+      it->second->push_back(sh->second);//insert at the end of the list
+    }
+    // typename SimplexTree::List_max_vertex access(Vertex_handle v) { 
+    //   return *(nodes_per_max_vertex_[v]); 
+    // }
+    typename SimplexTree::List_max_vertex& operator[](Vertex_handle v) { 
+      auto it_v = nodes_label_to_list_.find(v);
+      if(it_v != nodes_label_to_list_.end()) {
+        return *(*it_v); 
+      }
+      typename SimplexTree::List_max_vertex();//empty list
+    }
+  // map Vertex_handle v -> pointer to list of all Nodes with label v.
+    std::map<typename SimplexTree::Vertex_handle, 
+             typename SimplexTree::List_max_vertex* >   nodes_label_to_list_;
+  };
+
+  //if Options::link_nodes_by_label is true, store the lists of Nodes with 
+  //same label
+  typedef typename std::conditional<Options::link_nodes_by_label,
+                    cofaces_data_structure_optimized<Simplex_tree>,
+                    cofaces_data_structure_dummy<Simplex_tree>>::type 
+                                                      Nodes_by_label_data_structure;
+
+  /** Only if Options::link_nodes_by_label is true, nodes_with_label_[u] returns a 
+    * range of all Nodes in the Simplex_tree with the label u.*/
+  Nodes_by_label_data_structure                           nodes_by_label_;
+
 
 public:
-
 /**
-* Add an edge in the complex, its two vertices (if missing)
-* and all the missing
-* simplices of its star, defined to maintain the property
-* of the complex to be a flag complex. The edge {u,v} must not be in the complex.
-*
-* In term of edges in the graph, inserting edge u,v only affects N^+(u),
-* even if u and v were missing.
-*
-* For a new node with label v, we first do a local expansion for
-* computing the
-* children of this new node, and then a standard expansion for its children.
-* Nodes with label v (and their subtrees) already in the tree
-* do not get affected.
-*
-* Nodes with label u get affected only if a Node with label v is in their same
-* siblings set.
-* We then try to insert "ponctually" v all over the subtree rooted
-* at Node(u). Each
-* insertion of a Node with v label induces a local expansion at this
-* Node (as explained above)
-* and a sequence of "ponctual" insertion of Node(v) in the subtree
-* rooted at sibling nodes of the new node, on its left.
-*
-* @param[in] u,v              Vertex_handle representing the new edge
-* @param[in] zz_filtration    Must be empty. Contains at the end all new
-*                             simplices induced by the insertion of the edge.
-*
-* SimplexTreeOptions::link_simplices_through_max_vertex must be true.
-* Simplex_tree::Dictionary must sort Vertex_handles w/ increasing natural order <
-*/
+  * Add an edge in the complex, its two vertices (if missing)
+  * and all the missing
+  * simplices of its star, defined to maintain the property
+  * of the complex to be a flag complex. 
+  *
+  * In term of edges in the graph, inserting edge u,v only affects N^+(u),
+  * even if u and v were missing.
+  *
+  * For a new node with label v, we first do a local expansion for
+  * computing the
+  * children of this new node, and then a standard expansion for its children.
+  * Nodes with label v (and their subtrees) already in the tree
+  * do not get affected.
+  *
+  * Nodes with label u get affected only if a Node with label v is in their same
+  * siblings set.
+  * We then try to insert "ponctually" v all over the subtree rooted
+  * at Node(u). Each
+  * insertion of a Node with v label induces a local expansion at this
+  * Node (as explained above)
+  * and a sequence of "ponctual" insertion of Node(v) in the subtree
+  * rooted at sibling nodes of the new node, on its left.
+  *
+  * @param[in] u,v              Vertex_handle representing the new edge
+  * @param[in] zz_filtration    Must be empty. Contains at the end all new
+  *                             simplices induced by the insertion of the edge.
+  *
+  * SimplexTreeOptions::link_simplices_through_max_vertex must be true.
+  * Simplex_tree::Dictionary must sort Vertex_handles w/ increasing natural order <
+  */
   void flag_add_edge( Vertex_handle                   u
                     , Vertex_handle                   v
                     , Filtration_value                fil
@@ -1917,7 +1963,7 @@ public:
   {
   if(u == v) { // Are we inserting a vertex?
     auto res_ins = root_.members().emplace(u,Node(&root_,fil));
-    if(res_ins.second) { //if the vertex was not in the complex
+    if(res_ins.second) { //if the vertex is not in the complex, insert it
       update_simplex_tree_after_node_insertion(res_ins.first);
       zz_filtration.push_back(res_ins.first); //no more insert in root_.members()
     }
@@ -1927,22 +1973,27 @@ public:
   if(v < u) { std::swap(u,v); }
 
   //Note that we copy Simplex_handle (aka map iterators) in zz_filtration
-  //whereas we are still modifying the Simplex_tree. Insertions in siblings may
+  //while we are still modifying the Simplex_tree. Insertions in siblings may
   //invalidate Simplex_handles; we take care of this fact by first doing all
   //insertion in a Sibling, then inserting all handles in zz_filtration.
 
-  //check whether vertices u and v are in the tree, insert them if necessary
-  auto res_ins_v = root_.members().emplace(v,Node(&root_,fil));
-  auto res_ins_u = root_.members().emplace(u,Node(&root_,fil));
-  if(res_ins_v.second) {
-    zz_filtration.push_back(res_ins_v.first); //no more inserts in root_.members()
-  }
-  if(res_ins_u.second) {
-    zz_filtration.push_back(res_ins_u.first); //no more inserts in root_.members()
-  } 
+  //check whether vertices u and v are in the tree. If not, return an error.
+  auto sh_v = root_.members().find(v);  auto sh_u = root_.members().find(u);
+  GUDHI_CHECK(sh_v != root_.members().end() && sh_u != root_.members().end(), 
+              std::invalid_argument("Simplex_tree::flag_add_edge - insert an edge whose vertices are not in the complex") );
+
+  // auto res_ins_v = root_.members().emplace(v,Node(&root_,fil));
+  // auto res_ins_u = root_.members().emplace(u,Node(&root_,fil));
+  // if(res_ins_v.second) {
+  //   zz_filtration.push_back(res_ins_v.first); //no more inserts in root_.members()
+  // }
+  // if(res_ins_u.second) {
+  //   zz_filtration.push_back(res_ins_u.first); //no more inserts in root_.members()
+  // } 
   //check if the edge {u,v} is already in the complex, if true, nothing to do.
-  if( has_children(res_ins_u.first) && 
-      res_ins_u.first->second.children()->members().find(v) != res_ins_u.first->second.children()->members().end()) { return; }
+  if( has_children(sh_u) 
+      && sh_u->second.children()->members().find(v) 
+                          != sh_u->second.children()->members().end() ) { return; }
 
   //upper bound on dimension
   dimension_ = dim_max; dimension_to_be_lowered_ = true;
@@ -2316,7 +2367,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool simplex_handle_strong_validity = false;
-  static const bool link_simplices_through_max_vertex = false;
+  static const bool link_nodes_by_label = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2334,7 +2385,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool simplex_handle_strong_validity = false;
-  static const bool link_simplices_through_max_vertex = false;
+  static const bool link_nodes_by_label = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -2353,7 +2404,8 @@ struct Simplex_tree_options_zigzag_persistence {
   //allows deletion without invalidating iterators (Simplex_handles)
   static const bool simplex_handle_strong_validity = true;
   //add a pointer to each Node. All Nodes with a same label u are linked this way in an intrinsic list. Require to call a function after each insertion.
-  static const bool link_simplices_through_max_vertex = true;
+  //store an extra pair of pointers per nodes to put all nodes with same label u in a same list, for all u
+  static const bool link_nodes_by_label = true;
 };
 
 /** @} */  // end defgroup simplex_tree
