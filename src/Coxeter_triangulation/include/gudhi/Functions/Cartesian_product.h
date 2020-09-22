@@ -13,9 +13,11 @@
 
 #include <cstdlib>
 #include <tuple>
-#include <utility>
+#include <type_traits>  // for std::enable_if
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -139,7 +141,7 @@ struct Cartesian_product : public Function {
     cod_d_ = get_cod_d(function_tuple_);
   }
 
-private:
+ private:
   std::tuple<Functions...> function_tuple_;
   std::size_t amb_d_, cod_d_;
 };

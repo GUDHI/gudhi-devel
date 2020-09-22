@@ -11,7 +11,10 @@
 #ifndef FUNCTIONS_FUNCTION_AFFINE_PLANE_IN_RD_H_
 #define FUNCTIONS_FUNCTION_AFFINE_PLANE_IN_RD_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -85,7 +88,7 @@ struct Function_affine_plane_in_Rd : public Function {
     normal_matrix_.colwise().normalize();
   }
 
-protected:
+private:
   Eigen::MatrixXd normal_matrix_;
   std::size_t d_, k_, m_;
   Eigen::VectorXd off_;  

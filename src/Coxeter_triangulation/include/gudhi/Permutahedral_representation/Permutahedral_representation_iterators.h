@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <iostream>
-#include <algorithm>
+#include <algorithm>  // for std::find
 
 namespace Gudhi {
 
@@ -37,15 +37,15 @@ namespace coxeter_triangulation {
  * Forward iterator, 'value_type' is Permutahedral_representation::Vertex.*/
 template <class Permutahedral_representation>
 class Vertex_iterator : public boost::iterator_facade< Vertex_iterator<Permutahedral_representation>,
-						       typename Permutahedral_representation::Vertex const,
-						       boost::forward_traversal_tag> {
-protected:
+                                                       typename Permutahedral_representation::Vertex const,
+                                                       boost::forward_traversal_tag> {
+ private:
   friend class boost::iterator_core_access;
 
   using Vertex = typename Permutahedral_representation::Vertex;
   using Ordered_partition = typename Permutahedral_representation::OrderedSetPartition;
 
-  typedef Vertex value_t;
+  using value_t = Vertex;
 
   
   bool equal(Vertex_iterator const& other) const {
@@ -60,12 +60,12 @@ protected:
     std::size_t d = value_.size();
     for (auto i: *o_it_)
       if (i != d)
-	value_[i]++;
+        value_[i]++;
       else
-	for (std::size_t j = 0; j < d; j++)
-	  value_[j]--;
+        for (std::size_t j = 0; j < d; j++)
+          value_[j]--;
   }
-		       
+                       
   void increment() {
     if (is_end_)
       return;
@@ -84,9 +84,8 @@ public:
   {}
 
   Vertex_iterator() : is_end_(true) {}
-  
-  
-protected:
+
+ private:
   typename Ordered_partition::const_iterator o_it_, o_end_; 
   value_t value_;
   bool is_end_;
@@ -100,11 +99,11 @@ protected:
  * Forward iterator, value_type is Permutahedral_representation. */
 template <class Permutahedral_representation>
 class Face_iterator : public boost::iterator_facade< Face_iterator<Permutahedral_representation>,
-						     Permutahedral_representation const,
-						     boost::forward_traversal_tag> {
-  typedef Permutahedral_representation value_t;
+                                                     Permutahedral_representation const,
+                                                     boost::forward_traversal_tag> {
+  using value_t = Permutahedral_representation;
   
-protected:
+ private:
   friend class boost::iterator_core_access;
 
   using Vertex = typename Permutahedral_representation::Vertex;
@@ -130,9 +129,8 @@ protected:
     // Combination *c_it_ is supposed to be sorted in increasing order
     value_ = face_from_indices<Permutahedral_representation>(simplex_, *c_it_);
   }
-  
+
 public:
-  
   Face_iterator(const Permutahedral_representation& simplex, const uint& k)
     : simplex_(simplex),
       k_(k),
@@ -147,7 +145,7 @@ public:
   // Used for the creating an end iterator
   Face_iterator() : is_end_(true) {}
   
-protected:
+ private:
   Permutahedral_representation simplex_; // Input simplex
   uint k_;
   uint l_; // Dimension of the input simplex
@@ -165,11 +163,11 @@ protected:
  * Forward iterator, value_type is Permutahedral_representation. */
 template <class Permutahedral_representation>
 class Coface_iterator : public boost::iterator_facade< Coface_iterator<Permutahedral_representation>,
-						       Permutahedral_representation const,
-						       boost::forward_traversal_tag> {
-  typedef Permutahedral_representation value_t;
-  
-protected:
+                                                       Permutahedral_representation const,
+                                                       boost::forward_traversal_tag> {
+  using value_t = Permutahedral_representation;
+
+ private:
   friend class boost::iterator_core_access;
 
   using Vertex = typename Permutahedral_representation::Vertex;
@@ -187,20 +185,20 @@ protected:
     uint i = 0;
     for (; i < k_+1; i++) {
       if (++(o_its_[i]) != o_end_)
-	break;
+        break;
     }
     if (i == k_+1) {
       if (++i_it_ == i_end_) {
-	is_end_ = true;
-	return;
+        is_end_ = true;
+        return;
       }
       o_its_.clear();
       for (uint j = 0; j < k_ + 1; j++)
-	o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j]+1));
+        o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j]+1));
     }
     else
       for (uint j = 0; j < i; j++)
-	o_its_[j].reinitialize();
+        o_its_[j].reinitialize();
     update_value();
   }
 
@@ -212,30 +210,29 @@ protected:
     for (; u_ <= (*i_it_)[k_]; u_++) {
       auto range = (*o_its_[k_])[u_];
       if (std::find(range.begin(), range.end(), t_) != range.end())
-	break;
+        break;
     }
     uint i = 0;
     for (uint j = u_+1; j <= (*i_it_)[k_]; j++, i++)
       for (uint b: (*o_its_[k_])[j]) {
-	uint c = simplex_.partition()[k_][b];
+        uint c = simplex_.partition()[k_][b];
         value_.partition()[i].push_back(c);
-	value_.vertex()[c]--;
+        value_.vertex()[c]--;
       }
     for (uint h = 0; h < k_; h++)
       for (uint j = 0; j <= (*i_it_)[h]; j++, i++) {
-	for (uint b: (*o_its_[h])[j])
-	  value_.partition()[i].push_back(simplex_.partition()[h][b]);
+        for (uint b: (*o_its_[h])[j])
+          value_.partition()[i].push_back(simplex_.partition()[h][b]);
       }
     for (uint j = 0; j <= u_; j++, i++)
       for (uint b: (*o_its_[k_])[j])
-	value_.partition()[i].push_back(simplex_.partition()[k_][b]);
+        value_.partition()[i].push_back(simplex_.partition()[k_][b]);
     // sort the values in each part (probably not needed)
     for (auto& part: value_.partition())
       std::sort(part.begin(), part.end());
   }
-  
-public:
-  
+
+ public:
   Coface_iterator(const Permutahedral_representation& simplex, const uint& l)
     : simplex_(simplex),
       d_(simplex.vertex().size()),
@@ -248,8 +245,8 @@ public:
     uint j = 0;
     for (; j < simplex_.partition()[k_].size(); j++)
       if (simplex_.partition()[k_][j] == d_) {
-	t_ = j;
-	break;
+        t_ = j;
+        break;
       }
     if (j == simplex_.partition()[k_].size()) {
       std::cerr << "Coface iterator: the argument simplex is not a permutahedral representation\n";
@@ -263,8 +260,8 @@ public:
 
   // Used for the creating an end iterator
   Coface_iterator() : is_end_(true) {}
-  
-protected:
+
+ private:
   Permutahedral_representation simplex_; // Input simplex
   uint d_; // Ambient dimension
   uint l_; // Dimension of the coface

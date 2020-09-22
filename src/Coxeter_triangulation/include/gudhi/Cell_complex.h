@@ -13,10 +13,11 @@
 
 #include <Eigen/Dense> 
 
-#include <algorithm>
-#include <gudhi/Permutahedral_representation/Simplex_comparator.h>
-#include <fstream> // for Hasse_diagram_persistence.h
+#include <vector>
+#include <map>
+#include <utility>  // for std::make_pair
 
+#include <gudhi/Permutahedral_representation/Simplex_comparator.h>
 #include <gudhi/Cell_complex/Hasse_diagram_cell.h> // for Hasse_cell
 
 namespace Gudhi {
@@ -43,40 +44,36 @@ public:
   /** \brief Type of a simplex in the ambient triangulation.
    *  Is a model of the concept SimplexInCoxeterTriangulation.
    */
-  typedef typename Out_simplex_map_::key_type Simplex_handle;
+  using Simplex_handle = typename Out_simplex_map_::key_type;
   /** \brief Type of a cell in the cell complex. 
    *  Always is Gudhi::Hasse_cell from the Hasse diagram module.
    *  The additional information is the boolean that is true if and only if the cell lies
    *  on the boundary.
    */
-  typedef Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, bool> Hasse_cell;
+  using Hasse_cell = Gudhi::Hasse_diagram::Hasse_diagram_cell<int, double, bool>;
   /** \brief Type of a map from permutahedral representations of simplices in the
    *  ambient triangulation to the corresponding cells in the cell complex of some
    *  specific dimension.
    */
-  typedef std::map<Simplex_handle,
-		   Hasse_cell*,
-		   Simplex_comparator<Simplex_handle> > Simplex_cell_map;
+  using Simplex_cell_map = std::map<Simplex_handle, Hasse_cell*, Simplex_comparator<Simplex_handle> >;
   /** \brief Type of a vector of maps from permutahedral representations of simplices in the
    *  ambient triangulation to the corresponding cells in the cell complex of various dimensions.
    */
-  typedef std::vector<Simplex_cell_map> Simplex_cell_maps;
+  using Simplex_cell_maps = std::vector<Simplex_cell_map>;
   
   /** \brief Type of a map from cells in the cell complex to the permutahedral representations
    *  of the corresponding simplices in the ambient triangulation.
    */
-  typedef std::map<Hasse_cell*, Simplex_handle> Cell_simplex_map;
+  using Cell_simplex_map = std::map<Hasse_cell*, Simplex_handle>;
 
   /** \brief Type of a map from vertex cells in the cell complex to the permutahedral representations
    *  of their Cartesian coordinates.
    */
-  typedef std::map<Hasse_cell*, Eigen::VectorXd> Cell_point_map;
+  using Cell_point_map = std::map<Hasse_cell*, Eigen::VectorXd>;
 
 private:
     
-  Hasse_cell* insert_cell(const Simplex_handle& simplex,
-			  std::size_t cell_d,
-			  bool is_boundary) {
+  Hasse_cell* insert_cell(const Simplex_handle& simplex, std::size_t cell_d, bool is_boundary) {
     Simplex_cell_maps& simplex_cell_maps
       = (is_boundary? boundary_simplex_cell_maps_ : interior_simplex_cell_maps_); 
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
@@ -110,27 +107,27 @@ private:
       const Simplex_handle& simplex = sc_pair.first;
       Hasse_cell* cell = sc_pair.second;
       for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d)) {
-	Hasse_cell* new_cell = insert_cell(coface, cell_d, false);
-	new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+        Hasse_cell* new_cell = insert_cell(coface, cell_d, false);
+        new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
       }
     }
     
     if (is_manifold_with_boundary) {
       for (auto& sc_pair: boundary_simplex_cell_maps_[cell_d - 1]) {
-	const Simplex_handle& simplex = sc_pair.first;
-	Hasse_cell* cell = sc_pair.second;
-	if (cell_d != intr_d_)
-	  for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d + 1)) {
-	    Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
-	    new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
-	  }
-	auto map_it = interior_simplex_cell_maps_[cell_d].find(simplex);
-	if (map_it == interior_simplex_cell_maps_[cell_d].end())
-	  std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
-	else {
-	  Hasse_cell* i_cell = map_it->second;
-	  i_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
-	}
+        const Simplex_handle& simplex = sc_pair.first;
+        Hasse_cell* cell = sc_pair.second;
+        if (cell_d != intr_d_)
+          for (Simplex_handle coface: simplex.coface_range(cod_d_ + cell_d + 1)) {
+            Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
+            new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+          }
+        auto map_it = interior_simplex_cell_maps_[cell_d].find(simplex);
+        if (map_it == interior_simplex_cell_maps_[cell_d].end())
+          std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
+        else {
+          Hasse_cell* i_cell = map_it->second;
+          i_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+        }
       }
     }
   }
@@ -148,15 +145,15 @@ private:
       cell_point_map_.emplace(std::make_pair(new_cell, point));
     }
     for (std::size_t cell_d = 1;
-	 cell_d < interior_simplex_cell_maps_.size() &&
-	   !interior_simplex_cell_maps_[cell_d - 1].empty();
-	 ++cell_d) {
+         cell_d < interior_simplex_cell_maps_.size() &&
+           !interior_simplex_cell_maps_[cell_d - 1].empty();
+         ++cell_d) {
       expand_level(cell_d);
     }
   }
   
   void construct_complex_(const Out_simplex_map_& interior_simplex_map,
-			  const Out_simplex_map_& boundary_simplex_map) {
+                          const Out_simplex_map_& boundary_simplex_map) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_prejoin_lists.resize(interior_simplex_cell_maps_.size());
@@ -185,17 +182,17 @@ private:
 #endif        
 
     for (std::size_t cell_d = 1;
-	 cell_d < interior_simplex_cell_maps_.size() &&
-	   !interior_simplex_cell_maps_[cell_d - 1].empty();
-	 ++cell_d) {
+         cell_d < interior_simplex_cell_maps_.size() &&
+           !interior_simplex_cell_maps_[cell_d - 1].empty();
+         ++cell_d) {
       expand_level(cell_d);
       
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
       for (const auto& sc_pair: interior_simplex_cell_maps_[cell_d])
-	cc_interior_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
+        cc_interior_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
       if (cell_d < boundary_simplex_cell_maps_.size())
-	for (const auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
-	  cc_boundary_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
+        for (const auto& sc_pair: boundary_simplex_cell_maps_[cell_d])
+          cc_boundary_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
 #endif
     }
   }
@@ -230,7 +227,7 @@ public:
    * \param[in] limit_dimension The dimension of the constructed skeleton.
    */
   void construct_complex(const Out_simplex_map_& out_simplex_map,
-			 std::size_t limit_dimension) {
+                         std::size_t limit_dimension) {
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
     if (!out_simplex_map.empty())
       cod_d_ = out_simplex_map.begin()->first.dimension();
@@ -250,7 +247,7 @@ public:
    * to the intersection points.
    */
   void construct_complex(const Out_simplex_map_& interior_simplex_map,
-			 const Out_simplex_map_& boundary_simplex_map) {
+                         const Out_simplex_map_& boundary_simplex_map) {
     interior_simplex_cell_maps_.resize(intr_d_ + 1);
     boundary_simplex_cell_maps_.resize(intr_d_);
     if (!interior_simplex_map.empty())
@@ -273,8 +270,8 @@ public:
    * \param[in] limit_dimension The dimension of the constructed skeleton.
    */
   void construct_complex(const Out_simplex_map_& interior_simplex_map,
-			 const Out_simplex_map_& boundary_simplex_map,
-			 std::size_t limit_dimension) {
+                         const Out_simplex_map_& boundary_simplex_map,
+                         std::size_t limit_dimension) {
     interior_simplex_cell_maps_.resize(limit_dimension + 1);
     boundary_simplex_cell_maps_.resize(limit_dimension);
     if (!interior_simplex_map.empty())

@@ -15,6 +15,9 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
+#include <cstdlib>  // for std::size_t
+#include <algorithm>
+
  /** \brief Computes the permutahedral representation of a face of a given simplex
   *  and a range of the vertex indices that compose the face.
   *
@@ -25,10 +28,9 @@ namespace coxeter_triangulation {
   * @param[in] simplex Input simplex.
   * @param[in] indices Input range of indices.
   */
-template <class Permutahedral_representation,
-	  class Index_range>
+template <class Permutahedral_representation, class Index_range>
 Permutahedral_representation face_from_indices(const Permutahedral_representation& simplex,
-					       const Index_range& indices) {
+                                               const Index_range& indices) {
   using range_index = typename Index_range::value_type;
   using Ordered_set_partition = typename Permutahedral_representation::OrderedSetPartition;
   using Part = typename Ordered_set_partition::value_type;

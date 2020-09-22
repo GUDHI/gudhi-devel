@@ -11,7 +11,10 @@
 #ifndef FUNCTIONS_CONSTANT_FUNCTION_H_
 #define FUNCTIONS_CONSTANT_FUNCTION_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -57,7 +60,8 @@ struct Constant_function : public Function {
    */
   Constant_function(std::size_t d, std::size_t k, const Eigen::VectorXd& value)
     : d_(d), k_(k), value_(value) {}
-  
+
+ private:
   std::size_t d_, k_;
   Eigen::VectorXd value_;
 };

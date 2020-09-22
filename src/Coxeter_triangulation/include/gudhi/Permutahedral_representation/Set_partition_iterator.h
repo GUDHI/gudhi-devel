@@ -25,11 +25,11 @@ typedef unsigned uint;
  *   
 */
 class Set_partition_iterator : public boost::iterator_facade< Set_partition_iterator,
-							      std::vector<std::vector<uint> > const,
-							      boost::forward_traversal_tag> {
-  typedef std::vector<std::vector<uint> > value_t;
-  
-protected:
+                                                              std::vector<std::vector<uint> > const,
+                                                              boost::forward_traversal_tag> {
+  using value_t = std::vector<std::vector<uint>>;
+
+ private:
   friend class boost::iterator_core_access;
 
   bool equal(Set_partition_iterator const& other) const {
@@ -54,7 +54,7 @@ protected:
     }
     uint i = n_ - 1;
     while (rgs_[i] + 1 > max_[i] ||
-	   rgs_[i] + 1 >= k_)
+           rgs_[i] + 1 >= k_)
       i--;
     if (i == 0) {
       is_end_ = true;
@@ -71,16 +71,15 @@ protected:
     uint p = k_;
     if (mm < p)
       do {
-	max_[i] = p;
-	--i;
-	--p;
-	rgs_[i] = p;
+        max_[i] = p;
+        --i;
+        --p;
+        rgs_[i] = p;
       } while (max_[i] < p);
     update_value();
   }
   
-public:
-  
+ public:
   Set_partition_iterator(const uint& n, const uint& k)
     :
     value_(k),
@@ -116,12 +115,12 @@ public:
       max_[i] = rgs_[i-1] + 1;
     update_value();
   }
-  
-protected:
+
+ private:
   value_t value_;         // the dereference value
   std::vector<uint> rgs_; // restricted growth string
   std::vector<uint> max_; // max_[i] = max(rgs_[0],...,rgs[i-1]) + 1
-  bool is_end_;   // is true when the current permutation is the final one 
+  bool is_end_;           // is true when the current permutation is the final one 
 
   uint n_;
   uint k_;

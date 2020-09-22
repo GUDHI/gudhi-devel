@@ -11,9 +11,10 @@
 #ifndef FUNCTIONS_PL_APPROXIMATION_H_
 #define FUNCTIONS_PL_APPROXIMATION_H_
 
-#include <cstdlib>
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -90,7 +91,7 @@ struct PL_approximation : public Function {
   PL_approximation(const Function_& function, const Triangulation_& triangulation)
     : fun_(function), tr_(triangulation) {}
 
-private:  
+ private:  
   Function_ fun_;
   Triangulation_ tr_;
 };

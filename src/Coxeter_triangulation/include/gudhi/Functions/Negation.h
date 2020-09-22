@@ -11,9 +11,10 @@
 #ifndef FUNCTIONS_NEGATION_H_
 #define FUNCTIONS_NEGATION_H_
 
-#include <cstdlib>
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -62,6 +63,8 @@ struct Negation : public Function {
   Negation(const Function_& function) :
     fun_(function) {
   }
+
+ private:
   Function_ fun_;
 };
 
@@ -78,7 +81,7 @@ struct Negation : public Function {
  * \ingroup coxeter_triangulation
  */
 template <class Function_>
-Negation<Function_>  negation(const Function_& function) {
+Negation<Function_> negation(const Function_& function) {
   return Negation<Function_>(function);
 }
 

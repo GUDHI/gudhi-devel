@@ -11,7 +11,10 @@
 #ifndef FUNCTIONS_FUNCTION_MOMENT_CURVE_IN_RD_H_
 #define FUNCTIONS_FUNCTION_MOMENT_CURVE_IN_RD_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -73,7 +76,7 @@ struct Function_moment_curve_in_Rd : public Function {
 			      Eigen::VectorXd& offset)
     : m_(1), k_(d-1), d_(d), r_(r), off_(offset) {}
   
-protected:
+ private:
   std::size_t m_, k_, d_;
   double r_;
   Eigen::VectorXd off_;

@@ -11,7 +11,11 @@
 #ifndef FUNCTIONS_FUNCTION_TORUS_IN_R3_H_
 #define FUNCTIONS_FUNCTION_TORUS_IN_R3_H_
 
+#include <cstdlib>  // for std::size_t
+#include <cmath>  // for std::sqrt
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -62,7 +66,7 @@ struct Function_torus_in_R3 : public Function {
 		       Eigen::Vector3d off = Eigen::Vector3d::Zero()) :
     R_(R), r_(r), off_(off) {}
   
-protected:
+ private:
   double R_, r_;
   Eigen::Vector3d off_;
 };

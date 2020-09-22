@@ -25,11 +25,11 @@ typedef unsigned uint;
  *  Based on the algorithm by Mifsud.
 */
 class Integer_combination_iterator : public boost::iterator_facade< Integer_combination_iterator,
-								    std::vector<uint> const,
-								    boost::forward_traversal_tag> {
-  typedef std::vector<uint> value_t;
+                                                                    std::vector<uint> const,
+                                                                    boost::forward_traversal_tag> {
+  using value_t = std::vector<uint>;
   
-protected:
+ private:
   friend class boost::iterator_core_access;
   
   bool equal(Integer_combination_iterator const& other) const {
@@ -71,7 +71,6 @@ protected:
   }
 
 public:
-
   template <class Bound_range>
   Integer_combination_iterator(const uint& n, const uint& k, const Bound_range& bounds)
     :
@@ -109,8 +108,8 @@ public:
 
   // Used for the creating an end iterator
   Integer_combination_iterator() : is_end_(true), n_(0), k_(0) {}
-  
-protected:
+
+ private:
   value_t value_; // the dereference value
   bool is_end_;   // is true when the current integer combination is the final one 
 

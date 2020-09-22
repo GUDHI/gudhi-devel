@@ -13,8 +13,10 @@
 
 #include <vector>
 #include <limits>
+
 #include <gudhi/Permutahedral_representation/Permutation_iterator.h>
 #include <gudhi/Permutahedral_representation/Set_partition_iterator.h>
+
 #include <boost/range/iterator_range.hpp>
 
 namespace Gudhi {
@@ -48,11 +50,11 @@ struct Ordered_set_partition {
  *   
 */
 class Ordered_set_partition_iterator : public boost::iterator_facade< Ordered_set_partition_iterator,
-								      Ordered_set_partition const,
-								      boost::forward_traversal_tag> {
-  typedef Ordered_set_partition value_t;
+                                                                      Ordered_set_partition const,
+                                                                      boost::forward_traversal_tag> {
+  using value_t = Ordered_set_partition;
   
-protected:
+ private:
   friend class boost::iterator_core_access;
 
   bool equal(Ordered_set_partition_iterator const& other) const {
@@ -66,22 +68,19 @@ protected:
   void increment() {
     if (++value_.p_it_ == p_end_) {
       if (++value_.s_it_ == s_end_) {
-	is_end_ = true;
-	return;
+        is_end_ = true;
+        return;
       }
       else
-	value_.p_it_.reinitialize();
+        value_.p_it_.reinitialize();
     }
   }
   
-public:
-  
+ public:
   Ordered_set_partition_iterator(const uint& n, const uint& k)
     :
     value_({Set_partition_iterator(n,k), Permutation_iterator(k)}),
-    is_end_(n == 0)
-  {
-  }
+    is_end_(n == 0) {}
 
   // Used for the creating an end iterator
   Ordered_set_partition_iterator() : is_end_(true) {}
@@ -92,7 +91,7 @@ public:
     value_.s_it_.reinitialize();
   }
   
-protected:
+ private:
   Set_partition_iterator s_end_; // Set partition iterator and the corresponding end iterator
   Permutation_iterator p_end_; // Permutation iterator and the corresponding end iterator
   value_t value_;         // the dereference value

@@ -48,9 +48,9 @@ struct IntersectionOracle {
    *   (the domain dimension of the function).
    */
   template <class Simplex_handle,
-	    class Triangulation>
+            class Triangulation>
   Query_result<Simplex_handle> intersects(const Simplex_handle& simplex,
-					  const Triangulation& triangulation) const;
+                                          const Triangulation& triangulation) const;
 
   /** \brief Intersection query with the boundary of the manifold.
    *  
@@ -73,9 +73,9 @@ struct IntersectionOracle {
    *   (the domain dimension of the function).
    */
   template <class Simplex_handle,
-	    class Triangulation>
+            class Triangulation>
   Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
-						   const Triangulation& triangulation) const;
+                                                   const Triangulation& triangulation) const;
 
   /** \brief Returns true if the input point lies inside the piecewise-linear
    *   domain induced by the given ambient triangulation that defines the relative
@@ -89,7 +89,7 @@ struct IntersectionOracle {
    */
   template <class Triangulation>
   bool lies_in_domain(const Eigen::VectorXd& p,
-		      const Triangulation& triangulation) const {
+                      const Triangulation& triangulation) const {
     Eigen::VectorXd pl_p = make_pl_approximation(domain_fun_, triangulation)(p);
     return pl_p(0) < 0;
   }

@@ -11,8 +11,9 @@
 #ifndef PERMUTAHEDRAL_REPRESENTATION_SIZE_RANGE_H_
 #define PERMUTAHEDRAL_REPRESENTATION_SIZE_RANGE_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <boost/range/iterator_range.hpp>
-#include <cstdlib>         // std::size_t
 
 namespace Gudhi {
 
@@ -22,11 +23,11 @@ namespace coxeter_triangulation {
  */
 template <class T_it>
 class Size_iterator : public boost::iterator_facade< Size_iterator<T_it>,
-						     std::size_t const,
-						     boost::forward_traversal_tag> {
+                                                     std::size_t const,
+                                                     boost::forward_traversal_tag> {
   friend class boost::iterator_core_access;
 
-protected:
+ private:
   bool equal(Size_iterator const& other) const {
     return (is_end_ && other.is_end_);
   }
@@ -43,15 +44,14 @@ protected:
     value_ = t_it_->size()-1;
   }
 
-public:
-
+ public:
   Size_iterator(const T_it& t_begin, const T_it& t_end)
     : t_it_(t_begin), t_end_(t_end), is_end_(t_begin == t_end) {
     if (!is_end_)
       value_ = t_it_->size()-1;
   }
 
-protected:
+ private:
   T_it t_it_, t_end_;
   bool is_end_;
   std::size_t value_;
@@ -61,7 +61,7 @@ template <class T>
 class Size_range {
   const T& t_;
 
-public:
+ public:
   typedef Size_iterator<typename T::const_iterator> iterator;
   
   Size_range(const T& t) : t_(t) {}

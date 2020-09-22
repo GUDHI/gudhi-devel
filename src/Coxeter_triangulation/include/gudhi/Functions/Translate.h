@@ -11,9 +11,10 @@
 #ifndef FUNCTIONS_TRANSLATE_H_
 #define FUNCTIONS_TRANSLATE_H_
 
-#include <cstdlib>
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -65,6 +66,8 @@ struct Translate : public Function {
   Translate(const Function_& function, const Eigen::VectorXd& off) :
     fun_(function), off_(off) {
   }
+
+ private:
   Function_ fun_;
   Eigen::VectorXd off_;
 };

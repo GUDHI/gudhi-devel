@@ -11,9 +11,11 @@
 #ifndef FREUDENTHAL_TRIANGULATION_H_
 #define FREUDENTHAL_TRIANGULATION_H_
 
-#include <stack>
-#include <map>
-#include <numeric> //iota
+#include <vector>
+#include <algorithm>  // for std::sort
+#include <cmath>  // for std::floor
+#include <numeric>  // for std::iota
+#include <cstdlib>  // for std::size_t
 
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
@@ -40,21 +42,19 @@ namespace coxeter_triangulation {
  * Needs to be a model of SimplexInCoxeterTriangulation.
  */
 template <class Permutahedral_representation_
-	  = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
+          = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
 class Freudenthal_triangulation {
-
-  typedef Eigen::MatrixXd Matrix;
-  typedef Eigen::VectorXd Vector;
-  typedef Eigen::SparseMatrix<double> SparseMatrix;
-  typedef Eigen::Triplet<double> Triplet;
+  using Matrix = Eigen::MatrixXd;
+  using Vector = Eigen::VectorXd;
+  using SparseMatrix = Eigen::SparseMatrix<double>;
+  using Triplet = Eigen::Triplet<double>;
   
-public:
-
+ public:
   /** \brief Type of the simplices in the triangulation. */
-  typedef Permutahedral_representation_ Simplex_handle;
+  using Simplex_handle = Permutahedral_representation_;
 
   /** \brief Type of the vertices in the triangulation. */
-  typedef typename Permutahedral_representation_::Vertex Vertex_handle;
+  using Vertex_handle = typename Permutahedral_representation_::Vertex;
   
   
   /** \brief Constructor of the Freudenthal-Kuhn triangulation of a given dimension. 
@@ -155,37 +155,37 @@ public:
     std::vector<double> z;
     if (is_freudenthal) {
       for (std::size_t i = 0; i < d; i++) {
-	double x_i = scale * point[i];
-	int y_i = std::floor(x_i);
-	output.vertex().push_back(y_i);
-	z.push_back(x_i - y_i);
+        double x_i = scale * point[i];
+        int y_i = std::floor(x_i);
+        output.vertex().push_back(y_i);
+        z.push_back(x_i - y_i);
       }
     }
     else {
       Eigen::VectorXd p_vect(d);
       for (std::size_t i = 0; i < d; i++)
-	p_vect(i) = point[i];
+        p_vect(i) = point[i];
       Eigen::VectorXd x_vect = colpivhouseholderqr_.solve(p_vect - offset_);
       for (std::size_t i = 0; i < d; i++) {
-	double x_i = scale * x_vect(i);
-	int y_i = std::floor(x_i);
-	output.vertex().push_back(y_i);
-	z.push_back(x_i - y_i);
+        double x_i = scale * x_vect(i);
+        int y_i = std::floor(x_i);
+        output.vertex().push_back(y_i);
+        z.push_back(x_i - y_i);
       }
     }
     z.push_back(0);
     Part indices(d+1);
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(),
-	      indices.end(),
-	      [&z](std::size_t i1, std::size_t i2) {return z[i1] > z[i2];});
+              indices.end(),
+              [&z](std::size_t i1, std::size_t i2) {return z[i1] > z[i2];});
 
     output.partition().push_back(Part(1, indices[0]));
     for (std::size_t i = 1; i <= d; ++i)
       if (z[indices[i-1]] > z[indices[i]] + error)
-	output.partition().push_back(Part(1, indices[i]));
+        output.partition().push_back(Part(1, indices[i]));
       else
-	output.partition().back().push_back(indices[i]);
+        output.partition().back().push_back(indices[i]);
     return output;
   }
 

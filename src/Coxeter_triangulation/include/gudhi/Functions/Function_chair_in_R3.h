@@ -11,9 +11,11 @@
 #ifndef FUNCTIONS_FUNCTION_CHAIR_IN_R3_H_
 #define FUNCTIONS_FUNCTION_CHAIR_IN_R3_H_
 
-#include <cstdlib>
+#include <cstdlib>  // for std::size_t
+#include <cmath>  // for std::pow
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {

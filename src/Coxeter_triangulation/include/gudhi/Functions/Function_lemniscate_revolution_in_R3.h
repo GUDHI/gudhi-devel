@@ -11,7 +11,11 @@
 #ifndef FUNCTIONS_FUNCTION_LEMNISCATE_REVOLUTION_IN_R3_H_
 #define FUNCTIONS_FUNCTION_LEMNISCATE_REVOLUTION_IN_R3_H_
 
+#include <cstdlib>  // for std::size_t
+#include <cmath>  // for std::sqrt
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -51,7 +55,7 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    * See the method seed2() for the other point. 
    */
   virtual Eigen::VectorXd seed() const override {
-    Eigen::Vector3d result(sqrt(2*a_)+off_[0], off_[1], off_[2]);
+    Eigen::Vector3d result(std::sqrt(2*a_)+off_[0], off_[1], off_[2]);
     return result;
   }
 
@@ -60,7 +64,7 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
    * See the method seed() for the other point. 
    */
   Eigen::VectorXd seed2() const {
-    Eigen::Vector3d result(-sqrt(2*a_)+off_[0], off_[1], off_[2]);
+    Eigen::Vector3d result(-std::sqrt(2*a_)+off_[0], off_[1], off_[2]);
     return result;
   }
   
@@ -75,7 +79,7 @@ struct Function_lemniscate_revolution_in_R3 : public Function {
 				       Eigen::Vector3d off = Eigen::Vector3d::Zero())
     : a_(a), off_(off) {}
 
-protected:
+ private:
   double a_;
   Eigen::Vector3d off_;
 };

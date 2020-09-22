@@ -11,9 +11,8 @@
 #ifndef COXETER_TRIANGULATION_H_
 #define COXETER_TRIANGULATION_H_
 
-#include <stack>
-#include <map>
-#include <numeric> //iota
+#include <vector>
+#include <cmath>  // for std::sqrt
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -42,10 +41,9 @@ namespace coxeter_triangulation {
  *  Needs to be a model of SimplexInCoxeterTriangulation.
  */
 template <class Permutahedral_representation_
-	  = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
+          = Permutahedral_representation<std::vector<int>, std::vector<std::vector<std::size_t> > > >
 class Coxeter_triangulation : public Freudenthal_triangulation<Permutahedral_representation_> {
-
-  typedef Eigen::MatrixXd Matrix;
+  using Matrix = Eigen::MatrixXd;
 
   Matrix root_matrix(unsigned d) {
     Matrix cartan(d,d);
@@ -58,8 +56,8 @@ class Coxeter_triangulation : public Freudenthal_triangulation<Permutahedral_rep
     }
     for (unsigned i = 0; i < d; i++)
       for (unsigned j = 0; j < d; j++)
-	if (j+1 < i || j > i+1) 
-	  cartan(i,j) = 0;    
+        if (j+1 < i || j > i+1) 
+          cartan(i,j) = 0;    
     Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
     Eigen::VectorXd sqrt_diag(d);
     for (unsigned i = 0; i < d; ++i)
@@ -68,16 +66,15 @@ class Coxeter_triangulation : public Freudenthal_triangulation<Permutahedral_rep
     Matrix lower(d,d);
     for (unsigned i = 0; i < d; i++)
       for (unsigned j = 0; j < d; j++)
-	if (i < j)
-	  lower(i,j) = 0;
-	else
-	  lower(i,j) = 1;    
+        if (i < j)
+          lower(i,j) = 0;
+        else
+          lower(i,j) = 1;    
     Matrix result = (lower * saes.eigenvectors()*sqrt_diag.asDiagonal()).inverse();
     return result;
   }
-  
-public:
 
+ public:
   /** \brief Constructor of Coxeter triangulation of a given dimension. 
    * @param[in] dimension The dimension of the triangulation.
    */

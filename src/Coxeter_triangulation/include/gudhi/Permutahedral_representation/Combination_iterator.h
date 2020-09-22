@@ -83,7 +83,7 @@ public:
     }
   }
   
-protected:
+ private:
   value_t value_; // the dereference value
   bool is_end_;   // is true when the current permutation is the final one 
 

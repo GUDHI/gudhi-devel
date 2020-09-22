@@ -11,7 +11,10 @@
 #ifndef FUNCTIONS_FUNCTION_WHITNEY_UMBRELLA_IN_R3_H_
 #define FUNCTIONS_FUNCTION_WHITNEY_UMBRELLA_IN_R3_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -69,6 +72,8 @@ struct Function_whitney_umbrella_in_R3 : public Function {
    */
   Function_whitney_umbrella_in_R3(Eigen::Vector3d off = Eigen::Vector3d::Zero())
     : off_(off) {}
+
+ private:
   Eigen::Vector3d off_;
 };
 

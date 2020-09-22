@@ -8,21 +8,14 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
-#include <sstream>
-#include <type_traits>
-#include <cstdlib>
-#include <cstdio>
-
-
-
-
 #ifndef HASSE_DIAGRAM_CELL_H
 #define HASSE_DIAGRAM_CELL_H
 
+#include <vector>
+#include <utility>  // for std::pair
+#include <ostream>
+#include <string>
+#include <type_traits>  // for std::is_same
 
 namespace Gudhi {
 namespace Hasse_diagram {

@@ -12,8 +12,15 @@
 #define IO_OUTPUT_MESHES_TO_MEDIT_H_
 
 #include <gudhi/IO/Mesh_medit.h>
+
 #include <Eigen/Dense>
-#include <fstream>
+
+#include <cstdlib>  // for std::size_t
+#include <fstream>  // for std::ofstream
+#include <vector>
+#include <type_traits>  // for std::enable_if
+#include <tuple>  // for std::get
+#include <utility>  // for std::make_pair
 
 namespace Gudhi {
 

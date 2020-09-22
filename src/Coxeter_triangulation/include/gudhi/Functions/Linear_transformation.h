@@ -11,9 +11,10 @@
 #ifndef FUNCTIONS_LINEAR_TRANSFORMATION_H_
 #define FUNCTIONS_LINEAR_TRANSFORMATION_H_
 
-#include <cstdlib>
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -65,7 +66,7 @@ struct Linear_transformation : public Function {
     fun_(function), matrix_(matrix) {
   }
 
-private:
+ private:
   Function_ fun_;
   Eigen::MatrixXd matrix_;
 };

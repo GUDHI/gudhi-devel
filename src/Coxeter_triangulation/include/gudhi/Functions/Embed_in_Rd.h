@@ -11,10 +11,10 @@
 #ifndef FUNCTIONS_EMBED_IN_RD_H_
 #define FUNCTIONS_EMBED_IN_RD_H_
 
-#include <cstdlib>
-#include <random>
+#include <cstdlib>  // for std::size_t
 
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 
@@ -76,6 +76,8 @@ struct Embed_in_Rd : public Function {
   Embed_in_Rd(const Function_& function, std::size_t d) :
     fun_(function), d_(d) {
   }
+
+ private:
   Function_ fun_;
   std::size_t d_;
 };

@@ -11,7 +11,10 @@
 #ifndef FUNCTIONS_FUNCTION_SM_IN_RD_H_
 #define FUNCTIONS_FUNCTION_SM_IN_RD_H_
 
+#include <cstdlib>  // for std::size_t
+
 #include <gudhi/Functions/Function.h>
+
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -115,7 +118,7 @@ struct Function_Sm_in_Rd: public Function {
     : Function_Sm_in_Rd(rhs.r_, rhs.m_, rhs.d_, rhs.center_) {}
 
   
-protected:
+ private:
   std::size_t m_, k_, d_;
   double r_;
   Eigen::VectorXd center_;

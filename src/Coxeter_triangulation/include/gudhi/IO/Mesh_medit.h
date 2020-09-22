@@ -15,6 +15,11 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
+#include <Eigen/Dense>
+
+#include <vector>
+#include <utility>  // for std::pair
+
 /* \class Mesh_medit
  * \brief Structure to store a mesh that can be output in Medit .mesh file format
  *  using the output_meshes_to_medit method.

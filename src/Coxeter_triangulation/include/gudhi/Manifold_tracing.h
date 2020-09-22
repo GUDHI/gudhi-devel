@@ -76,26 +76,26 @@ public:
    * are the intersection points.
    */
   template <class Point_range,
-	    class Intersection_oracle>
+            class Intersection_oracle>
   void manifold_tracing_algorithm(const Point_range& seed_points,
-				  const Triangulation_& triangulation,
-				  const Intersection_oracle& oracle,
-				  Out_simplex_map& out_simplex_map) {
+                                  const Triangulation_& triangulation,
+                                  const Intersection_oracle& oracle,
+                                  Out_simplex_map& out_simplex_map) {
     std::size_t cod_d = oracle.cod_d();
     std::queue<Simplex_handle> queue;
 
     for (const auto& p: seed_points) {
       Simplex_handle full_simplex = triangulation.locate_point(p);
       for (Simplex_handle face: full_simplex.face_range(cod_d)) {
-	Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
-	if (qr.success &&
-	    out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) {
+        Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
+        if (qr.success &&
+            out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) {
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-	  mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
+          mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
-	  queue.emplace(face);
-	  break;
-	}
+          queue.emplace(face);
+          break;
+        }
       }
     }
     
@@ -104,12 +104,12 @@ public:
       Simplex_handle s = queue.front();
       queue.pop();
       for (auto cof: s.coface_range(cod_d+1)) {
-	for (auto face: cof.face_range(cod_d)) {
-	  Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
-	  if (qr.success &&
-	      out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
-	    queue.emplace(face);
-	}
+        for (auto face: cof.face_range(cod_d)) {
+          Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
+          if (qr.success &&
+              out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
+            queue.emplace(face);
+        }
       }
     }
   }
@@ -139,39 +139,39 @@ public:
    * and the mapped values are the intersection points.
    */
   template <class Point_range,
-	    class Intersection_oracle>
+            class Intersection_oracle>
   void manifold_tracing_algorithm(const Point_range& seed_points,
-				  const Triangulation_& triangulation,
-				  const Intersection_oracle& oracle,
-				  Out_simplex_map& interior_simplex_map,
-				  Out_simplex_map& boundary_simplex_map) {
+                                  const Triangulation_& triangulation,
+                                  const Intersection_oracle& oracle,
+                                  Out_simplex_map& interior_simplex_map,
+                                  Out_simplex_map& boundary_simplex_map) {
     std::size_t cod_d = oracle.cod_d();
     std::queue<Simplex_handle> queue;
 
     for (const auto& p: seed_points) {
       Simplex_handle full_simplex = triangulation.locate_point(p);
       for (Simplex_handle face: full_simplex.face_range(cod_d)) {
-	auto qr = oracle.intersects(face, triangulation);
+        auto qr = oracle.intersects(face, triangulation);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-	mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
-#endif	
-	if (qr.success) {
-	  if (oracle.lies_in_domain(qr.intersection, triangulation)) {
-	    if (interior_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
-	      queue.emplace(face);
-	  }
-	  else {
-	    for (Simplex_handle cof: face.coface_range(cod_d+1)) {
-	      auto qrb = oracle.intersects_boundary(cof, triangulation);
+        mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
+#endif        
+        if (qr.success) {
+          if (oracle.lies_in_domain(qr.intersection, triangulation)) {
+            if (interior_simplex_map.emplace(std::make_pair(face, qr.intersection)).second)
+              queue.emplace(face);
+          }
+          else {
+            for (Simplex_handle cof: face.coface_range(cod_d+1)) {
+              auto qrb = oracle.intersects_boundary(cof, triangulation);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-	      mt_seed_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
-#endif	
-	      if (qrb.success)
-		boundary_simplex_map.emplace(cof, qrb.intersection);
-	    }
-	  }
-	  // break;
-	}
+              mt_seed_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
+#endif        
+              if (qrb.success)
+                boundary_simplex_map.emplace(cof, qrb.intersection);
+            }
+          }
+          // break;
+        }
       }
     }
     
@@ -179,27 +179,27 @@ public:
       Simplex_handle s = queue.front();
       queue.pop();
       for (auto cof: s.coface_range(cod_d+1)) {
-	for (auto face: cof.face_range(cod_d)) {
-	  auto qr = oracle.intersects(face, triangulation);
+        for (auto face: cof.face_range(cod_d)) {
+          auto qr = oracle.intersects(face, triangulation);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-	  mt_inserted_list.push_back(MT_inserted_info(qr, face, false));
-#endif	
-	  if (qr.success) {
-	    if (oracle.lies_in_domain(qr.intersection, triangulation)) {
-	      if (interior_simplex_map.emplace(face, qr.intersection).second)
-		queue.emplace(face);
-	    }
-	    else {
-	      auto qrb = oracle.intersects_boundary(cof, triangulation);
+          mt_inserted_list.push_back(MT_inserted_info(qr, face, false));
+#endif        
+          if (qr.success) {
+            if (oracle.lies_in_domain(qr.intersection, triangulation)) {
+              if (interior_simplex_map.emplace(face, qr.intersection).second)
+                queue.emplace(face);
+            }
+            else {
+              auto qrb = oracle.intersects_boundary(cof, triangulation);
 #ifdef GUDHI_COX_OUTPUT_TO_HTML
-	      mt_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
-#endif	
-	      // assert (qrb.success); // always a success
-	      if (qrb.success)
-		boundary_simplex_map.emplace(cof, qrb.intersection);
-	    }
-	  }
-	}
+              mt_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
+#endif        
+              // assert (qrb.success); // always a success
+              if (qrb.success)
+                boundary_simplex_map.emplace(cof, qrb.intersection);
+            }
+          }
+        }
       }
     }
   }
@@ -237,18 +237,18 @@ public:
  * \ingroup coxeter_triangulation
  */
 template <class Point_range,
-	  class Triangulation,
-	  class Intersection_oracle,
-	  class Out_simplex_map>
+          class Triangulation,
+          class Intersection_oracle,
+          class Out_simplex_map>
 void manifold_tracing_algorithm(const Point_range& seed_points,
-				const Triangulation& triangulation,
-				const Intersection_oracle& oracle,
-				Out_simplex_map& out_simplex_map) {
+                                const Triangulation& triangulation,
+                                const Intersection_oracle& oracle,
+                                Out_simplex_map& out_simplex_map) {
   Manifold_tracing<Triangulation> mt;
   mt.manifold_tracing_algorithm(seed_points,
-				triangulation,
-				oracle,
-				out_simplex_map);
+                                triangulation,
+                                oracle,
+                                out_simplex_map);
 }
 
 /**
@@ -281,20 +281,20 @@ void manifold_tracing_algorithm(const Point_range& seed_points,
  * \ingroup coxeter_triangulation
  */
 template <class Point_range,
-	  class Triangulation,
-	  class Intersection_oracle,
-	  class Out_simplex_map>
+          class Triangulation,
+          class Intersection_oracle,
+          class Out_simplex_map>
 void manifold_tracing_algorithm(const Point_range& seed_points,
-				const Triangulation& triangulation,
-				const Intersection_oracle& oracle,
-				Out_simplex_map& interior_simplex_map,
-				Out_simplex_map& boundary_simplex_map) {
+                                const Triangulation& triangulation,
+                                const Intersection_oracle& oracle,
+                                Out_simplex_map& interior_simplex_map,
+                                Out_simplex_map& boundary_simplex_map) {
   Manifold_tracing<Triangulation> mt;
   mt.manifold_tracing_algorithm(seed_points,
-				triangulation,
-				oracle,
-				interior_simplex_map,
-				boundary_simplex_map);
+                                triangulation,
+                                oracle,
+                                interior_simplex_map,
+                                boundary_simplex_map);
 }
 
 

@@ -13,8 +13,7 @@
 
 #include <gudhi/Permutahedral_representation/Permutahedral_representation_iterators.h>
 
-#include <unordered_set>
-#include <iostream>
+#include <utility>  // for std::make_pair
 
 namespace Gudhi {
 
@@ -36,7 +35,7 @@ namespace coxeter_triangulation {
  * random-access ranges. 
  */
 template <class Vertex_,
-	  class Ordered_set_partition_>
+          class Ordered_set_partition_>
 class Permutahedral_representation {
 
   typedef Permutahedral_representation<Vertex_, Ordered_set_partition_> Self;
@@ -100,7 +99,7 @@ public:
       return false;
     for (std::size_t k = 0; k < partition_.size(); ++k)
       if (partition_[k] != other.partition_[k])
-	return false;
+        return false;
     return true;
   }
 
@@ -118,7 +117,7 @@ public:
    */
   Vertex_range vertex_range() const {
     return Vertex_range(Vertex_iterator(*this),
-  			Vertex_iterator());
+                          Vertex_iterator());
   }
 
   typedef Gudhi::coxeter_triangulation::Face_iterator<Self> Face_iterator;
@@ -128,7 +127,7 @@ public:
    */
   Face_range face_range(std::size_t value_dim) const {
     return Face_range(Face_iterator(*this, value_dim),
-		      Face_iterator());
+                      Face_iterator());
   }
 
   /** \brief Returns a range of permutahedral representations of facets of the simplex.
@@ -136,7 +135,7 @@ public:
    */
   Face_range facet_range() const {
     return Face_range(Face_iterator(*this, dimension()-1),
-		      Face_iterator());
+                      Face_iterator());
   }
   
   typedef Gudhi::coxeter_triangulation::Coface_iterator<Self> Coface_iterator;
@@ -146,7 +145,7 @@ public:
    */
   Coface_range coface_range(std::size_t value_dim) const {
     return Coface_range(Coface_iterator(*this, value_dim),
-			Coface_iterator());
+                        Coface_iterator());
   }
 
   /** \brief Returns a range of permutahedral representations of cofacets of the simplex.
@@ -154,7 +153,7 @@ public:
    */
   Coface_range cofacet_range() const {
     return Coface_range(Coface_iterator(*this, dimension()+1),
-			Coface_iterator());
+                        Coface_iterator());
   }
 
   /** \brief Returns true, if the simplex is a face of other simplex.
@@ -174,19 +173,19 @@ public:
     auto other_partition_it = other.partition_.begin();
     while (self_partition_it != partition_.end()) {
       while (other_partition_it != other.partition_.end() && v_self != v_other) {
-	const Part& other_part = *other_partition_it++;
-	if (other_partition_it == other.partition_.end())
-	  return false;
-	for (const auto& k: other_part)
-	  v_other[k]++;	  
+        const Part& other_part = *other_partition_it++;
+        if (other_partition_it == other.partition_.end())
+          return false;
+        for (const auto& k: other_part)
+          v_other[k]++;          
       }
       if (other_partition_it == other.partition_.end())
-	return false;
+        return false;
       const Part& self_part = *self_partition_it++;
       if (self_partition_it == partition_.end())
-	return true;
+        return true;
       for (const auto& k: self_part)
-	v_self[k]++;
+        v_self[k]++;
     }
     return true;
   }
@@ -204,9 +203,9 @@ private:
  * @param[in] simplex A simplex represented by its permutahedral representation.
  */
 template <class Vertex,
-	  class OrderedSetPartition>
+          class OrderedSetPartition>
 std::ostream& operator<<(std::ostream& os,
-			 const Permutahedral_representation<Vertex, OrderedSetPartition>& simplex) {
+                         const Permutahedral_representation<Vertex, OrderedSetPartition>& simplex) {
   // vertex part
   os << "(";
   if (simplex.vertex().empty()) {
@@ -225,12 +224,12 @@ std::ostream& operator<<(std::ostream& os,
     [&os](const Part& p) {
       os << "{";
       if (p.empty()) {
-	os << "}";
+        os << "}";
       }
       auto p_it = p.begin();
       os << *p_it++;
       for (; p_it != p.end(); ++p_it)
-	os << ", " << *p_it;  
+        os << ", " << *p_it;  
       os << "}";
     };
   os << " [";

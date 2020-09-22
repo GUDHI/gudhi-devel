@@ -11,8 +11,11 @@
 #ifndef FUNCTIONS_RANDOM_ORTHOGONAL_MATRIX_H_
 #define FUNCTIONS_RANDOM_ORTHOGONAL_MATRIX_H_
 
-#include <cstdlib>
-#include <random>
+#include <cstdlib>  // for std::size_t
+#include <cmath>  // for std::cos, std::sin
+#include <random>  // for std::uniform_real_distribution, std::random_device
+
+#include <gudhi/math.h>
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -41,10 +44,14 @@ Eigen::MatrixXd random_orthogonal_matrix(std::size_t d) {
   if (d == 1)
     return Eigen::VectorXd::Constant(1, 1.0);
   if (d == 2) {
-    double X = 2 * 3.14159265358;
-    double alpha = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/X));
+    // 0. < alpha < 2 Pi
+    std::uniform_real_distribution<double> unif(0., 2 * Gudhi::PI);
+    std::random_device rand_dev;
+    std::mt19937 rand_engine(rand_dev());
+    double alpha = unif(rand_engine);
+
     Eigen::Matrix2d rot;
-    rot << cos(alpha), -sin(alpha), sin(alpha), cos(alpha);
+    rot << std::cos(alpha), -std::sin(alpha), std::sin(alpha), cos(alpha);
     return rot;
   }
   Eigen::MatrixXd low_dim_rot = random_orthogonal_matrix(d-1);

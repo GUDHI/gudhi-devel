@@ -11,7 +11,9 @@
 #ifndef PERMUTAHEDRAL_REPRESENTATION_PERMUTATION_ITERATOR_H_
 #define PERMUTAHEDRAL_REPRESENTATION_PERMUTATION_ITERATOR_H_
 
+#include <cstdlib>  // for std::size_t
 #include <vector>
+
 #include <boost/range/iterator_range.hpp>
 
 namespace Gudhi {
@@ -24,11 +26,11 @@ typedef unsigned uint;
  *   Based on the optimization of the Heap's algorithm by Sedgewick.
 */
 class Permutation_iterator : public boost::iterator_facade< Permutation_iterator,
-							    std::vector<uint> const,
-							    boost::forward_traversal_tag> {
-  typedef std::vector<uint> value_t;
+                                                            std::vector<uint> const,
+                                                            boost::forward_traversal_tag> {
+  using value_t = std::vector<uint>;
   
-protected:
+ private:
   friend class boost::iterator_core_access;
 
   bool equal(Permutation_iterator const& other) const {
@@ -70,12 +72,12 @@ protected:
       ct_ = 5;
       uint j = 2;
       while (d_[j] == j+1) {
-	d_[j] = 0;
-	++j;
+        d_[j] = 0;
+        ++j;
       }
       if (j == n_ - 1) {
-	is_end_ = true;
-	return;
+        is_end_ = true;
+        return;
       }
       uint k = j+1;
       uint x = (k%2 ? d_[j] : 0);
@@ -117,8 +119,8 @@ public:
     if (n_ > 0)
       is_end_ = false;
   }
-  
-protected:
+
+ private:
   value_t value_; // the dereference value
   bool is_end_;   // is true when the current permutation is the final one 
   bool optim_3_;  // true if n>=3. for n >= 3, the algorithm is optimized

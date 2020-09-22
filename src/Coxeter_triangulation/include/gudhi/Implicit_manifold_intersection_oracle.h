@@ -37,15 +37,15 @@ namespace coxeter_triangulation {
  *  \ingroup coxeter_triangulation
  */
 template<class Function_,
-	 class Domain_function_ = Constant_function>
+         class Domain_function_ = Constant_function>
 class Implicit_manifold_intersection_oracle {
 
   /* Computes the affine coordinates of the intersection point of the implicit manifold
    * and the affine hull of the simplex. */
   template <class Simplex_handle, 
-	    class Triangulation>
+            class Triangulation>
   Eigen::VectorXd compute_lambda(const Simplex_handle& simplex,
-				 const Triangulation& triangulation) const {
+                                 const Triangulation& triangulation) const {
     std::size_t cod_d = this->cod_d();
     Eigen::MatrixXd matrix(cod_d + 1, cod_d + 1);
     for (std::size_t i = 0; i < cod_d + 1; ++i)
@@ -54,7 +54,7 @@ class Implicit_manifold_intersection_oracle {
     for (auto v: simplex.vertex_range()) {
       Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
       for (std::size_t i = 1; i < cod_d + 1; ++i)
-	matrix(i, j) = v_coords(i-1);
+        matrix(i, j) = v_coords(i-1);
       j++;
     }
     Eigen::VectorXd z(cod_d + 1);
@@ -68,9 +68,9 @@ class Implicit_manifold_intersection_oracle {
   /* Computes the affine coordinates of the intersection point of the boundary
    * of the implicit manifold and the affine hull of the simplex. */
   template <class Simplex_handle, 
-	    class Triangulation>
+            class Triangulation>
   Eigen::VectorXd compute_boundary_lambda(const Simplex_handle& simplex,
-					  const Triangulation& triangulation) const {
+                                          const Triangulation& triangulation) const {
     std::size_t cod_d = this->cod_d();
     Eigen::MatrixXd matrix(cod_d + 2, cod_d + 2);
     for (std::size_t i = 0; i < cod_d + 2; ++i)
@@ -79,7 +79,7 @@ class Implicit_manifold_intersection_oracle {
     for (auto v: simplex.vertex_range()) {
       Eigen::VectorXd v_coords = fun_(triangulation.cartesian_coordinates(v));
       for (std::size_t i = 1; i < cod_d + 1; ++i)
-	matrix(i, j) = v_coords(i-1);
+        matrix(i, j) = v_coords(i-1);
       Eigen::VectorXd bv_coords = domain_fun_(triangulation.cartesian_coordinates(v));
       matrix(cod_d + 1, j) = bv_coords(0);
       j++;
@@ -94,17 +94,17 @@ class Implicit_manifold_intersection_oracle {
 
   /* Computes the intersection result for a given simplex in a triangulation. */
   template <class Simplex_handle,
-	    class Triangulation>
+            class Triangulation>
   Query_result<Simplex_handle> intersection_result(const Eigen::VectorXd& lambda,
-						   const Simplex_handle& simplex,
-						   const Triangulation& triangulation) const {
+                                                   const Simplex_handle& simplex,
+                                                   const Triangulation& triangulation) const {
     using QR = Query_result<Simplex_handle>;
     std::size_t amb_d = triangulation.dimension();
     std::size_t cod_d = simplex.dimension();
 
     for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i)
       if (lambda(i) < 0 || lambda(i) > 1)
-	return QR({Eigen::VectorXd(), false});
+        return QR({Eigen::VectorXd(), false});
 
     Eigen::MatrixXd vertex_matrix(cod_d + 1, amb_d);
     auto v_range = simplex.vertex_range();
@@ -112,7 +112,7 @@ class Implicit_manifold_intersection_oracle {
     for (std::size_t i = 0; i < cod_d + 1 && v_it != v_range.end(); ++v_it, ++i) {
       Eigen::VectorXd v_coords = triangulation.cartesian_coordinates(*v_it);
       for (std::size_t j = 0; j < amb_d; ++j)
-	vertex_matrix(i, j) = v_coords(j);
+        vertex_matrix(i, j) = v_coords(j);
     }
     Eigen::VectorXd intersection = lambda.transpose()*vertex_matrix;
     return QR({intersection, true});
@@ -151,9 +151,9 @@ public:
    *   (the domain dimension of the function).
    */
   template <class Simplex_handle,
-	    class Triangulation>
+            class Triangulation>
   Query_result<Simplex_handle> intersects(const Simplex_handle& simplex,
-					  const Triangulation& triangulation) const {
+                                          const Triangulation& triangulation) const {
     Eigen::VectorXd lambda = compute_lambda(simplex, triangulation);
     return intersection_result(lambda, simplex, triangulation);
   }
@@ -179,9 +179,9 @@ public:
    *   (the domain dimension of the function).
    */
   template <class Simplex_handle,
-	    class Triangulation>
+            class Triangulation>
   Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
-						   const Triangulation& triangulation) const {
+                                                   const Triangulation& triangulation) const {
     Eigen::VectorXd lambda = compute_boundary_lambda(simplex, triangulation);
     return intersection_result(lambda, simplex, triangulation);
   }
@@ -199,7 +199,7 @@ public:
    */
   template <class Triangulation>
   bool lies_in_domain(const Eigen::VectorXd& p,
-		      const Triangulation& triangulation) const {
+                      const Triangulation& triangulation) const {
     Eigen::VectorXd pl_p = make_pl_approximation(domain_fun_, triangulation)(p);
     return pl_p(0) < 0;
   }
@@ -218,7 +218,7 @@ public:
    *   manifold with boundary.
    */
   Implicit_manifold_intersection_oracle(const Function_& function,
-					const Domain_function_& domain_function)
+                                        const Domain_function_& domain_function)
     : fun_(function), domain_fun_(domain_function) {}
 
   /** \brief Constructs an intersection oracle for an implicit manifold 
@@ -249,12 +249,12 @@ private:
  *  \ingroup coxeter_triangulation
  */
 template<class Function_,
-	 class Domain_function_>
+         class Domain_function_>
 Implicit_manifold_intersection_oracle<Function_, Domain_function_>
 make_oracle(const Function_& function,
-	    const Domain_function_& domain_function){
+            const Domain_function_& domain_function){
   return Implicit_manifold_intersection_oracle<Function_, Domain_function_>(function,
-									    domain_function);
+                                                                            domain_function);
 }
 
 
