@@ -25,8 +25,6 @@ namespace coxeter_triangulation {
  * \class Function_Sm_in_Rd
  * \brief A class for the function that defines an m-dimensional implicit sphere embedded
  * in the d-dimensional Euclidean space.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_Sm_in_Rd : public Function {
   /** \brief Value of the function at a specified point.

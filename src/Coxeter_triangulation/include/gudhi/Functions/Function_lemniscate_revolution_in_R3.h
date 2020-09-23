@@ -26,8 +26,6 @@ namespace coxeter_triangulation {
  * \class Function_lemniscate_revolution_in_R3
  * \brief A class that encodes the function, the zero-set of which is a surface of revolution
  * around the x axis based on the lemniscate of Bernoulli embedded in R^3.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_lemniscate_revolution_in_R3 : public Function {
   /**

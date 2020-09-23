@@ -25,8 +25,6 @@ namespace coxeter_triangulation {
  * \class Function_moment_curve_in_Rd
  * \brief A class for the function that defines an implicit moment curve
  * in the d-dimensional Euclidean space.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_moment_curve_in_Rd : public Function {
   /** \brief Value of the function at a specified point.

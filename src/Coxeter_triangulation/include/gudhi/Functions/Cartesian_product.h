@@ -94,8 +94,6 @@ inline typename std::enable_if<I != sizeof...(T), void>::type get_value(const st
  *
  * \tparam Functions A pack template parameter for functions. All functions should be models of
  * the concept FunctionForImplicitManifold.
- *
- * \ingroup coxeter_triangulation
  */
 template <class... Functions>
 struct Cartesian_product : public Function {

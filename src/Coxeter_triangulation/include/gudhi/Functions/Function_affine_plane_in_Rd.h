@@ -25,8 +25,6 @@ namespace coxeter_triangulation {
  * \class Function_affine_plane_in_Rd
  * \brief A class for the function that defines an m-dimensional implicit affine plane
  * embedded in d-dimensional Euclidean space.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_affine_plane_in_Rd : public Function {
   /**

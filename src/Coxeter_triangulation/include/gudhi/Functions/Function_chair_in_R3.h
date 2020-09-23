@@ -26,8 +26,6 @@ namespace coxeter_triangulation {
  * \class Function_chair_in_R3
  * \brief A class that encodes the function, the zero-set of which is a so-called
  * "chair" surface embedded in R^3.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_chair_in_R3 : public Function {
   /**

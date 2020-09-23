@@ -26,8 +26,6 @@ namespace coxeter_triangulation {
  * \class Function_iron_in_R3
  * \brief A class that encodes the function, the zero-set of which is a surface
  * embedded in R^3 that ressembles an iron.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_iron_in_R3 : public Function {
   /**

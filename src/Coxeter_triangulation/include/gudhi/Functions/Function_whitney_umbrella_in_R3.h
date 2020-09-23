@@ -25,8 +25,6 @@ namespace coxeter_triangulation {
  * \class Function_whitney_umbrella_in_R3
  * \brief A class that encodes the function, the zero-set of which is the Whitney umbrella
  * surface embedded in R^3.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_whitney_umbrella_in_R3 : public Function {
   /**

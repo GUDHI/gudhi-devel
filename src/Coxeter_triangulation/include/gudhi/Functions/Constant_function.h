@@ -25,8 +25,6 @@ namespace coxeter_triangulation {
  * \class Constant_function
  * \brief A class that encodes a constant function from R^d to R^k.
  * This class does not have any implicit manifold in correspondence.
- *
- * \ingroup coxeter_triangulation
  */
 struct Constant_function : public Function {
   /** \brief Value of the function at a specified point. The value is constant.

@@ -26,8 +26,6 @@ namespace coxeter_triangulation {
  * \class Function_torus_in_R3
  * \brief A class that encodes the function, the zero-set of which is a torus
  * surface embedded in R^3.
- *
- * \ingroup coxeter_triangulation
  */
 struct Function_torus_in_R3 : public Function {
   /**
