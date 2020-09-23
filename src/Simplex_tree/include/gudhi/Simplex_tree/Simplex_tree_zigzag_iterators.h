@@ -1,3 +1,17 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Clément Maria
+ *
+ *    Copyright (C) 2020 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM author: description of the modification.
+ *         
+ */
+
+#ifndef SIMPLEX_TREE_ZIGZAG_ITERATORS_H_
+#define SIMPLEX_TREE_ZIGZAG_ITERATORS_H_
+
 #include <iostream>
 #include <fstream>
 
@@ -108,14 +122,13 @@ private:
 
   * Edge_t must be of type Zigzag_edge
   */
-template< typename Kernel,
-		      typename Point_container,
+template< typename Point_container,
           typename Distance, //furnish()
           typename FiltrationValue,
           typename Edge_t >
 void ordered_points_to_one_skeleton_zigzag_filtration(
-              							    	Point_container const        & points,
-              						        Distance        const          distance,
+              							    	Point_container              & points,
+              						        Distance                       distance,
               						        FiltrationValue const          nu,
               						        FiltrationValue const          mu,
               						        std::vector<FiltrationValue> & filtration_values,
@@ -366,26 +379,27 @@ void ordered_points_to_one_skeleton_zigzag_filtration(
   edge_filtration.clear();
   edge_filtration.reserve(number_of_arrows + n); //count edges + vertices additions
 
-// Compare edges by distance first (shorter is smaller), and lexicographic ordering
-// otherwise. This agrees with the useful Rips filtration in standard persistence.
-struct edge_cmp {
-  edge_cmp(Point_container &points, Distance distance) 
-  : points_(&points), distance_(distance) {}
+  // Compare edges by distance first (shorter is smaller), and lexicographic 
+  // ordering
+  // otherwise. This agrees with the usual Rips filtration in standard persistence.
+  struct edge_cmp {
+    edge_cmp(Point_container *points, Distance distance) 
+    : points_(points), distance_(distance) {}
 
-  bool operator()(Edge_t e1, Edge_t e2) 
-  { //lengths of edges e1 and e2
-    FiltrationValue dist1 = distance_((*points_)[e1.u()], (*points_)[e1.v()]);
-    FiltrationValue dist2 = distance_((*points_)[e2.u()], (*points_)[e2.v()]);
-    if(dist1  != dist2)  {return dist1 < dist2;}
-    if(e1.u() != e2.u()) {return e1.u() < e2.u();}
-    return e1.v() < e2.v(); 
-  }
-private:
-  Point_container  *points_;
-  Distance          distance_;
-};
+    bool operator()(Edge_t e1, Edge_t e2) 
+    { //lengths of edges e1 and e2
+      FiltrationValue dist1 = distance_((*points_)[e1.u()], (*points_)[e1.v()]);
+      FiltrationValue dist2 = distance_((*points_)[e2.u()], (*points_)[e2.v()]);
+      if(dist1  != dist2)  {return dist1 < dist2;}
+      if(e1.u() != e2.u()) {return e1.u() < e2.u();}
+      return e1.v() < e2.v(); 
+    }
+  private:
+    Point_container  *points_;
+    Distance          distance_;
+  };
 //sort insertions and deletion by edge length, then lexicographic order
-  edge_cmp e_cmp(points, distance);
+  edge_cmp e_cmp(&points, distance);
 
 #ifdef GUDHI_USE_TBB
   tbb::parallel_for(size_t(0), n-1, [&](size_t i) {
@@ -524,8 +538,41 @@ class Flagzigzag_simplex_iterator
 
   //because the iterator modifies a complex represented by pointer, the iterator 
   //must be non-copiable.
-  Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & ) = delete;
+  // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & ) = delete;
+  //move constructor
+  Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other) 
+  : cpx_(other.cpx_)
+  , zigzag_edge_filtration_(other.zigzag_edge_filtration_)
+  , dim_max_(other.dim_max_)
+  , partial_zzfil_(other.partial_zzfil_)
+  , sh_it_(partial_zzfil_.begin())
+  , edge_it_(other.edge_it_)
+  , arrow_direction_(other.arrow_direction_)
+  , counter_insert(other.counter_insert)
+  , are_we_done(other.are_we_done)
+  , fil_(other.fil_) {}
 
+  // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& ) = 
+                                                                            // delete;
+//move assignement
+  Flagzigzag_simplex_iterator& operator=(Flagzigzag_simplex_iterator&& other )
+  {
+    cpx_                    = other.cpx_;
+    zigzag_edge_filtration_ = std::move(other.zigzag_edge_filtration_);
+    dim_max_                = other.dim_max_;
+    partial_zzfil_          = std::move(other.partial_zzfil_);
+    sh_it_                  = partial_zzfil_.begin();
+    edge_it_                = other.edge_it_;
+    arrow_direction_        = other.arrow_direction_;
+    counter_insert          = other.counter_insert;
+    are_we_done             = other.are_we_done;
+    fil_                    = other.fil_;
+    return *this;
+  }
+
+// private://prevent copy constructor and assignmenet to be called
+  // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & );
+  // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& );
   //User-defined copy constructor DANGEROUS
     // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other )
     // , cpx_(other.cpx_)
@@ -685,7 +732,7 @@ class Flagzigzag_simplex_iterator
 
 };
 
-
+#endif //SIMPLEX_TREE_ZIGZAG_ITERATORS_H_
 
 
 

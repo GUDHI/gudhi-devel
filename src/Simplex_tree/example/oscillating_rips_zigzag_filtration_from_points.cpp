@@ -2,9 +2,9 @@
 #include <fstream>
 #include <chrono>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Simplex_tree/Simplex_tree_zigzag_iterators.h>
 #include "gudhi/reader_utils.h"
 #include <gudhi/distance_functions.h>
-#include <gudhi/Zigzag_filtration.h>
 #include <gudhi/Points_off_io.h>
 #include <boost/program_options.hpp>
 #include <CGAL/Epick_d.h>
@@ -14,7 +14,7 @@
 // Types definition
 using Simplex_tree = 
                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
-using Zigzag_edge       = Zigzag_edge<Simplex_tree>;
+// using Zz_edge       = Zigzag_edge<Simplex_tree>;
 using Filtration_value  = Simplex_tree::Filtration_value;
 using K                 = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d           = typename K::Point_d;
@@ -38,8 +38,8 @@ void program_options( int argc, char* argv[]
 
 int main(int argc, char* argv[])
 {
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  int enlapsed_sec;
+  // std::chrono::time_point<std::chrono::system_clock> start, end;
+  // int enlapsed_sec;
 
   std::string off_file_points;
   Filtration_value nu, mu;
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
   program_options(argc, argv, off_file_points, nu, mu, dim_max);
 //sequence of insertion and deletions of vertices and edges
-  std::vector< Zz_edge >        edge_filtration;
+  std::vector< Zigzag_edge<Simplex_tree> >        edge_filtration;
 //epsilon_i values, size() == #points
   std::vector<Filtration_value> filtration_values;
 //extract points from file
@@ -70,10 +70,17 @@ int main(int argc, char* argv[])
   //sort points
   // start = std::chrono::system_clock::now();
   std::vector<Point_d> sorted_points;
+  // Gudhi::subsampling::choose_n_farthest_points( k_d, off_reader.get_point_cloud() 
+  //   , off_reader.get_point_cloud().size() //all points
+  //   , 0//start with point [0]//Gudhi::subsampling::random_starting_point
+  //   , std::back_inserter(sorted_points));
+
   Gudhi::subsampling::choose_n_farthest_points( k_d, off_reader.get_point_cloud() 
     , off_reader.get_point_cloud().size() //all points
     , 0//start with point [0]//Gudhi::subsampling::random_starting_point
     , std::back_inserter(sorted_points));
+
+//Gudhi::Euclidean_distance()
 
   // Gudhi::subsampling::pick_n_random_points(off_reader.get_point_cloud(), off_reader.get_point_cloud().size(), std::back_inserter(sorted_points));
 
@@ -86,10 +93,10 @@ int main(int argc, char* argv[])
   auto sqdist = k_d.squared_distance_d_object();
 
   // start = std::chrono::system_clock::now();
-	points_to_edge_filtration( sorted_points, 
-                             sqdist, 
-                             nu*nu, mu*mu, 
-                             filtration_values, edge_filtration );
+	ordered_points_to_one_skeleton_zigzag_filtration( sorted_points, 
+                                               sqdist, 
+                                               nu*nu, mu*mu, 
+                                               filtration_values, edge_filtration );
   // end = std::chrono::system_clock::now();
   // enlapsed_sec =std::chrono::duration_cast<std::chrono::seconds>(end-start).count();
   // std::cout << "Edge filtration computation: " << enlapsed_sec << " sec.\n";
@@ -124,7 +131,7 @@ int main(int argc, char* argv[])
   // traverse the entire oscillating Rips zigzag filtration 
   Simplex_tree st;
   st.initialize_filtration(edge_filtration, dim_max); 
-  auto zz_rg = st.filtration_simplex_range();
+  auto zz_rg(st.filtration_simplex_range());
   
   size_t num_arrows        = 0;
   size_t max_size_complex  = 0;
