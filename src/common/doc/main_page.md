@@ -135,7 +135,7 @@
  </tr>
 </table>
 
-## Filtrations and reconstructions {#FiltrationsReconstructions}
+## Filtrations
 ### Alpha complex
 
 <table>
@@ -294,6 +294,32 @@
  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref cover_complex
+    </td>
+ </tr>
+</table>
+
+## Manifold reconstructions
+### Coxeter triangulation
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "manifold_tracing_on_custom_function_example.png"
+    </td>
+    <td width="50%">
+    Coxeter triangulation module is designed to provide tools for constructing a piecewise-linear approximation of an
+    \f$m\f$-dimensional smooth manifold embedded in \f$ \mathbb{R}^d \f$ using an ambient triangulation.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Siargey Kachanovich<br>
+      <b>Introduced in:</b> GUDHI 3.4.0<br>
+      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal &ge; 4.11.0
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref coxeter_triangulation
     </td>
  </tr>
 </table>
