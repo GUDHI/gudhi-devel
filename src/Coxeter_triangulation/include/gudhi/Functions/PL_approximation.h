@@ -97,6 +97,8 @@ struct PL_approximation : public Function {
  *
  * \tparam Function_ The function template parameter. Should be a model of
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_, class Triangulation_>
 PL_approximation<Function_, Triangulation_> make_pl_approximation(const Function_& function,

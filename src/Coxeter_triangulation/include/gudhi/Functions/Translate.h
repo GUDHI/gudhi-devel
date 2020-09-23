@@ -76,6 +76,8 @@ struct Translate : public Function {
  *
  * \tparam Function_ The function template parameter. Should be a model of
  * the concept FunctionForImplicitManifold.
+ *
+ * \ingroup coxeter_triangulation
  */
 template <class Function_>
 Translate<Function_> translate(const Function_& function, Eigen::VectorXd off) {
