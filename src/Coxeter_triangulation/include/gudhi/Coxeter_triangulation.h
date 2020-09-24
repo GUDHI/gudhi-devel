@@ -46,28 +46,18 @@ class Coxeter_triangulation : public Freudenthal_triangulation<Permutahedral_rep
   using Matrix = Eigen::MatrixXd;
 
   Matrix root_matrix(unsigned d) {
-    Matrix cartan(d, d);
-    for (unsigned i = 0; i < d; i++) {
-      cartan(i, i) = 1.0;
-    }
+    Matrix cartan(Matrix::Identity(d, d));
     for (unsigned i = 1; i < d; i++) {
       cartan(i - 1, i) = -0.5;
       cartan(i, i - 1) = -0.5;
     }
-    for (unsigned i = 0; i < d; i++)
-      for (unsigned j = 0; j < d; j++)
-        if (j + 1 < i || j > i + 1) cartan(i, j) = 0;
     Eigen::SelfAdjointEigenSolver<Matrix> saes(cartan);
     Eigen::VectorXd sqrt_diag(d);
     for (unsigned i = 0; i < d; ++i) sqrt_diag(i) = std::sqrt(saes.eigenvalues()[i]);
 
-    Matrix lower(d, d);
-    for (unsigned i = 0; i < d; i++)
-      for (unsigned j = 0; j < d; j++)
-        if (i < j)
-          lower(i, j) = 0;
-        else
-          lower(i, j) = 1;
+    Matrix lower(Matrix::Ones(d, d));
+    lower = lower.triangularView<Eigen::Lower>();
+
     Matrix result = (lower * saes.eigenvectors() * sqrt_diag.asDiagonal()).inverse();
     return result;
   }

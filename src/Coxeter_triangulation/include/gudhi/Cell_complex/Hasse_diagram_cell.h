@@ -16,6 +16,7 @@
 #include <ostream>
 #include <string>
 #include <type_traits>  // for std::is_same
+#include <cstdlib>  // for std::size_t
 
 namespace Gudhi {
 namespace Hasse_diagram {
@@ -162,7 +163,7 @@ class Hasse_diagram_cell {
   void remove_deleted_elements_from_boundary_and_coboundary() {
     Cell_range new_boundary;
     new_boundary.reserve(this->boundary.size());
-    for (size_t bd = 0; bd != this->boundary.size(); ++bd) {
+    for (std::size_t bd = 0; bd != this->boundary.size(); ++bd) {
       if (!this->boundary[bd].first->deleted()) {
         new_boundary.push_back(this->boundary[bd]);
       }
@@ -171,7 +172,7 @@ class Hasse_diagram_cell {
 
     Cell_range new_coBoundary;
     new_coBoundary.reserve(this->coBoundary.size());
-    for (size_t cbd = 0; cbd != this->coBoundary.size(); ++cbd) {
+    for (std::size_t cbd = 0; cbd != this->coBoundary.size(); ++cbd) {
       if (!this->coBoundary[cbd].first->deleted()) {
         new_coBoundary.push_back(this->coBoundary[cbd]);
       }
@@ -187,7 +188,7 @@ class Hasse_diagram_cell {
     // cout << "position : " << c.position << ", dimension : " << c.dimension << ", filtration: " << c.filtration << ",
     // size of boudary : " <<  c.boundary.size() << "\n";
     out << c.position << " " << c.dimension << " " << c.filtration << std::endl;
-    for (size_t bd = 0; bd != c.boundary.size(); ++bd) {
+    for (std::size_t bd = 0; bd != c.boundary.size(); ++bd) {
       // do not write out the cells that has been deleted
       if (c.boundary[bd].first->deleted()) continue;
       out << c.boundary[bd].first->position << " " << c.boundary[bd].second << " ";
@@ -201,9 +202,9 @@ class Hasse_diagram_cell {
    **/
   inline std::vector<Hasse_diagram_cell*> get_list_of_boundary_elements() {
     std::vector<Hasse_diagram_cell*> result;
-    size_t size_of_boundary = this->boundary.size();
+    std::size_t size_of_boundary = this->boundary.size();
     result.reserve(size_of_boundary);
-    for (size_t bd = 0; bd != size_of_boundary; ++bd) {
+    for (std::size_t bd = 0; bd != size_of_boundary; ++bd) {
       result.push_back(this->boundary[bd].first);
     }
     return result;
@@ -214,9 +215,9 @@ class Hasse_diagram_cell {
    **/
   inline std::vector<unsigned> get_list_of_positions_of_boundary_elements() {
     std::vector<unsigned> result;
-    size_t size_of_boundary = this->boundary.size();
+    std::size_t size_of_boundary = this->boundary.size();
     result.reserve(size_of_boundary);
-    for (size_t bd = 0; bd != size_of_boundary; ++bd) {
+    for (std::size_t bd = 0; bd != size_of_boundary; ++bd) {
       result.push_back(this->boundary[bd].first->position);
     }
     return result;
@@ -244,14 +245,14 @@ class Hasse_diagram_cell {
       result += std::to_string(this->additional_info);
     }
     result += " boundary ";
-    for (size_t bd = 0; bd != this->boundary.size(); ++bd) {
+    for (std::size_t bd = 0; bd != this->boundary.size(); ++bd) {
       result += "( " + std::to_string(this->boundary[bd].first->position);
       result += " " + std::to_string(this->boundary[bd].second);
       result += ") ";
     }
 
     result += " coBoundary ";
-    for (size_t cbd = 0; cbd != this->coBoundary.size(); ++cbd) {
+    for (std::size_t cbd = 0; cbd != this->coBoundary.size(); ++cbd) {
       result += "( " + std::to_string(this->coBoundary[cbd].first->position);
       result += " " + std::to_string(this->coBoundary[cbd].second);
       result += ") ";

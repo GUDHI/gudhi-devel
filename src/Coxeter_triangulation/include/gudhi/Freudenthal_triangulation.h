@@ -198,7 +198,7 @@ class Freudenthal_triangulation {
    */
   Eigen::VectorXd barycenter(const Simplex_handle& simplex, double scale = 1) const {
     Eigen::VectorXd res_vector(dimension_);
-    for (size_t i = 0; i < dimension_; ++i) res_vector(i) = 0;
+    res_vector.setZero(dimension_, 1);
     for (auto v : simplex.vertex_range()) {
       res_vector += cartesian_coordinates(v, scale);
     }
