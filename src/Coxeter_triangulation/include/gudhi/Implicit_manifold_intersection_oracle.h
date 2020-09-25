@@ -107,6 +107,9 @@ class Implicit_manifold_intersection_oracle {
   /** \brief Codimension of the implicit manifold. */
   std::size_t cod_d() const { return fun_.cod_d(); }
 
+  /** \brief The seed point of the implicit manifold. */
+  Eigen::VectorXd seed() const { return fun_.seed(); }
+
   /** \brief Intersection query with the relative interior of the manifold.
    *
    *  \details The returned structure Query_result contains the boolean value

@@ -18,7 +18,6 @@
 #include <cstdlib>    // for std::size_t
 
 #include <Eigen/Eigenvalues>
-#include <Eigen/Sparse>
 #include <Eigen/SVD>
 
 #include <gudhi/Permutahedral_representation.h>
@@ -46,8 +45,6 @@ template <class Permutahedral_representation_ =
 class Freudenthal_triangulation {
   using Matrix = Eigen::MatrixXd;
   using Vector = Eigen::VectorXd;
-  using SparseMatrix = Eigen::SparseMatrix<double>;
-  using Triplet = Eigen::Triplet<double>;
 
  public:
   /** \brief Type of the simplices in the triangulation. */
