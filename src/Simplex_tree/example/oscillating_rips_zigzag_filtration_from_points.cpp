@@ -38,9 +38,6 @@ void program_options( int argc, char* argv[]
 
 int main(int argc, char* argv[])
 {
-  // std::chrono::time_point<std::chrono::system_clock> start, end;
-  // int enlapsed_sec;
-
   std::string off_file_points;
   Filtration_value nu, mu;
   int dim_max;
@@ -67,26 +64,13 @@ int main(int argc, char* argv[])
     return 0; 
   }
 
-  //sort points
-  // start = std::chrono::system_clock::now();
+  //sort points in furthest point order, starting with point[0]
   std::vector<Point_d> sorted_points;
-  // Gudhi::subsampling::choose_n_farthest_points( k_d, off_reader.get_point_cloud() 
-  //   , off_reader.get_point_cloud().size() //all points
-  //   , 0//start with point [0]//Gudhi::subsampling::random_starting_point
-  //   , std::back_inserter(sorted_points));
 
   Gudhi::subsampling::choose_n_farthest_points( k_d, off_reader.get_point_cloud() 
     , off_reader.get_point_cloud().size() //all points
     , 0//start with point [0]//Gudhi::subsampling::random_starting_point
     , std::back_inserter(sorted_points));
-
-//Gudhi::Euclidean_distance()
-
-  // Gudhi::subsampling::pick_n_random_points(off_reader.get_point_cloud(), off_reader.get_point_cloud().size(), std::back_inserter(sorted_points));
-
-  // end = std::chrono::system_clock::now();
-  // enlapsed_sec =std::chrono::duration_cast<std::chrono::seconds>(end-start).count();
-  // std::cout << "Furthest point sort: " << enlapsed_sec << " sec.\n";
 
   //Compute edge filtration with squared distance for efficiency. Note that with
   //squared distance, we must square parameters mu and nu too.
@@ -97,10 +81,6 @@ int main(int argc, char* argv[])
                                                sqdist, 
                                                nu*nu, mu*mu, 
                                                filtration_values, edge_filtration );
-  // end = std::chrono::system_clock::now();
-  // enlapsed_sec =std::chrono::duration_cast<std::chrono::seconds>(end-start).count();
-  // std::cout << "Edge filtration computation: " << enlapsed_sec << " sec.\n";
-  
   //apply sqrt to correct the use of squared distance
   for(auto & f : filtration_values) { f = std::sqrt(f); }
   for(auto & e : edge_filtration) { e.assign_filtration(std::sqrt(e.fil())); }

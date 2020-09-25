@@ -567,7 +567,7 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    return Dictionary_it(nullptr);
+    return null_simplex_;
   }
 
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
@@ -1974,9 +1974,10 @@ private:
     if constexpr(Options::link_nodes_by_label) {
       nodes_by_label_.insert(sh);
     }
-    if constexpr(Options::store_morse_matching) {//not necessary
-      assign_morse_pairing(sh);//make Morse critical by default
-    }
+    //morse matching set to critical from the outside
+    // if constexpr(Options::store_morse_matching) {//not necessary
+    //   make_critical(sh);//make Morse critical by default
+    // }
   }
 
   // update all extra data structures in the Simplex_tree, include fast
@@ -2085,7 +2086,7 @@ public:
   for(auto sh : zz_filtration) { update_simplex_tree_after_node_insertion(sh); }
 
   if constexpr(Options::store_morse_matching) {
-    dmt_().compute_matching(zz_filtration,this);
+    Discrete_morse_theory<Simplex_tree>().compute_matching(zz_filtration,this);
   }
 
 }
@@ -2307,11 +2308,11 @@ public:
   /* Allows to pair simplices together, in particular in a Morse matching.*/
   //no pairing
   struct Pairing_simplex_base_dummy {
-    Pairing_simplex_base_dummy() {}
-    Pairing_simplex_base_dummy(Simplex_handle sh) {}
-    void assign_pairing(Simplex_handle sh) {}
-    bool critical() { return true; }//everyone is critical = no pairing
-    bool is_paired_with(Simplex_handle sh) { return false; }
+    // Pairing_simplex_base_dummy() {}
+    // Pairing_simplex_base_dummy(Simplex_handle sh) {}
+    // void assign_pairing(Simplex_handle sh) {}
+    // bool critical() { return true; }//everyone is critical = no pairing
+    // bool is_paired_with(Simplex_handle sh) { return false; }
     // Simplex_handle morse_pairing() { return this->null_simplex(); }
   };
   //option to pair a Node with another one, or with itself
@@ -2335,45 +2336,55 @@ public:
   };
 
 public:
-    typedef typename std::conditional<Options::store_morse_matching,
-                         Pairing_simplex_base_morse
-                       , Pairing_simplex_base_dummy>::type    Pairing_simplex_base;
+  typedef typename std::conditional<Options::store_morse_matching,
+                       Pairing_simplex_base_morse
+                     , Pairing_simplex_base_dummy>::type    Pairing_simplex_base;
 
-/**
-  * Return the Simplex_handle to the simplex with which sh is paired.
+/** Return the Simplex_handle to the simplex with which sh is paired.
   * Return null_simplex() or itself if sh is critical. Must check critical(...) 
   * beforehand.
   * sh must be distinct from null_simplex()
   */
-    Simplex_handle morse_pair(Simplex_handle sh) {
-      if constexpr(Options::store_morse_matching) {
-          return sh->second.paired_with();
-      }
-      return sh;
+  Simplex_handle paired_with(Simplex_handle sh) {
+    if constexpr(Options::store_morse_matching) {
+        return sh->second.paired_with();
     }
-/**
-  * Return true iff the simplex is critical.
-  */
-    bool critical(Simplex_handle sh) { return sh->second.is_critical(); }
-/**
-  * Pair sh_t with sh_s and sh_s with sh_t.
-  * Both Simplex_handles must be valid, distinct from null_simplex() handles.
-  */
-    void assign_pairing(Simplex_handle sh_t, Simplex_handle sh_s) {
+    return sh;
+  }
+/** Return true iff the simplex is critical. By default, a simplex is critical when 
+  * we do not maintain a Morse matching.  */
+  bool critical(Simplex_handle sh) { 
+    if constexpr(Options::store_morse_matching) {
+      return sh->second.critical(); 
+    }
+    return true;
+  }
+
+/** Pair sh_t with sh_s and sh_s with sh_t.
+  * Both Simplex_handles must be valid, distinct from null_simplex() handles.  */
+  void assign_pairing(Simplex_handle sh_t, Simplex_handle sh_s) {
+    GUDHI_CHECK(Options::store_morse_matching, "cannot pair simplices with store_morse_matching == false");
+    if constexpr(Options::store_morse_matching) {
       sh_t->second.assign_pairing(sh_s);
       sh_s->second.assign_pairing(sh_t);
     }
-/**
-  * Assign its own Simplex_handle as paired simplex to sh, making sh critical.
-  */
-    void assign_morse_pairing(Simplex_handle sh) {
-      sh->second.assign_morse_pairing(sh);
+  }
+/** Assign its own Simplex_handle as paired simplex to sh, making sh critical. */
+  void make_critical(Simplex_handle sh) { 
+    if constexpr(Options::store_morse_matching) {
+      sh->second.assign_pairing(sh); 
     }
-/** Return true iff sh_t and sh_s are paired together.
+  }
+/** Return true iff sh_t and sh_s are paired together. By convention, a critical 
+  * simplex is paired with itself, even when no Morse matching is maintained (in 
+  * which case all simplices are considered critical).
   */
-    bool is_paired_with(Simplex_handle sh_t, Simplex_handle sh_s) {
+  bool is_paired_with(Simplex_handle sh_t, Simplex_handle sh_s) {
+    if constexpr(Options::store_morse_matching) {
       return (sh_t->second.is_paired_with(sh_s) && sh_s->second.is_paired_with(sh_t));
-    }
+    } 
+    return sh_t == sh_s;
+  }
 
  private:
   Vertex_handle null_vertex_;
@@ -2389,7 +2400,19 @@ public:
   Zigzagfiltration_simplex_range zigzag_simplex_range_;
   /** True iff the zigzag_simplex_range_ has been initialized */
   bool                           zigzag_simplex_range_initialized_;
+  /** Definition of a null dictionary to fix a null_simplex shared by all Simplex_tree<T>.*/
+  static Dictionary     null_dic_;
+  /** null_simplex_ = null_dic_.begin().*/
+  static Simplex_handle null_simplex_;
 };
+
+template<typename SimplexTreeOptions> 
+typename Simplex_tree<SimplexTreeOptions>::Dictionary Simplex_tree<SimplexTreeOptions>::null_dic_ = Simplex_tree<SimplexTreeOptions>::Dictionary();
+
+template<typename SimplexTreeOptions> 
+typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_tree<SimplexTreeOptions>::null_simplex_ = Simplex_tree<SimplexTreeOptions>::null_dic_.begin();
+
+
 
 // Print a Simplex_tree in os.
 template<typename...T>
@@ -2441,7 +2464,7 @@ struct Simplex_tree_options_full_featured {
   static const bool contiguous_vertices = false;
   static const bool simplex_handle_strong_validity = false;
   static const bool link_nodes_by_label = false;
-  static const bool store_morse_matching = false;
+  static const bool store_morse_matching = true;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2463,6 +2486,19 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_morse_matching = false;
 };
 
+struct Simplex_tree_options_morse_matching {
+  typedef linear_indexing_tag Indexing_tag;
+  static const bool is_zigzag = false;
+  typedef int Vertex_handle;
+  typedef float Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+  static const bool simplex_handle_strong_validity = false;
+  static const bool link_nodes_by_label = false;
+  static const bool store_morse_matching = true;
+};
 /** Model of SimplexTreeOptions.
  * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
