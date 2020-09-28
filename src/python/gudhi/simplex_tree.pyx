@@ -359,8 +359,8 @@ cdef class SimplexTree:
         return self.get_ptr().make_filtration_non_decreasing()
 
     def reset_filtration(self, filtration, min_dim = 0):
-        """This function resets filtration value from a given dimension. Resets all the simplex tree when
-        `min_dim = 0`.
+        """This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all the
+        simplex tree when `min_dim = 0`.
         `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
         make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
         afterwards for instance).
