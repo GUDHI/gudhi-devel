@@ -1677,14 +1677,7 @@ class Simplex_tree {
    * @param[in] min_dim The minimal dimension. Default value is 0.
    */
   void reset_filtration(Filtration_value filt_value, int min_dim = 0) {
-    for (auto& simplex : root_.members()) {
-      if (min_dim <= 0) {
-        simplex.second.assign_filtration(filt_value);
-      }
-      if (has_children(&simplex)) {
-        rec_reset_filtration(simplex.second.children(), filt_value, min_dim - 1);
-      }
-    }
+    rec_reset_filtration(&root_, filt_value, min_dim);
     clear_filtration(); // Drop the cache.
   }
 
