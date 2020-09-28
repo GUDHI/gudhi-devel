@@ -6,7 +6,7 @@
  * 
  * \section compiling Compiling
  * The library uses c++14 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.56.0
- * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.1.
+ * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.5.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
  * \subsection utilities Utilities and examples
@@ -17,8 +17,8 @@ cd build/
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make \endverbatim
  * By default, examples are disabled. You can activate their compilation with
- * <a href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
- * <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or by modifying the
+ * <a href="https://cmake.org/cmake/help/latest/manual/ccmake.1.html">ccmake</a> (on Linux and Mac OSX),
+ * <a href="https://cmake.org/cmake/help/latest/manual/cmake-gui.1.html">cmake-gui</a> (on Windows) or by modifying the
  * cmake command as follows :
 \verbatim  cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON ..
 make \endverbatim
@@ -28,7 +28,7 @@ make \endverbatim
  * To install the library (headers and activated utilities), run the following command in a terminal:
  * \verbatim  make install \endverbatim
  * This action may require to be in the sudoer or administrator of the machine in function of the operating system and
- * of <a href="https://cmake.org/cmake/help/v3.0/variable/CMAKE_INSTALL_PREFIX.html">CMAKE_INSTALL_PREFIX</a>.
+ * of <a href="https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html">CMAKE_INSTALL_PREFIX</a>.
  *
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:

@@ -14,12 +14,13 @@ RUN mkdir -p /opt/cmake \
     && sh cmake-3.16.2-Linux-x86_64.sh  --skip-license --prefix=/opt/cmake \
     && rm -f cmake-3.16.2-Linux-x86_64.sh
 
-RUN git clone -b boost-1.73.0 --depth 1 https://github.com/boostorg/boost.git \
-    && cd boost \
-    && git submodule update --init \
-    && ./bootstrap.sh --with-libraries=filesystem,program_options,system,thread,test \
-    && ./b2 headers \
-    && ./b2 install \
+# yum install boost-devel installs boost 1.53 and copy is the only way to install headers only boost
+RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.gz \
+    && tar xf boost_1_73_0.tar.gz \
+    && cd boost_1_73_0 \
+    && ./bootstrap.sh \
+    && ls \
+    && cp -r boost /usr/local/include/ \
     && cd .. \
     && rm -rf boost
 

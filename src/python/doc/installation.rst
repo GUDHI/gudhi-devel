@@ -40,7 +40,7 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
 `NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
