@@ -295,13 +295,9 @@ cdef class SimplexTree:
         """
         cdef pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] it =  self.get_ptr().get_boundary_iterators(simplex)
 
-        try:
-            while it.first != it.second:
-                yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
-                preincrement(it.first)
-        except RuntimeError:
-            print("simplex not found - cannot find boundaries")
-
+        while it.first != it.second:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
+            preincrement(it.first)
 
     def remove_maximal_simplex(self, simplex):
         """This function removes a given maximal N-simplex from the simplicial
