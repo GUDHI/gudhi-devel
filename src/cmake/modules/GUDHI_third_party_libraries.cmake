@@ -1,42 +1,11 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.56.0 REQUIRED COMPONENTS system filesystem unit_test_framework program_options thread)
+find_package(Boost 1.56.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framework program_options)
 
-if(NOT Boost_FOUND)
+# Boost_FOUND is not reliable
+if(NOT Boost_VERSION)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
-endif(NOT Boost_FOUND)
-
-# cf. https://cliutils.gitlab.io/modern-cmake/chapters/packages/Boost.html
-# This is needed if your Boost version is newer than your CMake version
-# or if you have an old version of CMake (<3.5)
-if(NOT TARGET Boost::program_options)
-    add_library(Boost::program_options IMPORTED INTERFACE)
-    set_property(TARGET Boost::program_options PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
-    set_property(TARGET Boost::program_options PROPERTY
-        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
-endif()
-if(NOT TARGET Boost::filesystem)
-    add_library(Boost::filesystem IMPORTED INTERFACE)
-    set_property(TARGET Boost::filesystem PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
-    set_property(TARGET Boost::filesystem PROPERTY
-        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
-endif()
-if(NOT TARGET Boost::unit_test_framework)
-    add_library(Boost::unit_test_framework IMPORTED INTERFACE)
-    set_property(TARGET Boost::unit_test_framework PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
-    set_property(TARGET Boost::unit_test_framework PROPERTY
-        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
-endif()
-if(NOT TARGET Boost::system)
-    add_library(Boost::system IMPORTED INTERFACE)
-    set_property(TARGET Boost::system PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
-    set_property(TARGET Boost::system PROPERTY
-        INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
-endif()
+endif(NOT Boost_VERSION)
 
 find_package(GMP)
 if(GMP_FOUND)
