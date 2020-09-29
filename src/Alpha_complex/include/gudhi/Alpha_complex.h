@@ -176,8 +176,8 @@ class Alpha_complex {
    * 
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
    * 
-   * The type InputPointRange must be a range for which std::begin and
-   * std::end return input iterators on a Kernel::Point_d or Kernel::Weighted_point_d.
+   * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+   * Kernel::Point_d or Kernel::Weighted_point_d.
    */
   template<typename InputPointRange >
   Alpha_complex(const InputPointRange& points)
@@ -190,12 +190,12 @@ class Alpha_complex {
    * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
    * weighted hidden point, ...).
    * 
-   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
+   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d.
    * 
    * @param[in] weights Range of points weights. Weights must be in Kernel::FT.
    * 
-   * The type InputPointRange must be a range for which std::begin and
-   * std::end return input iterators on a Kernel::Point_d.
+   * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+   * Kernel::Point_d.
    */
   template <typename InputPointRange, typename WeightRange>
   Alpha_complex(const InputPointRange& points, WeightRange weights) {
