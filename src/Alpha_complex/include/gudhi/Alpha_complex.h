@@ -101,15 +101,16 @@ template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, bool Weighte
 class Alpha_complex {
  public:
   /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
-  using Geom_traits = typename std::conditional<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>,
-                                                          Kernel>::type;
+  using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
+
   // Add an int in TDS to save point index in the structure
   using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
                                                  CGAL::Triangulation_vertex<Geom_traits, std::ptrdiff_t>,
                                                  CGAL::Triangulation_full_cell<Geom_traits> >;
+
   /** \brief A (Weighted or not) Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
-  using Triangulation = typename std::conditional<Weighted, CGAL::Regular_triangulation<Kernel, TDS>,
-                                                            CGAL::Delaunay_triangulation<Kernel, TDS>>::type;
+  using Triangulation = std::conditional_t<Weighted, CGAL::Regular_triangulation<Kernel, TDS>,
+                                                     CGAL::Delaunay_triangulation<Kernel, TDS>>;
 
   /** \brief CGAL kernel container for computations in function of the weighted or not characteristics.*/
   using A_kernel_d = Alpha_kernel_d<Kernel, Weighted>;
@@ -123,8 +124,7 @@ class Alpha_complex {
   using Sphere = typename A_kernel_d::Sphere;
 
   /** \brief A point, or a weighted point in Euclidean space.*/
-  using Point_d = typename std::conditional<Weighted, typename A_kernel_d::Weighted_point_d,
-                                                      typename A_kernel_d::Point_d>::type;
+  using Point_d = std::conditional_t<Weighted, typename A_kernel_d::Weighted_point_d, typename A_kernel_d::Point_d>;
 
  private:
   // Vertex_iterator type from CGAL.
