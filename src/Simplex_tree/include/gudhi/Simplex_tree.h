@@ -1780,17 +1780,18 @@ public:
   * oscillating Rips zigzag filtration with paramters mu and nu, built on top 
   * of the point cloud points with distance function distance. 
   */
-  template< typename Kernel, typename Point_container, typename Distance >
+  template< typename PointRange, typename Distance, typename OrderPolicy >
   Zigzagfiltration_simplex_range
-  zigzag_simplex_range( Point_container  const        & points,
-                        Distance         const          distance,
-                        Filtration_value const          nu,
+  zigzag_simplex_range( Filtration_value const          nu,
                         Filtration_value const          mu,
-                        int                            dim_max )
+                        int                             dim_max, 
+                        PointRange       const        & points,
+                        Distance         const          distance,
+                        OrderPolicy                     order_policy)
   {
     return
       Zigzagfiltration_simplex_range(
-          Zigzagfiltration_simplex_iterator(this, points, distance, nu, mu, dim_max) , Zigzagfiltration_simplex_iterator()  );
+          Zigzagfiltration_simplex_iterator(this, nu, mu, dim_max, points, distance, order_policy) , Zigzagfiltration_simplex_iterator()  );
   }
 
 public:
@@ -1802,14 +1803,15 @@ public:
     zigzag_simplex_range_initialized_ = true;
   }
 
-  template<typename Point_container, typename Distance>
-  void initialize_filtration( Point_container  const       & points,
-                              Distance         const         distance,
-                              Filtration_value const         nu,
+  template<typename PointRange, typename Distance, typename OrderPolicy>
+  void initialize_filtration( Filtration_value const         nu,
                               Filtration_value const         mu,
-                              int                            dim_max ) 
+                              int                            dim_max, 
+                              PointRange       const       & points,
+                              Distance         const         distance,
+                              OrderPolicy order_policy = farthest_point_ordering() )
   {
-    zigzag_simplex_range_ = zigzag_simplex_range(points, distance, nu, mu, dim_max);
+    zigzag_simplex_range_ = zigzag_simplex_range(nu, mu, dim_max, points, distance, order_policy);
     zigzag_simplex_range_initialized_ = true;
   }
 
@@ -2406,12 +2408,13 @@ public:
   static Simplex_handle null_simplex_;
 };
 
+/*Initializes a static empty Dictionary shared by all Simplex_tree<T>.*/
 template<typename SimplexTreeOptions> 
 typename Simplex_tree<SimplexTreeOptions>::Dictionary Simplex_tree<SimplexTreeOptions>::null_dic_ = Simplex_tree<SimplexTreeOptions>::Dictionary();
-
+/*Use the mepty dictionary .begin() as universal static null_simplex() for all 
+ * Simplex_tree<T>.*/
 template<typename SimplexTreeOptions> 
 typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_tree<SimplexTreeOptions>::null_simplex_ = Simplex_tree<SimplexTreeOptions>::null_dic_.begin();
-
 
 
 // Print a Simplex_tree in os.

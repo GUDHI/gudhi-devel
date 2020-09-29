@@ -2,19 +2,18 @@
 #include <fstream>
 #include <chrono>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/Simplex_tree_zigzag_iterators.h>
 #include "gudhi/reader_utils.h"
 #include <gudhi/distance_functions.h>
 #include <gudhi/Points_off_io.h>
 #include <boost/program_options.hpp>
 #include <CGAL/Epick_d.h>
-#include <gudhi/choose_n_farthest_points.h>
-#include <gudhi/pick_n_random_points.h>
+// #include <gudhi/choose_n_farthest_points.h>
+// #include <gudhi/pick_n_random_points.h>
 
 // Types definition
-using Simplex_tree = 
+using Simplex_tree      = 
                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
-// using Zz_edge       = Zigzag_edge<Simplex_tree>;
+using Zz_edge           = Zigzag_edge<Simplex_tree>;
 using Filtration_value  = Simplex_tree::Filtration_value;
 using K                 = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d           = typename K::Point_d;
@@ -26,16 +25,6 @@ void program_options( int argc, char* argv[]
                     , Filtration_value& mu
                     , int& dim_max);
 
-  // bool lex_cmp( Point_d p, Point_d q ) {
-  //   auto itp = p.begin(); auto itq = q.begin();
-  //   while(itp != p.end() && itq != q.end()) {
-  //     if(*itp != *itq) { return *itp < *itq; }
-  //     ++itp; ++itq;
-  //   }
-  //   return false;
-  // }
-
-
 int main(int argc, char* argv[])
 {
   std::string off_file_points;
@@ -44,94 +33,44 @@ int main(int argc, char* argv[])
 
   program_options(argc, argv, off_file_points, nu, mu, dim_max);
 //sequence of insertion and deletions of vertices and edges
-  std::vector< Zigzag_edge<Simplex_tree> >        edge_filtration;
+  std::vector< Zz_edge >        edge_filtration;
 //epsilon_i values, size() == #points
   std::vector<Filtration_value> filtration_values;
-//extract points from file
-  Points_off_reader off_reader(off_file_points); //read points
 //kernel
   K k_d; 
+//extract points from file
+  Points_off_reader off_reader(off_file_points); //read points
+  std::cout << "Point cloud of size "<< off_reader.get_point_cloud().size() << "\n";
+//remove duplicate points
+  off_reader.no_duplicate();
+  std::cout << "Remove duplicates: point cloud of size " << 
+                                        off_reader.get_point_cloud().size() << "\n";
 
-//check whether there are duplicates
-
-  // bool(*tmp_cmp)(Point_d,Point_d) = lex_cmp;
-  // std::set<Point_d, bool(*)(Point_d,Point_d) > no_dup(tmp_cmp);
-  
-  std::set<Point_d> no_dup;
-  for(auto p : off_reader.get_point_cloud()) { no_dup.insert(p); }
-  if(no_dup.size() != off_reader.get_point_cloud().size()) { 
-    std::cout << "Duplicates " << no_dup.size() << " vs. " << off_reader.get_point_cloud().size() << "\n"; 
-    return 0; 
-  }
-
-  //sort points in furthest point order, starting with point[0]
-  std::vector<Point_d> sorted_points;
-
-  Gudhi::subsampling::choose_n_farthest_points( k_d, off_reader.get_point_cloud() 
-    , off_reader.get_point_cloud().size() //all points
-    , 0//start with point [0]//Gudhi::subsampling::random_starting_point
-    , std::back_inserter(sorted_points));
-
-  //Compute edge filtration with squared distance for efficiency. Note that with
-  //squared distance, we must square parameters mu and nu too.
-  auto sqdist = k_d.squared_distance_d_object();
-
-  // start = std::chrono::system_clock::now();
-	ordered_points_to_one_skeleton_zigzag_filtration( sorted_points, 
-                                               sqdist, 
-                                               nu*nu, mu*mu, 
-                                               filtration_values, edge_filtration );
-  //apply sqrt to correct the use of squared distance
-  for(auto & f : filtration_values) { f = std::sqrt(f); }
-  for(auto & e : edge_filtration) { e.assign_filtration(std::sqrt(e.fil())); }
-//Print the points ordered by furthest point ordering
-  std::cout << "Point cloud, with furthest point ordering: \n";
-  for(auto point : sorted_points) {
-    for(auto x : point) { std::cout << x << " "; }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-//Print the epsilon values, presenting the sparsity of the point cloud
-  std::cout << "Epsilon filtration values: \n";
-  for(size_t i = 0; i < filtration_values.size(); ++i) {
-    std::cout << "eps_" << i << " = " << filtration_values[i] << std::endl;
-  }
-  std::cout << std::endl;
-//Print the zigzag filtration of the 1-skeleton
-  std::cout << "Edge filtration: \n";
-  for(auto edg : edge_filtration) 
-  { 
-   if(edg.type()) { std::cout << "+ "; } else { std::cout << "- "; }
-   if(edg.u() == edg.v()) { std::cout << edg.u() << " "; }
-   else { std::cout <<  edg.u() << " " << edg.v() << " "; }
-   std::cout << "  [" << edg.fil() << "]" << std::endl;
-  }
-  std::cout << std::endl;
- 
   // traverse the entire oscillating Rips zigzag filtration 
   Simplex_tree st;
-  st.initialize_filtration(edge_filtration, dim_max); 
+  //initialize the zigzag filtration ; this is mandatory. Use the squared Eucliean distance for efficiency. Note that we must nu*nu and mu*mu
+  st.initialize_filtration(nu*nu, mu*mu, dim_max, off_reader.get_point_cloud(),
+                           k_d.squared_distance_d_object(),
+                           farthest_point_ordering());//sort points by furthest pt order 
+  //access the zigzag filtration range of simplices
   auto zz_rg(st.filtration_simplex_range());
   
-  size_t num_arrows        = 0;
-  size_t max_size_complex  = 0;
-  size_t curr_size_complex = 0;
+  size_t num_arrows        = 0;//total number of insertion and deletion of simplices
+  size_t max_size_complex  = 0;//max size of a complex in the filtration
+  size_t curr_size_complex = 0;//size of the current complex
   std::cout << "Simplex filtration: \n";
-  std::cout << " ins/del  simplex  [fil_value , key]  (size cpx, max size cpx)\n";
+  std::cout << " ins/del  simplex  [fil_value , key]    (size cpx, max size cpx)\n";
   for(auto it = zz_rg.begin(); it != zz_rg.end(); ++it ) {
     ++num_arrows;
-    if(it.arrow_direction()) {
+    if(it.arrow_direction()) {//insertion
       std::cout << "+ ";
-      if(++curr_size_complex > max_size_complex) { 
-        max_size_complex = curr_size_complex; 
-      }
+      if(++curr_size_complex > max_size_complex) 
+      {  max_size_complex = curr_size_complex;  }
     }
-    else {
-      std::cout << "- ";
-      --curr_size_complex;
-    }
+    else { std::cout << "- "; --curr_size_complex; }//deletion
+    //print list of vertices
     for(auto u : st.simplex_vertex_range(*it)) { std::cout << u << " "; }
-    std::cout << "  [" << st.filtration(*it) << "," << st.key(*it) << "]\n";
+    std::cout << "  [" << sqrt(st.filtration(*it)) << "," << st.key(*it) << "]\n";
     std::cout << "  (" << curr_size_complex << "," << max_size_complex << ")\n";
   }
   std::cout << std::endl << std::endl;

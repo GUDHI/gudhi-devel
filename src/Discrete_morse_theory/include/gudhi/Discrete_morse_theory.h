@@ -22,11 +22,20 @@ public:
 /** Restrict the matching the a range of cells. value_type in range must match 
   * Complex::Simplex_handle. The available cells belong to the Complex cpx.
   *
-  * The range must be ordered in filtration order (i.e., faces before cofaces). We 
-  * read it from right to left.
+  * The range presented by pointers av_begin and av_end must satisfy the following 
+  * property: an iterator 'it' in this range always points to a Simplex_handle *it 
+  * which is maximal w.r.t. to inclusion among all simplices in the range 
+  * [it, av_end).
   *
-  * Assume all faces are marked critical by default.
-  * Benedetti-Lutz heuristic.
+  * Similarly, but in reverse, the range available_cells must satisfy: any iterator 
+  * 'it' in the range points to a simplex *it which is maximal w.r.t. inclusion 
+  * among all simplices in the range [available_cells.begin(), it). The reversed 
+  * convention ensures that compute_matching can be called on a range representing 
+  * a filtration, as used in persistent homology. 
+  *
+  * There is no assumption on the status of cells (critical or not) in the input 
+  * range. The algorithm implement the Benedetti-Lutz heuristic to compute a 
+  * (not necessarily optimal) Morse matching.
   */
   template<typename RangeCells>
   void compute_matching(const RangeCells &available_cells, Complex *cpx) {
@@ -44,7 +53,7 @@ public:
     };
     std::set<Cell_handle, Address_cmp> available;
     
-#ifdef GUDHI_USE_TBB
+#ifdef GUDHI_USE_TBB//faster sorting if parallel allowed
     std::vector<Cell_handle> tmp_av; tmp_av.reserve(av_end-av_begin);
     for(auto it_sh = av_begin; it_sh != av_end; ++it_sh) {
       tmp_av.push_back(*it_sh);
@@ -89,8 +98,7 @@ public:
     }
   }
 
-
-
+  /** Remove the matching by turning all cells in cpx critical.*/
   void clear_matching(Complex *cpx) {
     for(auto sh : cpx->complex_simplex_range()) { cpx->make_critical(sh); }
   }

@@ -5,6 +5,8 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2020/09 Clément Maria: Feed a distance function instead of a kernel.
+ *
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -51,25 +53,28 @@ enum : std::size_t {
  *  `input_pts` and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
- * @param[in] k A kernel object.
- * @param[in] input_pts Const reference to the input points.
+ * @param[in] dist A Distance object defining operator()(Point,Point).
+ * @param[in] input_pts_beg, input_pts_end Range [beg,end) of input points.
+ * @param[in] nb_points Number of input points.
  * @param[in] final_size The size of the subsample to compute.
  * @param[in] starting_point The seed in the farthest point algorithm.
  * @param[out] output_it The output iterator for points.
  * @param[out] dist_it The optional output iterator for distances.
  *  
  */
-template < typename Kernel,
-typename Point_range,
-typename PointOutputIterator,
-typename DistanceOutputIterator = Null_output_iterator>
-void choose_n_farthest_points(Kernel const &k,
-                              Point_range const &input_pts,
+template < typename Distance,
+           typename PointInputIterator,
+           typename PointOutputIterator,
+           typename DistanceOutputIterator = Null_output_iterator>
+void choose_n_farthest_points(Distance dist,
+                              PointInputIterator input_pts_beg,
+                              PointInputIterator input_pts_end,
+                              std::size_t nb_points,
                               std::size_t final_size,
                               std::size_t starting_point,
                               PointOutputIterator output_it,
                               DistanceOutputIterator dist_it = {}) {
-  std::size_t nb_points = boost::size(input_pts);
+  // std::size_t nb_points = //boost::size(input_pts);
   if (final_size > nb_points)
     final_size = nb_points;
 
@@ -85,8 +90,6 @@ void choose_n_farthest_points(Kernel const &k,
     starting_point = dis(gen);
   }
 
-  typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
-
   std::size_t current_number_of_landmarks = 0;  // counter for landmarks
   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
   std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
@@ -95,11 +98,12 @@ void choose_n_farthest_points(Kernel const &k,
 
   for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
     // curr_max_w at this point is the next landmark
-    *output_it++ = input_pts[curr_max_w];
+    *output_it++ = *(input_pts_beg + curr_max_w);//input_pts[curr_max_w];
     *dist_it++ = dist_to_L[curr_max_w];
     std::size_t i = 0;
-    for (auto&& p : input_pts) {
-      double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
+    for(auto it=input_pts_beg; it!=input_pts_end; ++it) {
+    // for (auto&& p : input_pts) {
+      double curr_dist = dist(*it, *(input_pts_beg + curr_max_w));
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;
       ++i;
@@ -112,6 +116,34 @@ void choose_n_farthest_points(Kernel const &k,
         curr_max_w = i;
       }
   }
+}
+/**
+ * @param[in] k A kernel object.
+ * @param[in] input_pts Const reference to the input points.
+ * @param[in] final_size The size of the subsample to compute.
+ * @param[in] starting_point The seed in the farthest point algorithm.
+ * @param[out] output_it The output iterator for points.
+ * @param[out] dist_it The optional output iterator for distances.
+ */
+template < typename Kernel,
+           typename Point_range,
+           typename PointOutputIterator,
+           typename DistanceOutputIterator = Null_output_iterator>
+void choose_n_farthest_points(Kernel const &k,
+                              Point_range const &input_pts,
+                              std::size_t final_size,
+                              std::size_t starting_point,
+                              PointOutputIterator output_it,
+                              DistanceOutputIterator dist_it = {}) 
+{
+  return choose_n_farthest_points(k.squared_distance_d_object(),
+                                  std::begin(input_pts),
+                                  std::end(input_pts),
+                                  boost::size(input_pts),
+                                  final_size,
+                                  starting_point,
+                                  output_it,
+                                  dist_it);
 }
 
 }  // namespace subsampling
