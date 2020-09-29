@@ -171,7 +171,8 @@ class Alpha_complex {
 
   /** \brief Alpha_complex constructor from a list of points.
    *
-   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+   * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
+   * weighted hidden point, ...).
    * 
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
    * 
@@ -186,7 +187,8 @@ class Alpha_complex {
 
   /** \brief Alpha_complex constructor from a list of points and weights.
    *
-   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+   * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
+   * weighted hidden point, ...).
    * 
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
    * 
