@@ -160,7 +160,8 @@ Table of Contents
  *
  * \section weightedversion Weighted specific version
  * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
- * For performances reasons, it is advised to use \ref eigen &ge; 3.5.8 and \ref cgal &ge; 5.2.0
+ * For performances reasons, it is advised to use \ref eigen &ge; 3.3.5 and \ref cgal &ge; 5.2.0.
+ * 
  * A weighted version for Alpha complex is available (cf. Alpha_complex). 
  *
  * This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
