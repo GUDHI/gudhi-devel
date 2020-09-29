@@ -9,7 +9,7 @@
 
 // Complexity = FAST, weighted = true, periodic = false
 using Weighted_alpha_complex_3d =
-    Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
+    Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::FAST, true, false>;
 using Bare_point = Weighted_alpha_complex_3d::Bare_point_3;
 using Weighted_point = Weighted_alpha_complex_3d::Weighted_point_3;
 
