@@ -50,7 +50,7 @@ std::vector<double> read_weight_file(const std::string &weight_file) {
     double weight = 0.0;
     // Attempt read the weight in a double format, return false if it fails
     while (weights_ifstr >> weight) {
-      weights.push_back(weight);
+      weights.emplace_back(weight);
     }
   } else {
     std::cerr << "Unable to read weights file " << weight_file << std::endl;

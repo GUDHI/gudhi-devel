@@ -18,11 +18,11 @@ int main(int argc, char **argv) {
   // Init of a list of points and weights from a small molecule
   // ----------------------------------------------------------------------------
   std::vector<Weighted_point> weighted_points;
-  weighted_points.push_back(Weighted_point(Bare_point(1, -1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(-1, 1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(-1, -1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(1, 1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(2, 2, 2), 1.));
+  weighted_points.emplace_back(Bare_point(1, -1, -1), 4.);
+  weighted_points.emplace_back(Bare_point(-1, 1, -1), 4.);
+  weighted_points.emplace_back(Bare_point(-1, -1, 1), 4.);
+  weighted_points.emplace_back(Bare_point(1, 1, 1),   4.);
+  weighted_points.emplace_back(Bare_point(2, 2, 2),   1.);
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points

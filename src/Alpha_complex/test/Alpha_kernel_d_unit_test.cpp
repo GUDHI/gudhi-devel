@@ -63,11 +63,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kerne
 
   using Point_d = typename Unweighted_kernel::Point_d;
   std::vector<Point_d> unw_pts;
-  unw_pts.push_back(Point_d(p0.begin(), p0.end()));
-  unw_pts.push_back(Point_d(p1.begin(), p1.end()));
-  unw_pts.push_back(Point_d(p2.begin(), p2.end()));
-  unw_pts.push_back(Point_d(p3.begin(), p3.end()));
-  unw_pts.push_back(Point_d(p4.begin(), p4.end()));
+  unw_pts.emplace_back(p0.begin(), p0.end());
+  unw_pts.emplace_back(p1.begin(), p1.end());
+  unw_pts.emplace_back(p2.begin(), p2.end());
+  unw_pts.emplace_back(p3.begin(), p3.end());
+  unw_pts.emplace_back(p4.begin(), p4.end());
 
   Unweighted_kernel kernel;
   auto unw_sphere = kernel.get_sphere(unw_pts.cbegin(), unw_pts.cend());
@@ -79,11 +79,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kerne
   using Weighted_point_d = typename Weighted_kernel::Weighted_point_d;
   using Bare_point_d = typename Weighted_kernel::Bare_point_d;
   std::vector<Weighted_point_d> w_pts;
-  w_pts.push_back(Weighted_point_d(Bare_point_d(p0.begin(), p0.end()), 0.));
-  w_pts.push_back(Weighted_point_d(Bare_point_d(p1.begin(), p1.end()), 0.));
-  w_pts.push_back(Weighted_point_d(Bare_point_d(p2.begin(), p2.end()), 0.));
-  w_pts.push_back(Weighted_point_d(Bare_point_d(p3.begin(), p3.end()), 0.));
-  w_pts.push_back(Weighted_point_d(Bare_point_d(p4.begin(), p4.end()), 0.));
+  w_pts.emplace_back(Bare_point_d(p0.begin(), p0.end()), 0.);
+  w_pts.emplace_back(Bare_point_d(p1.begin(), p1.end()), 0.);
+  w_pts.emplace_back(Bare_point_d(p2.begin(), p2.end()), 0.);
+  w_pts.emplace_back(Bare_point_d(p3.begin(), p3.end()), 0.);
+  w_pts.emplace_back(Bare_point_d(p4.begin(), p4.end()), 0.);
 
   Weighted_kernel w_kernel;
   auto w_sphere = w_kernel.get_sphere(w_pts.cbegin(), w_pts.cend());

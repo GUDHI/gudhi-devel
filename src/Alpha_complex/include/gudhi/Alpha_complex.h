@@ -310,7 +310,7 @@ class Alpha_complex {
       thread_local std::vector<Point_d> v;
       v.clear();
       for (auto vertex : cplx.simplex_vertex_range(s))
-        v.push_back(get_point_(vertex));
+        v.emplace_back(get_point_(vertex));
       cache_.emplace_back(kernel_.get_sphere(v.cbegin(), v.cend()));
     }
     return cache_[k];
@@ -326,7 +326,7 @@ class Alpha_complex {
     thread_local std::vector<Point_d> v;
     v.clear();
     for (auto vertex : cplx.simplex_vertex_range(s))
-      v.push_back(get_point_(vertex));
+      v.emplace_back(get_point_(vertex));
     return kernel_.get_squared_radius(v.cbegin(), v.cend());
   }
 
@@ -394,7 +394,7 @@ class Alpha_complex {
             std::clog << " " << (*vit)->data();
 #endif  // DEBUG_TRACES
             // Vector of vertex construction for simplex_tree structure
-            vertexVector.push_back((*vit)->data());
+            vertexVector.emplace_back((*vit)->data());
           }
         }
 #ifdef DEBUG_TRACES
