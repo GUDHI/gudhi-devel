@@ -11,8 +11,6 @@
 #ifndef ALPHA_COMPLEX_ALPHA_KERNEL_D_H_
 #define ALPHA_COMPLEX_ALPHA_KERNEL_D_H_
 
-#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
-#include <CGAL/Epick_d.h>  // For FAST version
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
