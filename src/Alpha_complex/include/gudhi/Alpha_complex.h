@@ -124,7 +124,7 @@ class Alpha_complex {
   using Sphere = typename A_kernel_d::Sphere;
 
   /** \brief A point, or a weighted point in Euclidean space.*/
-  using Point_d = std::conditional_t<Weighted, typename A_kernel_d::Weighted_point_d, typename A_kernel_d::Point_d>;
+  using Point_d = typename Geom_traits::Point_d;
 
  private:
   // Vertex_iterator type from CGAL.
