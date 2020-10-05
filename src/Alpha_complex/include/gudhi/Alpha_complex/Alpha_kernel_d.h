@@ -12,10 +12,8 @@
 #define ALPHA_COMPLEX_ALPHA_KERNEL_D_H_
 
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
-#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
-#include <CGAL/Epick_d.h>  // For FAST version
 
-#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
+#include <Eigen/Core>  // for EIGEN_VERSION_AT_LEAST
 
 #include <utility>  // for std::make_pair
 
@@ -117,7 +115,7 @@ class Alpha_kernel_d<Kernel, true> {
 
   template<class PointIterator>
   FT get_squared_radius(PointIterator begin, PointIterator end) const {
-    return get_sphere(begin, end).weight();
+    return kernel_.compute_squared_radius_smallest_orthogonal_sphere_d_object()(begin, end);
   }
 
   FT get_squared_radius(const Sphere& sph) const {
