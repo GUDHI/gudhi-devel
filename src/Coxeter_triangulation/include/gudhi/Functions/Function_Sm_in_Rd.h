@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,11 +24,11 @@ namespace coxeter_triangulation {
  * \brief A class for the function that defines an m-dimensional implicit sphere embedded
  * in the d-dimensional Euclidean space.
  */
-struct Function_Sm_in_Rd : public Function {
+struct Function_Sm_in_Rd {
   /** \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd x = p;
     for (std::size_t i = 0; i < d_; ++i) x(i) -= center_[i];
     Eigen::VectorXd result = Eigen::VectorXd::Zero(k_);
@@ -41,13 +39,13 @@ struct Function_Sm_in_Rd : public Function {
   }
 
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
-  virtual std::size_t amb_d() const override { return d_; };
+  std::size_t amb_d() const { return d_; };
 
   /** \brief Returns the codomain dimension. Same as the codimension of the sphere. */
-  virtual std::size_t cod_d() const override { return k_; };
+  std::size_t cod_d() const { return k_; };
 
   /** \brief Returns a point on the sphere. */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     Eigen::VectorXd result = Eigen::VectorXd::Zero(d_);
     result(0) += r_;
     for (std::size_t i = 0; i < d_; ++i) result(i) += center_[i];

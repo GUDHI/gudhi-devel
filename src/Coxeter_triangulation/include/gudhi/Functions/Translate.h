@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -30,24 +28,24 @@ namespace coxeter_triangulation {
  * the concept FunctionForImplicitManifold.
  */
 template <class Function_>
-struct Translate : public Function {
+struct Translate {
   /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd result = fun_(p - off_);
     return result;
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  virtual std::size_t amb_d() const override { return fun_.amb_d(); }
+  std::size_t amb_d() const { return fun_.amb_d(); }
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override { return fun_.cod_d(); }
+  std::size_t cod_d() const { return fun_.cod_d(); }
 
   /** \brief Returns a point on the zero-set. */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     Eigen::VectorXd result = fun_.seed();
     result += off_;
     return result;

@@ -19,8 +19,8 @@ using namespace Gudhi::coxeter_triangulation;
  * the equation of the manifold is x^3*y + y^3*z + z^3*x = 0.
  * The embedding consists of restricting the manifold to the affine subspace z = 1.
  */
-struct Function_surface_on_CP2_in_R4 : public Function {
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+struct Function_surface_on_CP2_in_R4 {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     // The real and imaginary parts of the variables x and y
     double xr = p(0), xi = p(1), yr = p(2), yi = p(3);
     Eigen::VectorXd result(cod_d());
@@ -36,10 +36,10 @@ struct Function_surface_on_CP2_in_R4 : public Function {
     return result;
   }
 
-  virtual std::size_t amb_d() const override { return 4; };
-  virtual std::size_t cod_d() const override { return 2; };
+  std::size_t amb_d() const { return 4; };
+  std::size_t cod_d() const { return 2; };
 
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     Eigen::VectorXd result = Eigen::VectorXd::Zero(4);
     return result;
   }

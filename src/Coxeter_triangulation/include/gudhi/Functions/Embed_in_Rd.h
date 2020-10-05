@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -29,12 +27,12 @@ namespace coxeter_triangulation {
  * the concept FunctionForImplicitManifold.
  */
 template <class Function_>
-struct Embed_in_Rd : public Function {
+struct Embed_in_Rd {
   /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     Eigen::VectorXd x = p;
     Eigen::VectorXd x_k(fun_.amb_d()), x_rest(d_ - fun_.amb_d());
     for (std::size_t i = 0; i < fun_.amb_d(); ++i) x_k(i) = x(i);
@@ -46,13 +44,13 @@ struct Embed_in_Rd : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  virtual std::size_t amb_d() const override { return d_; }
+  std::size_t amb_d() const { return d_; }
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override { return d_ - (fun_.amb_d() - fun_.cod_d()); }
+  std::size_t cod_d() const { return d_ - (fun_.amb_d() - fun_.cod_d()); }
 
   /** \brief Returns a point on the zero-set of the embedded function. */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     Eigen::VectorXd result = fun_.seed();
     result.conservativeResize(d_);
     for (std::size_t l = fun_.amb_d(); l < d_; ++l) result(l) = 0;

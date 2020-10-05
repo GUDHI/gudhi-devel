@@ -14,8 +14,6 @@
 #include <cstdlib>  // for std::size_t
 #include <cmath>    // for std::pow
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -27,12 +25,12 @@ namespace coxeter_triangulation {
  * \brief A class that encodes the function, the zero-set of which is a so-called
  * "chair" surface embedded in R^3.
  */
-struct Function_chair_in_R3 : public Function {
+struct Function_chair_in_R3 {
   /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     double x = p(0) - off_[0], y = p(1) - off_[1], z = p(2) - off_[2];
     Eigen::VectorXd result(cod_d());
     result(0) = std::pow(x * x + y * y + z * z - a_ * k_ * k_, 2) -
@@ -41,13 +39,13 @@ struct Function_chair_in_R3 : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  virtual std::size_t amb_d() const override { return 3; }
+  std::size_t amb_d() const { return 3; }
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override { return 1; }
+  std::size_t cod_d() const { return 1; }
 
   /** \brief Returns a point on the surface. */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     double t1 = a_ - b_;
     double discr = t1 * t1 - (1.0 - b_) * (a_ * a_ - b_);
     double z0 = k_ * std::sqrt((t1 + std::sqrt(discr)) / (1 - b_));

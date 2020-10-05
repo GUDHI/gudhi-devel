@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,22 +24,22 @@ namespace coxeter_triangulation {
  * \brief A class that encodes a constant function from R^d to R^k.
  * This class does not have any implicit manifold in correspondence.
  */
-struct Constant_function : public Function {
+struct Constant_function {
   /** \brief Value of the function at a specified point. The value is constant.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     return value_;
   }
 
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
-  virtual std::size_t amb_d() const override { return d_; };
+  std::size_t amb_d() const { return d_; };
 
   /** \brief Returns the codomain dimension. Same as the codimension of the sphere. */
-  virtual std::size_t cod_d() const override { return k_; };
+  std::size_t cod_d() const { return k_; };
 
   /** \brief No seed point is available. Throws an exception on evocation. */
-  virtual Eigen::VectorXd seed() const override { throw "Seed invoked on a constant function.\n"; }
+  Eigen::VectorXd seed() const { throw "Seed invoked on a constant function.\n"; }
 
   Constant_function() {}
 

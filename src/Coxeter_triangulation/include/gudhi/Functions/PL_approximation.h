@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,18 +24,18 @@ namespace coxeter_triangulation {
  * \brief Constructs a piecewise-linear approximation of a function induced by
  * an ambient triangulation.
  *
- * \tparam Function The function template parameter. Should be a model of
+ * \tparam Function_ The function template parameter. Should be a model of
  * the concept FunctionForImplicitManifold.
  * \tparam Triangulation The triangulation template parameter. Should be a model of
  * the concept TriangulationForManifoldTracing.
  */
 template <class Function_, class Triangulation_>
-struct PL_approximation : public Function {
+struct PL_approximation {
   /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     std::size_t cod_d = this->cod_d();
     std::size_t amb_d = this->amb_d();
     auto s = tr_.locate_point(p);
@@ -62,13 +60,13 @@ struct PL_approximation : public Function {
   }
 
   /** \brief Returns the domain (ambient) dimension. */
-  virtual std::size_t amb_d() const override { return fun_.amb_d(); }
+  std::size_t amb_d() const { return fun_.amb_d(); }
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override { return fun_.cod_d(); }
+  std::size_t cod_d() const { return fun_.cod_d(); }
 
   /** \brief Returns a point on the zero-set. */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     // TODO: not finished. Should use an oracle.
     return Eigen::VectorXd(amb_d());
   }

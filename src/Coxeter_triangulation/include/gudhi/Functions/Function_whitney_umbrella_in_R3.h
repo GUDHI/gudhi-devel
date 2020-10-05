@@ -13,8 +13,6 @@
 
 #include <cstdlib>  // for std::size_t
 
-#include <gudhi/Functions/Function.h>
-
 #include <Eigen/Dense>
 
 namespace Gudhi {
@@ -26,12 +24,12 @@ namespace coxeter_triangulation {
  * \brief A class that encodes the function, the zero-set of which is the Whitney umbrella
  * surface embedded in R^3.
  */
-struct Function_whitney_umbrella_in_R3 : public Function {
+struct Function_whitney_umbrella_in_R3 {
   /**
    * \brief Value of the function at a specified point.
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
-  virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
+  Eigen::VectorXd operator()(const Eigen::VectorXd& p) const {
     double x = p(0) - off_[0], y = p(1) - off_[1], z = p(2) - off_[2];
     Eigen::VectorXd result(cod_d());
     result(0) = x * x - y * y * z;
@@ -39,16 +37,16 @@ struct Function_whitney_umbrella_in_R3 : public Function {
   }
 
   /** \brief Returns the (ambient) domain dimension.*/
-  virtual std::size_t amb_d() const override { return 3; };
+  std::size_t amb_d() const { return 3; };
 
   /** \brief Returns the codomain dimension. */
-  virtual std::size_t cod_d() const override { return 1; };
+  std::size_t cod_d() const { return 1; };
 
   /** \brief Returns a point on the surface. This seed point is only one of
    * two necessary seed points for the manifold tracing algorithm.
    * See the method seed2() for the other point.
    */
-  virtual Eigen::VectorXd seed() const override {
+  Eigen::VectorXd seed() const {
     Eigen::Vector3d result(1 + off_[0], 1 + off_[1], 1 + off_[2]);
     return result;
   }
