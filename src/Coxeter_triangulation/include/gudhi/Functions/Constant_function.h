@@ -31,8 +31,7 @@ struct Constant_function : public Function {
    * @param[in] p The input point. The dimension needs to coincide with the ambient dimension.
    */
   virtual Eigen::VectorXd operator()(const Eigen::VectorXd& p) const override {
-    Eigen::VectorXd result = value_;
-    return result;
+    return value_;
   }
 
   /** \brief Returns the domain dimension. Same as the ambient dimension of the sphere. */
