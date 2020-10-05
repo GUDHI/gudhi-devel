@@ -74,7 +74,7 @@ Table of Contents
  * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
  * exact, but the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still
  * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
- * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
+ * - For performances reasons, it is advised to use \ref eigen &ge; 3.3.5 and \ref cgal &ge; 5.2.0.
  *
  * \section pointsexample Example from points
  *
@@ -160,7 +160,6 @@ Table of Contents
  *
  * \section weightedversion Weighted specific version
  * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
- * For performances reasons, it is advised to use \ref eigen &ge; 3.3.5 and \ref cgal &ge; 5.2.0.
  * 
  * A weighted version for Alpha complex is available (cf. Alpha_complex). 
  *
