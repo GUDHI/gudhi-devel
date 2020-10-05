@@ -161,7 +161,9 @@ Table of Contents
  * \section weightedversion Weighted specific version
  * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
  * 
- * A weighted version for Alpha complex is available (cf. Alpha_complex). 
+ * A weighted version for Alpha complex is available (cf. Alpha_complex). It is like a usual Alpha complex, but based
+ * on a <a href="https://doc.cgal.org/latest/Triangulation/index.html#title20">CGAL regular triangulation</a> instead
+ * of Delaunay.
  *
  * This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
  * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
