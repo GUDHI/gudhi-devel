@@ -134,7 +134,7 @@ class Alpha_complex {
   using size_type = typename Triangulation::size_type;
 
   // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
-  using Vector_vertex_iterator = typename std::vector< CGAL_vertex_iterator >;
+  using Vector_vertex_iterator = std::vector< CGAL_vertex_iterator >;
 
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
