@@ -23,12 +23,12 @@
 namespace Gudhi {
 
 /* \addtogroup simplex_tree
- * Iterators and range types for the Simplex_tree.
+ * Iterators and range over the star of a simplex in a Simplex_tree.
  * @{
  */
 
 /* \brief Iterator over all the roots of subtrees containing cofaces of all 
- * dimension of a given simplex. If the simplex as vertex of maximal label u, all
+ * dimension of a given simplex. If the simplex has vertex of maximal label u, all
  * roots have label u.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
@@ -111,7 +111,7 @@ private:
   const {
   	if (other.st_ == nullptr) { return (st_ == nullptr); }
   	if (st_ == nullptr) { return false; }
-  	return (it_ == other.it_);//(&(*it_) == &(*(other.it_)));
+  	return (it_ == other.it_);
   }
 
   Simplex_handle const& dereference() const { return sh_; }
@@ -125,7 +125,7 @@ private:
   	}
   }
 
-//given a Node of label max_v, returns true if the associated simplex is a coface of the simplex
+//given a Node of label max_v, returns true if the associated simplex is a coface of the simplex {..., max_v}
   is_coface                         predicate_;
   SimplexTree                     * st_;
 //filtered iterators over Nodes of same label max_v_, filtered with predicate_
@@ -137,8 +137,7 @@ private:
   Simplex_handle                    sh_;  
 };
 
-/* \brief Iterator over all cofaces of dimension exactly exact_dim_cofaces_ for
- * a simplex.
+/* \brief Iterator over all cofaces of a simplex.
  *
  * Uses hooks stored in the Node of the SimplexTree.*/
 template <class SimplexTree>
@@ -195,7 +194,7 @@ private:
  *
  * Additionally,
  * 
- *  - if all_cofaces == true: sh_ points to a coface of any dimension. bfs_queue 
+ *  - computing all cofaces: sh_ points to a coface of any dimension. bfs_queue 
  * contains a collection of Siblings* that must be considered (as well as there 
  * children). These are all sets of children of simplices in 
  * [ sib_->members().begin(), sh_ ]
@@ -234,17 +233,13 @@ private:
 //[it_,end_) == range of Simplex_handles of the roots of the cofaces trees (any dim)
   Simplex_tree_opt_cofaces_rooted_subtrees_simplex_iterator<SimplexTree> it_;
   Simplex_tree_opt_cofaces_rooted_subtrees_simplex_iterator<SimplexTree> end_;
-//curr Simplex_handle, returned by operator*. A coface of s of appropriate codim  
+//curr Simplex_handle, returned by operator*, pointing to a coface of s  
   Simplex_handle         sh_;               
-//sh_ is always in a coface subtree
-  // int            dim_root_; //dimension of the root       
-  // int            dim_sh_;   //dimension of simplex sh_, inside the subtree
- //exact dimension of the cofaces computed, max_int otherwise if we want ALL cofaces
-  // int            exact_dim_cofaces_;
+//set of siblings containing sh_ in the Simplex_tree
   Siblings             * sib_;//
-  // bool           all_cofaces;//true if we compute all cofaces, false otherwise
   //use a bfs search to avoid calling sib_->members().find(.)
   std::queue<Siblings *> bfs_queue_;
+  //true iff sh_ points to the root of a coface subtree
   bool                   is_root_;
 };
 

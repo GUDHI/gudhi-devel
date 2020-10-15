@@ -117,7 +117,12 @@ void choose_n_farthest_points(Distance dist,
       }
   }
 }
-/**
+/** \ingroup subsampling
+ *  \brief Subsample by a greedy strategy of iteratively adding the farthest point 
+ * from the current chosen point set to the subsampling. 
+ *
+ * Same as above, but using a kernel to access the distance function.
+ *
  * @param[in] k A kernel object.
  * @param[in] input_pts Const reference to the input points.
  * @param[in] final_size The size of the subsample to compute.

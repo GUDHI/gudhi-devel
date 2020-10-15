@@ -2761,12 +2761,17 @@ struct Simplex_tree_options_morse_matching {
   static const bool contiguous_vertices = true;
   static const bool simplex_handle_strong_validity = false;
   static const bool link_nodes_by_label = false;
-  static const bool store_morse_matching = true;
+  static const bool store_morse_matching = false;
 };
-/** Model of SimplexTreeOptions.
+/** Model of SimplexTreeOptions with all features activated, except the contiguous_vertices.
  * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
+ * Used for dynamic simplicial complexes, with Morse matching. The main application 
+ * is the computation of zigzag filtrations. 
+ * Note that Simplex_key is now signed, which is necessary for Morse matchings.
+ *
+ * Maximum number of insertions and deletion of simplices in a zigzag filtration 
+ * is <CODE>std::numeric_limits<int>::max()</CODE>
+ * (about 2 billions of simplices). */
 struct Simplex_tree_options_zigzag_persistence {
   typedef zigzag_indexing_tag Indexing_tag;
   static const bool is_zigzag = true;
@@ -2776,12 +2781,9 @@ struct Simplex_tree_options_zigzag_persistence {
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
-  //allows deletion without invalidating iterators (Simplex_handles)
   static const bool simplex_handle_strong_validity = true;
-  //add a pointer to each Node. All Nodes with a same label u are linked this way in an intrusive list. Require to call a function after each insertion.
-  //store an extra pair of pointers per nodes to put all nodes with same label u in a same list, for all u
   static const bool link_nodes_by_label = true;
-  static const bool store_morse_matching = true;//store_key must be true and Simplex_key signed
+  static const bool store_morse_matching = true;
 };
 
 /** @} */  // end defgroup simplex_tree

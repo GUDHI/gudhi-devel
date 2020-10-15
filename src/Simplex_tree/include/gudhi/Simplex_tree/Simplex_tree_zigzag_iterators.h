@@ -22,13 +22,24 @@
 #include <tbb/tbb.h>
 #endif
 
-/** Represents an edge for a zigzag filtrations of flag complexes. 
-  * The edge must have two endpoints, encoded by Vertex_handles, a filtration 
-  * value and a type (insertion or deletion) represented by a bool.
+namespace Gudhi {
+
+/* \addtogroup simplex_tree
+ * Iterators and range types for zigzag filtrations of the Simplex_tree.
+ * @{
+ */
+
+/** \brief Represents an edge, or a vertex, for a zigzag filtrations of flag 
+  * complexes. 
   *
-  * A sequence of such edges represents a full flag zigzag filtration.
+  * The edge must have two endpoints encoded by Vertex_handle u and v, a filtration 
+  * value fil, and a type (true for insertion, false for deletion) 
+  * represented by a bool.
   *
   * An edge with u_ == v_ represents a vertex labeled u_.
+  *
+  * A sequence of such edges represents implicitly a full flag zigzag filtration by
+  * the sequence of insertion and deletion of vertices and edges.
   */
 template< class FilteredComplex >
 class Zigzag_edge {
@@ -152,8 +163,6 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
   }
   GUDHI_CHECK(decreasing_eps, "non-decreasing sequence of epsilon values");
 
-  std::cout << "D\n";
-
   //initialize a distance matrix where dist_matrix[i][j] containing the pair 
   //(j, d(p_i,p_j)) for j < i. We sort edges according to length later.
   size_t n = dist_mat.size();//number of points
@@ -178,8 +187,6 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     }
   };
   point_distance_cmp cmp;
-
-  std::cout << "E\n";
 
 #ifdef GUDHI_USE_TBB
   tbb::parallel_for(size_t(0), n, [&](size_t i) {
@@ -379,9 +386,6 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
   }
 #endif
  
-  std::cout << "H\n";
-
-
   //initialise R({p_0}, +infinity)
   edge_filtration.emplace_back(0, 0, //add vertex p_0,+infty
                           std::numeric_limits<FiltrationValue>::infinity(), true);
@@ -396,15 +400,10 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
       edge_filtration.push_back(*edg_it);
     }
   }
-
-  std::cout << "I\n";
-
-
   //what remains is removed in the zigzag iterator with -infinity values. If eps_n-1
   //== 0, which is the usual case, the remaining simplices in the filtration are 
   //the n vertices.
 }
-
 
 
 /** Compute the epsilon values for an ordered set of points 
@@ -453,7 +452,7 @@ void compute_epsilon_values(PointRange const & points,//ordered set of points
   }
 }
 
-/** Re-ordering policies for a set of input points.
+/** \brief Re-ordering policies for a set of input points.
   *
   * already_ordered implies no re-ordering, O(1) complexity.
   *
@@ -557,8 +556,7 @@ void zigzag_filtration_one_skeleton(PointRange      const  & points,
   zigzag_filtration_one_skeleton(dist_mat, eps_values, nu, mu, edge_filtration);
 }
 
-/** 
-  * Iterator over a flag zigzag filtration implicitly 
+/** \brief Iterator over a flag zigzag filtration implicitly 
   * represented by a list of Zigzag_edges. 
   *
   * Given an empty FlagZigzagFiltrationComplex and a range of insertions and 
@@ -567,6 +565,10 @@ void zigzag_filtration_one_skeleton(PointRange      const  & points,
   * expand the complex in consequence to maintain the d-skeleton of the induced 
   * flag complexes filtration. It traverses all the newly added/removed 
   * simplices (induced by the new edge) before doing further modifications.
+  *
+  * The iterator can also be initialized with a set of points with a distance 
+  * function, in which case it computes an oscillating Rips zigzag filtration on 
+  * the point cloud. 
   */
 template< class FlagZigzagFilteredComplex >
 class Flagzigzag_simplex_iterator 
@@ -577,7 +579,6 @@ class Flagzigzag_simplex_iterator
 {
   public:
   typedef typename FlagZigzagFilteredComplex::Simplex_handle   Simplex_handle;
-  // typedef typename FlagZigzagFilteredComplex::Edge_type        Edge_type;
   typedef Zigzag_edge<FlagZigzagFilteredComplex>               Edge_type;
   typedef typename FlagZigzagFilteredComplex::Filtration_value Filtration_value;
 
@@ -597,7 +598,8 @@ class Flagzigzag_simplex_iterator
     sh_it_ = partial_zzfil_.begin(); edge_it_ = zigzag_edge_filtration_.begin();
   }
 
-/** Constructor from a point cloud and a distance function. 
+/** \brief Constructor from a point cloud and a distance function. 
+  *
   * Constructs the d-skeleton of the oscillating Rips zigzag filtration on the 
   * ordered set of points with paramters mu and nu.
   */
@@ -618,15 +620,10 @@ class Flagzigzag_simplex_iterator
     //compute the filtration of the 1-skeleton for the oRzz filtration
     zigzag_edge_filtration_ = std::vector< Edge_type >();
 
-    std::cout << "B\n";
-
     std::vector<Filtration_value> filtration_values;
     zigzag_filtration_one_skeleton(points, distance, nu, mu,
                                    zigzag_edge_filtration_, 
                                    order_policy );
-
-    std::cout << "C\n";
-
 
     dim_max_                = dim_max;
     are_we_done             = false;
@@ -650,20 +647,21 @@ class Flagzigzag_simplex_iterator
     { cpx_->assign_key(sh,counter_insert); ++counter_insert; } 
   }
 
-/** Constructor from a pre-computed 1-skeleton zigzag filtration.
+/** \brief Constructor from a pre-computed 1-skeleton zigzag filtration.
+  *
+  * The vector of Zigzag_edge must contain both vertices and edges.
   */
   Flagzigzag_simplex_iterator( FlagZigzagFilteredComplex * cpx 
                              , std::vector< Edge_type >  & zz_edge_fil
                              , int                         dim_max )
   {
     GUDHI_CHECK(cpx->empty(), "complex must be empty");
-    // zigzag_edge_filtration_ = std::vector< Edge_type >();
     zigzag_edge_filtration_ = zz_edge_fil;
     dim_max_                = dim_max;
     are_we_done             = false;
     cpx_                    = cpx;
     counter_insert          = 0;
-    partial_zzfil_          = std::vector< Simplex_handle >(); //TODO?
+    // partial_zzfil_          = std::vector< Simplex_handle >(); //TODO?
     edge_it_                = zigzag_edge_filtration_.begin();
     if(edge_it_ == zigzag_edge_filtration_.end()) 
     { cpx_ = nullptr; return; } //end() iterator
@@ -679,8 +677,6 @@ class Flagzigzag_simplex_iterator
     for(auto & sh : partial_zzfil_) 
     { cpx_->assign_key(sh,counter_insert); ++counter_insert; } 
   }
-
-  // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other) = delete;
 
   //because the iterator modifies a complex represented by pointer, the iterator 
   //must be non-copiable.
@@ -739,7 +735,6 @@ class Flagzigzag_simplex_iterator
 //move assignement
   Flagzigzag_simplex_iterator& operator=(Flagzigzag_simplex_iterator&& other )
   {
-    // std::cout << "call to copy assignement =??\n";
     cpx_                    = other.cpx_;
     zigzag_edge_filtration_.clear();
     zigzag_edge_filtration_ = std::move(other.zigzag_edge_filtration_);
@@ -754,22 +749,6 @@ class Flagzigzag_simplex_iterator
     fil_ = other.fil_;
     return *this;
   }
-
-// private://prevent copy constructor and assignmenet to be called
-  // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & );
-  // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& );
-  //User-defined copy constructor DANGEROUS
-    // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator& other )
-    // , cpx_(other.cpx_)
-    // , zigzag_edge_filtration_(other.zigzag_edge_filtration_)
-    // , dim_max_(other.dim_max_)
-    // , partial_zzfil_(other.partial_zzfil_)
-    // , sh_it_(partial_zzfil_.begin())
-    // , edge_it_(other.edge_it_)
-    // , arrow_direction_(other.arrow_direction_)
-    // , counter_insert(other.counter_insert)
-    // , are_we_done(other.are_we_done)
-    // , fil_(other.fil_) {} 
 
 /** Returns true if the Simplex_handle pointed to is an insertion, false if it is a
   * deletion.*/
@@ -951,6 +930,9 @@ public:
   //filtration value attached to the arrow
   Filtration_value                                 fil_;
 };
+
+/* @} */  // end addtogroup simplex_tree
+}  // namespace Gudhi
 
 #endif //SIMPLEX_TREE_ZIGZAG_ITERATORS_H_
 

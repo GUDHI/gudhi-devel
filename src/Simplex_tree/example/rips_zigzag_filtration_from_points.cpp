@@ -21,7 +21,7 @@
 // Types definition
 using Simplex_tree      = 
                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
-using Zz_edge           = Zigzag_edge<Simplex_tree>;
+using Zz_edge           = Gudhi::Zigzag_edge<Simplex_tree>;
 using Filtration_value  = Simplex_tree::Filtration_value;
 using K                 = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Point_d           = typename K::Point_d;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 //  
   st.initialize_filtration(nu*nu, mu*mu, dim_max, off_reader.get_point_cloud(),
                            k_d.squared_distance_d_object(),
-                           farthest_point_ordering());//sort points by furthest pt order 
+                           Gudhi::farthest_point_ordering());//sort points by furthest pt order 
 //
   auto end_init = std::chrono::high_resolution_clock::now();
   std::cout << "Initialize filtration in " << std::chrono::duration_cast<std::chrono::milliseconds>(end_init-start_init).count()/(double)1000 << " s\n";
