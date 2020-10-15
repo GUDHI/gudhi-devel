@@ -1949,6 +1949,8 @@ public:
     GUDHI_CHECK(empty(), "The complex must be empty when initializing a zigzag filtration");
     zigzag_simplex_range_ = std::move(zigzag_simplex_range(zz_edge_fil, dim_max));
     zigzag_simplex_range_initialized_ = true;
+    //this is just an upper bound on the dimension of the complex
+    set_dimension(dim_max);
   }
 
 /** \brief Initializes a filtration range for the (dim_max)-skeleton of the 
@@ -1973,6 +1975,8 @@ public:
     GUDHI_CHECK(empty(), "The complex must be empty when initializing a zigzag filtration");
     zigzag_simplex_range_ = std::move(zigzag_simplex_range(nu, mu, dim_max, points, distance, order_policy));
     zigzag_simplex_range_initialized_ = true;
+    //this is just an upper bound on the dimension of the complex
+    set_dimension(dim_max);
   }
 
   /** \brief Returns a range over the simplices of a zigzag filtration.

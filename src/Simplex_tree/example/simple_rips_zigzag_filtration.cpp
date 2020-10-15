@@ -9,7 +9,7 @@
 // Types definition
 using Simplex_tree      = 
                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
-using Zz_edge           = Zigzag_edge<Simplex_tree>;
+using Zz_edge           = Gudhi::Zigzag_edge<Simplex_tree>;
 using Filtration_value  = Simplex_tree::Filtration_value;
 
 using Point_d = std::vector<Filtration_value>;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
                                   nu, 
                                   mu, 
                                   edge_filtration,
-                                  farthest_point_ordering() );
+                                  Gudhi::farthest_point_ordering() );
 
   //Print the zigzag filtration of the 1-skeleton
   std::cout << "-----Edge filtration: \n";
