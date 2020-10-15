@@ -13,7 +13,7 @@
 #include <gudhi/Discrete_morse_theory.h>
 
 //allows Morse matching
-using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>;
+using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Simplex_handle = Simplex_tree::Simplex_handle;
