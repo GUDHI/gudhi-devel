@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
+#include <memory>  // for std::unique_ptr
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Regular_triangulation.h>  // aka. Weighted Delaunay triangulation
@@ -141,7 +142,7 @@ class Alpha_complex {
    * Vertex handles are inserted sequentially, starting at 0.*/
   Vector_vertex_iterator vertex_handle_to_iterator_;
   /** \brief Pointer on the CGAL Delaunay triangulation.*/
-  Triangulation* triangulation_;
+  std::unique_ptr<Triangulation> triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
   A_kernel_d kernel_;
 
@@ -158,8 +159,7 @@ class Alpha_complex {
    *
    * @param[in] off_file_name OFF file [path and] name.
    */
-  Alpha_complex(const std::string& off_file_name)
-      : triangulation_(nullptr) {
+  Alpha_complex(const std::string& off_file_name) {
     Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
       std::cerr << "Alpha_complex - Unable to read file " << off_file_name << "\n";
@@ -180,8 +180,7 @@ class Alpha_complex {
    * Kernel::Point_d or Kernel::Weighted_point_d.
    */
   template<typename InputPointRange >
-  Alpha_complex(const InputPointRange& points)
-      : triangulation_(nullptr) {
+  Alpha_complex(const InputPointRange& points) {
     init_from_range(points);
   }
 
@@ -206,12 +205,6 @@ class Alpha_complex {
     auto weighted_points = boost::range::combine(points, weights)
       | boost::adaptors::transformed([](auto const&t){return Point_d(boost::get<0>(t), boost::get<1>(t));});
     init_from_range(weighted_points);
-  }
-
-  /** \brief Alpha_complex destructor deletes the Delaunay triangulation.
-   */
-  ~Alpha_complex() {
-    delete triangulation_;
   }
 
   // Forbid copy/move constructor/assignment operator
@@ -249,7 +242,7 @@ class Alpha_complex {
 
     if (first != last) {
       // Delaunay triangulation init with point dimension.
-      triangulation_ = new Triangulation(kernel_.get_dimension(*first));
+      triangulation_ = std::make_unique<Triangulation>(kernel_.get_dimension(*first));
 
       std::vector<Point_d> point_cloud(first, last);
 
