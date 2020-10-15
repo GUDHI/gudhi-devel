@@ -13,7 +13,7 @@
   * one can compute persistent homology via a model of the concept 
   * PersistentHomology. 
   */
-struct FilteredComplex
+struct FlagZigzagFilteredComplex
 {
 /** \brief Handle to specify a simplex. */
   typedef unspecified      Simplex_handle;
