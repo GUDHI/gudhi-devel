@@ -56,17 +56,17 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_resolution_with_interval_length(double resolution)
         void set_resolution_with_interval_number(int resolution)
         void set_subsampling(double constant, double power)
-        void set_type(string type)
         void set_verbose(bool verbose)
         vector[int] subpopulation(int c)
-        void write_info()
-        void plot_DOT()
-        void plot_OFF()
+        double subcolor(int c)
+        void write_info(string data_name, string cover_name, string color_name)
+        void plot_DOT(string data_name)
+        void plot_OFF(string data_name)
         void set_point_cloud_from_range(vector[vector[double]] cloud)
         void set_distances_from_range(vector[vector[double]] distance_matrix)
 
 # CoverComplex python interface
-cdef class CoverComplex:
+cdef class GraphInducedComplex:
     """Cover complex data structure.
 
     The data structure is a simplicial complex, representing a Graph Induced
@@ -373,14 +373,6 @@ cdef class CoverComplex:
         """
         self.thisptr.set_subsampling(constant, power)
 
-    def set_type(self, type):
-        """Specifies whether the type of the output simplicial complex.
-
-        :param type: either "GIC" or "Nerve".
-        :type type: string
-        """
-        self.thisptr.set_type(type.encode('utf-8'))
-
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.
 
@@ -400,23 +392,34 @@ cdef class CoverComplex:
         """
         return self.thisptr.subpopulation(c)
 
-    def write_info(self):
+    def subcolor(self, c):
+        """Returns the mean color value corresponding to a specific node of the
+        created complex.
+
+        :param c: ID of the node.
+        :type c: int
+        :rtype: double
+        :returns: Mean color value of data points.
+        """
+        return self.thisptr.subcolor(c)
+
+    def write_info(self, dataname, covername, colorname):
         """Creates a .txt file called SC.txt describing the 1-skeleton, which can
         then be plotted with e.g. KeplerMapper.
         """
-        return self.thisptr.write_info()
+        return self.thisptr.write_info(dataname, covername, colorname)
 
-    def plot_dot(self):
+    def plot_dot(self, name):
         """Creates a .dot file called SC.dot for neato (part of the graphviz
         package) once the simplicial complex is computed to get a visualization of
         its 1-skeleton in a .pdf file.
         """
-        return self.thisptr.plot_DOT()
+        return self.thisptr.plot_DOT(name)
 
-    def plot_off(self):
+    def plot_off(self, name):
         """Creates a .off file called SC.off for 3D visualization, which contains
         the 2-skeleton of the GIC. This function assumes that the cover has been
         computed with Voronoi. If data points are in 1D or 2D, the remaining
         coordinates of the points embedded in 3D are set to 0.
         """
-        return self.thisptr.plot_OFF()
+        return self.thisptr.plot_OFF(name)
