@@ -24,6 +24,47 @@ from ..simplex_tree          import SimplexTree
 from ..nerve_gic             import GraphInducedComplex
 
 
+def estimate_scale(X, N=100, inp="point cloud", beta=0., C=10.):
+    """
+    Compute estimated scale of a point cloud or a distance matrix.
+
+    Parameters:
+        X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
+        N (int): subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+        inp (string): either "point cloud" or "distance matrix". Type of input data (default "point cloud").
+        beta (double): exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+        C (double): constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+
+    Returns:
+        delta (double): estimated scale that can be used with eg agglomerative clustering.
+    """
+    num_pts = X.shape[0]
+    delta, m = 0., int(  num_pts / np.exp((1+beta) * np.log(np.log(num_pts)/np.log(C)))  )
+    for _ in range(N):
+        subpop = np.random.choice(num_pts, size=m, replace=False)
+        if inp == "point cloud":
+            d, _, _ = directed_hausdorff(X, X[subpop,:])
+        if inp == "distance matrix":
+            d = np.max(np.min(X[:,subpop], axis=1), axis=0)
+        delta += d/N
+    return delta
+
+
+        
+
+# implement union-find
+def find(i, parents):
+    if parents[i] == i:
+        return i
+    else:
+        return find(parents[i], parents)
+
+def union(i, j, parents, f):
+    if f[i] <= f[j]:
+        parents[j] = i
+    else:
+        parents[i] = j
+
 
 class MapperComplex(BaseEstimator, TransformerMixin):
     """
