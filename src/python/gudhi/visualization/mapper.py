@@ -260,3 +260,367 @@ class MapperComplex(BaseEstimator, TransformerMixin):
         self.mapper_.initialize_filtration()
 
         return self
+
+
+class CoverComplex(BaseEstimator, TransformerMixin):
+
+    def __init__(self, complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0,
+                       voronoi_samples=100, filters=None, filter_bnds=None, resolutions=None, gains=None, N=100, beta=0., C=10.,
+                       clustering=None,
+                       graph="rips", rips_threshold=None, 
+                       input_name="data", cover_name="cover", color_name="color", verbose=False):
+
+        self.complex_type, self.input_type, self.cover, self.colors, self.mask = complex_type, input_type, cover, colors, mask
+        self.voronoi_samples, self.filters, self.filter_bnds, self.resolutions, self.gains, self.clustering = voronoi_samples, filters, filter_bnds, resolutions, gains, clustering
+        self.graph, self.rips_threshold, self.N, self.beta, self.C = graph, rips_threshold, N, beta, C
+        self.input_name, self.cover_name, self.color_name, self.verbose = input_name, cover_name, color_name, verbose
+
+    def fit(self, X, y=None):
+
+        self.data = X
+
+        if self.colors is None:
+            if self.input_type == "point cloud":
+                self.colors = X[:,0] if self.complex_type == "gic" else X[:,0:1]
+            elif self.input_type == "distance matrix":
+                self.colors = X.max(axis=0) if self.complex_type == "gic" else X.max(axis=0)[:,np.newaxis]
+
+        if self.filters is None:
+            if self.input_type == "point cloud":
+                self.filters = X[:,0] if self.complex_type == "gic" else X[:,0:1]
+            elif self.input_type == "distance matrix":
+                self.filters = X.max(axis=0) if self.complex_type == "gic" else X.max(axis=0)[:,np.newaxis]
+
+        if self.complex_type == "gic":
+
+            self.complex = GraphInducedComplex()
+            self.complex.set_verbose(self.verbose)
+
+            if self.input_type == "point cloud":
+                self.complex.set_point_cloud_from_range(X)
+            elif self.input_type == "distance matrix":
+                self.complex.set_distances_from_range(X)
+            
+            self.complex.set_color_from_range(self.colors)
+            
+            if self.complex_type == "gic":
+                if self.graph == "rips":
+                    if self.rips_threshold is not None:
+                        self.complex.set_graph_from_euclidean_rips(self.rips_threshold)
+                    else:
+                        self.complex.set_subsampling(self.C, self.beta)
+                        self.complex.set_graph_from_automatic_rips(self.N)
+
+            if self.cover == "voronoi":
+                assert self.complex_type is not "mapper"
+                self.complex.set_cover_from_Voronoi(self.voronoi_samples)
+
+            elif self.cover == "functional":
+
+                self.complex.set_function_from_range(self.filters)
+
+                if self.resolutions is None:
+                    self.complex.set_automatic_resolution()
+                elif type(self.resolutions) == float:
+                    self.complex.set_resolution_with_interval_length(self.resolutions)
+
+                if self.gains is None:
+                    self.complex.set_gain(.33)
+                elif type(self.gains) == float:
+                    self.complex.set_gain(self.gains)          
+
+                self.complex.set_cover_from_function()
+
+            self.complex.set_mask(self.mask)
+
+            self.complex.find_simplices()
+            simplex_tree = self.complex.create_simplex_tree()
+            
+            self.simplex_tree = SimplexTree()
+            idv, names = 0, {}
+            for v,_ in simplex_tree.get_skeleton(0):
+                if len(self.complex.subpopulation(v[0])) > self.mask:
+                    names[v[0]] = idv
+                    self.simplex_tree.insert([idv])
+                    idv += 1
+            for s,_ in simplex_tree.get_filtration():
+                if len(s) >= 2 and np.all([len(self.complex.subpopulation(v)) > self.mask for v in s]):
+                    self.simplex_tree.insert([names[v] for v in s])
+            self.node_info = {}
+            for v,_ in simplex_tree.get_skeleton(0):
+                if len(self.complex.subpopulation(v[0])) > self.mask:
+                    node = names[v[0]]
+                    pop = self.complex.subpopulation(v[0])
+                    self.node_info[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
+                
+        elif self.complex_type == "mapper":
+
+            assert self.cover is not "voronoi"
+            self.complex = MapperComplex(filters=self.filters, filter_bnds=self.filter_bnds, colors=self.colors, 
+                                         resolutions=self.resolutions, gains=self.gains, inp=self.input_type, 
+                                         clustering=self.clustering, mask=self.mask, N=self.N, beta=self.beta, C=self.C)
+            self.complex.fit(X)
+            self.simplex_tree = self.complex.mapper_
+            self.node_info = self.complex.node_info_
+
+        return self
+
+    def get_networkx(self, get_attrs=False):
+	
+        st = self.simplex_tree
+        G = nx.Graph()
+        for (splx,_) in st.get_skeleton(1):	
+            if len(splx) == 1:
+                G.add_node(splx[0])
+            if len(splx) == 2:
+                G.add_edge(splx[0], splx[1])
+        if get_attrs:
+            attrs = {k: {"attr_name": self.node_info[k]["colors"]} for k in G.nodes()}
+            nx.set_node_attributes(G, attrs)
+        return G
+
+    def compute_topological_features(self, threshold=0.):
+
+        st = self.simplex_tree
+        function = [self.node_info[v[0]]["colors"][0] for v,_ in st.get_skeleton(0)]
+        num_nodes = st.num_vertices()
+        dgm, bnd = [], []
+
+        # connected_components
+        A = np.zeros([num_nodes, num_nodes])
+        for (splx,_) in st.get_skeleton(1):
+            if len(splx) == 2:	
+                A[splx[0], splx[1]] = 1
+                A[splx[1], splx[0]] = 1
+        _, ccs = connected_components(A, directed=False)
+        for ccID in np.unique(ccs):
+            pts = np.argwhere(ccs == ccID).flatten()
+            vals = [function[p] for p in pts]
+            if np.abs(min(vals) - max(vals)) >= threshold:
+                dgm.append((0, (min(vals), max(vals))))
+                bnd.append(pts)
+
+        # loops
+        G = self.get_networkx()
+        bndall = cycle_basis(G)
+        for pts in bndall:
+            vals = [function[p] for p in pts]
+            if np.abs(min(vals) - max(vals)) >= threshold:	
+                dgm.append((1,(min(vals), max(vals))))
+                bnd.append(pts)
+        
+        # branches
+        for topo_type in ["downbranch", "upbranch"]:
+
+            # upranch is downbranch of opposite function
+            if topo_type == "upbranch":
+                function = [-f for f in function]
+
+            # sort vertices according to function values and compute inverse function 
+            sorted_idxs = np.argsort(np.array(function))
+            inv_sorted_idxs = np.zeros(num_nodes)
+            for i in range(num_nodes):
+                inv_sorted_idxs[sorted_idxs[i]] = i
+
+            # go through all vertices in ascending function order
+            persistence_diag, persistence_set, parents, visited = {}, {}, -np.ones(num_nodes, dtype=np.int32), {}
+            for i in range(num_nodes):
+
+                current_pt = sorted_idxs[i]
+                neighbors = np.ravel(np.argwhere(A[current_pt,:] == 1))
+                lower_neighbors = [n for n in neighbors if inv_sorted_idxs[n] <= i] if len(neighbors) > 0 else []
+
+                # no lower neighbors: current point is a local minimum
+                if lower_neighbors == []:
+                    parents[current_pt] = current_pt
+
+                # some lower neighbors exist
+                else:
+
+                    # find parent pg of lower neighbors with lowest function value
+                    neigh_parents = [find(n, parents) for n in lower_neighbors]
+                    pg = neigh_parents[np.argmin([function[n] for n in neigh_parents])]
+
+                    # set parent of current point to pg
+                    parents[current_pt] = pg
+
+                    # for each lower neighbor, we will create a persistence diagram point and corresponding set of nodes
+                    for neighbor in lower_neighbors:
+
+                        # get parent pn
+                        pn = find(neighbor, parents)
+                        val = function[pn]
+                        persistence_set[pn] = []
+
+                        # we will create persistence set only if parent pn is not local minimum pg
+                        if pn != pg:
+                            # go through all strictly lower nodes with parent pn
+                            for v in sorted_idxs[:i]:
+                                if find(v, parents) == pn:
+                                    # if it is already part of another persistence set, continue
+                                    try:
+                                        visited[v]
+                                    # else, mark visited and include it in current persistence set
+                                    except KeyError:
+                                        visited[v] = True
+                                        persistence_set[pn].append(v)
+
+                            # add current point to persistence set
+                            persistence_set[pn].append(current_pt)
+
+                            # do union and create persistence point corresponding to persistence set if persistence is sufficiently large
+                            if np.abs(function[pn]-function[current_pt]) >= threshold:
+                                persistence_diag[pn] = current_pt
+                                union(pg, pn, parents, function)
+
+            for key, val in iter(persistence_diag.items()):
+                if topo_type == "downbranch":
+                    dgm.append((0, (function[key],  function[val])))
+                elif topo_type == "upbranch":
+                    dgm.append((0, (-function[val], -function[key])))
+                bnd.append(persistence_set[key])
+
+        self.persistence_diagram, self.persistence_sets = dgm, bnd
+        return dgm, bnd
+
+    def bootstrap_topological_features(self, N):
+
+        if self.complex_type == "mapper":
+
+            dgm = self.persistence_diagram
+            num_pts, distribution = len(self.data), []
+            for bootstrap_id in range(N):
+
+                print(str(bootstrap_id) + "th iteration")
+
+                # Randomly select points
+                idxs = np.random.choice(num_pts, size=num_pts, replace=True)
+                Xboot = self.data[idxs,:] if self.input_type == "point cloud" else self.data[idxs,:][:,idxs]
+                f_boot, c_boot = self.filters[idxs,:], self.colors[idxs,:]
+                Mboot = self.__class__(complex_type="mapper", filters=f_boot, filter_bnds=self.filter_bnds, colors=c_boot, resolutions=self.resolutions, gains=self.gains, 
+                                      input_type=self.input_type, clustering=self.clustering).fit(Xboot)
+
+                # Compute the corresponding persistence diagrams
+                dgm_boot, _ = Mboot.compute_topological_features()
+
+            # Compute the bottleneck distance
+            npts, npts_boot = len(dgm), len(dgm_boot)
+            D1 = np.array([[dgm[pt][1][0], dgm[pt][1][1]] for pt in range(npts)]) 
+            D2 = np.array([[dgm_boot[pt][1][0], dgm_boot[pt][1][1]] for pt in range(npts_boot)])
+            try:
+                from .. import bottleneck_distance
+                bottle = bottleneck_distance(D1, D2)
+            except ImportError:
+                print("Gudhi built without CGAL")
+                raise
+            distribution.append(bottle)
+            self.distribution = np.sort(distribution)
+
+        elif self.complex_type == "gic":
+
+            self.complex.compute_PD()
+            self.complex.compute_distribution(N)
+
+    def get_distance_from_confidence_level(self, alpha=.95):
+        if self.complex_type == "gic":
+            return self.complex.compute_distance_from_confidence_level(alpha)
+        elif self.complex_type == "mapper":
+            return self.distribution[int(alpha*len(self.distribution))]
+
+    def get_confidence_level_from_distance(self, distance):
+        if self.complex_type == "gic":
+            return self.complex.compute_confidence_level_from_distance(distance)
+        elif self.complex_type == "mapper":
+            return len(np.argwhere(self.distribution <= distance))/len(self.distribution)
+
+    def get_pvalue(self):
+        if self.complex_type == "gic":
+            return self.complex.compute_p_value()
+        elif self.complex_type == "mapper":
+            distancemin = min([np.abs(pt[1][0]-pt[1][1]) for pt in self.persistence_diagram])
+            return 1.-self.compute_confidence_from_distance(distancemin)
+
+    def compute_differential_coordinates(self, nodes=None, features=None, sparse=False):
+
+        if self.input_type == "distance matrix":
+            print("Need coordinates for running differential coordinates!")
+            raise
+
+        node_info = self.node_info
+        X = self.data
+        nodes = [s[0] for s,_ in self.simplex_tree.get_skeleton(0)] if nodes is None else nodes
+
+        if features is None:
+            features = np.arange(X.shape[1])
+
+        list_idxs1 = list(np.unique(np.concatenate([node_info[node_name]["indices"] for node_name in nodes])))
+        list_idxs2 = list(set(np.arange(X.shape[0]))-set(list_idxs1))
+        pvals = []
+        for f in features:
+            if sparse:
+                Xsp = csr_matrix(X)
+                group1, group2 = np.squeeze(np.array(Xsp[list_idxs1,f].todense())), np.squeeze(np.array(Xsp[list_idxs2,f].todense()))
+            else:
+                group1, group2 = X[list_idxs1,f], X[list_idxs2,f]
+            _,pval = ks_2samp(group1, group2)
+            pvals.append(pval)
+        pvals = np.array(pvals)
+        F, P = features[np.argsort(pvals)], np.sort(pvals) 
+        return F, P
+
+    def print_to_dot(self, epsv=.2, epss=.4):
+
+        st = self.simplex_tree 
+        node_info = self.node_info
+
+        threshold = 0.
+        maxv, minv = max([node_info[k]["colors"][0] for k in node_info.keys()]), min([node_info[k]["colors"][0] for k in node_info.keys()])
+        maxs, mins = max([node_info[k]["size"]      for k in node_info.keys()]), min([node_info[k]["size"]      for k in node_info.keys()])  
+
+        f = open(self.input_name + ".dot", "w")
+        f.write("graph MAP{")
+        cols = []
+        for (simplex,_) in st.get_skeleton(0):
+            cnode = (1.-2*epsv) * (node_info[simplex[0]]["colors"][0] - minv)/(maxv-minv) + epsv if maxv != minv else 0
+            snode = (1.-2*epss) * (node_info[simplex[0]]["size"]-mins)/(maxs-mins) + epss if maxs != mins else 1
+            f.write(  str(simplex[0]) + "[shape=circle width=" + str(snode) + " fontcolor=black color=black label=\""  + "\" style=filled fillcolor=\"" + str(cnode) + ", 1, 1\"]")
+            cols.append(cnode)
+        for (simplex,_) in st.get_filtration():
+            if len(simplex) == 2:
+                f.write("  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];")
+        f.write("}")
+        f.close()
+
+        L = np.linspace(epsv, 1.-epsv, 100)
+        colsrgb = []
+        for c in L:	
+            colsrgb.append(colorsys.hsv_to_rgb(c,1,1))
+        fig, ax = plt.subplots(figsize=(6, 1))
+        fig.subplots_adjust(bottom=0.5)
+        my_cmap = matplotlib.colors.ListedColormap(colsrgb, name=self.color_name)
+        cb = matplotlib.colorbar.ColorbarBase(ax, cmap=my_cmap, norm=matplotlib.colors.Normalize(vmin=minv, vmax=maxv), orientation="horizontal")
+        cb.set_label(self.color_name)
+        fig.savefig("colorbar_" + self.color_name + ".pdf", format="pdf")
+        plt.close()
+
+    def print_to_txt(self):
+        st = self.simplex_tree
+        if self.complex_type == "gic":
+            self.complex.write_info(self.input_name.encode("utf-8"), self.cover_name.encode("utf-8"), self.color_name.encode("utf-8"))
+        elif self.complex_type == "mapper":
+            f = open(self.input_name + ".txt", "w")
+            f.write(self.input_name + "\n")
+            f.write(self.cover_name + "\n")
+            f.write(self.color_name + "\n")
+            f.write(str(self.complex.resolutions[0]) + " " + str(self.complex.gains[0]) + "\n")
+            f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
+            name2id = {}
+            idv = 0
+            for s,_ in st.get_skeleton(0):
+                f.write(str(idv) + " " + str(self.node_info[s[0]]["colors"][0]) + " " + str(self.node_info[s[0]]["size"]) + "\n")
+                name2id[s[0]] = idv
+                idv += 1
+            for s,_ in st.get_skeleton(1):
+                if len(s) == 2:
+                    f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
+            f.close()
