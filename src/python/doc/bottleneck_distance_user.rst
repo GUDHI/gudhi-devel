@@ -35,19 +35,19 @@ The following example explains how the distance is computed:
 
     import gudhi
 
-    message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance([[0., 0.]], [[0., 13.]])
+    message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance([[0., 2.]], [[1., 13.]])
     print(message)
 
 .. testoutput::
 
-    Bottleneck distance = 6.5
+    Bottleneck distance = 6.0
 
 .. figure::
     ../../doc/Bottleneck_distance/bottleneck_distance_example.png
     :figclass: align-center
     
-    The point (0, 13) is at distance 6.5 from the diagonal and more
-    specifically from the point (6.5, 6.5)
+    The point (1, 13) is at distance 6 from the diagonal and more
+    specifically from the point (7, 7).
 
 
 Basic example
