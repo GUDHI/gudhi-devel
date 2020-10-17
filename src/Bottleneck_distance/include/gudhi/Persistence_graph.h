@@ -51,8 +51,8 @@ class Persistence_graph {
   double bottleneck_alive() const;
   /** \internal \brief Returns the O(n^2) sorted distances between the points. */
   std::vector<double> sorted_distances() const;
-  /** \internal \brief Returns an upper bound for the diameter of the convex hull of all non infinite points */
-  double diameter_bound() const;
+  /** \internal \brief Returns an upper bound for the bottleneck distance of the finite points. */
+  double max_dist_to_diagonal() const;
   /** \internal \brief Returns the corresponding internal point */
   Internal_point get_u_point(int u_point_index) const;
   /** \internal \brief Returns the corresponding internal point */
@@ -160,13 +160,13 @@ inline Internal_point Persistence_graph::get_v_point(int v_point_index) const {
   return Internal_point(m, m, v_point_index);
 }
 
-inline double Persistence_graph::diameter_bound() const {
+inline double Persistence_graph::max_dist_to_diagonal() const {
   double max = 0.;
-  for (auto it = u.cbegin(); it != u.cend(); it++)
-    max = (std::max)(max, it->y());
-  for (auto it = v.cbegin(); it != v.cend(); it++)
-    max = (std::max)(max, it->y());
-  return max;
+  for (auto& p : u)
+    max = (std::max)(max, p.y() - p.x());
+  for (auto& p : v)
+    max = (std::max)(max, p.y() - p.x());
+  return max / 2;
 }
 
 }  // namespace persistence_diagram
