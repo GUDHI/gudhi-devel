@@ -72,6 +72,6 @@ The output is:
 
 .. testoutput::
 
-    Bottleneck distance approximation = 0.81
+    Bottleneck distance approximation = 0.72
     Bottleneck distance value = 0.75
 

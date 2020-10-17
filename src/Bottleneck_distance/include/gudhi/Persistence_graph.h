@@ -45,7 +45,7 @@ class Persistence_graph {
   int corresponding_point_in_v(int u_point_index) const;
   /** \internal \brief Given a point from U and a point from V, returns the distance between those points. */
   double distance(int u_point_index, int v_point_index) const;
-  /** \internal \brief Returns size = |U| = |V|. */
+  /** \internal \brief Returns size = |U| + |V|. */
   int size() const;
   /** \internal \brief Is there as many infinite points (alive components) in both diagrams ? */
   double bottleneck_alive() const;
