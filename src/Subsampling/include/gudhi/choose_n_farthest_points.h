@@ -111,6 +111,8 @@ void choose_n_farthest_points(Kernel const &k,
         curr_max_dist = dist_to_L[i];
         curr_max_w = i;
       }
+    // If all that remains are duplicates of points already taken, stop.
+    if (curr_max_dist == 0) break;
   }
 }
 
