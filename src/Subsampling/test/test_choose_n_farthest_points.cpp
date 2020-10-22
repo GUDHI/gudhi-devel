@@ -93,7 +93,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
 
   std::vector<FT> point2({1.0, 0.0, 0.0, 0.0});
   points.push_back(Point_d(point2.begin(), point2.end()));
-  // Choose all farthest points in a one point cloud
+  // Choose all farthest points among 2 points
+  Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  BOOST_CHECK(landmarks.size() == 2 && distances.size() == 2);
+  BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
+  BOOST_CHECK(distances[1] == 1);
+  landmarks.clear(); distances.clear();
+
+  // Ignore duplicated points
+  points.push_back(Point_d(point.begin(), point.end()));
   Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 2 && distances.size() == 2);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
