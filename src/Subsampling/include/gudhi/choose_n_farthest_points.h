@@ -48,7 +48,8 @@ enum : std::size_t {
  *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
  *  \tparam DistanceOutputIterator Output iterator for distances.
  *  \details It chooses `final_size` points from a random access range
- *  `input_pts` and outputs them in the output iterator `output_it`. It also
+ *  `input_pts` (or the number of distinct points if `final_size` is larger)
+ *  and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
  * @param[in] k A kernel object.
