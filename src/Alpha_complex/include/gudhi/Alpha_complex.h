@@ -198,7 +198,7 @@ class Alpha_complex {
    */
   template <typename InputPointRange, typename WeightRange>
   Alpha_complex(const InputPointRange& points, WeightRange weights) {
-    static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex_3d");
+    static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex");
     // FIXME: this test is only valid if we have a forward range
     GUDHI_CHECK(boost::size(weights) == boost::size(points),
                 std::invalid_argument("Points number in range different from weights range number"));
