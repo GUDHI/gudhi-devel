@@ -29,14 +29,10 @@
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
+// Use static dimension_tag to set dimension at 4
 typedef CGAL::Epeck_d< CGAL::Dimension_tag<4> > Exact_kernel_s;
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Inexact_kernel_s;
 
-typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
+typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s> list_of_kernel_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_kernel_variants) {
   // Random points construction
@@ -53,7 +49,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_kerne
   // Alpha complex from points
   Gudhi::alpha_complex::Alpha_complex<Kernel, false> alpha_complex_from_points(points);
   Gudhi::Simplex_tree<> simplex;
-  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex));
+  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex, std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity(), true));
   std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : simplex.filtration_simplex_range()) {
     std::clog << "   ( ";
@@ -68,7 +64,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_kerne
   std::vector<typename Kernel::FT> weights(20, 0.);
   Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_zero_weighted_points(points, weights);
   Gudhi::Simplex_tree<> zw_simplex;
-  BOOST_CHECK(alpha_complex_from_zero_weighted_points.create_complex(zw_simplex));
+  BOOST_CHECK(alpha_complex_from_zero_weighted_points.create_complex(zw_simplex, std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity(), true));
 
   std::clog << "Iterator on zero weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
   for (auto f_simplex : zw_simplex.filtration_simplex_range()) {
