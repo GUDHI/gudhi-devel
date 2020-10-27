@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_kerne
   std::mt19937 rand_engine(rand_dev());
   for (int idx = 0; idx < 20; idx++) {
     std::vector<double> point {rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine)};
-    points.emplace_back(Point_d(point.begin(), point.end()));
+    points.emplace_back(point.begin(), point.end());
   }
   
   // Alpha complex from points
@@ -108,8 +108,8 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   for (int idx = 0; idx < 20; idx++) {
     std::vector<double> point {rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine)};
     double weight = rd_wghts(rand_engine);
-    w_points_d.emplace_back(Weighted_point_d(Bare_point_d(point.begin(), point.end()), weight));
-    w_points_3.emplace_back(Weighted_point_3(Bare_point_3(point[0], point[1], point[2]), weight));
+    w_points_d.emplace_back(Bare_point_d(point.begin(), point.end()), weight);
+    w_points_3.emplace_back(Bare_point_3(point[0], point[1], point[2]), weight);
   }
 
   // Structures necessary for comparison
@@ -184,4 +184,33 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
     }
     ++dD_itr;
   }
+}
+
+BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_non_visible_points) {
+  using Point_d = typename Exact_kernel_d::Point_d;
+  std::vector<Point_d> points;
+  std::vector<double> p1 {0.};
+  points.emplace_back(p1.begin(), p1.end());
+  // closed enough points
+  std::vector<double> p2 {0.1};
+  points.emplace_back(p2.begin(), p2.end());
+  std::vector<typename Exact_kernel_d::FT> weights {100., 0.01};
+
+  Gudhi::alpha_complex::Alpha_complex<Exact_kernel_d, true> alpha_complex(points, weights);
+  Gudhi::Simplex_tree<> stree;
+  BOOST_CHECK(alpha_complex.create_complex(stree));
+
+  std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  for (auto f_simplex : stree.filtration_simplex_range()) {
+    std::clog << "   ( ";
+    for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << " ";
+    }
+    std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
+    std::clog << std::endl;
+  }
+
+  BOOST_CHECK(stree.filtration(stree.find({0})) == -100.);
+  BOOST_CHECK(stree.filtration(stree.find({1})) == stree.filtration(stree.find({0, 1})));
+
 }
