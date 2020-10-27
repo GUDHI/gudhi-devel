@@ -212,5 +212,6 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_non_visible_points) {
 
   BOOST_CHECK(stree.filtration(stree.find({0})) == -100.);
   BOOST_CHECK(stree.filtration(stree.find({1})) == stree.filtration(stree.find({0, 1})));
+  BOOST_CHECK(stree.filtration(stree.find({1})) > 100000);
 
 }
