@@ -33,7 +33,7 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
     The iteration starts with the landmark `starting point`.
 
     :param points: The input point set.
-    :type points: Iterable[Iterable[float]].
+    :type points: Iterable[Iterable[float]]
 
     Or
 
@@ -42,14 +42,15 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_poi
 
     And in both cases
 
-    :param nb_points: Number of points of the subsample.
-    :type nb_points: unsigned.
+    :param nb_points: Number of points of the subsample (the subsample may be \
+    smaller if there are fewer than nb_points distinct input points)
+    :type nb_points: int
     :param starting_point: The iteration starts with the landmark `starting \
-    point`,which is the index of the point to start with. If not set, this \
+    point`, which is the index of the point to start with. If not set, this \
     index is chosen randomly.
-    :type starting_point: unsigned.
+    :type starting_point: int
     :returns:  The subsample point set.
-    :rtype: List[List[float]].
+    :rtype: List[List[float]]
     """
     if off_file:
         if os.path.isfile(off_file):
@@ -76,7 +77,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     """Subsample a point set by picking random vertices.
 
     :param points: The input point set.
-    :type points: Iterable[Iterable[float]].
+    :type points: Iterable[Iterable[float]]
 
     Or
 
@@ -86,7 +87,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     And in both cases
 
     :param nb_points: Number of points of the subsample.
-    :type nb_points: unsigned.
+    :type nb_points: int
     :returns:  The subsample point set.
     :rtype: List[List[float]]
     """
@@ -107,7 +108,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     between any two points is greater than or equal to min_squared_dist.
 
     :param points: The input point set.
-    :type points: Iterable[Iterable[float]].
+    :type points: Iterable[Iterable[float]]
 
     Or
 
@@ -118,7 +119,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
 
     :param min_squared_dist: Minimum squared distance separating the output \
     points.
-    :type min_squared_dist: float.
+    :type min_squared_dist: float
     :returns:  The subsample point set.
     :rtype: List[List[float]]
     """
