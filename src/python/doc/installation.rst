@@ -394,6 +394,11 @@ mathematics, science, and engineering.
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
 
+TensorFlow
+----------
+
+`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+
 Bug reports and contributions
 *****************************
 

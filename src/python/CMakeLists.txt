@@ -103,6 +103,9 @@ if(PYTHONINTERP_FOUND)
     if(EAGERPY_FOUND)
       add_gudhi_debug_info("EagerPy version ${EAGERPY_VERSION}")
     endif()
+    if(TENSORFLOW_FOUND)
+      add_gudhi_debug_info("TensorFlow version ${TENSORFLOW_VERSION}")
+    endif()
 
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
@@ -496,10 +499,16 @@ if(PYTHONINTERP_FOUND)
 
     # Wasserstein
     if(OT_FOUND AND PYBIND11_FOUND)
-      if(TORCH_FOUND AND EAGERPY_FOUND)
+      # EagerPy dependency because of enable_autodiff=True
+      if(EAGERPY_FOUND)
         add_gudhi_py_test(test_wasserstein_distance)
       endif()
       add_gudhi_py_test(test_wasserstein_barycenter)
+    endif()
+    if(OT_FOUND)
+      if(TORCH_FOUND AND TENSORFLOW_FOUND AND EAGERPY_FOUND)
+        add_gudhi_py_test(test_wasserstein_with_tensors)
+      endif()
     endif()
 
     # Representations
