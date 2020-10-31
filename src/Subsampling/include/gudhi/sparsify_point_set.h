@@ -11,6 +11,8 @@
 #ifndef SPARSIFY_POINT_SET_H_
 #define SPARSIFY_POINT_SET_H_
 
+#include <boost/iterator/function_output_iterator.hpp>
+
 #include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 #include <gudhi/Clock.h>
@@ -63,29 +65,15 @@ sparsify_point_set(
   // Parse the input points, and add them if they are not too close to
   // the other points
   std::size_t pt_idx = 0;
-  for (typename Point_range::const_iterator it_pt = input_pts.begin();
-       it_pt != input_pts.end();
-       ++it_pt, ++pt_idx) {
-    if (dropped_points[pt_idx])
+  for (auto const& pt : input_pts) {
+    if (dropped_points[pt_idx++])
       continue;
 
-    *output_it++ = *it_pt;
-
-    auto ins_range = points_ds.incremental_nearest_neighbors(*it_pt);
+    *output_it++ = pt;
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
-    for (auto const& neighbor : ins_range) {
-      std::size_t neighbor_point_idx = neighbor.first;
-      // If the neighbor is too close, we drop the neighbor
-      if (neighbor.second < min_squared_dist) {
-        // N.B.: If neighbor_point_idx < pt_idx,
-        // dropped_points[neighbor_point_idx] is already true but adding a
-        // test doesn't make things faster, so why bother?
-        dropped_points[neighbor_point_idx] = true;
-      } else {
-        break;
-      }
-    }
+    auto drop = [&dropped_points] (std::ptrdiff_t neighbor_point_idx) { dropped_points[neighbor_point_idx] = true; };
+    points_ds.all_near_neighbors(pt, min_squared_dist, boost::make_function_output_iterator(std::ref(drop)));
   }
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
