@@ -53,7 +53,7 @@ int main(int argc, char* const argv[]) {
     // Choose landmarks
     start = clock();
     // Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
-    Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, number_of_landmarks,
+    Gudhi::subsampling::choose_n_farthest_points(K().squared_distance_d_object(), point_vector, number_of_landmarks,
                                                  Gudhi::subsampling::random_starting_point,
                                                  std::back_inserter(landmarks));
 
