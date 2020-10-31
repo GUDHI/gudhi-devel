@@ -57,7 +57,8 @@ enum : std::size_t {
  * @param[out] output_it The output iterator for points.
  * @param[out] dist_it The optional output iterator for distances.
  *
- * \warning Older versions of this function took a CGAL kernel as argument. Users need to replace `k` with `k.squared_distance_d_object()` in the first argument of every call to `choose_n_farthest_points`.
+ * \warning Older versions of this function took a CGAL kernel as argument. Users need to replace `k` with
+ * `k.squared_distance_d_object()` in the first argument of every call to `choose_n_farthest_points`.
  *  
  */
 template < typename Distance,
