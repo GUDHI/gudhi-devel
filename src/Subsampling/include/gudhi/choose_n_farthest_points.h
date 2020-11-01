@@ -38,20 +38,21 @@ enum : std::size_t {
  *  \ingroup subsampling
  *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
  *  current chosen point set to the subsampling. 
+ *  \details
  *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`,
  *  with a random landmark.
+ *  It chooses `final_size` points from a random access range
+ *  `input_pts` (or the number of distinct points if `final_size` is larger)
+ *  and outputs them in the output iterator `output_it`. It also
+ *  outputs the distance from each of those points to the set of previous
+ *  points in `dist_it`.
  *  \tparam Distance must provide an operator() that takes 2 points (value type of the range)
  *  and returns their distance (or some more general proximity measure) as a `double`.
  *  \tparam Point_range Random access range of points.
  *  \tparam PointOutputIterator Output iterator whose value type is the point type.
  *  \tparam DistanceOutputIterator Output iterator for distances.
- *  \details It chooses `final_size` points from a random access range
- *  `input_pts` (or the number of distinct points if `final_size` is larger)
- *  and outputs them in the output iterator `output_it`. It also
- *  outputs the distance from each of those points to the set of previous
- *  points in `dist_it`.
  * @param[in] dist A distance function.
- * @param[in] input_pts Const reference to the input points.
+ * @param[in] input_pts The input points.
  * @param[in] final_size The size of the subsample to compute.
  * @param[in] starting_point The seed in the farthest point algorithm.
  * @param[out] output_it The output iterator for points.
