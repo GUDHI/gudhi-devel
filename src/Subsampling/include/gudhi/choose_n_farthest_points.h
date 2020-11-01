@@ -41,7 +41,7 @@ enum : std::size_t {
  *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`,
  *  with a random landmark.
  *  \tparam Distance must provide an operator() that takes 2 points (value type of the range)
- *  and returns their distance (or some more general proximity measure).
+ *  and returns their distance (or some more general proximity measure) as a `double`.
  *  \tparam Point_range Random access range of points.
  *  \tparam PointOutputIterator Output iterator whose value type is the point type.
  *  \tparam DistanceOutputIterator Output iterator for distances.
@@ -88,6 +88,8 @@ void choose_n_farthest_points(Distance dist,
   }
 
   std::size_t current_number_of_landmarks = 0;  // counter for landmarks
+  static_assert(std::numeric_limits<double>::has_infinity);
+  // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
   std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
 
