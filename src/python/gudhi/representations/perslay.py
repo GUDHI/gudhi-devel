@@ -3,7 +3,7 @@ import tensorflow_addons as tfa
 from tensorflow import random_uniform_initializer as rui
 import numpy as np
 
-def permutation_equivariant_layer(inp, dimension, perm_op, lbda, b, gamma):
+def _permutation_equivariant_layer(inp, dimension, perm_op, lbda, b, gamma):
     """ DeepSet PersLay """
     dimension_before, num_pts = inp.shape[2], inp.shape[1]
     b = tf.expand_dims(tf.expand_dims(b, 0), 0)
@@ -22,7 +22,7 @@ def permutation_equivariant_layer(inp, dimension, perm_op, lbda, b, gamma):
     else:
         return A + b
 
-def rational_hat_layer(inp, q, mu, r):
+def _rational_hat_layer(inp, q, mu, r):
     """ Rational Hat PersLay """
     mu, r = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(r, 0), 0)
     dimension_before, num_pts = inp.shape[2], inp.shape[1]
@@ -30,32 +30,32 @@ def rational_hat_layer(inp, q, mu, r):
     norms = tf.norm(bc_inp - mu, ord=q, axis=2)
     return 1/(1 + norms) - 1/(1 + tf.math.abs(tf.math.abs(r)-norms)) 
 
-def rational_layer(inp, mu, sg, al):
+def _rational_layer(inp, mu, sg, al):
     """ Rational PersLay """
     mu, sg, al = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(sg, 0), 0), tf.expand_dims(tf.expand_dims(al, 0), 0)
     dimension_before, num_pts = inp.shape[2], inp.shape[1]
     bc_inp = tf.expand_dims(inp, -1)
     return 1/tf.math.pow(1+tf.math.reduce_sum(tf.math.multiply(tf.math.abs(bc_inp - mu), tf.math.abs(sg)), axis=2), al)
 
-def exponential_layer(inp, mu, sg):
+def _exponential_layer(inp, mu, sg):
     """ Exponential PersLay """
     mu, sg = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(sg, 0), 0)
     dimension_before, num_pts = inp.shape[2], inp.shape[1]
     bc_inp = tf.expand_dims(inp, -1)
     return tf.math.exp(tf.math.reduce_sum(-tf.math.multiply(tf.math.square(bc_inp - mu), tf.math.square(sg)), axis=2))
 
-def landscape_layer(inp, sp):
+def _landscape_layer(inp, sp):
     """ Landscape PersLay """
     sp = tf.expand_dims(tf.expand_dims(sp, 0), 0)
     return tf.math.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.math.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
 
-def betti_layer(inp, theta, sp):
+def _betti_layer(inp, theta, sp):
     """ Betti PersLay """
     sp = tf.expand_dims(tf.expand_dims(sp, 0), 0)
     X, Y = inp[:, :, 0:1], inp[:, :, 1:2]
     return  1. / ( 1. + tf.math.exp( -theta * (.5*(Y-X) - tf.math.abs(sp - .5*(Y+X))) )  )
 
-def entropy_layer(inp, theta, sp):
+def _entropy_layer(inp, theta, sp):
     """ Entropy PersLay
     WARNING: this function assumes that padding values are zero
     """
@@ -66,7 +66,7 @@ def entropy_layer(inp, theta, sp):
     entropy_terms = tf.where(LN > 0., -tf.math.multiply(LN, tf.math.log(LN)), LN)
     return  tf.math.multiply(entropy_terms, 1. / ( 1. + tf.math.exp( -theta * (.5*(Y-X) - tf.math.abs(sp - .5*(Y+X))) )  ))
 
-def image_layer(inp, image_size, image_bnds, sg):
+def _image_layer(inp, image_size, image_bnds, sg):
     """ Persistence Image PersLay """
     bp_inp = tf.einsum("ijk,kl->ijl", inp, tf.constant(np.array([[1.,-1.],[0.,1.]], dtype=np.float32)))
     dimension_before, num_pts = inp.shape[2], inp.shape[1]
@@ -77,7 +77,15 @@ def image_layer(inp, image_size, image_bnds, sg):
     return tf.expand_dims(tf.math.exp(tf.math.reduce_sum(  -tf.math.square(bc_inp-mu) / (2*tf.math.square(sg)),  axis=2)) / (2*np.pi*tf.math.square(sg)), -1)
 
 class PerslayModel(tf.keras.Model):
+    """
+    TensorFlow model implementing PersLay.
 
+    Attributes:
+        name (string): name of the layer. Used for naming variables.
+        diagdim (integer): dimension of persistence diagram points. Usually 2 but can handle more.
+        perslay_parameters (dict): dictionary containing the PersLay parameters. See file perslay_params.md
+        rho (TensorFlow model): layers used to process the learned representations of persistence diagrams (for instance, a fully connected layer that outputs the number of classes). Use the string "identity" if you want to output the representations directly. 
+    """
     def __init__(self, name, diagdim, perslay_parameters, rho):
         super(PerslayModel, self).__init__()
         self.namemodel            = name
@@ -199,21 +207,21 @@ class PerslayModel(tf.keras.Model):
             lvars = self.vars[nf][1]
             if plp["layer"] == "PermutationEquivariant":
                 for idx, (dim, pop) in enumerate(plp["lpeq"]):
-                    tensor_diag = permutation_equivariant_layer(tensor_diag, dim, pop, lvars[0][idx], lvars[1][idx], lvars[2][idx])
+                    tensor_diag = _permutation_equivariant_layer(tensor_diag, dim, pop, lvars[0][idx], lvars[1][idx], lvars[2][idx])
             elif plp["layer"] == "Landscape":
-                tensor_diag = landscape_layer(tensor_diag, lvars)
+                tensor_diag = _landscape_layer(tensor_diag, lvars)
             elif plp["layer"] == "BettiCurve":
-                tensor_diag = betti_layer(tensor_diag, plp["theta"], lvars)
+                tensor_diag = _betti_layer(tensor_diag, plp["theta"], lvars)
             elif plp["layer"] == "Entropy":
-                tensor_diag = entropy_layer(tensor_diag, plp["theta"], lvars)
+                tensor_diag = _entropy_layer(tensor_diag, plp["theta"], lvars)
             elif plp["layer"] == "Image":
-                tensor_diag = image_layer(tensor_diag, plp["image_size"], plp["image_bnds"], lvars)
+                tensor_diag = _image_layer(tensor_diag, plp["image_size"], plp["image_bnds"], lvars)
             elif plp["layer"] == "Exponential":
-                tensor_diag = exponential_layer(tensor_diag, **lvars)
+                tensor_diag = _exponential_layer(tensor_diag, **lvars)
             elif plp["layer"] == "Rational":
-                tensor_diag = rational_layer(tensor_diag, **lvars)
+                tensor_diag = _rational_layer(tensor_diag, **lvars)
             elif plp["layer"] == "RationalHat":
-                tensor_diag = rational_hat_layer(tensor_diag, plp["q"], **lvars)
+                tensor_diag = _rational_hat_layer(tensor_diag, plp["q"], **lvars)
 
             # Apply weight
             output_dim = len(tensor_diag.shape) - 2
