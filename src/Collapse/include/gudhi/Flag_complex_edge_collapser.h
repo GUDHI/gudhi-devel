@@ -18,6 +18,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <Eigen/Sparse>
+#include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -33,6 +34,11 @@
 #include <algorithm>  // for std::includes
 #include <iterator>  // for std::inserter
 #include <type_traits>  // for std::decay
+
+// Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
+#if !EIGEN_VERSION_AT_LEAST(3,1,0)
+# error Edge Collapse is only available for Eigen3 >= 3.1.0
+#endif
 
 namespace Gudhi {
 

@@ -1,0 +1,34 @@
+name: pip build osx
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.8']
+    name: Build wheels for Python ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Install dependencies
+        run: |
+          brew update || true
+          brew install boost eigen gmp mpfr cgal || true
+          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user twine delocate
+      - name: Build python wheel
+        run: |
+          python --version
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cd src/python
+          python setup.py bdist_wheel

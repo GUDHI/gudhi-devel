@@ -40,7 +40,7 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
 `NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
@@ -65,7 +65,7 @@ one can build the GUDHI Python module, by running the following commands in a te
     cd /path-to-gudhi/
     mkdir build
     cd build/
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
     cd python
     make
 
@@ -393,6 +393,11 @@ mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
+
+TensorFlow
+----------
+
+`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************
