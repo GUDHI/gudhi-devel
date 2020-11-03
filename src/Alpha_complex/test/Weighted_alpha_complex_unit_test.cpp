@@ -27,14 +27,14 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
 
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
-// Use static dimension_tag to set dimension at 4
-typedef CGAL::Epeck_d< CGAL::Dimension_tag<4> > Exact_kernel_s;
+using list_of_exact_kernel_variants = boost::mpl::list<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >,
+                                                       CGAL::Epeck_d< CGAL::Dimension_tag<4> >
+                                                       > ;
 
-typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s> list_of_kernel_variants;
+BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_exact_kernel_variants) {
+  // Check that in exact mode for static dimension 4 the code for dD unweighted and for dD weighted with all weights
+  // 0 give exactly the same simplex tree (simplices and filtration values).
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_kernel_variants) {
   // Random points construction
   using Point_d = typename Kernel::Point_d;
   std::vector<Point_d> points;
@@ -89,6 +89,8 @@ bool cgal_3d_point_sort (Point_d a,Point_d b) {
 }
 
 BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
+  // check that for random weighted 3d points in safe mode the 3D and dD codes give the same result with some tolerance
+
   // Random points construction
   using Kernel_dD = CGAL::Epeck_d< CGAL::Dimension_tag<3> >;
   using Bare_point_d = typename Kernel_dD::Point_d;
@@ -186,17 +188,25 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_non_visible_points) {
-  using Point_d = typename Exact_kernel_d::Point_d;
+using list_of_1d_kernel_variants = boost::mpl::list<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >,
+                                                    CGAL::Epeck_d< CGAL::Dimension_tag<1>>,
+                                                    CGAL::Epick_d< CGAL::Dynamic_dimension_tag >,
+                                                    CGAL::Epick_d< CGAL::Dimension_tag<1>>
+                                                    >;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Weighted_alpha_complex_non_visible_points, Kernel, list_of_1d_kernel_variants) {
+  // check that for 2 closed weighted 1-d points, one with a high weight to hide the second one with a small weight,
+  // that the point with a small weight has the same high filtration value than the edge formed by the 2 points
+  using Point_d = typename Kernel::Point_d;
   std::vector<Point_d> points;
   std::vector<double> p1 {0.};
   points.emplace_back(p1.begin(), p1.end());
   // closed enough points
   std::vector<double> p2 {0.1};
   points.emplace_back(p2.begin(), p2.end());
-  std::vector<typename Exact_kernel_d::FT> weights {100., 0.01};
+  std::vector<typename Kernel::FT> weights {100., 0.01};
 
-  Gudhi::alpha_complex::Alpha_complex<Exact_kernel_d, true> alpha_complex(points, weights);
+  Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex(points, weights);
   Gudhi::Simplex_tree<> stree;
   BOOST_CHECK(alpha_complex.create_complex(stree));
 

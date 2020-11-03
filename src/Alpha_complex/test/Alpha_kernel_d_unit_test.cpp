@@ -37,6 +37,8 @@ typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Inexact_kernel_s;
 typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_dimension, TestedKernel, list_of_kernel_variants) {
+  // Test for a point (weighted or not) in 4d, that the dimension is 4.
+
   Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, false> kernel;
   std::vector<double> p0 {0., 1., 2., 3.};
   typename TestedKernel::Point_d p0_d(p0.begin(), p0.end());
@@ -52,6 +54,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_dimension, TestedKernel, list_of_ke
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kernel_variants) {
+  // Test with 5 points on a 3-sphere, that get_sphere returns the same center and squared radius
+  // for dD unweighted and for dD weighted with all weights at 0.
+
   using Unweighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, false>;
   // Sphere: (x-1)² + (y-1)² + z² + t² = 1
   // At least 5 points for a 3-sphere
