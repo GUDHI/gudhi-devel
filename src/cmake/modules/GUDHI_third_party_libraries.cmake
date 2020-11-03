@@ -155,6 +155,7 @@ if( PYTHONINTERP_FOUND )
   find_python_module("pykeops")
   find_python_module("eagerpy")
   find_python_module_no_version("hnswlib")
+  find_python_module("tensorflow")
 endif()
 
 if(NOT GUDHI_PYTHON_PATH)
