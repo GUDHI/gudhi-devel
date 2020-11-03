@@ -287,6 +287,8 @@ cdef class SimplexTree:
 
     def get_boundaries(self, simplex):
         """This function returns a generator with the boundaries of a given N-simplex.
+        If you do not need the filtration values, the boundary can also be obtained as
+        :code:`itertools.combinations(simplex,len(simplex)-1)`.
 
         :param simplex: The N-simplex, represented by a list of vertex.
         :type simplex: list of int.
