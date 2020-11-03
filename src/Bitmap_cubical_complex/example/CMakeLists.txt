@@ -6,5 +6,3 @@ if (TBB_FOUND)
 endif()
 add_test(NAME Bitmap_cubical_complex_example_random COMMAND $<TARGET_FILE:Random_bitmap_cubical_complex>
     "2" "100" "100")
-
-install(TARGETS Random_bitmap_cubical_complex DESTINATION bin)
