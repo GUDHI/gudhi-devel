@@ -179,8 +179,8 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
       std::clog << std::endl;
       BOOST_CHECK(false);
     }
-    // I had to make a hard limit as it is converted from Kernel::FT
-    if (std::fabs(d3_itr->second - dD_itr->second) > 1e-5) {
+    // In safe mode, relative error is less than 1e-5 (can be changed with set_relative_precision_of_to_double)
+    if (std::fabs(d3_itr->second - dD_itr->second) / std::fabs(d3_itr->second) > 1e-5) {
       std::clog << d3_itr->second << " versus " << dD_itr->second << " diff " << std::fabs(d3_itr->second - dD_itr->second) << std::endl;
       BOOST_CHECK(false);
     }
