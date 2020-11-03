@@ -49,31 +49,32 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_exact
   // Alpha complex from points
   Gudhi::alpha_complex::Alpha_complex<Kernel, false> alpha_complex_from_points(points);
   Gudhi::Simplex_tree<> simplex;
-  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex, std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity(), true));
-  std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  Gudhi::Simplex_tree<>::Filtration_value infty = std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity();
+  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex, infty, true));
+  std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:"
+            << std::endl;
   for (auto f_simplex : simplex.filtration_simplex_range()) {
     std::clog << "   ( ";
     for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
       std::clog << vertex << " ";
     }
-    std::clog << ") -> " << "[" << simplex.filtration(f_simplex) << "] ";
-    std::clog << std::endl;
+    std::clog << ") -> " << "[" << simplex.filtration(f_simplex) << "] " << std::endl;
   }
 
   // Alpha complex from zero weighted points
   std::vector<typename Kernel::FT> weights(20, 0.);
   Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_zero_weighted_points(points, weights);
   Gudhi::Simplex_tree<> zw_simplex;
-  BOOST_CHECK(alpha_complex_from_zero_weighted_points.create_complex(zw_simplex, std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity(), true));
+  BOOST_CHECK(alpha_complex_from_zero_weighted_points.create_complex(zw_simplex, infty, true));
 
-  std::clog << "Iterator on zero weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on zero weighted alpha complex simplices in the filtration order, with [filtration value]:"
+            << std::endl;
   for (auto f_simplex : zw_simplex.filtration_simplex_range()) {
     std::clog << "   ( ";
     for (auto vertex : zw_simplex.simplex_vertex_range(f_simplex)) {
       std::clog << vertex << " ";
     }
-    std::clog << ") -> " << "[" << zw_simplex.filtration(f_simplex) << "] ";
-    std::clog << std::endl;
+    std::clog << ") -> " << "[" << zw_simplex.filtration(f_simplex) << "] " << std::endl;
   }
 
   BOOST_CHECK(zw_simplex == simplex);
@@ -125,7 +126,8 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   Gudhi::Simplex_tree<> w_simplex_d;
   BOOST_CHECK(alpha_complex_dD_from_weighted_points.create_complex(w_simplex_d));
 
-  std::clog << "Iterator on weighted alpha complex dD simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on weighted alpha complex dD simplices in the filtration order, with [filtration value]:"
+            << std::endl;
   for (auto f_simplex : w_simplex_d.filtration_simplex_range()) {
     Points points;
     for (auto vertex : w_simplex_d.simplex_vertex_range(f_simplex)) {
@@ -148,7 +150,8 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   Gudhi::Simplex_tree<> w_simplex_3;
   BOOST_CHECK(alpha_complex_3D_from_weighted_points.create_complex(w_simplex_3));
 
-  std::clog << "Iterator on weighted alpha complex 3D simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on weighted alpha complex 3D simplices in the filtration order, with [filtration value]:"
+            << std::endl;
   for (auto f_simplex : w_simplex_3.filtration_simplex_range()) {
     Points points;
     for (auto vertex : w_simplex_3.simplex_vertex_range(f_simplex)) {
@@ -161,8 +164,7 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
     for (auto point : points) {
       std::clog << point[0] << " " << point[1] << " " << point[2] << " | ";
     }
-    std::clog << ") -> " << "[" << w_simplex_3.filtration(f_simplex) << "] ";
-    std::clog << std::endl;
+    std::clog << ") -> " << "[" << w_simplex_3.filtration(f_simplex) << "] " << std::endl;
     pts_fltr_3d[points] = w_simplex_d.filtration(f_simplex);
   }
 
@@ -180,8 +182,9 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
       BOOST_CHECK(false);
     }
     // In safe mode, relative error is less than 1e-5 (can be changed with set_relative_precision_of_to_double)
-    if (std::fabs(d3_itr->second - dD_itr->second) / std::fabs(d3_itr->second) > 1e-5) {
-      std::clog << d3_itr->second << " versus " << dD_itr->second << " diff " << std::fabs(d3_itr->second - dD_itr->second) << std::endl;
+    if (std::fabs(d3_itr->second - dD_itr->second) > 1e-5 * (std::fabs(d3_itr->second) + std::fabs(dD_itr->second))) {
+      std::clog << d3_itr->second << " versus " << dD_itr->second << " diff "
+                << std::fabs(d3_itr->second - dD_itr->second) << std::endl;
       BOOST_CHECK(false);
     }
     ++dD_itr;
@@ -210,18 +213,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Weighted_alpha_complex_non_visible_points, Kernel,
   Gudhi::Simplex_tree<> stree;
   BOOST_CHECK(alpha_complex.create_complex(stree));
 
-  std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:"
+            << std::endl;
   for (auto f_simplex : stree.filtration_simplex_range()) {
     std::clog << "   ( ";
     for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
       std::clog << vertex << " ";
     }
-    std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "] ";
-    std::clog << std::endl;
+    std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "] " << std::endl;
   }
 
   BOOST_CHECK(stree.filtration(stree.find({0})) == -100.);
   BOOST_CHECK(stree.filtration(stree.find({1})) == stree.filtration(stree.find({0, 1})));
   BOOST_CHECK(stree.filtration(stree.find({1})) > 100000);
-
 }
