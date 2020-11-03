@@ -65,7 +65,7 @@ for module in pybind11_modules:
         ))
 
 # read the contents of introduction.rst
-with open("introduction.rst", "r") as fh:
+with open("@CMAKE_CURRENT_BINARY_DIR@/introduction.rst", "r") as fh:
     long_description = fh.read()
 
 setup(
