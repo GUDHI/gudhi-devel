@@ -184,6 +184,11 @@ cdef class SimplexTree:
         simplices are already present with a higher filtration value, their
         filtration value is lowered.
 
+        .. note::
+
+            Inserting a simplex with filtration value `math.nan` does not
+            modify the filtration value of any simplex already present.
+
         :param simplex: The N-simplex to insert, represented by a list of
             vertex.
         :type simplex: list of int
@@ -367,6 +372,11 @@ cdef class SimplexTree:
     def make_filtration_non_decreasing(self):
         """This function ensures that each simplex has a higher filtration
         value than its faces by increasing the filtration values.
+
+        .. note::
+
+            For this function, a value of NaN for a simplex of dimension 1 or more
+            is considered smaller than any other value.
 
         :returns: True if any filtration value was modified,
             False if the filtration was already non-decreasing.
