@@ -766,7 +766,9 @@ class Simplex_tree {
     /** \brief Insert a N-simplex and all its subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
    *
-   * Inserting a simplex with filtration value NaN does not modify the filtration value of any pre-existing simplex.
+   * Inserting a simplex with filtration value NaN does not modify the
+   * filtration value of any pre-existing simplex. Pre-existing NaN may or may
+   * not be updated by an insertion with a real value.
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
@@ -821,6 +823,8 @@ class Simplex_tree {
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
+      // In order for an insertion to handle pre-existing NaN like +Inf, we would need
+      // filtration(simplex_one) > filt || (isnan(filtration(simplex_one)) && ! isnan(filt))
       if (filtration(simplex_one) > filt) {
         assign_filtration(simplex_one, filt);
       } else {

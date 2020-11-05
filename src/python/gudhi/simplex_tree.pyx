@@ -188,6 +188,10 @@ cdef class SimplexTree:
 
             Inserting a simplex with filtration value `math.nan` does not
             modify the filtration value of any simplex already present.
+            However, it produces an invalid filtration, which needs to be fixed
+            with :meth:`make_filtration_non_decreasing` or
+            :meth:`assign_filtration`. Inserting simplices with real filtration
+            value may or may not update pre-existing NaN.
 
         :param simplex: The N-simplex to insert, represented by a list of
             vertex.
