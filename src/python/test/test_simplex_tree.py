@@ -408,9 +408,16 @@ def test_nan():
     st.insert([1], 2.)
     st.insert([4], 5.)
     st.insert([2], -1.)
+    st.insert([1, 4], 6.)
     st.insert([1, 2, 4], math.nan)
+    assert st.filtration([1]) == 2.
+    assert st.filtration([2]) == -1.
+    assert st.filtration([4]) == 5.
+    assert st.filtration([1, 4]) == 6.
     assert math.isnan(st.filtration([2, 4]))
     st.make_filtration_non_decreasing()
-    assert st.filtration([1, 2, 4]) == 5.
+    assert st.filtration([1, 2, 4]) == 6.
     assert st.filtration([1, 2]) == 2.
+    assert st.filtration([1, 4]) == 6.
     assert st.filtration([2]) == -1.
+    assert st.filtration([4]) == 5.
