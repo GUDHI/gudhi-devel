@@ -328,7 +328,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         step_x = x_values[1] - x_values[0]
 
         for diagram in X:
-            diagram_int = np.clip(np.ceil((diagram[:,:2] - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+            diagram_int = np.clip(np.ceil((diagram[:,:2] - self.sample_range[0]) / step_x), 0, self.resolution).astype(int)
             bc =  np.zeros(self.resolution)
             for interval in diagram_int:
                 bc[interval[0]:interval[1]] += 1
