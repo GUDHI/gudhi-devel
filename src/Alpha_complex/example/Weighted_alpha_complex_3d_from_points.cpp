@@ -7,7 +7,7 @@
 #include <vector>
 #include <limits>  // for numeric limits
 
-// Complexity = FAST, weighted = true, periodic = false
+// Complexity = SAFE, weighted = true, periodic = false
 using Weighted_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, true, false>;
 using Bare_point = Weighted_alpha_complex_3d::Bare_point_3;
@@ -18,11 +18,11 @@ int main(int argc, char **argv) {
   // Init of a list of points and weights from a small molecule
   // ----------------------------------------------------------------------------
   std::vector<Weighted_point> weighted_points;
-  weighted_points.push_back(Weighted_point(Bare_point(1, -1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(-1, 1, -1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(-1, -1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(1, 1, 1), 4.));
-  weighted_points.push_back(Weighted_point(Bare_point(2, 2, 2), 1.));
+  weighted_points.emplace_back(Bare_point(1, -1, -1), 4.);
+  weighted_points.emplace_back(Bare_point(-1, 1, -1), 4.);
+  weighted_points.emplace_back(Bare_point(-1, -1, 1), 4.);
+  weighted_points.emplace_back(Bare_point(1, 1, 1),   4.);
+  weighted_points.emplace_back(Bare_point(2, 2, 2),   1.);
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------------
     // Display information about the alpha complex
     // ----------------------------------------------------------------------------
-    std::clog << "Alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+    std::clog << "Weighted alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
               << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
-    std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+    std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
     for (auto f_simplex : simplex.filtration_simplex_range()) {
       std::clog << "   ( ";
       for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {

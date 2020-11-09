@@ -12,12 +12,6 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       COMMAND $<TARGET_FILE:Subsampling_example_choose_n_farthest_points>)
   add_test(NAME Subsampling_example_sparsify_point_set
       COMMAND $<TARGET_FILE:Subsampling_example_sparsify_point_set>)
-
-  install(TARGETS Subsampling_example_pick_n_random_points DESTINATION bin)
-  install(TARGETS Subsampling_example_choose_n_farthest_points DESTINATION bin)
-  install(TARGETS Subsampling_example_sparsify_point_set DESTINATION bin)
-
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
 add_executable(Subsampling_example_custom_distance example_custom_distance.cpp)
-install(TARGETS Subsampling_example_custom_distance DESTINATION bin)
