@@ -29,7 +29,7 @@ namespace subsampling {
  *  \ingroup subsampling
  *  \brief Outputs a subset of the input points so that the 
  *         squared distance between any two points
- *         is greater than or equal to `min_squared_dist`.
+ *         is greater than `min_squared_dist`.
  *
  * \tparam Kernel must be a model of the <a target="_blank"
  *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
@@ -53,6 +53,7 @@ sparsify_point_set(
                    OutputIterator output_it) {
   typedef typename Gudhi::spatial_searching::Kd_tree_search<
       Kernel, Point_range> Points_ds;
+  using std::sqrt;
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   Gudhi::Clock t;
@@ -73,7 +74,8 @@ sparsify_point_set(
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
     auto drop = [&dropped_points] (std::ptrdiff_t neighbor_point_idx) { dropped_points[neighbor_point_idx] = true; };
-    points_ds.all_near_neighbors(pt, min_squared_dist, boost::make_function_output_iterator(std::ref(drop)));
+    // FIXME: what if FT does not support sqrt?
+    points_ds.all_near_neighbors(pt, sqrt(min_squared_dist), boost::make_function_output_iterator(std::ref(drop)));
   }
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
