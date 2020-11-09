@@ -89,7 +89,7 @@ void choose_n_farthest_points(Distance dist,
   }
 
   std::size_t current_number_of_landmarks = 0;  // counter for landmarks
-  static_assert(std::numeric_limits<double>::has_infinity);
+  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
   std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
