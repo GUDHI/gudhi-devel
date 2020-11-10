@@ -1,5 +1,7 @@
-#ifdef GUDHI_DEBUG
-#define GUDHI_COX_OUTPUT_TO_HTML
+#ifndef IO_OUTPUT_DEBUG_TRACES_TO_HTML_H_
+#define IO_OUTPUT_DEBUG_TRACES_TO_HTML_H_
+
+#ifdef DEBUG_TRACES  // All this part of code can be skipped if DEBUG_TRACES are not ON - cmake -DDEBUG_TRACES=ON .
 
 #include <sstream>
 #include <fstream>
@@ -544,4 +546,5 @@ void write_to_html(std::string file_name) {
 
 }  // namespace Gudhi
 
-#endif
+#endif  // DEBUG_TRACES
+#endif  // IO_OUTPUT_DEBUG_TRACES_TO_HTML_H_

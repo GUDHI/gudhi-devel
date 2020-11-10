@@ -11,6 +11,7 @@
 #ifndef MANIFOLD_TRACING_H_
 #define MANIFOLD_TRACING_H_
 
+#include <gudhi/IO/output_debug_traces_to_html.h>  // for DEBUG_TRACES
 #include <gudhi/Query_result.h>
 
 #include <boost/functional/hash.hpp>
@@ -85,7 +86,7 @@ class Manifold_tracing {
       for (Simplex_handle face : full_simplex.face_range(cod_d)) {
         Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
         if (qr.success && out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) {
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
           mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
           queue.emplace(face);
@@ -141,7 +142,7 @@ class Manifold_tracing {
       Simplex_handle full_simplex = triangulation.locate_point(p);
       for (Simplex_handle face : full_simplex.face_range(cod_d)) {
         auto qr = oracle.intersects(face, triangulation);
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
         mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
         if (qr.success) {
@@ -150,7 +151,7 @@ class Manifold_tracing {
           } else {
             for (Simplex_handle cof : face.coface_range(cod_d + 1)) {
               auto qrb = oracle.intersects_boundary(cof, triangulation);
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
               mt_seed_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
 #endif
               if (qrb.success) boundary_simplex_map.emplace(cof, qrb.intersection);
@@ -167,7 +168,7 @@ class Manifold_tracing {
       for (auto cof : s.coface_range(cod_d + 1)) {
         for (auto face : cof.face_range(cod_d)) {
           auto qr = oracle.intersects(face, triangulation);
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
           mt_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
           if (qr.success) {
@@ -175,7 +176,7 @@ class Manifold_tracing {
               if (interior_simplex_map.emplace(face, qr.intersection).second) queue.emplace(face);
             } else {
               auto qrb = oracle.intersects_boundary(cof, triangulation);
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
               mt_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
 #endif
               // assert (qrb.success); // always a success

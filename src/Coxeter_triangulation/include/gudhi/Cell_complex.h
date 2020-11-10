@@ -17,6 +17,7 @@
 #include <map>
 #include <utility>  // for std::make_pair
 
+#include <gudhi/IO/output_debug_traces_to_html.h>  // for DEBUG_TRACES
 #include <gudhi/Permutahedral_representation/Simplex_comparator.h>
 #include <gudhi/Cell_complex/Hasse_diagram_cell.h>  // for Hasse_cell
 
@@ -73,7 +74,7 @@ class Cell_complex {
  private:
   Hasse_cell* insert_cell(const Simplex_handle& simplex, std::size_t cell_d, bool is_boundary) {
     Simplex_cell_maps& simplex_cell_maps = (is_boundary ? boundary_simplex_cell_maps_ : interior_simplex_cell_maps_);
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
     CC_detail_list& cc_detail_list =
         (is_boundary ? cc_boundary_detail_lists[cell_d] : cc_interior_detail_lists[cell_d]);
     cc_detail_list.emplace_back(CC_detail_info(simplex));
@@ -85,12 +86,12 @@ class Cell_complex {
       Hasse_cell* new_cell = hasse_cells_.back();
       simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
       cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
       cc_detail_list.back().status_ = CC_detail_info::Result_type::inserted;
 #endif
       return new_cell;
     }
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
     CC_detail_info& cc_info = cc_detail_list.back();
     cc_info.trigger_ = to_string(map_it->first);
     cc_info.status_ = CC_detail_info::Result_type::self;
@@ -130,7 +131,7 @@ class Cell_complex {
   }
 
   void construct_complex_(const Out_simplex_map_& out_simplex_map) {
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_prejoin_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
@@ -148,7 +149,7 @@ class Cell_complex {
   }
 
   void construct_complex_(const Out_simplex_map_& interior_simplex_map, const Out_simplex_map_& boundary_simplex_map) {
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
     cc_interior_summary_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_prejoin_lists.resize(interior_simplex_cell_maps_.size());
     cc_interior_detail_lists.resize(interior_simplex_cell_maps_.size());
@@ -168,7 +169,7 @@ class Cell_complex {
       Hasse_cell* new_cell = insert_cell(simplex, 0, false);
       cell_point_map_.emplace(std::make_pair(new_cell, point));
     }
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
     for (const auto& sc_pair : interior_simplex_cell_maps_[0])
       cc_interior_summary_lists[0].push_back(CC_summary_info(sc_pair));
     for (const auto& sc_pair : boundary_simplex_cell_maps_[0])
@@ -179,7 +180,7 @@ class Cell_complex {
          cell_d < interior_simplex_cell_maps_.size() && !interior_simplex_cell_maps_[cell_d - 1].empty(); ++cell_d) {
       expand_level(cell_d);
 
-#ifdef GUDHI_COX_OUTPUT_TO_HTML
+#ifdef DEBUG_TRACES
       for (const auto& sc_pair : interior_simplex_cell_maps_[cell_d])
         cc_interior_summary_lists[cell_d].push_back(CC_summary_info(sc_pair));
       if (cell_d < boundary_simplex_cell_maps_.size())
