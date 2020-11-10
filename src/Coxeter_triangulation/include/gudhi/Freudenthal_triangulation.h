@@ -149,6 +149,7 @@ class Freudenthal_triangulation {
     } else {
       Eigen::VectorXd p_vect(d);
       for (std::size_t i = 0; i < d; i++) p_vect(i) = point[i];
+      assert(p_vect.size() == offset_.size());
       Eigen::VectorXd x_vect = colpivhouseholderqr_.solve(p_vect - offset_);
       for (std::size_t i = 0; i < d; i++) {
         double x_i = scale * x_vect(i);
