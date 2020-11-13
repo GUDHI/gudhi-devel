@@ -323,22 +323,15 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
         """
-        num_diag, Xfit = len(X), []
+        Xfit = []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
 
-        for i in range(num_diag):
-
-            diagram, num_pts_in_diag = X[i], X[i].shape[0]
-
+        for diagram in X:
+            diagram_int = np.clip(np.ceil((diagram[:,:2] - self.sample_range[0]) / step_x), 0, self.resolution).astype(int)
             bc =  np.zeros(self.resolution)
-            for j in range(num_pts_in_diag):
-                [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                for k in range(min_idx, max_idx):
-                    bc[k] += 1
-
+            for interval in diagram_int:
+                bc[interval[0]:interval[1]] += 1
             Xfit.append(np.reshape(bc,[1,-1]))
 
         Xfit = np.concatenate(Xfit, 0)
