@@ -46,6 +46,9 @@ for the Alpha complex construction.
 coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
 to be recorded. Enter a negative value to see zero length intervals.
+* `-w [ --weight-file ]` is the path to the file containing the weights of the
+points (one value per line).
+Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
 
@@ -58,6 +61,10 @@ to be recorded. Enter a negative value to see zero length intervals.
 N.B.:
 
 * Filtration values are alpha square values.
+* Weights values are explained on CGAL
+[dD Triangulations](https://doc.cgal.org/latest/Triangulation/index.html)
+and
+[Regular triangulation](https://doc.cgal.org/latest/Triangulation/index.html#title20) documentation.
 
 
 ## alpha_complex_3d_persistence ##
