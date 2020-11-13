@@ -154,8 +154,10 @@ class Alpha_complex_3d {
     using Kernel = CGAL::Periodic_3_regular_triangulation_traits_3<Predicates>;
   };
 
+ public:
   using Kernel = typename Kernel_3<Predicates, Weighted, Periodic>::Kernel;
 
+ private:
   using TdsVb = typename std::conditional<Periodic, CGAL::Periodic_3_triangulation_ds_vertex_base_3<>,
                                           CGAL::Triangulation_ds_vertex_base_3<>>::type;
 

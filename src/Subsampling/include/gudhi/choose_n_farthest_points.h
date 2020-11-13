@@ -48,7 +48,8 @@ enum : std::size_t {
  *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
  *  \tparam DistanceOutputIterator Output iterator for distances.
  *  \details It chooses `final_size` points from a random access range
- *  `input_pts` and outputs them in the output iterator `output_it`. It also
+ *  `input_pts` (or the number of distinct points if `final_size` is larger)
+ *  and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
  * @param[in] k A kernel object.
@@ -99,7 +100,7 @@ void choose_n_farthest_points(Kernel const &k,
     *dist_it++ = dist_to_L[curr_max_w];
     std::size_t i = 0;
     for (auto&& p : input_pts) {
-      double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
+      double curr_dist = sqdist(p, input_pts[curr_max_w]);
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;
       ++i;
@@ -111,6 +112,8 @@ void choose_n_farthest_points(Kernel const &k,
         curr_max_dist = dist_to_L[i];
         curr_max_w = i;
       }
+    // If all that remains are duplicates of points already taken, stop.
+    if (curr_max_dist == 0) break;
   }
 }
 

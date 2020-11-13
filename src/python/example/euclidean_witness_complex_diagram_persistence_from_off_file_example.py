@@ -3,7 +3,6 @@
 import argparse
 import errno
 import os
-import matplotlib.pyplot as plot
 import gudhi
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
@@ -79,6 +78,7 @@ with open(args.file, "r") as f:
         print(simplex_tree.betti_numbers())
 
         if args.no_diagram == False:
+            import matplotlib.pyplot as plot
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
