@@ -1,11 +1,12 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Mathieu Carrière, Martin Royer
+# Author(s):       Mathieu Carrière, Martin Royer, Gard Spreemann
 #
 # Copyright (C) 2018-2020 Inria
 #
 # Modification(s):
 #   - 2020/06 Martin: ATOL integration
+#   - 2020/11 Gard: Irregular (non-evenly sampled) Betti curves.
 
 import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
@@ -349,6 +350,92 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             numpy array with shape (**resolution**): output Betti curve.
         """
         return self.fit_transform([diag])[0,:]
+
+
+class IrregularBettiCurve(BaseEstimator, TransformerMixin):
+    """
+    This is a class for computing Betti curves from a list of persistence diagrams. Unlike the BettiCurve class, the curves are not sampled at fixed, regular points. Each curve has all its data intact.
+    """
+
+    def __init__(self, filtration_range = [np.nan, np.nan]):
+        """
+        Constructor for the IrregularBettiCurve class.
+
+        Parameters:
+            filtration_range ([float, float]): minimum and maximum filtration range to consider, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). The behavior is not the same as for sample_range in BettiCurve. In particular, intervals born before x_min are not considered. Intervals born in [x_min, x_max) contribute to the Betti curves as if they were infinite.
+        """
+        self.filtration_range = np.array(filtration_range)
+
+    def fit(self, X, y = None):
+        """
+        See the corresponding function in BettiCurve.
+        """
+        if np.isnan(self.filtration_range).any():
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.filtration_range = np.where(np.isnan(self.filtration_range), np.array([mx, My]), np.array(self.filtration_range))
+
+        return self
+
+    def transform(self, X):
+        """
+        Compute the Betti curve for each persistence diagram.
+
+        Parameters:
+            X (list of n x 2 NumPy arrays): input persistence diagrams.
+        
+        Returns:
+            Pair (xs, bettis), where xs is a length-k NumPy array with all filtration values for which any of the Betti curves change value, and bettis is an (number of diagrams) x k NumPy integer array with the values of the k Betti curves at the corresponding filtration values. The value bettis[i, k] is the value of the Betti curve of the k'th diagram on the interval [xs[i], xs[i+1]).
+        """
+        assert(not np.isnan(self.filtration_range).any())
+
+        N = len(X)
+        cropped_pds = [pd[pd[:, 0] >= self.filtration_range[0]] for pd in X]
+
+        events = np.concatenate([pd.flatten(order="F") for pd in cropped_pds], axis=0)
+        sorting = np.argsort(events)
+        offsets = np.zeros(1 + N, dtype=int)
+        for i in range(0, N):
+            offsets[i+1] = offsets[i] + 2*cropped_pds[i].shape[0]
+        starts = offsets[0:N]
+        ends = offsets[1:N + 1] - 1
+
+        xs = [self.filtration_range[0]]
+        bettis = [[0] for i in range(0, N)]
+
+        for i in sorting:
+            if events[i] >= self.filtration_range[1]:
+                break
+            j = np.searchsorted(ends, i)
+            delta = 1 if i - starts[j] < len(cropped_pds[j]) else -1
+            if events[i] == xs[-1]:
+                bettis[j][-1] += delta
+            else:
+                xs.append(events[i])
+                for k in range(0, j):
+                    bettis[k].append(bettis[k][-1])
+                bettis[j].append(bettis[j][-1] + delta)
+                for k in range(j+1, N):
+                    bettis[k].append(bettis[k][-1])
+
+        xs = np.array(xs)
+        bettis = np.array(bettis, dtype=int)
+
+        return(xs, bettis)
+
+    def __call__(self, diag):
+        """
+        Apply IrregularBettiCurve on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            Pair (xs, b) of 1D NumPy arrays, xs containing the filtration values and b containing the Betti curve values. The Betti curve takes the value b[i] on the interval [xs[i], xs[i+1]).
+        """
+        res = self.fit_transform([diag])
+        return (res[0], res[1][0, :])
+
 
 class Entropy(BaseEstimator, TransformerMixin):
     """
