@@ -2,6 +2,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.interpolate
 import pytest
 
 from sklearn.cluster import KMeans
@@ -63,7 +64,7 @@ def test_dummy_atol():
             atol_vectoriser.transform(X=[a, b, c])
 
 
-from gudhi.representations.vector_methods import BettiCurve
+from gudhi.representations.vector_methods import BettiCurve, IrregularBettiCurve
 
 
 def test_infinity():
@@ -72,3 +73,30 @@ def test_infinity():
     assert c[1] == 0
     assert c[7] == 3
     assert c[9] == 2
+
+
+def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
+    m = 10
+    n = 500
+    reg_res = 100
+
+    pds = []
+    for i in range(0, m):
+        pd = np.zeros((n, 2))
+        pd[:, 0] = np.random.uniform(0, 10, n)
+        pd[:, 1] = np.random.uniform(pd[:, 0], 10, n)
+        pds.append(pd)
+
+    irregular = IrregularBettiCurve([0, 20])
+    irregular.fit(pds)
+    (irr_x, irr_y) = irregular.transform(pds)
+
+    regular = BettiCurve(resolution=reg_res, sample_range=[0, 20])
+    regular.fit(pds)
+    reg_y = regular.transform(pds)
+
+    for i in range(0, m):
+        interp = scipy.interpolate.interp1d(irr_x, irr_y[i, :], kind="previous", fill_value="extrapolate")
+        success = (reg_y[i, :] == interp(np.linspace(regular.sample_range[0], regular.sample_range[1], reg_res))).all()
+        assert(success)
+    
