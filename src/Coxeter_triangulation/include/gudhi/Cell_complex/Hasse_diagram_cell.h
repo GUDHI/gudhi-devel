@@ -36,8 +36,6 @@ class Hasse_diagram;
  * It also allow to store any additional information of a type Additional_information which is a template parameter of
  * the class (set by default to void).
  *
- * Please refer to \ref Hasse_diagram for examples.
- *
  * The complex is a template class requiring the following parameters:
  * Incidence_type_ - determine the type of incidence coefficients. Use integers in most general case.
  * Filtration_type_ - type of filtration of cells.

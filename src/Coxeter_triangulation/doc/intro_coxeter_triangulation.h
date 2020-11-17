@@ -196,20 +196,31 @@ the vertex cells in the cell complex to their Cartesian coordinates.
 
 \section example Examples
 
+\subsection examplewithoutboundaries Basic example without boundaries
+\include Coxeter_triangulation/cell_complex_from_basic_circle_manifold.cpp
+
+The program output is:
+
+\include Coxeter_triangulation/cell_complex_from_basic_circle_manifold_for_doc.txt
+
+\subsection exampleswithboundaries Example with boundaries
+
 Here is an example of constructing a piecewise-linear approximation of a flat torus embedded in \f$\mathbb{R}^4\f$,
 rotated by a random rotation in \f$\mathbb{R}^4\f$ and cut by a hyperplane.
 
 \include Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
 
-The output in medit is:
+The output in <a target="_blank" href="https://www.ljll.math.upmc.fr/frey/software.html">medit</a> is:
 
 \image html "flat_torus_with_boundary.png" "Output from the example of a flat torus with boundary"
+
+\subsection exampleswithcustomfunction Example with a custom function
 
 In the following more complex example, we define a custom function for the implicit manifold.
 
 \include Coxeter_triangulation/manifold_tracing_custom_function.cpp
 
-The output in medit looks as follows:
+The output in <a target="_blank" href="https://www.ljll.math.upmc.fr/frey/software.html">medit</a> looks as follows:
 
 \image html "custom_function.png" "Output from the example with a custom function"
 
