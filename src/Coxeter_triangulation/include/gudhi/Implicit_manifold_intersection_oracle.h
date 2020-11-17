@@ -17,8 +17,11 @@
 #include <gudhi/Functions/Constant_function.h>
 #include <gudhi/Functions/PL_approximation.h>
 #include <gudhi/Query_result.h>
+#include <gudhi/Debug_utils.h>  // for GUDHI_CHECK
 
 #include <vector>
+#include <limits>  // for std::numeric_limits<>
+#include <cmath>   // for std::fabs
 
 namespace Gudhi {
 
@@ -53,6 +56,11 @@ class Implicit_manifold_intersection_oracle {
     z(0) = 1;
     for (std::size_t i = 1; i < cod_d + 1; ++i) z(i) = 0;
     Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+    if (!z.isApprox(matrix*lambda)) {
+      // NaN non valid results
+      for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) lambda(i) =
+        std::numeric_limits<double>::quiet_NaN();
+    }
     return lambda;
   }
 
@@ -75,6 +83,11 @@ class Implicit_manifold_intersection_oracle {
     z(0) = 1;
     for (std::size_t i = 1; i < cod_d + 2; ++i) z(i) = 0;
     Eigen::VectorXd lambda = matrix.colPivHouseholderQr().solve(z);
+    if (!z.isApprox(matrix*lambda)) {
+      // NaN non valid results
+      for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) lambda(i) =
+        std::numeric_limits<double>::quiet_NaN();
+    }
     return lambda;
   }
 
@@ -85,10 +98,13 @@ class Implicit_manifold_intersection_oracle {
     using QR = Query_result<Simplex_handle>;
     std::size_t amb_d = triangulation.dimension();
     std::size_t cod_d = simplex.dimension();
-
-    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i)
-      if (lambda(i) < 0 || lambda(i) > 1) return QR({Eigen::VectorXd(), false});
-
+    for (std::size_t i = 0; i < (std::size_t)lambda.size(); ++i) {
+      if (std::isnan(lambda(i))) return QR({Eigen::VectorXd(), false});
+      GUDHI_CHECK((std::fabs(lambda(i) - 1.) > std::numeric_limits<double>::epsilon() &&
+                   std::fabs(lambda(i) - 0.) > std::numeric_limits<double>::epsilon()),
+                  std::invalid_argument("A vertex of the triangulation lies exactly on the manifold"));
+      if (lambda(i) < 0. || lambda(i) > 1.) return QR({Eigen::VectorXd(), false});
+    }
     Eigen::MatrixXd vertex_matrix(cod_d + 1, amb_d);
     auto v_range = simplex.vertex_range();
     auto v_it = v_range.begin();
@@ -159,6 +175,7 @@ class Implicit_manifold_intersection_oracle {
   template <class Simplex_handle, class Triangulation>
   Query_result<Simplex_handle> intersects_boundary(const Simplex_handle& simplex,
                                                    const Triangulation& triangulation) const {
+    //std::cout << "intersects_boundary" << std::endl;
     Eigen::VectorXd lambda = compute_boundary_lambda(simplex, triangulation);
     return intersection_result(lambda, simplex, triangulation);
   }

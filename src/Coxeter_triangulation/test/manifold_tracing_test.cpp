@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
     BOOST_CHECK(si_pair.second.size() == (long int)oracle.function().amb_d());
   }
   std::cout << "out_simplex_map.size() = " << out_simplex_map.size() << "\n";
-  BOOST_CHECK(out_simplex_map.size() == 1140);
+  BOOST_CHECK(out_simplex_map.size() == 1118);
 
   // manifold with boundary
   Function_Sm_in_Rd fun_boundary(3.0, 2, fun_sph.seed());
@@ -58,5 +58,5 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
     BOOST_CHECK(si_pair.second.size() == (long int)oracle.function().amb_d());
   }
   std::cout << "boundary_simplex_map.size() = " << boundary_simplex_map.size() << "\n";
-  BOOST_CHECK(boundary_simplex_map.size() == 55);
+  BOOST_CHECK(boundary_simplex_map.size() == 54);
 }
