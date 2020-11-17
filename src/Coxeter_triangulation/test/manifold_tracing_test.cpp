@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
     BOOST_CHECK(si_pair.first.dimension() == oracle.function().cod_d());
     BOOST_CHECK(si_pair.second.size() == (long int)oracle.function().amb_d());
   }
-  std::cout << "out_simplex_map.size() = " << out_simplex_map.size() << "\n";
+  std::clog << "out_simplex_map.size() = " << out_simplex_map.size() << "\n";
   BOOST_CHECK(out_simplex_map.size() == 1118);
 
   // manifold with boundary
@@ -51,12 +51,12 @@ BOOST_AUTO_TEST_CASE(manifold_tracing) {
     BOOST_CHECK(si_pair.first.dimension() == oracle.function().cod_d());
     BOOST_CHECK(si_pair.second.size() == (long int)oracle.function().amb_d());
   }
-  std::cout << "interior_simplex_map.size() = " << interior_simplex_map.size() << "\n";
+  std::clog << "interior_simplex_map.size() = " << interior_simplex_map.size() << "\n";
   BOOST_CHECK(interior_simplex_map.size() == 96);
   for (auto si_pair : boundary_simplex_map) {
     BOOST_CHECK(si_pair.first.dimension() == oracle.function().cod_d() + 1);
     BOOST_CHECK(si_pair.second.size() == (long int)oracle.function().amb_d());
   }
-  std::cout << "boundary_simplex_map.size() = " << boundary_simplex_map.size() << "\n";
+  std::clog << "boundary_simplex_map.size() = " << boundary_simplex_map.size() << "\n";
   BOOST_CHECK(boundary_simplex_map.size() == 54);
 }
