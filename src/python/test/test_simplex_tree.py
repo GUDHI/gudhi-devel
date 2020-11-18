@@ -356,5 +356,46 @@ def test_collapse_edges():
     st.collapse_edges()
     assert st.num_simplices() == 9
     assert st.find([1, 3]) == False
-    for simplex in st.get_skeleton(0): 
-        assert simplex[1] == 1. 
+    for simplex in st.get_skeleton(0):
+        assert simplex[1] == 1.
+
+def test_reset_filtration():
+    st = SimplexTree()
+    
+    assert st.insert([0, 1, 2], 3.) == True
+    assert st.insert([0, 3], 2.) == True
+    assert st.insert([3, 4, 5], 3.) == True
+    assert st.insert([0, 1, 6, 7], 4.) == True
+
+    # Guaranteed by construction
+    for simplex in st.get_simplices():
+        assert st.filtration(simplex[0]) >= 2.
+    
+    # dimension until 5 even if simplex tree is of dimension 3 to test the limits
+    for dimension in range(5, -1, -1):
+        st.reset_filtration(0., dimension)
+        for simplex in st.get_skeleton(3):
+            print(simplex)
+            if len(simplex[0]) < (dimension) + 1:
+                assert st.filtration(simplex[0]) >= 2.
+            else:
+                assert st.filtration(simplex[0]) == 0.
+
+def test_boundaries_iterator():
+    st = SimplexTree()
+
+    assert st.insert([0, 1, 2, 3], filtration=1.0) == True
+    assert st.insert([1, 2, 3, 4], filtration=2.0) == True
+
+    assert list(st.get_boundaries([1, 2, 3])) == [([1, 2], 1.0), ([1, 3], 1.0), ([2, 3], 1.0)]
+    assert list(st.get_boundaries([2, 3, 4])) == [([2, 3], 1.0), ([2, 4], 2.0), ([3, 4], 2.0)]
+    assert list(st.get_boundaries([2])) == []
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([]))
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([0, 4])) # (0, 4) does not exist
+
+    with pytest.raises(RuntimeError):
+        list(st.get_boundaries([6])) # (6) does not exist

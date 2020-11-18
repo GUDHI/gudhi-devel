@@ -1,4 +1,5 @@
 pytest
+pytest-cov
 sphinx
 sphinxcontrib-bibtex
 sphinx-paramlinks
@@ -7,6 +8,7 @@ scipy
 scikit-learn
 POT
 tensorflow
+tensorflow-addons
 torch<1.5
 pykeops
 hnswlib
