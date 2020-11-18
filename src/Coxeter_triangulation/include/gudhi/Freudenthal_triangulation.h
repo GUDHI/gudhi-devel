@@ -21,6 +21,7 @@
 #include <Eigen/SVD>
 
 #include <gudhi/Permutahedral_representation.h>
+#include <gudhi/Debug_utils.h>  // for GUDHI_CHECK
 
 namespace Gudhi {
 
@@ -57,11 +58,9 @@ class Freudenthal_triangulation {
    * @param[in] dimension The dimension of the triangulation.
    */
   Freudenthal_triangulation(std::size_t dimension)
-      : dimension_(dimension),
-        matrix_(Matrix::Identity(dimension, dimension)),
-        offset_(Vector::Zero(dimension)),
-        colpivhouseholderqr_(matrix_.colPivHouseholderQr()),
-        is_freudenthal(true) {}
+      : Freudenthal_triangulation(dimension, Matrix::Identity(dimension, dimension), Vector::Zero(dimension)) {
+    is_freudenthal_ = true;
+  }
 
   /** \brief Constructor of the Freudenthal-Kuhn triangulation of a given dimension under
    * a linear transformation by a given matrix.
@@ -70,11 +69,7 @@ class Freudenthal_triangulation {
    * Needs to be invertible.
    */
   Freudenthal_triangulation(std::size_t dimension, const Matrix& matrix)
-      : dimension_(dimension),
-        matrix_(matrix),
-        offset_(Vector::Zero(dimension)),
-        colpivhouseholderqr_(matrix_.colPivHouseholderQr()),
-        is_freudenthal(false) {}
+      : Freudenthal_triangulation(dimension, matrix, Vector::Zero(dimension)) {}
 
   /** \brief Constructor of the Freudenthal-Kuhn triangulation of a given dimension under
    * an affine transformation by a given matrix and a translation vector.
@@ -82,13 +77,17 @@ class Freudenthal_triangulation {
    * @param[in] matrix The matrix that defines the linear transformation.
    * Needs to be invertible.
    * @param[in] offset The offset vector.
+   * 
+   * @exception std::invalid_argument In debug mode, if offset size is different from dimension.
    */
   Freudenthal_triangulation(unsigned dimension, const Matrix& matrix, const Vector& offset)
       : dimension_(dimension),
         matrix_(matrix),
         offset_(offset),
         colpivhouseholderqr_(matrix_.colPivHouseholderQr()),
-        is_freudenthal(false) {}
+        is_freudenthal_(false) {
+    GUDHI_CHECK(dimension == offset_.size(), std::invalid_argument("Offset must be of size 'dimension'"));
+  }
 
   /** \brief Dimension of the triangulation. */
   unsigned dimension() const { return dimension_; }
@@ -105,7 +104,7 @@ class Freudenthal_triangulation {
   void change_matrix(const Eigen::MatrixXd& matrix) {
     matrix_ = matrix;
     colpivhouseholderqr_ = matrix.colPivHouseholderQr();
-    is_freudenthal = false;
+    is_freudenthal_ = false;
   }
 
   /** \brief Change the offset vector to a given value.
@@ -113,7 +112,7 @@ class Freudenthal_triangulation {
    */
   void change_offset(const Eigen::VectorXd& offset) {
     offset_ = offset;
-    is_freudenthal = false;
+    is_freudenthal_ = false;
   }
 
   /** \brief Returns the permutahedral representation of the simplex in the
@@ -129,17 +128,20 @@ class Freudenthal_triangulation {
    *
    * @param[in] point The query point.
    * @param[in] scale The scale of the triangulation.
+   * 
+   * @exception std::invalid_argument In debug mode, if point dimension is different from triangulation one.
    */
   template <class Point_d>
   Simplex_handle locate_point(const Point_d& point, double scale = 1) const {
     using Ordered_set_partition = typename Simplex_handle::OrderedSetPartition;
     using Part = typename Ordered_set_partition::value_type;
     unsigned d = point.size();
-    assert(d == dimension_);
+    GUDHI_CHECK(d == dimension_,
+                std::invalid_argument("The point must be of the same dimension as the triangulation"));
     double error = 1e-9;
     Simplex_handle output;
     std::vector<double> z;
-    if (is_freudenthal) {
+    if (is_freudenthal_) {
       for (std::size_t i = 0; i < d; i++) {
         double x_i = scale * point[i];
         int y_i = std::floor(x_i);
@@ -149,7 +151,6 @@ class Freudenthal_triangulation {
     } else {
       Eigen::VectorXd p_vect(d);
       for (std::size_t i = 0; i < d; i++) p_vect(i) = point[i];
-      assert(p_vect.size() == offset_.size());
       Eigen::VectorXd x_vect = colpivhouseholderqr_.solve(p_vect - offset_);
       for (std::size_t i = 0; i < d; i++) {
         double x_i = scale * x_vect(i);
@@ -208,7 +209,7 @@ class Freudenthal_triangulation {
   Matrix matrix_;
   Vector offset_;
   Eigen::ColPivHouseholderQR<Matrix> colpivhouseholderqr_;
-  bool is_freudenthal;
+  bool is_freudenthal_;
 };
 
 }  // namespace coxeter_triangulation

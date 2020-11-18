@@ -97,3 +97,18 @@ BOOST_AUTO_TEST_CASE(freudenthal_triangulation) {
   BOOST_CHECK(tr.matrix() == new_matrix);
   BOOST_CHECK(tr.offset() == new_offset);
 }
+
+#ifdef GUDHI_DEBUG
+BOOST_AUTO_TEST_CASE(freudenthal_triangulation_exceptions_in_debug_mode) {
+  // Point location check
+  typedef Gudhi::coxeter_triangulation::Freudenthal_triangulation<> FK_triangulation;
+
+  BOOST_CHECK_THROW (FK_triangulation tr(3, Eigen::MatrixXd::Identity(3, 3), Eigen::VectorXd::Zero(4)),
+                     std::invalid_argument);
+
+  FK_triangulation tr(3);
+  // Point of dimension 4
+  std::vector<double> point({3.5, -1.8, 0.3, 4.1});
+  BOOST_CHECK_THROW (tr.locate_point(point), std::invalid_argument);
+}
+#endif

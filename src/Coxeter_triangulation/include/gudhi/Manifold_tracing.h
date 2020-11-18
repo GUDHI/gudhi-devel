@@ -179,7 +179,6 @@ class Manifold_tracing {
 #ifdef DEBUG_TRACES
               mt_inserted_list.push_back(MT_inserted_info(qrb, cof, true));
 #endif
-              // assert (qrb.success); // always a success
               if (qrb.success) boundary_simplex_map.emplace(cof, qrb.intersection);
             }
           }
