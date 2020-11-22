@@ -74,8 +74,7 @@ sparsify_point_set(
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
     auto drop = [&dropped_points] (std::ptrdiff_t neighbor_point_idx) { dropped_points[neighbor_point_idx] = true; };
-    // FIXME: what if FT does not support sqrt?
-    points_ds.all_near_neighbors(pt, sqrt(min_squared_dist), boost::make_function_output_iterator(std::ref(drop)));
+    points_ds.all_near_neighbors2(pt, min_squared_dist, min_squared_dist, boost::make_function_output_iterator(std::ref(drop)));
   }
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING

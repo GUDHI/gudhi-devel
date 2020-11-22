@@ -11,7 +11,9 @@
 #ifndef PICK_N_RANDOM_POINTS_H_
 #define PICK_N_RANDOM_POINTS_H_
 
-#include <gudhi/Clock.h>
+#ifdef GUDHI_SUBSAMPLING_PROFILING
+# include <gudhi/Clock.h>
+#endif
 
 #include <boost/range/size.hpp>
 
