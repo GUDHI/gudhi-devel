@@ -13,7 +13,6 @@ Definition
 
 +---------------------------------------------+----------------------------------------------------------------------+
 | :doc:`cubical_complex_user`                 | * :doc:`cubical_complex_ref`                                         |
-|                                             | * :doc:`periodic_cubical_complex_ref`                                |
 +---------------------------------------------+----------------------------------------------------------------------+
 
 The cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous
@@ -112,7 +111,7 @@ Periodic boundary conditions
 ----------------------------
 
 Often one would like to impose periodic boundary conditions to the cubical complex (cf.
-:doc:`periodic_cubical_complex_ref`).
+:doc:`cubical_complex_ref`).
 Let :math:`I_1\times ... \times I_n` be a box that is decomposed with a cubical complex :math:`\mathcal{K}`.
 Imposing periodic boundary conditions in the direction i, means that the left and the right side of a complex
 :math:`\mathcal{K}` are considered the same. In particular, if for a bitmap :math:`\mathcal{K}` periodic boundary
