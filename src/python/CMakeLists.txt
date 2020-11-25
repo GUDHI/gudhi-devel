@@ -41,14 +41,7 @@ function( add_gudhi_debug_info DEBUG_INFO )
 endfunction( add_gudhi_debug_info )
 
 if(PYTHONINTERP_FOUND)
-  if(PYBIND11_FOUND)
-    add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
-    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
-    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
-    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'clustering', ")
-    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cubical', ")
-  endif()
-  if(CYTHON_FOUND)
+  if(CYTHON_FOUND AND PYBIND11_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_reader', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
@@ -63,15 +56,20 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'alpha_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
+    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'clustering', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cubical', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
+    add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
     if(PYTEST_FOUND)
       add_gudhi_debug_info("Pytest version ${PYTEST_VERSION}")
     endif()
@@ -281,37 +279,32 @@ if(PYTHONINTERP_FOUND)
         if(SCIPY_FOUND)
           if(SKLEARN_FOUND)
             if(OT_FOUND)
-              if(PYBIND11_FOUND)
-                if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                  set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
-                  # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                  # Images and biblio warnings because not found on developper version
-                  if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                    set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
-                  endif()
-                  # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
-                  add_custom_target(sphinx
-                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
-                      COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                      ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-                      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                      COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
+              if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+                # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+                # Images and biblio warnings because not found on developper version
+                if (GUDHI_PYTHON_PATH STREQUAL "src/python")
+                  set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                endif()
+                # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+                add_custom_target(sphinx
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+                    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                    ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+                    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                    COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
 
-                  add_test(NAME sphinx_py_test
-                           WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                           COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
-                           ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
+                add_test(NAME sphinx_py_test
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+                         ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
 
-                  # Set missing or not modules
-                  set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                  message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
-                  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-              else(PYBIND11_FOUND)
-                message("++ Python documentation module will not be compiled because pybind11 was not found")
+                # Set missing or not modules
+                set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
+              else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
                 set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-              endif(PYBIND11_FOUND)
+              endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
             else(OT_FOUND)
               message("++ Python documentation module will not be compiled because POT was not found")
               set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -379,9 +372,7 @@ if(PYTHONINTERP_FOUND)
                COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
-      if (PYBIND11_FOUND)
-        add_gudhi_py_test(test_bottleneck_distance)
-      endif()
+      add_gudhi_py_test(test_bottleneck_distance)
 
       # Cover complex
       file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -491,7 +482,7 @@ if(PYTHONINTERP_FOUND)
     add_gudhi_py_test(test_reader_utils)
 
     # Wasserstein
-    if(OT_FOUND AND PYBIND11_FOUND)
+    if(OT_FOUND)
       # EagerPy dependency because of enable_autodiff=True
       if(EAGERPY_FOUND)
         add_gudhi_py_test(test_wasserstein_distance)
@@ -519,7 +510,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Tomato
-    if(SCIPY_FOUND AND SKLEARN_FOUND AND PYBIND11_FOUND)
+    if(SCIPY_FOUND AND SKLEARN_FOUND)
       add_gudhi_py_test(test_tomato)
     endif()
 
@@ -536,10 +527,15 @@ if(PYTHONINTERP_FOUND)
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
-  else(CYTHON_FOUND)
-    message("++ Python module will not be compiled because cython was not found")
+  else(CYTHON_FOUND AND PYBIND11_FOUND)
+    if(NOT CYTHON_FOUND)
+      message("++ Python module will not be compiled because cython was not found")
+    endif()
+    if(NOT PYBIND11_FOUND)
+      message("++ Python module will not be compiled because pybind11 was not found")
+    endif()
     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-  endif(CYTHON_FOUND)
+  endif(CYTHON_FOUND AND PYBIND11_FOUND)
 else(PYTHONINTERP_FOUND)
   message("++ Python module will not be compiled because no Python interpreter was found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
