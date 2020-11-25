@@ -111,7 +111,7 @@ Periodic boundary conditions
 ----------------------------
 
 Often one would like to impose periodic boundary conditions to the cubical complex (cf.
-:doc:`cubical_complex_ref`).
+:class:`~gudhi.PeriodicCubicalComplex`).
 Let :math:`I_1\times ... \times I_n` be a box that is decomposed with a cubical complex :math:`\mathcal{K}`.
 Imposing periodic boundary conditions in the direction i, means that the left and the right side of a complex
 :math:`\mathcal{K}` are considered the same. In particular, if for a bitmap :math:`\mathcal{K}` periodic boundary

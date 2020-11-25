@@ -19,7 +19,7 @@ Cubical complex reference manual
 
    .. automethod:: gudhi.PeriodicCubicalComplex.__init__
 
-.. autoclass:: gudhi.CubicalBase_
+.. autoclass:: gudhi.CubicalComplexBaseClass
    :members:
    :undoc-members:
    :show-inheritance:

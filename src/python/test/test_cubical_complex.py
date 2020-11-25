@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import CubicalComplex, PeriodicCubicalComplex
+from gudhi import CubicalComplex, PeriodicCubicalComplex, CubicalComplexBaseClass
 import numpy as np
 import pytest
 
@@ -19,7 +19,11 @@ __license__ = "MIT"
 
 def test_empty_constructor():
     with pytest.raises(TypeError):
+        cub = CubicalComplexBaseClass()
+    with pytest.raises(TypeError):
         cub = CubicalComplex()
+    with pytest.raises(TypeError):
+        cub = PeriodicCubicalComplex()
 
 
 def test_non_existing_perseus_file_constructor():
@@ -53,6 +57,8 @@ def test_dimension_or_perseus_file_constructor():
 
 
 def simple_constructor(cub):
+    assert cub.dimension() == 2
+    assert cub.num_simplices() == 49
     assert cub.persistence() == [(0, (1.0, float("inf")))]
     assert cub.betti_numbers() == [1, 0, 0]
     assert cub.persistent_betti_numbers(0, 1000) == [0, 0, 0]
@@ -60,8 +66,7 @@ def simple_constructor(cub):
 def test_simple_constructor_from_top_cells():
     cub = CubicalComplex(
         dimensions=[3, 3],
-        top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9],
-    )
+        top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9])
     simple_constructor(cub)
 
 def test_simple_constructor_from_numpy_array():
@@ -73,18 +78,18 @@ def test_simple_constructor_from_numpy_array():
     simple_constructor(cub)
 
 def user_case_simple_constructor(cub):
+    assert cub.dimension() == 2
+    assert cub.num_simplices() == 49
     assert cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
 
 def test_user_case_simple_constructor_from_top_cells():
     cub = CubicalComplex(
         dimensions=[3, 3],
-        top_dimensional_cells=[float("inf"), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    )
+        top_dimensional_cells=[float("inf"), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
     user_case_simple_constructor(cub)
     other_cub = CubicalComplex(
         dimensions=[3, 3],
-        top_dimensional_cells=[1000.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-    )
+        top_dimensional_cells=[1000.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
     user_case_simple_constructor(other_cub)
 
 def test_user_case_simple_constructor_from_numpy_array():
