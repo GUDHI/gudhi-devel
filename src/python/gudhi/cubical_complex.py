@@ -280,7 +280,8 @@ class PeriodicCubicalComplex(CubicalComplexBaseClass):
             if os.path.isfile(perseus_file):
                 CubicalComplexBaseClass._thisptr = Periodic_cubical_complex_interface_(perseus_file.encode('utf-8'))
             else:
-                print("file " + perseus_file + " not found.", file=sys.stderr)
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                        perseus_file)
         else:
             raise TypeError("CubicalComplex can be constructed from dimensions, "
               "top_dimensional_cells and periodic_dimensions, or from "
