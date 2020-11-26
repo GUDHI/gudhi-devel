@@ -153,4 +153,9 @@ BOOST_AUTO_TEST_CASE(global) {
   BOOST_CHECK(bottleneck_distance(v1, v2, 0.) <= upper_bound / 100.);
   BOOST_CHECK(bottleneck_distance(v1, v2, upper_bound / 10000.) <= upper_bound / 100. + upper_bound / 10000.);
   BOOST_CHECK(std::abs(bottleneck_distance(v1, v2, 0.) - bottleneck_distance(v1, v2, upper_bound / 10000.)) <= upper_bound / 10000.);
+
+  std::vector< std::pair<double, double> > empty;
+  std::vector< std::pair<double, double> > one = {{8, 10}};
+  BOOST_CHECK(bottleneck_distance(empty, empty) == 0);
+  BOOST_CHECK(bottleneck_distance(empty, one) == 1);
 }
