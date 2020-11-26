@@ -71,7 +71,7 @@ using Weight_map = boost::property_map<Graph, boost::edge_weight_t>::type;
  *
  * \details
  * The data structure is a simplicial complex, representing a
- * Graph Induced simplicial Complex (GIC),
+ * Graph Induced simplicial Complex (GIC) or a Nerve,
  * and whose simplices are computed with a cover C of a point
  * cloud P, which often comes from the preimages of intervals
  * covering the image of a function f defined on P.
@@ -87,6 +87,7 @@ template <typename Point>
 class Cover_complex {
  private:
   bool verbose = false;  // whether to display information.
+  std::string type;      // Nerve or GIC
 
   std::vector<Point> point_cloud;               // input point cloud.
   std::vector<std::vector<double> > distances;  // all pairwise distances.
@@ -162,6 +163,14 @@ class Cover_complex {
   // *******************************************************************************************************************
   // Utils.
   // *******************************************************************************************************************
+
+ public:	
+  /** \brief Specifies whether the type of the output simplicial complex.	
+   *	
+   * @param[in] t std::string (either "GIC" or "Nerve").	
+   *	
+   */	
+  void set_type(const std::string& t) { type = t; }
 
  public:
   /** \brief Specifies whether the program should display information or not.
@@ -539,6 +548,11 @@ class Cover_complex {
       return 0;
     }
 
+    if (type != "GIC") {	
+      std::cerr << "Type of complex needs to be GIC." << std::endl;	
+      return 0;	
+    }
+
     double reso = 0;
     Index_map index = boost::get(boost::vertex_index, one_skeleton);
 
@@ -828,6 +842,38 @@ class Cover_complex {
     maximal_dim = cov_number.size() - 1;
     for (int i = 0; i <= maximal_dim; i++) cover_color[i].second /= cover_color[i].first;
   }
+
+ public:  // Set cover from range.
+  /** \brief Creates the cover C from a vector of assignments stored in memory. The assignments, or clusters IDs, are vectors of integers.
+  *
+  * @param[in] assignments input vector of vector of integers containing the cover assignments.
+  *
+  */
+  template <class InputRange>
+  void set_cover_from_range(InputRange const& assignments) {
+    std::vector<int> cov_elts, cov_number;
+    for(int i=0; i < n; i++){
+      cov_elts.clear();
+      for (unsigned int covid=0; covid < assignments[i].size(); covid++){
+        int cov = assignments[i][covid];
+        cov_elts.push_back(cov);
+        cov_number.push_back(cov);
+        cover_fct[cov] = cov;
+        cover_color[cov].second += func_color[i];
+        cover_color[cov].first++;
+        cover_back[cov].push_back(i);
+      }
+      cover[i] = cov_elts;
+    }
+
+    std::sort(cov_number.begin(), cov_number.end());
+    std::vector<int>::iterator it = std::unique(cov_number.begin(), cov_number.end());
+    cov_number.resize(std::distance(cov_number.begin(), it));
+
+    maximal_dim = cov_number.size() - 1;
+    for (int i = 0; i <= maximal_dim; i++) cover_color[i].second /= cover_color[i].first;
+  }
+
 
  public:  // Set cover from Voronoi
           /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
@@ -1270,6 +1316,20 @@ class Cover_complex {
    */
   void find_simplices() {
 
+    if (type != "Nerve" && type != "GIC") {	
+      std::cerr << "Type of complex needs to be specified." << std::endl;	
+      return;	
+    }	
+
+    if (type == "Nerve") {	
+      for(int i = 0; i < n; i++)  simplices.push_back(cover[i]);	
+      std::sort(simplices.begin(), simplices.end());	
+      std::vector<std::vector<int> >::iterator it = std::unique(simplices.begin(), simplices.end());	
+      simplices.resize(std::distance(simplices.begin(), it));	
+    }	
+
+
+    if (type == "GIC") {
       Index_map index = boost::get(boost::vertex_index, one_skeleton);
 
       if (functional_cover) {
@@ -1344,6 +1404,7 @@ class Cover_complex {
         simplices.resize(std::distance(simplices.begin(), it));
       }
     }
+  }
  
 };
 

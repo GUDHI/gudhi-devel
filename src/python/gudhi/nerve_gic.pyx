@@ -59,6 +59,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_color_from_range(vector[double] color)
         void set_cover_from_file(string cover_file_name)
         void set_cover_from_function()
+        void set_cover_from_range(vector[vector[int]] assignments)
         void set_cover_from_Euclidean_Voronoi(int m)
         void set_function_from_coordinate(int k)
         void set_function_from_file(string func_file_name)
@@ -72,6 +73,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_resolution_with_interval_length(double resolution)
         void set_resolution_with_interval_number(int resolution)
         void set_subsampling(double constant, double power)
+        void set_type(string type)
         void set_verbose(bool verbose)
         vector[int] subpopulation(int c)
         double subcolor(int c)
@@ -81,16 +83,13 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_point_cloud_from_range(vector[vector[double]] cloud)
         void set_distances_from_range(vector[vector[double]] distance_matrix)
 
-# CoverComplex python interface
-cdef class GraphInducedComplex:
-    """Cover complex data structure.
+# NGIComplex python interface
+cdef class NGIComplex:
+    """Cover complex data structure for Nerve and Graph Induced complexes.
 
     The data structure is a simplicial complex, representing a Graph Induced
     simplicial Complex (GIC) or a Nerve, and whose simplices are computed with
-    a cover C of a point cloud P, which often comes from the preimages of
-    intervals covering the image of a function f defined on P. These intervals
-    are parameterized by their resolution (either their length or their number)
-    and their gain (percentage of overlap). To compute a GIC, one also needs a
+    a cover C of a point cloud P. To compute a GIC, one also needs a
     graph G built on top of P, whose cliques with vertices belonging to
     different elements of C correspond to the simplices of the GIC.
     """
@@ -99,7 +98,7 @@ cdef class GraphInducedComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self):
-        """CoverComplex constructor.
+        """NGIComplex constructor.
         """
 
     # The real cython constructor
@@ -111,7 +110,7 @@ cdef class GraphInducedComplex:
             del self.thisptr
 
     def __is_defined(self):
-        """Returns true if CoverComplex pointer is not NULL.
+        """Returns true if NGIComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
@@ -267,6 +266,11 @@ cdef class GraphInducedComplex:
         """
         self.thisptr.set_cover_from_function()
 
+    def set_cover_from_range(self, assignments):
+        """Creates a cover C from a vector stored in memory.
+        """
+        self.thisptr.set_cover_from_range(assignments)
+
     def set_cover_from_Voronoi(self, m=100):
         """Creates the cover C from the Voronoï cells of a subsampling of the
         point cloud.
@@ -388,6 +392,13 @@ cdef class GraphInducedComplex:
         :type resolution: double
         """
         self.thisptr.set_subsampling(constant, power)
+
+    def set_type(self, type):	
+        """Specifies whether the type of the output simplicial complex.	
+        :param type: either "GIC" or "Nerve".	
+        :type type: string	
+        """	
+        self.thisptr.set_type(type.encode('utf-8'))
 
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.
@@ -664,22 +675,22 @@ class _MapperComplex(BaseEstimator, TransformerMixin):
         # Insert the simplices of the Mapper complex 
         for i in range(num_pts):
             self.mapper_.insert(cover[i], filtration=-3)
-        self.mapper_.initialize_filtration()
 
         return self
 
 
 class CoverComplex(BaseEstimator, TransformerMixin):
     """
-    Constructor for the CoverComplex class. This class wraps Mapper and Graph Induced complexes in a single interface. Graph Induced complexes can still be called from the class GraphInducedComplex (with a few more functionalities, such as defining datasets or graphs through files). Key differences between Mapper and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph, GIC accepts partitions instead of covers while Mapper requires cover elements to overlap, Mapper can handle cover defined with multiple filter functions while GIC requires single filter function. 
+    Constructor for the CoverComplex class. This class wraps Mapper, Nerve and Graph Induced complexes in a single interface. Graph Induced and Nerve complexes can still be called from the class NGIComplex (with a few more functionalities, such as defining datasets or graphs through files). Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5, meaning that the arguments "resolutions" and "gains" should have length 1. If you have more than one scalar filter, or if the gain is more than 0.5, the cover should be computed beforehand and fed to the class with the "assignments" argument. On the other hand, Mapper and Nerve complexes accept "resolutions" and "gains" with any length. 
 
     Attributes:
-        complex_type (string): type of cover complex. Either "mapper" or "gic". 
+        complex_type (string): type of cover complex. Either "mapper", "gic" or "nerve". 
         input_type (string): type of input data. Either "point cloud" or "distance matrix".
-        cover (string): specifies the cover. Either "functional" (preimages of filter function) or "voronoi".
+        cover (string): specifies the cover. Either "functional" (preimages of filter function), "voronoi" or "precomputed".
         colors (numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
         mask (int): threshold on the size of the cover complex nodes (default 0). Any node associated to a subpopulation with less than **mask** points will be removed.
         voronoi_samples (int): number of Voronoi germs used for partitioning the input dataset. Used only if complex_type = "gic" and cover = "voronoi".
+        assignments (list of length (num_points) of lists of integers): cover assignment for each point. Used only if complex_type = "gic" or "nerve" and cover = "precomputed".
         filters (numpy array of shape (num_points) x (num_filters)): filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points. Used only if cover = "functional".
         filter_bnds (numpy array of shape (num_filters) x 2): limits of each filter, of the form [[f_1^min, f_1^max], ..., [f_n^min, f_n^max]]. If one of the values is numpy.nan, it can be computed from the dataset with the fit() method. Used only if cover = "functional".
         resolutions (numpy array of shape num_filters containing integers): resolution of each filter function, ie number of intervals required to cover each filter image. Must be of length 1 if complex_type = "gic". Used only if cover = "functional". If None, it is estimated from data.
@@ -699,13 +710,13 @@ class CoverComplex(BaseEstimator, TransformerMixin):
         node_info_ (dictionary): various information associated to the nodes of the cover complex. 
     """
     def __init__(self, complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0,
-                       voronoi_samples=100, filters=None, filter_bnds=None, resolutions=None, gains=None, N=100, beta=0., C=10.,
+                       voronoi_samples=100, assignments=None, filters=None, filter_bnds=None, resolutions=None, gains=None, N=100, beta=0., C=10.,
                        clustering=None,
                        graph="rips", rips_threshold=None, 
                        input_name="data", cover_name="cover", color_name="color", verbose=False):
 
         self.complex_type, self.input_type, self.cover, self.colors, self.mask = complex_type, input_type, cover, colors, mask
-        self.voronoi_samples, self.filters, self.filter_bnds, self.resolutions, self.gains, self.clustering = voronoi_samples, filters, filter_bnds, resolutions, gains, clustering
+        self.voronoi_samples, self.assignments, self.filters, self.filter_bnds, self.resolutions, self.gains, self.clustering = voronoi_samples, assignments, filters, filter_bnds, resolutions, gains, clustering
         self.graph, self.rips_threshold, self.N, self.beta, self.C = graph, rips_threshold, N, beta, C
         self.input_name, self.cover_name, self.color_name, self.verbose = input_name, cover_name, color_name, verbose
 
@@ -731,68 +742,88 @@ class CoverComplex(BaseEstimator, TransformerMixin):
             elif self.input_type == "distance matrix":
                 self.filters = X.max(axis=0) if self.complex_type == "gic" else X.max(axis=0)[:,np.newaxis]
 
-        if self.complex_type == "gic":
+        if self.complex_type == "gic" or self.complex_type == "nerve":
 
-            self.complex = GraphInducedComplex()
-            self.complex.set_verbose(self.verbose)
+            if self.complex_type is not "nerve" or self.cover is not "functional": # Nerve + functional cover is a special case where it's better to use Mapper than C++ code
 
-            if self.input_type == "point cloud":
-                self.complex.set_point_cloud_from_range(X)
-            elif self.input_type == "distance matrix":
-                self.complex.set_distances_from_range(X)
+                ct = "GIC" if self.complex_type == "gic" else "Nerve"
+                self.complex = NGIComplex()
+                self.complex.set_type(ct)
+                self.complex.set_verbose(self.verbose)
+
+                if self.input_type == "point cloud":
+                    self.complex.set_point_cloud_from_range(X)
+                elif self.input_type == "distance matrix":
+                    self.complex.set_distances_from_range(X)
             
-            self.complex.set_color_from_range(self.colors)
+                self.complex.set_color_from_range(self.colors)
             
-            if self.complex_type == "gic":
-                if self.graph == "rips":
-                    if self.rips_threshold is not None:
-                        self.complex.set_graph_from_rips(self.rips_threshold)
-                    else:
-                        self.complex.set_subsampling(self.C, self.beta)
-                        self.complex.set_graph_from_automatic_rips(self.N)
+                if self.complex_type == "gic":
+                    if self.graph == "rips":
+                        if self.rips_threshold is not None:
+                            self.complex.set_graph_from_rips(self.rips_threshold)
+                        else:
+                            self.complex.set_subsampling(self.C, self.beta)
+                            self.complex.set_graph_from_automatic_rips(self.N)
 
             if self.cover == "voronoi":
-                assert self.complex_type is not "mapper"
+                assert self.complex_type is not "nerve"
                 self.complex.set_cover_from_Voronoi(self.voronoi_samples)
 
             elif self.cover == "functional":
 
-                self.complex.set_function_from_range(self.filters)
+                if self.complex_type == "gic":
 
-                if self.resolutions is None:
-                    self.complex.set_automatic_resolution()
-                else:
-                    self.complex.set_resolution_with_interval_number(self.resolutions[0])
+                    self.complex.set_function_from_range(self.filters)
 
-                if self.gains is None:
-                    self.complex.set_gain(.33)
-                else:
-                    self.complex.set_gain(self.gains[0])
+                    if self.resolutions is None:
+                        self.complex.set_automatic_resolution()
+                    else:
+                        self.complex.set_resolution_with_interval_number(self.resolutions[0])
 
-                self.complex.set_cover_from_function()
+                    if self.gains is None:
+                        self.complex.set_gain(.33)
+                    else:
+                        self.complex.set_gain(self.gains[0])
 
-            self.complex.set_mask(self.mask)
+                    self.complex.set_cover_from_function()
 
-            self.complex.find_simplices()
-            simplex_tree = self.complex.create_simplex_tree()
+                elif self.complex_type == "nerve": # it's actually better to use Mapper with constant clustering
+                    self.complex = _MapperComplex(filters=self.filters, filter_bnds=self.filter_bnds, colors=self.colors, 
+                                                 resolutions=self.resolutions, gains=self.gains, inp=self.input_type, 
+                                                 clustering=self._constant_clustering, mask=self.mask, N=self.N, beta=self.beta, C=self.C)
+                    self.complex.fit(X)
+                    self.simplex_tree = self.complex.mapper_
+                    self.node_info = self.complex.node_info_
+
+            elif self.cover == "precomputed":
+                self.complex.set_cover_from_range(self.assignments)
+
+            if self.complex_type is not "nerve" or self.cover is not "functional":
+
+                self.complex.set_mask(self.mask)
+
+                self.complex.find_simplices()
+                simplex_tree = self.complex.create_simplex_tree()
             
-            self.simplex_tree = SimplexTree()
-            idv, names = 0, {}
-            for v,_ in simplex_tree.get_skeleton(0):
-                if len(self.complex.subpopulation(v[0])) > self.mask:
-                    names[v[0]] = idv
-                    self.simplex_tree.insert([idv])
-                    idv += 1
-            for s,_ in simplex_tree.get_filtration():
-                if len(s) >= 2 and np.all([len(self.complex.subpopulation(v)) > self.mask for v in s]):
-                    self.simplex_tree.insert([names[v] for v in s])
-            self.node_info = {}
-            for v,_ in simplex_tree.get_skeleton(0):
-                if len(self.complex.subpopulation(v[0])) > self.mask:
-                    node = names[v[0]]
-                    pop = self.complex.subpopulation(v[0])
-                    self.node_info[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
-                
+                self.simplex_tree = SimplexTree()
+                idv, names = 0, {}
+                for v,_ in simplex_tree.get_skeleton(0):
+                    if len(self.complex.subpopulation(v[0])) > self.mask:
+                        names[v[0]] = idv
+                        self.simplex_tree.insert([idv])
+                        idv += 1
+                for s,_ in simplex_tree.get_filtration():
+                    if len(s) >= 2 and np.all([len(self.complex.subpopulation(v)) > self.mask for v in s]):
+                        self.simplex_tree.insert([names[v] for v in s])
+                self.node_info = {}
+                for v,_ in simplex_tree.get_skeleton(0):
+                    if len(self.complex.subpopulation(v[0])) > self.mask:
+                        node = names[v[0]]
+                        pop = self.complex.subpopulation(v[0])
+                        self.node_info[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
+    
+
         elif self.complex_type == "mapper":
 
             assert self.cover is not "voronoi"
@@ -826,6 +857,10 @@ class CoverComplex(BaseEstimator, TransformerMixin):
             attrs = {k: {"attr_name": self.node_info[k]["colors"]} for k in G.nodes()}
             nx.set_node_attributes(G, attrs)
         return G
+
+    class _constant_clustering():
+        def fit_predict(X):
+            return np.zeros([len(X)], dtype=np.int32)
 
     def compute_topological_features(self, threshold=0.):
         """

@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import GraphInducedComplex, CoverComplex
+from gudhi import NGIComplex, CoverComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -20,13 +20,13 @@ __license__ = "MIT"
 
 def test_empty_constructor():
     # Try to create an empty CoverComplex
-    cover = GraphInducedComplex()
+    cover = NGIComplex()
     assert cover.__is_defined() == True
 
 
 def test_non_existing_file_read():
     # Try to open a non existing file
-    cover = GraphInducedComplex()
+    cover = NGIComplex()
     with pytest.raises(FileNotFoundError):
         cover.read_point_cloud("pouetpouettralala.toubiloubabdou")
 
@@ -45,7 +45,7 @@ def test_files_creation():
 
 
 def test_nerve():
-    nerve = GraphInducedComplex()
+    nerve = NGIComplex()
     nerve.set_type("Nerve")
     assert nerve.read_point_cloud("cloud") == True
     nerve.set_color_from_coordinate()
@@ -60,7 +60,7 @@ def test_nerve():
 
 
 def test_graph_induced_complex():
-    gic = GraphInducedComplex()
+    gic = NGIComplex()
     gic.set_type("GIC")
     assert gic.read_point_cloud("cloud") == True
     gic.set_color_from_coordinate()
@@ -75,7 +75,7 @@ def test_graph_induced_complex():
 
 
 def test_voronoi_graph_induced_complex():
-    gic = GraphInducedComplex()
+    gic = NGIComplex()
     gic.set_type("GIC")
     assert gic.read_point_cloud("cloud") == True
     gic.set_color_from_coordinate()
@@ -122,7 +122,14 @@ def test_cover_complex():
 
     assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
 
+    M = CoverComplex(complex_type="nerve", input_type="point cloud", cover="precomputed", colors=None, mask=0, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]]).fit(X)
+    assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
+
+    M = CoverComplex(complex_type="nerve", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
+         resolutions=np.array([2,4]), gains=np.array([.3,.3])).fit(X)
+
+    assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
+
     D, B = M.compute_topological_features()
     assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
     assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
-

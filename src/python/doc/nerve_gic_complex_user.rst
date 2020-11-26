@@ -9,21 +9,27 @@ Definition
 
 .. include:: nerve_gic_complex_sum.inc
 
-Visualizations of the simplicial complexes can be done with either
+We provide two classes for computing cover complexes: one is CoverComplex, which can compute Mapper, Nerve and Graph Induced complexes in a scikit-learn format, 
+the other is NGIComplex, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
+while CoverComplex needs the inputs to be stored in memory).
+  
+Both classes can print output files, which can then be visualized with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/MLWave/kepler-mapper>`_.
-Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
+Input point clouds (when they are read from files in NGIComplex) are assumed to be stored in OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
+In the following, we provide examples for NGIComplex, and we refer to `this notebook <https://github.com/MathieuCarriere/tda-tutorials/blob/mapper/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of CoverComplex.
+
 
 Covers
 ------
 
-Nerves and Graph Induced Complexes require a cover C of the input point cloud P,
-that is a set of subsets of P whose union is P itself.
-Very often, this cover is obtained from the preimage of a family of intervals covering
-the image of some scalar-valued function f defined on P. This family is parameterized
-by its resolution, which can be either the number or the length of the intervals,
-and its gain, which is the overlap percentage between consecutive intervals (ordered by their first values).
+Mapper, Nerve and Graph Induced complexes require a cover C of the input point cloud P,
+that is, a set of subsets of P whose union is P itself.
+Very often, this cover is obtained from the preimage of a family of hypercubes covering
+the image of some function f sending P to Euclidean space. This family is parameterized
+by its resolution, which is the number of hypercubes,
+and its gain, which is the overlap percentage between consecutive hypercubes (ordered by their lower corners).
 
 Nerves
 ------
@@ -53,7 +59,7 @@ which are then refined into their connected components using the triangulation o
 .. code-block:: python
 
     import gudhi
-    nerve_complex = gudhi.CoverComplex()
+    nerve_complex = gudhi.NGIComplex()
     nerve_complex.set_verbose(True)
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
@@ -195,7 +201,7 @@ simplicial complex is in dimension 3 in this example.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.CoverComplex()
+    nerve_complex = gudhi.NGIComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/human.off')):
@@ -244,7 +250,7 @@ threshold, resolution and gain can be computed as well for the Nerve.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.CoverComplex()
+    nerve_complex = gudhi.NGIComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/KleinBottle5D.off')):
@@ -286,7 +292,7 @@ automatically selected as before.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.CoverComplex()
+    nerve_complex = gudhi.NGIComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/COIL_database/lucky_cat.off')):
