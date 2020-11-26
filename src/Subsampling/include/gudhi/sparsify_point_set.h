@@ -11,7 +11,12 @@
 #ifndef SPARSIFY_POINT_SET_H_
 #define SPARSIFY_POINT_SET_H_
 
-#include <boost/iterator/function_output_iterator.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION < 106600
+# include <boost/function_output_iterator.hpp>
+#else
+# include <boost/iterator/function_output_iterator.hpp>
+#endif
 
 #include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
@@ -53,7 +58,6 @@ sparsify_point_set(
                    OutputIterator output_it) {
   typedef typename Gudhi::spatial_searching::Kd_tree_search<
       Kernel, Point_range> Points_ds;
-  using std::sqrt;
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   Gudhi::Clock t;
