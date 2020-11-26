@@ -175,3 +175,10 @@ The output is:
     [[0.27916667 0.55416667]
      [0.7375     0.7625    ]
      [0.2375     0.2625    ]]
+
+Tutorial
+********
+
+This
+`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
+presents the concept of barycenter, or Fréchet mean, of a family of persistence diagrams.
