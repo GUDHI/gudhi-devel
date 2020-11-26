@@ -47,8 +47,8 @@ be a set of two elements).
 For further details and theory of cubical complexes, please consult :cite:`kaczynski2004computational` as well as the
 following paper :cite:`peikert2012topological`.
 
-Data structure.
----------------
+Data structure
+--------------
 
 The implementation of Cubical complex provides a representation of complexes that occupy a rectangular region in
 :math:`\mathbb{R}^n`. This extra assumption allows for a memory efficient way of storing cubical complexes in a form
@@ -77,8 +77,8 @@ Knowing the sizes of the bitmap, by a series of modulo operation, we can determi
 present in the product that gives the cube :math:`C`. In a similar way, we can compute boundary and the coboundary of
 each cube. Further details can be found in the literature.
 
-Input Format.
--------------
+Input Format
+------------
 
 In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
 filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
@@ -108,8 +108,8 @@ the program output is:
     
     Cubical complex is of dimension 2 - 49 simplices.
 
-Periodic boundary conditions.
------------------------------
+Periodic boundary conditions
+----------------------------
 
 Often one would like to impose periodic boundary conditions to the cubical complex (cf.
 :doc:`periodic_cubical_complex_ref`).
@@ -154,7 +154,13 @@ the program output is:
 
     Periodic cubical complex is of dimension 2 - 42 simplices.
 
-Examples.
----------
+Examples
+--------
 
 End user programs are available in python/example/ folder.
+
+Tutorial
+--------
+
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cubical-complexes.ipynb>`_
+explains how to represent sublevels sets of functions using cubical complexes.
