@@ -8,6 +8,7 @@ Cubical complex reference manual
 .. autoclass:: gudhi.CubicalComplex
    :members:
    :undoc-members:
+   :inherited-members:
    :show-inheritance:
 
    .. automethod:: gudhi.CubicalComplex.__init__
@@ -15,11 +16,7 @@ Cubical complex reference manual
 .. autoclass:: gudhi.PeriodicCubicalComplex
    :members:
    :undoc-members:
+   :inherited-members:
    :show-inheritance:
 
    .. automethod:: gudhi.PeriodicCubicalComplex.__init__
-
-.. autoclass:: gudhi.CubicalComplexBaseClass
-   :members:
-   :undoc-members:
-   :show-inheritance:

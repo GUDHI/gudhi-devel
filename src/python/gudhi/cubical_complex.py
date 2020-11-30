@@ -46,6 +46,7 @@ class CubicalComplexBaseClass:
         :returns:  int -- the complex dimension.
         """
         return self._thisptr.dimension()
+
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
 
