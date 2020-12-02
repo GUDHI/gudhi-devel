@@ -8,6 +8,7 @@ scipy
 scikit-learn
 POT
 tensorflow
+tensorflow-addons
 torch<1.5
 pykeops
 hnswlib

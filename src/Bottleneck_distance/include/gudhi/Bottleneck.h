@@ -35,8 +35,12 @@ namespace persistence_diagram {
 
 inline double bottleneck_distance_approx(Persistence_graph& g, double e) {
   double b_lower_bound = 0.;
-  double b_upper_bound = g.diameter_bound();
-  const double alpha = std::pow(g.size(), 1. / 5.);
+  double b_upper_bound = g.max_dist_to_diagonal();
+  int siz = g.size();
+  if (siz <= 1)
+    // The value of alpha would be wrong in this case
+    return b_upper_bound;
+  const double alpha = std::pow(siz, 1. / 5.);
   Graph_matching m(g);
   Graph_matching biggest_unperfect(g);
   while (b_upper_bound - b_lower_bound > 2 * e) {
