@@ -159,7 +159,7 @@ You shall have something like:
     Cython version 0.26.1
     Numpy version 1.14.1
     Eigen3 version 3.1.1
-    Installed modules are: off_reader;simplex_tree;rips_complex;
+    Installed modules are: simplex_tree;rips_complex;
         cubical_complex;periodic_cubical_complex;reader_utils;witness_complex;
         strong_witness_complex;alpha_complex;
     Missing modules are: bottleneck_distance;nerve_gic;subsampling;
@@ -186,7 +186,7 @@ A complete configuration would be :
     Matplotlib version 2.2.2
     Numpy version 1.14.5
     Eigen3 version 3.3.4
-    Installed modules are: off_reader;simplex_tree;rips_complex;
+    Installed modules are: simplex_tree;rips_complex;
         cubical_complex;periodic_cubical_complex;persistence_graphical_tools;
         reader_utils;witness_complex;strong_witness_complex;
         persistence_graphical_tools;bottleneck_distance;nerve_gic;subsampling;
