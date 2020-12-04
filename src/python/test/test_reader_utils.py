@@ -1,5 +1,5 @@
-""" This file is part of the Gudhi Library - https://inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://inria.fr/licensing/ for full license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2017 Inria
