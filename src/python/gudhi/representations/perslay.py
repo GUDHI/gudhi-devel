@@ -83,7 +83,7 @@ class PerslayModel(tf.keras.Model):
     Attributes:
         name (string): name of the layer. Used for naming variables.
         diagdim (integer): dimension of persistence diagram points. Usually 2 but can handle more.
-        perslay_parameters (dict): dictionary containing the PersLay parameters. See file perslay_params.md
+        perslay_parameters (dict): dictionary containing the PersLay parameters. See below.
         rho (TensorFlow model): layers used to process the learned representations of persistence diagrams (for instance, a fully connected layer that outputs the number of classes). Use the string "identity" if you want to output the representations directly. 
     """
     def __init__(self, name, diagdim, perslay_parameters, rho):
@@ -165,7 +165,7 @@ class PerslayModel(tf.keras.Model):
             elif layer == "RationalHat":
                 LMinit, LRinit = plp["lmean_init"], plp["lr_init"]
                 LMiv = LMinit if not callable(LMinit) else LMinit([self.diagdim, plp["lnum"]])
-                LRiv = LRinit if not callable(LRinit) else LVinit([1])
+                LRiv = LRinit if not callable(LRinit) else LRinit([1])
                 LM = tf.Variable(name=Lname+"-M", initial_value=LMiv, trainable=Ltrain)
                 LR = tf.Variable(name=Lname+"-R", initial_value=LRiv, trainable=Ltrain)
                 self.vars[nf].append([LM, LR])
@@ -217,11 +217,11 @@ class PerslayModel(tf.keras.Model):
             elif plp["layer"] == "Image":
                 tensor_diag = _image_layer(tensor_diag, plp["image_size"], plp["image_bnds"], lvars)
             elif plp["layer"] == "Exponential":
-                tensor_diag = _exponential_layer(tensor_diag, **lvars)
+                tensor_diag = _exponential_layer(tensor_diag, lvars[0], lvars[1])
             elif plp["layer"] == "Rational":
-                tensor_diag = _rational_layer(tensor_diag, **lvars)
+                tensor_diag = _rational_layer(tensor_diag, lvars[0], lvars[1], lvars[2])
             elif plp["layer"] == "RationalHat":
-                tensor_diag = _rational_hat_layer(tensor_diag, plp["q"], **lvars)
+                tensor_diag = _rational_hat_layer(tensor_diag, plp["q"], lvars[0], lvars[1])
 
             # Apply weight
             output_dim = len(tensor_diag.shape) - 2

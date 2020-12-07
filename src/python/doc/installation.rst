@@ -372,6 +372,15 @@ PyTorch
 `PyTorch <https://pytorch.org/>`_ is currently only used as a dependency of
 `PyKeOps`_, and in some tests.
 
+TensorFlow
+----------
+
+`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+
+:class:`~gudhi.representations.PerslayModel` in the :doc:`persistence representations </representations>` module requires
+`TensorFlow 2 <https://https://www.tensorflow.org/install/>`_.
+
+
 Scikit-learn
 ------------
 
@@ -394,10 +403,6 @@ mathematics, science, and engineering.
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
 
-TensorFlow
-----------
-
-`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************
