@@ -15,6 +15,8 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 
+#include <boost/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+
 #include <vector>
 #include <array>
 #include <string>
