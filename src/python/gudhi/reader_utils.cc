@@ -16,7 +16,11 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl_bind.h>
 
-#include <boost/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+#if BOOST_VERSION < 106600
+# include <boost/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+#else
+# include <boost/iterator/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+#endif
 
 #include <vector>
 #include <array>
