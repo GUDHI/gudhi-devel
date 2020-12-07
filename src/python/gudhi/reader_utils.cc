@@ -40,7 +40,7 @@ PYBIND11_MODULE(reader_utils, m) {
         )pbdoc"
       );
       m.def("read_lower_triangular_matrix_from_csv_file", &Gudhi::read_lower_triangular_matrix_from_csv_file<double>,
-        py::arg("csv_file"), py::arg("separator") = static_cast<const char>(';'),
+        py::arg("csv_file"), py::arg("separator") = ';',
         R"pbdoc(
     Read lower triangular matrix from a CSV style file.
 
