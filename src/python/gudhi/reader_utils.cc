@@ -32,7 +32,7 @@ PYBIND11_MODULE(reader_utils, m) {
         R"pbdoc(
     Read points from OFF file.
 
-    :param off_file: An OFF file style name.
+    :param off_file: Path to an `OFF <fileformats.html#off-file-format>`_ file.
     :type off_file: string
 
     :returns:  The point set.
@@ -44,7 +44,7 @@ PYBIND11_MODULE(reader_utils, m) {
         R"pbdoc(
     Read lower triangular matrix from a CSV style file.
 
-    :param csv_file: A CSV file style name.
+    :param csv_file: Path to a CSV file.
     :type csv_file: string
     :param separator: The value separator in the CSV file. Default value is ';'
     :type separator: char
@@ -62,7 +62,7 @@ PYBIND11_MODULE(reader_utils, m) {
     where `dim` is an `int`, `birth` a `float`, and `death` a `float`.
     Note: the function does not check that birth <= death.
 
-    :param persistence_file: A persistence file style name.
+    :param persistence_file: Path to a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
     :type persistence_file: string
 
     :returns:  The persistence pairs grouped by dimension.
@@ -88,7 +88,7 @@ PYBIND11_MODULE(reader_utils, m) {
     [[field] dimension] birth death
     Note: the function does not check that birth <= death.
 
-    :param persistence_file: A persistence file style name.
+    :param persistence_file: Path to a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
     :type persistence_file: string
     :param only_this_dim: The specific dimension. Default value is -1.
         If `only_this_dim` = -1, dimension is ignored and all lines are returned.
