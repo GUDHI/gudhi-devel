@@ -14,6 +14,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
+#include <pybind11/stl_bind.h>
 
 #include <boost/function_output_iterator.hpp>  // for boost::make_function_output_iterator
 
@@ -23,6 +24,8 @@
 
 namespace py = pybind11;
 
+using Persistence_intervals = std::vector<std::array<double,2>>;
+PYBIND11_MAKE_OPAQUE(Persistence_intervals);
 
 PYBIND11_MODULE(reader_utils, m) {
       m.attr("__license__") = "MIT";
@@ -71,6 +74,7 @@ PYBIND11_MODULE(reader_utils, m) {
     :rtype: Dict[int, List[Tuple[float, float]]]
         )pbdoc"
       );
+      py::bind_vector<Persistence_intervals>(m, "PersistenceIntervals", py::buffer_protocol());
       m.def("read_persistence_intervals_in_dimension", [](const std::string& persistence_file, int only_this_dim) {
             // std::vector<std::pair<double, double>> as in read_persistence_intervals_in_dimension
             // was not giving the good results because of memory alignment
@@ -80,8 +84,7 @@ PYBIND11_MODULE(reader_utils, m) {
               boost::make_function_output_iterator([only_this_dim, &ret](std::tuple<int, double, double> t) {
                 if (only_this_dim == get<0>(t) || only_this_dim == -1) ret.push_back({get<1>(t), get<2>(t)});
               }));
-            return py::array_t<double>(std::vector<std::ptrdiff_t>{static_cast<std::ptrdiff_t>(ret.size()), 2},
-              &ret[0][0]);
+            return py::array(py::cast(std::move(ret)));
           },
         py::arg("persistence_file"), py::arg("only_this_dim") = static_cast<int>(-1),
         R"pbdoc(
