@@ -76,12 +76,14 @@ PYBIND11_MODULE(reader_utils, m) {
       );
       py::bind_vector<Persistence_intervals>(m, "PersistenceIntervals", py::buffer_protocol());
       m.def("read_persistence_intervals_in_dimension", [](const std::string& persistence_file, int only_this_dim) {
+            py::gil_scoped_release release;
             // std::vector<std::pair<double, double>> is not exposable - cf. vector_has_data_and_format in pybind11/stl_bind.h
             std::vector<std::array<double,2>> ret;
             Gudhi::read_persistence_intervals_and_dimension(persistence_file,
               boost::make_function_output_iterator([only_this_dim, &ret](std::tuple<int, double, double> t) {
                 if (only_this_dim == get<0>(t) || only_this_dim == -1) ret.push_back({get<1>(t), get<2>(t)});
               }));
+            py::gil_scoped_acquire acquire;
             return py::array(py::cast(std::move(ret)));
           },
         py::arg("persistence_file"), py::arg("only_this_dim") = static_cast<int>(-1),
