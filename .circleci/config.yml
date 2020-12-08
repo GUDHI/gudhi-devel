@@ -95,10 +95,136 @@ jobs:
           path: /tmp/doxygen
           destination: doxygen
 
+  examples_without_cgal_eigen:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test examples without cgal and eigen
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  tests_without_cgal_eigen:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test unitary tests without cgal and eigen
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  utils_without_cgal_eigen:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test utilities without cgal and eigen
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  python_without_cgal_eigen:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test python module without cgal and eigen
+          command: |
+            git submodule init
+            git submodule update
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cd src/python
+            python3 setup.py build_ext --inplace
+            ctest --output-on-failure
+
+  examples_without_cgal:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test examples without cgal
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  tests_without_cgal:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test unitary tests without cgal
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  utils_without_cgal:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test utilities without cgal
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
+            make all
+            ctest --output-on-failure
+
+  python_without_cgal:
+    docker:
+      - image: gudhi/ci_for_gudhi_wo_cgal:latest
+    steps:
+      - checkout
+      - run:
+          name: Build and test python module without cgal
+          command: |
+            git submodule init
+            git submodule update
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cd src/python
+            python3 setup.py build_ext --inplace
+            ctest --output-on-failure
+
 workflows:
   version: 2
   build:
     jobs:
+      - examples_without_cgal_eigen
+      - tests_without_cgal_eigen
+      - utils_without_cgal_eigen
+      - python_without_cgal_eigen
+      - examples_without_cgal
+      - tests_without_cgal
+      - utils_without_cgal
+      - python_without_cgal
       - examples
       - tests
       - utils
