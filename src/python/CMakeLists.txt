@@ -504,7 +504,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Representations
-    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
       add_gudhi_py_test(test_representations)
     endif()
 
