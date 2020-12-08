@@ -149,7 +149,7 @@ jobs:
             git submodule update
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
             cd src/python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
@@ -208,7 +208,7 @@ jobs:
             git submodule update
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
             cd src/python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
