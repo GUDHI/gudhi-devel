@@ -27,6 +27,12 @@
 
 namespace Gudhi {
 
+#ifdef GUDHI_USE_EIGEN3
+const int _GUDHI_USE_EIGEN3 = 1;
+#else
+const int _GUDHI_USE_EIGEN3 = 0;
+#endif
+
 template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
  public:
@@ -191,7 +197,9 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     }
     return collapsed_stree_ptr;
 #else
-    return this;
+    // If no Eigen3, return a copy, as it will be deleted in pyx
+    Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface(*this);
+    return collapsed_stree_ptr;
 #endif
   }
 

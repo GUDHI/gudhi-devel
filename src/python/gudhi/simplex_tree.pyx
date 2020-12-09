@@ -17,6 +17,9 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+# For unitary tests purpose
+__GUDHI_USE_EIGEN3 = _GUDHI_USE_EIGEN3
+
 # SimplexTree python interface
 cdef class SimplexTree:
     """The simplex tree is an efficient and flexible data structure for
