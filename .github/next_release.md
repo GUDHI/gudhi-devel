@@ -12,6 +12,9 @@ Below is a list of changes made since GUDHI 3.3.0:
 - [Module](link)
      - ...
 
+- [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
+     - The C++ function `choose_n_farthest_points()` now takes a distance function instead of a kernel as first argument, users can replace `k` with `k.squared_distance_d_object()` in each call in their code.
+
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.3.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.4.0+is%3Aclosed) is available on GitHub.
 
