@@ -12,11 +12,12 @@
 #ifndef KD_TREE_SEARCH_H_
 #define KD_TREE_SEARCH_H_
 
+#include <gudhi/Debug_utils.h>
+
 #include <CGAL/Orthogonal_k_neighbor_search.h>
 #include <CGAL/Orthogonal_incremental_neighbor_search.h>
 #include <CGAL/Search_traits.h>
 #include <CGAL/Search_traits_adapter.h>
-#include <CGAL/Fuzzy_sphere.h>
 #include <CGAL/property_map.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
@@ -39,7 +40,6 @@
 
 namespace Gudhi {
 namespace spatial_searching {
-
 
   /**
   * \class Kd_tree_search Kd_tree_search.h gudhi/Kd_tree_search.h
@@ -83,7 +83,8 @@ class Kd_tree_search {
   typedef CGAL::Search_traits<
     FT, Point,
     typename Traits::Cartesian_const_iterator_d,
-    typename Traits::Construct_cartesian_const_iterator_d>  Traits_base;
+    typename Traits::Construct_cartesian_const_iterator_d,
+    typename Traits::Dimension>  Traits_base;
 
   typedef CGAL::Search_traits_adapter<
     std::ptrdiff_t,
@@ -110,7 +111,76 @@ class Kd_tree_search {
   /// of a point P and `second` is the squared distance between P and the query point.
   typedef Incremental_neighbor_search                       INS_range;
 
-  typedef CGAL::Fuzzy_sphere<STraits>                       Fuzzy_sphere;
+  // Because CGAL::Fuzzy_sphere takes the radius and not its square
+  struct Sphere_for_kdtree_search
+  {
+    typedef typename Traits::Point_d Point_d;
+    typedef typename Traits::FT FT;
+    typedef typename Traits::Dimension D;
+    typedef D Dimension;
+
+    private:
+    STraits traits;
+    Point_d c;
+    FT sqradmin, sqradmax;
+    bool use_max;
+
+    public:
+    // `prefer_max` means that we prefer outputting more points at squared distance between r2min and r2max,
+    // while `!prefer_max` means we prefer fewer.
+    Sphere_for_kdtree_search(Point_d const& c_, FT const& r2min, FT const& r2max, bool prefer_max=true, STraits const& traits_ = {})
+      : traits(traits_), c(c_), sqradmin(r2min), sqradmax(r2max), use_max(prefer_max)
+      { GUDHI_CHECK(r2min >= 0 && r2max >= r2min, "0 <= r2min <= r2max"); }
+
+    bool contains(std::ptrdiff_t i) const {
+      const Point_d& p = get(traits.point_property_map(), i);
+      auto ccci = traits.construct_cartesian_const_iterator_d_object();
+      return contains_point_given_as_coordinates(ccci(p), ccci(p, 0));
+    }
+
+    template <typename Coord_iterator>
+      bool contains_point_given_as_coordinates(Coord_iterator pi, Coord_iterator CGAL_UNUSED) const {
+        FT distance = 0;
+        auto ccci = traits.construct_cartesian_const_iterator_d_object();
+        auto ci = ccci(c);
+        auto ce = ccci(c, 0);
+        FT const& limit = use_max ? sqradmax : sqradmin;
+        while (ci != ce) {
+          distance += CGAL::square(*pi++ - *ci++);
+          // I think Clément advised to check the distance at every step instead of
+          // just at the end, especially when the dimension becomes large. Distance
+          // isn't part of the concept anyway.
+          if (distance > limit) return false;
+        }
+        return true;
+      }
+
+    bool inner_range_intersects(CGAL::Kd_tree_rectangle<FT, D> const& rect) const {
+      auto ccci = traits.construct_cartesian_const_iterator_d_object();
+      FT distance = 0;
+      auto ci = ccci(c);
+      auto ce = ccci(c, 0);
+      for (int i = 0; ci != ce; ++i, ++ci) {
+        distance += CGAL::square(CGAL::max<FT>(CGAL::max<FT>(*ci - rect.max_coord(i), rect.min_coord(i) - *ci), 0 ));
+        if (distance > sqradmin) return false;
+      }
+      return true;
+    }
+
+
+    bool outer_range_contains(CGAL::Kd_tree_rectangle<FT, D> const& rect) const {
+      auto ccci = traits.construct_cartesian_const_iterator_d_object();
+      FT distance = 0;
+      auto ci = ccci(c);
+      auto ce = ccci(c, 0);
+      for (int i = 0; ci != ce; ++i, ++ci) {
+        distance += CGAL::square(CGAL::max<FT>(*ci - rect.min_coord(i), rect.max_coord(i) - *ci));
+        if (distance > sqradmax) return false;
+      }
+      return true;
+    }
+  };
+
   /// \brief Constructor
   /// @param[in] points Const reference to the point range. This range
   /// is not copied, so it should not be destroyed or modified afterwards.
@@ -266,10 +336,26 @@ class Kd_tree_search {
   /// @param[in] eps Approximation factor.
   template <typename OutputIterator>
   void all_near_neighbors(Point const& p,
-                   FT radius,
+                   FT const& radius,
                    OutputIterator it,
                    FT eps = FT(0)) const {
-    m_tree.search(it, Fuzzy_sphere(p, radius, eps, m_tree.traits()));
+    all_near_neighbors2(p, CGAL::square(radius - eps), CGAL::square(radius + eps), it);
+  }
+
+  /// \brief Search for all the neighbors in a ball. This is similar to `all_near_neighbors` but takes directly
+  /// the square of the minimum distance below which points must be considered neighbors and square of the
+  /// maximum distance above which they cannot be.
+  /// @param[in] p The query point.
+  /// @param[in] sq_radius_min The square of the minimum search radius
+  /// @param[in] sq_radius_max The square of the maximum search radius
+  /// @param[out] it The points that lie inside the sphere of center `p` and squared radius `sq_radius`.
+  ///                Note: `it` is used this way: `*it++ = each_point`.
+  template <typename OutputIterator>
+  void all_near_neighbors2(Point const& p,
+                   FT const& sq_radius_min,
+                   FT const& sq_radius_max,
+                   OutputIterator it) const {
+    m_tree.search(it, Sphere_for_kdtree_search(p, sq_radius_min, sq_radius_max, true, m_tree.traits()));
   }
 
   int tree_depth() const {

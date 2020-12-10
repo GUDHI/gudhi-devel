@@ -105,7 +105,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
 
 def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     """Outputs a subset of the input points so that the squared distance
-    between any two points is greater than or equal to min_squared_dist.
+    between any two points is greater than min_squared_dist.
 
     :param points: The input point set.
     :type points: Iterable[Iterable[float]]
