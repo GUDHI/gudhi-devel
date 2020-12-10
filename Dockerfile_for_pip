@@ -46,7 +46,7 @@ ENV PYTHON35="/opt/python/cp35-cp35m/"
 ENV PYTHON36="/opt/python/cp36-cp36m/"
 ENV PYTHON37="/opt/python/cp37-cp37m/"
 ENV PYTHON38="/opt/python/cp38-cp38/"
-ENV PYTHON38="/opt/python/cp39-cp39/"
+ENV PYTHON39="/opt/python/cp39-cp39/"
 
 ENV PATH="/opt/cmake/bin:${PATH}"
 ENV PATH="/opt/rh/devtoolset-8/root/usr/bin:${PATH}"
