@@ -5,18 +5,20 @@
 Cubical complex reference manual
 ################################
 
+Cubical complex
+---------------
+
 .. autoclass:: gudhi.CubicalComplex
    :members:
-   :undoc-members:
    :inherited-members:
-   :show-inheritance:
 
    .. automethod:: gudhi.CubicalComplex.__init__
 
+Periodic cubical complex
+------------------------
+
 .. autoclass:: gudhi.PeriodicCubicalComplex
    :members:
-   :undoc-members:
    :inherited-members:
-   :show-inheritance:
 
    .. automethod:: gudhi.PeriodicCubicalComplex.__init__
