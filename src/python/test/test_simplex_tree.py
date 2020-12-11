@@ -353,15 +353,16 @@ def test_collapse_edges():
 
     assert st.num_simplices() == 10
 
-    # If no Eigen3, collapse_edges just return a copy, no action. Maybe it would require some user warning
-    st.collapse_edges()
     if __GUDHI_USE_EIGEN3:
+        st.collapse_edges()
         assert st.num_simplices() == 9
         assert st.find([1, 3]) == False
         for simplex in st.get_skeleton(0):
             assert simplex[1] == 1.
     else:
-        assert st.num_simplices() == 10
+        # If no Eigen3, collapse_edges throws an exception
+        with pytest.raises(RuntimeError):
+            st.collapse_edges()
 
 def test_reset_filtration():
     st = SimplexTree()

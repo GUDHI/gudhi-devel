@@ -628,8 +628,8 @@ cdef class SimplexTree:
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
 
-        :note: collapse_edges function requires `Eigen <installation.html#eigen>`_ >= 3.1.0, otherwise no action is
-        performed.
+        :note: collapse_edges method requires `Eigen <installation.html#eigen>`_ >= 3.1.0 and an exception is thrown
+        if this method is not available.
         """
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()

@@ -191,9 +191,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     }
     return collapsed_stree_ptr;
 #else
-    // If no Eigen3, return a copy, as it will be deleted in pyx
-    Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface(*this);
-    return collapsed_stree_ptr;
+    throw std::runtime_error("Unable to collapse edges as it requires Eigen3 >= 3.1.0.");
 #endif
   }
 
