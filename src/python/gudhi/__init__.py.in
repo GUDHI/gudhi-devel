@@ -23,6 +23,10 @@ __all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
 __available_modules = ''
 __missing_modules = ''
 
+# For unitary tests purpose
+# could use "if 'collapse_edges' in gudhi.__all__" when collapse edges will have a python module
+__GUDHI_USE_EIGEN3 = @GUDHI_USE_EIGEN3@
+
 # Try to import * from gudhi.__module_name for default modules.
 # Extra modules require an explicit import by the user (mostly because of
 # unusual dependencies, but also to avoid cluttering namespace gudhi and

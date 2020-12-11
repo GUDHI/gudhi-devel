@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import SimplexTree, simplex_tree
+from gudhi import SimplexTree, __GUDHI_USE_EIGEN3
 import pytest
 
 __author__ = "Vincent Rouvreau"
@@ -355,7 +355,7 @@ def test_collapse_edges():
 
     # If no Eigen3, collapse_edges just return a copy, no action. Maybe it would require some user warning
     st.collapse_edges()
-    if simplex_tree.__GUDHI_USE_EIGEN3:
+    if __GUDHI_USE_EIGEN3:
         assert st.num_simplices() == 9
         assert st.find([1, 3]) == False
         for simplex in st.get_skeleton(0):

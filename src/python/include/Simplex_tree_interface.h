@@ -27,12 +27,6 @@
 
 namespace Gudhi {
 
-#ifdef GUDHI_USE_EIGEN3
-const int _GUDHI_USE_EIGEN3 = 1;
-#else
-const int _GUDHI_USE_EIGEN3 = 0;
-#endif
-
 template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
  public:
