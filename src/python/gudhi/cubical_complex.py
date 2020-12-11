@@ -27,8 +27,8 @@ class CubicalComplexBaseClass:
     """The CubicalComplexBaseClass is a base class for cubical to avoid duplicated code.
     Do not initialize, it will throw an exception.
     """
-    _thisptr = None
-    _pcohptr = None
+    _cpp_cubical = None
+    _cpp_perscoh = None
 
     def __init__(self):
         raise TypeError("CubicalComplexBaseClass is not supposed to be constructed.")
@@ -38,14 +38,14 @@ class CubicalComplexBaseClass:
 
         :returns:  int -- the number of all cubes in the complex.
         """
-        return self._thisptr.num_simplices()
+        return self._cpp_cubical.num_simplices()
 
     def dimension(self):
         """This function returns the dimension of the complex.
 
         :returns:  int -- the complex dimension.
         """
-        return self._thisptr.dimension()
+        return self._cpp_cubical.dimension()
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
@@ -62,7 +62,7 @@ class CubicalComplexBaseClass:
             persistence of the complex.
         """
         self.compute_persistence(homology_coeff_field, min_persistence)
-        return self._pcohptr.get_persistence()
+        return self._cpp_perscoh.get_persistence()
 
     def cofaces_of_persistence_pairs(self):
         """A persistence interval is described by a pair of cells, one that creates the
@@ -95,10 +95,11 @@ class CubicalComplexBaseClass:
         :note: cofaces_of_persistence_pairs function requires :func:`~gudhi.CubicalComplex.compute_persistence`
             or :func:`persistence` function to be launched first.
         """
-        assert self._pcohptr != None, "compute_persistence() or persistence() must be called before cofaces_of_persistence_pairs()"
+        assert self._cpp_perscoh != None, \
+            "compute_persistence() or persistence() must be called before cofaces_of_persistence_pairs()"
 
         output = [[],[]]
-        pr = np.array(self._pcohptr.cofaces_of_cubical_persistence_pairs())
+        pr = np.array(self._cpp_perscoh.cofaces_of_cubical_persistence_pairs())
 
         ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
         ess = pr[ess_ind]
@@ -127,8 +128,9 @@ class CubicalComplexBaseClass:
         :note: betti_numbers function always returns [1, 0, 0, ...] as infinity
             filtration cubes are not removed from the complex.
         """
-        assert self._pcohptr != None, "compute_persistence() or persistence() must be called before betti_numbers()"
-        return self._pcohptr.betti_numbers()
+        assert self._cpp_perscoh != None, \
+            "compute_persistence() or persistence() must be called before betti_numbers()"
+        return self._cpp_perscoh.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the complex.
@@ -146,8 +148,9 @@ class CubicalComplexBaseClass:
         :note: persistent_betti_numbers function requires :func:`~gudhi.CubicalComplex.compute_persistence`
             or :func:`persistence` function to be launched first.
         """
-        assert self._pcohptr != None, "compute_persistence() or persistence() must be called before persistent_betti_numbers()"
-        return self._pcohptr.persistent_betti_numbers(from_value, to_value)
+        assert self._cpp_perscoh != None, \
+            "compute_persistence() or persistence() must be called before persistent_betti_numbers()"
+        return self._cpp_perscoh.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the complex in a
@@ -161,8 +164,9 @@ class CubicalComplexBaseClass:
         :note: intervals_in_dim function requires :func:`~gudhi.CubicalComplex.compute_persistence`
             or :func:`persistence` function to be launched first.
         """
-        assert self._pcohptr != None, "compute_persistence() or persistence() must be called before persistence_intervals_in_dimension()"
-        return np.array(self._pcohptr.intervals_in_dimension(dimension))
+        assert self._cpp_perscoh != None, \
+            "compute_persistence() or persistence() must be called before persistence_intervals_in_dimension()"
+        return np.array(self._cpp_perscoh.intervals_in_dimension(dimension))
 
 class CubicalComplex(CubicalComplexBaseClass):
     """The CubicalComplex is an example of a structured complex useful in
@@ -193,7 +197,7 @@ class CubicalComplex(CubicalComplexBaseClass):
         """
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (perseus_file == '')):
-            CubicalComplexBaseClass._thisptr = Cubical_complex_interface_(dimensions, top_dimensional_cells)
+            CubicalComplexBaseClass._cpp_cubical = Cubical_complex_interface_(dimensions, top_dimensional_cells)
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (perseus_file == '')):
             top_dimensional_cells = np.array(top_dimensional_cells,
@@ -201,11 +205,11 @@ class CubicalComplex(CubicalComplexBaseClass):
                                              order = 'F')
             dimensions = top_dimensional_cells.shape
             top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            CubicalComplexBaseClass._thisptr = Cubical_complex_interface_(dimensions, top_dimensional_cells)
+            CubicalComplexBaseClass._cpp_cubical = Cubical_complex_interface_(dimensions, top_dimensional_cells)
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                CubicalComplexBaseClass._thisptr = Cubical_complex_interface_(perseus_file.encode('utf-8'))
+                CubicalComplexBaseClass._cpp_cubical = Cubical_complex_interface_(perseus_file.encode('utf-8'))
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                         perseus_file)
@@ -230,8 +234,8 @@ class CubicalComplex(CubicalComplexBaseClass):
         :type min_persistence: float.
         :returns: Nothing.
         """
-        CubicalComplexBaseClass._pcohptr = Persistent_cohomology_cubical_interface_(self._thisptr, True)
-        CubicalComplexBaseClass._pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        CubicalComplexBaseClass._cpp_perscoh = Persistent_cohomology_cubical_interface_(self._cpp_cubical, True)
+        CubicalComplexBaseClass._cpp_perscoh.compute_persistence(homology_coeff_field, min_persistence)
 
 
 class PeriodicCubicalComplex(CubicalComplexBaseClass):
@@ -267,7 +271,9 @@ class PeriodicCubicalComplex(CubicalComplexBaseClass):
         """
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
-            CubicalComplexBaseClass._thisptr = Periodic_cubical_complex_interface_(dimensions, top_dimensional_cells, periodic_dimensions)
+            CubicalComplexBaseClass._cpp_cubical = Periodic_cubical_complex_interface_(dimensions,
+                                                                                       top_dimensional_cells,
+                                                                                       periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
             top_dimensional_cells = np.array(top_dimensional_cells,
@@ -275,11 +281,13 @@ class PeriodicCubicalComplex(CubicalComplexBaseClass):
                                              order = 'F')
             dimensions = top_dimensional_cells.shape
             top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            CubicalComplexBaseClass._thisptr = Periodic_cubical_complex_interface_(dimensions, top_dimensional_cells, periodic_dimensions)
+            CubicalComplexBaseClass._cpp_cubical = Periodic_cubical_complex_interface_(dimensions,
+                                                                                       top_dimensional_cells,
+                                                                                       periodic_dimensions)
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                CubicalComplexBaseClass._thisptr = Periodic_cubical_complex_interface_(perseus_file.encode('utf-8'))
+                CubicalComplexBaseClass._cpp_cubical = Periodic_cubical_complex_interface_(perseus_file.encode('utf-8'))
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                         perseus_file)
@@ -306,5 +314,6 @@ class PeriodicCubicalComplex(CubicalComplexBaseClass):
         :type min_persistence: float.
         :returns: Nothing.
         """
-        CubicalComplexBaseClass._pcohptr = Persistent_cohomology_periodic_cubical_interface_(self._thisptr, True)
-        CubicalComplexBaseClass._pcohptr.compute_persistence(homology_coeff_field, min_persistence)
+        CubicalComplexBaseClass._cpp_perscoh = Persistent_cohomology_periodic_cubical_interface_(self._cpp_cubical,
+                                                                                                 True)
+        CubicalComplexBaseClass._cpp_perscoh.compute_persistence(homology_coeff_field, min_persistence)
