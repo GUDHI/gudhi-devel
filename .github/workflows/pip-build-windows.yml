@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.9']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v1
