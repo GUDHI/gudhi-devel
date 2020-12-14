@@ -629,7 +629,7 @@ cdef class SimplexTree:
         :type nb_iterations: int
 
         :note: collapse_edges method requires `Eigen <installation.html#eigen>`_ >= 3.1.0 and an exception is thrown
-        if this method is not available.
+            if this method is not available.
         """
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
