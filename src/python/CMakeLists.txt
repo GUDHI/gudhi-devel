@@ -134,6 +134,10 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_EIGEN3', ")
+      set(GUDHI_USE_EIGEN3 "True")
+    else (EIGEN3_FOUND)
+      set(GUDHI_USE_EIGEN3 "False")
     endif (EIGEN3_FOUND)
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_reader', ")
@@ -506,7 +510,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Representations
-    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
+    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
       add_gudhi_py_test(test_representations)
     endif()
 

@@ -44,7 +44,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point, Kernel, list_of_tested
 
   landmarks.clear();
   Kernel k;
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 100, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
+  auto d = k.squared_distance_d_object();
+  Gudhi::subsampling::choose_n_farthest_points(d, points, 100, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
 
   BOOST_CHECK(landmarks.size() == 100);
   for (auto landmark : landmarks)
@@ -61,32 +62,33 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
   std::vector< FT > distances;
   landmarks.clear();
   Kernel k;
+  auto d = k.squared_distance_d_object();
   // Choose -1 farthest points in an empty point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 0);
   landmarks.clear(); distances.clear();
   // Choose 0 farthest points in an empty point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 0, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, 0, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 0);
   landmarks.clear(); distances.clear();
   // Choose 1 farthest points in an empty point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, 1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 0);
   landmarks.clear(); distances.clear();
 
   std::vector<FT> point({0.0, 0.0, 0.0, 0.0});
   points.emplace_back(point.begin(), point.end());
   // Choose -1 farthest points in a one point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 1 && distances.size() == 1);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
   landmarks.clear(); distances.clear();
   // Choose 0 farthest points in a one point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 0, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, 0, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 0 && distances.size() == 0);
   landmarks.clear(); distances.clear();
   // Choose 1 farthest points in a one point cloud
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, 1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 1 && distances.size() == 1);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
   landmarks.clear(); distances.clear();
@@ -94,7 +96,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
   std::vector<FT> point2({1.0, 0.0, 0.0, 0.0});
   points.emplace_back(point2.begin(), point2.end());
   // Choose all farthest points among 2 points
-  Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 2 && distances.size() == 2);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
   BOOST_CHECK(distances[1] == 1);
@@ -102,7 +104,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
 
   // Ignore duplicated points
   points.emplace_back(point.begin(), point.end());
-  Gudhi::subsampling::choose_n_farthest_points(k, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
+  Gudhi::subsampling::choose_n_farthest_points(d, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
   BOOST_CHECK(landmarks.size() == 2 && distances.size() == 2);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
   BOOST_CHECK(distances[1] == 1);
