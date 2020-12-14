@@ -61,7 +61,8 @@ int main(int argc, char* argv[]) {
 
   // Choose landmarks (decomment one of the following two lines)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
-  Gudhi::subsampling::choose_n_farthest_points(K(), witnesses, nbL, Gudhi::subsampling::random_starting_point,
+  Gudhi::subsampling::choose_n_farthest_points(K().squared_distance_d_object(), witnesses, nbL,
+                                               Gudhi::subsampling::random_starting_point,
                                                std::back_inserter(landmarks));
 
   // Compute witness complex

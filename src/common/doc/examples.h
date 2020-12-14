@@ -42,7 +42,7 @@
  * @example Persistence_representations/persistence_landscape.cpp
  * @example Tangential_complex/example_basic.cpp
  * @example Tangential_complex/example_with_perturb.cpp
- * @example Subsampling/example_custom_kernel.cpp
+ * @example Subsampling/example_custom_distance.cpp
  * @example Subsampling/example_choose_n_farthest_points.cpp
  * @example Subsampling/example_sparsify_point_set.cpp
  * @example Subsampling/example_pick_n_random_points.cpp
