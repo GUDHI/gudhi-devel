@@ -20,7 +20,7 @@ int main(void) {
 
   K k;
   std::vector<Point_d> results;
-  Gudhi::subsampling::choose_n_farthest_points(k, points, 100,
+  Gudhi::subsampling::choose_n_farthest_points(k.squared_distance_d_object(), points, 100,
                                                Gudhi::subsampling::random_starting_point,
                                                std::back_inserter(results));
   std::clog << "Before sparsification: " << points.size() << " points.\n";
