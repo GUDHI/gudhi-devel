@@ -7,7 +7,7 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 Below is a list of changes made since GUDHI 3.3.0:
 
 - [Alpha complex](https://gudhi.inria.fr/doc/latest/group__alpha__complex.html)
-     - the C++ weighted version for alpha complex is now available in dimension D.
+     - the C++ weighted version for alpha complex is now available in any dimension D.
 
 - Simplex tree [C++](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html) [Python](http://gudhi.gforge.inria.fr/python/latest/simplex_tree_ref.html)
      - A new method to reset the filtrations
