@@ -44,6 +44,8 @@ extensions = [
     'sphinx_paramlinks',
 ]
 
+bibtex_bibfiles = ['../../biblio/bibliography.bib']
+
 todo_include_todos = True
 # plot option : do not show hyperlinks (Source code, png, hires.png, pdf)
 plot_html_show_source_link = False
