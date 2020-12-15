@@ -1,3 +1,3 @@
 from .tensorflow import *
 
-__all__ = ["SimplexTreeModel", "RipsModel", "CubicalModel"]
+__all__ = ["LowerStarSimplexTreeModel", "RipsModel", "CubicalModel"]

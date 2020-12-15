@@ -65,13 +65,13 @@ def _SimplexTree(stbase, fct, dim, card):
     indices = indices[:2*card] + [0 for _ in range(0,max(0,2*card-len(indices)))]
     return list(np.array(indices, dtype=np.int32))
 
-class SimplexTreeModel(tf.keras.Model):
+class LowerStarSimplexTreeModel(tf.keras.Model):
     """
-    TensorFlow model for computing lower-star persistence out of a simplex tree.
+    TensorFlow model for computing lower-star persistence out of a simplex tree. Since simplex trees cannot be easily encoded as TensorFlow variables, the model takes as input a path to a file containing the simplex tree simplices, and read it each time the simplex tree is required for computations.
 
     Attributes:
         F (TensorFlow variable): filter function values over the vertices of the simplex tree
-        stbase (string): path to the file containing the simplex tree
+        stbase (string): path to the file containing the simplex tree. Each line of the file should represent a simplex as a sequence of integers separated by spaces
         card (int): maximum number of points in the persistence diagram
         dim (int): homology dimension
     """

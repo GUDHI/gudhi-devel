@@ -31,7 +31,7 @@ def test_st_diff():
 
     Finit = np.array([6.,4.,3.,4.,5.,4.,3.,2.,3.,4.,5.], dtype=np.float32)
     F = tf.Variable(initial_value=Finit, trainable=True)
-    model = SimplexTreeModel(F, stbase="simplextree.txt", dim=0, card=10)
+    model = LowerStarSimplexTreeModel(F, stbase="simplextree.txt", dim=0, card=10)
 
     with tf.GradientTape() as tape:
         dgm = model.call()
