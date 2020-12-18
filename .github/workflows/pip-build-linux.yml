@@ -11,11 +11,11 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Build wheels for Python 3.8
+      - name: Build wheels for Python 3.9
         run: |
-          mkdir build_38
-          cd build_38
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          mkdir build_39
+          cd build_39
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON39/bin/python ..
           cd src/python
-          $PYTHON38/bin/python setup.py bdist_wheel
+          $PYTHON39/bin/python setup.py bdist_wheel
           auditwheel repair dist/*.whl

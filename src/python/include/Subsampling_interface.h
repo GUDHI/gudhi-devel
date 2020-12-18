@@ -11,6 +11,7 @@
 #ifndef INCLUDE_SUBSAMPLING_INTERFACE_H_
 #define INCLUDE_SUBSAMPLING_INTERFACE_H_
 
+#include <gudhi/distance_functions.h>
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/sparsify_point_set.h>
@@ -27,14 +28,13 @@ namespace subsampling {
 
 using Subsampling_dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
 using Subsampling_point_d = Subsampling_dynamic_kernel::Point_d;
-using Subsampling_ft = Subsampling_dynamic_kernel::FT;
 
 // ------ choose_n_farthest_points ------
 std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector<std::vector<double>>& points,
                                                                unsigned nb_points) {
   std::vector<std::vector<double>> landmarks;
-  Subsampling_dynamic_kernel k;
-  choose_n_farthest_points(k, points, nb_points, random_starting_point, std::back_inserter(landmarks));
+  choose_n_farthest_points(Euclidean_distance(), points, nb_points,
+                           random_starting_point, std::back_inserter(landmarks));
 
   return landmarks;
 }
@@ -42,8 +42,8 @@ std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector
 std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector<std::vector<double>>& points,
                                                                unsigned nb_points, unsigned starting_point) {
   std::vector<std::vector<double>> landmarks;
-  Subsampling_dynamic_kernel k;
-  choose_n_farthest_points(k, points, nb_points, starting_point, std::back_inserter(landmarks));
+  choose_n_farthest_points(Euclidean_distance(), points, nb_points,
+                           starting_point, std::back_inserter(landmarks));
 
   return landmarks;
 }
