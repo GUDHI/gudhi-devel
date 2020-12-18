@@ -32,6 +32,7 @@ using Persistence_intervals = std::vector<std::array<double,2>>;
 PYBIND11_MAKE_OPAQUE(Persistence_intervals);
 
 PYBIND11_MODULE(reader_utils, m) {
+      py::bind_vector<Persistence_intervals>(m, "PersistenceIntervals", py::buffer_protocol());
       m.attr("__license__") = "MIT";
       m.def("read_points_from_off_file", [](const std::string& off_file) {
             Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
@@ -78,9 +79,8 @@ PYBIND11_MODULE(reader_utils, m) {
     :rtype: Dict[int, List[Tuple[float, float]]]
         )pbdoc"
       );
-      py::bind_vector<Persistence_intervals>(m, "PersistenceIntervals", py::buffer_protocol());
       m.def("read_persistence_intervals_in_dimension", [](const std::string& persistence_file, int only_this_dim) {
-            std::vector<std::array<double,2>> ret;
+            Persistence_intervals ret;
             {
               py::gil_scoped_release release;
               // std::vector<std::pair<double, double>> is not exposable - cf. vector_has_data_and_format in pybind11/stl_bind.h
