@@ -51,6 +51,7 @@ PYBIND11_MODULE(reader_utils, m) {
     :rtype: List[List[float]]
         )pbdoc"
       );
+
       m.def("read_lower_triangular_matrix_from_csv_file", &Gudhi::read_lower_triangular_matrix_from_csv_file<double>,
         py::arg("csv_file"), py::arg("separator") = ';',
         R"pbdoc(
@@ -65,6 +66,7 @@ PYBIND11_MODULE(reader_utils, m) {
     :rtype: List[List[float]]
         )pbdoc"
       );
+
       m.def("read_persistence_intervals_grouped_by_dimension", &Gudhi::read_persistence_intervals_grouped_by_dimension,
         py::arg("persistence_file"),
         R"pbdoc(
@@ -81,6 +83,7 @@ PYBIND11_MODULE(reader_utils, m) {
     :rtype: Dict[int, List[Tuple[float, float]]]
         )pbdoc"
       );
+
       m.def("read_persistence_intervals_in_dimension", [](const std::string& persistence_file, int only_this_dim) {
             Persistence_intervals ret;
             {
