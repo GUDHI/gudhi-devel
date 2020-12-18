@@ -33,7 +33,9 @@ PYBIND11_MAKE_OPAQUE(Persistence_intervals);
 
 PYBIND11_MODULE(reader_utils, m) {
       py::bind_vector<Persistence_intervals>(m, "PersistenceIntervals", py::buffer_protocol());
+
       m.attr("__license__") = "MIT";
+
       m.def("read_points_from_off_file", [](const std::string& off_file) {
             Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
             return off_reader.get_point_cloud();
