@@ -141,12 +141,16 @@ def test_simple_sparsify_points():
     # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 0.0) == []
     # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 10.0) == []
     assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.0) == point_set
-    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=1.0) == point_set
-    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=2.0) == [
+    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.999) == point_set
+    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=1.001) == [
         [0, 1],
         [1, 0],
     ]
-    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=2.01) == [[0, 1]]
+    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=1.999) == [
+        [0, 1],
+        [1, 0],
+    ]
+    assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=2.001) == [[0, 1]]
 
     assert (
         len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=0.0))
@@ -157,11 +161,11 @@ def test_simple_sparsify_points():
         == 5
     )
     assert (
-        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=40.0))
+        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=40.1))
         == 4
     )
     assert (
-        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=90.0))
+        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=89.9))
         == 3
     )
     assert (
@@ -169,7 +173,7 @@ def test_simple_sparsify_points():
         == 2
     )
     assert (
-        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=325.0))
+        len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=324.9))
         == 2
     )
     assert (
