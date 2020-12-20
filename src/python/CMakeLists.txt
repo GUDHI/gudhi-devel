@@ -512,6 +512,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 
+    # Betti curves.
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_betti_curve_representations)
+    endif()
+
     # Time Delay
     add_gudhi_py_test(test_time_delay)
 
