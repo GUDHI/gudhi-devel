@@ -49,13 +49,13 @@ cdef class RipsComplex:
         :type max_edge_length: float
 
         :param points: A list of points in d-Dimension.
-        :type points: list of list of double
+        :type points: list of list of float
 
         Or
 
         :param distance_matrix: A distance matrix (full square or lower
             triangular).
-        :type points: list of list of double
+        :type points: list of list of float
 
         And in both cases
 
@@ -89,10 +89,10 @@ cdef class RipsComplex:
 
     def create_simplex_tree(self, max_dimension=1):
         """
-        :param max_dimension: graph expansion for rips until this given maximal
+        :param max_dimension: graph expansion for Rips until this given maximal
             dimension.
         :type max_dimension: int
-        :returns: A simplex tree created from the Delaunay Triangulation.
+        :returns: A simplex tree encoding the Vietoris–Rips filtration.
         :rtype: SimplexTree
         """
         stree = SimplexTree()
