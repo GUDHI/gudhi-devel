@@ -1,23 +1,19 @@
-We are pleased to announce the release 3.4.0 of the GUDHI library.
+We are pleased to announce the release 3.5.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers dD weighted alpha complex, pip and conda packages for Python 3.9.
+As a major new feature, the GUDHI library now offers ...
 
-We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.4.0.tar.gz).
+We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since GUDHI 3.3.0:
+Below is a list of changes made since GUDHI 3.4.0:
 
-- [Alpha complex](https://gudhi.inria.fr/doc/latest/group__alpha__complex.html)
-     - the C++ weighted version for alpha complex is now available in any dimension D.
+- [Module](link)
+     - ...
 
-- Simplex tree [C++](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html) [Python](http://gudhi.gforge.inria.fr/python/latest/simplex_tree_ref.html)
-     - A new method to reset the filtrations
-     - A new method to get the boundaries of a simplex
-
-- [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
-     - The C++ function `choose_n_farthest_points()` now takes a distance function instead of a kernel as first argument, users can replace `k` with `k.squared_distance_d_object()` in each call in their code.
+- [Module](link)
+     - ...
 
 - Miscellaneous
-     - The [list of bugs that were solved since GUDHI-3.3.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.4.0+is%3Aclosed) is available on GitHub.
+     - The [list of bugs that were solved since GUDHI-3.4.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.5.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
