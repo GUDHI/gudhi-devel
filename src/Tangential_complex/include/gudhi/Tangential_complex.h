@@ -954,7 +954,11 @@ class Tangential_complex {
 
     // Triangulation's traits functor & objects
     typename Tr_traits::Compute_weight_d point_weight = local_tr_traits.compute_weight_d_object();
+#if CGAL_VERSION_NR < 1050200000
     typename Tr_traits::Power_center_d power_center = local_tr_traits.power_center_d_object();
+#else
+    typename Tr_traits::Construct_power_sphere_d power_center = local_tr_traits.construct_power_sphere_d_object();
+#endif
 
     //***************************************************
     // Build a minimal triangulation in the tangent space
@@ -1100,7 +1104,11 @@ class Tangential_complex {
     std::size_t closest_pt_index = updated_pts_ds.k_nearest_neighbors(center_point, 1, false).begin()->first;
 
     typename K::Construct_weighted_point_d k_constr_wp = m_k.construct_weighted_point_d_object();
+#if CGAL_VERSION_NR < 1050200000
     typename K::Power_distance_d k_power_dist = m_k.power_distance_d_object();
+#else
+    typename K::Compute_power_product_d k_power_dist = m_k.compute_power_product_d_object();
+#endif
 
     // Construct a weighted point equivalent to the star sphere
     Weighted_point star_sphere = k_constr_wp(compute_perturbed_point(i), m_squared_star_spheres_radii_incl_margin[i]);
