@@ -50,14 +50,14 @@ RUN apt-get install -y make \
     pkg-config \
     curl
 
-RUN curl -LO "https://github.com/CGAL/cgal/releases/download/v5.1/CGAL-5.1.tar.xz" \
-    && tar xf CGAL-5.1.tar.xz \
+RUN curl -LO "https://github.com/CGAL/cgal/releases/download/v5.2/CGAL-5.2.tar.xz" \
+    && tar xf CGAL-5.2.tar.xz \
     && mkdir build \
     && cd build \
-    && cmake -DCMAKE_BUILD_TYPE=Release ../CGAL-5.1/ \
+    && cmake -DCMAKE_BUILD_TYPE=Release ../CGAL-5.2/ \
     && make install \
     && cd .. \
-    && rm -rf build CGAL-5.1
+    && rm -rf build CGAL-5.2
 
 ADD .github/build-requirements.txt /
 ADD .github/test-requirements.txt /
