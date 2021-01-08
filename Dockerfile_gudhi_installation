@@ -68,7 +68,7 @@ RUN pip3 install \
     scikit-learn
 
 # apt clean up
-RUN apt autoremove && rm -rf /var/lib/apt/lists/*
+RUN apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-3.3.0/gudhi.3.3.0.tar.gz" \
 && tar xf gudhi.3.3.0.tar.gz \
