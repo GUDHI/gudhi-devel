@@ -46,6 +46,24 @@ def test_multiple():
     assert d1 == pytest.approx(d2, rel=0.02)
 
 
+# Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
+def test_atol_doc():
+    a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
+    b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
+    c = np.array([[3, 2, -1], [1, 2, -1]])
+
+    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    assert np.sort(atol_vectoriser.fit(X=[a, b, c]).centers, axis=0) == \
+        pytest.approx(np.array([[2. , 0.66666667, -0.4], \
+                                [2.6, 2.8       , 3.33333333]]))
+    assert np.sort(atol_vectoriser(a)) == pytest.approx(np.array([0.42375966, 1.18168665]))
+    assert np.sort(atol_vectoriser(c)) == pytest.approx(np.array([0.02062512, 1.25157463]))
+    assert np.sort(atol_vectoriser.transform(X=[a, b, c]), axis=0) == \
+        pytest.approx(np.array([[0.02062512, 0.42375966], \
+                                [0.29861028, 1.06330156], \
+                                [1.18168665, 1.25157463]]))
+
+
 def test_dummy_atol():
     a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
     b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
