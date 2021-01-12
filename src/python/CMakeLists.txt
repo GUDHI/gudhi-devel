@@ -374,7 +374,6 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND AND PYBIND11_FOUND)
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
              COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
-
     add_gudhi_py_test(test_bottleneck_distance)
 
     # Cover complex
@@ -498,7 +497,7 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND AND PYBIND11_FOUND)
   endif()
 
   # Representations
-  if(SKLEARN_FOUND AND MATPLOTLIB_FOUND)
+  if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
     add_gudhi_py_test(test_representations)
   endif()
 
@@ -525,9 +524,6 @@ if(PYTHONINTERP_FOUND AND CYTHON_FOUND AND PYBIND11_FOUND)
   if(SCIPY_FOUND)
     add_gudhi_py_test(test_dtm_rips_complex)
   endif()
-
-  # Set missing or not modules
-  set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
 
 else(PYTHONINTERP_FOUND AND CYTHON_FOUND AND PYBIND11_FOUND)
   if(NOT CYTHON_FOUND)
