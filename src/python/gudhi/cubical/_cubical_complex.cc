@@ -47,11 +47,16 @@ PYBIND11_MODULE(_cubical_complex, m) {
     .def(py::init<Cubical_complex_interface_*, bool>())
     .def("compute_persistence", &Persistent_cohomology_cubical_interface_::compute_persistence,
          py::call_guard<py::gil_scoped_release>())
-    .def("get_persistence", &Persistent_cohomology_cubical_interface_::get_persistence)
-    .def("cofaces_of_cubical_persistence_pairs", &Persistent_cohomology_cubical_interface_::cofaces_of_cubical_persistence_pairs)
-    .def("betti_numbers", &Persistent_cohomology_cubical_interface_::betti_numbers)
-    .def("persistent_betti_numbers", &Persistent_cohomology_cubical_interface_::persistent_betti_numbers)
-    .def("intervals_in_dimension", &Persistent_cohomology_cubical_interface_::intervals_in_dimension);
+    .def("get_persistence", &Persistent_cohomology_cubical_interface_::get_persistence,
+         py::call_guard<py::gil_scoped_release>())
+    .def("cofaces_of_cubical_persistence_pairs", &Persistent_cohomology_cubical_interface_::cofaces_of_cubical_persistence_pairs,
+         py::call_guard<py::gil_scoped_release>())
+    .def("betti_numbers", &Persistent_cohomology_cubical_interface_::betti_numbers,
+         py::call_guard<py::gil_scoped_release>())
+    .def("persistent_betti_numbers", &Persistent_cohomology_cubical_interface_::persistent_betti_numbers,
+         py::call_guard<py::gil_scoped_release>())
+    .def("intervals_in_dimension", &Persistent_cohomology_cubical_interface_::intervals_in_dimension,
+         py::call_guard<py::gil_scoped_release>());
 
   // Periodic cubical complex
   py::class_<Periodic_cubical_complex_interface_>(m, "Periodic_cubical_complex_interface_")
@@ -66,10 +71,14 @@ PYBIND11_MODULE(_cubical_complex, m) {
     .def(py::init<Periodic_cubical_complex_interface_*, bool>())
     .def("compute_persistence", &Persistent_cohomology_periodic_cubical_interface_::compute_persistence,
          py::call_guard<py::gil_scoped_release>())
-    .def("get_persistence", &Persistent_cohomology_periodic_cubical_interface_::get_persistence)
+    .def("get_persistence", &Persistent_cohomology_periodic_cubical_interface_::get_persistence,
+         py::call_guard<py::gil_scoped_release>())
     .def("cofaces_of_cubical_persistence_pairs",
         &Persistent_cohomology_periodic_cubical_interface_::cofaces_of_cubical_persistence_pairs)
-    .def("betti_numbers", &Persistent_cohomology_periodic_cubical_interface_::betti_numbers)
-    .def("persistent_betti_numbers", &Persistent_cohomology_periodic_cubical_interface_::persistent_betti_numbers)
-    .def("intervals_in_dimension", &Persistent_cohomology_periodic_cubical_interface_::intervals_in_dimension);
+    .def("betti_numbers", &Persistent_cohomology_periodic_cubical_interface_::betti_numbers,
+         py::call_guard<py::gil_scoped_release>())
+    .def("persistent_betti_numbers", &Persistent_cohomology_periodic_cubical_interface_::persistent_betti_numbers,
+         py::call_guard<py::gil_scoped_release>())
+    .def("intervals_in_dimension", &Persistent_cohomology_periodic_cubical_interface_::intervals_in_dimension,
+         py::call_guard<py::gil_scoped_release>());
 }
