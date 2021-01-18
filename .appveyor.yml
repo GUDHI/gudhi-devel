@@ -48,9 +48,9 @@ install:
   - python --version
   - pip --version
   - python -m pip install --user --upgrade pip
-  - python -m pip install --user -r .github/build-requirements.txt
+  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
   # No PyKeOps on windows, let's workaround this one.
-  - for /F "tokens=*" %%A in (.github/test-requirements.txt) do python -m pip install --user  %%A
+  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install --user  %%A
 
 build_script:
   - mkdir build
