@@ -59,4 +59,18 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
   endif()
   gudhi_add_boost_test(Weighted_alpha_complex_test_unit)
 
+  add_executable ( Weighted_alpha_complex_non_visible_points_test_unit Weighted_alpha_complex_non_visible_points_unit_test.cpp )
+  target_link_libraries(Weighted_alpha_complex_non_visible_points_test_unit ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(Weighted_alpha_complex_non_visible_points_test_unit ${TBB_LIBRARIES})
+  endif()
+  gudhi_add_boost_test(Weighted_alpha_complex_non_visible_points_test_unit)
+
+  add_executable ( Zero_weighted_alpha_complex_test_unit Zero_weighted_alpha_complex_unit_test.cpp )
+  target_link_libraries(Zero_weighted_alpha_complex_test_unit ${CGAL_LIBRARY})
+  if (TBB_FOUND)
+    target_link_libraries(Zero_weighted_alpha_complex_test_unit ${TBB_LIBRARIES})
+  endif()
+  gudhi_add_boost_test(Zero_weighted_alpha_complex_test_unit)
+
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
