@@ -24,14 +24,14 @@ RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.
     && cd .. \
     && rm -rf boost
 
-RUN wget https://github.com/CGAL/cgal/releases/download/v5.1/CGAL-5.1.tar.xz \
-    && tar xf CGAL-5.1.tar.xz \
+RUN wget https://github.com/CGAL/cgal/releases/download/v5.2/CGAL-5.2.tar.xz \
+    && tar xf CGAL-5.2.tar.xz \
     && mkdir build \
     && cd build \
-    && /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../CGAL-5.1/ \
+    && /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../CGAL-5.2/ \
     && make install \
     && cd .. \
-    && rm -rf build CGAL-5.1
+    && rm -rf build CGAL-5.2
 
 ADD .github/build-requirements.txt /
 

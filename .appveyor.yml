@@ -60,7 +60,7 @@ build_script:
       cd src/python &
       type setup.py &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
-      ctest -j 1 --output-on-failure -C Release -E sphinx
+      ctest -j 1 --output-on-failure -C Release
     ) else (
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release -E diff_files
