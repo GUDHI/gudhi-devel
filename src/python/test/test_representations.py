@@ -46,6 +46,32 @@ def test_multiple():
     assert d1 == pytest.approx(d2, rel=0.02)
 
 
+# Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
+# Note the test below must be up to date with the Atol class documentation
+def test_atol_doc():
+    a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
+    b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
+    c = np.array([[3, 2, -1], [1, 2, -1]])
+
+    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    # Atol will do
+    # X = np.concatenate([a,b,c])
+    # kmeans = KMeans(n_clusters=2, random_state=202006).fit(X) 
+    # kmeans.labels_ will be : array([1, 0, 1, 0, 0, 1, 0, 0])
+    first_cluster = np.asarray([a[0], a[2], b[2]])
+    second_cluster = np.asarray([a[1], b[0], b[2], c[0], c[1]])
+
+    # Check the center of the first_cluster and second_cluster are in Atol centers
+    centers = atol_vectoriser.fit(X=[a, b, c]).centers
+    np.isclose(centers, first_cluster.mean(axis=0)).all(1).any() 
+    np.isclose(centers, second_cluster.mean(axis=0)).all(1).any() 
+
+    vectorization = atol_vectoriser.transform(X=[a, b, c])
+    assert np.allclose(vectorization[0], atol_vectoriser(a))
+    assert np.allclose(vectorization[1], atol_vectoriser(b))
+    assert np.allclose(vectorization[2], atol_vectoriser(c))
+
+
 def test_dummy_atol():
     a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
     b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
