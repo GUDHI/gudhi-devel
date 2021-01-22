@@ -33,6 +33,9 @@ Hera, used for Wasserstein distance, is available on an external git repository.
 git submodule update --init
 ```
 
+[gudhi-deploy](https://github.com/GUDHI/gudhi-deploy) is used for Continuous Integration python
+requirements and will also be downloaded by the above command.
+
 ## Configuring a remote for a fork
 ```bash
 git remote add upstream https://github.com/GUDHI/gudhi-devel.git

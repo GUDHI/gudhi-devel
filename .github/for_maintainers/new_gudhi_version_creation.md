@@ -90,7 +90,8 @@ ln -s @GUDHI_VERSION@ latest
 
 ## Pip package
 
-The pip package construction shall be started on release creation, you just have to check [gudhi github actions](https://github.com/GUDHI/gudhi-devel/actions) results.
+The pip package construction shall be started on release creation, you just have to check
+[gudhi github actions](https://github.com/GUDHI/gudhi-devel/actions) results.
 The version number must be conform to [pep440](https://www.python.org/dev/peps/pep-0440/#pre-releases)
 
 ## Conda package
@@ -105,28 +106,20 @@ If you need to update conda tools (conda-build, conda-smithy, ...), add a commen
 
 ## Docker image
 
-You have to modify the `Dockerfile_gudhi_installation` at the root of this repository in order to use the last release, cf. lines:
+You have to modify the
+[Dockerfile_gudhi_installation](https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_gudhi_installation)
+in gudhi-deploy repository in order to use the last release, cf. lines:
 ```
 ...
-RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-@GUDHI_VERSION@/gudhi.@GUDHI_VERSION@.tar.gz" \
-&& tar xf gudhi.@GUDHI_VERSION@.tar.gz \
-&& cd gudhi.@GUDHI_VERSION@ \
+ARG GUDHI_VERSION="3.X.X"
 ...
 ```
 
-Build and push images to docker hub:
-```
-docker build -f Dockerfile_gudhi_installation -t gudhi/latest_gudhi_version:@GUDHI_VERSION@ .
-docker run --rm -it gudhi/latest_gudhi_version:@GUDHI_VERSION@ 
-```
+After pushing the changes the docker image build will be automatically performed for
+[latest_gudhi_version](https://hub.docker.com/repository/docker/gudhi/latest_gudhi_version)
+docker image on docker hub.
 
-***[Check there are no error with utils and python version]***
-
-```
-docker tag gudhi/latest_gudhi_version:@GUDHI_VERSION@ gudhi/latest_gudhi_version:latest
-docker push gudhi/latest_gudhi_version:latest
-docker push gudhi/latest_gudhi_version:@GUDHI_VERSION@
-```
+***[Check there are no error]***
 
 ## Mail sending
 Send version mail to the following lists :
