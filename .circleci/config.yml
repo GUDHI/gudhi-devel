@@ -1,7 +1,11 @@
 version: 2.0
 jobs:
+
+### With all third parties
+
   examples:
     docker:
+      # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
@@ -95,8 +99,12 @@ jobs:
           path: /tmp/doxygen
           destination: doxygen
 
+
+### With all third parties, except CGAL and Eigen
+
   examples_without_cgal_eigen:
     docker:
+      # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image_without_cgal
       - image: gudhi/ci_for_gudhi_wo_cgal:latest
     steps:
       - checkout
@@ -153,6 +161,9 @@ jobs:
             cd src/python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
+
+
+### With all third parties, except CGAL
 
   examples_without_cgal:
     docker:
