@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.9']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v1
@@ -22,7 +22,7 @@ jobs:
         run: |
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
-          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
       - name: Build python wheel
         run: |

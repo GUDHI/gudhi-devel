@@ -38,33 +38,35 @@ enum : std::size_t {
  *  \ingroup subsampling
  *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
  *  current chosen point set to the subsampling. 
- *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`, with a random landmark.
- *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
- *          concept <a target="_blank"
- *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a> (despite the name, taken from CGAL, this can be any kind of metric or proximity measure).
- *  It must also contain a public member `squared_distance_d_object()` that returns an object of this type.
- *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
- *         via `operator[]` and the points should be stored contiguously in memory.
- *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
- *  \tparam DistanceOutputIterator Output iterator for distances.
- *  \details It chooses `final_size` points from a random access range
+ *  \details
+ *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`,
+ *  with a random landmark.
+ *  It chooses `final_size` points from a random access range
  *  `input_pts` (or the number of distinct points if `final_size` is larger)
  *  and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
- * @param[in] k A kernel object.
- * @param[in] input_pts Const reference to the input points.
+ *  \tparam Distance must provide an operator() that takes 2 points (value type of the range)
+ *  and returns their distance (or some more general proximity measure) as a `double`.
+ *  \tparam Point_range Random access range of points.
+ *  \tparam PointOutputIterator Output iterator whose value type is the point type.
+ *  \tparam DistanceOutputIterator Output iterator for distances.
+ * @param[in] dist A distance function.
+ * @param[in] input_pts The input points.
  * @param[in] final_size The size of the subsample to compute.
  * @param[in] starting_point The seed in the farthest point algorithm.
  * @param[out] output_it The output iterator for points.
  * @param[out] dist_it The optional output iterator for distances.
+ *
+ * \warning Older versions of this function took a CGAL kernel as argument. Users need to replace `k` with
+ * `k.squared_distance_d_object()` in the first argument of every call to `choose_n_farthest_points`.
  *  
  */
-template < typename Kernel,
+template < typename Distance,
 typename Point_range,
 typename PointOutputIterator,
 typename DistanceOutputIterator = Null_output_iterator>
-void choose_n_farthest_points(Kernel const &k,
+void choose_n_farthest_points(Distance dist,
                               Point_range const &input_pts,
                               std::size_t final_size,
                               std::size_t starting_point,
@@ -86,9 +88,9 @@ void choose_n_farthest_points(Kernel const &k,
     starting_point = dis(gen);
   }
 
-  typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
-
   std::size_t current_number_of_landmarks = 0;  // counter for landmarks
+  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
+  // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
   const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
   std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
 
@@ -100,7 +102,7 @@ void choose_n_farthest_points(Kernel const &k,
     *dist_it++ = dist_to_L[curr_max_w];
     std::size_t i = 0;
     for (auto&& p : input_pts) {
-      double curr_dist = sqdist(p, input_pts[curr_max_w]);
+      double curr_dist = dist(p, input_pts[curr_max_w]);
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;
       ++i;

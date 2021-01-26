@@ -1,8 +1,8 @@
 # Must be conform to pep440 - https://www.python.org/dev/peps/pep-0440/#pre-releases
 set (GUDHI_MAJOR_VERSION 3)
-set (GUDHI_MINOR_VERSION 4)
+set (GUDHI_MINOR_VERSION 5)
 # GUDHI_PATCH_VERSION can be 'ZaN' for Alpha release, 'ZbN' for Beta release, 'ZrcN' for release candidate or 'Z' for a final release.
-set (GUDHI_PATCH_VERSION 0a0)
+set (GUDHI_PATCH_VERSION 0rc1)
 set(GUDHI_VERSION ${GUDHI_MAJOR_VERSION}.${GUDHI_MINOR_VERSION}.${GUDHI_PATCH_VERSION})
 
 message(STATUS "GUDHI version : ${GUDHI_VERSION}")

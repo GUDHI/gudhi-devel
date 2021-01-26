@@ -113,8 +113,6 @@ make doxygen
  * Spatial_searching/example_spatial_searching.cpp</a>
  * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
  * Subsampling/example_choose_n_farthest_points.cpp</a>
- * \li <a href="_subsampling_2example_custom_kernel_8cpp-example.html">
- * Subsampling/example_custom_kernel.cpp</a>
  * \li <a href="_subsampling_2example_pick_n_random_points_8cpp-example.html">
  * Subsampling/example_pick_n_random_points.cpp</a>
  * \li <a href="_subsampling_2example_sparsify_point_set_8cpp-example.html">
@@ -153,8 +151,6 @@ make doxygen
  * Spatial_searching/example_spatial_searching.cpp</a>
  * \li <a href="_subsampling_2example_choose_n_farthest_points_8cpp-example.html">
  * Subsampling/example_choose_n_farthest_points.cpp</a>
- * \li <a href="_subsampling_2example_custom_kernel_8cpp-example.html">
- * Subsampling/example_custom_kernel.cpp</a>
  * \li <a href="_subsampling_2example_pick_n_random_points_8cpp-example.html">
  * Subsampling/example_pick_n_random_points.cpp</a>
  * \li <a href="_subsampling_2example_sparsify_point_set_8cpp-example.html">

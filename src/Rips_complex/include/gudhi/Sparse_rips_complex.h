@@ -67,8 +67,7 @@ class Sparse_rips_complex {
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
-    Ker<decltype(dist_fun)> kernel(dist_fun);
-    subsampling::choose_n_farthest_points(kernel, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
+    subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
   }
@@ -128,17 +127,6 @@ class Sparse_rips_complex {
   }
 
  private:
-  // choose_n_farthest_points wants the distance function in this form...
-  template <class Distance>
-  struct Ker {
-    typedef std::size_t Point_d;  // index into point range
-    Ker(Distance& d) : dist(d) {}
-    // Despite the name, this is not squared...
-    typedef Distance Squared_distance_d;
-    Squared_distance_d& squared_distance_d_object() const { return dist; }
-    Distance& dist;
-  };
-
   // PointRange must be random access.
   template <typename Distance>
   void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {

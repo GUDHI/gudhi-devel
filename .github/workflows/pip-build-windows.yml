@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.9']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v1
@@ -24,7 +24,7 @@ jobs:
           vcpkg upgrade --no-dry-run
           type c:/vcpkg/ports/cgal/portfile.cmake
           vcpkg install eigen3 cgal --triplet x64-windows
-          python -m pip install --user -r .github/build-requirements.txt
+          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip list
       - name: Build python wheel
         run: |

@@ -11,6 +11,13 @@
 #ifndef SPARSIFY_POINT_SET_H_
 #define SPARSIFY_POINT_SET_H_
 
+#include <boost/version.hpp>
+#if BOOST_VERSION < 106600
+# include <boost/function_output_iterator.hpp>
+#else
+# include <boost/iterator/function_output_iterator.hpp>
+#endif
+
 #include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 #include <gudhi/Clock.h>
@@ -27,7 +34,7 @@ namespace subsampling {
  *  \ingroup subsampling
  *  \brief Outputs a subset of the input points so that the 
  *         squared distance between any two points
- *         is greater than or equal to `min_squared_dist`.
+ *         is greater than `min_squared_dist`.
  *
  * \tparam Kernel must be a model of the <a target="_blank"
  *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
@@ -63,29 +70,15 @@ sparsify_point_set(
   // Parse the input points, and add them if they are not too close to
   // the other points
   std::size_t pt_idx = 0;
-  for (typename Point_range::const_iterator it_pt = input_pts.begin();
-       it_pt != input_pts.end();
-       ++it_pt, ++pt_idx) {
-    if (dropped_points[pt_idx])
+  for (auto const& pt : input_pts) {
+    if (dropped_points[pt_idx++])
       continue;
 
-    *output_it++ = *it_pt;
-
-    auto ins_range = points_ds.incremental_nearest_neighbors(*it_pt);
+    *output_it++ = pt;
 
     // If another point Q is closer that min_squared_dist, mark Q to be dropped
-    for (auto const& neighbor : ins_range) {
-      std::size_t neighbor_point_idx = neighbor.first;
-      // If the neighbor is too close, we drop the neighbor
-      if (neighbor.second < min_squared_dist) {
-        // N.B.: If neighbor_point_idx < pt_idx,
-        // dropped_points[neighbor_point_idx] is already true but adding a
-        // test doesn't make things faster, so why bother?
-        dropped_points[neighbor_point_idx] = true;
-      } else {
-        break;
-      }
-    }
+    auto drop = [&dropped_points] (std::ptrdiff_t neighbor_point_idx) { dropped_points[neighbor_point_idx] = true; };
+    points_ds.all_near_neighbors2(pt, min_squared_dist, min_squared_dist, boost::make_function_output_iterator(std::ref(drop)));
   }
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
