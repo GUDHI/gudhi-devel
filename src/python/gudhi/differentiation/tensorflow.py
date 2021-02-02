@@ -202,13 +202,17 @@ def _Cubical(X, dim, card):
     # Compute the persistence pairs with Gudhi
     cc = CubicalComplex(dimensions=X.shape, top_dimensional_cells=X.flatten())
     cc.persistence()
-    cof = cc.cofaces_of_persistence_pairs()[0][dim]
+    try:
+        cof = cc.cofaces_of_persistence_pairs()[0][dim]
+    except IndexError:
+        cof = np.array([])
 
-    # Sort points with distance-to-diagonal
-    Xs = X.shape
-    pers = [X[np.unravel_index(cof[idx,1], Xs)] - X[np.unravel_index(cof[idx,0], Xs)] for idx in range(len(cof))]
-    perm = np.argsort(pers)
-    cof = cof[perm[::-1]]
+    if len(cof) > 0:
+        # Sort points with distance-to-diagonal
+        Xs = X.shape
+        pers = [X[np.unravel_index(cof[idx,1], Xs)] - X[np.unravel_index(cof[idx,0], Xs)] for idx in range(len(cof))]
+        perm = np.argsort(pers)
+        cof = cof[perm[::-1]]
     
     # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices
     D = len(Xs)
