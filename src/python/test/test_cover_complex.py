@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import CoverComplex
+from gudhi import NGIComplex, CoverComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -23,13 +23,11 @@ def test_empty_constructor():
     cover = NGIComplex()
     assert cover.__is_defined() == True
 
-
 def test_non_existing_file_read():
     # Try to open a non existing file
     cover = NGIComplex()
     with pytest.raises(FileNotFoundError):
         cover.read_point_cloud("pouetpouettralala.toubiloubabdou")
-
 
 def test_files_creation():
     # Create test file
@@ -42,7 +40,6 @@ def test_files_creation():
     graph_file = open("graph", "w")
     graph_file.write("0 1\n0 2\n1 2")
     graph_file.close()
-
 
 def test_nerve():
     nerve = NGIComplex()
@@ -58,7 +55,6 @@ def test_nerve():
     assert (stree.num_simplices() - stree.num_vertices()) == 0
     assert stree.dimension() == 0
 
-
 def test_graph_induced_complex():
     gic = NGIComplex()
     gic.set_type("GIC")
@@ -72,7 +68,6 @@ def test_graph_induced_complex():
     assert stree.num_vertices() == 3
     assert (stree.num_simplices() - stree.num_vertices()) == 4
     assert stree.dimension() == 2
-
 
 def test_voronoi_graph_induced_complex():
     gic = NGIComplex()
@@ -115,7 +110,7 @@ def test_cover_complex():
     M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=5, colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
          resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6).fit(X)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([1, 3], 0.0), ([4], 0.0), ([2, 4], 0.0), ([3, 4], 0.0)]
+    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([0, 3], 0.0), ([2, 3], 0.0), ([4], 0.0), ([2, 4], 0.0)]
 
     M = CoverComplex(complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
          resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6)).fit(X)
@@ -133,3 +128,4 @@ def test_cover_complex():
     D, B = M.compute_topological_features()
     assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
     assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
+
