@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import NGIComplex, CoverComplex
+from gudhi import CoverComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
