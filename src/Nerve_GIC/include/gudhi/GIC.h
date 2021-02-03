@@ -1105,7 +1105,7 @@ class Cover_complex {
            * This function assumes that the cover has been computed with Voronoi. If data points are in 1D or 2D,
            * the remaining coordinates of the points embedded in 3D are set to 0.
            */
-  void plot_OFF(std::string point_cloud_name) {
+  void plot_OFF(std::string point_cloud_name="VoronoiGIC") {
     assert(cover_name == "Voronoi");
 
     int m = voronoi_subsamples.size();
