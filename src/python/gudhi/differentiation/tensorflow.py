@@ -76,7 +76,7 @@ class LowerStarSimplexTreeModel(tf.keras.Model):
         dim (int): homology dimension
     """
     def __init__(self, F, stbase="simplextree.txt", dim=0, card=50):
-        super(SimplexTreeModel, self).__init__()
+        super(LowerStarSimplexTreeModel, self).__init__()
         self.F = F
         self.dim = dim
         self.card = card
