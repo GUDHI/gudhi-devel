@@ -1,6 +1,5 @@
 import numpy               as np
 import tensorflow          as tf
-import tensorflow_addons   as tfa
 from ..simplex_tree     import SimplexTree
 from ..rips_complex     import RipsComplex
 from ..cubical_complex  import CubicalComplex
@@ -166,7 +165,7 @@ class RipsModel(tf.keras.Model):
         m, d, c = self.mel, self.dim, self.card
         
         # Compute distance matrix
-        DX = tfa.losses.metric_learning.pairwise_distance(self.X)
+        DX = tf.math.sqrt(tf.reduce_sum((tf.expand_dims(self.X, 1)-tf.expand_dims(self.X, 0))**2, 2))
         DXX = tf.reshape(DX, [1, DX.shape[0], DX.shape[1]])
         
         # Turn numpy function into tensorflow function
