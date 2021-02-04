@@ -26,10 +26,8 @@ import numpy as np
 import itertools
 import matplotlib
 import matplotlib.pyplot as plt
-import networkx as nx
-import colorsys
 
-from networkx                import cycle_basis
+
 from scipy.sparse.csgraph    import dijkstra, shortest_path, connected_components
 from scipy.sparse            import csr_matrix
 from sklearn.base            import BaseEstimator, TransformerMixin
@@ -846,17 +844,21 @@ class CoverComplex(BaseEstimator, TransformerMixin):
         Returns:
             G (networkx graph): graph representing the 1-skeleton of the cover complex.
         """
-        st = self.simplex_tree
-        G = nx.Graph()
-        for (splx,_) in st.get_skeleton(1):	
-            if len(splx) == 1:
-                G.add_node(splx[0])
-            if len(splx) == 2:
-                G.add_edge(splx[0], splx[1])
-        if get_attrs:
-            attrs = {k: {"attr_name": self.node_info[k]["colors"]} for k in G.nodes()}
-            nx.set_node_attributes(G, attrs)
-        return G
+        try:
+            import networkx as nx
+            st = self.simplex_tree
+            G = nx.Graph()
+            for (splx,_) in st.get_skeleton(1):	
+                if len(splx) == 1:
+                    G.add_node(splx[0])
+                if len(splx) == 2:
+                    G.add_edge(splx[0], splx[1])
+            if get_attrs:
+                attrs = {k: {"attr_name": self.node_info[k]["colors"]} for k in G.nodes()}
+                nx.set_node_attributes(G, attrs)
+            return G
+        except ImportError:
+            print("Networkx not found, nx graph not computed")
 
     class _constant_clustering():
         def fit_predict(X):
@@ -894,12 +896,16 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
         # loops
         G = self.get_networkx()
-        bndall = cycle_basis(G)
-        for pts in bndall:
-            vals = [function[p] for p in pts]
-            if np.abs(min(vals) - max(vals)) >= threshold:	
-                dgm.append((1,(min(vals), max(vals))))
-                bnd.append(pts)
+        try:
+            from networkx import cycle_basis
+            bndall = cycle_basis(G)
+            for pts in bndall:
+                vals = [function[p] for p in pts]
+                if np.abs(min(vals) - max(vals)) >= threshold:	
+                    dgm.append((1,(min(vals), max(vals))))
+                    bnd.append(pts)
+        except ImportError:
+            print("Networkx not found, loops not computed")
         
         # branches
         for topo_type in ["downbranch", "upbranch"]:
@@ -1132,15 +1138,19 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
         L = np.linspace(epsv, 1.-epsv, 100)
         colsrgb = []
-        for c in L:	
-            colsrgb.append(colorsys.hsv_to_rgb(c,1,1))
-        fig, ax = plt.subplots(figsize=(6, 1))
-        fig.subplots_adjust(bottom=0.5)
-        my_cmap = matplotlib.colors.ListedColormap(colsrgb, name=self.color_name)
-        cb = matplotlib.colorbar.ColorbarBase(ax, cmap=my_cmap, norm=matplotlib.colors.Normalize(vmin=minv, vmax=maxv), orientation="horizontal")
-        cb.set_label(self.color_name)
-        fig.savefig("colorbar_" + self.color_name + ".pdf", format="pdf")
-        plt.close()
+        try:
+            import colorsys
+            for c in L:
+                colsrgb.append(colorsys.hsv_to_rgb(c,1,1))
+            fig, ax = plt.subplots(figsize=(6, 1))
+            fig.subplots_adjust(bottom=0.5)
+            my_cmap = matplotlib.colors.ListedColormap(colsrgb, name=self.color_name)
+            cb = matplotlib.colorbar.ColorbarBase(ax, cmap=my_cmap, norm=matplotlib.colors.Normalize(vmin=minv, vmax=maxv), orientation="horizontal")
+            cb.set_label(self.color_name)
+            fig.savefig("colorbar_" + self.color_name + ".pdf", format="pdf")
+            plt.close()
+        except ImportError:
+            print("colorsys not found, colorbar not printed")
 
     def print_to_txt(self):
         """
