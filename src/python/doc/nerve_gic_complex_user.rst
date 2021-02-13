@@ -210,7 +210,7 @@ simplicial complex is in dimension 3 in this example.
         nerve_complex.set_graph_from_OFF()
         nerve_complex.set_cover_from_Voronoi(700)
         nerve_complex.find_simplices()
-        nerve_complex.plot_off()
+        nerve_complex.plot_off('GIC_human')
 
 the program outputs SC.off. Using e.g.
 
