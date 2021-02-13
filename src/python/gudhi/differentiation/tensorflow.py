@@ -176,7 +176,11 @@ class RipsModel(tf.keras.Model):
         ids = tf.nest.map_structure(tf.stop_gradient, tf.map_fn(RipsTF,DXX,dtype=[tf.int32 for _ in range(4*c)]))
         
         # Get persistence diagram by simply picking the corresponding entries in the distance matrix
-        dgm = tf.reshape(tf.gather_nd(DX, tf.reshape(ids, [2*c,2])), [c,2])
+        if d > 0:
+            dgm = tf.reshape(tf.gather_nd(DX, tf.reshape(ids, [2*c,2])), [c,2])
+        else:
+            ids = tf.reshape(ids, [2*c,2])[1::2,:]
+            dgm = tf.concat([tf.zeros([c,1]), tf.reshape(tf.gather_nd(DX, ids), [c,1])], axis=1)
         return dgm
 
 
