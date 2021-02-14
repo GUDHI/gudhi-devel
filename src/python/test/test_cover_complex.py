@@ -126,5 +126,10 @@ def test_cover_complex():
     assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
 
     D, B = M.compute_topological_features()
-    assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
-    assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
+    try:
+        import networkx
+        assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
+        assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
+    except ImportError:
+        assert D == [(0, (1.0, 2.0))]
+        assert B == [[0, 1, 2, 3, 4, 5]]
