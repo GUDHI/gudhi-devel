@@ -210,7 +210,7 @@ simplicial complex is in dimension 3 in this example.
         nerve_complex.set_graph_from_OFF()
         nerve_complex.set_cover_from_Voronoi(700)
         nerve_complex.find_simplices()
-        nerve_complex.plot_off('GIC_human')
+        nerve_complex.plot_off(b'GIC')
 
 the program outputs SC.off. Using e.g.
 
@@ -262,7 +262,7 @@ threshold, resolution and gain can be computed as well for the Nerve.
         nerve_complex.set_gain()
         nerve_complex.set_cover_from_function()
         nerve_complex.find_simplices()
-        nerve_complex.plot_dot()
+        nerve_complex.plot_dot(b'GIC')
 
 the program outputs SC.dot. Using e.g.
 
@@ -306,7 +306,7 @@ automatically selected as before.
         nerve_complex.set_gain()
         nerve_complex.set_cover_from_function()
         nerve_complex.find_simplices()
-        nerve_complex.plot_dot()
+        nerve_complex.plot_dot(b'GIC')
 
 the program outputs again SC.dot which gives the following visualization after using neato:
 
