@@ -107,10 +107,10 @@ def test_cover_complex():
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([2, 3], 0.0)]
 
-    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=5, colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
+    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=2, colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
          resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6).fit(X)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([1, 3], 0.0), ([4], 0.0), ([2, 4], 0.0), ([3, 4], 0.0)]
+    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0)]
 
     M = CoverComplex(complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
          resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6)).fit(X)
@@ -128,4 +128,3 @@ def test_cover_complex():
     D, B = M.compute_topological_features()
     assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
     assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
-
