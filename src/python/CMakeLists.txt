@@ -247,6 +247,7 @@ if(PYTHONINTERP_FOUND)
     endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+    set(GUDHI_SETUP_PY_INTRODUCTION_RST "${CMAKE_CURRENT_SOURCE_DIR}/introduction.rst")
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
     # Generate gudhi/__init__.py
@@ -262,9 +263,6 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
-
-    # Some files for pip package
-    file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
     add_custom_command(
         OUTPUT gudhi.so
