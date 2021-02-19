@@ -65,7 +65,7 @@ for module in pybind11_modules:
         ))
 
 # read the contents of introduction.rst
-with open("@GUDHI_SETUP_PY_INTRODUCTION_RST@", "r") as fh:
+with open("introduction.rst", "r") as fh:
     long_description = fh.read()
 
 setup(
