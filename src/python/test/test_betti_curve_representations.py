@@ -9,7 +9,6 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
     pinf = 0.05
     pzero = 0.05
     res = 100
-    success = True
     
     pds = []
     for i in range(0, m):
@@ -26,8 +25,8 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
 
     bc2 = BettiCurve2(None)
     bettis2 = bc2.fit_transform(pds)
-    success = success and (bc2.grid_ == bc.grid_).all()
-    success = success and (bettis2 == bettis).all()
+    assert((bc2.grid_ == bc.grid_).all())
+    assert((bettis2 == bettis).all())
 
     for i in range(0, m):
         grid = np.linspace(pds[i][np.isfinite(pds[i])].min(), pds[i][np.isfinite(pds[i])].max() + 1, res)
@@ -37,6 +36,4 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
 
         interp = scipy.interpolate.interp1d(bc.grid_, bettis[i, :], kind="previous", fill_value="extrapolate")
         bettis_interp = np.array(interp(grid), dtype=int)
-        success = success and (bettis_interp == bettis_gridded).all()
-
-    assert(success)
+        assert((bettis_interp == bettis_gridded).all())
