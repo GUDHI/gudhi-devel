@@ -357,6 +357,16 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
     """
     A more flexible replacement for the BettiCurve class.
 
+    Parameters
+    ----------
+    grid: 1d array or None, default=None
+        Filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinites are OK. If None (default), a grid will be computed that captures all the filtration value changes.
+
+    Attributes
+    ----------
+    grid_: 1d array
+        Contains the compute grid after fit or fit_transform.
+
     Examples
     --------
     If pd is a persistence diagram and xs is a grid such that xs[0] >= pd.min(), then the result of
@@ -372,20 +382,6 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, grid = None):
-        """
-        Constructor for the BettiCurve class.
-
-        Parameters
-        ----------
-        grid: 1d array or None, default=None
-             Filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinites are OK. If None (default), a grid will be computed that captures all the filtration value changes.
-
-        Attributes
-        ----------
-        grid_: 1d array
-             Contains the compute grid after fit or fit_transform.
-        """
-
         self.grid_ = np.array(grid)
 
 
