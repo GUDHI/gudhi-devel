@@ -369,7 +369,7 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    If pd is a persistence diagram and xs is a grid such that xs[0] >= pd.min(), then the result of
+    If pd is a persistence diagram and xs is a nonempty grid of finite values such that xs[0] >= pd.min(), then the result of
     >>> bc = BettiCurve2(xs)
     >>> result = bc(pd)
     and
