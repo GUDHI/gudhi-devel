@@ -30,8 +30,9 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
     success = success and (bettis2 == bettis).all()
 
     for i in range(0, m):
-        grid = np.linspace(pds[i].min(), pds[i].max() + 1, res)
+        grid = np.linspace(pds[i][np.isfinite(pds[i])].min(), pds[i][np.isfinite(pds[i])].max() + 1, res)
         bc_gridded = BettiCurve2(grid)
+        bc_gridded.fit([])
         bettis_gridded = bc_gridded(pds[i])
 
         interp = scipy.interpolate.interp1d(bc.grid_, bettis[i, :], kind="previous", fill_value="extrapolate")
