@@ -64,10 +64,10 @@ class Sparse_rips_complex {
    */
   template <typename RandomAccessPointRange, typename Distance>
   Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
-      : epsilon_(epsilon) {
+      : epsilon_(epsilon), num_pts(boost::size(points)) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
-    subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
+    subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, num_pts), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
   }
@@ -109,7 +109,7 @@ class Sparse_rips_complex {
       return;
     }
     const int n = boost::size(params);
-    std::vector<Filtration_value> lambda(n);
+    std::vector<Filtration_value> lambda(num_pts);
     // lambda[original_order]=params[sorted_order]
     for(int i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
@@ -178,6 +178,8 @@ class Sparse_rips_complex {
 
   Graph graph_;
   double epsilon_;
+  // If input points have multiplicity, this can differ from params.size()
+  Vertex_handle num_pts;
   // Because of the arbitrary split between constructor and create_complex
   // sorted_points[sorted_order]=original_order
   std::vector<Vertex_handle> sorted_points;
