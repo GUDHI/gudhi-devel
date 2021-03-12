@@ -25,12 +25,17 @@ __license__ = "MIT"
 
 
 def _empty_alpha(precision):
+    alpha_complex = gd.AlphaComplex(precision = precision)
+    assert alpha_complex.__is_defined() == True
+
+def _one_2d_point_alpha(precision):
     alpha_complex = gd.AlphaComplex(points=[[0, 0]], precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def test_empty_alpha():
     for precision in ['fast', 'safe', 'exact']:
         _empty_alpha(precision)
+        _one_2d_point_alpha(precision)
 
 def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]

@@ -71,20 +71,18 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points = None, off_file = '', precision = 'safe'):
+    def __cinit__(self, points = [], off_file = '', precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 
-        cdef vector[vector[double]] pts
         if off_file:
             if os.path.isfile(off_file):
                 points = read_points_from_off_file(off_file = off_file)
             else:
                 print("file " + off_file + " not found.")
-        if points is None:
-            # Empty Alpha construction
-            points=[]
+        # need to copy the points to use them without the gil
+        cdef vector[vector[double]] pts
         pts = points
         with nogil:
             self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
