@@ -61,9 +61,8 @@ cdef class AlphaComplex:
         :param points: A list of points in d-Dimension.
         :type points: list of list of double
 
-        Or
-
-        :param off_file: An OFF file style name.
+        :param off_file: An `OFF file style <fileformats.html#off-file-format>`_ name. `points` are
+            read and overwritten by the points in the `off_file`.
         :type off_file: string
 
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
