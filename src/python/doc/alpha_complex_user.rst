@@ -178,7 +178,7 @@ In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the alpha complex from 300 random points on a 2-torus.
+This example builds the alpha complex from 300 random points on a 2-torus, given by an `OFF file <fileformats.html#off-file-format>`_.
 
 Then, it computes the persistence diagram and displays it:
 
