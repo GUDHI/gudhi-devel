@@ -876,23 +876,29 @@ class CoverComplex(BaseEstimator, TransformerMixin):
             bnds (list of lists): list of feature points. Each element of this list is the list of point IDs forming the corresponding feature. 
         """
         st = self.simplex_tree
-        function = [self.node_info[v[0]]["colors"][0] for v,_ in st.get_skeleton(0)]
         num_nodes = st.num_vertices()
+        function, namefunc, invnamefunc = {}, {}, {}
+        nodeID = 0
+        for (s,_) in st.get_skeleton(0):
+            namefunc[s[0]] = nodeID
+            invnamefunc[nodeID] = s[0]
+            function[s[0]] = self.node_info[s[0]]["colors"][0]
+            nodeID += 1
         dgm, bnd = [], []
 
         # connected_components
         A = np.zeros([num_nodes, num_nodes])
         for (splx,_) in st.get_skeleton(1):
             if len(splx) == 2:	
-                A[splx[0], splx[1]] = 1
-                A[splx[1], splx[0]] = 1
+                A[namefunc[splx[0]], namefunc[splx[1]]] = 1
+                A[namefunc[splx[1]], namefunc[splx[0]]] = 1
         _, ccs = connected_components(A, directed=False)
         for ccID in np.unique(ccs):
             pts = np.argwhere(ccs == ccID).flatten()
-            vals = [function[p] for p in pts]
+            vals = [function[invnamefunc[p]] for p in pts]
             if np.abs(min(vals) - max(vals)) >= threshold:
                 dgm.append((0, (min(vals), max(vals))))
-                bnd.append(pts)
+                bnd.append([invnamefunc[p] for p in pts])
 
         # loops
         G = self.get_networkx()
@@ -910,12 +916,16 @@ class CoverComplex(BaseEstimator, TransformerMixin):
         # branches
         for topo_type in ["downbranch", "upbranch"]:
 
+            lfunction = []
+            for i in range(num_nodes):
+                lfunction.append(function[invnamefunc[i]])
+
             # upranch is downbranch of opposite function
             if topo_type == "upbranch":
-                function = [-f for f in function]
+                lfunction = [-f for f in lfunction]
 
             # sort vertices according to function values and compute inverse function 
-            sorted_idxs = np.argsort(np.array(function))
+            sorted_idxs = np.argsort(np.array(lfunction))
             inv_sorted_idxs = np.zeros(num_nodes)
             for i in range(num_nodes):
                 inv_sorted_idxs[sorted_idxs[i]] = i
@@ -937,7 +947,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
                     # find parent pg of lower neighbors with lowest function value
                     neigh_parents = [find(n, parents) for n in lower_neighbors]
-                    pg = neigh_parents[np.argmin([function[n] for n in neigh_parents])]
+                    pg = neigh_parents[np.argmin([lfunction[n] for n in neigh_parents])]
 
                     # set parent of current point to pg
                     parents[current_pt] = pg
@@ -947,7 +957,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
                         # get parent pn
                         pn = find(neighbor, parents)
-                        val = function[pn]
+                        val = lfunction[pn]
                         persistence_set[pn] = []
 
                         # we will create persistence set only if parent pn is not local minimum pg
@@ -967,16 +977,16 @@ class CoverComplex(BaseEstimator, TransformerMixin):
                             persistence_set[pn].append(current_pt)
 
                             # do union and create persistence point corresponding to persistence set if persistence is sufficiently large
-                            if np.abs(function[pn]-function[current_pt]) >= threshold:
+                            if np.abs(lfunction[pn]-lfunction[current_pt]) >= threshold:
                                 persistence_diag[pn] = current_pt
-                                union(pg, pn, parents, function)
+                                union(pg, pn, parents, lfunction)
 
             for key, val in iter(persistence_diag.items()):
                 if topo_type == "downbranch":
-                    dgm.append((0, (function[key],  function[val])))
+                    dgm.append((0, (lfunction[key],  lfunction[val])))
                 elif topo_type == "upbranch":
-                    dgm.append((0, (-function[val], -function[key])))
-                bnd.append(persistence_set[key])
+                    dgm.append((0, (-lfunction[val], -lfunction[key])))
+                bnd.append([invnamefunc[v] for v in persistence_set[key]])
 
         bnd = [list(b) for b in bnd]
         self.persistence_diagram, self.persistence_sets = dgm, bnd 
