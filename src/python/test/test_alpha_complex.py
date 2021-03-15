@@ -261,3 +261,58 @@ def _3d_tetrahedrons(precision):
 def test_3d_tetrahedrons():
     for precision in ['fast', 'safe', 'exact']:
         _3d_tetrahedrons(precision)
+
+def test_non_existing_off_file():
+    with pytest.raises(FileNotFoundError):
+        alpha = gd.AlphaComplex(off_file="pouetpouettralala.toubiloubabdou")
+
+def test_non_existing_weight_file():
+    off_file = open("alphacomplexdoc.off", "w")
+    off_file.write("OFF         \n" \
+                   "7 0 0       \n" \
+                   "1.0 1.0  0.0\n" \
+                   "7.0 0.0  0.0\n" \
+                   "4.0 6.0  0.0\n" \
+                   "9.0 6.0  0.0\n" \
+                   "0.0 14.0 0.0\n" \
+                   "2.0 19.0 0.0\n" \
+                   "9.0 17.0 0.0\n"  )
+    off_file.close()
+
+    with pytest.raises(FileNotFoundError):
+        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
+                                weight_file="pouetpouettralala.toubiloubabdou")
+
+
+def test_inconsistency_off_weight_file():
+    off_file = open("alphacomplexdoc.off", "w")
+    off_file.write("OFF         \n" \
+                   "7 0 0       \n" \
+                   "1.0 1.0  0.0\n" \
+                   "7.0 0.0  0.0\n" \
+                   "4.0 6.0  0.0\n" \
+                   "9.0 6.0  0.0\n" \
+                   "0.0 14.0 0.0\n" \
+                   "2.0 19.0 0.0\n" \
+                   "9.0 17.0 0.0\n"  )
+    off_file.close()
+    # 7 points, 8 weights, on purpose
+    weight_file = open("alphacomplexdoc.wgt", "w")
+    weight_file.write("5.0\n" \
+                   "2.0\n" \
+                   "7.0\n" \
+                   "4.0\n" \
+                   "9.0\n" \
+                   "0.0\n" \
+                   "2.0\n" \
+                   "9.0\n"  )
+    weight_file.close()
+
+    with pytest.raises(ValueError):
+        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
+                                weight_file="alphacomplexdoc.wgt")
+
+    # 7 points, 6 weights, on purpose
+    with pytest.raises(ValueError):
+        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
+                                weights=[1., 2., 3., 4., 5., 6.])

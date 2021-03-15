@@ -16,11 +16,12 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
+import errno
 import os
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
-from gudhi import read_points_from_off_file
+from gudhi import read_points_from_off_file, read_weights
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -55,7 +56,7 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file='', precision='safe'):
+    def __init__(self, points=[], off_file='', weights=[], weight_file='', precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -65,12 +66,24 @@ cdef class AlphaComplex:
             read and overwritten by the points in the `off_file`.
         :type off_file: string
 
+        :param weights: A list of weights. If set, the number of weights must correspond to the
+            number of points.
+        :type weights: list of double
+
+        :param weight_file: A file containing a list of weights (one per line).
+            `weights` are read and overwritten by the weights in the `weight_file`.
+            If set, the number of weights must correspond to the number of points.
+        :type weight_file: string
+
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
+
+        :raises FileNotFoundError: If `off_file` and/or `weight_file` is set but not found.
+        :raises ValueError: In case of inconsistency between the number of points and weights.
         """
 
     # The real cython constructor
-    def __cinit__(self, points = [], off_file = '', precision = 'safe'):
+    def __cinit__(self, points = [], off_file = '', weights=[], weight_file='', precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
@@ -79,12 +92,28 @@ cdef class AlphaComplex:
             if os.path.isfile(off_file):
                 points = read_points_from_off_file(off_file = off_file)
             else:
-                print("file " + off_file + " not found.")
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
+
+        if weight_file:
+            if os.path.isfile(weight_file):
+                weights = read_weights(weight_file = weight_file)
+            else:
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), weight_file)
+
         # need to copy the points to use them without the gil
         cdef vector[vector[double]] pts
+        cdef vector[double] wgts
         pts = points
-        with nogil:
-            self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
+        if len(weights) == 0:
+            with nogil:
+                self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
+        else:
+            if len(weights) == len(points):
+                wgts = weights
+                with nogil:
+                    self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
+            else:
+                raise ValueError("Inconsistency between the number of points and weights")
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
