@@ -44,16 +44,15 @@ This example builds the alpha-complex from the given points:
 
 .. testcode::
 
-    import gudhi
-    alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+    from gudhi import AlphaComplex
+    ac = AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
 
-    simplex_tree = alpha_complex.create_simplex_tree()
-    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
+    stree = ac.create_simplex_tree()
+    print('Alpha complex is of dimension ', stree.dimension(), ' - ',
+      stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
+
     fmt = '%s -> %.2f'
-    for filtered_value in simplex_tree.get_filtration():
+    for filtered_value in stree.get_filtration():
         print(fmt % tuple(filtered_value))
 
 The output is:
@@ -174,6 +173,78 @@ of speed-up, since we always first build the full filtered complex, so it is rec
 :paramref:`~gudhi.AlphaComplex.create_simplex_tree.max_alpha_square`.
 In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 
+Weighted specific version
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0.
+
+A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
+`CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_
+of Delaunay.
+
+This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
+it. This example is taken from
+`CGAL 3d weighted alpha shapes <https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13>`_.
+
+Then, it is asked to display information about the alpha complex.
+
+.. testcode::
+
+    from gudhi import AlphaComplex
+    wgt_ac = AlphaComplex(weighted_points=[[[ 1., -1., -1.], 4.],
+                                           [[-1.,  1., -1.], 4.],
+                                           [[-1., -1.,  1.], 4.],
+                                           [[ 1.,  1.,  1.], 4.],
+                                           [[ 2.,  2.,  2.], 1.]])
+    # equivalent to:
+    # wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
+    #                               [-1.,  1., -1.],
+    #                               [-1., -1.,  1.],
+    #                               [ 1.,  1.,  1.],
+    #                               [ 2.,  2.,  2.]],
+    #                       weights = [4., 4., 4., 4., 1.])
+
+    stree = wgt_ac.create_simplex_tree()
+    print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',
+          stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
+    fmt = '%s -> %.2f'
+    for filtered_value in stree.get_filtration():
+        print(fmt % tuple(filtered_value))
+
+The output is:
+
+.. testoutput::
+
+   Weighted alpha complex is of dimension 3 - 29 simplices - 5 vertices.
+   [ 0 ] -> [-4] 
+   [ 1 ] -> [-4] 
+   [ 2 ] -> [-4] 
+   [ 3 ] -> [-4] 
+   [ 1, 0 ] -> [-2] 
+   [ 2, 0 ] -> [-2] 
+   [ 2, 1 ] -> [-2] 
+   [ 3, 0 ] -> [-2] 
+   [ 3, 1 ] -> [-2] 
+   [ 3, 2 ] -> [-2] 
+   [ 2, 1, 0 ] -> [-1.33333] 
+   [ 3, 1, 0 ] -> [-1.33333] 
+   [ 3, 2, 0 ] -> [-1.33333] 
+   [ 3, 2, 1 ] -> [-1.33333] 
+   [ 3, 2, 1, 0 ] -> [-1] 
+   [ 4 ] -> [-1] 
+   [ 4, 2 ] -> [-1] 
+   [ 4, 0 ] -> [23] 
+   [ 4, 1 ] -> [23] 
+   [ 4, 2, 0 ] -> [23] 
+   [ 4, 2, 1 ] -> [23] 
+   [ 4, 3 ] -> [23] 
+   [ 4, 3, 2 ] -> [23] 
+   [ 4, 1, 0 ] -> [95] 
+   [ 4, 2, 1, 0 ] -> [95] 
+   [ 4, 3, 0 ] -> [95] 
+   [ 4, 3, 1 ] -> [95] 
+   [ 4, 3, 2, 0 ] -> [95] 
+   [ 4, 3, 2, 1 ] -> [95] 
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
@@ -186,14 +257,9 @@ Then, it computes the persistence diagram and displays it:
    :include-source:
 
     import matplotlib.pyplot as plt
-    import gudhi
-    alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
-        '/data/points/tore3D_300.off')
-    simplex_tree = alpha_complex.create_simplex_tree()
-    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
-    diag = simplex_tree.persistence()
-    gudhi.plot_persistence_diagram(diag)
+    import gudhi as gd
+    ac = gd.AlphaComplex(off_file=gd.__root_source_dir__ + '/data/points/tore3D_300.off')
+    stree = ac.create_simplex_tree()
+    dgm = stree.persistence()
+    gd.plot_persistence_diagram(dgm, legend = True)
     plt.show()

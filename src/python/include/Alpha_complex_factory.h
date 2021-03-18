@@ -55,13 +55,13 @@ class Abstract_alpha_complex {
   virtual ~Abstract_alpha_complex() = default;
 };
 
-class Exact_Alphacomplex_dD final : public Abstract_alpha_complex {
+class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
   using Point = typename Kernel::Point_d;
 
  public:
-  Exact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
+  Exact_alpha_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
     : exact_version_(exact_version),
       alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
@@ -81,13 +81,13 @@ class Exact_Alphacomplex_dD final : public Abstract_alpha_complex {
   Alpha_complex<Kernel> alpha_complex_;
 };
 
-class Inexact_Alphacomplex_dD final : public Abstract_alpha_complex {
+class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
   using Point = typename Kernel::Point_d;
 
  public:
-  Inexact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
+  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
     : exact_version_(exact_version),
       alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
   }
@@ -106,8 +106,61 @@ class Inexact_Alphacomplex_dD final : public Abstract_alpha_complex {
   Alpha_complex<Kernel> alpha_complex_;
 };
 
+class Exact_weighted_alpha_complex_dD final : public Abstract_alpha_complex {
+ private:
+  using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+  using Point = typename Kernel::Point_d;
+
+ public:
+  Exact_weighted_alpha_complex_dD(const std::vector<std::vector<double>>& points,
+                                  const std::vector<double>& weights, bool exact_version)
+    : exact_version_(exact_version),
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>), weights) {
+  }
+
+  virtual std::vector<double> get_point(int vh) override {
+    Point const& point = alpha_complex_.get_point(vh).point();
+    return pt_cgal_to_cython(point);
+  }
+
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+                                   bool default_filtration_value) override {
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+  }
+
+ private:
+  bool exact_version_;
+  Alpha_complex<Kernel, true> alpha_complex_;
+};
+
+class Inexact_weighted_alpha_complex_dD final : public Abstract_alpha_complex {
+ private:
+  using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  using Point = typename Kernel::Point_d;
+
+ public:
+  Inexact_weighted_alpha_complex_dD(const std::vector<std::vector<double>>& points,
+                                    const std::vector<double>& weights, bool exact_version)
+    : exact_version_(exact_version),
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>), weights) {
+  }
+
+  virtual std::vector<double> get_point(int vh) override {
+    Point const& point = alpha_complex_.get_point(vh).point();
+    return pt_cgal_to_cython(point);
+  }
+  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+                                   bool default_filtration_value) override {
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+  }
+
+ private:
+  bool exact_version_;
+  Alpha_complex<Kernel, true> alpha_complex_;
+};
+
 template <complexity Complexity>
-class Alphacomplex_3D final : public Abstract_alpha_complex {
+class Alpha_complex_3D final : public Abstract_alpha_complex {
  private:
   using Point = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
 
@@ -116,7 +169,7 @@ class Alphacomplex_3D final : public Abstract_alpha_complex {
   }
 
  public:
-  Alphacomplex_3D(const std::vector<std::vector<double>>& points)
+  Alpha_complex_3D(const std::vector<std::vector<double>>& points)
     : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
   }
 

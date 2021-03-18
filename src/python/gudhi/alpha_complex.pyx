@@ -29,7 +29,7 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, bool fast_version, bool exact_version) nogil except +
+        Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
 
@@ -56,26 +56,35 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file='', weights=[], weight_file='', precision='safe'):
+    def __init__(self, points=[], off_file='', weights=[], weight_file='', weighted_points=[],
+                 precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
-        :type points: list of list of double
+        :type points: Iterable[Iterable[float]]
 
-        :param off_file: An `OFF file style <fileformats.html#off-file-format>`_ name. `points` are
-            read and overwritten by the points in the `off_file`.
+        :param off_file: An `OFF file style <fileformats.html#off-file-format>`_ name. 
+            If an `off_file` is given with `points` or `weighted_points`, only points from the
+            file are taken into account.
         :type off_file: string
 
         :param weights: A list of weights. If set, the number of weights must correspond to the
             number of points.
-        :type weights: list of double
+        :type weights: Iterable[float]
 
         :param weight_file: A file containing a list of weights (one per line).
-            `weights` are read and overwritten by the weights in the `weight_file`.
-            If set, the number of weights must correspond to the number of points.
+            If a `weight_file` is given with `weights` or `weighted_points`, only weights from the
+            file are taken into account.
+
         :type weight_file: string
 
-        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :param weighted_points: A list of points in d-Dimension and its weight.
+            If `weighted_points` are given with `weights` or `points`, these last ones will
+            not be taken into account.
+        :type weighted_points: Iterable[Iterable[float], float]
+
+        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is
+            'safe'.
         :type precision: string
 
         :raises FileNotFoundError: If `off_file` and/or `weight_file` is set but not found.
@@ -83,10 +92,15 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points = [], off_file = '', weights=[], weight_file='', precision = 'safe'):
+    def __cinit__(self, points = [], off_file = '', weights=[], weight_file='', weighted_points=[],
+                  precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
+
+        if len(weighted_points) > 0:
+            points = [wpt[0] for wpt in weighted_points]
+            weights = [wpt[1] for wpt in weighted_points]
 
         if off_file:
             if os.path.isfile(off_file):
@@ -100,20 +114,18 @@ cdef class AlphaComplex:
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), weight_file)
 
+        # weights are set but is inconsistent with the number of points
+        if len(weights) != 0 and len(weights) != len(points):
+            raise ValueError("Inconsistency between the number of points and weights")
+
         # need to copy the points to use them without the gil
         cdef vector[vector[double]] pts
         cdef vector[double] wgts
         pts = points
+        wgts = weights
         if len(weights) == 0:
             with nogil:
-                self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
-        else:
-            if len(weights) == len(points):
-                wgts = weights
-                with nogil:
-                    self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
-            else:
-                raise ValueError("Inconsistency between the number of points and weights")
+                self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
