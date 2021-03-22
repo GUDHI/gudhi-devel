@@ -19,7 +19,7 @@ __license__ = "MIT"
 print("#####################################################################")
 print("AlphaComplex creation from points")
 alpha_complex = AlphaComplex(points=[[0, 0], [1, 0], [0, 1], [1, 1]])
-simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=60.0)
+simplex_tree = alpha_complex.create_simplex_tree()
 
 if simplex_tree.find([0, 1]):
     print("[0, 1] Found !!")
