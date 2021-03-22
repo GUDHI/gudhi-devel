@@ -277,6 +277,7 @@ if(PYTHONINTERP_FOUND)
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
 
   set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
+  message("$$$$ GUDHI_PYTHON_PATH_ENV = ${GUDHI_PYTHON_PATH_ENV}")
   # Documentation generation is available through sphinx - requires all modules
   # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
   if(SPHINX_PATH)
