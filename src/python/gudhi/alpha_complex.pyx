@@ -123,9 +123,8 @@ cdef class AlphaComplex:
         cdef vector[double] wgts
         pts = points
         wgts = weights
-        if len(weights) == 0:
-            with nogil:
-                self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
+        with nogil:
+            self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
