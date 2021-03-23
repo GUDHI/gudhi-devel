@@ -316,3 +316,40 @@ def test_inconsistency_off_weight_file():
     with pytest.raises(ValueError):
         alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
                                 weights=[1., 2., 3., 4., 5., 6.])
+
+def _with_or_without_weight_file(precision):
+    off_file = open("weightalphacomplex.off", "w")
+    off_file.write("OFF         \n" \
+                   "5 0 0       \n" \
+                   "1. -1. -1.  \n" \
+                   "-1. 1. -1.  \n" \
+                   "-1. -1. 1.  \n" \
+                   "1. 1. 1.    \n" \
+                   "2. 2. 2.")
+    off_file.close()
+
+    weight_file = open("weightalphacomplex.wgt", "w")
+    weight_file.write("4.0\n" \
+                      "4.0\n" \
+                      "4.0\n" \
+                      "4.0\n" \
+                      "1.0\n" )
+    weight_file.close()
+
+    stree_from_files =  gd.AlphaComplex(off_file="weightalphacomplex.off",
+                                        weight_file="weightalphacomplex.wgt",
+                                        precision = precision).create_simplex_tree()
+
+    stree_from_values = gd.AlphaComplex(points=[[ 1., -1., -1.],
+                                                [-1.,  1., -1.],
+                                                [-1., -1.,  1.],
+                                                [ 1.,  1.,  1.],
+                                                [ 2.,  2.,  2.]],
+                                        weights = [4., 4., 4., 4., 1.],
+                                        precision = precision).create_simplex_tree()
+
+    assert stree_from_files == stree_from_values
+
+def test_with_or_without_weight_file():
+    for precision in ['fast', 'safe', 'exact']:
+        _with_or_without_weight_file(precision)
