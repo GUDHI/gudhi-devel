@@ -191,18 +191,12 @@ Then, it is asked to display information about the alpha complex.
 .. testcode::
 
     from gudhi import AlphaComplex
-    wgt_ac = AlphaComplex(weighted_points=[[[ 1., -1., -1.], 4.],
-                                           [[-1.,  1., -1.], 4.],
-                                           [[-1., -1.,  1.], 4.],
-                                           [[ 1.,  1.,  1.], 4.],
-                                           [[ 2.,  2.,  2.], 1.]])
-    # equivalent to:
-    # wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
-    #                               [-1.,  1., -1.],
-    #                               [-1., -1.,  1.],
-    #                               [ 1.,  1.,  1.],
-    #                               [ 2.,  2.,  2.]],
-    #                       weights = [4., 4., 4., 4., 1.])
+    wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
+                                  [-1.,  1., -1.],
+                                  [-1., -1.,  1.],
+                                  [ 1.,  1.,  1.],
+                                  [ 2.,  2.,  2.]],
+                          weights = [4., 4., 4., 4., 1.])
 
     stree = wgt_ac.create_simplex_tree()
     print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',

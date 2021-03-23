@@ -56,15 +56,14 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file='', weights=[], weight_file='', weighted_points=[],
-                 precision='safe'):
+    def __init__(self, points=[], off_file='', weights=[], weight_file='', precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
         :type points: Iterable[Iterable[float]]
 
         :param off_file: An `OFF file style <fileformats.html#off-file-format>`_ name. 
-            If an `off_file` is given with `points` or `weighted_points`, only points from the
+            If an `off_file` is given with `points` as arguments, only points from the
             file are taken into account.
         :type off_file: string
 
@@ -73,15 +72,10 @@ cdef class AlphaComplex:
         :type weights: Iterable[float]
 
         :param weight_file: A file containing a list of weights (one per line).
-            If a `weight_file` is given with `weights` or `weighted_points`, only weights from the
+            If a `weight_file` is given with `weights` as arguments, only weights from the
             file are taken into account.
 
         :type weight_file: string
-
-        :param weighted_points: A list of points in d-Dimension and its weight.
-            If `weighted_points` are given with `weights` or `points`, these last ones will
-            not be taken into account.
-        :type weighted_points: Iterable[Iterable[float], float]
 
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is
             'safe'.
@@ -92,15 +86,11 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points = [], off_file = '', weights=[], weight_file='', weighted_points=[],
-                  precision = 'safe'):
-        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+    def __cinit__(self, points = [], off_file = '', weights=[], weight_file='', precision = 'safe'):
+        assert precision in ['fast', 'safe', 'exact'], \
+            "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
-
-        if len(weighted_points) > 0:
-            points = [wpt[0] for wpt in weighted_points]
-            weights = [wpt[1] for wpt in weighted_points]
 
         if off_file:
             if os.path.isfile(off_file):
