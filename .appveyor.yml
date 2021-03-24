@@ -1,5 +1,5 @@
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
 
 build:
   parallel: true
@@ -31,6 +31,7 @@ environment:
 
 
 cache:
+  - c:\Tools\vcpkg\installed
   - '%LOCALAPPDATA%\pip\Cache'
 
 init:
