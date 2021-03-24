@@ -42,7 +42,7 @@ install:
   - git submodule update --init
   - vcpkg update
   - vcpkg upgrade --no-dry-run
-  - vcpkg install eigen3:x64-windows cgal:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows
+  - vcpkg install tbb:x64-windows eigen3:x64-windows cgal:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
