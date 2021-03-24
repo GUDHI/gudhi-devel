@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
-import gudhi
-ac = gudhi.AlphaComplex(off_file='../../data/points/tore3D_1307.off')
+import gudhi as gd
+points = gd.read_points_from_off_file(off_file = '../../data/points/tore3D_1307.off')
+ac = gd.AlphaComplex(points = points)
 st = ac.create_simplex_tree()
 points = np.array([ac.get_point(i) for i in range(st.num_vertices())])
 # We want to plot the alpha-complex with alpha=0.1.

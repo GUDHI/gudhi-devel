@@ -243,7 +243,8 @@ The output is:
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the alpha complex from 300 random points on a 2-torus, given by an `OFF file <fileformats.html#off-file-format>`_.
+This example builds the alpha complex from 300 random points on a 2-torus, given by an
+`OFF file <fileformats.html#off-file-format>`_.
 
 Then, it computes the persistence diagram and displays it:
 
@@ -252,8 +253,9 @@ Then, it computes the persistence diagram and displays it:
 
     import matplotlib.pyplot as plt
     import gudhi as gd
-    ac = gd.AlphaComplex(off_file=gd.__root_source_dir__ + '/data/points/tore3D_300.off')
-    stree = ac.create_simplex_tree()
+    off_file = gd.__root_source_dir__ + '/data/points/tore3D_300.off'
+    points = gd.read_points_from_off_file(off_file = off_file)
+    stree = gd.AlphaComplex(points = points).create_simplex_tree()
     dgm = stree.persistence()
     gd.plot_persistence_diagram(dgm, legend = True)
     plt.show()

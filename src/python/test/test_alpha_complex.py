@@ -12,6 +12,8 @@ import gudhi as gd
 import math
 import numpy as np
 import pytest
+import warnings
+
 try:
     # python3
     from itertools import zip_longest
@@ -203,7 +205,13 @@ def test_delaunay_complex():
         _delaunay_complex(precision)
 
 def _3d_points_on_a_plane(precision, default_filtration_value):
-    alpha = gd.AlphaComplex(off_file='alphacomplexdoc.off', precision = precision)
+    alpha = gd.AlphaComplex(points = [[1.0, 1.0 , 0.0],
+                                      [7.0, 0.0 , 0.0],
+                                      [4.0, 6.0 , 0.0],
+                                      [9.0, 6.0 , 0.0],
+                                      [0.0, 14.0, 0.0],
+                                      [2.0, 19.0, 0.0],
+                                      [9.0, 17.0, 0.0]], precision = precision)
 
     simplex_tree = alpha.create_simplex_tree(default_filtration_value = default_filtration_value)
     assert simplex_tree.dimension() == 2
@@ -211,28 +219,16 @@ def _3d_points_on_a_plane(precision, default_filtration_value):
     assert simplex_tree.num_simplices() == 25
 
 def test_3d_points_on_a_plane():
-    off_file = open("alphacomplexdoc.off", "w")
-    off_file.write("OFF         \n" \
-                   "7 0 0       \n" \
-                   "1.0 1.0  0.0\n" \
-                   "7.0 0.0  0.0\n" \
-                   "4.0 6.0  0.0\n" \
-                   "9.0 6.0  0.0\n" \
-                   "0.0 14.0 0.0\n" \
-                   "2.0 19.0 0.0\n" \
-                   "9.0 17.0 0.0\n"  )
-    off_file.close()
-
     for default_filtration_value in [True, False]:
         for precision in ['fast', 'safe', 'exact']:
             _3d_points_on_a_plane(precision, default_filtration_value)
 
 def _3d_tetrahedrons(precision):
     points = 10*np.random.rand(10, 3)
-    alpha = gd.AlphaComplex(points=points, precision = precision)
+    alpha = gd.AlphaComplex(points = points, precision = precision)
     st_alpha = alpha.create_simplex_tree(default_filtration_value = False)
     # New AlphaComplex for get_point to work
-    delaunay = gd.AlphaComplex(points=points, precision = precision)
+    delaunay = gd.AlphaComplex(points = points, precision = precision)
     st_delaunay = delaunay.create_simplex_tree(default_filtration_value = True)
 
     delaunay_tetra = []
@@ -262,84 +258,45 @@ def test_3d_tetrahedrons():
     for precision in ['fast', 'safe', 'exact']:
         _3d_tetrahedrons(precision)
 
+def test_off_file_deprecation_warning():
+    off_file = open("alphacomplexdoc.off", "w")
+    off_file.write("OFF         \n" \
+                   "7 0 0       \n" \
+                   "1.0 1.0  0.0\n" \
+                   "7.0 0.0  0.0\n" \
+                   "4.0 6.0  0.0\n" \
+                   "9.0 6.0  0.0\n" \
+                   "0.0 14.0 0.0\n" \
+                   "2.0 19.0 0.0\n" \
+                   "9.0 17.0 0.0\n"  )
+    off_file.close()
+
+    with pytest.warns(DeprecationWarning):
+        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off")
+
 def test_non_existing_off_file():
     with pytest.raises(FileNotFoundError):
         alpha = gd.AlphaComplex(off_file="pouetpouettralala.toubiloubabdou")
 
-def test_non_existing_weight_file():
-    off_file = open("alphacomplexdoc.off", "w")
-    off_file.write("OFF         \n" \
-                   "7 0 0       \n" \
-                   "1.0 1.0  0.0\n" \
-                   "7.0 0.0  0.0\n" \
-                   "4.0 6.0  0.0\n" \
-                   "9.0 6.0  0.0\n" \
-                   "0.0 14.0 0.0\n" \
-                   "2.0 19.0 0.0\n" \
-                   "9.0 17.0 0.0\n"  )
-    off_file.close()
-
-    with pytest.raises(FileNotFoundError):
-        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
-                                weight_file="pouetpouettralala.toubiloubabdou")
-
-
-def test_inconsistency_off_weight_file():
-    off_file = open("alphacomplexdoc.off", "w")
-    off_file.write("OFF         \n" \
-                   "7 0 0       \n" \
-                   "1.0 1.0  0.0\n" \
-                   "7.0 0.0  0.0\n" \
-                   "4.0 6.0  0.0\n" \
-                   "9.0 6.0  0.0\n" \
-                   "0.0 14.0 0.0\n" \
-                   "2.0 19.0 0.0\n" \
-                   "9.0 17.0 0.0\n"  )
-    off_file.close()
-    # 7 points, 8 weights, on purpose
-    weight_file = open("alphacomplexdoc.wgt", "w")
-    weight_file.write("5.0\n" \
-                   "2.0\n" \
-                   "7.0\n" \
-                   "4.0\n" \
-                   "9.0\n" \
-                   "0.0\n" \
-                   "2.0\n" \
-                   "9.0\n"  )
-    weight_file.close()
+def test_inconsistency_points_and_weights():
+    points = [[1.0, 1.0 , 0.0],
+              [7.0, 0.0 , 0.0],
+              [4.0, 6.0 , 0.0],
+              [9.0, 6.0 , 0.0],
+              [0.0, 14.0, 0.0],
+              [2.0, 19.0, 0.0],
+              [9.0, 17.0, 0.0]]
+    with pytest.raises(ValueError):
+        # 7 points, 8 weights, on purpose
+        alpha = gd.AlphaComplex(points = points,
+                                weights = [1., 2., 3., 4., 5., 6., 7., 8.])
 
     with pytest.raises(ValueError):
-        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
-                                weight_file="alphacomplexdoc.wgt")
+        # 7 points, 6 weights, on purpose
+        alpha = gd.AlphaComplex(points = points,
+                                weights = [1., 2., 3., 4., 5., 6.])
 
-    # 7 points, 6 weights, on purpose
-    with pytest.raises(ValueError):
-        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off",
-                                weights=[1., 2., 3., 4., 5., 6.])
-
-def _with_or_without_weight_file(precision):
-    off_file = open("weightalphacomplex.off", "w")
-    off_file.write("OFF         \n" \
-                   "5 0 0       \n" \
-                   "1. -1. -1.  \n" \
-                   "-1. 1. -1.  \n" \
-                   "-1. -1. 1.  \n" \
-                   "1. 1. 1.    \n" \
-                   "2. 2. 2.")
-    off_file.close()
-
-    weight_file = open("weightalphacomplex.wgt", "w")
-    weight_file.write("4.0\n" \
-                      "4.0\n" \
-                      "4.0\n" \
-                      "4.0\n" \
-                      "1.0\n" )
-    weight_file.close()
-
-    stree_from_files =  gd.AlphaComplex(off_file="weightalphacomplex.off",
-                                        weight_file="weightalphacomplex.wgt",
-                                        precision = precision).create_simplex_tree()
-
+def _doc_example(precision):
     stree_from_values = gd.AlphaComplex(points=[[ 1., -1., -1.],
                                                 [-1.,  1., -1.],
                                                 [-1., -1.,  1.],
@@ -348,8 +305,11 @@ def _with_or_without_weight_file(precision):
                                         weights = [4., 4., 4., 4., 1.],
                                         precision = precision).create_simplex_tree()
 
-    assert stree_from_files == stree_from_values
+    assert stree_from_values.filtration([0, 1, 2, 3]) == pytest.approx(-1.)
+    assert stree_from_values.filtration([0, 1, 3, 4]) == pytest.approx(95.)
+    assert stree_from_values.filtration([0, 2, 3, 4]) == pytest.approx(95.)
+    assert stree_from_values.filtration([1, 2, 3, 4]) == pytest.approx(95.)
 
-def test_with_or_without_weight_file():
+def test_doc_example():
     for precision in ['fast', 'safe', 'exact']:
-        _with_or_without_weight_file(precision)
+        _doc_example(precision)

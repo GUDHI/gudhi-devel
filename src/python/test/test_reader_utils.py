@@ -125,19 +125,3 @@ def test_read_persistence_intervals_with_dimension():
         1: [(9.6, 14.0), (3.0, float("Inf"))],
         3: [(34.2, 34.974)],
     }
-
-
-def test_non_existing_weights_file():
-    with raises(FileNotFoundError):
-        # Try to open a non existing file
-        persistence = gd.read_weights(weight_file="pouetpouettralala.toubiloubabdou")
-
-def test_read_weights():
-    # Create test file
-    test_file = open("test_read_weights.wgt", "w")
-    test_file.write(
-        "2.7\n 9.6 \n\t34.2\n3.\t\n\n"
-    )
-    test_file.close()
-    weights = gd.read_weights(weight_file = "test_read_weights.wgt")
-    assert weights == [2.7, 9.6, 34.2, 3.]

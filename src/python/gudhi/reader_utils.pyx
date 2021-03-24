@@ -84,19 +84,3 @@ def read_persistence_intervals_in_dimension(persistence_file='', only_this_dim=-
                 'utf-8'), only_this_dim))
     print("file " + persistence_file + " not set or not found.")
     return []
-
-def read_weights(weight_file=''):
-    """Reads a file containing weights. Only one float value per line is read and stored.
-    The return value is a `list(weight)`.
-
-    :param weight_file: A weight file style name (one weight per line).
-    :type weight_file: string
-
-    :returns:  A list of weights.
-    :rtype: List[float]
-    """
-    weights=[]
-    with open(weight_file, 'r') as wfile:
-        weights = [float(wline) for wline in wfile if wline.strip()]
-    return weights
-
