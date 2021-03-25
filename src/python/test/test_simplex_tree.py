@@ -404,15 +404,3 @@ def test_boundaries_iterator():
 
     with pytest.raises(RuntimeError):
         list(st.get_boundaries([6])) # (6) does not exist
-
-def test_equality_operator():
-    st1 = SimplexTree()
-    st2 = SimplexTree()
-
-    assert st1 == st2
-
-    st1.insert([1,2,3], 4.)
-    assert st1 != st2
-
-    st2.insert([1,2,3], 4.)
-    assert st1 == st2

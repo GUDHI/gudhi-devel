@@ -639,12 +639,3 @@ cdef class SimplexTree:
             self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
             # Delete old pointer
             del ptr
-
-    def __eq__(self, other):
-        """Simplex tree equality operator using C++ depth first search operator==
-
-        :returns: True if the 2 simplex trees are equal, False otherwise.
-        :rtype: bool
-        """
-        cdef intptr_t other_int_ptr=other.thisptr
-        return dereference(self.get_ptr()) == dereference(<Simplex_tree_interface_full_featured*>other_int_ptr)
