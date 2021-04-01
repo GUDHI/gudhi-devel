@@ -37,7 +37,8 @@ namespace coxeter_triangulation {
  */
 template <class Triangulation_>
 class Manifold_tracing {
-  typedef typename Triangulation_::Simplex_handle Simplex_handle;
+ public:
+  using Simplex_handle = typename Triangulation_::Simplex_handle;
 
   struct Simplex_hash {
     typedef Simplex_handle argument_type;
