@@ -30,10 +30,20 @@ class Alpha_complex_interface {
   Alpha_complex_interface(const std::vector<std::vector<double>>& points,
                           const std::vector<double>& weights,
                           bool fast_version, bool exact_version)
-  : points_(points),
-    weights_(weights),
-    fast_version_(fast_version),
-    exact_version_(exact_version) {
+  : empty_point_set_(points.size() == 0) {
+    if (fast_version) {
+      if (weights.size() == 0) {
+        alpha_ptr_ = std::make_unique<Inexact_alpha_complex_dD>(points, exact_version);
+      } else {
+        alpha_ptr_ = std::make_unique<Inexact_weighted_alpha_complex_dD>(points, weights, exact_version);
+      }
+    } else {
+      if (weights.size() == 0) {
+        alpha_ptr_ = std::make_unique<Exact_alpha_complex_dD>(points, exact_version);
+      } else {
+        alpha_ptr_ = std::make_unique<Exact_weighted_alpha_complex_dD>(points, weights, exact_version);
+      }
+    }
   }
 
   std::vector<double> get_point(int vh) {
@@ -42,47 +52,14 @@ class Alpha_complex_interface {
 
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value) {
-    if (points_.size() > 0) {
-      std::size_t dimension = points_[0].size();
-      if (dimension == 3 && weights_.size() == 0 && !default_filtration_value) {
-        if (fast_version_)
-          alpha_ptr_ = std::make_unique<Alpha_complex_3D<Gudhi::alpha_complex::complexity::FAST>>(points_);
-        else if (exact_version_)
-          alpha_ptr_ = std::make_unique<Alpha_complex_3D<Gudhi::alpha_complex::complexity::EXACT>>(points_);
-        else
-          alpha_ptr_ = std::make_unique<Alpha_complex_3D<Gudhi::alpha_complex::complexity::SAFE>>(points_);
-        if (!alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value)) {
-          // create_simplex_tree will fail if all points are on a plane - Retry with dD by setting dimension to 2
-          dimension--;
-          alpha_ptr_.reset();
-        }
-      }
-      // Not ** else ** because we have to take into account if 3d fails
-      if (dimension != 3 || weights_.size() != 0 || default_filtration_value) {
-        if (fast_version_) {
-          if (weights_.size() == 0) {
-            alpha_ptr_ = std::make_unique<Inexact_alpha_complex_dD>(points_, exact_version_);
-          } else {
-            alpha_ptr_ = std::make_unique<Inexact_weighted_alpha_complex_dD>(points_, weights_, exact_version_);
-          }
-        } else {
-          if (weights_.size() == 0) {
-            alpha_ptr_ = std::make_unique<Exact_alpha_complex_dD>(points_, exact_version_);
-          } else {
-            alpha_ptr_ = std::make_unique<Exact_weighted_alpha_complex_dD>(points_, weights_, exact_version_);
-          }
-        }
-        alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
-      }
-    }
+    // Nothing to be done in case of an empty point set
+    if (!empty_point_set_)
+      alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
   }
 
  private:
   std::unique_ptr<Abstract_alpha_complex> alpha_ptr_;
-  std::vector<std::vector<double>> points_;
-  std::vector<double> weights_;
-  bool fast_version_;
-  bool exact_version_;
+  bool empty_point_set_;
 };
 
 }  // namespace alpha_complex

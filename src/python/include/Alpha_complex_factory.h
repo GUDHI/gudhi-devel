@@ -31,6 +31,34 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
+template<typename CgalPointType, bool Weighted>
+struct Point_cgal_to_cython;
+
+template<typename CgalPointType>
+struct Point_cgal_to_cython<CgalPointType, false> {
+  std::vector<double> operator()(CgalPointType const& point) const 
+  {
+    std::vector<double> vd;
+    vd.reserve(point.dimension());
+    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
+      vd.push_back(CGAL::to_double(*coord));
+    return vd;
+  }
+};
+
+template<typename CgalPointType>
+struct Point_cgal_to_cython<CgalPointType, true> {
+  std::vector<double> operator()(CgalPointType const& weighted_point) const 
+  {
+    auto point = weighted_point.point();
+    std::vector<double> vd;
+    vd.reserve(point.dimension());
+    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
+      vd.push_back(CGAL::to_double(*coord));
+    return vd;
+  }
+};
+
 template <typename CgalPointType>
 std::vector<double> pt_cgal_to_cython(CgalPointType const& point) {
   std::vector<double> vd;
@@ -159,13 +187,14 @@ class Inexact_weighted_alpha_complex_dD final : public Abstract_alpha_complex {
   Alpha_complex<Kernel, true> alpha_complex_;
 };
 
-template <complexity Complexity>
+template <complexity Complexity, bool Weighted = false>
 class Alpha_complex_3D final : public Abstract_alpha_complex {
  private:
-  using Point = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
+  using Bare_point = typename Alpha_complex_3d<Complexity, Weighted, false>::Bare_point_3;
+  using Point = typename Alpha_complex_3d<Complexity, Weighted, false>::Point_3;
 
-  static Point pt_cython_to_cgal_3(std::vector<double> const& vec) {
-    return Point(vec[0], vec[1], vec[2]);
+  static Bare_point pt_cython_to_cgal_3(std::vector<double> const& vec) {
+    return Bare_point(vec[0], vec[1], vec[2]);
   }
 
  public:
@@ -173,18 +202,23 @@ class Alpha_complex_3D final : public Abstract_alpha_complex {
     : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
   }
 
+  Alpha_complex_3D(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3), weights) {
+  }
+
   virtual std::vector<double> get_point(int vh) override {
     Point const& point = alpha_complex_.get_point(vh);
-    return pt_cgal_to_cython(point);
+    return Point_cgal_to_cython<Point, Weighted>()(point);
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
+    alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
+    return true;
   }
 
  private:
-  Alpha_complex_3d<Complexity, false, false> alpha_complex_;
+  Alpha_complex_3d<Complexity, Weighted, false> alpha_complex_;
 };
 
 
