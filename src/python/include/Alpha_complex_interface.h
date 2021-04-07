@@ -31,17 +31,18 @@ class Alpha_complex_interface {
                           const std::vector<double>& weights,
                           bool fast_version, bool exact_version)
   : empty_point_set_(points.size() == 0) {
+    const bool weighted = (weights.size() > 0);
     if (fast_version) {
-      if (weights.size() == 0) {
-        alpha_ptr_ = std::make_unique<Inexact_alpha_complex_dD>(points, exact_version);
+      if (weighted) {
+        alpha_ptr_ = std::make_unique<Inexact_alpha_complex_dD<true>>(points, weights, exact_version);
       } else {
-        alpha_ptr_ = std::make_unique<Inexact_weighted_alpha_complex_dD>(points, weights, exact_version);
+        alpha_ptr_ = std::make_unique<Inexact_alpha_complex_dD<false>>(points, exact_version);
       }
     } else {
-      if (weights.size() == 0) {
-        alpha_ptr_ = std::make_unique<Exact_alpha_complex_dD>(points, exact_version);
+      if (weighted) {
+        alpha_ptr_ = std::make_unique<Exact_alpha_complex_dD<true>>(points, weights, exact_version);
       } else {
-        alpha_ptr_ = std::make_unique<Exact_weighted_alpha_complex_dD>(points, weights, exact_version);
+        alpha_ptr_ = std::make_unique<Exact_alpha_complex_dD<false>>(points, exact_version);
       }
     }
   }
