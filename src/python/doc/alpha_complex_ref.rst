@@ -9,6 +9,11 @@ Alpha complex reference manual
 .. autoclass:: gudhi.AlphaComplex
    :members:
    :undoc-members:
-   :show-inheritance:
 
    .. automethod:: gudhi.AlphaComplex.__init__
+
+.. autoclass:: gudhi.AlphaComplex3D
+   :members:
+   :undoc-members:
+
+   .. automethod:: gudhi.AlphaComplex3D.__init__

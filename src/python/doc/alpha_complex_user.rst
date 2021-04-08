@@ -9,7 +9,7 @@ Definition
 
 .. include:: alpha_complex_sum.inc
 
-:doc:`AlphaComplex <alpha_complex_ref>` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
+:class:`~gudhi.AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
@@ -176,8 +176,6 @@ In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 Weighted specific version
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0.
-
 A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
 `CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_
 of Delaunay.
@@ -259,3 +257,11 @@ Then, it computes the persistence diagram and displays it:
     dgm = stree.persistence()
     gd.plot_persistence_diagram(dgm, legend = True)
     plt.show()
+
+3d specific version
+^^^^^^^^^^^^^^^^^^^
+
+:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0.
+
+A specific module for Alpha complex is available in 3d (cf. :class:`~gudhi.AlphaComplex3D`) and
+allows to construct standard and weighted versions of alpha complexes.
