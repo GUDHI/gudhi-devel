@@ -175,11 +175,11 @@ def _handle_essential_parts(X, Y, order):
     return c, np.array(m)
 
 
-def _offdiag(X, enable_autodiff):
+def _finite_part(X, enable_autodiff):
     '''
     :param X: (n x 2) numpy array encoding a persistence diagram.
     :param enable_autodiff: boolean, to handle the case where X is a eagerpy tensor.
-    :returns: The off-diagonal part of a diagram `X` (points with finite coordinates).
+    :returns: The finite part of a diagram `X` (points with finite coordinates).
     '''
     if enable_autodiff:
         # Assumes the diagrams only have finite coordinates. Thus, return X directly.
@@ -262,13 +262,13 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         essential_cost = 0
         essential_matching = None
 
-    # Extract off-diaognal points of the diagrams. Note that if enable_autodiff is True, nothing is done here (X,Y are
+    # Extract finite points of the diagrams. Note that if enable_autodiff is True, nothing is done here (X,Y are
     # assumed to be tensors with only finite coordinates).
-    X, Y = _offdiag(X, enable_autodiff), _offdiag(Y, enable_autodiff)
+    X, Y = _finite_part(X, enable_autodiff), _finite_part(Y, enable_autodiff)
     n = len(X)
     m = len(Y)
 
-    # Now the standard pipeline for off-diagonal parts
+    # Now the standard pipeline for finite parts
     if enable_autodiff:
         import eagerpy as ep
 
