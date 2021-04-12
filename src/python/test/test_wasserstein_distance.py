@@ -9,7 +9,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.wasserstein.wasserstein import _proj_on_diag, _offdiag, _handle_essential_parts, _get_essential_parts
+from gudhi.wasserstein.wasserstein import _proj_on_diag, _finite_part, _handle_essential_parts, _get_essential_parts
 from gudhi.wasserstein import wasserstein_distance as pot
 from gudhi.hera import wasserstein_distance as hera
 import numpy as np
@@ -28,10 +28,10 @@ def test_proj_on_diag():
     assert np.array_equal(_proj_on_diag(empty), empty)
 
 
-def test_offdiag():
+def test_finite_part():
     diag = np.array([[0, 1], [3, 5], [2, np.inf], [3, np.inf], [-np.inf, 8], [-np.inf, 12], [-np.inf, -np.inf],
                      [np.inf, np.inf], [-np.inf, np.inf], [-np.inf, np.inf]])
-    assert np.array_equal(_offdiag(diag, enable_autodiff=False), [[0, 1], [3, 5]])
+    assert np.array_equal(_finite_part(diag, enable_autodiff=False), [[0, 1], [3, 5]])
 
 
 def test_handle_essential_parts():
