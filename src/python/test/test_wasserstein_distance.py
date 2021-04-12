@@ -31,7 +31,7 @@ def test_proj_on_diag():
 def test_finite_part():
     diag = np.array([[0, 1], [3, 5], [2, np.inf], [3, np.inf], [-np.inf, 8], [-np.inf, 12], [-np.inf, -np.inf],
                      [np.inf, np.inf], [-np.inf, np.inf], [-np.inf, np.inf]])
-    assert np.array_equal(_finite_part(diag, enable_autodiff=False), [[0, 1], [3, 5]])
+    assert np.array_equal(_finite_part(diag), [[0, 1], [3, 5]])
 
 
 def test_handle_essential_parts():

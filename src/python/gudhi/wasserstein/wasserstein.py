@@ -113,6 +113,7 @@ def _get_essential_parts(a):
         second_coord_infinite_positive = (a[:,1] == np.inf)
         first_coord_infinite_negative = (a[:,0] == -np.inf)
         second_coord_infinite_negative = (a[:,1] == -np.inf)
+
         ess_first_type  = np.where(second_coord_finite & first_coord_infinite_negative)[0] # coord (-inf, x)
         ess_second_type = np.where(first_coord_finite & second_coord_infinite_positive)[0]  # coord (x, +inf)
         ess_third_type  = np.where(first_coord_infinite_negative & second_coord_infinite_positive)[0]  # coord (-inf, +inf)
