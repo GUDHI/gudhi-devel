@@ -47,7 +47,7 @@ The following example explains how the distance is computed:
     :figclass: align-center
     
     The point (0, 13) is at distance 6.5 from the diagonal and more
-    specifically from the point (6.5, 6.5)
+    specifically from the point (6.5, 6.5).
 
 
 Basic example
@@ -72,6 +72,6 @@ The output is:
 
 .. testoutput::
 
-    Bottleneck distance approximation = 0.81
+    Bottleneck distance approximation = 0.72
     Bottleneck distance value = 0.75
 

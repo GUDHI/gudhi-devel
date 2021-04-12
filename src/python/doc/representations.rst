@@ -12,11 +12,45 @@ This module, originally available at https://github.com/MathieuCarriere/sklearn-
 
 A diagram is represented as a numpy array of shape (n,2), as can be obtained from :func:`~gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time. The classes in this module can handle several persistence diagrams at once. In that case, the diagrams are provided as a list of numpy arrays. Note that it is not necessary for the diagrams to have the same number of points, i.e., for the corresponding arrays to have the same number of rows: all classes can handle arrays with different shapes.
 
-A small example is provided
+Examples
+--------
 
-.. only:: builder_html
+Landscapes
+^^^^^^^^^^
 
-    * :download:`diagram_vectorizations_distances_kernels.py <../example/diagram_vectorizations_distances_kernels.py>`
+This example computes the first two Landscapes associated to a persistence diagram with four points. The landscapes are evaluated on ten samples, leading to two vectors with ten coordinates each, that are eventually concatenated in order to produce a single vector representation.
+
+.. testcode::
+
+    import numpy as np
+    from gudhi.representations import Landscape
+    # A single diagram with 4 points
+    D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])
+    diags = [D]
+    l=Landscape(num_landscapes=2,resolution=10).fit_transform(diags)
+    print(l) 
+
+The output is:
+
+.. testoutput::
+
+    [[1.02851895 2.05703791 2.57129739 1.54277843 0.89995409 1.92847304
+      2.95699199 3.08555686 2.05703791 1.02851895 0.         0.64282435
+      0.         0.         0.51425948 0.         0.         0.
+      0.77138922 1.02851895]]
+
+Various kernels
+^^^^^^^^^^^^^^^
+
+This small example is also provided
+:download:`diagram_vectorizations_distances_kernels.py <../example/diagram_vectorizations_distances_kernels.py>`
+
+Machine Learning and Topological Data Analysis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-representations.ipynb>`_ explains how to
+efficiently combine machine learning and topological data analysis with the
+:doc:`representations module<representations>`.
 
 
 Preprocessing
@@ -46,27 +80,3 @@ Metrics
    :members:
    :special-members:
    :show-inheritance:
-
-Basic example
--------------
-
-This example computes the first two Landscapes associated to a persistence diagram with four points. The landscapes are evaluated on ten samples, leading to two vectors with ten coordinates each, that are eventually concatenated in order to produce a single vector representation.
-
-.. testcode::
-
-    import numpy as np
-    from gudhi.representations import Landscape
-    # A single diagram with 4 points
-    D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])
-    diags = [D]
-    l=Landscape(num_landscapes=2,resolution=10).fit_transform(diags)
-    print(l) 
-
-The output is:
-
-.. testoutput::
-
-    [[1.02851895 2.05703791 2.57129739 1.54277843 0.89995409 1.92847304
-      2.95699199 3.08555686 2.05703791 1.02851895 0.         0.64282435
-      0.         0.         0.51425948 0.         0.         0.
-      0.77138922 1.02851895]]

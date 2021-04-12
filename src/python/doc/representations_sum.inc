@@ -2,7 +2,7 @@
    :widths: 30 40 30
 
    +------------------------------------------------------------------+----------------------------------------------------------------+-------------------------------------------------------------+
-   | .. figure::                                                      | Vectorizations, distances and kernels that work on persistence | :Author: Mathieu Carrière                                   |
+   | .. figure::                                                      | Vectorizations, distances and kernels that work on persistence | :Author: Mathieu Carrière, Martin Royer                     |
    |      img/sklearn-tda.png                                         | diagrams, compatible with scikit-learn.                        |                                                             |
    |                                                                  |                                                                | :Since: GUDHI 3.1.0                                         |
    |                                                                  |                                                                |                                                             |

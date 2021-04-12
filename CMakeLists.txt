@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 project(GUDHIdev)
 
@@ -25,6 +25,7 @@ add_gudhi_module(common)
 add_gudhi_module(Alpha_complex)
 add_gudhi_module(Bitmap_cubical_complex)
 add_gudhi_module(Bottleneck_distance)
+add_gudhi_module(Collapse)
 add_gudhi_module(Contraction)
 add_gudhi_module(Cech_complex)
 add_gudhi_module(Hasse_complex)

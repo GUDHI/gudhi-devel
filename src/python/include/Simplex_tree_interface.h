@@ -15,10 +15,15 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
+#ifdef GUDHI_USE_EIGEN3
+#include <gudhi/Flag_complex_edge_collapser.h>
+#endif
 
 #include <iostream>
 #include <vector>
 #include <utility>  // std::pair
+#include <tuple>
+#include <iterator>  // for std::distance
 
 namespace Gudhi {
 
@@ -36,6 +41,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
   using Extended_filtration_data = typename Base::Extended_filtration_data;
+  using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
 
  public:
 
@@ -157,6 +163,38 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return new_dgm;
   }
 
+  Simplex_tree_interface* collapse_edges(int nb_collapse_iteration) {
+#ifdef GUDHI_USE_EIGEN3
+    using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
+    std::vector<Filtered_edge> edges;
+    for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
+      if (Base::dimension(sh) == 1) {
+        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
+        auto vit = rg.begin();
+        Vertex_handle v = *vit;
+        Vertex_handle w = *++vit;
+        edges.emplace_back(v, w, Base::filtration(sh));
+      }
+    }
+
+    for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
+      edges = Gudhi::collapse::flag_complex_collapse_edges(edges);
+    }
+    Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface();
+    // Copy the original 0-skeleton
+    for (Simplex_handle sh : Base::skeleton_simplex_range(0)) {
+      collapsed_stree_ptr->insert({*(Base::simplex_vertex_range(sh).begin())}, Base::filtration(sh));
+    }
+    // Insert remaining edges
+    for (auto remaining_edge : edges) {
+      collapsed_stree_ptr->insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+    }
+    return collapsed_stree_ptr;
+#else
+    throw std::runtime_error("Unable to collapse edges as it requires Eigen3 >= 3.1.0.");
+#endif
+  }
+
   // Iterator over the simplex tree
   Complex_simplex_iterator get_simplices_iterator_begin() {
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
@@ -187,6 +225,15 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     return Base::skeleton_simplex_range(dimension).end();
+  }
+
+  std::pair<Boundary_simplex_iterator, Boundary_simplex_iterator> get_boundary_iterators(const Simplex& simplex) {
+    auto bd_sh = Base::find(simplex);
+    if (bd_sh == Base::null_simplex())
+      throw std::runtime_error("simplex not found - cannot find boundaries");
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    auto boundary_srange = Base::boundary_simplex_range(bd_sh);
+    return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
 };
 

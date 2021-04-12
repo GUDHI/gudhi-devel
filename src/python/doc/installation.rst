@@ -40,7 +40,7 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
 `NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
@@ -65,7 +65,7 @@ one can build the GUDHI Python module, by running the following commands in a te
     cd /path-to-gudhi/
     mkdir build
     cd build/
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
     cd python
     make
 
@@ -323,6 +323,35 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+LaTeX
+~~~~~
+
+If a sufficiently complete LaTeX toolchain is available (including dvipng and ghostscript), the LaTeX option of
+matplotlib is enabled for prettier captions (cf.
+`matplotlib text rendering with LaTeX <https://matplotlib.org/3.3.0/tutorials/text/usetex.html>`_).
+It also requires `type1cm` LaTeX package (not detected by matplotlib).
+
+If you are facing issues with LaTeX rendering, like this one:
+
+.. code-block:: none
+
+    Traceback (most recent call last):
+      File "/usr/lib/python3/dist-packages/matplotlib/texmanager.py", line 302, in _run_checked_subprocess
+        report = subprocess.check_output(command,
+    ...
+    ! LaTeX Error: File `type1cm.sty' not found.
+    ...
+
+This is because the LaTeX package is not installed on your system. On Ubuntu systems you can install texlive-full
+(for all LaTeX packages), or more specific packages like texlive-latex-extra, cm-super.
+
+You can still deactivate LaTeX rendering by saying:
+
+.. code-block:: python
+
+    import gudhi
+    gudhi.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
+
 PyKeOps
 -------
 
@@ -364,6 +393,11 @@ mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
+
+TensorFlow
+----------
+
+`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************

@@ -69,7 +69,7 @@ cdef class SimplexTree:
         this simplicial complex, or +infinity if it is not in the complex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :returns:  The simplicial complex filtration value.
         :rtype:  float
         """
@@ -80,7 +80,7 @@ cdef class SimplexTree:
         given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :param filtration:  The new filtration value.
         :type filtration:  float
 
@@ -153,7 +153,7 @@ cdef class SimplexTree:
         """This function sets the dimension of the simplicial complex.
 
         :param dimension: The new dimension value.
-        :type dimension: int.
+        :type dimension: int
 
         .. note::
 
@@ -172,7 +172,7 @@ cdef class SimplexTree:
         complex or not.
 
         :param simplex: The N-simplex to find, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
@@ -186,9 +186,9 @@ cdef class SimplexTree:
 
         :param simplex: The N-simplex to insert, represented by a list of
             vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :param filtration: The filtration value of the simplex.
-        :type filtration: float.
+        :type filtration: float
         :returns:  true if the simplex was not yet in the complex, false
             otherwise (whatever its original filtration value).
         :rtype:  bool
@@ -228,7 +228,7 @@ cdef class SimplexTree:
         """This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
 
         :param dimension: The skeleton dimension value.
-        :type dimension: int.
+        :type dimension: int
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  generator with tuples(simplex, filtration)
         """
@@ -243,7 +243,7 @@ cdef class SimplexTree:
         """This function returns the star of a given N-simplex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :returns:  The (simplices of the) star of a simplex.
         :rtype:  list of tuples(simplex, filtration)
         """
@@ -265,10 +265,10 @@ cdef class SimplexTree:
         given codimension.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
         :param codimension: The codimension. If codimension = 0, all cofaces
             are returned (equivalent of get_star function)
-        :type codimension: int.
+        :type codimension: int
         :returns:  The (simplices of the) cofaces of a simplex
         :rtype:  list of tuples(simplex, filtration)
         """
@@ -285,12 +285,28 @@ cdef class SimplexTree:
             ct.append((v, filtered_simplex.second))
         return ct
 
+    def get_boundaries(self, simplex):
+        """This function returns a generator with the boundaries of a given N-simplex.
+        If you do not need the filtration values, the boundary can also be obtained as
+        :code:`itertools.combinations(simplex,len(simplex)-1)`.
+
+        :param simplex: The N-simplex, represented by a list of vertex.
+        :type simplex: list of int.
+        :returns:  The (simplices of the) boundary of a simplex
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] it =  self.get_ptr().get_boundary_iterators(simplex)
+
+        while it.first != it.second:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
+            preincrement(it.first)
+
     def remove_maximal_simplex(self, simplex):
         """This function removes a given maximal N-simplex from the simplicial
         complex.
 
         :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
+        :type simplex: list of int
 
         .. note::
 
@@ -308,7 +324,7 @@ cdef class SimplexTree:
         """Prune above filtration value given as parameter.
 
         :param filtration: Maximum threshold value.
-        :type filtration: float.
+        :type filtration: float
         :returns: The filtration modification information.
         :rtype: bool
 
@@ -328,7 +344,7 @@ cdef class SimplexTree:
         return self.get_ptr().prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
-        """Expands the Simplex_tree containing only its one skeleton
+        """Expands the simplex tree containing only its one skeleton
         until dimension max_dim.
 
         The expanded simplicial complex until dimension :math:`d`
@@ -338,11 +354,11 @@ cdef class SimplexTree:
         The filtration value assigned to a simplex is the maximal filtration
         value of one of its edges.
 
-        The Simplex_tree must contain no simplex of dimension bigger than
+        The simplex tree must contain no simplex of dimension bigger than
         1 when calling the method.
 
         :param max_dim: The maximal dimension.
-        :type max_dim: int.
+        :type max_dim: int
         """
         cdef int maxdim = max_dim
         with nogil:
@@ -358,38 +374,54 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
+    def reset_filtration(self, filtration, min_dim = 0):
+        """This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all the
+        simplex tree when `min_dim = 0`.
+        `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
+        make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+        afterwards for instance).
+
+        :param filtration: New threshold value.
+        :type filtration: float.
+        :param min_dim: The minimal dimension. Default value is 0.
+        :type min_dim: int.
+        """
+        self.get_ptr().reset_filtration(filtration, min_dim)
+
     def extend_filtration(self):
-        """ Extend filtration for computing extended persistence. This function only uses the 
-        filtration values at the 0-dimensional simplices, and computes the extended persistence 
-        diagram induced by the lower-star filtration computed with these values. 
+        """ Extend filtration for computing extended persistence. This function only uses the filtration values at the
+        0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration
+        computed with these values.
 
         .. note::
 
-            Note that after calling this function, the filtration 
-            values are actually modified within the Simplex_tree. 
-            The function :func:`extended_persistence`
-            retrieves the original values.
+            Note that after calling this function, the filtration values are actually modified within the simplex tree.
+            The function :func:`extended_persistence` retrieves the original values.
 
         .. note::
 
-            Note that this code creates an extra vertex internally, so you should make sure that
-            the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
+            Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does
+            not contain a vertex with the largest possible value (i.e., 4294967295).
+
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        explains how to compute an extension of persistence called extended persistence.
         """
         self.get_ptr().compute_extended_filtration()
 
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
-        """This function retrieves good values for extended persistence, and separate the diagrams 
-        into the Ordinary, Relative, Extended+ and Extended- subdiagrams.
+        """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
+        Relative, Extended+ and Extended- subdiagrams.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
-        :type homology_coeff_field: int.
-        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the persistence diagram point coordinates) to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Sets min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
-        :returns: A list of four persistence diagrams in the format described in :func:`persistence`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
+        :type homology_coeff_field: int
+        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the
+            persistence diagram point coordinates) to take into account (strictly greater than min_persistence).
+            Default value is 0.0. Sets min_persistence to -1.0 to see all values.
+        :type min_persistence: float
+        :returns: A list of four persistence diagrams in the format described in :func:`persistence`. The first one is
+            Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+            See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in
+            https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
 
@@ -400,6 +432,9 @@ cdef class SimplexTree:
             The coordinates of the persistence diagram points might be a little different than the
             original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
             performed on these values during the computation of extended persistence.
+
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        explains how to compute an extension of persistence called extended persistence.
         """
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
@@ -415,12 +450,12 @@ cdef class SimplexTree:
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number. Default value is 11.
-        :type homology_coeff_field: int.
+        :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
             0.0.
             Set min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
+        :type min_persistence: float
         :param persistence_dim_max: If true, the persistent homology for the
             maximal dimension in the complex is computed. If false, it is
             ignored. Default is false.
@@ -438,12 +473,12 @@ cdef class SimplexTree:
 
         :param homology_coeff_field: The homology coefficient field. Must be a
             prime number. Default value is 11.
-        :type homology_coeff_field: int.
+        :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
             0.0.
             Sets min_persistence to -1.0 to see all values.
-        :type min_persistence: float.
+        :type min_persistence: float
         :param persistence_dim_max: If true, the persistent homology for the
             maximal dimension in the complex is computed. If false, it is
             ignored. Default is false.
@@ -478,10 +513,10 @@ cdef class SimplexTree:
 
         :param from_value: The persistence birth limit to be added in the
             numbers (persistent birth <= from_value).
-        :type from_value: float.
+        :type from_value: float
         :param to_value: The persistence death limit to be added in the
             numbers (persistent death > to_value).
-        :type to_value: float.
+        :type to_value: float
 
         :returns: The persistent Betti numbers ([B0, B1, ..., Bn]).
         :rtype:  list of int
@@ -498,7 +533,7 @@ cdef class SimplexTree:
         complex in a specific dimension.
 
         :param dimension: The specific dimension.
-        :type dimension: int.
+        :type dimension: int
         :returns: The persistence intervals.
         :rtype:  numpy array of dimension 2
 
@@ -527,7 +562,7 @@ cdef class SimplexTree:
         complex in a user given file name.
 
         :param persistence_file: Name of the file.
-        :type persistence_file: string.
+        :type persistence_file: string
 
         :note: intervals_in_dim function requires
             :func:`compute_persistence`
@@ -581,3 +616,26 @@ cdef class SimplexTree:
             infinite0 = np_array(next(l))
             infinites = [np_array(d).reshape(-1,2) for d in l]
         return (normal0, normals, infinite0, infinites)
+
+    def collapse_edges(self, nb_iterations = 1):
+        """Assuming the simplex tree is a 1-skeleton graph, this method collapse edges (simplices of higher dimension
+        are ignored) and resets the simplex tree from the remaining edges.
+        A good candidate is to build a simplex tree on top of a :class:`~gudhi.RipsComplex` of dimension 1 before
+        collapsing edges
+        (cf. :download:`rips_complex_edge_collapse_example.py <../example/rips_complex_edge_collapse_example.py>`).
+        For implementation details, please refer to :cite:`edgecollapsesocg2020`.
+
+        :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
+        :type nb_iterations: int
+
+        :note: collapse_edges method requires `Eigen <installation.html#eigen>`_ >= 3.1.0 and an exception is thrown
+            if this method is not available.
+        """
+        # Backup old pointer
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        cdef int nb_iter = nb_iterations
+        with nogil:
+            # New pointer is a new collapsed simplex tree
+            self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
+            # Delete old pointer
+            del ptr

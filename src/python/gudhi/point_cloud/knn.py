@@ -46,7 +46,7 @@ class KNearestNeighbors:
             sort_results (bool): if True, then distances and indices of each point are
                 sorted on return, so that the first column contains the closest points.
                 Otherwise, neighbors are returned in an arbitrary order. Defaults to True.
-            enable_autodiff (bool): if the input is a torch.tensor, jax.numpy.ndarray or tensorflow.Tensor, this
+            enable_autodiff (bool): if the input is a torch.tensor or tensorflow.Tensor, this
                 instructs the function to compute distances in a way that works with automatic differentiation.
                 This is experimental, not supported for all metrics, and requires the package EagerPy.
                 Defaults to False.

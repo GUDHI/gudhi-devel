@@ -12,14 +12,17 @@
 #ifndef ALPHA_COMPLEX_H_
 #define ALPHA_COMPLEX_H_
 
+#include <gudhi/Alpha_complex/Alpha_kernel_d.h>
 #include <gudhi/Debug_utils.h>
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
+#include <memory>  // for std::unique_ptr
 
 #include <CGAL/Delaunay_triangulation.h>
+#include <CGAL/Regular_triangulation.h>  // aka. Weighted Delaunay triangulation
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
 #include <CGAL/Epick_d.h>  // For FAST version
 #include <CGAL/Spatial_sort_traits_adapter_d.h>
@@ -28,6 +31,10 @@
 #include <CGAL/NT_converter.h>
 
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
+
+#include <boost/range/size.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include <iostream>
 #include <vector>
@@ -91,49 +98,56 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
  * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
  */
-template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>
+template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, bool Weighted = false>
 class Alpha_complex {
  public:
+  /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
+  using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
+
   // Add an int in TDS to save point index in the structure
-  typedef CGAL::Triangulation_data_structure<typename Kernel::Dimension,
-                              CGAL::Triangulation_vertex<Kernel, std::ptrdiff_t>,
-                              CGAL::Triangulation_full_cell<Kernel> > TDS;
-  /** \brief A Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
-  typedef CGAL::Delaunay_triangulation<Kernel, TDS> Delaunay_triangulation;
+  using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
+                                                 CGAL::Triangulation_vertex<Geom_traits, std::ptrdiff_t>,
+                                                 CGAL::Triangulation_full_cell<Geom_traits> >;
 
-  /** \brief A point in Euclidean space.*/
-  typedef typename Kernel::Point_d Point_d;
-  /** \brief Geometric traits class that provides the geometric types and predicates needed by Delaunay
-   * triangulations.*/
-  typedef Kernel Geom_traits;
+  /** \brief A (Weighted or not) Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
+  using Triangulation = std::conditional_t<Weighted, CGAL::Regular_triangulation<Kernel, TDS>,
+                                                     CGAL::Delaunay_triangulation<Kernel, TDS>>;
 
- private:
-  typedef typename Kernel::Compute_squared_radius_d Squared_Radius;
-  typedef typename Kernel::Side_of_bounded_sphere_d Is_Gabriel;
-  typedef typename Kernel::Point_dimension_d        Point_Dimension;
-
-  // Vertex_iterator type from CGAL.
-  typedef typename Delaunay_triangulation::Vertex_iterator CGAL_vertex_iterator;
-
-  // size_type type from CGAL.
-  typedef typename Delaunay_triangulation::size_type size_type;
-
-  // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
-  typedef typename std::vector< CGAL_vertex_iterator > Vector_vertex_iterator;
+  /** \brief CGAL kernel container for computations in function of the weighted or not characteristics.*/
+  using A_kernel_d = Alpha_kernel_d<Kernel, Weighted>;
 
   // Numeric type of coordinates in the kernel
-  typedef typename Kernel::FT FT;
+  using FT = typename A_kernel_d::FT;
+
+  /** \brief Sphere is a std::pair<Kernel::Point_d, Kernel::FT> (aka. circurmcenter and squared radius).
+   * If Weighted, Sphere is a Kernel::Weighted_point_d (aka. circurmcenter and the weight value is the squared radius).
+  */
+  using Sphere = typename A_kernel_d::Sphere;
+
+  /** \brief A point, or a weighted point in Euclidean space.*/
+  using Point_d = typename Geom_traits::Point_d;
+
+ private:
+  // Vertex_iterator type from CGAL.
+  using CGAL_vertex_iterator = typename Triangulation::Vertex_iterator;
+
+  // size_type type from CGAL.
+  using size_type = typename Triangulation::size_type;
+
+  // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
+  using Vector_vertex_iterator = std::vector< CGAL_vertex_iterator >;
 
  private:
   /** \brief Vertex iterator vector to switch from simplex tree vertex handle to CGAL vertex iterator.
    * Vertex handles are inserted sequentially, starting at 0.*/
   Vector_vertex_iterator vertex_handle_to_iterator_;
   /** \brief Pointer on the CGAL Delaunay triangulation.*/
-  Delaunay_triangulation* triangulation_;
+  std::unique_ptr<Triangulation> triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
-  Kernel kernel_;
+  A_kernel_d kernel_;
+
   /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
-  std::vector<std::pair<Point_d, FT>> cache_, old_cache_;
+  std::vector<Sphere> cache_, old_cache_;
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
@@ -145,8 +159,7 @@ class Alpha_complex {
    *
    * @param[in] off_file_name OFF file [path and] name.
    */
-  Alpha_complex(const std::string& off_file_name)
-      : triangulation_(nullptr) {
+  Alpha_complex(const std::string& off_file_name) {
     Gudhi::Points_off_reader<Point_d> off_reader(off_file_name);
     if (!off_reader.is_valid()) {
       std::cerr << "Alpha_complex - Unable to read file " << off_file_name << "\n";
@@ -158,23 +171,40 @@ class Alpha_complex {
 
   /** \brief Alpha_complex constructor from a list of points.
    *
-   * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
+   * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
+   * weighted hidden point, ...).
    * 
-   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d
+   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
    * 
-   * The type InputPointRange must be a range for which std::begin and
-   * std::end return input iterators on a Kernel::Point_d.
+   * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+   * Kernel::Point_d or Kernel::Weighted_point_d.
    */
   template<typename InputPointRange >
-  Alpha_complex(const InputPointRange& points)
-      : triangulation_(nullptr) {
+  Alpha_complex(const InputPointRange& points) {
     init_from_range(points);
   }
 
-  /** \brief Alpha_complex destructor deletes the Delaunay triangulation.
+  /** \brief Alpha_complex constructor from a list of points and weights.
+   *
+   * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
+   * weighted hidden point, ...).
+   * 
+   * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d.
+   * 
+   * @param[in] weights Range of points weights. Weights must be in Kernel::FT.
+   * 
+   * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
+   * Kernel::Point_d.
    */
-  ~Alpha_complex() {
-    delete triangulation_;
+  template <typename InputPointRange, typename WeightRange>
+  Alpha_complex(const InputPointRange& points, WeightRange weights) {
+    static_assert(Weighted, "This constructor is not available for non-weighted versions of Alpha_complex");
+    // FIXME: this test is only valid if we have a forward range
+    GUDHI_CHECK(boost::size(weights) == boost::size(points),
+                std::invalid_argument("Points number in range different from weights range number"));
+    auto weighted_points = boost::range::combine(points, weights)
+      | boost::adaptors::transformed([](auto const&t){return Point_d(boost::get<0>(t), boost::get<1>(t));});
+    init_from_range(weighted_points);
   }
 
   // Forbid copy/move constructor/assignment operator
@@ -202,15 +232,17 @@ class Alpha_complex {
                 << std::endl;
     #endif
 
+#if CGAL_VERSION_NR < 1050101000
+    // Make compilation fail if weighted and CGAL < 5.1
+    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1");
+#endif
+
     auto first = std::begin(points);
     auto last = std::end(points);
 
     if (first != last) {
-      // point_dimension function initialization
-      Point_Dimension point_dimension = kernel_.point_dimension_d_object();
-
-      // Delaunay triangulation is point dimension.
-      triangulation_ = new Delaunay_triangulation(point_dimension(*first));
+      // Delaunay triangulation init with point dimension.
+      triangulation_ = std::make_unique<Triangulation>(kernel_.get_dimension(*first));
 
       std::vector<Point_d> point_cloud(first, last);
 
@@ -218,18 +250,20 @@ class Alpha_complex {
       std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
                                           boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
 
-      typedef boost::iterator_property_map<typename std::vector<Point_d>::iterator,
-                                           CGAL::Identity_property_map<std::ptrdiff_t>> Point_property_map;
-      typedef CGAL::Spatial_sort_traits_adapter_d<Kernel, Point_property_map> Search_traits_d;
+      using Point_property_map = boost::iterator_property_map<typename std::vector<Point_d>::iterator,
+                                                              CGAL::Identity_property_map<std::ptrdiff_t>>;
+      using Search_traits_d = CGAL::Spatial_sort_traits_adapter_d<Geom_traits, Point_property_map>;
 
       CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
 
-      typename Delaunay_triangulation::Full_cell_handle hint;
+      typename Triangulation::Full_cell_handle hint;
       for (auto index : indices) {
-        typename Delaunay_triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
-        // Save index value as data to retrieve it after insertion
-        pos->data() = index;
-        hint = pos->full_cell();
+        typename Triangulation::Vertex_handle pos = triangulation_->insert(point_cloud[index], hint);
+        if (pos != nullptr) {
+          // Save index value as data to retrieve it after insertion
+          pos->data() = index;
+          hint = pos->full_cell();
+        }
       }
       // --------------------------------------------------------------------------------------------
       // structure to retrieve CGAL points from vertex handle - one vertex handle per point.
@@ -270,9 +304,7 @@ class Alpha_complex {
       v.clear();
       for (auto vertex : cplx.simplex_vertex_range(s))
         v.push_back(get_point_(vertex));
-      Point_d c = kernel_.construct_circumcenter_d_object()(v.cbegin(), v.cend());
-      FT r = kernel_.squared_distance_d_object()(c, v[0]);
-      cache_.emplace_back(std::move(c), std::move(r));
+      cache_.emplace_back(kernel_.get_sphere(v.cbegin(), v.cend()));
     }
     return cache_[k];
   }
@@ -282,13 +314,13 @@ class Alpha_complex {
   auto radius(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
     auto k = cplx.key(s);
     if(k!=cplx.null_key())
-      return old_cache_[k].second;
+      return kernel_.get_squared_radius(old_cache_[k]);
     // Using a transform_range is slower, currently.
     thread_local std::vector<Point_d> v;
     v.clear();
     for (auto vertex : cplx.simplex_vertex_range(s))
       v.push_back(get_point_(vertex));
-    return kernel_.compute_squared_radius_d_object()(v.cbegin(), v.cend());
+    return kernel_.get_squared_radius(v.cbegin(), v.cend());
   }
 
  public:
@@ -322,9 +354,9 @@ class Alpha_complex {
                       bool exact = false,
                       bool default_filtration_value = false) {
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
-    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
-    typedef typename SimplicialComplexForAlpha::Simplex_handle Simplex_handle;
-    typedef std::vector<Vertex_handle> Vector_vertex;
+    using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
+    using Simplex_handle = typename SimplicialComplexForAlpha::Simplex_handle;
+    using Vector_vertex = std::vector<Vertex_handle>;
 
     if (triangulation_ == nullptr) {
       std::cerr << "Alpha_complex cannot create_complex from a NULL triangulation\n";
@@ -368,6 +400,7 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
 
     if (!default_filtration_value) {
+      CGAL::NT_converter<FT, Filtration_value> cgal_converter;
       // --------------------------------------------------------------------------------------------
       // ### For i : d -> 0
       for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
@@ -378,14 +411,13 @@ class Alpha_complex {
             // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
             if (std::isnan(complex.filtration(f_simplex))) {
               Filtration_value alpha_complex_filtration = 0.0;
-              // No need to compute squared_radius on a single point - alpha is 0.0
-              if (f_simplex_dim > 0) {
+              // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
+              if (Weighted || f_simplex_dim > 0) {
                 auto const& sqrad = radius(complex, f_simplex);
 #if CGAL_VERSION_NR >= 1050000000
                 if(exact) CGAL::exact(sqrad);
 #endif
-                CGAL::NT_converter<FT, Filtration_value> cv;
-                alpha_complex_filtration = cv(sqrad);
+                alpha_complex_filtration = cgal_converter(sqrad);
               }
               complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
@@ -393,7 +425,7 @@ class Alpha_complex {
 #endif  // DEBUG_TRACES
             }
             // No need to propagate further, unweighted points all have value 0
-            if (decr_dim > 1)
+            if (decr_dim > !Weighted)
               propagate_alpha_filtration(complex, f_simplex);
           }
         }
@@ -416,8 +448,8 @@ class Alpha_complex {
   template <typename SimplicialComplexForAlpha, typename Simplex_handle>
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
-    typedef typename SimplicialComplexForAlpha::Filtration_value Filtration_value;
-    typedef typename SimplicialComplexForAlpha::Vertex_handle Vertex_handle;
+    using Filtration_value = typename SimplicialComplexForAlpha::Filtration_value;
+    using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
 
     // ### Foreach Tau face of Sigma
     for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
@@ -450,7 +482,7 @@ class Alpha_complex {
         while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
         Vertex_handle extra = *longiter;
         auto const& cache=get_cache(complex, f_boundary);
-        bool is_gab = kernel_.squared_distance_d_object()(cache.first, get_point_(extra)) >= cache.second;
+        bool is_gab = kernel_.is_gabriel(cache, get_point_(extra));
 #ifdef DEBUG_TRACES
         std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
 #endif  // DEBUG_TRACES

@@ -48,11 +48,14 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
 class Abstract_alpha_complex {
  public:
   virtual std::vector<double> get_point(int vh) = 0;
+
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) = 0;
+
+  virtual ~Abstract_alpha_complex() = default;
 };
 
-class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
+class Exact_Alphacomplex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
   using Point = typename Kernel::Point_d;
@@ -78,7 +81,7 @@ class Exact_Alphacomplex_dD : public Abstract_alpha_complex {
   Alpha_complex<Kernel> alpha_complex_;
 };
 
-class Inexact_Alphacomplex_dD : public Abstract_alpha_complex {
+class Inexact_Alphacomplex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
   using Point = typename Kernel::Point_d;
@@ -104,7 +107,7 @@ class Inexact_Alphacomplex_dD : public Abstract_alpha_complex {
 };
 
 template <complexity Complexity>
-class Alphacomplex_3D : public Abstract_alpha_complex {
+class Alphacomplex_3D final : public Abstract_alpha_complex {
  private:
   using Point = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
 

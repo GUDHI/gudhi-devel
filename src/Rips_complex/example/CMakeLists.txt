@@ -72,8 +72,3 @@ if (DIFF_PATH)
 
 endif()
 
-install(TARGETS Rips_complex_example_from_off DESTINATION bin)
-install(TARGETS Rips_complex_example_one_skeleton_from_points DESTINATION bin)
-install(TARGETS Rips_complex_example_one_skeleton_from_distance_matrix DESTINATION bin)
-install(TARGETS Rips_complex_example_from_csv_distance_matrix DESTINATION bin)
-install(TARGETS Rips_complex_example_one_skeleton_rips_from_correlation_matrix DESTINATION bin)

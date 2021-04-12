@@ -1,16 +1,17 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Mathieu Carrière
+# Author(s):       Mathieu Carrière, Martin Royer
 #
-# Copyright (C) 2018-2019 Inria
+# Copyright (C) 2018-2020 Inria
 #
 # Modification(s):
-#   - YYYY/MM Author: Description of the modification
+#   - 2020/06 Martin: ATOL integration
 
 import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.neighbors     import DistanceMetric
+from sklearn.metrics       import pairwise
 
 from .preprocessing import DiagramScaler, BirthPersistenceTransform
 
@@ -322,22 +323,15 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
         """
-        num_diag, Xfit = len(X), []
+        Xfit = []
         x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         step_x = x_values[1] - x_values[0]
 
-        for i in range(num_diag):
-
-            diagram, num_pts_in_diag = X[i], X[i].shape[0]
-
+        for diagram in X:
+            diagram_int = np.clip(np.ceil((diagram[:,:2] - self.sample_range[0]) / step_x), 0, self.resolution).astype(int)
             bc =  np.zeros(self.resolution)
-            for j in range(num_pts_in_diag):
-                [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                for k in range(min_idx, max_idx):
-                    bc[k] += 1
-
+            for interval in diagram_int:
+                bc[interval[0]:interval[1]] += 1
             Xfit.append(np.reshape(bc,[1,-1]))
 
         Xfit = np.concatenate(Xfit, 0)
@@ -574,3 +568,141 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
             numpy array with shape (**threshold**): output complex vector of coefficients.
         """
         return self.fit_transform([diag])[0,:]
+
+def _lapl_contrast(measure, centers, inertias):
+    """contrast function for vectorising `measure` in ATOL"""
+    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / inertias)
+
+def _gaus_contrast(measure, centers, inertias):
+    """contrast function for vectorising `measure` in ATOL"""
+    return np.exp(-pairwise.pairwise_distances(measure, Y=centers, squared=True) / inertias**2)
+
+def _indicator_contrast(diags, centers, inertias):
+    """contrast function for vectorising `measure` in ATOL"""
+    robe_curve = np.clip(2-pairwise.pairwise_distances(diags, Y=centers)/inertias, 0, 1)
+    return robe_curve
+
+def _cloud_weighting(measure):
+    """automatic uniform weighting with mass 1 for `measure` in ATOL"""
+    return np.ones(shape=measure.shape[0])
+
+def _iidproba_weighting(measure):
+    """automatic uniform weighting with mass 1/N for `measure` in ATOL"""
+    return np.ones(shape=measure.shape[0]) / measure.shape[0]
+
+class Atol(BaseEstimator, TransformerMixin):
+    """
+    This class allows to vectorise measures (e.g. point clouds, persistence diagrams, etc) after a quantisation step.
+
+    ATOL paper: :cite:`royer2019atol`
+
+    Example
+    --------
+    >>> from sklearn.cluster import KMeans
+    >>> from gudhi.representations.vector_methods import Atol
+    >>> import numpy as np
+    >>> a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
+    >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
+    >>> c = np.array([[3, 2, -1], [1, 2, -1]])
+    >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    >>> atol_vectoriser.fit(X=[a, b, c]).centers # doctest: +SKIP
+    >>> # array([[ 2.        ,  0.66666667,  3.33333333],
+    >>> #        [ 2.6       ,  2.8       , -0.4       ]])
+    >>> atol_vectoriser(a)
+    >>> # array([1.18168665, 0.42375966]) # doctest: +SKIP
+    >>> atol_vectoriser(c)
+    >>> # array([0.02062512, 1.25157463]) # doctest: +SKIP
+    >>> atol_vectoriser.transform(X=[a, b, c]) # doctest: +SKIP
+    >>> # array([[1.18168665, 0.42375966],
+    >>> #        [0.29861028, 1.06330156],
+    >>> #        [0.02062512, 1.25157463]])
+    """
+    # Note the example above must be up to date with the one in tests called test_atol_doc
+    def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
+        """
+        Constructor for the Atol measure vectorisation class.
+
+        Parameters:
+            quantiser (Object): Object with `fit` (sklearn API consistent) and `cluster_centers` and `n_clusters`
+                attributes, e.g. sklearn.cluster.KMeans. It will be fitted when the Atol object function `fit` is called.
+            weighting_method (string): constant generic function for weighting the measure points
+                choose from {"cloud", "iidproba"}
+                (default: constant function, i.e. the measure is seen as a point cloud by default).
+                This will have no impact if weights are provided along with measures all the way: `fit` and `transform`.
+            contrast (string): constant function for evaluating proximity of a measure with respect to centers
+                choose from {"gaussian", "laplacian", "indicator"}
+                (default: gaussian contrast function, see page 3 in the ATOL paper).
+        """
+        self.quantiser = quantiser
+        self.contrast = {
+            "gaussian": _gaus_contrast,
+            "laplacian": _lapl_contrast,
+            "indicator": _indicator_contrast,
+        }.get(contrast, _gaus_contrast)
+        self.weighting_method = {
+            "cloud"   : _cloud_weighting,
+            "iidproba": _iidproba_weighting,
+        }.get(weighting_method, _cloud_weighting)
+
+    def fit(self, X, y=None, sample_weight=None):
+        """
+        Calibration step: fit centers to the sample measures and derive inertias between centers.
+
+        Parameters:
+            X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
+                (measures can have different N).
+            y: Ignored, present for API consistency by convention.
+            sample_weight (list of numpy arrays): weights for each measure point in X, optional.
+                If None, the object's weighting_method will be used.
+
+        Returns:
+            self
+        """
+        if not hasattr(self.quantiser, 'fit'):
+            raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
+        if sample_weight is None:
+            sample_weight = np.concatenate([self.weighting_method(measure) for measure in X])
+
+        measures_concat = np.concatenate(X)
+        self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
+        self.centers = self.quantiser.cluster_centers_
+        if self.quantiser.n_clusters == 1:
+            dist_centers = pairwise.pairwise_distances(measures_concat)
+            np.fill_diagonal(dist_centers, 0)
+            self.inertias = np.array([np.max(dist_centers)/2])
+        else:
+            dist_centers = pairwise.pairwise_distances(self.centers)
+            dist_centers[dist_centers == 0] = np.inf
+            self.inertias = np.min(dist_centers, axis=0)/2
+        return self
+
+    def __call__(self, measure, sample_weight=None):
+        """
+        Apply measure vectorisation on a single measure.
+
+        Parameters:
+            measure (n x d numpy array): input measure in R^d.
+
+        Returns:
+            numpy array in R^self.quantiser.n_clusters.
+        """
+        if sample_weight is None:
+            sample_weight = self.weighting_method(measure)
+        return np.sum(sample_weight * self.contrast(measure, self.centers, self.inertias.T).T, axis=1)
+
+    def transform(self, X, sample_weight=None):
+        """
+        Apply measure vectorisation on a list of measures.
+
+        Parameters:
+            X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
+                (measures can have different N).
+            sample_weight (list of numpy arrays): weights for each measure point in X, optional.
+                If None, the object's weighting_method will be used.
+
+        Returns:
+            numpy array with shape (number of measures) x (self.quantiser.n_clusters).
+        """
+        if sample_weight is None:
+            sample_weight = [self.weighting_method(measure) for measure in X]
+        return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])

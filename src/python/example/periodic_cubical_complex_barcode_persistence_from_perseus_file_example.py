@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import matplotlib.pyplot as plot
 import errno
 import os
 import gudhi
@@ -75,6 +74,7 @@ if is_file_perseus(args.file):
     print("betti_numbers()=")
     print(periodic_cubical_complex.betti_numbers())
     if args.no_barcode == False:
+        import matplotlib.pyplot as plot
         gudhi.plot_persistence_barcode(diag)
         plot.show()
 else:
