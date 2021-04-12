@@ -100,7 +100,7 @@ any matching has a cost +inf and thus can be considered to be optimal. In such a
     print("matchings:", matchings)
 
 
-The output is:
+The output is: 
 
 .. testoutput::
 
