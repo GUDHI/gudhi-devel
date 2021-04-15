@@ -641,7 +641,7 @@ cdef class SimplexTree:
             del ptr
 
     def __eq__(self, other:SimplexTree):
-        """Simplex tree equality operator using C++ depth first search operator==
+        """Test for structural equality
         :returns: True if the 2 simplex trees are equal, False otherwise.
         :rtype: bool
         """
