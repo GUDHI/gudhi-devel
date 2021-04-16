@@ -111,7 +111,7 @@ class KNearestNeighbors:
             nargs = {
                 k: v for k, v in self.params.items() if k in {"p", "n_jobs", "metric_params", "algorithm", "leaf_size"}
             }
-            self.nn = NearestNeighbors(self.k, metric=self.metric, **nargs)
+            self.nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric, **nargs)
             self.nn.fit(X)
 
         if self.params["implementation"] == "hnsw":
