@@ -11,7 +11,7 @@ from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
 import numpy
 from numpy import array as np_array
-cimport simplex_tree
+cimport gudhi.simplex_tree
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"

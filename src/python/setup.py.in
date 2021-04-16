@@ -41,10 +41,9 @@ for module in cython_modules:
         libraries=libraries,
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        runtime_library_dirs=runtime_library_dirs,
-        cython_directives = {'language_level': str(sys.version_info[0])},))
+        runtime_library_dirs=runtime_library_dirs,))
 
-ext_modules = cythonize(ext_modules)
+ext_modules = cythonize(ext_modules, compiler_directives={'language_level': str(sys.version_info[0])})
 
 for module in pybind11_modules:
     my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
