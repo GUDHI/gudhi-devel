@@ -17,8 +17,67 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/metafunctions.hpp>
+#include <boost/iterator/counting_iterator.hpp>
 
 #include <vector>
+
+namespace Gudhi {
+namespace rips_complex {
+// A custom graph class, because boost::adjacency_list does not conveniently allow to choose vertex descriptors
+template <class Vertex_handle, class Filtration_value>
+struct Graph {
+  typedef std::vector<Vertex_handle> VList;
+  typedef std::vector<std::tuple<Vertex_handle, Vertex_handle, Filtration_value>> EList;
+  typedef typename VList::const_iterator vertex_iterator;
+  typedef boost::counting_iterator<std::size_t> edge_iterator;
+  VList vlist;
+  EList elist;
+};
+template <class Vertex_handle, class Filtration_value>
+void add_vertex(Vertex_handle v, Graph<Vertex_handle, Filtration_value>&g) { g.vlist.push_back(v); }
+template <class Vertex_handle, class Filtration_value>
+void add_edge(Vertex_handle u, Vertex_handle v, Filtration_value f, Graph<Vertex_handle, Filtration_value>&g) { g.elist.emplace_back(u, v, f); }
+template <class Vertex_handle, class Filtration_value>
+std::size_t num_vertices(Graph<Vertex_handle, Filtration_value> const&g) { return g.vlist.size(); }
+template <class Vertex_handle, class Filtration_value>
+std::size_t num_edges(Graph<Vertex_handle, Filtration_value> const&g) { return g.elist.size(); }
+template <class Vertex_handle, class Filtration_value, class Iter = typename Graph<Vertex_handle, Filtration_value>::vertex_iterator>
+std::pair<Iter, Iter>
+vertices(Graph<Vertex_handle, Filtration_value> const&g) {
+  return { g.vlist.begin(), g.vlist.end() };
+}
+template <class Vertex_handle, class Filtration_value>
+std::pair<boost::counting_iterator<std::size_t>, boost::counting_iterator<std::size_t>>
+edges(Graph<Vertex_handle, Filtration_value> const&g) {
+  typedef boost::counting_iterator<std::size_t> I;
+  return { I(0), I(g.elist.size()) };
+}
+template <class Vertex_handle, class Filtration_value>
+std::size_t source(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<0>(g.elist[e]); }
+template <class Vertex_handle, class Filtration_value>
+std::size_t target(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<1>(g.elist[e]); }
+template <class Vertex_handle, class Filtration_value>
+Filtration_value get(vertex_filtration_t, Graph<Vertex_handle, Filtration_value> const&, Vertex_handle) { return 0; }
+template <class Vertex_handle, class Filtration_value>
+Filtration_value get(edge_filtration_t, Graph<Vertex_handle, Filtration_value> const&g, std::size_t e) { return std::get<2>(g.elist[e]); }
+}  // namespace rips_complex
+}  // namespace Gudhi
+namespace boost {
+template <class Vertex_handle, class Filtration_value>
+struct graph_traits<Gudhi::rips_complex::Graph<Vertex_handle, Filtration_value>> {
+  typedef Gudhi::rips_complex::Graph<Vertex_handle, Filtration_value> G;
+  struct traversal_category : vertex_list_graph_tag, edge_list_graph_tag {};
+  typedef Vertex_handle vertex_descriptor;
+  typedef typename G::vertex_iterator vertex_iterator;
+  typedef std::size_t vertices_size_type;
+  typedef std::size_t edge_descriptor;
+  typedef typename G::edge_iterator edge_iterator;
+  typedef std::size_t edges_size_type;
+  typedef directed_tag directed_category;
+  typedef disallow_parallel_edge_tag edge_parallel_category;
+};
+// Etc, since we don't expose this graph to the world, we know we are not going to query property_traits.
+}
 
 namespace Gudhi {
 
@@ -45,13 +104,8 @@ template <typename Filtration_value>
 class Sparse_rips_complex {
  private:
   // TODO(MG): use a different graph where we know we can safely insert in parallel.
-  //           Use a graph that lets us skip some vertices, for `mini` or redundant points.
-  typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-                                         boost::property<vertex_filtration_t, Filtration_value>,
-                                         boost::property<edge_filtration_t, Filtration_value>>
-      Graph;
-
   typedef int Vertex_handle;
+  typedef rips_complex::Graph<Vertex_handle, Filtration_value> Graph;
 
  public:
   /** \brief Sparse_rips_complex constructor from a list of points.
@@ -137,13 +191,9 @@ class Sparse_rips_complex {
     const int n = boost::size(points);
     double cst = epsilon * (1 - epsilon) / 2;
     graph_.~Graph();
-    new (&graph_) Graph(n);
-    // for(auto v : vertices(g)) // doesn't work :-(
-    typename boost::graph_traits<Graph>::vertex_iterator v_i, v_e;
-    for (std::tie(v_i, v_e) = vertices(graph_); v_i != v_e; ++v_i) {
-      auto v = *v_i;
-      // This whole loop might not be necessary, leave it until someone investigates if it is safe to remove.
-      put(vertex_filtration_t(), graph_, v, 0);
+    new (&graph_) Graph();
+    for (int i = 0; i < n; ++i) {
+      add_vertex(i, graph_);
     }
 
     // TODO(MG):
