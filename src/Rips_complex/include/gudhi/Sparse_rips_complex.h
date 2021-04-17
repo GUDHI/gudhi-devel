@@ -45,6 +45,7 @@ template <typename Filtration_value>
 class Sparse_rips_complex {
  private:
   // TODO(MG): use a different graph where we know we can safely insert in parallel.
+  //           Use a graph that lets us skip some vertices, for `mini` or redundant points.
   typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
                                          boost::property<vertex_filtration_t, Filtration_value>,
                                          boost::property<edge_filtration_t, Filtration_value>>
@@ -58,7 +59,8 @@ class Sparse_rips_complex {
    * @param[in] points Range of points.
    * @param[in] distance Distance function that returns a `Filtration_value` from 2 given points.
    * @param[in] epsilon Approximation parameter. epsilon must be positive.
-   * @param[in] mini Minimal filtration value. Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
+   * @param[in] mini Not implemented yet, and broken in previous versions. Minimal filtration value.
+   * Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
    * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    *
    */
@@ -67,6 +69,7 @@ class Sparse_rips_complex {
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
+    // TODO: stop choose_n_farthest_points once it reaches mini? Then the graph vertices would not be [0, ..., n-1] which complicates things.
     subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
@@ -116,9 +119,9 @@ class Sparse_rips_complex {
     double cst = epsilon_ * (1 - epsilon_) / 2;
     auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
       auto filt = complex.filtration(sh);
-      auto mini = filt * cst;
+      auto min_f = filt * cst;
       for(auto v : complex.simplex_vertex_range(sh)){
-        if(lambda[v] < mini)
+        if(lambda[v] < min_f)
           return true; // v died before this simplex could be born
       }
       return false;
@@ -149,12 +152,22 @@ class Sparse_rips_complex {
     for (int i = 0; i < n; ++i) {
       auto&& pi = points[i];
       auto li = params[i];
-      if (li < mini) break;
+      // FIXME: see below about mini. It might be ok to uncomment just this one, but it requires a proof.
+      // if ((li < mini || li <= 0) && i != 0) break;
+      if (li <= 0 && i != 0) break;
+      // The parameter of the first point is not very meaningful, it is supposed to be infinite,
+      // but if the type does not support it...
+      // Points with multiplicity get connected to their first representative, no need to handle
+      // the redundant ones in the outer loop.
       for (int j = i + 1; j < n; ++j) {
         auto&& pj = points[j];
         auto d = dist(pi, pj);
         auto lj = params[j];
-        if (lj < mini) break;
+        // FIXME: It would make sense to ignore the points with low param completely, but the current graph type we are
+        // using implicitly inserts all the vertices 0 ... n-1, so this would create isolated vertices, which is bad.
+        // If we do end up ignoring those points, we should do it early, around choose_n_farthest_points. But be careful
+        // that the size of lambda should reflect the original number of points then.
+        // if (lj < mini) break;
         GUDHI_CHECK(lj <= li, "Bad furthest point sorting");
         Filtration_value alpha;
 
