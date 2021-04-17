@@ -152,5 +152,5 @@ def test_sparse_with_multiplicity():
     ]
     rips = RipsComplex(points=points, sparse=0.01)
     simplex_tree = rips.create_simplex_tree(max_dimension=2)
-    assert simplex_tree.num_simplices() == 25
+    assert simplex_tree.num_simplices() == 7
     diag = simplex_tree.persistence()

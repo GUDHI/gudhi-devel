@@ -76,7 +76,7 @@ struct graph_traits<Gudhi::rips_complex::Graph<Vertex_handle, Filtration_value>>
   typedef directed_tag directed_category;
   typedef disallow_parallel_edge_tag edge_parallel_category;
 };
-// Etc, since we don't expose this graph to the world, we know we are not going to query property_traits.
+// Etc, since we don't expose this graph to the world, we know we are not going to query property_traits for instance.
 }
 
 namespace Gudhi {
@@ -113,8 +113,7 @@ class Sparse_rips_complex {
    * @param[in] points Range of points.
    * @param[in] distance Distance function that returns a `Filtration_value` from 2 given points.
    * @param[in] epsilon Approximation parameter. epsilon must be positive.
-   * @param[in] mini Not implemented yet, and broken in previous versions. Minimal filtration value.
-   * Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
+   * @param[in] mini Minimal filtration value. Ignore anything below this scale. This is a less efficient version of `Gudhi::subsampling::sparsify_point_set()`.
    * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    *
    */
@@ -123,7 +122,7 @@ class Sparse_rips_complex {
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
-    // TODO: stop choose_n_farthest_points once it reaches mini? Then the graph vertices would not be [0, ..., n-1] which complicates things.
+    // TODO: stop choose_n_farthest_points once it reaches mini or 0?
     subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
@@ -165,10 +164,10 @@ class Sparse_rips_complex {
       complex.expansion(dim_max);
       return;
     }
-    const int n = boost::size(params);
-    std::vector<Filtration_value> lambda(n);
+    const Vertex_handle n = num_vertices(graph_);
+    std::vector<Filtration_value> lambda(max_v + 1);
     // lambda[original_order]=params[sorted_order]
-    for(int i=0;i<n;++i)
+    for(Vertex_handle i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_) / 2;
     auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
@@ -188,36 +187,32 @@ class Sparse_rips_complex {
   template <typename Distance>
   void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {
     const auto& points = sorted_points; // convenience alias
-    const int n = boost::size(points);
+    Vertex_handle n = boost::size(points);
     double cst = epsilon * (1 - epsilon) / 2;
-    graph_.~Graph();
-    new (&graph_) Graph();
-    for (int i = 0; i < n; ++i) {
-      add_vertex(i, graph_);
+    max_v = -1; // Useful for the size of the map lambda.
+    for (Vertex_handle i = 0; i < n; ++i) {
+      if ((params[i] < mini || params[i] <= 0) && i != 0) break;
+      // The parameter of the first point is not very meaningful, it is supposed to be infinite,
+      // but if the type does not support it...
+      // It would be better to do this reduction of the number of points earlier, around choose_n_farthest_points.
+      add_vertex(points[i], graph_);
+      max_v = std::max(max_v, points[i]);
     }
+    n = num_vertices(graph_);
 
     // TODO(MG):
     // - make it parallel
     // - only test near-enough neighbors
-    for (int i = 0; i < n; ++i) {
+    for (Vertex_handle i = 0; i < n; ++i) {
       auto&& pi = points[i];
       auto li = params[i];
-      // FIXME: see below about mini. It might be ok to uncomment just this one, but it requires a proof.
-      // if ((li < mini || li <= 0) && i != 0) break;
-      if (li <= 0 && i != 0) break;
-      // The parameter of the first point is not very meaningful, it is supposed to be infinite,
-      // but if the type does not support it...
-      // Points with multiplicity get connected to their first representative, no need to handle
-      // the redundant ones in the outer loop.
-      for (int j = i + 1; j < n; ++j) {
+      // If we inserted all the points, points with multiplicity would get connected to their first representative,
+      // no need to handle the redundant ones in the outer loop.
+      // if (li <= 0 && i != 0) break;
+      for (Vertex_handle j = i + 1; j < n; ++j) {
         auto&& pj = points[j];
         auto d = dist(pi, pj);
         auto lj = params[j];
-        // FIXME: It would make sense to ignore the points with low param completely, but the current graph type we are
-        // using implicitly inserts all the vertices 0 ... n-1, so this would create isolated vertices, which is bad.
-        // If we do end up ignoring those points, we should do it early, around choose_n_farthest_points. But be careful
-        // that the size of lambda should reflect the original number of points then.
-        // if (lj < mini) break;
         GUDHI_CHECK(lj <= li, "Bad furthest point sorting");
         Filtration_value alpha;
 
@@ -241,6 +236,7 @@ class Sparse_rips_complex {
 
   Graph graph_;
   double epsilon_;
+  Vertex_handle max_v;
   // Because of the arbitrary split between constructor and create_complex
   // sorted_points[sorted_order]=original_order
   std::vector<Vertex_handle> sorted_points;
