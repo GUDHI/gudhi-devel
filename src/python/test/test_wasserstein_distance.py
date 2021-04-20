@@ -67,15 +67,24 @@ def test_handle_essential_parts():
 
 
 def test_get_essential_parts():
-    diag = np.array([[0, 1], [3, 5], [2, np.inf], [3, np.inf], [-np.inf, 8], [-np.inf, 12], [-np.inf, -np.inf],
+    diag1 = np.array([[0, 1], [3, 5], [2, np.inf], [3, np.inf], [-np.inf, 8], [-np.inf, 12], [-np.inf, -np.inf],
                      [np.inf, np.inf], [-np.inf, np.inf], [-np.inf, np.inf]])
 
-    res = _get_essential_parts(diag)
+    diag2 = np.array([[0, 1], [3, 5], [2, np.inf], [3, np.inf]])
+
+    res  = _get_essential_parts(diag1)
+    res2 = _get_essential_parts(diag2)
     assert np.array_equal(res[0], [4, 5])
     assert np.array_equal(res[1], [2, 3])
     assert np.array_equal(res[2], [8, 9])
     assert np.array_equal(res[3], [6]   )
     assert np.array_equal(res[4], [7]   )
+
+    assert np.array_equal(res2[0], []    )
+    assert np.array_equal(res2[1], [2, 3])
+    assert np.array_equal(res2[2], []    )
+    assert np.array_equal(res2[3], []    )
+    assert np.array_equal(res2[4], []    )
 
 
 def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):
@@ -152,7 +161,7 @@ def pot_wrap(**extra):
     return fun
 
 def test_wasserstein_distance_pot():
-    _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True)
+    _basic_wasserstein(pot, 1e-15, test_infinity=False, test_matching=True)  # pot with its standard args
     _basic_wasserstein(pot_wrap(enable_autodiff=True, keep_essential_parts=False), 1e-15, test_infinity=False, test_matching=False)
 
 def test_wasserstein_distance_hera():

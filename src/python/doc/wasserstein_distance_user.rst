@@ -92,6 +92,7 @@ any matching has a cost +inf and thus can be considered to be optimal. In such a
     for j in dgm2_to_diagonal:
         print("point %s in dgm2 is matched to the diagonal" %j)
 
+    # An example where essential part cardinalities differ
     dgm3 = np.array([[1, 2], [0, np.inf]])
     dgm4 = np.array([[1, 2], [0, np.inf], [1, np.inf]])
     cost, matchings = gudhi.wasserstein.wasserstein_distance(dgm3, dgm4, matching=True, order=1, internal_p=2)
