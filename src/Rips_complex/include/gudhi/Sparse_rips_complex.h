@@ -164,10 +164,10 @@ class Sparse_rips_complex {
       complex.expansion(dim_max);
       return;
     }
-    const Vertex_handle n = num_vertices(graph_);
+    const std::size_t n = num_vertices(graph_);
     std::vector<Filtration_value> lambda(max_v + 1);
     // lambda[original_order]=params[sorted_order]
-    for(Vertex_handle i=0;i<n;++i)
+    for(std::size_t i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_) / 2;
     auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
@@ -187,10 +187,10 @@ class Sparse_rips_complex {
   template <typename Distance>
   void compute_sparse_graph(Distance& dist, double const epsilon, Filtration_value const mini, Filtration_value const maxi) {
     const auto& points = sorted_points; // convenience alias
-    Vertex_handle n = boost::size(points);
+    std::size_t n = boost::size(points);
     double cst = epsilon * (1 - epsilon) / 2;
     max_v = -1; // Useful for the size of the map lambda.
-    for (Vertex_handle i = 0; i < n; ++i) {
+    for (std::size_t i = 0; i < n; ++i) {
       if ((params[i] < mini || params[i] <= 0) && i != 0) break;
       // The parameter of the first point is not very meaningful, it is supposed to be infinite,
       // but if the type does not support it...
@@ -203,13 +203,13 @@ class Sparse_rips_complex {
     // TODO(MG):
     // - make it parallel
     // - only test near-enough neighbors
-    for (Vertex_handle i = 0; i < n; ++i) {
+    for (std::size_t i = 0; i < n; ++i) {
       auto&& pi = points[i];
       auto li = params[i];
       // If we inserted all the points, points with multiplicity would get connected to their first representative,
       // no need to handle the redundant ones in the outer loop.
       // if (li <= 0 && i != 0) break;
-      for (Vertex_handle j = i + 1; j < n; ++j) {
+      for (std::size_t j = i + 1; j < n; ++j) {
         auto&& pj = points[j];
         auto d = dist(pi, pj);
         auto lj = params[j];
