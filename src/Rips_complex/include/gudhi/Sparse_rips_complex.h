@@ -15,7 +15,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/choose_n_farthest_points.h>
 
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <boost/range/metafunctions.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 
@@ -118,7 +118,7 @@ class Sparse_rips_complex {
    *
    */
   template <typename RandomAccessPointRange, typename Distance>
-  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
+  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double const epsilon, Filtration_value const mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value const maxi=std::numeric_limits<Filtration_value>::infinity())
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
@@ -139,7 +139,7 @@ class Sparse_rips_complex {
    * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    */
   template <typename DistanceMatrix>
-  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
+  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double const epsilon, Filtration_value const mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value const maxi=std::numeric_limits<Filtration_value>::infinity())
       : Sparse_rips_complex(boost::irange<Vertex_handle>(0, boost::size(distance_matrix)),
                             [&](Vertex_handle i, Vertex_handle j) { return (i==j) ? 0 : (i<j) ? distance_matrix[j][i] : distance_matrix[i][j]; },
                             epsilon, mini, maxi) {}
@@ -155,7 +155,7 @@ class Sparse_rips_complex {
    *
    */
   template <typename SimplicialComplexForRips>
-  void create_complex(SimplicialComplexForRips& complex, int dim_max) {
+  void create_complex(SimplicialComplexForRips& complex, int const dim_max) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Sparse_rips_complex::create_complex - simplicial complex is not empty"));
 
@@ -185,7 +185,7 @@ class Sparse_rips_complex {
  private:
   // PointRange must be random access.
   template <typename Distance>
-  void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {
+  void compute_sparse_graph(Distance& dist, double const epsilon, Filtration_value const mini, Filtration_value const maxi) {
     const auto& points = sorted_points; // convenience alias
     Vertex_handle n = boost::size(points);
     double cst = epsilon * (1 - epsilon) / 2;
