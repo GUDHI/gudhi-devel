@@ -315,7 +315,7 @@ class Cell_complex {
   const Cell_point_map& cell_point_map() const { return cell_point_map_; }
 
   /**
-   * \brief Conxtructor for the class Cell_complex.
+   * \brief Constructor for the class Cell_complex.
    *
    * \param[in] intrinsic_dimension The dimension of the cell complex.
    */

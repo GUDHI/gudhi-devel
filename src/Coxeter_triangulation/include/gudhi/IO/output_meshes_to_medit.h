@@ -68,11 +68,14 @@ typename std::enable_if<I != sizeof...(Meshes), void>::type fill_meshes(Vertex_p
                                 tetrahedra_scalar_range, index + mesh.vertex_points.size(), meshes...);
 }
 
-/** \brief Outputs a text file with specified meshes that can be visualized in Medit.
+/** \brief Outputs a text file with specified meshes that can be visualized in
+ *   <a target="_blank" href="https://www.ljll.math.upmc.fr/frey/software.html">Medit</a>.
  *
  *  @param[in] amb_d Ambient dimension. Can be 2 or 3.
  *  @param[in] file_name The name of the output file.
  *  @param[in] meshes A pack of meshes to be specified separated by commas.
+ * 
+ *  @ingroup coxeter_triangulation
  */
 template <typename... Meshes>
 void output_meshes_to_medit(std::size_t amb_d, std::string file_name, const Meshes&... meshes) {

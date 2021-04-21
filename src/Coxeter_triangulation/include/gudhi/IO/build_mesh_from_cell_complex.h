@@ -114,6 +114,10 @@ void populate_mesh(Mesh_medit& output, Simplex_cell_map& sc_map, Configuration c
     }
 }
 
+/** @brief Builds a Gudhi::coxeter_triangulation::Mesh_medit from a Gudhi::coxeter_triangulation::Cell_complex
+ * 
+ *  @ingroup coxeter_triangulation
+ */
 template <class Cell_complex>
 Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
                                         Configuration i_configuration = Configuration(),

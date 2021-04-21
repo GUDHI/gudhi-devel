@@ -20,11 +20,11 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \class Mesh_medit
- * \brief Structure to store a mesh that can be output in Medit .mesh file format
- *  using the output_meshes_to_medit method.
+/** \class Mesh_medit
+ *  \brief Structure to store a mesh that can be output in Medit .mesh file format
+ *   using the output_meshes_to_medit method.
  *
- * \ingroup coxeter_triangulation
+ *  \ingroup coxeter_triangulation
  */
 struct Mesh_medit {
   /** \brief Type of a range of vertices. */
