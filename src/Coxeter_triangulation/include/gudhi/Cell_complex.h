@@ -25,18 +25,14 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/**
- *  \ingroup coxeter_triangulation
- */
-
 /** \class Cell_complex
  *  \brief A class that constructs the cell complex from the output provided by the class
- *   Gudhi::Manifold_tracing<Triangulation_>.
+ *   \ref Gudhi::coxeter_triangulation::Manifold_tracing.
+ * 
+ *  The use and interfaces of this cell complex is limited to the \ref coxeter_triangulation implementation.
  *
  *  \tparam Out_simplex_map_ The type of a map from a simplex type that is a
  *   model of SimplexInCoxeterTriangulation to Eigen::VectorXd.
- *
- *  \ingroup coxeter_triangulation
  */
 template <class Out_simplex_map_>
 class Cell_complex {

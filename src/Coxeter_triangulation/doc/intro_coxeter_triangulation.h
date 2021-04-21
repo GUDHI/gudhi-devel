@@ -166,6 +166,8 @@ The base function classes above can be composed or modified into new functions u
   The type of \f$T\f$ is required to be a model of the concept
   \ref Gudhi::coxeter_triangulation::TriangulationForManifoldTracing "TriangulationForManifoldTracing".
 
+It is also possible to implement your own function as detailed in this \ref exampleswithcustomfunction.
+
 \section cellcomplex Cell complex construction
 
 The output of the manifold tracing algorithm can be transformed into the Hasse diagram of a cell complex that
@@ -193,6 +195,9 @@ from the cells in the cell complex to the permutahedral representations of the c
 triangulation.
 \li The method \ref Gudhi::coxeter_triangulation::Cell_complex::cell_point_map() "cell_point_map()" returns a map from
 the vertex cells in the cell complex to their Cartesian coordinates.
+
+The use and interfaces of this \ref Gudhi::coxeter_triangulation::Cell_complex "Cell_complex" is limited to the
+Coxeter_triangulation implementation.
 
 \section example Examples
 

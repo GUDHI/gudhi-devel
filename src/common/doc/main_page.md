@@ -314,7 +314,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 3.4.0<br>
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref eigen &ge; 3.1.0
     </td>
  </tr>
  <tr>
