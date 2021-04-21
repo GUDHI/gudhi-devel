@@ -13,7 +13,7 @@
 #include <gudhi/Implicit_manifold_intersection_oracle.h>
 #include <gudhi/Manifold_tracing.h>
 #include <gudhi/Cell_complex.h>
-#include <gudhi/Functions/random_orthogonal_matrix.h>
+#include <gudhi/Functions/random_orthogonal_matrix.h>  // requires CGAL
 
 #include <gudhi/IO/build_mesh_from_cell_complex.h>
 #include <gudhi/IO/output_meshes_to_medit.h>

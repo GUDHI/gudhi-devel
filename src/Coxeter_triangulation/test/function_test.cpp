@@ -27,7 +27,6 @@
 #include <gudhi/Functions/Function_lemniscate_revolution_in_R3.h>
 #include <gudhi/Functions/Function_iron_in_R3.h>
 #include <gudhi/Functions/Function_moment_curve_in_Rd.h>
-#include <gudhi/Functions/random_orthogonal_matrix.h>
 #include <gudhi/Functions/Embed_in_Rd.h>
 #include <gudhi/Functions/Translate.h>
 #include <gudhi/Functions/Linear_transformation.h>
@@ -109,17 +108,6 @@ BOOST_AUTO_TEST_CASE(function) {
   {
     Function_moment_curve_in_Rd fun_moment_curve(3, 5);
     test_function(fun_moment_curve);
-  }
-  {
-    // random orthogonal matrix
-    Eigen::MatrixXd matrix = random_orthogonal_matrix(5);
-    Eigen::MatrixXd id_matrix = matrix.transpose() * matrix;
-    for (std::size_t i = 0; i < 5; ++i)
-      for (std::size_t j = 0; j < 5; ++j)
-        if (i == j)
-          GUDHI_TEST_FLOAT_EQUALITY_CHECK(id_matrix(i, j), 1.0, 1e-10);
-        else
-          GUDHI_TEST_FLOAT_EQUALITY_CHECK(id_matrix(i, j), 0.0, 1e-10);
   }
   {
     // function embedding
