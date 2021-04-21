@@ -198,7 +198,7 @@ def _warn_infty(matching):
         warnings.warn('Cardinality of essential parts differs. Distance (cost) is +infty, and the returned matching is None.')
         return np.inf, None
     else:
-        warnings.warn('Cardinality of essential parts diffes. Distance (cost) is +infty.')
+        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +infty.')
         return np.inf
 
 
