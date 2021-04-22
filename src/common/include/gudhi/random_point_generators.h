@@ -18,6 +18,7 @@
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <vector>  // for vector<>
+#include <cmath> // for M_PI
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -164,11 +165,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t nu
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 6.2832 * k1 / num_lines;
-      v = 6.2832 * k2 / num_lines;
+      u = 2 * M_PI * k1 / num_lines;
+      v = 2 * M_PI * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 6.2832);
-      v = rng.get_double(0, 6.2832);
+      u = rng.get_double(0, 2 * M_PI);
+      v = rng.get_double(0, 2 * M_PI);
     }
     Point p = construct_point(k,
                               (R + r * std::cos(u)) * std::cos(v),
@@ -200,7 +201,7 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
                                             (100. + radius_noise_percentage) / 100.);
       }
       std::vector<typename Kernel::FT> cp2 = current_point;
-      double alpha = 6.2832 * slice_idx / num_slices;
+      double alpha = 2 * M_PI * slice_idx / num_slices;
       cp2.push_back(radius_noise_ratio * std::cos(alpha));
       cp2.push_back(radius_noise_ratio * std::sin(alpha));
       generate_uniform_points_on_torus_d(
@@ -234,7 +235,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
       std::vector<typename Kernel::FT> pt;
       pt.reserve(dim * 2);
       for (int curdim = 0; curdim < dim; ++curdim) {
-        FT alpha = rng.get_double(0, 6.2832);
+        FT alpha = rng.get_double(0, 2 * M_PI);
         pt.push_back(radius_noise_ratio * std::cos(alpha));
         pt.push_back(radius_noise_ratio * std::sin(alpha));
       }
@@ -370,7 +371,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std:
   for (std::size_t i = 0; i < num_points;) {
     Point p_sphere = *generator++;  // First 3 coords
 
-    FT alpha = rng.get_double(0, 6.2832);
+    FT alpha = rng.get_double(0, 2 * M_PI);
     std::vector<FT> pt(5);
     pt[0] = k_coord(p_sphere, 0);
     pt[1] = k_coord(p_sphere, 1);
@@ -403,11 +404,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_3D(std::si
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 6.2832 * k1 / num_lines;
-      v = 6.2832 * k2 / num_lines;
+      u = 2 * M_PI * k1 / num_lines;
+      v = 2 * M_PI * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 6.2832);
-      v = rng.get_double(0, 6.2832);
+      u = rng.get_double(0, 2 * M_PI);
+      v = rng.get_double(0, 2 * M_PI);
     }
     double tmp = cos(u / 2) * sin(v) - sin(u / 2) * sin(2. * v);
     Point p = construct_point(k,
@@ -439,11 +440,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_4D(std::si
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 6.2832 * k1 / num_lines;
-      v = 6.2832 * k2 / num_lines;
+      u = 2 * M_PI * k1 / num_lines;
+      v = 2 * M_PI * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 6.2832);
-      v = rng.get_double(0, 6.2832);
+      u = rng.get_double(0, 2 * M_PI);
+      v = rng.get_double(0, 2 * M_PI);
     }
     Point p = construct_point(k,
                               (a + b * cos(v)) * cos(u) + (noise == 0. ? 0. : rng.get_double(0, noise)),
@@ -478,11 +479,11 @@ generate_points_on_klein_bottle_variant_5D(
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 6.2832 * k1 / num_lines;
-      v = 6.2832 * k2 / num_lines;
+      u = 2 * M_PI * k1 / num_lines;
+      v = 2 * M_PI * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 6.2832);
-      v = rng.get_double(0, 6.2832);
+      u = rng.get_double(0, 2 * M_PI);
+      v = rng.get_double(0, 2 * M_PI);
     }
     FT x1 = (a + b * cos(v)) * cos(u);
     FT x2 = (a + b * cos(v)) * sin(u);
