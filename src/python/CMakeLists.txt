@@ -290,7 +290,7 @@ if(PYTHONINTERP_FOUND)
           if(SKLEARN_FOUND)
             if(OT_FOUND)
               if(PYBIND11_FOUND)
-                if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                   set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                   # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
                   # Images and biblio warnings because not found on developper version
@@ -312,10 +312,10 @@ if(PYTHONINTERP_FOUND)
 
                   # Set missing or not modules
                   set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                  message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                  message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
                   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
               else(PYBIND11_FOUND)
                 message("++ Python documentation module will not be compiled because pybind11 was not found")
                 set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
