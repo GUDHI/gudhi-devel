@@ -428,7 +428,7 @@ cdef class SimplexTree:
         :param max_dim: Expansion maximal dimension value.
         :type max_dim: int
         :param blocker_func: Blocker oracle.
-        :type blocker_func: Its concept is `Boolean blocker_func(list of int)`
+        :type blocker_func: Callable[[List[int]], bool]
         """
         self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 

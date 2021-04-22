@@ -39,7 +39,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
   using Extended_filtration_data = typename Base::Extended_filtration_data;
-  typedef bool (*blocker_func)(Simplex simplex, void *user_data);
+  typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
 
  public:
 
@@ -189,7 +189,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return collapsed_stree_ptr;
   }
 
-  void expansion_with_blockers_callback(int dimension, blocker_func user_func, void *user_data) {
+  void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) {
     Base::expansion_with_blockers(dimension, [&](Simplex_handle sh){
       Simplex simplex;
       for (auto vertex : Base::simplex_vertex_range(sh)) {
