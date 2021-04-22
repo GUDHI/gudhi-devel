@@ -200,46 +200,43 @@ Then, it is asked to display information about the alpha complex.
     print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',
           stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
     fmt = '%s -> %.2f'
-    for filtered_value in stree.get_filtration():
-        print(fmt % tuple(filtered_value))
+    for simplex in stree.get_simplices():
+        print(fmt % tuple(simplex))
 
 The output is:
 
-..
-   the line below should be a '.. testoutput::' but order fails in the output on OSx
-
-.. code-block:: text
+.. testoutput::
 
    Weighted alpha complex is of dimension  3  -  29  simplices -  5  vertices.
-   [0] -> -4.00
-   [1] -> -4.00
-   [2] -> -4.00
-   [3] -> -4.00
-   [0, 1] -> -2.00
-   [0, 2] -> -2.00
-   [1, 2] -> -2.00
-   [0, 3] -> -2.00
-   [1, 3] -> -2.00
-   [2, 3] -> -2.00
-   [0, 2, 3] -> -1.33
-   [1, 2, 3] -> -1.33
-   [0, 1, 2] -> -1.33
-   [0, 1, 3] -> -1.33
    [0, 1, 2, 3] -> -1.00
-   [4] -> -1.00
-   [3, 4] -> -1.00
-   [0, 4] -> 23.00
-   [1, 4] -> 23.00
-   [2, 4] -> 23.00
-   [0, 3, 4] -> 23.00
-   [1, 3, 4] -> 23.00
-   [2, 3, 4] -> 23.00
-   [0, 1, 4] -> 95.00
-   [0, 2, 4] -> 95.00
-   [1, 2, 4] -> 95.00
+   [0, 1, 2] -> -1.33
    [0, 1, 3, 4] -> 95.00
+   [0, 1, 3] -> -1.33
+   [0, 1, 4] -> 95.00
+   [0, 1] -> -2.00
    [0, 2, 3, 4] -> 95.00
+   [0, 2, 3] -> -1.33
+   [0, 2, 4] -> 95.00
+   [0, 2] -> -2.00
+   [0, 3, 4] -> 23.00
+   [0, 3] -> -2.00
+   [0, 4] -> 23.00
+   [0] -> -4.00
    [1, 2, 3, 4] -> 95.00
+   [1, 2, 3] -> -1.33
+   [1, 2, 4] -> 95.00
+   [1, 2] -> -2.00
+   [1, 3, 4] -> 23.00
+   [1, 3] -> -2.00
+   [1, 4] -> 23.00
+   [1] -> -4.00
+   [2, 3, 4] -> 23.00
+   [2, 3] -> -2.00
+   [2, 4] -> 23.00
+   [2] -> -4.00
+   [3, 4] -> -1.00
+   [3] -> -4.00
+   [4] -> -1.00
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
