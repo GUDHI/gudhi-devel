@@ -205,7 +205,10 @@ Then, it is asked to display information about the alpha complex.
 
 The output is:
 
-.. testoutput::
+..
+   the line below should be a '.. testoutput::' but order fails in the output on OSx
+
+.. code-block:: text
 
    Weighted alpha complex is of dimension  3  -  29  simplices -  5  vertices.
    [0] -> -4.00
