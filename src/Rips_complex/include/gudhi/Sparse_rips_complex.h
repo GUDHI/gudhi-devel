@@ -53,9 +53,9 @@ edges(Graph<Vertex_handle, Filtration_value> const&g) {
   return { I(0), I(g.elist.size()) };
 }
 template <class Vertex_handle, class Filtration_value>
-std::size_t source(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<0>(g.elist[e]); }
+Vertex_handle source(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<0>(g.elist[e]); }
 template <class Vertex_handle, class Filtration_value>
-std::size_t target(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<1>(g.elist[e]); }
+Vertex_handle target(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<1>(g.elist[e]); }
 template <class Vertex_handle, class Filtration_value>
 Filtration_value get(vertex_filtration_t, Graph<Vertex_handle, Filtration_value> const&, Vertex_handle) { return 0; }
 template <class Vertex_handle, class Filtration_value>
