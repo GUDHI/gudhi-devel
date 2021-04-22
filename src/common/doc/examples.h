@@ -92,5 +92,8 @@
  * @example Persistence_representations/persistence_landscapes/create_landscapes.cpp
  * @example Persistence_representations/persistence_landscapes/compute_distance_of_landscapes.cpp
  * @example Persistence_representations/persistence_landscapes/plot_landscapes.cpp
+ * @example Coxeter_triangulation/cell_complex_from_basic_circle_manifold.cpp
+ * @example Coxeter_triangulation/manifold_tracing_custom_function.cpp
+ * @example Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp
  */
  

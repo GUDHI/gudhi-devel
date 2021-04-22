@@ -26,8 +26,5 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   gudhi_add_boost_test(Coxeter_triangulation_manifold_tracing_test)
   
   add_executable ( Coxeter_triangulation_cell_complex_test cell_complex_test.cpp )
-  if (TBB_FOUND)
-     target_link_libraries(Coxeter_triangulation_cell_complex_test ${TBB_LIBRARIES})
-  endif()
   gudhi_add_boost_test(Coxeter_triangulation_cell_complex_test)
 endif()
