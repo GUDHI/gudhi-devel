@@ -99,20 +99,13 @@ Or install it definitely in your Python packages folder:
 .. code-block:: bash
 
     cd /path-to-gudhi/build/python
-    # May require sudo or administrator privileges
-    make install
+    python setup.py install # add --user to the command if you do not have the permission
 
 .. note::
 
-    :code:`make install` is only a
-    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
-    to shortcut :code:`python setup.py install` command.
     It does not take into account :code:`CMAKE_INSTALL_PREFIX`.
-    But one can use :code:`python setup.py install ...` specific options in the python directory:
-
-.. code-block:: bash
-
-    python setup.py install --prefix /home/gudhi  # Install in /home/gudhi directory
+    But one can use
+    `alternate location installation <https://docs.python.org/3/install/#alternate-installation>`_.
 
 Test suites
 ===========
