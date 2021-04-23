@@ -27,8 +27,6 @@
 
 namespace Gudhi {
 
-constexpr double pi = boost::math::constants::pi<double>();
-
 ///////////////////////////////////////////////////////////////////////////////
 // Note: All these functions have been tested with the CGAL::Epick_d kernel
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,6 +150,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_moment_curve(std::size_
 template <typename Kernel/*, typename TC_basis*/>
 std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t num_points, double R, double r,
                                                                   bool uniform = false) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
@@ -167,11 +167,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t nu
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 2 * pi * k1 / num_lines;
-      v = 2 * pi * k2 / num_lines;
+      u = two_pi * k1 / num_lines;
+      v = two_pi * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 2 * pi);
-      v = rng.get_double(0, 2 * pi);
+      u = rng.get_double(0, two_pi);
+      v = rng.get_double(0, two_pi);
     }
     Point p = construct_point(k,
                               (R + r * std::cos(u)) * std::cos(v),
@@ -190,6 +190,8 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
                                                double radius_noise_percentage = 0.,
                                                std::vector<typename Kernel::FT> current_point =
                                                        std::vector<typename Kernel::FT>()) {
+  using namespace boost::math::double_constants;
+
   CGAL::Random rng;
   int point_size = static_cast<int>(current_point.size());
   if (point_size == 2 * dim) {
@@ -203,7 +205,7 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
                                             (100. + radius_noise_percentage) / 100.);
       }
       std::vector<typename Kernel::FT> cp2 = current_point;
-      double alpha = 2 * pi * slice_idx / num_slices;
+      double alpha = two_pi * slice_idx / num_slices;
       cp2.push_back(radius_noise_ratio * std::cos(alpha));
       cp2.push_back(radius_noise_ratio * std::sin(alpha));
       generate_uniform_points_on_torus_d(
@@ -215,6 +217,8 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
 template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num_points, int dim, bool uniform = false,
                                                                  double radius_noise_percentage = 0.) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
@@ -237,7 +241,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
       std::vector<typename Kernel::FT> pt;
       pt.reserve(dim * 2);
       for (int curdim = 0; curdim < dim; ++curdim) {
-        FT alpha = rng.get_double(0, 2 * pi);
+        FT alpha = rng.get_double(0, two_pi);
         pt.push_back(radius_noise_ratio * std::cos(alpha));
         pt.push_back(radius_noise_ratio * std::sin(alpha));
       }
@@ -360,6 +364,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_two_spheres_d(std::size
 template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std::size_t num_points,
                                                                             double sphere_radius) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::FT FT;
   typedef typename Kernel::Point_d Point;
   Kernel k;
@@ -373,7 +379,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std:
   for (std::size_t i = 0; i < num_points;) {
     Point p_sphere = *generator++;  // First 3 coords
 
-    FT alpha = rng.get_double(0, 2 * pi);
+    FT alpha = rng.get_double(0, two_pi);
     std::vector<FT> pt(5);
     pt[0] = k_coord(p_sphere, 0);
     pt[1] = k_coord(p_sphere, 1);
@@ -391,6 +397,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std:
 template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_3D(std::size_t num_points, double a, double b,
                                                                          bool uniform = false) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
@@ -406,11 +414,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_3D(std::si
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 2 * pi * k1 / num_lines;
-      v = 2 * pi * k2 / num_lines;
+      u = two_pi * k1 / num_lines;
+      v = two_pi * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 2 * pi);
-      v = rng.get_double(0, 2 * pi);
+      u = rng.get_double(0, two_pi);
+      v = rng.get_double(0, two_pi);
     }
     double tmp = cos(u / 2) * sin(v) - sin(u / 2) * sin(2. * v);
     Point p = construct_point(k,
@@ -427,6 +435,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_3D(std::si
 template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_4D(std::size_t num_points, double a, double b,
                                                                          double noise = 0., bool uniform = false) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
@@ -442,11 +452,11 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_4D(std::si
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 2 * pi * k1 / num_lines;
-      v = 2 * pi * k2 / num_lines;
+      u = two_pi * k1 / num_lines;
+      v = two_pi * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 2 * pi);
-      v = rng.get_double(0, 2 * pi);
+      u = rng.get_double(0, two_pi);
+      v = rng.get_double(0, two_pi);
     }
     Point p = construct_point(k,
                               (a + b * cos(v)) * cos(u) + (noise == 0. ? 0. : rng.get_double(0, noise)),
@@ -466,6 +476,8 @@ template <typename Kernel>
 std::vector<typename Kernel::Point_d>
 generate_points_on_klein_bottle_variant_5D(
                                            std::size_t num_points, double a, double b, bool uniform = false) {
+  using namespace boost::math::double_constants;
+
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
@@ -481,11 +493,11 @@ generate_points_on_klein_bottle_variant_5D(
     if (uniform) {
       std::size_t k1 = i / num_lines;
       std::size_t k2 = i % num_lines;
-      u = 2 * pi * k1 / num_lines;
-      v = 2 * pi * k2 / num_lines;
+      u = two_pi * k1 / num_lines;
+      v = two_pi * k2 / num_lines;
     } else {
-      u = rng.get_double(0, 2 * pi);
-      v = rng.get_double(0, 2 * pi);
+      u = rng.get_double(0, two_pi);
+      v = rng.get_double(0, two_pi);
     }
     FT x1 = (a + b * cos(v)) * cos(u);
     FT x2 = (a + b * cos(v)) * sin(u);
