@@ -133,3 +133,24 @@ def test_filtered_rips_from_distance_matrix():
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
+
+
+def test_sparse_with_multiplicity():
+    points = [
+        [3, 4],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [0.1, 2],
+        [3, 4.1],
+    ]
+    rips = RipsComplex(points=points, sparse=0.01)
+    simplex_tree = rips.create_simplex_tree(max_dimension=2)
+    assert simplex_tree.num_simplices() == 7
+    diag = simplex_tree.persistence()

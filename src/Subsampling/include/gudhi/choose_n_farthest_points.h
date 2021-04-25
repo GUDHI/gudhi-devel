@@ -42,7 +42,7 @@ enum : std::size_t {
  *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`,
  *  with a random landmark.
  *  It chooses `final_size` points from a random access range
- *  `input_pts` (or the number of distinct points if `final_size` is larger)
+ *  `input_pts` (or the number of input points if `final_size` is larger)
  *  and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
@@ -88,34 +88,57 @@ void choose_n_farthest_points(Distance dist,
     starting_point = dis(gen);
   }
 
-  std::size_t current_number_of_landmarks = 0;  // counter for landmarks
-  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
-  const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
-  std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
+  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
+
+  *output_it++ = input_pts[starting_point];
+  *dist_it++ = std::numeric_limits<double>::infinity();
+  if (final_size == 1) return;
+
+  std::vector<std::size_t> points(nb_points);  // map from remaining points to indexes in input_pts
+  std::vector< double > dist_to_L(nb_points);  // vector of current distances to L from points
+  for(std::size_t i = 0; i < nb_points; ++i) {
+    points[i] = i;
+    dist_to_L[i] = dist(input_pts[i], input_pts[starting_point]);
+  }
+  // The indirection through points makes the program a bit slower. Some alternatives:
+  // - the original code never removed points and counted on them not
+  //   reappearing because of a self-distance of 0. This causes unnecessary
+  //   computations when final_size is large. It also causes trouble if there are
+  //   input points at distance 0 from each other.
+  // - copy input_pts and update the local copy when removing points.
 
   std::size_t curr_max_w = starting_point;
 
-  for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
-    // curr_max_w at this point is the next landmark
-    *output_it++ = input_pts[curr_max_w];
-    *dist_it++ = dist_to_L[curr_max_w];
+  for (std::size_t current_number_of_landmarks = 1; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
+    std::size_t latest_landmark = points[curr_max_w];
+    // To remove the latest landmark at index curr_max_w, replace it
+    // with the last point and reduce the length of the vector.
+    std::size_t last = points.size() - 1;
+    if (curr_max_w != last) {
+      points[curr_max_w] = points[last];
+      dist_to_L[curr_max_w] = dist_to_L[last];
+    }
+    points.pop_back();
+
+    // Update distances to L.
     std::size_t i = 0;
-    for (auto&& p : input_pts) {
-      double curr_dist = dist(p, input_pts[curr_max_w]);
+    for (auto p : points) {
+      double curr_dist = dist(input_pts[p], input_pts[latest_landmark]);
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;
       ++i;
     }
-    // choose the next curr_max_w
-    double curr_max_dist = 0;  // used for defining the furhest point from L
-    for (i = 0; i < dist_to_L.size(); i++)
+    // choose the next landmark
+    curr_max_w = 0;
+    double curr_max_dist = dist_to_L[curr_max_w];  // used for defining the furthest point from L
+    for (i = 1; i < points.size(); i++)
       if (dist_to_L[i] > curr_max_dist) {
         curr_max_dist = dist_to_L[i];
         curr_max_w = i;
       }
-    // If all that remains are duplicates of points already taken, stop.
-    if (curr_max_dist == 0) break;
+    *output_it++ = input_pts[points[curr_max_w]];
+    *dist_it++ = dist_to_L[curr_max_w];
   }
 }
 
