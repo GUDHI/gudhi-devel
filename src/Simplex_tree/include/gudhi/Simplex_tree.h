@@ -1060,8 +1060,8 @@ class Simplex_tree {
    *
    * Inserts all vertices and edges given by a OneSkeletonGraph.
    * OneSkeletonGraph must be a model of
-   * <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/EdgeListGraph.html">boost::EdgeListGraph</a>
-   * and <a href="http://www.boost.org/doc/libs/1_65_1/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
+   * <a href="http://www.boost.org/doc/libs/1_76_0/libs/graph/doc/VertexAndEdgeListGraph.html">boost::VertexAndEdgeListGraph</a>
+   * and <a href="http://www.boost.org/doc/libs/1_76_0/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
    * The vertex filtration value is accessible through the property tag
    * vertex_filtration_t.
@@ -1081,7 +1081,10 @@ class Simplex_tree {
     // the simplex tree must be empty
     assert(num_simplices() == 0);
 
-    if (boost::num_vertices(skel_graph) == 0) {
+    // is there a better way to let the compiler know that we don't mean Simplex_tree::num_vertices?
+    using boost::num_vertices;
+
+    if (num_vertices(skel_graph) == 0) {
       return;
     }
     if (num_edges(skel_graph) == 0) {
@@ -1090,18 +1093,18 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(boost::num_vertices(skel_graph));
+    root_.members_.reserve(num_vertices(skel_graph));
 
     typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
         v_it_end;
-    for (std::tie(v_it, v_it_end) = boost::vertices(skel_graph); v_it != v_it_end;
+    for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end;
          ++v_it) {
       root_.members_.emplace_hint(
                                   root_.members_.end(), *v_it,
-                                  Node(&root_, boost::get(vertex_filtration_t(), skel_graph, *v_it)));
+                                  Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it)));
     }
     std::pair<typename boost::graph_traits<OneSkeletonGraph>::edge_iterator,
-              typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = boost::edges(skel_graph);
+              typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = edges(skel_graph);
     // boost_edges.first is the equivalent to boost_edges.begin()
     // boost_edges.second is the equivalent to boost_edges.end()
     for (; boost_edges.first != boost_edges.second; boost_edges.first++) {
@@ -1123,7 +1126,7 @@ class Simplex_tree {
       }
 
       sh->second.children()->members().emplace(v,
-          Node(sh->second.children(), boost::get(edge_filtration_t(), skel_graph, edge)));
+          Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge)));
     }
   }
 
