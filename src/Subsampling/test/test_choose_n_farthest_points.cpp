@@ -102,11 +102,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
   BOOST_CHECK(distances[1] == 1);
   landmarks.clear(); distances.clear();
 
-  // Ignore duplicated points
+  // Accept duplicated points
   points.emplace_back(point.begin(), point.end());
   Gudhi::subsampling::choose_n_farthest_points(d, points, -1, -1, std::back_inserter(landmarks), std::back_inserter(distances));
-  BOOST_CHECK(landmarks.size() == 2 && distances.size() == 2);
+  BOOST_CHECK(landmarks.size() == 3 && distances.size() == 3);
   BOOST_CHECK(distances[0] == std::numeric_limits<FT>::infinity());
   BOOST_CHECK(distances[1] == 1);
+  BOOST_CHECK(distances[2] == 0);
   landmarks.clear(); distances.clear();
 }
