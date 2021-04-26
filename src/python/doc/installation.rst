@@ -100,6 +100,7 @@ Or install it definitely in your Python packages folder:
 
     cd /path-to-gudhi/build/python
     python setup.py install # add --user to the command if you do not have the permission
+    # Or 'pip install .'
 
 .. note::
 

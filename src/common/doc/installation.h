@@ -30,6 +30,10 @@ make \endverbatim
  * This action may require to be in the sudoer or administrator of the machine in function of the operating system and
  * of <a href="https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html">CMAKE_INSTALL_PREFIX</a>.
  *
+ * \note Python module will be compiled by the `make` command, but `make install` will not install it. Please refer to
+ * the <a href="https://gudhi.inria.fr/python/latest/installation.html#gudhi-python-module-installation">Python
+ * module installation documentation</a>.
+ * 
  * \subsection testsuites Test suites
  * To test your build, run the following command in a terminal:
  * \verbatim make test \endverbatim
