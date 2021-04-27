@@ -88,7 +88,7 @@ This example builds the Tangential complex of point set.
 Note that the dimension of the kernel here is dynamic, which is slower, but more flexible:
 the intrinsic and ambient dimensions does not have to be known at compile-time.
 
-\include Tangential_complex/example_basic.cpp
+\include example_basic.cpp
 
 \section example_with_perturb Example with perturbation
 
@@ -97,7 +97,7 @@ by perturbing the positions of points involved in inconsistent simplices.
 Note that the dimension of the kernel here is static, which is the best choice when the
 dimensions are known at compile-time.
 
-\include Tangential_complex/example_with_perturb.cpp
+\include example_with_perturb.cpp
 
  */
 /** @} */  // end defgroup tangential_complex

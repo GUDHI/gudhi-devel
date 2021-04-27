@@ -34,16 +34,21 @@ make -j 4 all && ctest -j 4 --output-on-failure
 ## Create the documentation
 ```bash
 mkdir gudhi.doc.@GUDHI_VERSION@
+```
+
+***[Check there are no error and the warnings]***
+
+```bash
+cd gudhi.@GUDHI_VERSION@
+rm -rf build; mkdir build; cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
 make doxygen  2>&1 | tee dox.log && grep warning dox.log
 ```
 
 ***[Check there are no error and the warnings]***
 
 ```bash
-cp -R gudhi.@GUDHI_VERSION@/doc/html gudhi.doc.@GUDHI_VERSION@/cpp
-cd gudhi.@GUDHI_VERSION@
-rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+cp -R html ../../gudhi.doc.@GUDHI_VERSION@/cpp
 export LC_ALL=en_US.UTF-8  # cf. bug https://github.com/GUDHI/gudhi-devel/issues/111
 make sphinx
 ```
