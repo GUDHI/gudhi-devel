@@ -131,7 +131,7 @@ def _cost_and_match_essential_parts(X, Y, idX, idY, order, axis):
     :param Y: (n x 2) numpy.array (dgm points)
     :param idX: indices to consider for this one dimensional OT problem (in X)
     :param idY: indices to consider for this one dimensional OT problem (in Y)
-    :param order: exponent for Wasserstein distanc ecomputation
+    :param order: exponent for Wasserstein distance computation
     :param axis: must be 0 or 1, correspond to the coordinate which is finite.
     :returns: cost (float) and match for points with *one* infinite coordinate.
 
@@ -267,7 +267,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     # Check essential part and enable autodiff together
     if enable_autodiff and keep_essential_parts:
         warnings.warn('''enable_autodiff=True and keep_essential_parts=True are incompatible together.
-                      keep_essential_parts is set to False: only points with finite coordiantes are considered
+                      keep_essential_parts is set to False: only points with finite coordinates are considered
                       in the following.
                       ''')
         keep_essential_parts = False
