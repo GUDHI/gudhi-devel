@@ -83,7 +83,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
     :returns: float, the total persistence of the diagram (that is, its distance to the empty diagram).
 
     .. note::
-        Can be +infty if the diagram has an essential part (points with infinite coordinates).
+        Can be +inf if the diagram has an essential part (points with infinite coordinates).
     '''
     if enable_autodiff:
         import eagerpy as ep
@@ -203,10 +203,10 @@ def _warn_infty(matching):
     `matching=True`) about the returned matching being `None`.
     '''
     if matching:
-        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +infty, and the returned matching is None.')
+        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +inf, and the returned matching is None.')
         return np.inf, None
     else:
-        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +infty.')
+        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +inf.')
         return np.inf
 
 
