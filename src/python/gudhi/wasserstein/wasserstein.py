@@ -267,7 +267,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     # Check essential part and enable autodiff together
     if enable_autodiff and keep_essential_parts:
         warnings.warn('''enable_autodiff=True and keep_essential_parts=True are incompatible together.
-                      keep_essential_parts is set to False: only points with finite coordiantes are considered
+                      keep_essential_parts is set to False: only points with finite coordinates are considered
                       in the following.
                       ''')
         keep_essential_parts = False
