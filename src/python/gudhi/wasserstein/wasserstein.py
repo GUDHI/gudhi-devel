@@ -131,7 +131,7 @@ def _cost_and_match_essential_parts(X, Y, idX, idY, order, axis):
     :param Y: (n x 2) numpy.array (dgm points)
     :param idX: indices to consider for this one dimensional OT problem (in X)
     :param idY: indices to consider for this one dimensional OT problem (in Y)
-    :param order: exponent for Wasserstein distanc ecomputation
+    :param order: exponent for Wasserstein distance computation
     :param axis: must be 0 or 1, correspond to the coordinate which is finite.
     :returns: cost (float) and match for points with *one* infinite coordinate.
 
