@@ -191,13 +191,9 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
   void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) {
     Base::expansion_with_blockers(dimension, [&](Simplex_handle sh){
-      Simplex simplex;
-      for (auto vertex : Base::simplex_vertex_range(sh)) {
-        simplex.insert(simplex.begin(), vertex);
-      }
+      Simplex simplex(Base::simplex_vertex_range(sh).begin(), Base::simplex_vertex_range(sh).end());
       return user_func(simplex, user_data);
     });
-    Base::clear_filtration();
   }
 
   // Iterator over the simplex tree
