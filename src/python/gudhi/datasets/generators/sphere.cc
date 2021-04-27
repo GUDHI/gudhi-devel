@@ -42,9 +42,9 @@ py::array_t<double> generate_points_on_sphere(size_t num_points, int dim, double
     return points;
 }
 
-PYBIND11_MODULE(random_point_generators, m) {
+PYBIND11_MODULE(sphere, m) {
       m.attr("__license__") = "LGPL v3";
-      m.def("generate_points_on_sphere_d", &generate_points_on_sphere,
+      m.def("generate_random_points", &generate_points_on_sphere,
           py::arg("num_points"), py::arg("dim"), py::arg("radius") = 1,
           R"pbdoc(
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d

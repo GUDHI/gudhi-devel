@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gudhi import random_point_generators
+from gudhi.datasets.generators import sphere
 from gudhi import AlphaComplex
 
 
@@ -19,11 +19,11 @@ __copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 print("#####################################################################")
-print("AlphaComplex creation from generated points")
+print("AlphaComplex creation from generated points on sphere")
 
 
 # Generate a circle: 50 points; dim 2; radius 1
-points = random_point_generators.generate_points_on_sphere_d(50, 2, 1)
+points = sphere.generate_random_points(50, 2, 1)
 
 # Create an alpha complex
 alpha_complex = AlphaComplex(points=points)
