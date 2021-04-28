@@ -37,3 +37,18 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
         interp = scipy.interpolate.interp1d(bc.grid_, bettis[i, :], kind="previous", fill_value="extrapolate")
         bettis_interp = np.array(interp(grid), dtype=int)
         assert((bettis_interp == bettis_gridded).all())
+
+
+def test_empty_with_predefined_grid():
+    random_grid = np.sort(np.random.uniform(0, 1, 100))
+    bc = BettiCurve2(random_grid)
+    bettis = bc.fit_transform([])
+    assert((bc.grid_ == random_grid).all())
+    assert((bettis == 0).all())
+
+    
+def test_empty():
+    bc = BettiCurve2()
+    bettis = bc.fit_transform([])
+    assert(bc.grid_ == [-np.inf])
+    assert((bettis == 0).all())

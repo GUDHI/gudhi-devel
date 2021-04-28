@@ -417,6 +417,9 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
         """
 
         if self.predefined_grid is None:
+            if not X:
+                X = [np.zeros((0, 2))]
+            
             N = len(X)
 
             events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
@@ -469,6 +472,9 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
         if not self.is_fitted():
             raise NotFittedError("Not fitted.")
 
+        if not X:
+            X = [np.zeros((0, 2))]
+        
         N = len(X)
 
         events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
