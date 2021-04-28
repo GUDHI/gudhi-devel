@@ -226,7 +226,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     :param matching: if ``True``, computes and returns the optimal matching between X and Y, encoded as
         a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
         the j-th point in Y, with the convention that (-1) represents the diagonal.
-    :param order: Wasserstein exponent W_q
+    :param order: Wasserstein exponent q (1 <= q < infinity).
     :type order: float
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2).
     :type internal_p: float
