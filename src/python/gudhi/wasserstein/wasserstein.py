@@ -210,32 +210,37 @@ def _warn_infty(matching):
         return np.inf
 
 
-
 def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enable_autodiff=False,
                          keep_essential_parts=True):
     '''
-    :param X: (n x 2) numpy.array encoding the first diagram. Can contain essential parts (points with infinite
-                        coordinates).
-    :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param matching: if True, computes and returns the optimal matching between X and Y, encoded as
-                     a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
-                     the j-th point in Y, with the convention (-1) represents the diagonal.
-                     Note that if the cost is +inf (essential parts have different number of points,
-                     then the optimal matching will be set to `None`.
-    :param order: exponent for Wasserstein. Default value is 1.
+    Compute the Wasserstein distance between persistence diagram using Python Optimal Transport backend.
+    Diagrams can contain points with infinity coordinates (essential parts).
+    Points with (-inf,-inf) and (+inf,+inf) coordinates are considered as belonging to the diagonal.
+    If the distance between two diagrams is +inf (which happens if the cardinalities of essential
+    parts differ) and optimal matching is required, it will be set to ``None``.
+
+    :param X: The first diagram.
+    :type X: n x 2 numpy.array
+    :param Y:  The second diagram.
+    :type Y: m x 2 numpy.array
+    :param matching: if ``True``, computes and returns the optimal matching between X and Y, encoded as
+        a (n x 2) np.array  [...[i,j]...], meaning the i-th point in X is matched to
+        the j-th point in Y, with the convention that (-1) represents the diagonal.
+    :param order: Wasserstein exponent W_q
+    :type order: float
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2).
-                       Default value is `np.inf`.
-    :param enable_autodiff: If X and Y are torch.tensor or tensorflow.Tensor, make the computation
+    :type internal_p: float
+    :param enable_autodiff: If X and Y are ``torch.tensor`` or ``tensorflow.Tensor``, make the computation
         transparent to automatic differentiation. This requires the package EagerPy and is currently incompatible
-        with `matching=True` and with `keep_essential_parts=True`.
+        with ``matching=True`` and with ``keep_essential_parts=True``.
 
         .. note:: This considers the function defined on the coordinates of the off-diagonal finite points of X and Y
             and lets the various frameworks compute its gradient. It never pulls new points from the diagonal.
     :type enable_autodiff: bool
-    :param keep_essential_parts: If False, only considers the finite points in the diagrams.
-                                 Otherwise, computes the distance between the essential parts separately.
+    :param keep_essential_parts: If ``False``, only considers the finite points in the diagrams.
+                                 Otherwise, include essential parts in cost and matching computation.
     :type keep_essential_parts: bool
-    :returns: the Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with
+    :returns: The Wasserstein distance of order q (1 <= q < infinity) between persistence diagrams with
               respect to the internal_p-norm as ground metric.
               If matching is set to True, also returns the optimal matching between X and Y.
               If cost is +inf, any matching is optimal and thus it returns `None` instead.
