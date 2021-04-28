@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gudhi.datasets.generators import sphere
+from gudhi.datasets.generators.points import sphere
 from gudhi import AlphaComplex
 
 
