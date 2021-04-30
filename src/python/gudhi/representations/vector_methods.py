@@ -287,73 +287,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
         """
         return self.fit_transform([diag])[0,:]
 
+
 class BettiCurve(BaseEstimator, TransformerMixin):
-    """
-    This is a class for computing Betti curves from a list of persistence diagrams. A Betti curve is a 1D piecewise-constant function obtained from the rank function. It is sampled evenly on a given range and the vector of samples is returned. See https://www.researchgate.net/publication/316604237_Time_Series_Classification_via_Topological_Data_Analysis for more details.
-    """
-    def __init__(self, resolution=100, sample_range=[np.nan, np.nan]):
-        """
-        Constructor for the BettiCurve class.
-
-        Parameters:
-            resolution (int): number of sample for the piecewise-constant function (default 100).
-            sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
-        """
-        self.resolution, self.sample_range = resolution, sample_range
-
-    def fit(self, X, y=None):
-        """
-        Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams.
-
-        Parameters:
-            X (list of n x 2 numpy arrays): input persistence diagrams.
-            y (n x 1 array): persistence diagram labels (unused).
-        """
-        if np.isnan(np.array(self.sample_range)).any():
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
-        return self
-
-    def transform(self, X):
-        """
-        Compute the Betti curve for each persistence diagram individually and concatenate the results.
-
-        Parameters:
-            X (list of n x 2 numpy arrays): input persistence diagrams.
-    
-        Returns:
-            numpy array with shape (number of diagrams) x (**resolution**): output Betti curves.
-        """
-        Xfit = []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
-        step_x = x_values[1] - x_values[0]
-
-        for diagram in X:
-            diagram_int = np.clip(np.ceil((diagram[:,:2] - self.sample_range[0]) / step_x), 0, self.resolution).astype(int)
-            bc =  np.zeros(self.resolution)
-            for interval in diagram_int:
-                bc[interval[0]:interval[1]] += 1
-            Xfit.append(np.reshape(bc,[1,-1]))
-
-        Xfit = np.concatenate(Xfit, 0)
-
-        return Xfit
-
-    def __call__(self, diag):
-        """
-        Apply BettiCurve on a single persistence diagram and outputs the result.
-
-        Parameters:
-            diag (n x 2 numpy array): input persistence diagram.
-
-        Returns:
-            numpy array with shape (**resolution**): output Betti curve.
-        """
-        return self.fit_transform([diag])[0,:]
-
-
-class BettiCurve2(BaseEstimator, TransformerMixin):
     """
     A more flexible replacement for the BettiCurve class. There are two modes of operation: with a predefined grid, and without. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams chance Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line.
 
