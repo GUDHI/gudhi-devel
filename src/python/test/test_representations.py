@@ -63,12 +63,3 @@ def test_dummy_atol():
             atol_vectoriser.transform(X=[a, b, c])
 
 
-from gudhi.representations.vector_methods import BettiCurve
-
-
-def test_infinity():
-    a = np.array([[1.0, 8.0], [2.0, np.inf], [3.0, 4.0]])
-    c = BettiCurve(20, [0.0, 10.0])(a)
-    assert c[1] == 0
-    assert c[7] == 3
-    assert c[9] == 2

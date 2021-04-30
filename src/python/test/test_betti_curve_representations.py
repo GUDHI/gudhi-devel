@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.interpolate
 
-from gudhi.representations.vector_methods import BettiCurve2
+from gudhi.representations.vector_methods import BettiCurve
 
 def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
     m = 10
