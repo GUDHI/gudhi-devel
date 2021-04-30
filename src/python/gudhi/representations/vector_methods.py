@@ -359,8 +359,8 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    predefined_grid: 1d array or None, default=None
-        Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are OK. If None (default), a grid will be computed that captures all changes in Betti numbers in the provided data.
+    predefined_grid: 1d array, triple or None, default=None
+        Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are OK. If a triple of the form (l, u, n), the grid will be uniform from l to u in n steps. If None (default), a grid will be computed that captures all changes in Betti numbers in the provided data.
 
     Attributes
     ----------
@@ -382,7 +382,13 @@ class BettiCurve2(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, predefined_grid = None):
-        self.predefined_grid = predefined_grid
+        if isinstance(predefined_grid, tuple):
+            if len(predefined_grid) != 3:
+                raise ValueError("Expected array, None or triple.")
+
+            self.predefined_grid = np.linspace(predefined_grid[0], predefined_grid[1], predefined_grid[2])
+        else:
+            self.predefined_grid = predefined_grid
 
         
     def is_fitted(self):
