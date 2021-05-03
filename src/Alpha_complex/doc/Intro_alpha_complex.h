@@ -83,7 +83,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the simplicial complex.
  *
- * \include Alpha_complex/Alpha_complex_from_points.cpp
+ * \include Alpha_complex_from_points.cpp
  *
  * When launching:
  *
@@ -92,7 +92,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_60.txt
+ * \include alphaoffreader_for_doc_60.txt
  *
  * \section createcomplexalgorithm Create complex algorithm
  *
@@ -171,7 +171,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Weighted_alpha_complex_from_points.cpp
+ * \include Weighted_alpha_complex_from_points.cpp
  *
  * When launching:
  *
@@ -180,7 +180,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ * \include weightedalpha3dfrompoints_for_doc.txt
  *
  *
  * \section offexample Example from OFF file
@@ -190,7 +190,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Alpha_complex_from_off.cpp
+ * \include Alpha_complex_from_off.cpp
  *
  * When launching:
  *
@@ -199,7 +199,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_32.txt
+ * \include alphaoffreader_for_doc_32.txt
  *
  *
  * \section weighted3dexample 3d specific version
@@ -215,7 +215,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
+ * \include Weighted_alpha_complex_3d_from_points.cpp
  *
  * The results will be the same as in \ref weightedversion .
  *

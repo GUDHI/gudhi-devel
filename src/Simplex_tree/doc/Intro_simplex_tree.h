@@ -39,10 +39,10 @@ namespace Gudhi {
  * \subsubsection filteredcomplexessimplextreeexamples Examples
  * 
  * Here is a list of simplex tree examples :
- * \li <a href="_simplex_tree_2simple_simplex_tree_8cpp-example.html">
+ * \li <a href="simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a> - Simple simplex tree construction and basic function use.
  *
- * \li <a href="_simplex_tree_2simplex_tree_from_cliques_of_graph_8cpp-example.html">
+ * \li <a href="simplex_tree_from_cliques_of_graph_8cpp-example.html">
  * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a> - Simplex tree construction from cliques of graph read in
  * a file.
  * 
@@ -54,11 +54,11 @@ Expand the simplex tree in 3.8e-05 s.
 Information of the Simplex Tree: 
 Number of vertices = 10   Number of simplices = 98 \endcode
  * 
- * \li <a href="_simplex_tree_2example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
+ * \li <a href="example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
  * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a> - Simplex tree is computed and displayed
  * from a 3D alpha complex (Requires CGAL, GMP and GMPXX to be installed).
  * 
- * \li <a href="_simplex_tree_2graph_expansion_with_blocker_8cpp-example.html">
+ * \li <a href="graph_expansion_with_blocker_8cpp-example.html">
  * Simplex_tree/graph_expansion_with_blocker.cpp</a> - Simple simplex tree construction from a one-skeleton graph with
  * a simple blocker expansion method.
  *
