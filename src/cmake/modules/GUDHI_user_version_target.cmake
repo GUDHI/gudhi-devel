@@ -14,14 +14,7 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    make_directory ${GUDHI_USER_VERSION_DIR}
                    COMMENT "user_version creation in ${GUDHI_USER_VERSION_DIR}")
 
-foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
-  set(GUDHI_DOXYGEN_IMAGE_PATH "${GUDHI_DOXYGEN_IMAGE_PATH}    doc/${GUDHI_MODULE}/ \\  \n")
-endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
-
-# Generate Doxyfile for Doxygen - cf. root CMakeLists.txt for explanation
-configure_file(${CMAKE_SOURCE_DIR}/src/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile" @ONLY)
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-        copy ${CMAKE_CURRENT_BINARY_DIR}/src/Doxyfile ${GUDHI_USER_VERSION_DIR}/Doxyfile)
+file(COPY "${CMAKE_SOURCE_DIR}/src/Doxyfile.in" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
 # Generate bib files for Doxygen - cf. root CMakeLists.txt for explanation
 string(TIMESTAMP GUDHI_VERSION_YEAR "%Y")
@@ -48,6 +41,8 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/GUDHIConfig.cmake.in ${GUDHI_USER_VERSION_DIR}/GUDHIConfig.cmake.in)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/CMakeGUDHIVersion.txt ${GUDHI_USER_VERSION_DIR}/CMakeGUDHIVersion.txt)
+add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                   copy ${CMAKE_SOURCE_DIR}/src/Doxyfile.in ${GUDHI_USER_VERSION_DIR}/Doxyfile.in)
 
 # As cython generates .cpp files in source, we have to copy all except cpp files from python directory
 file(GLOB_RECURSE PYTHON_FILES ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/*)
