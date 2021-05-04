@@ -43,7 +43,7 @@ install:
   - set VCPKG_BUILD_TYPE=release
   - git submodule update --init
   - vcpkg install yasm-tool:x86-windows
-  - vcpkg install boost-disjoint-sets boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 cgal --triplet x64-windows
+  - vcpkg install boost-graph boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 cgal --triplet x64-windows
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
