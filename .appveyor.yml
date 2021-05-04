@@ -36,9 +36,11 @@ init:
   - echo %target%
 
 install:
+  - cd C:\Tools\vcpkg
+  - git pull
+  - .\bootstrap-vcpkg.bat
+  - cd %APPVEYOR_BUILD_FOLDER%
   - set VCPKG_BUILD_TYPE=release
-  - vcpkg update
-  - vcpkg upgrade --no-dry-run
   - git submodule update --init
   - vcpkg install yasm-tool:x86-windows
   - vcpkg install boost-disjoint-sets boost-serialization boost-date-time boost-system boost-filesystem boost-units boost-thread boost-program-options eigen3 cgal --triplet x64-windows
