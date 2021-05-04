@@ -274,8 +274,6 @@ if(PYTHONINTERP_FOUND)
     add_custom_target(python ALL DEPENDS gudhi.so
                       COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
-    install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/setup.py install)")
-
   set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
   # Documentation generation is available through sphinx - requires all modules
   # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
