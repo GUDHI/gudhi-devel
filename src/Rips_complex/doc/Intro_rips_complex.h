@@ -64,7 +64,7 @@ namespace rips_complex {
  * And so on for simplex (0,1,2,3).
  * 
  * If the Rips_complex interfaces are not detailed enough for your need, please refer to
- * <a href="_persistent_cohomology_2rips_persistence_step_by_step_8cpp-example.html">
+ * <a href="rips_persistence_step_by_step_8cpp-example.html">
  * rips_persistence_step_by_step.cpp</a> example, where the constructions of the graph and
  * the Simplex_tree are more detailed.
  *
@@ -111,7 +111,7 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
- * \include Rips_complex/example_one_skeleton_rips_from_points.cpp
+ * \include example_one_skeleton_rips_from_points.cpp
  * 
  * When launching (Rips maximal distance between 2 points is 12.0, is expanded
  * until dimension 1 - one skeleton graph in other words):
@@ -121,7 +121,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/one_skeleton_rips_for_doc.txt
+ * \include one_skeleton_rips_for_doc.txt
  * 
  * \subsection ripsoffexample Example from OFF file
  * 
@@ -132,7 +132,7 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the Rips complex.
  * 
- * \include Rips_complex/example_rips_complex_from_off_file.cpp
+ * \include example_rips_complex_from_off_file.cpp
  * 
  * When launching:
  * 
@@ -141,7 +141,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/full_skeleton_rips_for_doc.txt
+ * \include full_skeleton_rips_for_doc.txt
  * 
  *
  * \subsection sparseripspointscloudexample Example of a sparse Rips from a point cloud
@@ -149,7 +149,7 @@ namespace rips_complex {
  * This example builds the full sparse Rips of a set of 2D Euclidean points, then prints some minimal
  * information about the complex.
  * 
- * \include Rips_complex/example_sparse_rips.cpp
+ * \include example_sparse_rips.cpp
  * 
  * When launching:
  * 
@@ -172,7 +172,7 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
- * \include Rips_complex/example_one_skeleton_rips_from_distance_matrix.cpp
+ * \include example_one_skeleton_rips_from_distance_matrix.cpp
  * 
  * When launching (Rips maximal distance between 2 points is 1.0, is expanded until dimension 1 - one skeleton graph
  * with other words):
@@ -182,7 +182,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/one_skeleton_rips_for_doc.txt
+ * \include one_skeleton_rips_for_doc.txt
  * 
  * \subsection ripscsvdistanceexample Example from a distance matrix read in a csv file
  * 
@@ -192,7 +192,7 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the Rips complex.
  * 
- * \include Rips_complex/example_rips_complex_from_csv_distance_matrix_file.cpp
+ * \include example_rips_complex_from_csv_distance_matrix_file.cpp
  * 
  * When launching:
  * 
@@ -201,7 +201,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/full_skeleton_rips_for_doc.txt
+ * \include full_skeleton_rips_for_doc.txt
  * 
  * 
  * \section ripscorrelationematrix Correlation matrix
@@ -213,7 +213,7 @@ namespace rips_complex {
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
- * \include Rips_complex/example_one_skeleton_rips_from_correlation_matrix.cpp
+ * \include example_one_skeleton_rips_from_correlation_matrix.cpp
  * 
  * When launching:
  * 
@@ -222,7 +222,7 @@ namespace rips_complex {
  *
  * the program output is:
  * 
- * \include Rips_complex/one_skeleton_rips_from_correlation_matrix_for_doc.txt
+ * \include one_skeleton_rips_from_correlation_matrix_for_doc.txt
  * 
  * All the other constructions discussed for Rips complex for distance matrix can be also performed for Rips complexes
  * construction from correlation matrices.
