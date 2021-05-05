@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gudhi.datasets.generators.points import sphere
+from gudhi.datasets.generators import points
 from gudhi import AlphaComplex
 
 
@@ -22,11 +22,10 @@ print("#####################################################################")
 print("AlphaComplex creation from generated points on sphere")
 
 
-# Generate a circle: 50 points; dim 2; radius 1
-points = sphere.generate_random_points(50, 2, 1)
+gen_points = points.sphere(n_samples = 50, dim = 2, radius = 1, sample = "random")
 
 # Create an alpha complex
-alpha_complex = AlphaComplex(points=points)
+alpha_complex = AlphaComplex(points = gen_points)
 simplex_tree = alpha_complex.create_simplex_tree()
 
 result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \

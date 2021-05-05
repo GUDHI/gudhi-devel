@@ -21,40 +21,47 @@ namespace py = pybind11;
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kern;
 
-py::array_t<double> generate_points_on_sphere(size_t num_points, int dim, double radius) {
+py::array_t<double> generate_points_on_sphere(size_t n_samples, int dim, double radius, std::string sample) {
+    
+    if (sample != "random") {
+        throw pybind11::value_error("sample type is not supported");
+    }
 
-    py::array_t<double> points({num_points, (size_t)dim});
+    py::array_t<double> points({n_samples, (size_t)dim});
 
     py::buffer_info buf = points.request();
     double *ptr = static_cast<double *>(buf.ptr);
 
-    GUDHI_CHECK(num_points == buf.shape[0], "Py array first dimension not matching num_points on sphere");
+    GUDHI_CHECK(n_samples == buf.shape[0], "Py array first dimension not matching n_samples on sphere");
     GUDHI_CHECK(dim == buf.shape[1], "Py array second dimension not matching the ambient space dimension");
 
 
     py::gil_scoped_release release;
-    auto points_generated = Gudhi::generate_points_on_sphere_d<Kern>(num_points, dim, radius);
+    auto points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, dim, radius);
 
-    for (size_t i = 0; i < num_points; i++)
+    for (size_t i = 0; i < n_samples; i++)
         for (int j = 0; j < dim; j++)
             ptr[i*dim+j] = points_generated[i][j];
 
     return points;
 }
 
-PYBIND11_MODULE(sphere, m) {
+PYBIND11_MODULE(points, m) {
       m.attr("__license__") = "LGPL v3";
-      m.def("generate_random_points", &generate_points_on_sphere,
-          py::arg("num_points"), py::arg("dim"), py::arg("radius") = 1,
+      m.def("sphere", &generate_points_on_sphere,
+          py::arg("n_samples"), py::arg("dim"),
+          py::arg("radius") = 1, py::arg("sample") = "random",
           R"pbdoc(
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
-    :param num_points: The number of points to be generated.
-    :type num_points: unsigned integer
-    :param dim: The dimension.
+    :param n_samples: The number of points to be generated.
+    :type n_samples: integer
+    :param dim: The ambient dimension d.
     :type dim: integer
     :param radius: The radius.
     :type radius: float
+    :param sample: The sample type.
+    :type sample: string
     :rtype: numpy array of float
     :returns: the generated points on a sphere.
     )pbdoc");
