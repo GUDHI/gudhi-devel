@@ -41,7 +41,7 @@ there.
 
 The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
-`NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
+`NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_ and
 `pybind11 <https://github.com/pybind/pybind11>`_ to compile
 the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual
