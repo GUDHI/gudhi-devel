@@ -22,7 +22,7 @@ jobs:
         run: |
           cd c:/vcpkg
           git fetch --all --tags
-          git checkout 2020.07
+          git checkout 2020.06
           bootstrap-vcpkg.bat
           vcpkg version
           vcpkg install eigen3 cgal --triplet x64-windows
