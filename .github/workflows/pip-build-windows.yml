@@ -21,6 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd c:/vcpkg
+          git fetch --all --tags
           git checkout 2020.11
           bootstrap-vcpkg.bat
           vcpkg version
