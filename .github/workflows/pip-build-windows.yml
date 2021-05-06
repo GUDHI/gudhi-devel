@@ -25,6 +25,8 @@ jobs:
           git checkout 2020.11
           bootstrap-vcpkg.bat
           vcpkg version
+          vcpkg remove boost-uninstall:x64-windows --recurse
+          vcpkg remove eigen3:x64-windows cgal:x64-windows mpfr:x64-windows mpir:x64-windows
           vcpkg install eigen3 cgal --triplet x64-windows
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip list
