@@ -22,22 +22,18 @@ namespace py = pybind11;
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kern;
 
 
-py::array_t<double> generate_points_on_torus(size_t num_points, int dim, bool uniform) {
+py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, bool uniform) {
 
     std::vector<typename Kern::Point_d> points_generated;
 
     {
         py::gil_scoped_release release;
-        points_generated = Gudhi::generate_points_on_torus_d<Kern>(num_points, dim, uniform);
+        points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, uniform);
     }
 
     size_t npoints = points_generated.size();
 
-    py::print("points generated size: ");
-    py::print(points_generated.size());
-    py::print(points_generated[0].size());
-
-    GUDHI_CHECK(2*dim == points_generated[0].size(), "Py array second dimension not matching the double ambient space dimension");
+    GUDHI_CHECK(2*dim == points_generated[0].size(), "Py array second dimension not matching the double torus dimension");
 
     py::array_t<double> points({npoints, (size_t)2*dim});
 
@@ -54,15 +50,15 @@ py::array_t<double> generate_points_on_torus(size_t num_points, int dim, bool un
 PYBIND11_MODULE(_torus, m) {
       m.attr("__license__") = "LGPL v3";
       m.def("generate_random_points", &generate_points_on_torus,
-          py::arg("num_points"), py::arg("dim"), py::arg("uniform") = false,
+          py::arg("n_samples"), py::arg("dim"), py::arg("uniform") = false,
           R"pbdoc(
     Generate random i.i.d. points on a d-torus in R^2d
 
-    :param num_points: The number of points to be generated.
-    :type num_points: unsigned integer
+    :param n_samples: The number of points to be generated.
+    :type n_samples: integer
     :param dim: The dimension.
     :type dim: integer
-    :param uniform: A flag to define if the points generation is uniform (generated as a grid).
+    :param uniform: A flag to define if the points generation is uniform (i.e generated as a grid).
     :type uniform: bool
     :rtype: numpy array of float
     :returns: the generated points on a torus.
