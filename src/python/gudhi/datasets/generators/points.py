@@ -10,7 +10,7 @@
 import numpy as np
 import itertools
 
-def generate_random_points(n_samples, dim):
+def _generate_random_points(n_samples, dim):
 
     # Generate random angles of size n_samples*dim
     alpha = 2*np.pi*np.random.rand(n_samples*dim)
@@ -20,7 +20,7 @@ def generate_random_points(n_samples, dim):
     
     return array_points
 
-def generate_grid_points(n_samples, dim):
+def _generate_grid_points(n_samples, dim):
     
     n_samples_grid = int(n_samples**(1./dim))
     alpha = np.linspace(0, 2*np.pi, n_samples_grid, endpoint=False)
@@ -30,13 +30,13 @@ def generate_grid_points(n_samples, dim):
     
     return array_points
 
-def generate_points(n_samples, dim, sample='random'):
+def torus(n_samples, dim, sample='random'):
     if sample == 'random':
         print("Sample is random")
-        generate_random_points(n_samples, dim)
+        return _generate_random_points(n_samples, dim)
     elif sample == 'grid':
         print("Sample is grid")
-        generate_grid_points(n_samples, dim)
+        return _generate_grid_points(n_samples, dim)
     else:
-        print("Sample type '{}' is not supported".format(sample))
+        raise Exception("Sample type '{}' is not supported".format(sample))
         return

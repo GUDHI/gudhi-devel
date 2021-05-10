@@ -47,9 +47,9 @@ py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, bool uni
     return points;
 }
 
-PYBIND11_MODULE(_torus, m) {
+PYBIND11_MODULE(_points, m) {
       m.attr("__license__") = "LGPL v3";
-      m.def("generate_random_points", &generate_points_on_torus,
+      m.def("torus", &generate_points_on_torus,
           py::arg("n_samples"), py::arg("dim"), py::arg("uniform") = false,
           R"pbdoc(
     Generate random i.i.d. points on a d-torus in R^2d
