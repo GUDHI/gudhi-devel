@@ -23,7 +23,7 @@ jobs:
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user twine delocate
+          python -m pip install --user pytest twine delocate
       - name: Build python wheel
         run: |
           python --version
@@ -32,3 +32,9 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           python setup.py bdist_wheel
+      - name: Install python wheel
+        run: |
+          python -m pip install --user build/src/python/dist/*.whl
+      - name: Test python wheel
+        run: |
+          python -m pytest src/python/test/test_alpha_complex.py
