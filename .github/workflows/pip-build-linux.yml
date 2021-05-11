@@ -25,4 +25,5 @@ jobs:
           $PYTHON39/bin/python -m pip install --user build_39/src/python/dist/*.whl
       - name: Test python wheel
         run: |
+          $PYTHON39/bin/python -m pip install --user pytest
           $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
