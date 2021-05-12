@@ -64,7 +64,7 @@ int main() {
  * \section bottleneckbasicexample Basic example
  *
  * This other example computes the bottleneck distance from 2 persistence diagrams:
- * \include Bottleneck_distance/bottleneck_basic_example.cpp
+ * \include bottleneck_basic_example.cpp
  *
  * \code
     Bottleneck distance = 0.75

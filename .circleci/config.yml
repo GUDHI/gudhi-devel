@@ -90,10 +90,15 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..
+            make user_version
+            cd version
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
             make doxygen 2>&1 | tee dox.log
             grep warning dox.log
-            cp dox.log version/doc/html/
-            cp -R version/doc/html /tmp/doxygen
+            cp dox.log html/
+            cp -R html /tmp/doxygen
 
       - store_artifacts:
           path: /tmp/doxygen
