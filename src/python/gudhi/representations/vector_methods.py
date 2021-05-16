@@ -290,7 +290,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
 class BettiCurve(BaseEstimator, TransformerMixin):
     """
-    A more flexible replacement for the BettiCurve class. There are two modes of operation: with a predefined grid, and without. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams chance Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line.
+    Compute Betti curves from persistence diagrams. There are two modes of operation: with a predefined grid, and without. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams chance Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line.
 
     Parameters
     ----------
@@ -305,11 +305,11 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     Examples
     --------
     If pd is a persistence diagram and xs is a nonempty grid of finite values such that xs[0] >= pd.min(), then the result of
-    >>> bc = BettiCurve2(xs)
+    >>> bc = BettiCurve(xs)
     >>> result = bc(pd)
     and
     >>> from scipy.interpolate import interp1d
-    >>> bc = BettiCurve2(None)
+    >>> bc = BettiCurve(None)
     >>> bettis = bc.fit_transform([pd])
     >>> interp = interp1d(bc.grid_, bettis[0, :], kind="previous", fill_value="extrapolate")
     >>> result = np.array(interp(xs), dtype=int)
