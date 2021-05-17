@@ -22,23 +22,24 @@ jobs:
         run: |
           cd c:/vcpkg
           git fetch --all --tags
-          git checkout 2020.06
+          git checkout 2021.04.30
           bootstrap-vcpkg.bat
           vcpkg version
-          vcpkg install eigen3 cgal --triplet x64-windows
+          vcpkg install yasm-tool:x86-windows
+          vcpkg install eigen3 cgal --triplet x64-windows && exit True
+          dir c:/vcpkg/installed/x64-windows/bin/
           cd ${{ github.workspace }}
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user pytest
           python -m pip list
-          dir c:/vcpkg/installed/x64-windows/bin/
       - name: Build python wheel
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DGMP_INCLUDE_DIR="c:/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/vcpkg/installed/x64-windows/lib/mpir.lib" -DGMP_LIBRARIES_DIR="c:/vcpkg/installed/x64-windows/lib" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DPython_ADDITIONAL_VERSIONS=3 ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           cp c:/vcpkg/installed/x64-windows/bin/mpfr.dll gudhi/
-          cp c:/vcpkg/installed/x64-windows/bin/mpir.dll gudhi/
+          cp c:/vcpkg/installed/x64-windows/bin/gmp.dll gudhi/
           python setup.py bdist_wheel
       - name: Install python wheel
         run: |
