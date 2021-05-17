@@ -6,8 +6,8 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.4.0:
 
-- [Module](link)
-     - ...
+- [Coxeter triangulation](https://gudhi.inria.fr/doc/latest/group__coxeter__triangulation.html)
+     - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation. 
 
 - [Module](link)
      - ...
