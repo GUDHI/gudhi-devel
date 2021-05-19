@@ -51,7 +51,10 @@ jobs:
       - name: Install and test python wheel
         run: |
           cd ${{ github.workspace }}
-          python -m pip install --user pytest "build/src/python/dist/*.whl"
+          cd build/src/python/dist/
+          Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
+          cd ${{ github.workspace }}
+          python -m pip install --user pytest
           python -m pytest src/python/test/test_alpha_complex.py
       - name: Publish on PyPi
         env:
