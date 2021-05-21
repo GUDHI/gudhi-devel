@@ -14,7 +14,11 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
-#include <boost/function_output_iterator.hpp>
+#if BOOST_VERSION < 106600
+# include <boost/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+#else
+# include <boost/iterator/function_output_iterator.hpp>  // for boost::make_function_output_iterator
+#endif
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
