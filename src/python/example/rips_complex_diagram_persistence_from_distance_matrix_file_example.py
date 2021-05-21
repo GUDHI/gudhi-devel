@@ -44,7 +44,7 @@ print("RipsComplex creation from distance matrix read in a csv file")
 message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
 print(message)
 
-distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file)
+distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file, separator=',')
 rips_complex = gudhi.RipsComplex(
     distance_matrix=distance_matrix, max_edge_length=args.max_edge_length
 )
