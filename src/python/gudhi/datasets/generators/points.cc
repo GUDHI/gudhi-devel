@@ -24,7 +24,7 @@ typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kern;
 py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim, double radius, std::string sample) {
     
     if (sample != "random") {
-        throw pybind11::value_error("sample type is not supported");
+        throw pybind11::value_error("This sample type is not supported");
     }
 
     py::array_t<double> points({n_samples, (size_t)ambient_dim});
@@ -50,7 +50,7 @@ PYBIND11_MODULE(points, m) {
       m.attr("__license__") = "LGPL v3";
       m.def("sphere", &generate_points_on_sphere,
           py::arg("n_samples"), py::arg("ambient_dim"),
-          py::arg("radius") = 1, py::arg("sample") = "random",
+          py::arg("radius") = 1., py::arg("sample") = "random",
           R"pbdoc(
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
@@ -58,9 +58,9 @@ PYBIND11_MODULE(points, m) {
     :type n_samples: integer
     :param ambient_dim: The ambient dimension d.
     :type ambient_dim: integer
-    :param radius: The radius.
+    :param radius: The radius. Default value is `1.`.
     :type radius: float
-    :param sample: The sample type.
+    :param sample: The sample type. Default and only available value is `"random"`.
     :type sample: string
     :rtype: numpy array of float
     :returns: the generated points on a sphere.
