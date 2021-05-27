@@ -56,7 +56,7 @@ PYBIND11_MODULE(_points, m) {
 
     :param n_samples: The number of points to be generated.
     :type n_samples: integer
-    :param dim: The dimension.
+    :param dim: The dimension of the torus on which points would be generated in R^2*dim.
     :type dim: integer
     :param uniform: A flag to define if the points generation is uniform (i.e generated as a grid).
     :type uniform: bool
