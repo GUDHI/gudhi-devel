@@ -30,7 +30,7 @@ def test_full_square_distance_matrix_csv_file():
     test_file.write("0;1;2;3;\n1;0;4;5;\n2;4;0;6;\n3;5;6;0;")
     test_file.close()
     matrix = gudhi.read_lower_triangular_matrix_from_csv_file(
-        csv_file="full_square_distance_matrix.csv"
+        csv_file="full_square_distance_matrix.csv", separator=";"
     )
     assert matrix == [[], [1.0], [2.0, 4.0], [3.0, 5.0, 6.0]]
 

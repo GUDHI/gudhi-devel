@@ -21,6 +21,30 @@ namespace py = pybind11;
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kern;
 
+py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim, double radius, std::string sample) {
+
+    if (sample != "random") {
+        throw pybind11::value_error("This sample type is not supported");
+    }
+
+    py::array_t<double> points({n_samples, (size_t)ambient_dim});
+
+    py::buffer_info buf = points.request();
+    double *ptr = static_cast<double *>(buf.ptr);
+
+    GUDHI_CHECK(n_samples == buf.shape[0], "Py array first dimension not matching n_samples on sphere");
+    GUDHI_CHECK(ambient_dim == buf.shape[1], "Py array second dimension not matching the ambient space dimension");
+
+
+    py::gil_scoped_release release;
+    auto points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+
+    for (size_t i = 0; i < n_samples; i++)
+        for (int j = 0; j < ambient_dim; j++)
+            ptr[i*ambient_dim+j] = points_generated[i][j];
+
+    return points;
+}
 
 py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, bool uniform) {
 
@@ -48,19 +72,38 @@ py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, bool uni
 }
 
 PYBIND11_MODULE(_points, m) {
-      m.attr("__license__") = "LGPL v3";
-      m.def("torus", &generate_points_on_torus,
+    m.attr("__license__") = "LGPL v3";
+
+    m.def("sphere", &generate_points_on_sphere,
+          py::arg("n_samples"), py::arg("ambient_dim"),
+          py::arg("radius") = 1., py::arg("sample") = "random",
+          R"pbdoc(
+          Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
+
+          :param n_samples: The number of points to be generated.
+          :type n_samples: integer
+          :param ambient_dim: The ambient dimension d.
+          :type ambient_dim: integer
+          :param radius: The radius. Default value is `1.`.
+          :type radius: float
+          :param sample: The sample type. Default and only available value is `"random"`.
+          :type sample: string
+          :rtype: numpy array of float
+          :returns: the generated points on a sphere.
+          )pbdoc");
+
+    m.def("torus", &generate_points_on_torus,
           py::arg("n_samples"), py::arg("dim"), py::arg("uniform") = false,
           R"pbdoc(
-    Generate random i.i.d. points on a d-torus in R^2d
+          Generate random i.i.d. points on a d-torus in R^2d
 
-    :param n_samples: The number of points to be generated.
-    :type n_samples: integer
-    :param dim: The dimension of the torus on which points would be generated in R^2*dim.
-    :type dim: integer
-    :param uniform: A flag to define if the points generation is uniform (i.e generated as a grid).
-    :type uniform: bool
-    :rtype: numpy array of float
-    :returns: the generated points on a torus.
-    )pbdoc");
+          :param n_samples: The number of points to be generated.
+          :type n_samples: integer
+          :param dim: The dimension of the torus on which points would be generated in R^2*dim.
+          :type dim: integer
+          :param uniform: A flag to define if the points generation is uniform (i.e generated as a grid).
+          :type uniform: bool
+          :rtype: numpy array of float
+          :returns: the generated points on a torus.
+          )pbdoc");
 }
