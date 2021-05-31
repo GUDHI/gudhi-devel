@@ -536,6 +536,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
+    # sklearn
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_cubical_persistence)
+    endif()
+
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
