@@ -20,7 +20,7 @@ def test_simple_constructor_from_top_cells():
     cells = datasets.load_digits().images[0]
     cp = CubicalPersistence(persistence_dim = 0)
     np.testing.assert_array_equal(cp._CubicalPersistence__transform(cells),
-                                  np.array([[0., 6.], [0., 8.]]))
+                                  np.array([[0., 6.], [0., 8.], [ 0., np.inf]]))
 
 def test_simple_constructor_from_top_cells_list():
     digits = datasets.load_digits().images[:10]
@@ -29,8 +29,4 @@ def test_simple_constructor_from_top_cells_list():
     diags = cp.fit_transform(digits)
     assert len(diags) == 10
     np.testing.assert_array_equal(diags[0],
-                                  np.array([[0., 6.], [0., 8.]]))
-
-# from gudhi.representations import PersistenceImage
-# pi = PersistenceImage(bandwidth=50, weight=lambda x: x[1]**2, im_range=[0,256,0,256], resolution=[20, 20])
-# pi.fit_transform(diags)
+                                  np.array([[0., 6.], [0., 8.], [ 0., np.inf]]))

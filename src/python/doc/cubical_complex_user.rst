@@ -7,14 +7,19 @@ Cubical complex user manual
 Definition
 ----------
 
-=====================================  =====================================  =====================================
-:Author: Pawel Dlotko                  :Since: GUDHI PYTHON 2.0.0             :License: GPL v3
-=====================================  =====================================  =====================================
+.. list-table::
+   :widths: 25 50 25
+   :header-rows: 0
 
-+---------------------------------------------+----------------------------------------------------------------------+
-| :doc:`cubical_complex_user`                 | * :doc:`cubical_complex_ref`                                         |
-|                                             | * :doc:`periodic_cubical_complex_ref`                                |
-+---------------------------------------------+----------------------------------------------------------------------+
+   * - :Author: Pawel Dlotko
+     - :Since: GUDHI 2.0.0
+     - :License: MIT
+   * - :doc:`cubical_complex_user`
+     - * :doc:`cubical_complex_ref`
+       * :doc:`periodic_cubical_complex_ref`
+       * :doc:`cubical_complex_sklearn_itf_ref`
+     -
+
 
 The cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous
 numerics) and image analysis.
@@ -164,3 +169,40 @@ Tutorial
 
 This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cubical-complexes.ipynb>`_
 explains how to represent sublevels sets of functions using cubical complexes.
+
+Scikit-learn like interface example
+-----------------------------------
+
+.. plot::
+   :include-source:
+
+    # Standard scientific Python imports
+    import matplotlib.pyplot as plt
+    from sklearn import datasets
+    
+    # Import cubical persistence computation scikit-learn interfaces
+    from gudhi.sklearn.cubical_persistence import CubicalPersistence
+    # Import persistence representation
+    from gudhi.representations import PersistenceImage, DiagramSelector
+    
+    # Get the first 10 images from scikit-learn hand digits dataset
+    digits = datasets.load_digits().images[:10]
+    targets = datasets.load_digits().target[:10]
+    
+    # TDA pipeline
+    cub = CubicalPersistence(persistence_dim = 0, n_jobs=-2)
+    diags = cub.fit_transform(digits)
+    
+    finite = DiagramSelector(use=True, point_type="finite")
+    finite_diags = finite.fit_transform(diags)
+    
+    persim = PersistenceImage(im_range=[0,16,0,16], resolution=[16, 16])
+    pers_images = persim.fit_transform(finite_diags)
+    
+    # Display persistence images
+    _, axes = plt.subplots(nrows=1, ncols=10, figsize=(15, 3))
+    for ax, image, label in zip(axes, pers_images, targets):
+        ax.set_axis_off()
+        ax.imshow(image.reshape(16, 16), cmap=plt.cm.gray_r, interpolation='nearest')
+        ax.set_title('Target: %i' % label)
+    plt.show()

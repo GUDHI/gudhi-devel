@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 
 class CubicalPersistence(BaseEstimator, TransformerMixin):
     # Fast way to find primes and should be enough
-    available_primes_ = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    _available_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
     """
     This is a class for computing the persistence diagrams from a cubical complex.
     """
@@ -24,7 +24,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         self.persistence_dim = persistence_dim
 
         self.homology_coeff_field_ = None
-        for dim in self.available_primes_:
+        for dim in self._available_primes:
             if dim > persistence_dim + 1:
                 self.homology_coeff_field_ = dim
                 break
@@ -45,14 +45,11 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         cubical_complex.compute_persistence(homology_coeff_field = self.homology_coeff_field_,
                                             min_persistence = self.min_persistence)
         diagrams = cubical_complex.persistence_intervals_in_dimension(self.persistence_dim)
-        if self.persistence_dim == 0:
-            # return all but the last, always [ 0., inf]
-            diagrams = diagrams[:-1]
         return diagrams
 
     def transform(self, X, Y=None):
         """
-        Compute all the cubical complexes and their persistence diagrams.
+        Compute all the cubical complexes and their associated persistence diagrams.
 
         Parameters:
             X (list of list of double OR list of numpy.ndarray): List of cells filtration values.
