@@ -46,11 +46,11 @@ def fetch(url, filename, dirname = "remote_datasets", checksum_flag = False, fil
     Parameters
     ----------
     url : string
-        The url to fetch the dataset from
+        The url to fetch the dataset from.
     filename : string
-        The filename to download
+        The name to give to downloaded file.
     dirname : string
-        The directory to save the file to.
+        The directory to save the file to. Default is "remote_datasets".
     checksum_flag : boolean
         To set if the user wants the file checksum. Default is 'False'.
         Note that if checksum_flag is set to 'True', the file_checksum must be provided.
@@ -83,3 +83,21 @@ def fetch(url, filename, dirname = "remote_datasets", checksum_flag = False, fil
                                                       file_checksum))
 
     return file_path
+
+def fetch_spiral_2d(filename = "spiral_2d.csv", dirname = "remote_datasets"):
+    """
+    Fetch spiral_2d.csv remotely
+
+    Parameters
+    ----------
+    filename : string
+        The name to give to downloaded file. Default is "spiral_2d.csv"
+    dirname : string
+        The directory to save the file to. Default is "remote_datasets".
+
+    Returns
+    -------
+    file_path: string
+        Full path of the created file.
+    """
+    return fetch("https://raw.githubusercontent.com/Hind-M/gudhi-data/main/spiral_2d.csv", filename, dirname, True, '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
