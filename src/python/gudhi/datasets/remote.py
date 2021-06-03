@@ -100,4 +100,5 @@ def fetch_spiral_2d(filename = "spiral_2d.csv", dirname = "remote_datasets"):
     file_path: string
         Full path of the created file.
     """
-    return fetch("https://raw.githubusercontent.com/Hind-M/gudhi-data/main/spiral_2d.csv", filename, dirname, True, '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
+    return fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", filename, dirname, True,
+                 '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
