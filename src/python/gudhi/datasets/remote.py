@@ -39,7 +39,7 @@ def _checksum_sha256(file_path):
             sha256_hash.update(buffer)
     return sha256_hash.hexdigest()
 
-def fetch(url, filename, dirname = "remote_datasets", checksum_flag = False, file_checksum = None):
+def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
     """
     Fetch the wanted dataset from the given url and save it in file_path
 
@@ -51,12 +51,8 @@ def fetch(url, filename, dirname = "remote_datasets", checksum_flag = False, fil
         The name to give to downloaded file.
     dirname : string
         The directory to save the file to. Default is "remote_datasets".
-    checksum_flag : boolean
-        To set if the user wants the file checksum. Default is 'False'.
-        Note that if checksum_flag is set to 'True', the file_checksum must be provided.
     file_checksum : string
         The file checksum using sha256 to check against the one computed on the downloaded file.
-        To be considered, checksum_flag must be set to 'True'.
         Default is 'None'.
 
     Returns
@@ -71,10 +67,7 @@ def fetch(url, filename, dirname = "remote_datasets", checksum_flag = False, fil
 
     urlretrieve(url, file_path)
 
-    if (checksum_flag):
-        if file_checksum is None:
-            raise ValueError("The file checksum must be provided - different from None - for the check to be performed.")
-
+    if file_checksum is not None:
         checksum = _checksum_sha256(file_path)
         if file_checksum != checksum:
             raise IOError("{} has a SHA256 checksum : {}, "
@@ -100,5 +93,5 @@ def fetch_spiral_2d(filename = "spiral_2d.csv", dirname = "remote_datasets"):
     file_path: string
         Full path of the created file.
     """
-    return fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", filename, dirname, True,
+    return fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", filename, dirname,
                  '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
