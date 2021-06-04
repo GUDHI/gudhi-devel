@@ -19,18 +19,18 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
         pd[np.random.uniform(0, 1, n) < pinf, 1] = np.inf
         pds.append(pd)
     
-    bc = BettiCurve2(None)
+    bc = BettiCurve(None)
     bc.fit(pds)
     bettis = bc.transform(pds)
 
-    bc2 = BettiCurve2(None)
+    bc2 = BettiCurve(None)
     bettis2 = bc2.fit_transform(pds)
     assert((bc2.grid_ == bc.grid_).all())
     assert((bettis2 == bettis).all())
 
     for i in range(0, m):
         grid = np.linspace(pds[i][np.isfinite(pds[i])].min(), pds[i][np.isfinite(pds[i])].max() + 1, res)
-        bc_gridded = BettiCurve2(grid)
+        bc_gridded = BettiCurve(grid)
         bc_gridded.fit([])
         bettis_gridded = bc_gridded(pds[i])
 
@@ -41,14 +41,14 @@ def test_betti_curve_is_irregular_betti_curve_followed_by_interpolation():
 
 def test_empty_with_predefined_grid():
     random_grid = np.sort(np.random.uniform(0, 1, 100))
-    bc = BettiCurve2(random_grid)
+    bc = BettiCurve(random_grid)
     bettis = bc.fit_transform([])
     assert((bc.grid_ == random_grid).all())
     assert((bettis == 0).all())
 
     
 def test_empty():
-    bc = BettiCurve2()
+    bc = BettiCurve()
     bettis = bc.fit_transform([])
     assert(bc.grid_ == [-np.inf])
     assert((bettis == 0).all())
