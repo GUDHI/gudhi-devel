@@ -63,7 +63,7 @@ def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
 
     file_path = join(dirname, filename)
 
-    # Check that an existing file does not already exist at file_path
+    # Check for an already existing file at file_path
     if not exists(file_path):
         # Create directory if not existing
         if not exists(dirname):
@@ -71,13 +71,12 @@ def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
 
         urlretrieve(url, file_path)
 
-        if file_checksum is not None:
-            checksum = _checksum_sha256(file_path)
-            if file_checksum != checksum:
-                raise IOError("{} has a SHA256 checksum : {}, "
-                            "different from expected : {}."
-                            "The file may be corrupted or the given url may be wrong !".format(file_path, checksum,
-                                                        file_checksum))
+    if file_checksum is not None:
+        checksum = _checksum_sha256(file_path)
+        if file_checksum != checksum:
+            raise IOError("{} has a SHA256 checksum : {}, "
+                        "different from expected : {}."
+                        "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum))
 
     return file_path
 
