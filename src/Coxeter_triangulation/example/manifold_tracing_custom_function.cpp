@@ -4,7 +4,7 @@
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
 #include <gudhi/Implicit_manifold_intersection_oracle.h>
 #include <gudhi/Manifold_tracing.h>
-#include <gudhi/Cell_complex.h>
+#include <gudhi/Coxeter_triangulation/Cell_complex/Cell_complex.h>
 #include <gudhi/Functions/Linear_transformation.h>
 
 #include <gudhi/IO/build_mesh_from_cell_complex.h>

@@ -12,7 +12,7 @@
 #define MANIFOLD_TRACING_H_
 
 #include <gudhi/IO/output_debug_traces_to_html.h>  // for DEBUG_TRACES
-#include <gudhi/Manifold_tracing/Query_result.h>
+#include <gudhi/Coxeter_triangulation/Query_result.h>
 
 #include <boost/functional/hash.hpp>
 

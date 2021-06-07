@@ -3,7 +3,7 @@
 #include <gudhi/Coxeter_triangulation.h>
 #include <gudhi/Implicit_manifold_intersection_oracle.h>  // for Gudhi::coxeter_triangulation::make_oracle
 #include <gudhi/Manifold_tracing.h>
-#include <gudhi/Cell_complex.h>
+#include <gudhi/Coxeter_triangulation/Cell_complex/Cell_complex.h>
 #include <gudhi/Functions/Function_Sm_in_Rd.h>
 
 using namespace Gudhi::coxeter_triangulation;

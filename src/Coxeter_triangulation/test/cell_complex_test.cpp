@@ -22,7 +22,7 @@
 #include <gudhi/Functions/Function_torus_in_R3.h>
 #include <gudhi/Implicit_manifold_intersection_oracle.h>
 #include <gudhi/Manifold_tracing.h>
-#include <gudhi/Cell_complex.h>
+#include <gudhi/Coxeter_triangulation/Cell_complex/Cell_complex.h>
 
 using namespace Gudhi::coxeter_triangulation;
 

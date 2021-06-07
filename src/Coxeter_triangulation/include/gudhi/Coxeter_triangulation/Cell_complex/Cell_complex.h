@@ -19,7 +19,7 @@
 
 #include <gudhi/IO/output_debug_traces_to_html.h>  // for DEBUG_TRACES
 #include <gudhi/Permutahedral_representation/Simplex_comparator.h>
-#include <gudhi/Cell_complex/Hasse_diagram_cell.h>  // for Hasse_cell
+#include <gudhi/Coxeter_triangulation/Cell_complex/Hasse_diagram_cell.h>  // for Hasse_cell
 
 namespace Gudhi {
 
