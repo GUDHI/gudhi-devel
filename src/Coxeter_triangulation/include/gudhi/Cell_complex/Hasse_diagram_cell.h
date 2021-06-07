@@ -31,7 +31,9 @@ class Hasse_diagram;
  * \ingroup Hasse_diagram
  *
  * \details
- * This is a data structure to store a cell in a general Hasse diagram data structure. 	It store the following
+ * The use and interfaces of this Hasse diagram cell is limited to the \ref coxeter_triangulation implementation.
+ * 
+ * This is a data structure to store a cell in a general Hasse diagram data structure. 	It stores the following
  * information about the cell: References to boundary and coBoundary elements, dimension of a cell and its filtration.
  * It also allow to store any additional information of a type Additional_information which is a template parameter of
  * the class (set by default to void).
