@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
   std::clog << "Vertices:" << std::endl;
   for (const auto& cp_pair : cell_complex.cell_point_map()) {
     std::clog << index << " : (" << cp_pair.second(0) << ", " << cp_pair.second(1) << ")" << std::endl;
-    vi_map.emplace(std::make_pair(cp_pair.first, index++));
+    vi_map.emplace(cp_pair.first, index++);
   }
 
   std::clog << "Edges:" << std::endl;

@@ -73,15 +73,15 @@ class Cell_complex {
 #ifdef DEBUG_TRACES
     CC_detail_list& cc_detail_list =
         (is_boundary ? cc_boundary_detail_lists[cell_d] : cc_interior_detail_lists[cell_d]);
-    cc_detail_list.emplace_back(CC_detail_info(simplex));
+    cc_detail_list.emplace_back(simplex);
 #endif
     Simplex_cell_map& simplex_cell_map = simplex_cell_maps[cell_d];
     auto map_it = simplex_cell_map.find(simplex);
     if (map_it == simplex_cell_map.end()) {
       hasse_cells_.push_back(new Hasse_cell(is_boundary, cell_d));
       Hasse_cell* new_cell = hasse_cells_.back();
-      simplex_cell_map.emplace(std::make_pair(simplex, new_cell));
-      cell_simplex_map_.emplace(std::make_pair(new_cell, simplex));
+      simplex_cell_map.emplace(simplex, new_cell);
+      cell_simplex_map_.emplace(new_cell, simplex);
 #ifdef DEBUG_TRACES
       cc_detail_list.back().status_ = CC_detail_info::Result_type::inserted;
 #endif
@@ -102,7 +102,7 @@ class Cell_complex {
       Hasse_cell* cell = sc_pair.second;
       for (Simplex_handle coface : simplex.coface_range(cod_d_ + cell_d)) {
         Hasse_cell* new_cell = insert_cell(coface, cell_d, false);
-        new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+        new_cell->get_boundary().emplace_back(cell, 1);
       }
     }
 
@@ -113,14 +113,14 @@ class Cell_complex {
         if (cell_d != intr_d_)
           for (Simplex_handle coface : simplex.coface_range(cod_d_ + cell_d + 1)) {
             Hasse_cell* new_cell = insert_cell(coface, cell_d, true);
-            new_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+            new_cell->get_boundary().emplace_back(cell, 1);
           }
         auto map_it = interior_simplex_cell_maps_[cell_d].find(simplex);
         if (map_it == interior_simplex_cell_maps_[cell_d].end())
           std::cerr << "Cell_complex::expand_level error: A boundary cell does not have an interior counterpart.\n";
         else {
           Hasse_cell* i_cell = map_it->second;
-          i_cell->get_boundary().emplace_back(std::make_pair(cell, 1));
+          i_cell->get_boundary().emplace_back(cell, 1);
         }
       }
     }
@@ -136,7 +136,7 @@ class Cell_complex {
       const Simplex_handle& simplex = os_pair.first;
       const Eigen::VectorXd& point = os_pair.second;
       Hasse_cell* new_cell = insert_cell(simplex, 0, false);
-      cell_point_map_.emplace(std::make_pair(new_cell, point));
+      cell_point_map_.emplace(new_cell, point);
     }
     for (std::size_t cell_d = 1;
          cell_d < interior_simplex_cell_maps_.size() && !interior_simplex_cell_maps_[cell_d - 1].empty(); ++cell_d) {
@@ -157,13 +157,13 @@ class Cell_complex {
       const Simplex_handle& simplex = os_pair.first;
       const Eigen::VectorXd& point = os_pair.second;
       Hasse_cell* new_cell = insert_cell(simplex, 0, true);
-      cell_point_map_.emplace(std::make_pair(new_cell, point));
+      cell_point_map_.emplace(new_cell, point);
     }
     for (auto& os_pair : interior_simplex_map) {
       const Simplex_handle& simplex = os_pair.first;
       const Eigen::VectorXd& point = os_pair.second;
       Hasse_cell* new_cell = insert_cell(simplex, 0, false);
-      cell_point_map_.emplace(std::make_pair(new_cell, point));
+      cell_point_map_.emplace(new_cell, point);
     }
 #ifdef DEBUG_TRACES
     for (const auto& sc_pair : interior_simplex_cell_maps_[0])

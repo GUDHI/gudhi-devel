@@ -514,7 +514,7 @@ void write_visu(std::ofstream& ofs) {
       << "      <h2> Visualization details debug trace </h2>\n";
   // std::vector<std::map<std::string, std::string> > vs_maps(cc_interior_summary_lists.size());
   std::map<std::string, std::string> vs_map;
-  for (const auto& sv_pair : simplex_vlist_map) vs_map.emplace(std::make_pair(sv_pair.second, sv_pair.first));
+  for (const auto& sv_pair : simplex_vlist_map) vs_map.emplace(sv_pair.second, sv_pair.first);
   ofs << "      <ul>\n";
   for (const auto& vs_pair : vs_map) {
     std::string w_simplex = vs_pair.second.substr(1);

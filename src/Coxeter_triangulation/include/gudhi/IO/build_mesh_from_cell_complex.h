@@ -57,12 +57,12 @@ void populate_mesh(Mesh_medit& output, Simplex_cell_map& sc_map, Configuration c
       for (const auto& ei_pair : cell->get_boundary())
         for (const auto& vi_pair : ei_pair.first->get_boundary()) vertex_indices.emplace(vi_map[vi_pair.first]);
       for (const std::size_t& v : vertex_indices) barycenter += output.vertex_points[v - 1];
-      ci_map.emplace(std::make_pair(cell, index++));
+      ci_map.emplace(cell, index++);
       output.vertex_points.emplace_back((1. / vertex_indices.size()) * barycenter);
 #ifdef DEBUG_TRACES
       std::string vlist = " (" + std::to_string(index - 1) + ")";
       for (const std::size_t& v : vertex_indices) vlist += " " + std::to_string(v);
-      cell_vlist_map.emplace(std::make_pair(to_string(cell), vlist));
+      cell_vlist_map.emplace(to_string(cell), vlist);
 #endif
     }
 
@@ -71,11 +71,11 @@ void populate_mesh(Mesh_medit& output, Simplex_cell_map& sc_map, Configuration c
       Hasse_cell* edge_cell = sc_pair.second;
       Mesh_element_vertices edge;
       for (const auto& vi_pair : edge_cell->get_boundary()) edge.push_back(vi_map[vi_pair.first]);
-      output.edges.emplace_back(std::make_pair(edge, configuration.ref_edges));
+      output.edges.emplace_back(edge, configuration.ref_edges);
 #ifdef DEBUG_TRACES
       std::string vlist;
       for (const std::size_t& v : edge) vlist += " " + std::to_string(v);
-      cell_vlist_map.emplace(std::make_pair(to_string(edge_cell), vlist));
+      cell_vlist_map.emplace(to_string(edge_cell), vlist);
 #endif
     }
 
@@ -84,7 +84,7 @@ void populate_mesh(Mesh_medit& output, Simplex_cell_map& sc_map, Configuration c
       for (const auto& ei_pair : sc_pair.second->get_boundary()) {
         Mesh_element_vertices triangle(1, ci_map[sc_pair.second]);
         for (const auto& vi_pair : ei_pair.first->get_boundary()) triangle.push_back(vi_map[vi_pair.first]);
-        output.triangles.emplace_back(std::make_pair(triangle, configuration.ref_triangles));
+        output.triangles.emplace_back(triangle, configuration.ref_triangles);
       }
     }
 
@@ -101,14 +101,14 @@ void populate_mesh(Mesh_medit& output, Simplex_cell_map& sc_map, Configuration c
 #ifdef DEBUG_TRACES
       std::string vlist = " (" + std::to_string(index) + ")";
       for (const std::size_t& v : vertex_indices) vlist += " " + std::to_string(v);
-      cell_vlist_map.emplace(std::make_pair(to_string(cell), vlist));
+      cell_vlist_map.emplace(to_string(cell), vlist);
 #endif
 
       for (const auto& ci_pair : cell->get_boundary())
         for (const auto& ei_pair : ci_pair.first->get_boundary()) {
           Mesh_element_vertices tetrahedron = {index, ci_map[sc_pair.second]};
           for (const auto& vi_pair : ei_pair.first->get_boundary()) tetrahedron.push_back(vi_map[vi_pair.first]);
-          output.tetrahedra.emplace_back(std::make_pair(tetrahedron, configuration.ref_tetrahedra));
+          output.tetrahedra.emplace_back(tetrahedron, configuration.ref_tetrahedra);
         }
       index++;
     }
@@ -134,9 +134,9 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
 #ifdef DEBUG_TRACES
     std::string vlist;
     vlist += " " + std::to_string(index);
-    cell_vlist_map.emplace(std::make_pair(to_string(cp_pair.first), vlist));
+    cell_vlist_map.emplace(to_string(cp_pair.first), vlist);
 #endif
-    vi_map.emplace(std::make_pair(cp_pair.first, index++));
+    vi_map.emplace(cp_pair.first, index++);
     output.vertex_points.push_back(cp_pair.second);
     output.vertex_points.back().conservativeResize(amb_d);
   }
@@ -148,7 +148,7 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
       std::string simplex = "I" + to_string(sc_pair.first);
       std::string cell = to_string(sc_pair.second);
       std::string vlist = cell_vlist_map.at(cell).substr(1);
-      simplex_vlist_map.emplace(std::make_pair(simplex, vlist));
+      simplex_vlist_map.emplace(simplex, vlist);
     }
 #endif
   populate_mesh(output, cell_complex.boundary_simplex_cell_maps(), b_configuration, amb_d, vi_map);
@@ -158,7 +158,7 @@ Mesh_medit build_mesh_from_cell_complex(const Cell_complex& cell_complex,
       std::string simplex = "B" + to_string(sc_pair.first);
       std::string cell = to_string(sc_pair.second);
       std::string vlist = cell_vlist_map.at(cell).substr(1);
-      simplex_vlist_map.emplace(std::make_pair(simplex, vlist));
+      simplex_vlist_map.emplace(simplex, vlist);
     }
 #endif
   return output;

@@ -50,17 +50,17 @@ typename std::enable_if<I != sizeof...(Meshes), void>::type fill_meshes(Vertex_p
   for (const auto& e : mesh.edges) {
     std::vector<std::size_t> edge;
     for (const auto& v_i : e.first) edge.push_back(v_i + index);
-    edges.emplace_back(std::make_pair(edge, e.second));
+    edges.emplace_back(edge, e.second);
   }
   for (const auto& t : mesh.triangles) {
     std::vector<std::size_t> triangle;
     for (const auto& v_i : t.first) triangle.push_back(v_i + index);
-    triangles.emplace_back(std::make_pair(triangle, t.second));
+    triangles.emplace_back(triangle, t.second);
   }
   for (const auto& t : mesh.tetrahedra) {
     std::vector<std::size_t> tetrahedron;
     for (const auto& v_i : t.first) tetrahedron.push_back(v_i + index);
-    tetrahedra.emplace_back(std::make_pair(tetrahedron, t.second));
+    tetrahedra.emplace_back(tetrahedron, t.second);
   }
   for (const auto& b : mesh.triangles_scalar_range) triangles_scalar_range.push_back(b);
   for (const auto& b : mesh.tetrahedra_scalar_range) tetrahedra_scalar_range.push_back(b);

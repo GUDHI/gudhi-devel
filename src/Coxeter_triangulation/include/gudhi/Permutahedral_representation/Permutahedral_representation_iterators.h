@@ -173,7 +173,7 @@ class Coface_iterator
       }
       o_its_.clear();
       for (uint j = 0; j < k_ + 1; j++)
-        o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[j].size(), (*i_it_)[j] + 1));
+        o_its_.emplace_back(simplex_.partition()[j].size(), (*i_it_)[j] + 1);
     } else
       for (uint j = 0; j < i; j++) o_its_[j].reinitialize();
     update_value();
@@ -225,7 +225,7 @@ class Coface_iterator
       return;
     }
     for (uint i = 0; i < k_ + 1; i++)
-      o_its_.emplace_back(Ordered_set_partition_iterator(simplex_.partition()[i].size(), (*i_it_)[i] + 1));
+      o_its_.emplace_back(simplex_.partition()[i].size(), (*i_it_)[i] + 1);
     update_value();
   }
 

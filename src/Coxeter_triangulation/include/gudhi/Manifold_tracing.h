@@ -86,7 +86,7 @@ class Manifold_tracing {
       Simplex_handle full_simplex = triangulation.locate_point(p);
       for (Simplex_handle face : full_simplex.face_range(cod_d)) {
         Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
-        if (qr.success && out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) {
+        if (qr.success && out_simplex_map.emplace(face, qr.intersection).second) {
 #ifdef DEBUG_TRACES
           mt_seed_inserted_list.push_back(MT_inserted_info(qr, face, false));
 #endif
@@ -102,7 +102,7 @@ class Manifold_tracing {
       for (auto cof : s.coface_range(cod_d + 1)) {
         for (auto face : cof.face_range(cod_d)) {
           Query_result<Simplex_handle> qr = oracle.intersects(face, triangulation);
-          if (qr.success && out_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) queue.emplace(face);
+          if (qr.success && out_simplex_map.emplace(face, qr.intersection).second) queue.emplace(face);
         }
       }
     }
@@ -148,7 +148,7 @@ class Manifold_tracing {
 #endif
         if (qr.success) {
           if (oracle.lies_in_domain(qr.intersection, triangulation)) {
-            if (interior_simplex_map.emplace(std::make_pair(face, qr.intersection)).second) queue.emplace(face);
+            if (interior_simplex_map.emplace(face, qr.intersection).second) queue.emplace(face);
           } else {
             for (Simplex_handle cof : face.coface_range(cod_d + 1)) {
               auto qrb = oracle.intersects_boundary(cof, triangulation);
