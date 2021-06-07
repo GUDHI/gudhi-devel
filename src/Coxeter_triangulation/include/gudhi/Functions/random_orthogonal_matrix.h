@@ -15,14 +15,14 @@
 #include <cmath>    // for std::cos, std::sin
 #include <random>   // for std::uniform_real_distribution, std::random_device
 
-#include <gudhi/math.h>
-
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/SVD>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
+
+#include <boost/math/constants/constants.hpp>  // for PI value
 
 namespace Gudhi {
 
@@ -44,7 +44,7 @@ Eigen::MatrixXd random_orthogonal_matrix(std::size_t d) {
   if (d == 1) return Eigen::VectorXd::Constant(1, 1.0);
   if (d == 2) {
     // 0. < alpha < 2 Pi
-    std::uniform_real_distribution<double> unif(0., 2 * Gudhi::PI);
+    std::uniform_real_distribution<double> unif(0., 2 * boost::math::constants::pi<double>());
     std::random_device rand_dev;
     std::mt19937 rand_engine(rand_dev());
     double alpha = unif(rand_engine);
