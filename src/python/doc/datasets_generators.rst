@@ -52,9 +52,9 @@ First module : **_points**
 """"""""""""""""""""""""""
 
 The user should provide the number of points to be generated on the torus :code:`n_samples`, and the dimension :code:`dim` of the torus on which points would be generated in :math:`R^{2dim}`.
-The flag :code:`uniform` is optional and is set to **False** by default, meaning that the points will be generated randomly.
+The :code:`sample` argument is optional and is set to **'random'** by default.
 In this case, the returned generated points would be an array of shape :math:`(n\_samples, 2*dim)`.
-Otherwise, if set to **True**, the points are generated as a grid and would be given as an array of shape :
+Otherwise, if set to **'grid'**, the points are generated on a grid and would be given as an array of shape :
 
 .. math::
 
@@ -70,7 +70,7 @@ Example
    gen_points = _points.torus(n_samples = 50, dim = 3)
    
    # Generate 27 points on a torus as a grid in R^6
-   gen_points = _points.torus(n_samples = 50, dim = 3, uniform = True)
+   gen_points = _points.torus(n_samples = 50, dim = 3, sample = 'grid')
 
 .. autofunction:: gudhi.datasets.generators._points.torus
 
@@ -79,7 +79,7 @@ Second module : **points**
 
 The user should provide the number of points to be generated on the torus :code:`n_samples` and the dimension :code:`dim` of the torus on which points would be generated in :math:`R^{2dim}`.
 The :code:`sample` argument is optional and is set to **'random'** by default.
-The other allowed value of sample type is **'grid'** and is equivalent to :code:`uniform = True` in the first module.
+The other allowed value of sample type is **'grid'**.
 
 Example
 """""""

@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
           if (dimension == 3)
             points = Gudhi::generate_points_on_torus_3D<K>(points_number, dimension, radius, radius/2.);
           else
-            points = Gudhi::generate_points_on_torus_d<K>(points_number, dimension, true);
+            points = Gudhi::generate_points_on_torus_d<K>(points_number, dimension, "grid");
         break;
         case Data_shape::klein:
           switch (dimension) {

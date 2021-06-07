@@ -46,13 +46,13 @@ py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim,
     return points;
 }
 
-py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, bool uniform) {
+py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, std::string sample) {
 
     std::vector<typename Kern::Point_d> points_generated;
 
     {
         py::gil_scoped_release release;
-        points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, uniform);
+        points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
     }
 
     size_t npoints = points_generated.size();
@@ -93,7 +93,7 @@ PYBIND11_MODULE(_points, m) {
           )pbdoc");
 
     m.def("torus", &generate_points_on_torus,
-          py::arg("n_samples"), py::arg("dim"), py::arg("uniform") = false,
+          py::arg("n_samples"), py::arg("dim"), py::arg("sample") = "random",
           R"pbdoc(
           Generate random i.i.d. points on a d-torus in R^2d
 
@@ -101,8 +101,8 @@ PYBIND11_MODULE(_points, m) {
           :type n_samples: integer
           :param dim: The dimension of the torus on which points would be generated in R^2*dim.
           :type dim: integer
-          :param uniform: A flag to define if the points generation is uniform (i.e generated as a grid).
-          :type uniform: bool
+          :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
+          :type sample: string
           :rtype: numpy array of float
           :returns: the generated points on a torus.
           )pbdoc");
