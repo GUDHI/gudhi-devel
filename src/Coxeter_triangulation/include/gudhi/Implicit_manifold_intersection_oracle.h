@@ -16,7 +16,7 @@
 #include <gudhi/Permutahedral_representation/face_from_indices.h>
 #include <gudhi/Functions/Constant_function.h>
 #include <gudhi/Functions/PL_approximation.h>
-#include <gudhi/Query_result.h>
+#include <gudhi/Manifold_tracing/Query_result.h>
 #include <gudhi/Debug_utils.h>  // for GUDHI_CHECK
 
 #include <vector>
