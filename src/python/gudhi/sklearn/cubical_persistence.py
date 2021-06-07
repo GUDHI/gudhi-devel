@@ -1,7 +1,9 @@
 from .. import CubicalComplex
 from sklearn.base import BaseEstimator, TransformerMixin
+
 # joblib is required by scikit-learn
 from joblib import Parallel, delayed
+
 
 class CubicalPersistence(BaseEstimator, TransformerMixin):
     # Fast way to find primes and should be enough
@@ -9,6 +11,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the persistence diagrams from a cubical complex.
     """
+
     def __init__(self, dimensions=None, persistence_dim=0, min_persistence=0, n_jobs=None):
         """
         Constructor for the CubicalPersistence class.
@@ -41,9 +44,10 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, cells):
-        cubical_complex = CubicalComplex(top_dimensional_cells = cells, dimensions = self.dimensions)
-        cubical_complex.compute_persistence(homology_coeff_field = self.homology_coeff_field_,
-                                            min_persistence = self.min_persistence)
+        cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.dimensions)
+        cubical_complex.compute_persistence(
+            homology_coeff_field=self.homology_coeff_field_, min_persistence=self.min_persistence
+        )
         diagrams = cubical_complex.persistence_intervals_in_dimension(self.persistence_dim)
         return diagrams
 
@@ -59,5 +63,4 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         """
 
         # threads is preferred as cubical construction and persistence computation releases the GIL
-        return Parallel(n_jobs=self.n_jobs, prefer="threads")(
-            delayed(self.__transform)(cells) for cells in X)
+        return Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
