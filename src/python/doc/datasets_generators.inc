@@ -2,8 +2,8 @@
    :widths: 30 40 30
 
    +-----------------------------------+--------------------------------------------+--------------------------------------------------------------------------------------+
-   | | :math:`(x_1, x_2, \ldots, x_d)` | Datasets generators (points).              | :Authors: Hind Montassif                                                             |
-   |                                   |                                            |                                                                                      |
+   | .. figure::                       | Datasets generators (points).              | :Authors: Hind Montassif                                                             |
+   |     img/sphere_3d.png             |                                            |                                                                                      |
    |                                   |                                            | :Since: GUDHI 3.5.0                                                                  |
    |                                   |                                            |                                                                                      |
    |                                   |                                            | :License: MIT (`LGPL v3 </licensing/>`_)                                             |
