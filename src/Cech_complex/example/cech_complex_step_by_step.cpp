@@ -24,9 +24,9 @@
 #include <map>
 
 // ----------------------------------------------------------------------------
-// rips_persistence_step_by_step is an example of each step that is required to
-// build a Rips over a Simplex_tree. Please refer to rips_persistence to see
-// how to do the same thing with the Rips_complex wrapper for less detailed
+// cech_complex_step_by_step is an example of each step that is required to
+// build a Cech over a Simplex_tree. Please refer to cech_complex_example_from_points to see
+// how to do the same thing with the Cech complex wrapper for less detailed
 // steps.
 // ----------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
   Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(), max_radius,
                                                                             Gudhi::Minimal_enclosing_ball_radius());
 
-  // Construct the Rips complex in a Simplex Tree
+  // Construct the Cech complex in a Simplex Tree
   Simplex_tree st;
   // insert the proximity graph in the simplex tree
   st.insert_graph(prox_graph);
@@ -129,9 +129,9 @@ void program_options(int argc, char* argv[], std::string& off_file_points, Filtr
   visible.add_options()("help,h", "produce help message")(
       "max-radius,r",
       po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-      "Maximal length of an edge for the Rips complex construction.")(
+      "Maximal length of an edge for the Cech complex construction.")(
       "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),
-      "Maximal dimension of the Rips complex we want to compute.");
+      "Maximal dimension of the Cech complex we want to compute.");
 
   po::positional_options_description pos;
   pos.add("input-file", 1);
