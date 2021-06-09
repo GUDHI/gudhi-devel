@@ -53,7 +53,7 @@ template<typename CgalPointType>
 struct Point_cgal_to_cython<CgalPointType, true> {
   std::vector<double> operator()(CgalPointType const& weighted_point) const 
   {
-    auto point = weighted_point.point();
+    const auto& point = weighted_point.point();
     std::vector<double> vd;
     vd.reserve(point.dimension());
     for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
