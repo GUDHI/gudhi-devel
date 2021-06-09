@@ -107,7 +107,7 @@ class Points_off_visitor_reader {
  * This example loads points from an OFF file and builds a vector of points (vector of double).
  * Then, it is asked to display the points.
  * 
- * \include common/example_vector_double_points_off_reader.cpp
+ * \include example_vector_double_points_off_reader.cpp
  * 
  * When launching:
  * 
@@ -116,7 +116,7 @@ class Points_off_visitor_reader {
  *
  * the program outputs a file ../../data/points/alphacomplexdoc.off.txt:
  * 
- * \include common/vectordoubleoffreader_result.txt
+ * \include vectordoubleoffreader_result.txt
  */
 template<typename Point_d>
 class Points_off_reader {
