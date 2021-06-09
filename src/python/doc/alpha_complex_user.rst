@@ -173,8 +173,8 @@ of speed-up, since we always first build the full filtered complex, so it is rec
 :paramref:`~gudhi.AlphaComplex.create_simplex_tree.max_alpha_square`.
 In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 
-Weighted specific version
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Weighted version
+^^^^^^^^^^^^^^^^
 
 A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
 `CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_
