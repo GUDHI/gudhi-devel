@@ -36,22 +36,18 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
-    """AlphaComplex is a simplicial complex constructed from the finite cells
-    of a Delaunay Triangulation.
+    """AlphaComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    The filtration value of each simplex is computed as the square of the
-    circumradius of the simplex if the circumsphere is empty (the simplex is
-    then said to be Gabriel), and as the minimum of the filtration values of
-    the codimension 1 cofaces that make it not Gabriel otherwise.
+    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration values of the
+    codimension 1 cofaces that make it not Gabriel otherwise.
 
-    All simplices that have a filtration value strictly greater than a given
-    alpha squared value are not inserted into the complex.
+    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
+    the complex.
 
     .. note::
 
-        When Alpha_complex is constructed with an infinite value of alpha, the
-        complex is a Delaunay complex.
-
+        When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
 
     cdef Alpha_complex_interface * this_ptr
@@ -63,18 +59,14 @@ cdef class AlphaComplex:
         :param points: A list of points in d-Dimension.
         :type points: Iterable[Iterable[float]]
 
-        :param off_file: **[deprecated]** An `OFF file style <fileformats.html#off-file-format>`_
-            name.
-            If an `off_file` is given with `points` as arguments, only points from the file are
-            taken into account.
+        :param off_file: **[deprecated]** An `OFF file style <fileformats.html#off-file-format>`_ name.
+            If an `off_file` is given with `points` as arguments, only points from the file are taken into account.
         :type off_file: string
 
-        :param weights: A list of weights. If set, the number of weights must correspond to the
-            number of points.
+        :param weights: A list of weights. If set, the number of weights must correspond to the number of points.
         :type weights: Iterable[float]
 
-        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is
-            'safe'.
+        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
 
         :raises FileNotFoundError: **[deprecated]** If `off_file` is set but not found.
@@ -83,8 +75,7 @@ cdef class AlphaComplex:
 
     # The real cython constructor
     def __cinit__(self, points = [], off_file = '', weights=None, precision = 'safe'):
-        assert precision in ['fast', 'safe', 'exact'], \
-            "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 

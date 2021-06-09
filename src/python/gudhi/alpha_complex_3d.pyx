@@ -36,22 +36,24 @@ cdef extern from "Alpha_complex_interface_3d.h" namespace "Gudhi":
 
 # AlphaComplex3D python interface
 cdef class AlphaComplex3D:
-    """AlphaComplex3D is a simplicial complex constructed from the finite cells
-    of a Delaunay Triangulation.
+    """AlphaComplex3D is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    The filtration value of each simplex is computed as the square of the
-    circumradius of the simplex if the circumsphere is empty (the simplex is
-    then said to be Gabriel), and as the minimum of the filtration values of
-    the codimension 1 cofaces that make it not Gabriel otherwise.
+    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration values of the
+    codimension 1 cofaces that make it not Gabriel otherwise.
 
-    All simplices that have a filtration value strictly greater than a given
-    alpha squared value are not inserted into the complex.
+    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
+    the complex.
 
     .. note::
 
-        When AlphaComplex3D is constructed with an infinite value of alpha, the
-        complex is a Delaunay complex.
+        When AlphaComplex3D is constructed with an infinite value of alpha, the complex is a Delaunay complex.
 
+    .. warning::
+
+        Contrary to the dD version, with the 3d version, the vertices in the output simplex tree are not guaranteed to
+        match the order of the input points. One can use :func:`~gudhi.AlphaComplex3D.get_point` to get the initial
+        point back.
     """
 
     cdef Alpha_complex_interface_3d * this_ptr
@@ -63,12 +65,10 @@ cdef class AlphaComplex3D:
         :param points: A list of points in d-Dimension.
         :type points: Iterable[Iterable[float]]
 
-        :param weights: A list of weights. If set, the number of weights must correspond to the
-            number of points.
+        :param weights: A list of weights. If set, the number of weights must correspond to the number of points.
         :type weights: Iterable[float]
 
-        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is
-            'safe'.
+        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
 
         :raises ValueError: In case of inconsistency between the number of points and weights.
@@ -76,8 +76,7 @@ cdef class AlphaComplex3D:
 
     # The real cython constructor
     def __cinit__(self, points = [], weights=[], precision = 'safe'):
-        assert precision in ['fast', 'safe', 'exact'], \
-            "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 

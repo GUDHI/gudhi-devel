@@ -34,8 +34,6 @@ Remarks
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 * For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
-* The vertices in the output simplex tree are not guaranteed to match the order of the input points. One can use
-  :func:`~gudhi.AlphaComplex.get_point` to get the initial point back.
 
 Example from points
 -------------------
@@ -265,3 +263,9 @@ Then, it computes the persistence diagram and displays it:
 
 A specific module for Alpha complex is available in 3d (cf. :class:`~gudhi.AlphaComplex3D`) and
 allows to construct standard and weighted versions of alpha complexes.
+
+Remark
+""""""
+
+* Contrary to the dD version, with the 3d version, the vertices in the output simplex tree are not guaranteed to match
+  the order of the input points. One can use :func:`~gudhi.AlphaComplex3D.get_point` to get the initial point back.
