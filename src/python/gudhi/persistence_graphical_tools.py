@@ -168,7 +168,7 @@ def plot_persistence_barcode(
         if colormap == None:
             colormap = plt.cm.Set1.colors
         if axes == None:
-            fig, axes = plt.subplots(1, 1)
+            _, axes = plt.subplots(1, 1)
 
         persistence = sorted(persistence, key=lambda birth: birth[1][0])
 
@@ -307,7 +307,7 @@ def plot_persistence_diagram(
         if colormap == None:
             colormap = plt.cm.Set1.colors
         if axes == None:
-            fig, axes = plt.subplots(1, 1)
+            _, axes = plt.subplots(1, 1)
 
         (min_birth, max_death) = __min_birth_max_death(persistence, band)
         delta = (max_death - min_birth) * inf_delta
@@ -487,7 +487,7 @@ def plot_persistence_density(
         if cmap is None:
             cmap = plt.cm.hot_r
         if axes == None:
-            fig, axes = plt.subplots(1, 1)
+            _, axes = plt.subplots(1, 1)
 
         # line display of equation : birth = death
         x = np.linspace(death.min(), birth.max(), 1000)
