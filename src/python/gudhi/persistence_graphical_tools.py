@@ -502,7 +502,7 @@ def plot_persistence_density(
         zi = k(np.vstack([xi.flatten(), yi.flatten()]))
 
         # Make the plot
-        img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap)
+        img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap, shading='auto')
 
         if greyblock:
             axes.add_patch(mpatches.Polygon([[birth.min(), birth.min()], [death.max(), birth.min()], [death.max(), death.max()]], fill=True, color='lightgrey'))
