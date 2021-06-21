@@ -296,7 +296,7 @@ def test_inconsistency_points_and_weights():
         alpha = gd.AlphaComplex(points = points,
                                 weights = [1., 2., 3., 4., 5., 6.])
 
-def _doc_example(precision):
+def _weighted_doc_example(precision):
     stree_from_values = gd.AlphaComplex(points=[[ 1., -1., -1.],
                                                 [-1.,  1., -1.],
                                                 [-1., -1.,  1.],
@@ -310,6 +310,6 @@ def _doc_example(precision):
     assert stree_from_values.filtration([0, 2, 3, 4]) == pytest.approx(95.)
     assert stree_from_values.filtration([1, 2, 3, 4]) == pytest.approx(95.)
 
-def test_doc_example():
+def test_weighted_doc_example():
     for precision in ['fast', 'safe', 'exact']:
-        _doc_example(precision)
+        _weighted_doc_example(precision)
