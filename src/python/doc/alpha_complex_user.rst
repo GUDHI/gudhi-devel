@@ -33,7 +33,6 @@ Remarks
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
-* For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
 
 Example from points
 -------------------
