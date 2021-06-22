@@ -11,6 +11,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "alpha_complex_3d"
 #include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <cmath>  // float comparison
 #include <limits>
@@ -35,6 +36,7 @@ using Safe_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::SAFE, false, false>;
 using Exact_alpha_complex_3d =
     Gudhi::alpha_complex::Alpha_complex_3d<Gudhi::alpha_complex::complexity::EXACT, false, false>;
+
 
 template <typename Point>
 std::vector<Point> get_points() {
@@ -196,4 +198,32 @@ BOOST_AUTO_TEST_CASE(Alpha_complex_3d_from_points) {
 
     ++safe_sh;
   }
+}
+
+typedef boost::mpl::list<Fast_alpha_complex_3d, Safe_alpha_complex_3d, Exact_alpha_complex_3d> list_of_alpha_variants;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_3d_exceptions_points_on_plane, Alpha, list_of_alpha_variants) {
+  std::vector<typename Alpha::Bare_point_3> points_on_plane;
+  points_on_plane.emplace_back(1.0, 1.0 , 0.0);
+  points_on_plane.emplace_back(7.0, 0.0 , 0.0);
+  points_on_plane.emplace_back(4.0, 6.0 , 0.0);
+  points_on_plane.emplace_back(9.0, 6.0 , 0.0);
+  points_on_plane.emplace_back(0.0, 14.0, 0.0);
+  points_on_plane.emplace_back(2.0, 19.0, 0.0);
+  points_on_plane.emplace_back(9.0, 17.0, 0.0);
+
+  Alpha alpha_complex(points_on_plane);
+  Gudhi::Simplex_tree<> stree;
+
+  BOOST_CHECK_THROW(alpha_complex.create_complex(stree), std::domain_error);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_3d_exceptions_non_empty_simplex_tree, Alpha, list_of_alpha_variants) {
+  Alpha alpha_complex(get_points<typename Alpha::Bare_point_3>());
+  Gudhi::Simplex_tree<> stree;
+  stree.insert_simplex_and_subfaces({2,1,0}, 3.0);
+
+#ifdef GUDHI_DEBUG
+  BOOST_CHECK_THROW(alpha_complex.create_complex(stree), std::invalid_argument);
+#endif  // GUDHI_DEBUG
 }

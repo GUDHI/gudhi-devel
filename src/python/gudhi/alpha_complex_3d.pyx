@@ -62,7 +62,7 @@ cdef class AlphaComplex3D:
     def __init__(self, points=[], weights=[], precision='safe'):
         """AlphaComplex3D constructor.
 
-        :param points: A list of points in d-Dimension.
+        :param points: A list of points in 3d.
         :type points: Iterable[Iterable[float]]
 
         :param weights: A list of weights. If set, the number of weights must correspond to the number of points.
@@ -118,6 +118,8 @@ cdef class AlphaComplex3D:
         :type max_alpha_square: float
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
+
+        :raises ValueError: If the points given at construction time are on a plane.
         """
         stree = SimplexTree()
         cdef double mas = max_alpha_square

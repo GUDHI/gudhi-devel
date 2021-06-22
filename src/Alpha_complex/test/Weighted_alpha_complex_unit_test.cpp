@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   // Weighted alpha complex for 3D version
   Exact_weighted_alpha_complex_3d alpha_complex_3D_from_weighted_points(w_points_3);
   Gudhi::Simplex_tree<> w_simplex_3;
-  BOOST_CHECK(alpha_complex_3D_from_weighted_points.create_complex(w_simplex_3));
+  alpha_complex_3D_from_weighted_points.create_complex(w_simplex_3);
 
   std::clog << "Iterator on weighted alpha complex 3D simplices in the filtration order, with [filtration value]:"
             << std::endl;

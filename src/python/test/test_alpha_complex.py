@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi as gd
+from gudhi import AlphaComplex
 import math
 import numpy as np
 import pytest
@@ -21,17 +21,14 @@ except ImportError:
     # python2
     from itertools import izip_longest as zip_longest
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 
 def _empty_alpha(precision):
-    alpha_complex = gd.AlphaComplex(precision = precision)
+    alpha_complex = AlphaComplex(precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def _one_2d_point_alpha(precision):
-    alpha_complex = gd.AlphaComplex(points=[[0, 0]], precision = precision)
+    alpha_complex = AlphaComplex(points=[[0, 0]], precision = precision)
     assert alpha_complex.__is_defined() == True
 
 def test_empty_alpha():
@@ -41,7 +38,7 @@ def test_empty_alpha():
 
 def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    alpha_complex = gd.AlphaComplex(points=point_list, precision = precision)
+    alpha_complex = AlphaComplex(points=point_list, precision = precision)
     assert alpha_complex.__is_defined() == True
 
     simplex_tree = alpha_complex.create_simplex_tree()
@@ -76,18 +73,9 @@ def _infinite_alpha(precision):
     assert point_list[1] == alpha_complex.get_point(1)
     assert point_list[2] == alpha_complex.get_point(2)
     assert point_list[3] == alpha_complex.get_point(3)
-    try:
-        alpha_complex.get_point(4) == []
-    except IndexError:
-        pass
-    else:
-        assert False
-    try:
-        alpha_complex.get_point(125) == []
-    except IndexError:
-        pass
-    else:
-        assert False
+
+    with pytest.raises(IndexError):
+        alpha_complex.get_point(len(point_list))
 
 def test_infinite_alpha():
     for precision in ['fast', 'safe', 'exact']:
@@ -95,7 +83,7 @@ def test_infinite_alpha():
 
 def _filtered_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = gd.AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(max_alpha_square=0.25)
 
@@ -106,18 +94,9 @@ def _filtered_alpha(precision):
     assert point_list[1] == filtered_alpha.get_point(1)
     assert point_list[2] == filtered_alpha.get_point(2)
     assert point_list[3] == filtered_alpha.get_point(3)
-    try:
-        filtered_alpha.get_point(4) == []
-    except IndexError:
-        pass
-    else:
-        assert False
-    try:
-        filtered_alpha.get_point(125) == []
-    except IndexError:
-        pass
-    else:
-        assert False
+
+    with pytest.raises(IndexError):
+        filtered_alpha.get_point(len(point_list))
 
     assert list(simplex_tree.get_filtration()) == [
         ([0], 0.0),
@@ -148,10 +127,10 @@ def _safe_alpha_persistence_comparison(precision):
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
     
     #build alpha complex and simplex tree
-    alpha_complex1 = gd.AlphaComplex(points=embedding1, precision = precision)
+    alpha_complex1 = AlphaComplex(points=embedding1, precision = precision)
     simplex_tree1 = alpha_complex1.create_simplex_tree()
     
-    alpha_complex2 = gd.AlphaComplex(points=embedding2, precision = precision)
+    alpha_complex2 = AlphaComplex(points=embedding2, precision = precision)
     simplex_tree2 = alpha_complex2.create_simplex_tree()
     
     diag1 = simplex_tree1.persistence()
@@ -169,7 +148,7 @@ def test_safe_alpha_persistence_comparison():
 
 def _delaunay_complex(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    filtered_alpha = gd.AlphaComplex(points=point_list, precision = precision)
+    filtered_alpha = AlphaComplex(points=point_list, precision = precision)
 
     simplex_tree = filtered_alpha.create_simplex_tree(default_filtration_value = True)
 
@@ -180,18 +159,11 @@ def _delaunay_complex(precision):
     assert point_list[1] == filtered_alpha.get_point(1)
     assert point_list[2] == filtered_alpha.get_point(2)
     assert point_list[3] == filtered_alpha.get_point(3)
-    try:
-        filtered_alpha.get_point(4) == []
-    except IndexError:
-        pass
-    else:
-        assert False
-    try:
-        filtered_alpha.get_point(125) == []
-    except IndexError:
-        pass
-    else:
-        assert False
+
+    with pytest.raises(IndexError):
+        filtered_alpha.get_point(4)
+    with pytest.raises(IndexError):
+        filtered_alpha.get_point(125)
 
     for filtered_value in simplex_tree.get_filtration():
         assert math.isnan(filtered_value[1])
@@ -205,7 +177,7 @@ def test_delaunay_complex():
         _delaunay_complex(precision)
 
 def _3d_points_on_a_plane(precision, default_filtration_value):
-    alpha = gd.AlphaComplex(points = [[1.0, 1.0 , 0.0],
+    alpha = AlphaComplex(points = [[1.0, 1.0 , 0.0],
                                       [7.0, 0.0 , 0.0],
                                       [4.0, 6.0 , 0.0],
                                       [9.0, 6.0 , 0.0],
@@ -225,10 +197,10 @@ def test_3d_points_on_a_plane():
 
 def _3d_tetrahedrons(precision):
     points = 10*np.random.rand(10, 3)
-    alpha = gd.AlphaComplex(points = points, precision = precision)
+    alpha = AlphaComplex(points = points, precision = precision)
     st_alpha = alpha.create_simplex_tree(default_filtration_value = False)
     # New AlphaComplex for get_point to work
-    delaunay = gd.AlphaComplex(points = points, precision = precision)
+    delaunay = AlphaComplex(points = points, precision = precision)
     st_delaunay = delaunay.create_simplex_tree(default_filtration_value = True)
 
     delaunay_tetra = []
@@ -272,11 +244,12 @@ def test_off_file_deprecation_warning():
     off_file.close()
 
     with pytest.warns(DeprecationWarning):
-        alpha = gd.AlphaComplex(off_file="alphacomplexdoc.off")
+        alpha = AlphaComplex(off_file="alphacomplexdoc.off")
 
 def test_non_existing_off_file():
-    with pytest.raises(FileNotFoundError):
-        alpha = gd.AlphaComplex(off_file="pouetpouettralala.toubiloubabdou")
+    with pytest.warns(DeprecationWarning):
+        with pytest.raises(FileNotFoundError):
+            alpha = AlphaComplex(off_file="pouetpouettralala.toubiloubabdou")
 
 def test_inconsistency_points_and_weights():
     points = [[1.0, 1.0 , 0.0],
@@ -288,27 +261,27 @@ def test_inconsistency_points_and_weights():
               [9.0, 17.0, 0.0]]
     with pytest.raises(ValueError):
         # 7 points, 8 weights, on purpose
-        alpha = gd.AlphaComplex(points = points,
+        alpha = AlphaComplex(points = points,
                                 weights = [1., 2., 3., 4., 5., 6., 7., 8.])
 
     with pytest.raises(ValueError):
         # 7 points, 6 weights, on purpose
-        alpha = gd.AlphaComplex(points = points,
+        alpha = AlphaComplex(points = points,
                                 weights = [1., 2., 3., 4., 5., 6.])
 
 def _weighted_doc_example(precision):
-    stree_from_values = gd.AlphaComplex(points=[[ 1., -1., -1.],
-                                                [-1.,  1., -1.],
-                                                [-1., -1.,  1.],
-                                                [ 1.,  1.,  1.],
-                                                [ 2.,  2.,  2.]],
-                                        weights = [4., 4., 4., 4., 1.],
-                                        precision = precision).create_simplex_tree()
+    stree = AlphaComplex(points=[[ 1., -1., -1.],
+                                    [-1.,  1., -1.],
+                                    [-1., -1.,  1.],
+                                    [ 1.,  1.,  1.],
+                                    [ 2.,  2.,  2.]],
+                            weights = [4., 4., 4., 4., 1.],
+                            precision = precision).create_simplex_tree()
 
-    assert stree_from_values.filtration([0, 1, 2, 3]) == pytest.approx(-1.)
-    assert stree_from_values.filtration([0, 1, 3, 4]) == pytest.approx(95.)
-    assert stree_from_values.filtration([0, 2, 3, 4]) == pytest.approx(95.)
-    assert stree_from_values.filtration([1, 2, 3, 4]) == pytest.approx(95.)
+    assert stree.filtration([0, 1, 2, 3]) == pytest.approx(-1.)
+    assert stree.filtration([0, 1, 3, 4]) == pytest.approx(95.)
+    assert stree.filtration([0, 2, 3, 4]) == pytest.approx(95.)
+    assert stree.filtration([1, 2, 3, 4]) == pytest.approx(95.)
 
 def test_weighted_doc_example():
     for precision in ['fast', 'safe', 'exact']:
