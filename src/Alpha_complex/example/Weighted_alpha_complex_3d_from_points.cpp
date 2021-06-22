@@ -30,23 +30,22 @@ int main(int argc, char **argv) {
   Weighted_alpha_complex_3d alpha_complex_from_points(weighted_points);
 
   Gudhi::Simplex_tree<> simplex;
-  if (alpha_complex_from_points.create_complex(simplex)) {
-    // ----------------------------------------------------------------------------
-    // Display information about the alpha complex
-    // ----------------------------------------------------------------------------
-    std::clog << "Weighted alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
-              << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
+  alpha_complex_from_points.create_complex(simplex);
+  // ----------------------------------------------------------------------------
+  // Display information about the alpha complex
+  // ----------------------------------------------------------------------------
+  std::clog << "Weighted alpha complex is of dimension " << simplex.dimension() << " - " << simplex.num_simplices()
+            << " simplices - " << simplex.num_vertices() << " vertices." << std::endl;
 
-    std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
-    for (auto f_simplex : simplex.filtration_simplex_range()) {
-      std::clog << "   ( ";
-      for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
-        std::clog << vertex << " ";
-      }
-      std::clog << ") -> "
-                << "[" << simplex.filtration(f_simplex) << "] ";
-      std::clog << std::endl;
+  std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:" << std::endl;
+  for (auto f_simplex : simplex.filtration_simplex_range()) {
+    std::clog << "   ( ";
+    for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << " ";
     }
+    std::clog << ") -> "
+              << "[" << simplex.filtration(f_simplex) << "] ";
+    std::clog << std::endl;
   }
   return 0;
 }
