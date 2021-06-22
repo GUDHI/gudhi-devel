@@ -10,6 +10,7 @@
 
 from gudhi import AlphaComplex3D
 import pytest
+import numpy as np
 
 try:
     # python3
@@ -147,3 +148,12 @@ def _weighted_doc_example(precision):
 def test_weighted_doc_example():
     for precision in ['fast', 'safe', 'exact']:
         _weighted_doc_example(precision)
+
+def test_points_not_in_3d():
+    with pytest.raises(ValueError):
+        alpha = AlphaComplex3D(points = np.random.rand(6,2))
+    with pytest.raises(ValueError):
+        alpha = AlphaComplex3D(points = np.random.rand(6,4))
+
+    alpha = AlphaComplex3D(points = np.random.rand(6,3))
+    assert alpha.__is_defined() == True

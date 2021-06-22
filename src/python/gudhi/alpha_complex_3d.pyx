@@ -71,6 +71,7 @@ cdef class AlphaComplex3D:
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
 
+        :raises ValueError: If the given points are not in 3d.
         :raises ValueError: In case of inconsistency between the number of points and weights.
         """
 
@@ -79,6 +80,10 @@ cdef class AlphaComplex3D:
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
+
+        if len(points) > 0:
+            if len(points[0]) != 3:
+                raise ValueError("AlphaComplex3D only accepts 3d points as an input")
 
         # weights are set but is inconsistent with the number of points
         if len(weights) != 0 and len(weights) != len(points):
