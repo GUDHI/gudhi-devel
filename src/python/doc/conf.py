@@ -126,9 +126,6 @@ html_theme = 'python_docs_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-     "sidebarbgcolor": "#A1ADCD",
-     "sidebartextcolor": "black",
-     "sidebarlinkcolor": "#334D5C",
      "body_max_width": "100%",
 }
 
