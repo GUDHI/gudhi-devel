@@ -43,6 +43,21 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     }
   };
 
+  bool is_prime(int n) {
+    // Primality test using 6k+-1 optimization.
+    if (n <= 3)
+      return n > 1;
+    if ((n % 2 == 0) || (n % 3 == 0))
+      return false;
+    int i = 5;
+    while (i*i <= n) {
+      if ((n % i == 0) || (n % (i + 2) == 0))
+        return false;
+      i += 6;
+    }
+    return true;
+  }
+
  public:
   Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max=false)
       : Base(*stptr, persistence_dim_max),
@@ -50,6 +65,11 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
 
   // TODO: move to the constructors?
   void compute_persistence(int homology_coeff_field, double min_persistence) {
+    // Check that homology_coeff_field is a prime number (including not null)
+    if(!is_prime(homology_coeff_field)) {
+        std::cerr << "Warning: The persistence was not computed ; homology_coeff_field must be a prime number";
+        return;
+    }
     Base::init_coefficients(homology_coeff_field);
     Base::compute_persistent_cohomology(min_persistence);
   }
