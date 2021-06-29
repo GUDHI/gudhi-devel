@@ -14,18 +14,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Build wheel for Python 3.5
-        run: |
-          mkdir build_35
-          cd build_35
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON35/bin/python ..
-          cd src/python
-          $PYTHON35/bin/python setup.py bdist_wheel
-          auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.5
-        run: |
-          $PYTHON35/bin/python -m pip install --user pytest build_35/src/python/dist/*.whl
-          $PYTHON35/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Build wheel for Python 3.6
         run: |
           mkdir build_36
@@ -74,13 +62,25 @@ jobs:
         run: |
           $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
           $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
+      - name: Build wheel for Python 3.10
+        run: |
+          mkdir build_310
+          cd build_310
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON310/bin/python ..
+          cd src/python
+          $PYTHON310/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.10
+        run: |
+          $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
+          $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          $PYTHON39/bin/python -m twine upload build_35/src/python/wheelhouse/*
-          $PYTHON39/bin/python -m twine upload build_36/src/python/wheelhouse/*
-          $PYTHON39/bin/python -m twine upload build_37/src/python/wheelhouse/*
-          $PYTHON39/bin/python -m twine upload build_38/src/python/wheelhouse/*
-          $PYTHON39/bin/python -m twine upload build_39/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_36/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_37/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_38/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_39/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_310/src/python/wheelhouse/*
