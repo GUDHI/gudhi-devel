@@ -1,10 +1,8 @@
 // List of GUDHI examples - Doxygen needs at least a file tag to analyse comments
 // In user_version, `find . -name "*.cpp"` in example and utilities folders
 /*! @file Examples
- * \section Alpha_complex_examples Alpha complex
  * @example Alpha_complex_from_off.cpp
  * @example Alpha_complex_from_points.cpp
- * \section bottleneck_examples bottleneck
  * @example bottleneck_basic_example.cpp
  * @example alpha_rips_persistence_bottleneck_distance.cpp
  * @example example_nearest_landmark_table.cpp
@@ -94,5 +92,8 @@
  * @example persistence_landscapes/create_landscapes.cpp
  * @example persistence_landscapes/compute_distance_of_landscapes.cpp
  * @example persistence_landscapes/plot_landscapes.cpp
+ * @example cell_complex_from_basic_circle_manifold.cpp
+ * @example manifold_tracing_custom_function.cpp
+ * @example manifold_tracing_flat_torus_with_boundary.cpp
  */
  
