@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gudhi.datasets.generators import points
+from gudhi.datasets.generators import _points
 from gudhi import AlphaComplex
 
 
@@ -22,7 +22,7 @@ print("#####################################################################")
 print("AlphaComplex creation from generated points on sphere")
 
 
-gen_points = points.sphere(n_samples = 50, ambient_dim = 2, radius = 1, sample = "random")
+gen_points = _points.sphere(n_samples = 50, ambient_dim = 2, radius = 1, sample = "random")
 
 # Create an alpha complex
 alpha_complex = AlphaComplex(points = gen_points)
