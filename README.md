@@ -23,9 +23,13 @@ git submodule update --init
 
 To install GUDHI, you can follow the [C++ compilation procedure](https://gudhi.inria.fr/doc/latest/installation.html), the [Python compilation procedure](https://gudhi.inria.fr/python/latest/installation.html), use our [conda-forge package](https://gudhi.inria.fr/conda/), or [go with Docker](https://gudhi.inria.fr/dockerfile/).
 
+# Contribution
+
+In case you have a question, you found an issue, or even if you want to contribute to GUDHI project's documentation or code,
+please read our [contributing guide](.github/CONTRIBUTING.md).
+
 # More information
 
 * [The GUDHI website](https://gudhi.inria.fr/)
-* [Contact us](https://gudhi.inria.fr/contact/)
 * [Subscribe to the GUDHI users mailing list](https://gudhi.inria.fr/keepintouch/)
 * [Tutorials](https://gudhi.inria.fr/tutorials/)
