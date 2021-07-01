@@ -13,6 +13,8 @@
 
 #include <utility>
 #include <vector>
+#include <stdexcept>
+#include <cmath>
 
 namespace Gudhi {
 
@@ -34,15 +36,30 @@ class Field_Zp {
 
   void init(int charac) {
     assert(charac > 0);  // division by zero + non negative values
+
     Prime = charac;
+
+    // Check for primality
+    if ((Prime == 0) || (Prime == 1) || ((Prime > 3) && ((Prime % 2 == 0) || (Prime % 3 == 0))))
+        throw std::invalid_argument("homology_coeff_field must be a prime number");
+
     inverse_.clear();
     inverse_.reserve(charac);
     inverse_.push_back(0);
     for (int i = 1; i < Prime; ++i) {
       int inv = 1;
-      while (((inv * i) % Prime) != 1)
+      int mult = inv * i;
+      while ( (mult % Prime) != 1) {
         ++inv;
+        if(mult == Prime)
+            throw std::invalid_argument("homology_coeff_field must be a prime number");
+        mult = inv * i;
+      }
       inverse_.push_back(inv);
+      if ( (i <= std::sqrt(Prime)) && (((i-5)%6) == 0) ) {
+        if ((Prime % i == 0) || (Prime % (i + 2) == 0))
+            throw std::invalid_argument("homology_coeff_field must be a prime number");
+      }
     }
   }
 
