@@ -254,17 +254,3 @@ Then, it computes the persistence diagram and displays it:
     dgm = stree.persistence()
     gd.plot_persistence_diagram(dgm, legend = True)
     plt.show()
-
-3d specific version
-^^^^^^^^^^^^^^^^^^^
-
-:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0.
-
-A specific module for Alpha complex is available in 3d (cf. :class:`~gudhi.AlphaComplex3D`) and
-allows to construct standard and weighted versions of alpha complexes.
-
-Remark
-""""""
-
-* Contrary to the dD version, with the 3d version, the vertices in the output simplex tree are not guaranteed to match
-  the order of the input points. One can use :func:`~gudhi.AlphaComplex3D.get_point` to get the initial point back.

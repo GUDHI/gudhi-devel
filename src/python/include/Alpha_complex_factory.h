@@ -147,41 +147,6 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
   Alpha_complex<Kernel, Weighted> alpha_complex_;
 };
 
-template <complexity Complexity, bool Weighted = false>
-class Alpha_complex_3D final : public Abstract_alpha_complex {
- private:
-  using Bare_point = typename Alpha_complex_3d<Complexity, Weighted, false>::Bare_point_3;
-  using Point = typename Alpha_complex_3d<Complexity, Weighted, false>::Point_3;
-
-  static Bare_point pt_cython_to_cgal_3(std::vector<double> const& vec) {
-    return Bare_point(vec[0], vec[1], vec[2]);
-  }
-
- public:
-  Alpha_complex_3D(const std::vector<std::vector<double>>& points)
-    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
-  }
-
-  Alpha_complex_3D(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
-    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3), weights) {
-  }
-
-  virtual std::vector<double> get_point(int vh) override {
-    // Can be a Weighted or a Bare point in function of Weighted
-    return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
-  }
-
-  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value) override {
-    alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
-    return true;
-  }
-
- private:
-  Alpha_complex_3d<Complexity, Weighted, false> alpha_complex_;
-};
-
-
 }  // namespace alpha_complex
 
 }  // namespace Gudhi

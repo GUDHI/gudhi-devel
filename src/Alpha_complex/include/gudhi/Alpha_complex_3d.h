@@ -48,7 +48,6 @@
 #include <memory>       // for std::unique_ptr
 #include <type_traits>  // for std::conditional and std::enable_if
 #include <limits>  // for numeric_limits<>
-#include <exception>  // for domain_error and invalid_argument
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -429,18 +428,19 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
    * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time.
    *
-   * @exception invalid_argument In debug mode, if `complex` given as argument is not empty.
-   * @exception domain_error If `points` given in the constructor are on a 2d plane.
+   * @return true if creation succeeds, false otherwise.
    *
    * @pre The simplicial complex must be empty (no vertices).
    *
    */
   template <typename SimplicialComplexForAlpha3d,
             typename Filtration_value = typename SimplicialComplexForAlpha3d::Filtration_value>
-  void create_complex(SimplicialComplexForAlpha3d& complex,
+  bool create_complex(SimplicialComplexForAlpha3d& complex,
                       Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity()) {
-    GUDHI_CHECK(complex.num_vertices() == 0,
-      std::invalid_argument("Alpha_complex_3d create_complex - The complex given as argument is not empty"));
+    if (complex.num_vertices() > 0) {
+      std::cerr << "Alpha_complex_3d create_complex - complex is not empty\n";
+      return false;  // ----- >>
+    }
 
     using Complex_vertex_handle = typename SimplicialComplexForAlpha3d::Vertex_handle;
     using Simplex_tree_vector_vertex = std::vector<Complex_vertex_handle>;
@@ -461,8 +461,10 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
 #ifdef DEBUG_TRACES
     std::clog << "filtration_with_alpha_values returns : " << objects.size() << " objects" << std::endl;
 #endif  // DEBUG_TRACES
-    if (objects.size() == 0)
-      throw std::domain_error("Alpha_complex_3d create_complex - no triangulation as points are on a 2d plane");
+    if (objects.size() == 0) {
+      std::cerr << "Alpha_complex_3d create_complex - no triangulation as points are on a 2d plane\n";
+      return false;  // ----- >>
+    }
 
     using Alpha_value_iterator = typename std::vector<FT>::const_iterator;
     Alpha_value_iterator alpha_value_iterator = alpha_values.begin();
@@ -557,6 +559,7 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
     // Remove all simplices that have a filtration value greater than max_alpha_square
     complex.prune_above_filtration(max_alpha_square);
     // --------------------------------------------------------------------------------------------
+    return true;
   }
 
   /** \brief get_point returns the point corresponding to the vertex given as parameter.
