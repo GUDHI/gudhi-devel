@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import errno
-import os
-import gudhi
+import gudhi as gd
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
     which is released under MIT.
@@ -41,33 +39,24 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-with open(args.file, "r") as f:
-    first_line = f.readline()
-    if (first_line == "OFF\n") or (first_line == "nOFF\n"):
-        print("##############################################################")
-        print("AlphaComplex creation from points read in a OFF file")
+print("##############################################################")
+print("AlphaComplex creation from points read in a OFF file")
 
-        alpha_complex = gudhi.AlphaComplex(off_file=args.file)
-        if args.max_alpha_square is not None:
-            print("with max_edge_length=", args.max_alpha_square)
-            simplex_tree = alpha_complex.create_simplex_tree(
-                max_alpha_square=args.max_alpha_square
-            )
-        else:
-            simplex_tree = alpha_complex.create_simplex_tree()
+points = gd.read_points_from_off_file(off_file = args.file)
+alpha_complex = gd.AlphaComplex(points = points)
+if args.max_alpha_square is not None:
+    print("with max_edge_length=", args.max_alpha_square)
+    simplex_tree = alpha_complex.create_simplex_tree(
+        max_alpha_square=args.max_alpha_square
+    )
+else:
+    simplex_tree = alpha_complex.create_simplex_tree()
 
-        print("Number of simplices=", simplex_tree.num_simplices())
+print("Number of simplices=", simplex_tree.num_simplices())
 
-        diag = simplex_tree.persistence()
-
-        print("betti_numbers()=", simplex_tree.betti_numbers())
-
-        if args.no_diagram == False:
-            import matplotlib.pyplot as plot
-            gudhi.plot_persistence_diagram(diag, band=args.band)
-            plot.show()
-    else:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                args.file)
-
-    f.close()
+diag = simplex_tree.persistence()
+print("betti_numbers()=", simplex_tree.betti_numbers())
+if args.no_diagram == False:
+    import matplotlib.pyplot as plot
+    gd.plot_persistence_diagram(diag, band=args.band)
+    plot.show()
