@@ -265,6 +265,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
+    file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
     # Some files for pip package
     file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
@@ -540,6 +541,11 @@ if(PYTHONINTERP_FOUND)
     # DTM Rips
     if(SCIPY_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
+    endif()
+
+    # sklearn
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_cubical_persistence)
     endif()
 
 
