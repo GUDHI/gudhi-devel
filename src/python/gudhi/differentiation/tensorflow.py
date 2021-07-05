@@ -1,6 +1,5 @@
 import numpy               as np
 import tensorflow          as tf
-from ..simplex_tree     import SimplexTree
 from ..rips_complex     import RipsComplex
 from ..cubical_complex  import CubicalComplex
 
@@ -16,87 +15,70 @@ from ..cubical_complex  import CubicalComplex
 
 # The parameters of the model are the vertex function values of the simplex tree.
 
-def _SimplexTree(stbase, fct, dim, card):
-    # Parameters: stbase (array containing the name of the file where the simplex tree is located)
-    #             fct (function values on the vertices of stbase),
-    #             dim (homological dimension),
-    #             card (number of persistence diagram points, sorted by distance-to-diagonal)
-    
-    # Copy stbase in another simplex tree st
-    st = SimplexTree()
-    f = open(stbase[0], "r")
-    for line in f:
-        ints = line.split(" ")
-        s = [int(v) for v in ints[:-1]]
-        st.insert(s, -1e10)
-    f.close()
-        
+def _LowerStarSimplexTree(simplextree, filtration, dimension):
+    # Parameters: simplextree (simplex tree on which to compute persistence)
+    #             filtration (function values on the vertices of st),
+    #             dimension (homology dimension),
+
     # Assign new filtration values
-    for i in range(st.num_vertices()):
-        st.assign_filtration([i], fct[i])
-    st.make_filtration_non_decreasing()
+    for i in range(simplextree.num_vertices()):
+        simplextree.assign_filtration([i], filtration[i])
+    simplextree.make_filtration_non_decreasing()
     
     # Compute persistence diagram
-    dgm = st.persistence()
+    dgm = simplextree.persistence()
     
     # Get vertex pairs for optimization. First, get all simplex pairs
-    pairs = st.persistence_pairs()
+    pairs = simplextree.persistence_pairs()
     
     # Then, loop over all simplex pairs
     indices, pers = [], []
     for s1, s2 in pairs:
         # Select pairs with good homological dimension and finite lifetime
-        if len(s1) == dim+1 and len(s2) > 0:
+        if len(s1) == dimension+1 and len(s2) > 0:
             # Get IDs of the vertices corresponding to the filtration values of the simplices
             l1, l2 = np.array(s1), np.array(s2)
-            i1 = l1[np.argmax(fct[l1])]
-            i2 = l2[np.argmax(fct[l2])]
+            i1 = l1[np.argmax(filtration[l1])]
+            i2 = l2[np.argmax(filtration[l2])]
             indices.append(i1)
             indices.append(i2)
             # Compute lifetime
-            pers.append(st.filtration(s2) - st.filtration(s1))
+            pers.append(simplextree.filtration(s2)-simplextree.filtration(s1))
     
     # Sort vertex pairs wrt lifetime
     perm = np.argsort(pers)
-    indices = list(np.reshape(indices, [-1,2])[perm][::-1,:].flatten())
+    indices = np.reshape(indices, [-1,2])[perm][::-1,:].flatten()
     
-    # Pad vertex pairs
-    indices = indices[:2*card] + [0 for _ in range(0,max(0,2*card-len(indices)))]
-    return list(np.array(indices, dtype=np.int32))
+    return np.array(indices, dtype=np.int32)
 
-class LowerStarSimplexTreeModel(tf.keras.Model):
+class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
-    TensorFlow model for computing lower-star persistence out of a simplex tree. Since simplex trees cannot be easily encoded as TensorFlow variables, the model takes as input a path to a file containing the simplex tree simplices, and read it each time the simplex tree is required for computations.
+    TensorFlow layer for computing lower-star persistence out of a simplex tree
 
     Attributes:
-        F (TensorFlow variable): filter function values over the vertices of the simplex tree
-        stbase (string): path to the file containing the simplex tree. Each line of the file should represent a simplex as a sequence of integers separated by spaces
-        card (int): maximum number of points in the persistence diagram
-        dim (int): homology dimension
+        simplextree (gudhi.SimplexTree()): underlying simplex tree 
+        dimension (int): homology dimension
     """
-    def __init__(self, F, stbase="simplextree.txt", dim=0, card=50):
-        super(LowerStarSimplexTreeModel, self).__init__()
-        self.F = F
-        self.dim = dim
-        self.card = card
-        self.st = stbase
-        
-    def call(self):
-        d, c = self.dim, self.card
-        st, fct = self.st, self.F
+    def __init__(self, simplextree, dimension=0, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.dimension   = dimension
+        self.simplextree = simplextree
+    
+    def build(self):
+        super.build()
+    
+    def call(self, filtration):
+        """
+        Compute lower-star persistence diagram associated to a function defined on the vertices of the simplex tree
 
-        # Turn STPers into a numpy function
-        SimplexTreeTF = lambda fct: tf.numpy_function(_SimplexTree, [np.array([st], dtype=str), fct, d, c], [tf.int32 for _ in range(2*c)])
-        
+        Parameters:
+            F (TensorFlow variable): filter function values over the vertices of the simplex tree
+        """
         # Don't try to compute gradients for the vertex pairs
-        fcts = tf.reshape(fct, [1, self.F.shape[0]])
-        inds = tf.nest.map_structure(tf.stop_gradient, tf.map_fn(SimplexTreeTF, 
-                                                                 fcts, dtype=[tf.int32 for _ in range(2*c)]))
-        
+        indices = tf.stop_gradient(_LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimension))
         # Get persistence diagram
-        self.dgm = tf.reshape(tf.gather_nd(self.F, inds), [c,2]) 
+        self.dgm = tf.reshape(tf.gather(filtration, indices), [-1,2]) 
         return self.dgm
-
 
 
 
@@ -112,15 +94,14 @@ class LowerStarSimplexTreeModel(tf.keras.Model):
 
 # The parameters of the model are the point coordinates.
 
-def _Rips(DX, mel, dim, card):
+def _Rips(DX, max_edge, dimension):
     # Parameters: DX (distance matrix), 
-    #             mel (maximum edge length for Rips filtration), 
-    #             dim (homological dimension), 
-    #             card (number of persistence diagram points, sorted by distance-to-diagonal)
+    #             max_edge (maximum edge length for Rips filtration), 
+    #             dimension (homology dimension)
 
     # Compute the persistence pairs with Gudhi
-    rc = RipsComplex(distance_matrix=DX, max_edge_length=mel)
-    st = rc.create_simplex_tree(max_dimension=dim+1)
+    rc = RipsComplex(distance_matrix=DX, max_edge_length=max_edge)
+    st = rc.create_simplex_tree(max_dimension=dimension+1)
     dgm = st.persistence()
     pairs = st.persistence_pairs()
 
@@ -128,59 +109,54 @@ def _Rips(DX, mel, dim, card):
     # distance among all pairwise distances between the simplex vertices
     indices, pers = [], []
     for s1, s2 in pairs:
-        if len(s1) == dim+1 and len(s2) > 0:
+        if len(s1) == dimension+1 and len(s2) > 0:
             l1, l2 = np.array(s1), np.array(s2)
-            i1 = [s1[v] for v in np.unravel_index(np.argmax(DX[l1,:][:,l1]),[len(s1), len(s1)])]
-            i2 = [s2[v] for v in np.unravel_index(np.argmax(DX[l2,:][:,l2]),[len(s2), len(s2)])]
-            indices += i1
-            indices += i2
-            pers.append(st.filtration(s2) - st.filtration(s1))
+            i1 = [l1[v] for v in np.unravel_index(np.argmax(DX[l1,:][:,l1]),[len(l1), len(l1)])]
+            i2 = [l2[v] for v in np.unravel_index(np.argmax(DX[l2,:][:,l2]),[len(l2), len(l2)])]
+            indices.append(i1)
+            indices.append(i2)
+            pers.append(st.filtration(s2)-st.filtration(s1))
     
     # Sort points with distance-to-diagonal
     perm = np.argsort(pers)
-    indices = list(np.reshape(indices, [-1,4])[perm][::-1,:].flatten())
-    
-    # Output indices
-    indices = indices[:4*card] + [0 for _ in range(0,max(0,4*card-len(indices)))]
-    return list(np.array(indices, dtype=np.int32))
+    indices = np.reshape(indices, [-1,4])[perm][::-1,:].flatten()
 
-class RipsModel(tf.keras.Model):
+    return np.array(indices, dtype=np.int32)
+
+class RipsLayer(tf.keras.layers.Layer):
     """
-    TensorFlow model for computing Rips persistence out of a point cloud.
+    TensorFlow layer for computing Rips persistence out of a point cloud
 
     Attributes:
-        X (TensorFlow variable): point cloud of shape [number of points, number of dimensions]
-        mel (float): maximum edge length for the Rips complex 
-        card (int): maximum number of points in the persistence diagram
-        dim (int): homology dimension
+        maximum_edge_length (float): maximum edge length for the Rips complex 
+        dimension (int): homology dimension
     """
-    def __init__(self, X, mel=12, dim=1, card=50):
-        super(RipsModel, self).__init__()
-        self.X = X
-        self.mel = mel
-        self.dim = dim
-        self.card = card
+    def __init__(self, maximum_edge_length=12, dimension=1, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.max_edge = maximum_edge_length
+        self.dimension = dimension
+
+    def build(self):
+        super.build()
         
-    def call(self):
-        m, d, c = self.mel, self.dim, self.card
-        
+    def call(self, X):
+        """
+        Compute Rips persistence diagram associated to a point cloud
+
+        Parameters:   
+            X (TensorFlow variable): point cloud of shape [number of points, number of dimensions]
+        """    
         # Compute distance matrix
-        DX = tf.math.sqrt(tf.reduce_sum((tf.expand_dims(self.X, 1)-tf.expand_dims(self.X, 0))**2, 2))
-        DXX = tf.reshape(DX, [1, DX.shape[0], DX.shape[1]])
-        
-        # Turn numpy function into tensorflow function
-        RipsTF = lambda DX: tf.numpy_function(_Rips, [DX, m, d, c], [tf.int32 for _ in range(4*c)])
-        
+        DX = tf.math.sqrt(tf.reduce_sum((tf.expand_dims(X, 1)-tf.expand_dims(X, 0))**2, 2))
         # Compute vertices associated to positive and negative simplices 
         # Don't compute gradient for this operation
-        ids = tf.nest.map_structure(tf.stop_gradient, tf.map_fn(RipsTF,DXX,dtype=[tf.int32 for _ in range(4*c)]))
-        
+        indices = tf.stop_gradient(_Rips(DX.numpy(), self.max_edge, self.dimension))
         # Get persistence diagram by simply picking the corresponding entries in the distance matrix
-        if d > 0:
-            dgm = tf.reshape(tf.gather_nd(DX, tf.reshape(ids, [2*c,2])), [c,2])
+        if self.dimension > 0:
+            dgm = tf.reshape(tf.gather_nd(DX, tf.reshape(indices, [-1,2])), [-1,2])
         else:
-            ids = tf.reshape(ids, [2*c,2])[1::2,:]
-            dgm = tf.concat([tf.zeros([c,1]), tf.reshape(tf.gather_nd(DX, ids), [c,1])], axis=1)
+            indices = tf.reshape(indices, [-1,2])[1::2,:]
+            dgm = tf.concat([tf.zeros([indices.shape[0],1]), tf.reshape(tf.gather_nd(DX, indices), [-1,1])], axis=1)
         return dgm
 
 
@@ -197,16 +173,15 @@ class RipsModel(tf.keras.Model):
 
 # The parameters of the model are the pixel values.
 
-def _Cubical(X, dim, card):
+def _Cubical(X, dimension):
     # Parameters: X (image),
-    #             dim (homological dimension), 
-    #             card (number of persistence diagram points, sorted by distance-to-diagonal)
+    #             dimension (homology dimension)
 
     # Compute the persistence pairs with Gudhi
     cc = CubicalComplex(dimensions=X.shape, top_dimensional_cells=X.flatten())
     cc.persistence()
     try:
-        cof = cc.cofaces_of_persistence_pairs()[0][dim]
+        cof = cc.cofaces_of_persistence_pairs()[0][dimension]
     except IndexError:
         cof = np.array([])
 
@@ -218,41 +193,39 @@ def _Cubical(X, dim, card):
         cof = cof[perm[::-1]]
     
     # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices
-    D = len(Xs)
-    ocof = np.array([0 for _ in range(D*card*2)])
+    D = len(Xs) if len(cof) > 0 else 1
+    ocof = np.array([0 for _ in range(D*2*cof.shape[0])])
     count = 0
-    for idx in range(0,min(2*card, 2*cof.shape[0]),2):
+    for idx in range(0,2*cof.shape[0],2):
         ocof[D*idx:D*(idx+1)]     = np.unravel_index(cof[count,0], Xs)
         ocof[D*(idx+1):D*(idx+2)] = np.unravel_index(cof[count,1], Xs)
         count += 1
-    return list(np.array(ocof, dtype=np.int32))
+    return np.array(ocof, dtype=np.int32)
 
-class CubicalModel(tf.keras.Model):
+class CubicalLayer(tf.keras.layers.Layer):
     """
-    TensorFlow model for computing cubical persistence out of a cubical complex.
+    TensorFlow layer for computing cubical persistence out of a cubical complex
 
     Attributes:
-        X (TensorFlow variable): pixel values of the cubical complex
-        card (int): maximum number of points in the persistence diagram
-        dim (int): homology dimension
+        dimension (int): homology dimension
     """
-    def __init__(self, X, dim=1, card=50):
-        super(CubicalModel, self).__init__()
-        self.X = X
-        self.dim = dim
-        self.card = card
+    def __init__(self, dimension=1, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.dimension = dimension
+
+    def build(self):
+        super.build()
         
-    def call(self):
-        d, c, D = self.dim, self.card, len(self.X.shape)
-        XX = tf.reshape(self.X, [1, self.X.shape[0], self.X.shape[1]])
-        
-        # Turn numpy function into tensorflow function
-        CbTF = lambda X: tf.numpy_function(_Cubical, [X, d, c], [tf.int32 for _ in range(2*D*c)])
-        
+    def call(self, X):
+        """
+        Compute persistence diagram associated to a cubical complex filtered by some pixel values 
+
+        Parameters:
+            X (TensorFlow variable): pixel values of the cubical complex
+        """
         # Compute pixels associated to positive and negative simplices 
         # Don't compute gradient for this operation
-        inds = tf.nest.map_structure(tf.stop_gradient, tf.map_fn(CbTF,XX,dtype=[tf.int32 for _ in range(2*D*c)]))
-        
+        indices = tf.stop_gradient(_Cubical(X.numpy(), self.dimension))
         # Get persistence diagram by simply picking the corresponding entries in the image
-        dgm = tf.reshape(tf.gather_nd(self.X, tf.reshape(inds, [-1,D])), [-1,2])
+        dgm = tf.reshape(tf.gather_nd(X, tf.reshape(indices, [-1,len(X.shape)])), [-1,2])
         return dgm
