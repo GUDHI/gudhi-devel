@@ -12,3 +12,10 @@ Cover complexes reference manual
    :show-inheritance:
 
    .. automethod:: gudhi.CoverComplex.__init__
+
+.. autoclass:: gudhi.NGIComplex
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automethod:: gudhi.NGIComplex.__init__
