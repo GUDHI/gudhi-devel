@@ -19,6 +19,9 @@ def _LowerStarSimplexTree(simplextree, filtration, dimension):
     # Parameters: simplextree (simplex tree on which to compute persistence)
     #             filtration (function values on the vertices of st),
     #             dimension (homology dimension),
+    
+    for s,_ in simplextree.get_filtration():
+        simplextree.assign_filtration(s, -1e10)
 
     # Assign new filtration values
     for i in range(simplextree.num_vertices()):
