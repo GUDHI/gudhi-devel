@@ -1,268 +1,151 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Mathieu Carrière
+#
+# Copyright (C) 2018-2019 Inria
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
 import tensorflow as tf
-import tensorflow_addons as tfa
-from tensorflow import random_uniform_initializer as rui
 import numpy as np
 
-def _permutation_equivariant_layer(inp, dimension, perm_op, lbda, b, gamma):
-    """ DeepSet PersLay """
-    dimension_before, num_pts = inp.shape[2], inp.shape[1]
-    b = tf.expand_dims(tf.expand_dims(b, 0), 0)
-    A = tf.reshape(tf.einsum("ijk,kl->ijl", inp, lbda), [-1, num_pts, dimension])
-    if perm_op != None:
-        if perm_op == "max":
-            beta = tf.tile(tf.expand_dims(tf.math.reduce_max(inp, axis=1), 1), [1, num_pts, 1])
-        elif perm_op == "min":
-            beta = tf.tile(tf.expand_dims(tf.math.reduce_min(inp, axis=1), 1), [1, num_pts, 1])
-        elif perm_op == "sum":
-            beta = tf.tile(tf.expand_dims(tf.math.reduce_sum(inp, axis=1), 1), [1, num_pts, 1])
+class GridPerslayWeight(tf.keras.layers.Layer):
+
+    def __init__(self, grid, grid_bnds, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.grid = tf.Variable(initial_value=grid, trainable=True)
+        self.grid_bnds = grid_bnds
+    
+    def build(self, input_shape):
+        return self
+
+    def call(self, diagrams):
+        grid_shape = self.grid.shape
+        indices = []
+        for dim in range(2):
+            [m,M] = self.grid_bnds[dim]
+            coords = tf.expand_dims(diagrams[:,:,dim],-1)
+            ids = grid_shape[dim]*(coords-m)/(M-m)
+            indices.append(tf.cast(ids, tf.int32))
+        weight = tf.gather_nd(params=self.grid, indices=tf.concat(indices, axis=2))
+        return weight
+    
+class GaussianMixturePerslayWeight(tf.keras.layers.Layer):
+    
+    def __init__(self, gaussians, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.W = tf.Variable(initial_value=gaussians, trainable=True)
+
+    def build(self, input_shape):
+        return self
+        
+    def call(self, diagrams):
+        means     = tf.expand_dims(tf.expand_dims(self.W[:2,:],0),0)
+        variances = tf.expand_dims(tf.expand_dims(self.W[2:,:],0),0)
+        diagrams  = tf.expand_dims(diagrams, -1)
+        dists     = tf.math.multiply(tf.math.square(diagrams-means), 1/tf.math.square(variances))
+        weight    = tf.math.reduce_sum(tf.math.exp(tf.math.reduce_sum(-dists, axis=2)), axis=2)
+        return weight
+    
+class PowerPerslayWeight(tf.keras.layers.Layer):
+    
+    def __init__(self, constant, power, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.constant = tf.Variable(initial_value=constant, trainable=True)
+        self.power = power
+        
+    def build(self, input_shape):
+        return self
+    
+    def call(self, diagrams):
+        weight = self.constant * tf.math.pow(tf.math.abs(diagrams[:,:,1]-diagrams[:,:,0]), self.power)
+        return weight
+    
+
+class GaussianPerslayPhi(tf.keras.layers.Layer):
+    
+    def __init__(self, image_size, image_bnds, variance, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.image_size = image_size
+        self.image_bnds = image_bnds
+        self.variance   = tf.Variable(initial_value=variance, trainable=True)
+        
+    def build(self, input_shape):
+        return self
+        
+    def call(self, diagrams):
+        diagrams_d = tf.concat([diagrams[:,:,0:1], diagrams[:,:,1:2]-diagrams[:,:,0:1]], axis=2)
+        step = [(self.image_bnds[i][1]-self.image_bnds[i][0])/self.image_size[i] for i in range(2)]
+        coords = [tf.range(self.image_bnds[i][0], self.image_bnds[i][1], step[i]) for i in range(2)]
+        M = tf.meshgrid(*coords)
+        mu = tf.concat([tf.expand_dims(tens, 0) for tens in M], axis=0)
+        for _ in range(2):
+            diagrams_d = tf.expand_dims(diagrams_d,-1)
+        dists = tf.math.square(diagrams_d-mu) / (2*tf.math.square(self.variance))
+        gauss = tf.math.exp(tf.math.reduce_sum(-dists, axis=2)) / (2*np.pi*tf.math.square(self.variance))
+        return tf.expand_dims(gauss,-1), M[0].shape + tuple([1])
+     
+class TentPerslayPhi(tf.keras.layers.Layer):
+    
+    def __init__(self, samples, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.samples   = tf.Variable(initial_value=samples, trainable=True)
+        
+    def build(self, input_shape):
+        return self
+        
+    def call(self, diagrams):
+        samples_d = tf.expand_dims(tf.expand_dims(self.samples,0),0)
+        xs, ys = diagrams[:,:,0:1], diagrams[:,:,1:2]
+        tent = tf.math.maximum(.5*(ys-xs) - tf.math.abs(samples_d-.5*(ys+xs)), np.array([0.]))
+        return tent, self.samples.shape
+    
+class FlatPerslayPhi(tf.keras.layers.Layer):
+    
+    def __init__(self, samples, theta, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.samples = tf.Variable(initial_value=samples, trainable=True)
+        self.theta   = tf.Variable(initial_value=theta,   trainable=True)
+        
+    def build(self, input_shape):
+        return self
+        
+    def call(self, diagrams):
+        samples_d = tf.expand_dims(tf.expand_dims(self.samples,0),0)
+        xs, ys = diagrams[:,:,0:1], diagrams[:,:,1:2]
+        flat = 1./(1.+tf.math.exp(-self.theta*(.5*(ys-xs)-tf.math.abs(samples_d-.5*(ys+xs)))))
+        return flat, self.samples.shape
+
+class Perslay(tf.keras.layers.Layer):
+
+    def __init__(self, weight, phi, perm_op, rho, **kwargs):
+        super().__init__(dynamic=True, **kwargs)
+        self.weight  = weight
+        self.phi     = phi
+        self.pop     = perm_op  
+        self.rho     = rho
+
+    def build(self, input_shape):
+        return self
+
+    def call(self, diagrams):
+
+        vector, dim = self.phi(diagrams)
+        weight = self.weight(diagrams)
+        for _ in range(len(dim)):
+            weight = tf.expand_dims(weight, -1)
+        vector = tf.math.multiply(vector, weight)
+          
+        permop = self.pop
+        if type(permop) == str and permop[:3] == 'top':
+            k = int(permop[3:])
+            vector = vector.to_tensor(default_value=-1e10)
+            vector = tf.math.top_k(tf.transpose(vector, perm=[0, 2, 1]), k=k).values
+            vector = tf.reshape(vector, [-1,k*dim[0]])
         else:
-            raise Exception("perm_op should be min, max or sum")
-        B = tf.reshape(tf.einsum("ijk,kl->ijl", beta, gamma), [-1, num_pts, dimension])
-        return A - B + b
-    else:
-        return A + b
+            vector = permop(vector, axis=1)
 
-def _rational_hat_layer(inp, q, mu, r):
-    """ Rational Hat PersLay """
-    mu, r = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(r, 0), 0)
-    dimension_before, num_pts = inp.shape[2], inp.shape[1]
-    bc_inp = tf.expand_dims(inp, -1)
-    norms = tf.norm(bc_inp - mu, ord=q, axis=2)
-    return 1/(1 + norms) - 1/(1 + tf.math.abs(tf.math.abs(r)-norms)) 
-
-def _rational_layer(inp, mu, sg, al):
-    """ Rational PersLay """
-    mu, sg, al = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(sg, 0), 0), tf.expand_dims(tf.expand_dims(al, 0), 0)
-    dimension_before, num_pts = inp.shape[2], inp.shape[1]
-    bc_inp = tf.expand_dims(inp, -1)
-    return 1/tf.math.pow(1+tf.math.reduce_sum(tf.math.multiply(tf.math.abs(bc_inp - mu), tf.math.abs(sg)), axis=2), al)
-
-def _exponential_layer(inp, mu, sg):
-    """ Exponential PersLay """
-    mu, sg = tf.expand_dims(tf.expand_dims(mu, 0), 0), tf.expand_dims(tf.expand_dims(sg, 0), 0)
-    dimension_before, num_pts = inp.shape[2], inp.shape[1]
-    bc_inp = tf.expand_dims(inp, -1)
-    return tf.math.exp(tf.math.reduce_sum(-tf.math.multiply(tf.math.square(bc_inp - mu), tf.math.square(sg)), axis=2))
-
-def _landscape_layer(inp, sp):
-    """ Landscape PersLay """
-    sp = tf.expand_dims(tf.expand_dims(sp, 0), 0)
-    return tf.math.maximum( .5 * (inp[:, :, 1:2] - inp[:, :, 0:1]) - tf.math.abs(sp - .5 * (inp[:, :, 1:2] + inp[:, :, 0:1])), np.array([0]))
-
-def _betti_layer(inp, theta, sp):
-    """ Betti PersLay """
-    sp = tf.expand_dims(tf.expand_dims(sp, 0), 0)
-    X, Y = inp[:, :, 0:1], inp[:, :, 1:2]
-    return  1. / ( 1. + tf.math.exp( -theta * (.5*(Y-X) - tf.math.abs(sp - .5*(Y+X))) )  )
-
-def _entropy_layer(inp, theta, sp):
-    """ Entropy PersLay
-    WARNING: this function assumes that padding values are zero
-    """
-    sp = tf.expand_dims(tf.expand_dims(sp, 0), 0)
-    bp_inp = tf.einsum("ijk,kl->ijl", inp, tf.constant(np.array([[1.,-1.],[0.,1.]], dtype=np.float32)))
-    L, X, Y = bp_inp[:, :, 1:2], bp_inp[:, :, 0:1], bp_inp[:, :, 0:1] + bp_inp[:, :, 1:2]
-    LN = tf.math.multiply(L, 1. / tf.expand_dims(tf.linalg.matmul(L[:,:,0], tf.ones([L.shape[1],1])), -1))
-    entropy_terms = tf.where(LN > 0., -tf.math.multiply(LN, tf.math.log(LN)), LN)
-    return  tf.math.multiply(entropy_terms, 1. / ( 1. + tf.math.exp( -theta * (.5*(Y-X) - tf.math.abs(sp - .5*(Y+X))) )  ))
-
-def _image_layer(inp, image_size, image_bnds, sg):
-    """ Persistence Image PersLay """
-    bp_inp = tf.einsum("ijk,kl->ijl", inp, tf.constant(np.array([[1.,-1.],[0.,1.]], dtype=np.float32)))
-    dimension_before, num_pts = inp.shape[2], inp.shape[1]
-    coords = [tf.range(start=image_bnds[i][0], limit=image_bnds[i][1], delta=(image_bnds[i][1] - image_bnds[i][0]) / image_size[i]) for i in range(dimension_before)]
-    M = tf.meshgrid(*coords)
-    mu = tf.concat([tf.expand_dims(tens, 0) for tens in M], axis=0)
-    bc_inp = tf.reshape(bp_inp, [-1, num_pts, dimension_before] + [1 for _ in range(dimension_before)])
-    return tf.expand_dims(tf.math.exp(tf.math.reduce_sum(  -tf.math.square(bc_inp-mu) / (2*tf.math.square(sg)),  axis=2)) / (2*np.pi*tf.math.square(sg)), -1)
-
-class PerslayModel(tf.keras.Model):
-    """
-    TensorFlow model implementing PersLay.
-
-    Attributes:
-        name (string): name of the layer. Used for naming variables.
-        diagdim (integer): dimension of persistence diagram points. Usually 2 but can handle more.
-        perslay_parameters (dict): dictionary containing the PersLay parameters. See below.
-        rho (TensorFlow model): layers used to process the learned representations of persistence diagrams (for instance, a fully connected layer that outputs the number of classes). Use the string "identity" if you want to output the representations directly. 
-    """
-    def __init__(self, name, diagdim, perslay_parameters, rho):
-        super(PerslayModel, self).__init__()
-        self.namemodel            = name
-        self.diagdim              = diagdim
-        self.perslay_parameters   = perslay_parameters
-        self.rho                  = rho
-
-        self.vars = [[] for _ in range(len(self.perslay_parameters))]
-        for nf, plp in enumerate(self.perslay_parameters):
-
-            weight = plp["pweight"]
-            if weight != None:
-                Winit, Wtrain, Wname = plp["pweight_init"], plp["pweight_train"], self.namemodel + "-pweight-" + str(nf)
-                if not callable(Winit):
-                    W = tf.Variable(name=Wname, initial_value=Winit, trainable=Wtrain)
-                else:
-                    if weight == "power":
-                        W = tf.Variable(name=Wname, initial_value=Winit([1]), trainable=Wtrain)
-                    elif weight == "grid":
-                        Wshape = plp["pweight_size"]
-                        W = tf.Variable(name=Wname, initial_value=Winit(Wshape), trainable=Wtrain)
-                    elif weight == "gmix":
-                        ngs = plp["pweight_num"] 
-                        W = tf.Variable(name=Wname, initial_value=Winit([4,ngs]), trainable=Wtrain)
-            else:
-                W = 0
-            self.vars[nf].append(W)
-
-            layer, Ltrain, Lname = plp["layer"], plp["layer_train"], self.namemodel + "-" + str(nf)
-
-            if layer == "PermutationEquivariant":
-                Lpeq, LWinit, LBinit, LGinit = plp["lpeq"], plp["lweight_init"], plp["lbias_init"], plp["lgamma_init"]
-                LW, LB, LG = [], [], []
-                for idx, (dim, pop) in enumerate(Lpeq):
-                    dim_before = self.diagdim if idx == 0 else Lpeq[idx-1][0]
-                    LWiv = LWinit([dim_before, dim]) if callable(LWinit) else LWinit
-                    LBiv = LBinit([dim]) if callable(LBinit) else LBinit
-                    LW.append(      tf.Variable(name=Lname+"-W", initial_value=LWiv, trainable=Ltrain))
-                    LB.append(      tf.Variable(name=Lname+"-B", initial_value=LBiv, trainable=Ltrain))
-                    if pop != None:
-                        LGiv = LGinit([dim_before, dim]) if callable(LGinit) else LGinit
-                        LG.append(  tf.Variable(name=Lname+"-G", initial_value=LGiv, trainable=Ltrain))
-                    else:
-                        LG.append([])
-                self.vars[nf].append([LW, LB, LG])
-
-            elif layer == "Landscape" or layer == "BettiCurve" or layer == "Entropy":
-                LSinit = plp["lsample_init"]
-                LSiv = LSinit if not callable(LSinit) else LSinit([plp["lsample_num"]]) 
-                LS = tf.Variable(name=Lname+"-S", initial_value=LSiv, trainable=Ltrain)
-                self.vars[nf].append(LS)
-
-            elif layer == "Image":
-                LVinit = plp["lvariance_init"]
-                LViv = LVinit if not callable(LVinit) else LVinit([1])
-                LV = tf.Variable(name=Lname+"-V", initial_value=LViv, trainable=Ltrain)
-                self.vars[nf].append(LV)
-
-            elif layer == "Exponential":
-                LMinit, LVinit = plp["lmean_init"], plp["lvariance_init"]
-                LMiv = LMinit if not callable(LMinit) else LMinit([self.diagdim, plp["lnum"]])
-                LViv = LVinit if not callable(LVinit) else LVinit([self.diagdim, plp["lnum"]])
-                LM = tf.Variable(name=Lname+"-M", initial_value=LMiv, trainable=Ltrain)
-                LV = tf.Variable(name=Lname+"-V", initial_value=LViv, trainable=Ltrain)
-                self.vars[nf].append([LM, LV])
-
-            elif layer == "Rational":
-                LMinit, LVinit, LAinit = plp["lmean_init"], plp["lvariance_init"], plp["lalpha_init"]
-                LMiv = LMinit if not callable(LMinit) else LMinit([self.diagdim, plp["lnum"]])
-                LViv = LVinit if not callable(LVinit) else LVinit([self.diagdim, plp["lnum"]])
-                LAiv = LAinit if not callable(LAinit) else LAinit([plp["lnum"]])
-                LM = tf.Variable(name=Lname+"-M", initial_value=LMiv, trainable=Ltrain)
-                LV = tf.Variable(name=Lname+"-V", initial_value=LViv, trainable=Ltrain)
-                LA = tf.Variable(name=Lname+"-A", initial_value=LAiv, trainable=Ltrain)
-                self.vars[nf].append([LM, LV, LA])
-
-            elif layer == "RationalHat":
-                LMinit, LRinit = plp["lmean_init"], plp["lr_init"]
-                LMiv = LMinit if not callable(LMinit) else LMinit([self.diagdim, plp["lnum"]])
-                LRiv = LRinit if not callable(LRinit) else LRinit([1])
-                LM = tf.Variable(name=Lname+"-M", initial_value=LMiv, trainable=Ltrain)
-                LR = tf.Variable(name=Lname+"-R", initial_value=LRiv, trainable=Ltrain)
-                self.vars[nf].append([LM, LR])
-
-    def compute_representations(self, diags, training=False):
-
-        list_v = []
-
-        for nf, plp in enumerate(self.perslay_parameters):
-
-            diag = diags[nf]
-
-            N, dimension_diag = diag.shape[1], diag.shape[2]
-            tensor_mask = diag[:, :, dimension_diag - 1]
-            tensor_diag = diag[:, :, :dimension_diag - 1]
-
-            W = self.vars[nf][0]
-
-            if plp["pweight"] == "power":
-                p = plp["pweight_power"]
-                weight = W * tf.math.pow(tf.math.abs(tensor_diag[:, :, 1:2]-tensor_diag[:, :, 0:1]), p)
-
-            elif plp["pweight"] == "grid":
-                grid_shape = W.shape  
-                indices = []
-                for dim in range(dimension_diag-1):
-                    [m, M] = plp["pweight_bnds"][dim]
-                    coords = tf.slice(tensor_diag, [0, 0, dim], [-1, -1, 1])
-                    ids = grid_shape[dim] * (coords - m)/(M - m)
-                    indices.append(tf.cast(ids, tf.int32))
-                weight = tf.expand_dims(tf.gather_nd(params=W, indices=tf.concat(indices, axis=2)), -1)
-
-            elif plp["pweight"] == "gmix":
-                M, V = tf.expand_dims(tf.expand_dims(W[:2,:], 0), 0), tf.expand_dims(tf.expand_dims(W[2:,:], 0), 0) 
-                bc_inp = tf.expand_dims(tensor_diag, -1)
-                weight = tf.expand_dims(tf.math.reduce_sum(tf.math.exp(tf.math.reduce_sum(-tf.math.multiply(tf.math.square(bc_inp-M), tf.math.square(V)), axis=2)), axis=2), -1)
-
-
-            lvars = self.vars[nf][1]
-            if plp["layer"] == "PermutationEquivariant":
-                for idx, (dim, pop) in enumerate(plp["lpeq"]):
-                    tensor_diag = _permutation_equivariant_layer(tensor_diag, dim, pop, lvars[0][idx], lvars[1][idx], lvars[2][idx])
-            elif plp["layer"] == "Landscape":
-                tensor_diag = _landscape_layer(tensor_diag, lvars)
-            elif plp["layer"] == "BettiCurve":
-                tensor_diag = _betti_layer(tensor_diag, plp["theta"], lvars)
-            elif plp["layer"] == "Entropy":
-                tensor_diag = _entropy_layer(tensor_diag, plp["theta"], lvars)
-            elif plp["layer"] == "Image":
-                tensor_diag = _image_layer(tensor_diag, plp["image_size"], plp["image_bnds"], lvars)
-            elif plp["layer"] == "Exponential":
-                tensor_diag = _exponential_layer(tensor_diag, lvars[0], lvars[1])
-            elif plp["layer"] == "Rational":
-                tensor_diag = _rational_layer(tensor_diag, lvars[0], lvars[1], lvars[2])
-            elif plp["layer"] == "RationalHat":
-                tensor_diag = _rational_hat_layer(tensor_diag, plp["q"], lvars[0], lvars[1])
-
-            # Apply weight
-            output_dim = len(tensor_diag.shape) - 2
-            if plp["pweight"] != None:
-                for _ in range(output_dim-1):
-                    weight = tf.expand_dims(weight, -1)
-                tiled_weight = tf.tile(weight, [1, 1] + tensor_diag.shape[2:])
-                tensor_diag = tf.math.multiply(tensor_diag, tiled_weight)
-
-            # Apply mask
-            for _ in range(output_dim):
-                tensor_mask = tf.expand_dims(tensor_mask, -1)
-            tiled_mask = tf.tile(tensor_mask, [1, 1] + tensor_diag.shape[2:])
-            masked_layer = tf.math.multiply(tensor_diag, tiled_mask)
-
-            # Permutation invariant operation
-            if plp["perm_op"] == "topk" and output_dim == 1:  # k first values
-                masked_layer_t = tf.transpose(masked_layer, perm=[0, 2, 1])
-                values, indices = tf.math.top_k(masked_layer_t, k=plp["keep"])
-                vector = tf.reshape(values, [-1, plp["keep"] * tensor_diag.shape[2]])
-            elif plp["perm_op"] == "sum":  # sum
-                vector = tf.math.reduce_sum(masked_layer, axis=1)
-            elif plp["perm_op"] == "max":  # maximum
-                vector = tf.math.reduce_max(masked_layer, axis=1)
-            elif plp["perm_op"] == "mean":  # minimum
-                vector = tf.math.reduce_mean(masked_layer, axis=1)
-
-            # Second layer of channel
-            vector = plp["final_model"].call(vector, training=training) if plp["final_model"] != "identity" else vector
-            list_v.append(vector)
-
-        # Concatenate all channels and add other features
-        representations = tf.concat(values=list_v, axis=1)
-        return representations
-
-    def call(self, inputs, training=False):
-
-        diags, feats = inputs[0], inputs[1]
-        representations = self.compute_representations(diags, training)
-        concat_representations = tf.concat(values=[representations, feats], axis=1)
-        final_representations = self.rho(concat_representations) if self.rho != "identity" else concat_representations
-
-        return final_representations
-
+        vector = self.rho(vector)
+            
+        return vector
