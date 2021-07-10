@@ -8,7 +8,7 @@ Representations manual
 
 .. include:: representations_sum.inc
 
-This module, originally available at https://github.com/MathieuCarriere/sklearn-tda and named sklearn_tda, aims at bridging the gap between persistence diagrams and machine learning, by providing implementations of most of the vector representations for persistence diagrams in the literature, in a scikit-learn format. More specifically, it provides tools, using the scikit-learn standard interface, to compute distances and kernels on persistence diagrams, and to convert these diagrams into vectors in Euclidean space.
+This module, originally available at https://github.com/MathieuCarriere/sklearn-tda and named sklearn_tda, aims at bridging the gap between persistence diagrams and machine learning, by providing implementations of most of the vector representations for persistence diagrams in the literature, in a scikit-learn format. More specifically, it provides tools, using the scikit-learn standard interface, to compute distances and kernels on persistence diagrams, and to convert these diagrams into vectors in Euclidean space. Moreover, this module also contains the `PersLay architecture <http://proceedings.mlr.press/v108/carriere20a.html>`_, which is a general neural network architecture for performing deep learning with persistence diagrams. It is implemented in TensorFlow 2. 
 
 A diagram is represented as a numpy array of shape (n,2), as can be obtained from :func:`~gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a numpy array of shape (n,1), storing only the birth time. The classes in this module can handle several persistence diagrams at once. In that case, the diagrams are provided as a list of numpy arrays. Note that it is not necessary for the diagrams to have the same number of points, i.e., for the corresponding arrays to have the same number of rows: all classes can handle arrays with different shapes.
 
@@ -50,7 +50,7 @@ Machine Learning and Topological Data Analysis
 
 This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-representations.ipynb>`_ explains how to
 efficiently combine machine learning and topological data analysis with the
-:doc:`representations module<representations>`.
+:doc:`representations module<representations>` in a scikit-learn fashion. This `notebook <https://github.com/MathieuCarriere/tda-tutorials/blob/perslay/Tuto-GUDHI-perslay-expe.ipynb>`_ and `this one <https://github.com/MathieuCarriere/tda-tutorials/blob/perslay/Tuto-GUDHI-perslay-visu.ipynb>`_ explain how to use the PersLay architecture.
 
 
 Preprocessing
@@ -80,3 +80,12 @@ Metrics
    :members:
    :special-members:
    :show-inheritance:
+
+Deep Learning
+-------------
+.. automodule:: gudhi.representations.perslay
+   :members:
+   :special-members:
+   :show-inheritance:
+
+.. include:: perslay_params.md
