@@ -186,10 +186,10 @@ BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_13 )
   test_rips_persistence_in_dimension(13);
 }
 
-// TODO(VR): not working from 6
-// std::string str_rips_persistence = test_rips_persistence(6, 0);
-// TODO(VR): division by zero
-// std::string str_rips_persistence = test_rips_persistence(0, 0);
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_46349 )
+{
+  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(46349), std::invalid_argument);
+}
 
 /** SimplexTree minimal options to test the limits.
  * 

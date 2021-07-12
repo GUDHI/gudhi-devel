@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
-#include <cmath>
 
 namespace Gudhi {
 
@@ -39,6 +38,10 @@ class Field_Zp {
 
     Prime = charac;
 
+    // Check that the provided prime is less than the maximum allowed as int and calculation below : 46337 ; i.e (max_prime-1)**2 <= INT_MAX
+    if(Prime > 46337)
+        throw std::invalid_argument("Maximum homology_coeff_field allowed value is 46337");
+
     // Check for primality
     if ((Prime == 0) || (Prime == 1) || ((Prime > 3) && ((Prime % 2 == 0) || (Prime % 3 == 0))))
         throw std::invalid_argument("homology_coeff_field must be a prime number");
@@ -56,7 +59,7 @@ class Field_Zp {
         mult = inv * i;
       }
       inverse_.push_back(inv);
-      if ( (i <= std::sqrt(Prime)) && (((i-5)%6) == 0) ) {
+      if ( (i*i <= Prime) && (((i-5)%6) == 0) ) {
         if ((Prime % i == 0) || (Prime % (i + 2) == 0))
             throw std::invalid_argument("homology_coeff_field must be a prime number");
       }
