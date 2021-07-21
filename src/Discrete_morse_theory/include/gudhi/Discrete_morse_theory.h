@@ -48,6 +48,14 @@ public:
   */
   template<typename RangeCells>
   void compute_matching(RangeCells &available_cells, Complex *cpx) {
+
+    std::cout << "Insert a coface before a subface: \n";
+    std::cout << "make; ./src/Zigzag_persistence/example/zigzag_persistence_flag_zigzag_points -n 2.7 -m 2.75 -d 4 ~/Desktop/spiral_4d_2k.dxyz\n";
+    std::cout << "At insertion 460. Before compute Morse:\n";
+    std::cout << "1.28054 -> 11 9 \n1.28054 -> 11 10 9 \n1.28054 -> 11 9 2 \n1.28054 -> 11 9 3 2 \n1.28054 -> 11 9 3 \n1.28054 -> 11 10 9 3 \n1.28054 -> 11 8 \n";
+    std::cout << "After compute Morse:\n";
+    std::cout << "11 9 \n11 10 9 \n11 9 2 \n11 9 3 2 \n11 9 3 \n11 10 9 3 \n";
+
     std::vector<Cell_handle> new_order = //in reverse inclusion order
             compute_matching(available_cells.rbegin(), available_cells.rend(), cpx);
     auto it2 = new_order.rbegin();//read it in reverse
