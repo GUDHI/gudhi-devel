@@ -53,13 +53,13 @@ public:
   Zigzag_edge() : u_(-1), v_(-1), fil_(-1) {}
 
 /* Returns vertex with smaller label. */
-  typename FilteredComplex::Vertex_handle    u()    const { return u_; }
+  typename FilteredComplex::Vertex_handle    u() const { return u_; }
 /* Returns vertex with bigger label. */
   typename FilteredComplex::Vertex_handle    v() const { return v_; }
 /* Returns the filtration value of the edge. */
-  typename FilteredComplex::Filtration_value fil()  { return fil_; }
+  typename FilteredComplex::Filtration_value fil() const { return fil_; }
 /* Returns true if insertion of the edge, false if removal. */
-  bool                                       type() { return type_; }
+  bool                                       type() const { return type_; }
 
   bool operator==(const Zigzag_edge &e) const {
     return ( (e.u_ == u_) && (e.v_ == v_) && 
@@ -74,6 +74,48 @@ private:
   typename FilteredComplex::Filtration_value fil_;
   bool                                       type_;
 };
+
+template< class FilteredComplex >
+class identity_filtration {
+public:
+
+  typedef typename FilteredComplex::Filtration_value Filtration_value;
+
+  identity_filtration() {};
+
+  Filtration_value modifier(Filtration_value f) { return f; }
+  Filtration_value inverse_modifier(Filtration_value f) { return f; }
+
+  void operator()(Zigzag_edge<FilteredComplex> &e) {}
+  bool do_something() { return false; }
+};
+/* Apply sqrt to the length of an edge.*/
+template< class FilteredComplex >
+class sqrt_filtration {
+public:
+  typedef typename FilteredComplex::Filtration_value Filtration_value;
+
+  sqrt_filtration() {}
+
+  Filtration_value modifier(Filtration_value f) { return std::sqrt(f); }
+  Filtration_value inverse_modifier(Filtration_value f) { return f*f; }
+
+  void operator()(Zigzag_edge<FilteredComplex> &e) { 
+    e.assign_filtration(modifier(e.fil())); 
+  }
+  bool do_something() { return true; }
+};
+
+template< class FilteredComplex >
+std::ostream& operator<<(std::ostream& os, 
+                         const Zigzag_edge< FilteredComplex >& e)
+{
+  os << e.fil() << " ";
+  if(e.type()) { os << "->"; }
+  else { os << "<-"; }
+  std::cout << " " << e.u() << " " << e.v();
+  return os;
+}
 
 /** \brief Computes the 1-skeleton-filtration allowing to generate the oscillating 
   * Rips zigzag filtration of a discrete metric space (such as a set of points).
@@ -153,6 +195,13 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
                                     FiltrationValue const       mu,
                                     std::vector<Edge_t>       & edge_filtration )
 { 
+  
+  // std::cout << "Epsilon values:\n";
+  // for(int i=0; i<eps_values.size(); ++i) {
+  //   std::cout << "eps_" << i << "  " << sqrt(eps_values[i]) << "\n";
+  // }
+  // std::cout << "nu=" << nu << "    mu=" << mu << "\n";
+
   GUDHI_CHECK(dist_mat.size() == eps_values.size(), "invalid number of points and epsilon values");
   GUDHI_CHECK((nu <= mu) && (nu >= 0), "invalid parameters mu and nu");
   bool decreasing_eps = true;
@@ -234,6 +283,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //R({p_0, ... , p_i}, nu * eps_i) -> R({p_0, ... , p_i}, mu * eps_i),
     //i.e., all (p_j,p_k) with 0 <= k < j <= i with
     //                                           nu eps_i < d(p_j,p_k) <= mu eps_i  
+    //these new edges get filtration value eps_values[i]
     for(size_t j = 1; j <= i ; ++j) { 
       //get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
       //dist_matrix[j][k] = d(p_j,p_k) with k<j
@@ -252,6 +302,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //now consider all edges added in inclusion:
     //R({p_0, ... , p_i}, mu * eps_i) -> R({p_0, ... , p_i, p_i+1}, mu * eps_i)
     //i.e., all (p_j,p_i+1) with 0 <= j <= i with       d(p_j,p_i+1) <= mu eps_i  
+    //these new edges get filtration value eps_values[i]
     //first striclty longer edge
     it = std::upper_bound(dist_matrix[i+1].begin(), dist_matrix[i+1].end(), 
             std::pair<int, FiltrationValue>(n, mu * eps_values[i]), cmp); 
@@ -267,6 +318,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //R({p_0, ... , p_{i+1}}, mu * eps_i) <- R({p_0, ... , p_{i+1}}, nu * eps_{i+1})
     //i.e., all edges (p_k,p_j), 0<=k<j<=i+1, such that 
     // nu eps_{i+1} < d(p_k,p_j) <= mu eps_i
+    //these new edges get filtration value eps_values[i]
     for(size_t j = 1; j <= i+1; ++j) {
       //get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
       //dist_matrix[j][k] = d(p_j,p_k) with k<j
@@ -277,7 +329,8 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
         --it;
         //when reading an edge in R({p_0, ... , p_{i+1}}, nu * eps_{i+1}), stop
         if(it->second <= nu * eps_values[i+1]) { break; }
-        edges_removed[i].emplace_back(it->first, j, eps_values[i+1], false);
+        // edges_removed[i].emplace_back(it->first, j, eps_values[i+1], false);
+        edges_removed[i].emplace_back(it->first, j, eps_values[i], false);
         ++number_of_arrows;
       }
     }
@@ -292,6 +345,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //R({p_0, ... , p_i}, nu * eps_i) -> R({p_0, ... , p_i}, mu * eps_i),
     //i.e., all (p_j,p_k) with 0 <= k < j <= i with
     //                                           nu eps_i < d(p_j,p_k) <= mu eps_i  
+    //these new edges get filtration value eps_values[i]
     for(size_t j = 1; j <= i ; ++j) { 
       //get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
       //dist_matrix[j][k] = d(p_j,p_k) with k<j
@@ -310,6 +364,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //now consider all edges added in inclusion:
     //R({p_0, ... , p_i}, mu * eps_i) -> R({p_0, ... , p_i, p_i+1}, mu * eps_i)
     //i.e., all (p_j,p_i+1) with 0 <= j <= i with       d(p_j,p_i+1) <= mu eps_i  
+    //these new edges get filtration value eps_values[i]
     //first striclty longer edge
     it = std::upper_bound(dist_matrix[i+1].begin(), dist_matrix[i+1].end(), 
             std::pair<int, FiltrationValue>(n, mu * eps_values[i]), cmp); 
@@ -325,6 +380,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
     //R({p_0, ... , p_{i+1}}, mu * eps_i) <- R({p_0, ... , p_{i+1}}, nu * eps_{i+1})
     //i.e., all edges (p_k,p_j), 0<=k<j<=i+1, such that 
     // nu eps_{i+1} < d(p_k,p_j) <= mu eps_i
+    //these new edges get filtration value eps_values[i]
     for(size_t j = 1; j <= i+1; ++j) {
       //get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
       //dist_matrix[j][k] = d(p_j,p_k) with k<j
@@ -335,7 +391,8 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
         --it;
         //when reading an edge in R({p_0, ... , p_{i+1}}, nu * eps_{i+1}), stop
         if(it->second <= nu * eps_values[i+1]) { break; }
-        edges_removed[i].emplace_back(it->first, j, eps_values[i+1], false);
+        // edges_removed[i].emplace_back(it->first, j, eps_values[i+1], false);
+        edges_removed[i].emplace_back(it->first, j, eps_values[i], false);
         ++number_of_arrows;
       }
     }
@@ -388,7 +445,9 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
  
   //initialise R({p_0}, +infinity)
   edge_filtration.emplace_back(0, 0, //add vertex p_0,+infty
-                          std::numeric_limits<FiltrationValue>::infinity(), true);
+                          // std::numeric_limits<FiltrationValue>::infinity(), true);
+                        eps_values[0], true);
+
   for(size_t i = 0; i < n-1; ++i) {//all ascending arrows eps_i
     edge_filtration.emplace_back(i+1, i+1, eps_values[i], true);//add p_{i+1},eps_i
     for(auto edg_it = edges_added[i].begin(); 
@@ -403,6 +462,7 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
   //what remains is removed in the zigzag iterator with -infinity values. If eps_n-1
   //== 0, which is the usual case, the remaining simplices in the filtration are 
   //the n vertices.
+  //cannot inforce this here.
 }
 
 
@@ -596,6 +656,8 @@ class Flagzigzag_simplex_iterator
   , fil_(0)
   {
     sh_it_ = partial_zzfil_.begin(); edge_it_ = zigzag_edge_filtration_.begin();
+
+    // count_vertices = 0;
   }
 
 /** \brief Constructor from a point cloud and a distance function. 
@@ -605,14 +667,16 @@ class Flagzigzag_simplex_iterator
   */
   template< typename PointRange,
             typename Distance,
-            typename OrderPolicy >
+            typename OrderPolicy,
+            typename EdgeModifier >
   Flagzigzag_simplex_iterator(FlagZigzagFilteredComplex    * cpx,
                               Filtration_value const         nu,
                               Filtration_value const         mu,
                               int                            dim_max,
                               PointRange       const       & points,
                               Distance         const         distance,
-                              OrderPolicy order_policy = farthest_point_ordering()) 
+                              OrderPolicy order_policy,// = farthest_point_ordering()) 
+                              EdgeModifier edge_modifier)
   {
     //check that the model of FlagZigzagFilteredComplex is empty
     GUDHI_CHECK(cpx->empty(), "complex must be empty");
@@ -620,10 +684,23 @@ class Flagzigzag_simplex_iterator
     //compute the filtration of the 1-skeleton for the oRzz filtration
     zigzag_edge_filtration_ = std::vector< Edge_type >();
 
+    Filtration_value nu_tmp = nu;
+    Filtration_value mu_tmp = mu;
+    if(edge_modifier.do_something()) {
+      nu_tmp = edge_modifier.inverse_modifier(nu);
+      mu_tmp = edge_modifier.inverse_modifier(mu);
+    }
+
     std::vector<Filtration_value> filtration_values;
-    zigzag_filtration_one_skeleton(points, distance, nu, mu,
+    zigzag_filtration_one_skeleton(points, distance, nu_tmp, mu_tmp,
                                    zigzag_edge_filtration_, 
-                                   order_policy );
+                                   order_policy);
+
+    if(edge_modifier.do_something()) {
+      for(auto &e : zigzag_edge_filtration_) { edge_modifier(e); }
+    }
+
+    std::cout << "NUMBER OF EDGES = " << zigzag_edge_filtration_.size()+points.size() << "\n";
 
     dim_max_                = dim_max;
     are_we_done             = false;
@@ -638,6 +715,10 @@ class Flagzigzag_simplex_iterator
     arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
     GUDHI_CHECK(arrow_direction_, "cannot remove a simplex from an empty complex");
     
+    // count_vertices = 0; 
+    // std::cout << "  - vertex: " << count_vertices << "\n"; 
+
+
     cpx_->flag_add_edge( edge_it_->u(), edge_it_->v(), edge_it_->fil()
                        , dim_max_, partial_zzfil_);
     fil_ = edge_it_->fil();
@@ -666,6 +747,10 @@ class Flagzigzag_simplex_iterator
     if(edge_it_ == zigzag_edge_filtration_.end()) 
     { cpx_ = nullptr; return; } //end() iterator
     
+    // count_vertices = 0; 
+    // std::cout << "  - vertex: " << count_vertices << "\n"; 
+    // ++count_vertices;
+
     //add the first edge
     arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
     GUDHI_CHECK(arrow_direction_, "cannot remove a simplex from an empty complex");
@@ -696,6 +781,8 @@ class Flagzigzag_simplex_iterator
     zigzag_edge_filtration_ = std::move(other.zigzag_edge_filtration_);
     partial_zzfil_.clear();
     partial_zzfil_ = std::move(other.partial_zzfil_);
+
+    // count_vertices = other.count_vertices;
   }
 /** Copy constructor can only be called if no increment has been called on the 
   * pointer (i.e., right after initialization).
@@ -725,6 +812,9 @@ class Flagzigzag_simplex_iterator
     if(!zigzag_edge_filtration_.empty()) { ++edge_it_; }//next edge
     partial_zzfil_          = other.partial_zzfil_;
     sh_it_                  = partial_zzfil_.begin();
+
+    // count_vertices = other.count_vertices;
+
   }
 
   // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& ) = 
@@ -747,6 +837,9 @@ class Flagzigzag_simplex_iterator
     counter_insert          = other.counter_insert;
     are_we_done             = other.are_we_done;
     fil_ = other.fil_;
+
+    // count_vertices = other.count_vertices;
+
     return *this;
   }
 
@@ -795,7 +888,8 @@ private:
       //there may still be simplices in the complex
       if(edge_it_ == zigzag_edge_filtration_.end()) 
       { 
-        if(are_we_done) { //no more edges, no more simplices, we are done
+        if(are_we_done) { //no more edges, no more simplices in the complex, 
+          //we are done
           //explicitly empty the complex
           for(auto sh : partial_zzfil_) { cpx_->remove_maximal_simplex(sh); } 
           counter_insert += partial_zzfil_.size();
@@ -804,7 +898,9 @@ private:
           return; 
         } 
         else {//no edge left, remove the simplices remaining in the complex 
-          fil_ = - std::numeric_limits<Filtration_value>::infinity();
+          // fil_ = - std::numeric_limits<Filtration_value>::infinity();
+          fil_ = 0;
+
           are_we_done = true;//happens once
           //fills up zz_partial with the remaining simplices in complex, but 
           //does not actually remove them from the complex.
@@ -817,6 +913,12 @@ private:
       }
       //partial_zzfil_ is empty and edge_it points to a new edge
       if( edge_it_->type() ) { //forward arrow //modify the complex
+
+        // if(edge_it_->u() == edge_it_->v()) {
+        //   std::cout << "  - vertex: " << count_vertices << "\n"; 
+        //   ++count_vertices;
+        // }
+
         //add the new edge and expand the flag complex. partial_zz_fil_ points to
         //all the newly inserted simplices, in filtration order.
         cpx_->flag_add_edge( edge_it_->u(), edge_it_->v()
@@ -902,6 +1004,9 @@ public:
   }
 
 public:
+  // int count_vertices;
+
+
 /* Complex getting modified by the iterator, must be model of 
  * FlagZigzagFilteredComplex.*/
   FlagZigzagFilteredComplex                      * cpx_; 
@@ -927,7 +1032,9 @@ public:
   int                                              counter_insert;
   //true iff we are finishing emptying the complex
   bool                                             are_we_done;
-  //filtration value attached to the arrow
+  //filtration value attached to the arrow, this is equal to the filtration value 
+  //of the vertex or edge insertion/deletion that induced the insertion/deletion of
+  //the simplex pointed to by the iterator.
   Filtration_value                                 fil_;
 };
 

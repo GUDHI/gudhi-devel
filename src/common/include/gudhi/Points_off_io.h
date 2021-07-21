@@ -160,23 +160,6 @@ class Points_off_reader {
     return point_cloud;
   }
 
-  /** \brief Remove all duplicate points. 
-    *
-    * Point_d must be comparable with <.
-    *
-    * @return the number of duplicates removed.
-    */
-  int no_duplicate() {
-    int num_points = get_point_cloud().size();
-    std::set<Point_d> no_dup;
-    for(auto p : get_point_cloud()) { no_dup.insert(p); }
-    if( (int)no_dup.size() != num_points) { 
-      point_cloud.clear(); point_cloud.resize(no_dup.size());
-      for(auto &p : no_dup) { point_cloud.push_back(p); }
-    }
-    return num_points-(int)point_cloud.size();
-  }
-
  private:
   /** \brief point_cloud.*/
   std::vector<Point_d> point_cloud;

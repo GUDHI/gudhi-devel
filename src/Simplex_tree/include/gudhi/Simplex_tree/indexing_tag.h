@@ -5,7 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - YYYY/MM Author: Description of the modification
+ *      - 2021/07 Clément Maria: Add zigzag_indexing_tag
  */
 
 #ifndef SIMPLEX_TREE_INDEXING_TAG_H_
@@ -20,10 +20,13 @@ namespace Gudhi {
 struct linear_indexing_tag {
 };
 
-/* \brief Tag for a zigzag ordering of simplices. */
+/** \brief Tag for a zigzag ordering of simplices. 
+ *
+ * \implements IndexingTag
+ */ 
  struct zigzag_indexing_tag {
 };
  
-}  // namespace Gudhi
+} // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_INDEXING_TAG_H_

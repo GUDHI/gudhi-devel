@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
   // traverse the entire oscillating Rips zigzag filtration 
   Simplex_tree st;
-  //initialize the zigzag filtration ; this is mandatory. Use the squared Eucliean distance for efficiency. Note that we must use nu*nu and mu*mu. Reorder point by
+  //initialize the zigzag filtration ; this is mandatory. Use the squared Euclidean distance for efficiency. Note that we must use nu*nu and mu*mu. Reorder point by
   //farthest point ordering.
 
   auto start_init = std::chrono::high_resolution_clock::now();

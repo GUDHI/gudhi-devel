@@ -6,9 +6,10 @@
  *
  *    Modification(s):
  *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same 
- *        label in an intrusive list. Add and remove 
- *        an edge in a flag complex, implementation of zigzag filtrations. Option 
- *        to store Morse matchings.
+ *        label in an intrusive list. 
+ *      - 2020/09 Add and remove an edge in a flag complex, implementation of 
+ *        zigzag filtrations. 
+ *      - 2020/09 Option to store Morse matchings, and interface.
  *         
  */
 
@@ -203,7 +204,7 @@ private:
   //A range and iterator for an optimized search for cofaces, based on the Nodes 
   //of same label being linked in a list. Requires to store 2 more pointers per 
   //Nodes, but faster running time
-  typedef Simplex_tree_optimized_cofaces_simplex_iterator<Simplex_tree> 
+  typedef Simplex_tree_optimized_star_simplex_iterator<Simplex_tree> 
                                                     Optimized_star_simplex_iterator;
   typedef boost::iterator_range<Optimized_star_simplex_iterator> 
                                                        Optimized_star_simplex_range;
@@ -244,22 +245,22 @@ public:
       * 'value_type' is Simplex_handle.
       */
     typedef Flagzigzag_simplex_iterator< Simplex_tree >
-                                                  Zigzagfiltration_simplex_iterator;
+                                                Zigzag_filtration_simplex_iterator;
     /** Range for the flag zigzag filtration.*/
-    typedef boost::iterator_range< Zigzagfiltration_simplex_iterator >
-                                                     Zigzagfiltration_simplex_range;
+    typedef boost::iterator_range< Zigzag_filtration_simplex_iterator >
+                                                   Zigzag_filtration_simplex_range;
     /** \brief Range over the simplices of the simplicial complex, ordered by the 
       * filtration, depending on the nature (zigzag or non-zigzag) of the 
       * complex. */
     typedef typename std::conditional< Options::is_zigzag, 
-                      Zigzagfiltration_simplex_range,
+                      Zigzag_filtration_simplex_range,
                       std::vector<Simplex_handle> >::type  Filtration_simplex_range;
     /** \brief Iterator over the simplices of the simplicial complex, ordered by 
       * the filtration.
       *
       * 'value_type' is Simplex_handle. */
     typedef typename std::conditional< Options::is_zigzag,
-          Zigzagfiltration_simplex_iterator,
+          Zigzag_filtration_simplex_iterator,
           typename std::vector<Simplex_handle>::const_iterator >::type
                                                         Filtration_simplex_iterator;
 
@@ -1093,28 +1094,6 @@ public:
    */
 
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
-    return cofaces_simplex_range(simplex, codimension,
-                              // std::integral_constant<bool, Options::link_nodes_by_label>{}
-                              std::integral_constant<bool, false>{}
-                              );
-  }
-
- // /** Fast search of cofaces
- //   * This function uses the hooks stored in the Nodes of the simplex tree,
- //   * if link_simplices_through_max_vertex = true.
- //   */
- //  Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension, std::true_type) {
- //    assert(codimension >= 0);
- //    Simplex_vertex_range rg = simplex_vertex_range(simplex);
- //    std::vector<Vertex_handle> copy(rg.begin(), rg.end());
- //    // must be sorted in decreasing order
- //    assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
-
- //    return Cofaces_simplex_range(Cofaces_simplex_iterator(this, copy, codimension),
- //                   Cofaces_simplex_iterator());
- //    }
-
-  Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension, std::false_type) {
     Cofaces_simplex_range cofaces;
     // codimension must be positive or null integer
     assert(codimension >= 0);
@@ -1883,13 +1862,13 @@ private:
   * Zigzag_edge< Simplex_tree > is a model of ZigzagEdge.
   */
   template< class ZigzagEdgeRange >
-  Zigzagfiltration_simplex_range
+  Zigzag_filtration_simplex_range
   zigzag_simplex_range( ZigzagEdgeRange &zz_edge_fil, int dim_max )
   {
     return
-      Zigzagfiltration_simplex_range(
-          Zigzagfiltration_simplex_iterator(this, zz_edge_fil, dim_max)
-          , Zigzagfiltration_simplex_iterator()  );
+      Zigzag_filtration_simplex_range(
+          Zigzag_filtration_simplex_iterator(this, zz_edge_fil, dim_max)
+          , Zigzag_filtration_simplex_iterator()  );
   }
 /** \brief Returns a range of simplices for the (dim_max)-skeleton of the 
   * oscillating Rips zigzag filtration with parameters mu and nu, built on top 
@@ -1902,18 +1881,19 @@ private:
   * @param[in] order_policy a policy for reordering the points in 'points'. Can be 
   * of type 'already_ordered', 'farthest_point_ordering', or 'random_point_ordering'
   */
-  template< typename PointRange, typename Distance, typename OrderPolicy >
-  Zigzagfiltration_simplex_range
+  template< typename PointRange, typename Distance, typename OrderPolicy, typename EdgeModifier >
+  Zigzag_filtration_simplex_range
   zigzag_simplex_range( Filtration_value const          nu,
                         Filtration_value const          mu,
                         int                             dim_max, 
                         PointRange       const        & points,
                         Distance         const          distance,
-                        OrderPolicy                     order_policy)
+                        OrderPolicy                     order_policy,
+                        EdgeModifier                    edge_modifier)
   {
     return
-      Zigzagfiltration_simplex_range(
-          Zigzagfiltration_simplex_iterator(this, nu, mu, dim_max, points, distance, order_policy) , Zigzagfiltration_simplex_iterator()  );
+      Zigzag_filtration_simplex_range(
+          Zigzag_filtration_simplex_iterator(this, nu, mu, dim_max, points, distance, order_policy, edge_modifier) , Zigzag_filtration_simplex_iterator() );
   }
 
 public:
@@ -1963,17 +1943,21 @@ public:
   * @param[in] distance a distance functions on Points
   * @param[in] order_policy a policy for reordering the points in 'points'. Can be 
   * of type 'already_ordered', 'farthest_point_ordering', or 'random_point_ordering'
+  @ @param[in] edge_modifier a method applied to the edges of the filtration after 
+  * computation. For example, if the edge lengths are computed with squared 
+  * Euclidean distance for efficiency, apply sqrt to all edge lengths.
   */
-  template<typename PointRange, typename Distance, typename OrderPolicy>
+  template<typename PointRange, typename Distance, typename OrderPolicy, typename EdgeModifier>
   void initialize_filtration( Filtration_value const         nu,
                               Filtration_value const         mu,
                               int                            dim_max, 
                               PointRange       const       & points,
                               Distance         const         distance,
-                              OrderPolicy order_policy = farthest_point_ordering() )
+                              OrderPolicy order_policy, //= farthest_point_ordering(),
+                              EdgeModifier edge_modifier)// = do_nothing<  >() )
   { //empty complex
     GUDHI_CHECK(empty(), "The complex must be empty when initializing a zigzag filtration");
-    zigzag_simplex_range_ = std::move(zigzag_simplex_range(nu, mu, dim_max, points, distance, order_policy));
+    zigzag_simplex_range_ = std::move(zigzag_simplex_range(nu, mu, dim_max, points, distance, order_policy, edge_modifier));
     zigzag_simplex_range_initialized_ = true;
     //this is just an upper bound on the dimension of the complex
     set_dimension(dim_max);
@@ -2278,12 +2262,51 @@ public:
 #else
   sort(zz_filtration.begin(), zz_filtration.end(), reverse_lexigraphic_order(this));
 #endif
+
+  // ///////////////////
+  // if(u == 9 && v == 11) {
+  //   std::cout << "XXXXX\n";
+  //   for(auto sh : zz_filtration) {
+  //     for(auto v : simplex_vertex_range(sh)) { std::cout << v << " "; }
+  //     std::cout << "\n";
+  //   }
+  //   std::cout << "YYYYY\n";
+  // }
+  // //////////////////
+
   //update all extra data structures for the new nodes
   for(auto sh : zz_filtration) { update_simplex_tree_after_node_insertion(sh); }
+
+
+  // std::cout << "Add edge " << u << " " << v << "   -> new simplices " << zz_filtration.size() << "\n";
+
+  //   ///////////////////
+  // if(u == 9 && v == 11) {
+  //   std::cout << "ZZZZZ\n";
+  //   for(auto sh : zz_filtration) {
+  //     for(auto v : simplex_vertex_range(sh)) { std::cout << v << " "; }
+  //     std::cout << "\n";
+  //   }
+  //   std::cout << "TTTTT\n";
+  // }
+  // //////////////////
+
+
   //compute a Morse matching
   if constexpr(Options::store_morse_matching) {
     Discrete_morse_theory<Simplex_tree>().compute_matching(zz_filtration,this);
   }
+
+  //   ///////////////////
+  // if(u == 9 && v == 11) {
+  //   std::cout << "ZZZZZ\n";
+  //   for(auto sh : zz_filtration) {
+  //     for(auto v : simplex_vertex_range(sh)) { std::cout << v << " "; }
+  //     std::cout << "\n";
+  //   }
+  //   std::cout << "TTTTT\n";
+  // }
+  // //////////////////
 }
 
 private:
@@ -2508,7 +2531,6 @@ public:
 
       //keep track of all cofaces of edge {u,v}, including edge itself
       for(auto sh : star_simplex_range(sh_uv)) { zz_filtration.push_back(sh); }
-      // for(auto sh : cofaces_simplex_range(sh_uv,0)) { zz_filtration.push_back(sh); }
       return;
     }
   }
@@ -2521,6 +2543,7 @@ public:
     //sort by decreasing key values. Because keys increase with order of 
     //insertion, this ensures that only maximal simplices are considered 
     //when removing simplices read from left to right in zz_filtration
+
 #ifdef GUDHI_USE_TBB
     tbb::parallel_sort( zz_filtration.begin(), zz_filtration.end()
     , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
@@ -2664,9 +2687,9 @@ public:
   int dimension_;
   bool dimension_to_be_lowered_ = false;
   /** Range for zigzag filtrations.*/
-  Zigzagfiltration_simplex_range zigzag_simplex_range_;
+  Zigzag_filtration_simplex_range zigzag_simplex_range_;
   /** True iff the zigzag_simplex_range_ has been initialized */
-  bool                           zigzag_simplex_range_initialized_;
+  bool                            zigzag_simplex_range_initialized_;
   /** Definition of a null dictionary to fix a null_simplex shared by all Simplex_tree<T>.*/
   static Dictionary     null_dic_;
   /** null_simplex_ = null_dic_.begin().*/
@@ -2676,7 +2699,7 @@ public:
 /*Initializes a static empty Dictionary shared by all Simplex_tree<T>.*/
 template<typename SimplexTreeOptions> 
 typename Simplex_tree<SimplexTreeOptions>::Dictionary Simplex_tree<SimplexTreeOptions>::null_dic_ = Simplex_tree<SimplexTreeOptions>::Dictionary();
-/*Use the mepty dictionary .begin() as universal static null_simplex() for all 
+/*Use the empty dictionary .begin() as universal static null_simplex() for all 
  * Simplex_tree<T>.*/
 template<typename SimplexTreeOptions> 
 typename Simplex_tree<SimplexTreeOptions>::Simplex_handle Simplex_tree<SimplexTreeOptions>::null_simplex_ = Simplex_tree<SimplexTreeOptions>::null_dic_.begin();
@@ -2787,7 +2810,7 @@ struct Simplex_tree_options_zigzag_persistence {
   static const bool contiguous_vertices = false;
   static const bool simplex_handle_strong_validity = true;
   static const bool link_nodes_by_label = true;
-  static const bool store_morse_matching = true;
+  static const bool store_morse_matching = false;//true;
 };
 
 /** @} */  // end defgroup simplex_tree
