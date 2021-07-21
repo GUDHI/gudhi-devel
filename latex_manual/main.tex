@@ -1,0 +1,354 @@
+\documentclass[11pt]{amsart}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath, amssymb, amsthm, amscd}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage[hidelinks,pagebackref,pdftex]{hyperref}
+\usepackage{color}
+\usepackage{import}
+\usepackage[margin=3cm]{geometry}
+
+%%  If the following line is uncommented, we see the labels of theorems, 
+%% figures, etc. in the margins.
+%\usepackage[notref,notcite]{showkeys}
+
+%% Fix margin notes
+\usepackage{marginnote}
+%% \catcode `\@=11
+% Tiny marginpars 
+\long\def\@savemarbox#1#2{\global\setbox#1\vtop{\hsize\marginparwidth 
+  \@parboxrestore\tiny\raggedright #2}}
+\marginparwidth .75in \marginparsep 7pt 
+%% \long\def\flag#1#2{\framebox{#1}\marginpar{#2}}
+%% \long\def\sotto#1{{\bf [[} {\em #1 } {\bf ]]}}
+%% \catcode`\@=12
+\newcommand\marginkris[1]{{\tiny \marginnote{{\color{blue} #1}}} \normalmarginpar}
+\newcommand\marginclem[1]{{\tiny \marginnote{{\color{red} #1}}} \normalmarginpar}
+
+
+%% For hyperref
+\renewcommand{\backreftwosep}{\backrefsep}
+\renewcommand{\backreflastsep}{\backrefsep}
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{
+  \ifcase #1
+  [No citations.]
+  \or [#2]
+  \else [#2]
+  \fi }
+
+%%This command stops the Math Review numbers appearing in the references! 
+\AtBeginDocument{%
+   \def\MR#1{}
+}
+
+%% Theorems, etc
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}[equation]{Theorem}
+\newtheorem{conjecture}[equation]{Conjecture}
+\newtheorem{lemma}[equation]{Lemma}
+\newtheorem{corollary}[equation]{Corollary}
+\newtheorem{proposition}[equation]{Proposition}
+
+%% Named theorem environment
+\newtheorem*{namedtheorem}{\theoremname}
+\newcommand{\theoremname}{testing}
+\newenvironment{named}[1]{\renewcommand{\theoremname}{#1}\begin{namedtheorem}}{\end{namedtheorem}}
+
+%% Definitions, etc
+\theoremstyle{definition}
+\newtheorem{definition}[equation]{Definition}
+\newtheorem{example}[equation]{Example}
+\newtheorem{remark}[equation]{Remark}
+\newtheorem{question}[equation]{Question}
+
+%% Simplifying commands, symbols, etc
+\newcommand{\from}{\colon} % As in ``f maps \_from\_ X \_to\_ Y''.
+\newcommand{\R}{{\mathbb{R}}}
+\newcommand{\Z}{{\mathbb{Z}}}
+\newcommand{\N}{{\mathbb{N}}}
+\newcommand{\C}{{\mathbb{C}}}
+\newcommand{\Q}{{\mathbb{Q}}}
+
+\newcommand{\RP}{\mathbb{R}P}
+
+\newcommand{\tri}{\mathfrak{T}}
+\newcommand{\M}{M}
+
+\newcommand{\bdy}{\partial}
+\newcommand{\tw}{\operatorname{tw}}
+\newcommand{\cng}{\operatorname{cng}}
+\newcommand{\dist}{\mathrm{dist}}
+\newcommand{\poly}{\mathrm{poly}}
+\newcommand{\width}{\mathrm{width}}
+
+%% Shortcuts to refer to things (requires careful naming)
+\newcommand{\refarg}[1]{\hfill {\small {\bf Lemma~\ref{lem:#1}}}}
+\newcommand{\refthm}[1]{Theorem~\ref{Thm:#1}}
+\newcommand{\reflem}[1]{Lemma~\ref{Lem:#1}}
+\newcommand{\refprop}[1]{Proposition~\ref{Prop:#1}}
+\newcommand{\refcor}[1]{Corollary~\ref{Cor:#1}}
+\newcommand{\refrem}[1]{Remark~\ref{Rem:#1}}
+\newcommand{\refclaim}[1]{Claim~\ref{Claim:#1}}
+\newcommand{\refconj}[1]{Conjecture~\ref{Conj:#1}}
+\newcommand{\refeqn}[1]{\eqref{Eqn:#1}}
+\newcommand{\refitm}[1]{\eqref{Itm:#1}}
+\newcommand{\refdef}[1]{Definition~\ref{Def:#1}}
+\newcommand{\refsec}[1]{Section~\ref{Sec:#1}}
+\newcommand{\reffig}[1]{Figure~\ref{Fig:#1}}
+
+\newcommand{\clem}[1]{ \color{red}{#1} \color{black}{}}
+\newcommand{\kris}[1]{ \color{blue}{#1} \color{black}{}}
+
+\title{Détails sur la branche zigzag-filtration-simplex-tree de gudhi-devel}
+\author{Cl\'ement Maria}
+
+\begin{document}
+
+\maketitle
+
+
+
+
+
+% SIMPLEX\_TREE\_STAR\_SIMPLEX\_ITERATORS\_ ok
+% SIMPLEX\_TREE\_H\_                      ...
+
+% Point\_cloud.h            ok
+% Zigzag\_persistence.h
+% Simplex\_tree.h
+
+% Simplex\_tree\_zigzag\_iterators.h
+% indexing\_tag.h           ok
+
+
+% Bonjour à tous,
+
+% comme vous avez du le voir, je viens de soumettre une grosse mise à jour de ma branche   ...
+
+% Comme demandé plus tôt par Marc, voici une explication des différentes composantes (essentiellement indépendantes les unes des autres, mais nécessaires pour faire tourner des exemples).
+
+
+\section{Calcul rapide de la star d'un simplexe}
+
+L'algorithme suivant est décrit dans l'article sur le Simplex tree. Il part du principe suivant : pour un simplexe s, dont l'étiquette maximale d'un de ses sommets est u, l'ensemble de ses cofaces (s compris) dans le simplex tree est représenté par un ensemble de sous-arbre, dont les racines ont pour étiquette u. L'algorithme consiste à trouver les racines de ces sous-arbre, et à traverser tous leurs noeuds.
+
+Pour l'implémentation :
+
+
+\subsection{Relier les n\oe uds avec même étiquette}
+
+Il faut relier dans une liste $L\_u$ tous les noeuds de l'arbre avec étiquette $u$ (et ce pour toute étiquette $u$) pour une recherche rapide des candidats pour être racine. Cette propriété est maintenue à tout moment dans la construction du Simplex\_tree. C'est implémenté en donnant :
+
+\begin{itemize}
+\item La possibilité de maintenir deux \emph{boost hooks} pour que tous les {\tt Node} avec la même {\tt Simplex\_key} soient reliés dans une même liste intrusive. L'implémentation se fait par la création de deux classes :
+
+\medskip
+
+{\tt Hooks\_simplex\_base\_dummy} (vide), et
+{\tt Hooks\_simplex\_base\_link\_nodes} (contenant un boost intrusive list member hook),
+
+\medskip
+
+et d'un std::conditional pour choisir celle que l'on veut (appelée {\tt Hooks\_simplex\_base}), et d'un héritage de {\tt Node} (dans {\tt Simplex\_tree\_node\_explicit\_storage.h}) depuis {\tt Hooks\_simplex\_base}.
+
+\medskip
+
+Ce mécanisme est commandé par la nouvelle entrée {\tt static const bool link\_nodes\_by\_label = true} dans les modèles de {\tt SimplexTreeOptions} (fin du fichier {\tt Simplex_tree.h}).
+
+\item Si {\tt link\_nodes\_by\_label == true}, il faut également maintenir les listes intrusives. Cela est fait par l'introduction de deux structures :
+
+\medskip
+
+{\tt nodes\_by\_label\_dummy} (empty, pour le cas {\tt link\_nodes\_by\_label == false}), et 
+{\tt nodes\_by\_label\_intrusive\_list} (qui contient une map : "étiquette $u$ -> pointeur vers une liste intrusive contenant tous les noeuds d'étiquette $u$).
+
+Un {\tt std::conditional} sur {\tt Options::link\_nodes\_by\_label} permet de choisir quel type on veut, et on stocke une telle structure comme membre de la classe {\tt Simplex\_tree}:
+
+\medskip
+
+  {\tt Nodes\_by\_label\_data\_structure        nodes\_by\_label\_;}
+
+\medskip
+
+Au passage, l'utilisation de structure intrusive m'oblige à travailler avec des {\tt Node}, contrairement à des {\tt Simplex\_handle} (i.e., itérateurs de {\tt value\_type pair<Simplex\_key,Node>}). J'ai donc du re-implémenter les fonctions {\tt "self\_siblings", "dimension"}, et {\tt "has\_children"} en prenant un {\tt Simplex\_key} et un {\tt Node} en entrée (à la place du {\tt Simplex\_handle} habituel).
+
+\medskip
+
+Finalement, l'insertion et la suppression d'un n\oe ud entraînent des changements plus grand dans le {\tt Simplex\_tree}, notamment le fait que les listes intrusives décrites plus haut sont modifiées. J'ai implémenté ça par l'ajout de deux fonctions membres :
+
+\medskip
+
+  {\tt void update\_simplex\_tree\_after\_node\_insertion(Simplex\_handle sh)} et
+  
+\smallskip
+
+  {\tt void update\_simplex\_tree\_before\_node\_removal(Simplex\_handle sh)},
+
+\medskip
+
+qui, d'une part, met à jours toutes les structures additionnelles une fois que le simplex a été inséré dans un {\tt Siblings} (et a désormais un {\tt Simplex\_handle}), et, d'autre part, prépare le complexe à la suppression d'un simplex avant d'être enlevé de son {\tt Siblings} (et donc avec toujours un {\tt Simplex\_handle} toujours valide). Ces fonctions gèrent les listes intrusives, et seront utiles pour implémenter la théorie de Morse discrète (j'en parlerai plus bas). 
+
+\end{itemize}
+
+\subsection{De nouveaux itérateurs de star}
+
+J'ai implémenté de nouveaux itérateurs (dans le fichier {\tt Simplex\_tree/Simplex\_tree\_star\_simplex\_iterators.h}) pour calculer la star d'un simplexe. Précisémment :
+
+\begin{itemize}
+%
+\item {\tt class Simplex\_tree\_optimized\_cofaces\_rooted\_subtrees\_simplex\_iterator} : pour un simplex $\sigma$ donné, d'étiquette maximale $u$, implémente un itérateur parcourant tous les n\oe uds du simplex tree d'étiquette $u$ (en utilisant les listes intrusives) avec un filtre (``filter iterator'') pour ne garder que les cofaces de $\sigma$.
+%
+\item {\tt class Simplex\_tree\_optimized\_star\_simplex\_iterator} : iterateur sur les cofaces d'un simplex $\sigma$ ($\sigma$ compris), qui utilise un {\tt Simplex\_tree\_optimized\_cofaces\_rooted\_subtrees\_simplex\_iterator} pour trouver les sous-arbres contenant les cofaces, et parcourt ces sous-arbres (en largeur).
+\end{itemize}
+
+Dans {\tt Simplex\_tree.h}, il nous faut le bon type pour {\tt Star\_simplex\_iterator}. J'ai donc ajouté les {\tt typedef} :
+
+\medskip
+
+  {\tt typedef Simplex\_tree\_optimized\_star\_simplex\_iterator<Simplex\_tree> 
+                                                    Optimized\_star\_simplex\_iterator;}
+
+\medskip
+
+  {\tt typedef boost::iterator\_range<Optimized\_star\_simplex\_iterator> 
+                                                       Optimized\_star\_simplex\_range;}
+
+\medskip
+
+et un {\tt std::conditional} sur {\tt Options::link\_nodes\_by\_label} pour definir le {\tt typedef Star\_simplex\_range}.
+
+J'ai également un {\tt constexpr(Options::link\_nodes\_by\_label)} dans 
+{\tt Star\_simplex\_range star\_simplex\_range(const Simplex\_handle simplex)} 
+car les implémentations sont différentes (pour la version non-optimisée, on se rapporte à un calcul de cofaces normal).
+
+
+\begin{remark}
+À noter que, pour le moment, cet itérateur calcule toutes les cofaces (la star) et pas celles d'une dimension donnée. Cependant, on pourra relativement facilement raffiner l'implémentation de {\tt class Simplex\_tree\_optimized\_star\_simplex\_iterator} pour discriminer sur la dimension. On devrait observer un gain intéressant sur la calcul de cofaces brute force.
+\end{remark}
+
+
+
+
+\section{Construction de filtration zigzag de flag complexe (partie combinatoire)}
+
+Étant donnée un range d'insertions et de suppressions de sommets et d'arêtes (i.e., une filtration zigzag du $1$-squelette), faire les expansions et suppressions appropriées dans le {\tt Simplex\_tree} à la volée.
+
+\subsection{Modificateur du simplex tree}
+
+Implémentation dans {\tt Simplex\_tree.h} de
+
+\begin{itemize}
+\item la possibilité d'utiliser une {\tt boost::container::map} pour stocker les {\tt Node} d'un {\tt Sibling}, à la place d'une {\tt flat\_map} qui est moins dynamique (on fait beaucoup d'insertions et de suppressions de simplexes dans une filtration zigzag). De plus, mon implémentation des filtrations zigzag {\bf requiert} que les {\tt Simplex\_handle} (ici des {\tt map::iterator} donc) restent valide pendant toute la période où un simplex est dans le complexe (ce n'est pas le cas dans les {\tt flat\_map} qui "bougent" en mémoire).
+
+Cette possibilité est donnée par la nouvelle entrée ``{\tt static const bool simplex\_handle\_strong\_validity = true;}'' dans les modèles de
+{\tt SimplexTreeOptions}, et par un {\tt std::conditional} pour le {\tt typedef Dictionary}.
+
+\item nouvelles fonctions membre :
+
+\medskip
+
+{\tt flag\_add\_edge} -> permet d'ajouter un sommet ou une arête, et de faire l'expansion du complexe jusqu'à la dimension maximale autorisée. Tous les nouveaux simplexes sont enregistrés dans un vecteur. Le {\tt Simplex\_tree} est {\em modifié}.
+
+{\tt flag\_add\_edge} dépend de plusieurs fonctions "{\tt zz\_punctual\_expansion, zz\_local\_expansion, zz\_siblings\_expansion}", qui implémentent différents cas d'expansion locale, et {\tt zz\_intersection} qui fait des intersections de Siblings.
+
+\medskip
+
+{\tt flag\_lazy\_remove\_edge} -> enregistre (sans modifier le {\tt Simplex\_tree}) toutes les cofaces d'un sommet ou d'une arête qu'on veut supprimer, en utilisant le {\tt Star\_simplex\_iterator}.
+
+\medskip
+
+{\tt flag\_lazy\_empty\_complex} -> la même chose, mais pour tout supprimer, en utilsant le {\tt Complex_simplex_iterator}.
+
+\medskip
+
+Dans ces deux dernières fonctions, la suppression effective des simplexes dans le complexes se fait avec le traditionnel {\tt remove_maximal_simplex(sh)}, déjà implémenté.
+
+\item de nouveaux itérateurs de filtration zigzag dans le fichier {\tt Simplex\_tree/Simplex\_tree\_zigzag\_iterators.h}. 
+
+Dans {\tt Simplex\_tree.h}, cela se traduit par l'introduction d'un type "{\tt Zigzag\_filtration\_simplex\_iterator}" et "{\tt Zigzag\_filtration\_simplex\_range}", et "{\tt Filtration\_simplex\_range}" est choisi en fonction d'un {\tt std::conditional} sur {\tt Options::is\_zigzag} (nouvelle option du simplex tree).
+
+L'interface pour accéder à la filtration est toujours avec 
+{\tt filtration\_simplex\_range(...)}, mais dépend désormais d'un {\tt linear\_indexing\_tag} (filtration standard) ou d'un {\tt zigzag\_indexing\_tag}.
+
+\begin{remark}
+{\tt linear\_indexing\_tag/zigzag\_indexing\_tag} et {\tt bool is\_zigzag} sont redondants dans les {\tt Options}. Je propose d'utiliser un {\tt constexpr(Options::is\_zigzag)} (que je trouve plus lisible) pour {\tt filtration\_simplex\_range} (et les autres fonctions où {\tt linear\_indexing\_tag} est utilisé), et de supprimer ces {\tt indexing\_tag}. Qu'en pensez-vous ?
+
+Certaines fonctions, comme "{\tt Simplex\_handle simplex(Simplex\_key idx)}", qui n'ont pas de version en persistence zigzag, pourraient utiliser un "{\tt std::false\_type}" en input, auquel cas on appelerait "{\tt simplex(key, Options::is\_zigzag)}". Je pense que ça déclenchera toujours une erreur à la compilation ?
+\end{remark}
+
+\item Ces nouveaux itérateurs zigzag sont implémentés dans {\tt Simplex\_tree/Simplex\_tree\_zigzag\_iterators.h}. Ce fichier contient :
+
+\begin{itemize}
+\item un type {\tt Zigzag\_edge} qui encode une arête $\{u,v\}$, ou un sommet $\{u\}$ (auquel cas on a $u=v$).
+\item un ensemble de méthodes géométriques ({\tt compute\_epsilon\_values, zigzag\_filtration\_one\_skeleton}) qui permettent de calculer une filtration zigzag du $1$-squelette (insertion et suppressions de sommets et d'arêtes) à partir d'un nuage de points géométriques (par calculer une \emph{oscillating Rips zigzag filtration}). Je les décris dans la section suivante.
+\item la classe {\tt Flagzigzag\_simplex\_iterator} qui, à partir d'une filtration zigzag du $1$-squelette (membres {\tt std::vector< Edge_type > zigzag\_edge\_filtration\_;}), implémente un itérateur de la filtration zigzag complète, en maintenant un {\tt Simplex\_tree} et en appelant dessus, et à la volée, les diverses fonctions d'expansion décrites plus haut. 
+
+\smallskip
+
+Cet itérateur est de {\tt value\_type Simplex\_handle}. À noter que cet itérateur maintient plus de méthodes publiques que d'habitude. Notamment {\tt arrow\_direction} (qui indique s'il s'agit d'une insertion ou d'une suppression) et {\tt filtration()} (qui donne la valeur de filtration associée à l'insertion/suppression du simplexe sur lequel on pointe ; ceci est du au fait que la valeur de filtration d'une suppression de simplexe n'est pas égale à celle stockée dans le simplexe tree, qui est la valeur de filtration au moment de l'insertion de ce simplexe).
+
+\end{itemize}
+
+
+
+
+
+
+
+\section{La partie géométrique de la construction de filtration zigzag : les oscillating Rips}
+
+Ces méthodes géométriques permettent de calculer l'oscillating Rips zigzag filtration du $1$-squelette du complexe, à partir d'un nuage de points.
+
+\clem{continuer}
+
+
+
+
+\section{La théorie de Morse discrète}
+
+J'ai implémenté une bonne partie des mécanismes, mais il me manque le calcul de bord dans un complexe de Morse. Je décris les mécanismes :
+
+La volonté de faire la théorie de Morse discrète est donnée par Options::store\_morse\_matching.
+
+- la possibilité de stocker un Simplex\_handle dans chaque Node, pour représenter le simplex avec lequel on forme une paire de Morse. Implémenté par les deux classes 
+
+Pairing\_simplex\_base\_dummy (vide) et Pairing\_simplex\_base\_morse (contient un membre Simplex\_handle) dont Simplex\_tree\_node\_explicit\_storage hérite.
+
+- des méthodes "paired\_with, critical, assign\_pairing, make\_critical, is\_paired\_with" dans la classe Simpex\_tree pour atteindre l'information au sujet des paires de Morse.
+
+- un appel à "Discrete\_morse\_theory<Simplex\_tree>().compute\_matching" quand on insère un ensemble de simplexe avec la même valeur de filtration (par exemple dans flag\_add\_edge). Cette méthode calcul un appariement de Morse (c'est dans le paquetage Discrete\_morse\_theory) et stocke l'information dans les noeuds du simplex tree.
+
+- une mise à jour des noeuds dans les fonctions :
+
+  void update\_simplex\_tree\_after\_node\_insertion(Simplex\_handle sh) -> un nouveau simplex est critique par défaut,
+
+  void update\_simplex\_tree\_before\_node\_removal(Simplex\_handle sh) -> en enlevant un simplex non-critique, il faut rendre le simplex, avec lequel il forme une paire de Morse, critique.
+
+
+
+
+\clem{cf break morse pair dans st_zigzag_iterators}
+
+
+
+
+Il y a également de nouveaux fichiers :
+
+Point\_cloud.h implémente des méthodes simples sur les nuages de points : chercher et éliminer les doublons, perturbations aléatoires, vérifier que deux paires de points (distincts) x,y,z,t ne soient pas à la même distance, i.e., d(x,y) != d(z,t).
+
+Cette dernière méthode peut paraître étrange, mais en réalité elle est utile pour qu'un "farthest point sampling" d'un nuage de points soit unique une fois qu'on a choisi le premier point. (utilisé dans ma construction de l'oscillating Rips zigzag filtration).
+
+
+src/Zigzag\_persistence/
+  avec le fichier Zigzag\_persistence.h Implémente la persistence zigzag.
+
+
+data/points/S3\_in\_R4\_2k\_uniform.off Un échantillonage uniform de 2000 points sur la 3-sphère unité dans R4. C'est un cas intéressant pour la persistence zigzag qui permet de reconstruire et d'inférer l'homologie de 3-variétés.
+
+
+\end{document}
