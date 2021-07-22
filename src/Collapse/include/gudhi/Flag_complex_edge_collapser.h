@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Siddharth Pritam
+ *    Author(s):       Siddharth Pritam, Marc Glisse
  *
  *    Copyright (C) 2020 Inria
  *
@@ -16,6 +16,8 @@
 
 #include <boost/functional/hash.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
 
 #include <Eigen/Sparse>
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
@@ -345,6 +347,225 @@ class Flag_complex_edge_collapser {
 
 };
 
+template<typename Vertex, typename Filtration_value>
+struct Flag_complex_edge_collapser2 {
+  using Filtered_edge = std::tuple<Vertex, Vertex, Filtration_value>;
+  typedef std::pair<Vertex,Vertex> Edge;
+  struct Cmpi { template<class T, class U> bool operator()(T const&a, U const&b)const{return b<a; } };
+  typedef std::list<Edge> Edge_group; // vector? on erase elements...
+  typedef std::map<Filtration_value, Edge_group, Cmpi> Events; // decreasing order
+  Events events;
+  typedef boost::container::flat_map<Vertex, Filtration_value> Ngb_list;
+  //typedef std::unordered_map<Vertex, Ngb_list> Neighbors;
+  typedef std::vector<Ngb_list> Neighbors; // we still need to find the edge in the group then...
+  Neighbors neighbors;
+  Vertex num_vertices;
+
+  template<class FilteredEdgeRange>
+  void read_edges(FilteredEdgeRange const&r){
+    neighbors.resize(num_vertices);
+    std::vector<typename Ngb_list::sequence_type> neighbors2(num_vertices);
+    for(auto&&e : r){
+      using std::get;
+      Vertex u = get<0>(e);
+      Vertex v = get<1>(e);
+      Filtration_value f = get<2>(e);
+      auto i = events.emplace_hint(events.end(), f, 0);
+      neighbors2[u].emplace_back(v, f);
+      neighbors2[v].emplace_back(u, f);
+      i->second.push_back(std::minmax({u, v}));
+    }
+    for(int i=0;i<neighbors2.size();++i){
+      neighbors[i].adopt_sequence(std::move(neighbors2[i])); // calls sort
+    }
+    neighbors2.clear();
+  }
+
+  void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Ngb_list const&nu, Ngb_list const&nv, Filtration_value f_event){
+    auto ui = nu.begin();
+    auto ue = nu.end();
+    auto vi = nv.begin();
+    auto ve = nv.end();
+    assert(ui != ue && vi != ve);
+    while(ui != ue && vi != ve){
+      Vertex w = ui->first;
+      if(w < vi->first) { ++ui; continue; }
+      if(w > vi->first) { ++vi; continue; }
+      Filtration_value f = std::max(ui->second, vi->second);
+      if(f > f_event)
+        e_ngb_later.emplace_back(f, w);
+      else
+        e_ngb.insert(e_ngb.end(), w);
+      ++ui; ++vi;
+    }
+  }
+
+  // Test if the neighborhood of e is included in the closed neighborhood of c
+  template<class Ngb>
+  bool is_dominated_by(Ngb const& e_ngb, Vertex c, Filtration_value f){
+    Ngb_list const&nc = neighbors[c];
+    // if few neighbors, use dichotomy?
+    // try a gallop strategy? an unordered_map? a bitset?
+#if 0
+    auto ci = nc.begin();
+    auto ce = nc.end();
+    for(auto v : e_ngb) {
+      if(v==c)continue;
+      ci = std::lower_bound(ci, ce, v, [](auto a, auto b){return a.first < b;});
+      if(ci == nc.end() || ci->first != v || ci->second > f) return false;
+    }
+    return true;
+#elif 0
+    for(auto v : e_ngb) {
+      if(v==c)continue;
+      auto it = nc.find(v);
+      if(it == nc.end() || it->second > f) return false;
+    }
+    return true;
+#else
+    auto ci = nc.begin();
+    auto ce = nc.end();
+    auto eni = e_ngb.begin();
+    auto ene = e_ngb.end();
+    assert(eni != ene);
+    assert(ci != ce);
+    if(*eni == c && ++eni == ene) return true;
+    for(;;){
+      Vertex ve = *eni;
+      Vertex vc = ci->first;
+      while(ve > vc) {
+        if(++ci == ce) return false;
+        vc = ci->first;
+      }
+      if(ve < vc) return false;
+      // ve == vc
+      if(ci->second > f) return false;
+      if(++eni == ene)return true;
+      // Should we store a closed neighborhood of c (including c) so we can avoid testing for c at each iteration?
+      if(*eni == c && ++eni == ene)return true;
+      if(++ci == ce) return false;
+    }
+#endif
+  }
+
+  // delay = [](double d){return d*1.05;}
+  template<class FilteredEdgeRange, class Delay>
+  void process_edges(FilteredEdgeRange const& edges, Delay&& delay) {
+    {
+      Vertex maxi = 0, maxj = 0;
+      for(auto& fe : edges) {
+        Vertex i = std::get<0>(fe);
+        Vertex j = std::get<1>(fe);
+        if (i > maxi) maxi = i;
+        if (j > maxj) maxj = j;
+      }
+      num_vertices = std::max(maxi, maxj) + 1;
+    }
+
+    read_edges(edges);
+
+    typename Events::iterator evi;
+    boost::container::flat_set<Vertex> e_ngb;
+    e_ngb.reserve(num_vertices);
+    //std::multimap<Filtration_value, Vertex> e_ngb_later;
+    std::vector<std::pair<Filtration_value, Vertex>> e_ngb_later;
+    // do not use reverse_iterator, it behaves badly with erase.
+    for(auto next_evi = events.begin(); (evi = next_evi) != events.end(); ){
+      ++next_evi; // do it now, in case we remove evi
+      Edge_group& eg = evi->second;
+      //Filtration_value f_event = evi->first;
+      auto next_ei = eg.begin();
+      auto ei = next_ei;
+      for(; (ei = next_ei) != eg.end();){
+        next_ei = std::next(ei); // do it now, in case we remove ei
+        Vertex u = ei->first;
+        Vertex v = ei->second;
+        auto time = evi;
+        Filtration_value a_bit_later = delay(evi->first);
+        if(a_bit_later != evi->first) {
+#if 0
+        auto next_time = time;
+        while (next_time != events.begin() && (--next_time)->first <= a_bit_later)
+          time = next_time;
+#else
+        // too bad there isn't a map::lower_bound_after
+        time = events.lower_bound(a_bit_later);
+#endif
+        }
+        auto start_time = time;
+        e_ngb.clear();
+        e_ngb_later.clear();
+        common_neighbors(e_ngb, e_ngb_later, neighbors[u], neighbors[v], time->first);
+        auto cmp1=[](auto const&a, auto const&b){return a.first > b.first;};
+        auto e_ngb_later_begin=e_ngb_later.begin();
+        auto e_ngb_later_end=e_ngb_later.end();
+        bool heapified = false;
+
+        bool dead = false;
+        while(true) {
+          Vertex dominator = -1;
+          // special case for size 1
+          // if(e_ngb.size()==1){dominator=*e_ngb.begin();}else
+          // TODO: try testing dominators in order of filtration value
+          for(auto c : e_ngb){
+            if(is_dominated_by(e_ngb, c, time->first)){
+              dominator = c;
+              break;
+            }
+          }
+          if(dominator==-1) break;
+          bool still_dominated;
+          do {
+            if(e_ngb_later_begin == e_ngb_later_end) {
+              dead = true; goto end_move;
+            }
+            if(!heapified) {
+              // Eagerly sorting can be slow
+              std::make_heap(e_ngb_later_begin, e_ngb_later_end, cmp1);
+              heapified=true;
+            }
+            // go back to storing an iterator in e_ngb_later?
+            time = events.lower_bound(e_ngb_later_begin->first);
+            still_dominated = true;
+            while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time->first) {
+              Vertex w = e_ngb_later_begin->second;
+              auto wit = neighbors[dominator].find(w);
+              if (wit == neighbors[dominator].end() || wit->second > e_ngb_later_begin->first)
+                still_dominated = false;
+              e_ngb.insert(w);
+              std::pop_heap(e_ngb_later_begin, e_ngb_later_end--, cmp1);
+            }
+          } while (still_dominated); // this doesn't seem to help that much...
+        }
+end_move:
+        if(dead) {
+          neighbors[u].erase(v);
+          neighbors[v].erase(u);
+          eg.erase(ei);
+        } else if(start_time != time){
+          time->second.push_back(*ei);
+          neighbors[u][v]=time->first;
+          neighbors[v][u]=time->first;
+          eg.erase(ei);
+        }
+      }
+      // check if event is dead (all edges have moved)
+      if (evi->second.empty()) {
+        events.erase(evi);
+      }
+    }
+  }
+
+  std::vector<Filtered_edge> output() {
+    std::vector<std::tuple<Vertex, Vertex, Filtration_value>> r;
+    for(auto& ev : events)
+      for(auto& e : ev.second)
+        r.emplace_back(e.first, e.second, ev.first);
+    return r;
+  }
+
+};
+
 /** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent
  * homology and returns the remaining edges as a range.
  *
@@ -375,6 +596,30 @@ template<class FilteredEdgeRange> auto flag_complex_collapse_edges(const Filtere
         });
   }
   return remaining_edges;
+}
+
+// Would it help to label the points according to some spatial sorting?
+template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges2(FilteredEdgeRange&& edges, Delay&&delay) {
+  auto first_edge_itr = std::begin(edges);
+  using Vertex = std::decay_t<decltype(std::get<0>(*first_edge_itr))>;
+  using Filtration_value = std::decay_t<decltype(std::get<2>(*first_edge_itr))>;
+  using Edge_collapser = Flag_complex_edge_collapser2<Vertex, Filtration_value>;
+  if (first_edge_itr != std::end(edges)) {
+    std::vector<typename Edge_collapser::Filtered_edge> edges2;
+    if(std::is_same<FilteredEdgeRange, std::vector<typename Edge_collapser::Filtered_edge>>::value)
+      edges2 = std::move(edges);
+    else
+      edges2.insert(edges2.end(), edges.begin(), edges.end());
+    // The sorting is not necessary, but inserting in the map is faster if done in order
+    std::sort(edges2.begin(), edges2.end(), [](auto const&a, auto const&b){return std::get<2>(a)>std::get<2>(b);});
+    Edge_collapser edge_collapser;
+    edge_collapser.process_edges(edges2, std::forward<Delay>(delay));
+    return edge_collapser.output();
+  }
+  return std::vector<typename Edge_collapser::Filtered_edge>();
+}
+template<class FilteredEdgeRange> auto flag_complex_collapse_edges2(const FilteredEdgeRange& edges) {
+  return flag_complex_collapse_edges2(edges, [](auto const&d){return d;});
 }
 
 }  // namespace collapse
