@@ -405,7 +405,7 @@ struct Flag_complex_edge_collapser2 {
   bool is_dominated_by(Ngb const& e_ngb, Vertex c, Filtration_value f){
     Ngb_list const&nc = neighbors[c];
     // if few neighbors, use dichotomy?
-    // try a gallop strategy? an unordered_map? a bitset?
+    // try a gallop strategy? a bitset?
 #if 0
     auto ci = nc.begin();
     auto ce = nc.end();
@@ -416,6 +416,7 @@ struct Flag_complex_edge_collapser2 {
     }
     return true;
 #elif 0
+    // I tried storing a copy of neighbors as a vector<absl::flat_hash_map> and using it for nc, but it was a bit slower here. It did help noticably with neighbors[dominator].find(w) in the main function though.
     for(auto v : e_ngb) {
       if(v==c)continue;
       auto it = nc.find(v);
