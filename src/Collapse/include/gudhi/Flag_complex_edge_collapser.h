@@ -537,6 +537,14 @@ struct Flag_complex_edge_collapser2 {
         e_ngb.clear();
         e_ngb_later.clear();
         common_neighbors(e_ngb, e_ngb_later, u, v, time->first);
+        /* If we identify a good candidate (the first common neighbor) for being a dominator of e until infinity, we can check that a bit more cheaply. It does not seem to help for a sequential execution, but it could be interesting for parallelism: for many edges in parallel, find a dominator, and remove marked edges sequentially as long as their dominator is not the extremity of an edge already removed. For some input, such a rough heuristic may detect a negligible number of removable edges.
+        for(auto w : e_ngb) {
+          if(neighbors_dense(candidate, w) > time->first) goto try_harder;
+        }
+        for(auto&& fw : e_ngb_later) {
+          if(neighbors_dense(candidate, fw.second) > fw.first) goto try_harder;
+        }
+        */
         auto cmp1=[](auto const&a, auto const&b){return a.first > b.first;};
         auto e_ngb_later_begin=e_ngb_later.begin();
         auto e_ngb_later_end=e_ngb_later.end();
@@ -555,7 +563,7 @@ struct Flag_complex_edge_collapser2 {
             }
           }
           if(dominator==-1) break;
-          // TODO: investigate what we can do without sorting. Does looking for the first common vertex and checking if this is a dominator all along allow removing a non-negligible number of edges? That could have interesting implications for parallelism.
+          // investigate what we can do without sorting...
           bool still_dominated;
           do {
             if(e_ngb_later_begin == e_ngb_later_end) {
@@ -567,7 +575,7 @@ struct Flag_complex_edge_collapser2 {
               heapified=true;
             }
             // too bad there isn't a map::lower_bound_after
-            // go back to storing an iterator in e_ngb_later?
+            // go back to storing an iterator in e_ngb_later? Slowing down common_neighbors may not be worth it.
             time = events.lower_bound(e_ngb_later_begin->first);
             still_dominated = true;
             while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time->first) {
