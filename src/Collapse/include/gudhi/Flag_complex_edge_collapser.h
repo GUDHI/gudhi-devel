@@ -534,6 +534,7 @@ struct Flag_complex_edge_collapser2 {
               std::make_heap(e_ngb_later_begin, e_ngb_later_end, cmp1);
               heapified=true;
             }
+            // too bad there isn't a map::lower_bound_after
             // go back to storing an iterator in e_ngb_later?
             time = events.lower_bound(e_ngb_later_begin->first);
             still_dominated = true;
