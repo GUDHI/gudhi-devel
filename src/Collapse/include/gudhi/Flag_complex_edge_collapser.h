@@ -404,9 +404,10 @@ struct Flag_complex_edge_collapser2 {
   template<class Ngb>
   bool is_dominated_by(Ngb const& e_ngb, Vertex c, Filtration_value f){
     Ngb_list const&nc = neighbors[c];
-    // if few neighbors, use dichotomy?
-    // try a gallop strategy? a bitset?
+    // The best strategy probably depends on the distribution, how sparse / dense the adjacency matrix is, how (un)balanced the sizes of e_ngb and nc are.
+    // Some efficient operations on sets work best with bitsets, although the need for a map complicates things.
 #if 0
+    // if few neighbors, use dichotomy? Seems slower.
     auto ci = nc.begin();
     auto ce = nc.end();
     for(auto v : e_ngb) {
@@ -435,6 +436,7 @@ struct Flag_complex_edge_collapser2 {
       Vertex ve = *eni;
       Vertex vc = ci->first;
       while(ve > vc) {
+        // try a gallop strategy (exponential search)? Seems slower
         if(++ci == ce) return false;
         vc = ci->first;
       }
