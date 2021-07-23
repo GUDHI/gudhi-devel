@@ -547,7 +547,7 @@ struct Flag_complex_edge_collapser2 {
           Vertex dominator = -1;
           // special case for size 1
           // if(e_ngb.size()==1){dominator=*e_ngb.begin();}else
-          // TODO: try testing dominators in order of filtration value
+          // it is tempting to test the dominators in increasing order of filtration value, which is likely to reduce the number of calls to is_dominated_by before finding a dominator, but sorting, even partially / lazily, is very expensive.
           for(auto c : e_ngb){
             if(is_dominated_by(e_ngb, c, time->first)){
               dominator = c;
@@ -555,6 +555,7 @@ struct Flag_complex_edge_collapser2 {
             }
           }
           if(dominator==-1) break;
+          // TODO: investigate what we can do without sorting. Does looking for the first common vertex and checking if this is a dominator all along allow removing a non-negligible number of edges? That could have interesting implications for parallelism.
           bool still_dominated;
           do {
             if(e_ngb_later_begin == e_ngb_later_end) {
