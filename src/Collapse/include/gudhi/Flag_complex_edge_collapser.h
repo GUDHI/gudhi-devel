@@ -358,7 +358,7 @@ struct Flag_complex_edge_collapser2 {
   typedef boost::container::flat_map<Vertex, Filtration_value> Ngb_list;
   //typedef std::unordered_map<Vertex, Ngb_list> Neighbors;
   typedef std::vector<Ngb_list> Neighbors; // we still need to find the edge in the group then...
-  Neighbors neighbors;
+  Neighbors neighbors; // closed neighborhood
   Vertex num_vertices;
 
   template<class FilteredEdgeRange>
@@ -376,12 +376,16 @@ struct Flag_complex_edge_collapser2 {
       i->second.push_back(std::minmax({u, v}));
     }
     for(int i=0;i<neighbors2.size();++i){
+      neighbors2[i].emplace_back(i, -std::numeric_limits<Filtration_value>::infinity());
       neighbors[i].adopt_sequence(std::move(neighbors2[i])); // calls sort
     }
     neighbors2.clear();
   }
 
-  void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Ngb_list const&nu, Ngb_list const&nv, Filtration_value f_event){
+  // Open neighborhood
+  void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Vertex u, Vertex v, Filtration_value f_event){
+    Ngb_list const&nu = neighbors[u];
+    Ngb_list const&nv = neighbors[v];
     auto ui = nu.begin();
     auto ue = nu.end();
     auto vi = nv.begin();
@@ -391,11 +395,14 @@ struct Flag_complex_edge_collapser2 {
       Vertex w = ui->first;
       if(w < vi->first) { ++ui; continue; }
       if(w > vi->first) { ++vi; continue; }
-      Filtration_value f = std::max(ui->second, vi->second);
-      if(f > f_event)
-        e_ngb_later.emplace_back(f, w);
-      else
-        e_ngb.insert(e_ngb.end(), w);
+      // nu and nv are closed, so we need to exclude e here.
+      if(w != u && w != v) {
+        Filtration_value f = std::max(ui->second, vi->second);
+        if(f > f_event)
+          e_ngb_later.emplace_back(f, w);
+        else
+          e_ngb.insert(e_ngb.end(), w);
+      }
       ++ui; ++vi;
     }
   }
@@ -431,7 +438,7 @@ struct Flag_complex_edge_collapser2 {
     auto ene = e_ngb.end();
     assert(eni != ene);
     assert(ci != ce);
-    if(*eni == c && ++eni == ene) return true;
+    // if(*eni == c && ++eni == ene) return true;
     for(;;){
       Vertex ve = *eni;
       Vertex vc = ci->first;
@@ -444,8 +451,8 @@ struct Flag_complex_edge_collapser2 {
       // ve == vc
       if(ci->second > f) return false;
       if(++eni == ene)return true;
-      // Should we store a closed neighborhood of c (including c) so we can avoid testing for c at each iteration?
-      if(*eni == c && ++eni == ene)return true;
+      // If we stored an open neighborhood of c (excluding c), we would need to test for c here and before the loop
+      // if(*eni == c && ++eni == ene)return true;
       if(++ci == ce) return false;
     }
 #endif
@@ -498,7 +505,7 @@ struct Flag_complex_edge_collapser2 {
         auto start_time = time;
         e_ngb.clear();
         e_ngb_later.clear();
-        common_neighbors(e_ngb, e_ngb_later, neighbors[u], neighbors[v], time->first);
+        common_neighbors(e_ngb, e_ngb_later, u, v, time->first);
         auto cmp1=[](auto const&a, auto const&b){return a.first > b.first;};
         auto e_ngb_later_begin=e_ngb_later.begin();
         auto e_ngb_later_end=e_ngb_later.end();
@@ -532,7 +539,7 @@ struct Flag_complex_edge_collapser2 {
             still_dominated = true;
             while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time->first) {
               Vertex w = e_ngb_later_begin->second;
-              auto wit = neighbors[dominator].find(w);
+              auto wit = neighbors[dominator].find(w); // an open neighborhood would suffice here
               if (wit == neighbors[dominator].end() || wit->second > e_ngb_later_begin->first)
                 still_dominated = false;
               e_ngb.insert(w);
