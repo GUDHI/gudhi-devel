@@ -359,11 +359,26 @@ struct Flag_complex_edge_collapser2 {
   //typedef std::unordered_map<Vertex, Ngb_list> Neighbors;
   typedef std::vector<Ngb_list> Neighbors; // we still need to find the edge in the group then...
   Neighbors neighbors; // closed neighborhood
-  Vertex num_vertices;
+  std::size_t num_vertices;
+
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+  // Minimal matrix interface
+  // Using this matrix generally helps performance, but the memory use may be excessive for a very sparse graph
+  // (and in extreme cases the constant initialization of the matrix may start to dominate the runnning time).
+  std::vector<Filtration_value> neighbors_data;
+  void init_neighbors_dense(){
+    neighbors_data.clear();
+    neighbors_data.resize(num_vertices*num_vertices, std::numeric_limits<Filtration_value>::infinity());
+  }
+  Filtration_value& neighbors_dense(Vertex i, Vertex j){return neighbors_data[num_vertices*j+i];}
+#endif
 
   template<class FilteredEdgeRange>
   void read_edges(FilteredEdgeRange const&r){
     neighbors.resize(num_vertices);
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+    init_neighbors_dense();
+#endif
     std::vector<typename Ngb_list::sequence_type> neighbors2(num_vertices);
     for(auto&&e : r){
       using std::get;
@@ -374,16 +389,24 @@ struct Flag_complex_edge_collapser2 {
       neighbors2[u].emplace_back(v, f);
       neighbors2[v].emplace_back(u, f);
       i->second.push_back(std::minmax({u, v}));
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+      neighbors_dense(u,v)=f;
+      neighbors_dense(v,u)=f;
+#endif
     }
     for(int i=0;i<neighbors2.size();++i){
       neighbors2[i].emplace_back(i, -std::numeric_limits<Filtration_value>::infinity());
       neighbors[i].adopt_sequence(std::move(neighbors2[i])); // calls sort
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+      neighbors_dense(i,i)=-std::numeric_limits<Filtration_value>::infinity();
+#endif
     }
     neighbors2.clear();
   }
 
   // Open neighborhood
   void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Vertex u, Vertex v, Filtration_value f_event){
+    // Using neighbors_dense here seems to hurt, even if we loop on the smaller of nu and nv.
     Ngb_list const&nu = neighbors[u];
     Ngb_list const&nv = neighbors[v];
     auto ui = nu.begin();
@@ -410,9 +433,16 @@ struct Flag_complex_edge_collapser2 {
   // Test if the neighborhood of e is included in the closed neighborhood of c
   template<class Ngb>
   bool is_dominated_by(Ngb const& e_ngb, Vertex c, Filtration_value f){
-    Ngb_list const&nc = neighbors[c];
     // The best strategy probably depends on the distribution, how sparse / dense the adjacency matrix is, how (un)balanced the sizes of e_ngb and nc are.
     // Some efficient operations on sets work best with bitsets, although the need for a map complicates things.
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+    for(auto v : e_ngb) {
+      // if(v==c)continue;
+      if(neighbors_dense(v,c) > f) return false;
+    }
+    return true;
+#else
+    auto&&nc = neighbors[c];
 #if 0
     // if few neighbors, use dichotomy? Seems slower.
     auto ci = nc.begin();
@@ -424,7 +454,7 @@ struct Flag_complex_edge_collapser2 {
     }
     return true;
 #elif 0
-    // I tried storing a copy of neighbors as a vector<absl::flat_hash_map> and using it for nc, but it was a bit slower here. It did help noticably with neighbors[dominator].find(w) in the main function though.
+    // I tried storing a copy of neighbors as a vector<absl::flat_hash_map> and using it for nc, but it was a bit slower here. It did help with neighbors[dominator].find(w) in the main function though, sometimes enough, sometimes not.
     for(auto v : e_ngb) {
       if(v==c)continue;
       auto it = nc.find(v);
@@ -455,6 +485,7 @@ struct Flag_complex_edge_collapser2 {
       // if(*eni == c && ++eni == ene)return true;
       if(++ci == ce) return false;
     }
+#endif
 #endif
   }
 
@@ -540,9 +571,15 @@ struct Flag_complex_edge_collapser2 {
             still_dominated = true;
             while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time->first) {
               Vertex w = e_ngb_later_begin->second;
-              auto wit = neighbors[dominator].find(w); // an open neighborhood would suffice here
-              if (wit == neighbors[dominator].end() || wit->second > e_ngb_later_begin->first)
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+              if (neighbors_dense(dominator,w) > e_ngb_later_begin->first)
                 still_dominated = false;
+#else
+              auto& ngb_dom = neighbors[dominator];
+              auto wit = ngb_dom.find(w); // neighborhood may be open or closed, it does not matter
+              if (wit == ngb_dom.end() || wit->second > e_ngb_later_begin->first)
+                still_dominated = false;
+#endif
               e_ngb.insert(w);
               std::pop_heap(e_ngb_later_begin, e_ngb_later_end--, cmp1);
             }
@@ -552,11 +589,19 @@ end_move:
         if(dead) {
           neighbors[u].erase(v);
           neighbors[v].erase(u);
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+          neighbors_dense(u,v)=std::numeric_limits<Filtration_value>::infinity();
+          neighbors_dense(v,u)=std::numeric_limits<Filtration_value>::infinity();
+#endif
           eg.erase(ei);
         } else if(start_time != time){
           time->second.push_back(*ei);
           neighbors[u][v]=time->first;
           neighbors[v][u]=time->first;
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+          neighbors_dense(u,v)=time->first;
+          neighbors_dense(v,u)=time->first;
+#endif
           eg.erase(ei);
         }
       }
