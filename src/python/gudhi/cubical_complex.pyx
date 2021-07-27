@@ -147,7 +147,7 @@ cdef class CubicalComplex:
         :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -169,7 +169,7 @@ cdef class CubicalComplex:
         """This function computes and returns the persistence of the complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is

@@ -176,6 +176,11 @@ BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_5 )
   test_rips_persistence_in_dimension(5);
 }
 
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_6 )
+{
+  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(6), std::invalid_argument);
+}
+
 BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_11 )
 {
   test_rips_persistence_in_dimension(11);
