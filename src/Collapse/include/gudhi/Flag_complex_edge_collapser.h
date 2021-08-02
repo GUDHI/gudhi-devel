@@ -352,29 +352,18 @@ struct Flag_complex_edge_collapser2 {
   using Filtered_edge = std::tuple<Vertex, Vertex, Filtration_value>;
   typedef std::pair<Vertex,Vertex> Edge;
   struct Cmpi { template<class T, class U> bool operator()(T const&a, U const&b)const{return b<a; } };
-  typedef std::list<Edge> Edge_group; // vector? on erase elements...
   typedef boost::container::flat_map<Vertex, Filtration_value> Ngb_list;
   //typedef std::unordered_map<Vertex, Ngb_list> Neighbors;
   typedef std::vector<Ngb_list> Neighbors; // we still need to find the edge in the group then...
   Neighbors neighbors; // closed neighborhood
   std::size_t num_vertices;
-  //struct Edge_insert {
-  //  Vertex u, v;
-  //  // extra info here?
-  //};
-  struct Event {
-    Filtration_value t;
-    size_t pos_next;
-    //std::vector<Edge_insert> edges;
-    Edge_group edges;
-    Event(Filtration_value f, size_t i): t(f), pos_next(i) {}
-  };
-  std::vector<Event> timetable;
+  std::vector<std::tuple<Vertex, Vertex, Filtration_value>> res;
 
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
   // Minimal matrix interface
   // Using this matrix generally helps performance, but the memory use may be excessive for a very sparse graph
   // (and in extreme cases the constant initialization of the matrix may start to dominate the runnning time).
+  // Are there cases where the matrix is too big but a hash table would help?
   std::vector<Filtration_value> neighbors_data;
   void init_neighbors_dense(){
     neighbors_data.clear();
@@ -412,19 +401,12 @@ struct Flag_complex_edge_collapser2 {
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
     init_neighbors_dense();
 #endif
-    Filtration_value f_cur = -std::numeric_limits<Filtration_value>::infinity();
     std::vector<typename Ngb_list::sequence_type> neighbors2(num_vertices);
-    std::size_t pos_f = -1;
     for(auto&&e : r){
       using std::get;
       Vertex u = get<0>(e);
       Vertex v = get<1>(e);
       Filtration_value f = get<2>(e);
-      if(f != f_cur) {
-        f_cur = f;
-        timetable.emplace_back(f, ++pos_f);
-      }
-      timetable.back().edges.push_back({u,v}); // no need to sort u,v ?
       neighbors2[u].emplace_back(v, f);
       neighbors2[v].emplace_back(u, f);
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
@@ -443,6 +425,7 @@ struct Flag_complex_edge_collapser2 {
   }
 
   // Open neighborhood
+    __attribute__((noinline)) // otherwise +50% on the running time on one example!
   void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Vertex u, Vertex v, Filtration_value f_event){
     // Using neighbors_dense here seems to hurt, even if we loop on the smaller of nu and nv.
     Ngb_list const&nu = neighbors[u];
@@ -547,40 +530,21 @@ struct Flag_complex_edge_collapser2 {
 
     read_edges(edges);
 
-    typename std::vector<Event>::iterator evi;
     boost::container::flat_set<Vertex> e_ngb;
     e_ngb.reserve(num_vertices);
     //std::multimap<Filtration_value, Vertex> e_ngb_later;
     std::vector<std::pair<Filtration_value, Vertex>> e_ngb_later;
-    auto& events = timetable;
     // do not use reverse_iterator, it behaves badly with erase.
-    for(auto next_evi = events.begin(); (evi = next_evi) != events.end(); ){
-      ++next_evi; // do it now, in case we remove evi
-      Edge_group& eg = evi->edges;
-      //Filtration_value f_event = evi->first;
-      auto next_ei = eg.begin();
-      auto ei = next_ei;
-      for(; (ei = next_ei) != eg.end();){
-        next_ei = std::next(ei); // do it now, in case we remove ei
-        Vertex u = ei->first;
-        Vertex v = ei->second;
-        auto time = evi;
-        Filtration_value a_bit_later = delay(evi->t);
-        if(a_bit_later != evi->t) {
-#if 0
-        auto next_time = time;
-        while (next_time != events.begin() && (--next_time)->first <= a_bit_later)
-          time = next_time;
-#else
-        // too bad there isn't a map::lower_bound_after
-        time = std::lower_bound(timetable.begin(), time, a_bit_later, [=](auto&e, auto f){return e.t>f;}); // ???
-        // FIXME: don't use this if it is empty. pos_next is in the wrong direction :-(
-#endif
-        }
+    for(auto&e:edges) {
+      {
+        Vertex u = std::get<0>(e);
+        Vertex v = std::get<1>(e);
+        Filtration_value input_time = std::get<2>(e);
+        auto time = delay(input_time);
         auto start_time = time;
         e_ngb.clear();
         e_ngb_later.clear();
-        common_neighbors(e_ngb, e_ngb_later, u, v, time->t);
+        common_neighbors(e_ngb, e_ngb_later, u, v, time);
         /* If we identify a good candidate (the first common neighbor) for being a dominator of e until infinity, we can check that a bit more cheaply. It does not seem to help for a sequential execution, but it could be interesting for parallelism: for many edges in parallel, find a dominator, and remove marked edges sequentially as long as their dominator is not the extremity of an edge already removed. For some input, such a rough heuristic may detect a negligible number of removable edges.
         for(auto w : e_ngb) {
           if(neighbors_dense(candidate, w) > time->first) goto try_harder;
@@ -601,7 +565,7 @@ struct Flag_complex_edge_collapser2 {
           // if(e_ngb.size()==1){dominator=*e_ngb.begin();}else
           // it is tempting to test the dominators in increasing order of filtration value, which is likely to reduce the number of calls to is_dominated_by before finding a dominator, but sorting, even partially / lazily, is very expensive.
           for(auto c : e_ngb){
-            if(is_dominated_by(e_ngb, c, time->t)){
+            if(is_dominated_by(e_ngb, c, time)){
               dominator = c;
               break;
             }
@@ -618,12 +582,9 @@ struct Flag_complex_edge_collapser2 {
               std::make_heap(e_ngb_later_begin, e_ngb_later_end, cmp1);
               heapified=true;
             }
-            // too bad there isn't a map::lower_bound_after
-            // go back to storing an iterator in e_ngb_later? Slowing down common_neighbors may not be worth it.
-            time = std::lower_bound(timetable.begin(), time, e_ngb_later_begin->first, [=](auto&e, auto f){return e.t>f;}); // ???
-            assert(time->t == e_ngb_later_begin->first && !time->edges.empty());
+            time = e_ngb_later_begin->first; // first place it may become critical
             still_dominated = true;
-            while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time->t) {
+            while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time) {
               Vertex w = e_ngb_later_begin->second;
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
               if (neighbors_dense(dominator,w) > e_ngb_later_begin->first)
@@ -640,32 +601,21 @@ struct Flag_complex_edge_collapser2 {
           } while (still_dominated); // this doesn't seem to help that much...
         }
 end_move:
+        // Use an output functor? The edges won't come sorted, but that shouldn't matter.
         if(dead) {
           remove_neighbor(u, v);
-          eg.erase(ei);
         } else if(start_time != time){
-          time->edges.push_back(*ei);
-          delay_neighbor(u, v, time->t);
-          eg.erase(ei);
+          delay_neighbor(u, v, time);
+          res.emplace_back(u, v, time);
+        } else {
+          res.emplace_back(u, v, input_time);
         }
-      }
-      // check if event is dead (all edges have moved)
-      if (evi->edges.empty()) {
-        if(evi == timetable.begin())
-          evi->pos_next = -1;
-        else
-          evi->pos_next = std::prev(evi)->pos_next;
-        //events.erase(evi);
       }
     }
   }
 
   std::vector<Filtered_edge> output() {
-    std::vector<std::tuple<Vertex, Vertex, Filtration_value>> r;
-    for(auto& ev : timetable)
-      for(auto& e : ev.edges)
-        r.emplace_back(e.first, e.second, ev.t);
-    return r;
+    return std::move(res);
   }
 
 };
