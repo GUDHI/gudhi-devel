@@ -1,3 +1,10 @@
+/*    This file is a prototype for the Gudhi Library.
+ *    Author(s):       Clément Maria
+ *    Copyright (C) 2021 Inria
+ *    This version is under developement, please do not redistribute this software. 
+ *    This program is for academic research use only. 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <gudhi/Simplex_tree.h>
