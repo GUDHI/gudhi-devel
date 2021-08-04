@@ -16,7 +16,6 @@
 #include <fstream>
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/pick_n_random_points.h>
-#include <gudhi/Discrete_morse_theory.h>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/tbb.h>
@@ -32,11 +31,12 @@ namespace Gudhi {
 /** \brief Represents an edge, or a vertex, for a zigzag filtrations of flag 
   * complexes. 
   *
-  * The edge must have two endpoints encoded by Vertex_handle u and v, a filtration 
+  * \details The edge must have two endpoints encoded by Vertex_handle u and v, 
+  * a filtration 
   * value fil, and a type (true for insertion, false for deletion) 
   * represented by a bool.
   *
-  * An edge with u_ == v_ represents a vertex labeled u_.
+  * An edge with <CODE>u_ == v_<\CODE> represents a vertex labeled <CODE>u_<\CODE>.
   *
   * A sequence of such edges represents implicitly a full flag zigzag filtration by
   * the sequence of insertion and deletion of vertices and edges.
@@ -66,7 +66,10 @@ public:
              (e.fil_ == fil_) && (e.type_ == type_) );
   }
 
-  void assign_filtration(typename FilteredComplex::Filtration_value fil) { fil_ = fil; }
+  void assign_filtration(typename FilteredComplex::Filtration_value fil) 
+  { fil_ = fil; }
+
+  void permute_vertices() { std::swap(u_,v_); }
 
 private:
   typename FilteredComplex::Vertex_handle    u_;
@@ -75,13 +78,14 @@ private:
   bool                                       type_;
 };
 
+/** Modifier that can be applied to a <CODE>Zigzag_edge<\CODE>. This one does nothing.*/
 template< class FilteredComplex >
 class identity_filtration {
 public:
 
   typedef typename FilteredComplex::Filtration_value Filtration_value;
 
-  identity_filtration() {};
+  identity_filtration() {}
 
   Filtration_value modifier(Filtration_value f) { return f; }
   Filtration_value inverse_modifier(Filtration_value f) { return f; }
@@ -89,7 +93,10 @@ public:
   void operator()(Zigzag_edge<FilteredComplex> &e) {}
   bool do_something() { return false; }
 };
-/* Apply sqrt to the length of an edge.*/
+/** \brief Modifier that can be applied to a <CODE>Zigzag_edge<\CODE>. This one applies sqrt to the filtration value of an edge.
+ * 
+ * \details Useful in particular when geometric computations (edge length, etc) are 
+ * run with squared Euclidean distance for performance. */
 template< class FilteredComplex >
 class sqrt_filtration {
 public:
@@ -106,6 +113,7 @@ public:
   bool do_something() { return true; }
 };
 
+/** Write a <CODE>Zigzag_edge<\CODE> in a stream.*/
 template< class FilteredComplex >
 std::ostream& operator<<(std::ostream& os, 
                          const Zigzag_edge< FilteredComplex >& e)
@@ -113,19 +121,20 @@ std::ostream& operator<<(std::ostream& os,
   os << e.fil() << " ";
   if(e.type()) { os << "->"; }
   else { os << "<-"; }
-  std::cout << " " << e.u() << " " << e.v();
+  os << " " << e.u() << " " << e.v();
   return os;
 }
 
-/** \brief Computes the 1-skeleton-filtration allowing to generate the oscillating 
-  * Rips zigzag filtration of a discrete metric space (such as a set of points).
+/** \brief Computes the 1-skeleton zigzag filtration allowing to generate the 
+  * oscillating 
+  * Rips zigzag filtration of a discrete metric space (such as a set of points). See \cite DBLP:journals/focm/OudotS15 for a detailed definition.
   *
-  * Let \f$P = \{p_0 ... p_{n-1}\}\f$ be an ordered, finite, set of points in a 
+  * Let \f$P = \{p_0 ... p_{n-1}\}\f$ be a finite, ordered set of points in a 
   * metric space with distance \f$d(p_i,p_j)\f$. 
   * Let \f$(\varepsilon_0, \ldots , \varepsilon_{n-1})\f$ be a decreasing sequence 
   * of positive scalars, 
   * i.e., such that \f$ \varepsilon_i \geq \varepsilon_j \geq 0 \f$ for any 
-  * \f$n>i>j\geq 0\f$.
+  * \f$n>i>j\geq 0\f$. 
   * Let \f$\mu\f$ and \f$\nu\f$ be two scalars such that \f$0 < \nu \leq \mu\f$.
   *
   * Specifically, denote by \f$P_i\f$ the subset of points \f$\{p_0 ... p_i\}\f$ 
@@ -133,9 +142,9 @@ std::ostream& operator<<(std::ostream& os,
   * of threshold \f$\rho \geq 0\f$ built on points \f$P_i\f$. 
   *
   * The oscillating Rips zigzag filtration associated to this data is the zigzag 
-  * filtration is the filtration:
+  * filtration:
   *
-  * \f$
+  * \f$$
   *            \mathcal{R}^{+\infty}(P_0) \ \ \ \ \ 
   *   \supseteq \mathcal{R}^{\nu \cdot \varepsilon_0}(P_0) 
   *    \subseteq \mathcal{R}^{\mu \cdot \varepsilon_0}(P_1) 
@@ -144,32 +153,34 @@ std::ostream& operator<<(std::ostream& os,
   *       \supseteq \mathcal{R}^{\nu \cdot \varepsilon_2}(P_2) 
   *        \subseteq \cdots 
   *         \supseteq \mathcal{R}^{\nu \cdot \varepsilon_{n-1}}(P_{n-1})
-  *          \ \ \ \ \ \supseteq \mathcal{R}^{-\infty}(\emptyset) \f$
+  *          \ \ \ \ \ \supseteq \mathcal{R}^{-\infty}(\emptyset) \f$$
   *
   * By convention, we start with a Rips complex on a single vertex p_0, 
   * with \f$\varpesilon_{-1}=+\infty\f$ threshold, and finish with an empty Rips 
   * complex with \f$\varpesilon_{n}=-\infty\f$ threshold. These extra epsilon 
   * values at indices -1 and n are in particular used in zigzag persistent homology.
-  * More specifically:
+  * More specifically, we use the following convention ofr filtration values:
   *
-  * A simplex inserted in the inclusion 
-  * \f$\mathcal{R}^{\nu \cdot \varepsilon_i}(P_i) 
-  *     \subseteq \mathcal{R}^{\mu \cdot \varepsilon_i}(P_{i+1})\f$ 
-  * is given filtration value \f$\varepsilon_i\f$. The vertex $p_0$ inserted as 
-  * first simplex is given filtration value \f$\varepsilon_{-1} = +\infty\f$. 
+  * Leftmost insertion: The vertex \f$p_0\f$ in \f$\mathcal{R}^{+\infty}(P_0)\f$ is 
+  * inserted with filtration value \f$\varpesilon_{-1}=+\infty\f$.
   *
-  * A simplex removed in the inclusion 
-  * \f$\mathcal{R}^{\mu \cdot \varepsilon_i}(P_{i+1}) 
-  *     \supseteq \mathcal{R}^{\nu \cdot \varepsilon_{i+1}}(P_{i+1})\f$ 
-  * is given filtration value \f$\varepsilon_{i+1}\f$. The vertices removed when 
-  * emptying the complex in the rightmost arrow are given filtration value 
-  * \f$\varpesilon_{n}=-\infty\f$.
+  * Rightmost deletions: All vertices removed in the inclusion 
+  * \f$\mathcal{R}^{\nu \cdot \varepsilon_{n-1}}(P_{n-1}) 
+  *           \supseteq \mathcal{R}^{-\infty}(\emptyset) \f$ are removed with 
+  * filtration value \f$\varpesilon_{n}=-\infty\f$.
+  * 
+  * Middle insertions/deletions: For any \f$i\f$, with \f$0 \leq i \leq n-1\f$, any 
+  * insertion or deletion of a simplex in the sequence of left and right inclusions 
+  *             \f$\mathcal{R}^{\nu \cdot \varepsilon_i}(P_i) 
+  *    \subseteq \mathcal{R}^{\mu \cdot \varepsilon_i}(P_{i+1}) 
+  *     \supseteq \mathcal{R}^{\nu \cdot \varepsilon_{i+1}}(P_{i+1})\f$
+  * is given filtration value \f$\varepsilon_i\f$. 
   *
   * The method computes the sequence of insertions and removals 
   * of the oscillating Rips zigzag filtration restricted to vertices and edges, 
   * i.e., the 1-skeleton. 
   * Because all complexes of the filtration are flag complexes, the 
-  * 1-skeleton-filtration encodes fully the entire filtration, in a much more 
+  * 1-skeleton zigzag filtration encodes fully the entire filtration, in a much more 
   * compact way.
   *
   * Edge_t must be of type Zigzag_edge.
@@ -177,11 +188,11 @@ std::ostream& operator<<(std::ostream& os,
   * @param[in] dist_matrix The distance matrix representing the discrete metric 
   *   space with ordered points \f$P = \{p_0 ... p_{n-1}\}\f$. dist_mat[i][j] must 
   *   return the value \f$d(p_i,p_j)\f$ whenever \f$i>j\f$. 
-  * @param[in] eps_values Range of epsilon values, such that eps_values[i] >= 
-  *   eps_values[j] >= 0 whenever i>j. The range must be of same size as the number 
-  *   of points in the discrete metric space.
+  * @param[in] eps_values Range of epsilon values, such that <CODE>eps_values[i] >= 
+  *   eps_values[j] >= 0<\CODE> whenever <CODE>i>=j<\CODE>. The range must be of 
+  * same size as the number of points in the discrete metric space.
   * @param[in] mu, nu The two parameters \f$\mu,\nu\f$ such that
-  *   \f$\mu\geq\nu\geq0\f$
+  *   \f$\mu\geq\nu\geq0\f$.
   * @param[in] edge_filtration Vector in which the 1-skeleton filtration is 
   *   written. The vector is cleared beforehand. 
   */
@@ -195,13 +206,6 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
                                     FiltrationValue const       mu,
                                     std::vector<Edge_t>       & edge_filtration )
 { 
-  
-  // std::cout << "Epsilon values:\n";
-  // for(int i=0; i<eps_values.size(); ++i) {
-  //   std::cout << "eps_" << i << "  " << sqrt(eps_values[i]) << "\n";
-  // }
-  // std::cout << "nu=" << nu << "    mu=" << mu << "\n";
-
   GUDHI_CHECK(dist_mat.size() == eps_values.size(), "invalid number of points and epsilon values");
   GUDHI_CHECK((nu <= mu) && (nu >= 0), "invalid parameters mu and nu");
   bool decreasing_eps = true;
@@ -403,50 +407,10 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
   edge_filtration.clear();
   edge_filtration.reserve(number_of_arrows + n); //count edges + vertices additions
 
-  // Compare edges by distance first (shorter is smaller), and lexicographic 
-  // ordering 
-  // otherwise. This agrees with the usual Rips filtration in standard persistence.
-  struct edge_cmp {
-    edge_cmp(DistanceMatrix *dist_mat) 
-    : dist_ptr_(dist_mat) {}
-
-    bool operator()(Edge_t e1, Edge_t e2) 
-    { //lengths of edges e1 and e2
-      int u1 = e1.u(); int v1 = e1.v(); if(u1>v1) { std::swap(u1,v1); }
-      int u2 = e2.u(); int v2 = e2.v(); if(u2>v2) { std::swap(u2,v2); }
-      FiltrationValue dist1 = (*dist_ptr_)[v1][u1];
-      FiltrationValue dist2 = (*dist_ptr_)[v2][u2];;
-      if(dist1  != dist2)  {return dist1 < dist2;}
-      if(u1 != u2) {return u1 < u2;}
-      return v1 < v2; 
-    }
-
-    DistanceMatrix * dist_ptr_;
-  };
-
-//sort insertions and deletion by edge length, then lexicographic order
-  edge_cmp e_cmp(&dist_mat);
-
-#ifdef GUDHI_USE_TBB
-  tbb::parallel_for(size_t(0), n-1, [&](size_t i) {
-    //add shortest edges first
-    std::stable_sort(edges_added[i].begin(), edges_added[i].end(), e_cmp);
-    //remove longest edges first (read from right to left), see below
-    std::stable_sort(edges_removed[i].begin(), edges_removed[i].end(), e_cmp);
-  } );
-#else
-  for(size_t i = 0; i < n-1; ++i) {
-    //add shortest edges first
-    std::stable_sort(edges_added[i].begin(), edges_added[i].end(), e_cmp);
-    //remove longest edges first (read from right to left), see below
-    std::stable_sort(edges_removed[i].begin(), edges_removed[i].end(), e_cmp);
-  }
-#endif
- 
   //initialise R({p_0}, +infinity)
   edge_filtration.emplace_back(0, 0, //add vertex p_0,+infty
-                          // std::numeric_limits<FiltrationValue>::infinity(), true);
-                        eps_values[0], true);
+                           std::numeric_limits<FiltrationValue>::infinity(), true);
+                        // eps_values[0], true);
 
   for(size_t i = 0; i < n-1; ++i) {//all ascending arrows eps_i
     edge_filtration.emplace_back(i+1, i+1, eps_values[i], true);//add p_{i+1},eps_i
@@ -466,11 +430,23 @@ void zigzag_filtration_one_skeleton(DistanceMatrix            & dist_mat,
 }
 
 
-/** Compute the epsilon values for an ordered set of points 
-  * \f$P = \{p_0, \ldots, p_{n-1}\f$, with  
-  * eps_range[i] <- eps_i = d_H(P_i,P), where d_H is the Hausdorff distance and 
-  * P_i = \{p_0, \ldots, p_{n-1}\}.
-  */
+/** \brief Compute the epsilon values for an ordered set of points, measuring the 
+ * sparsity of the ordering. 
+ *
+ * \details Let \f$P = \{p_0, \ldots, p_{n-1}\f$ be the ordered set of points. Then 
+ * the method sets <CODE>eps_range[i]<\CODE> with the value \$f\varepsilon_i\$f, 
+ * defined as \f$\varpesilon_i = d_H(P_i,P)\f$, the Hausdorff between the points 
+ * \f$P_i= \{p_0, \ldots, p_{i}\}\f$ and the entire point cloud 
+ * \f$P = \{p_0, \ldots, p_{n-1}\}\f$.
+ *
+ * @param[in] points Range of points.
+ * @param[in] distance Distance function that can be called on two points. 
+ * @param[in] eps_range   Vector in which the epsilon values are written, 
+ *                        <CODE>eps_range[i]<\CODE> is \$f\varepsilon_i\$f. 
+ *                        Satisfyies <CODE>eps_values[i] >= 
+ *                        eps_values[j] >= 0<\CODE> whenever <CODE>i>=j<\CODE>. 
+ *                        The range must be of same size as the number of points.
+ */
 template< typename PointRange,
           typename Distance, //furnish()
           typename EpsilonRange >
@@ -514,17 +490,23 @@ void compute_epsilon_values(PointRange const & points,//ordered set of points
 
 /** \brief Re-ordering policies for a set of input points.
   *
-  * already_ordered implies no re-ordering, O(1) complexity.
-  *
-  * farthest_point_ordering re-orders points with a farthest point strategy, 
-  *   starting with point [0]. This strategy is the slowest but garantees the best 
-  *   sparsification of the point set.
-  *
-  * random_ordering shuffles randomly the point set.
+  * \details <CODE>already_ordered<\CODE> implies no re-ordering, in 
+  * \f$O(1)\f$ complexity.
   */
 struct already_ordered { int policy(){return 0;} };
-struct farthest_point_ordering {int policy(){return 1;} };
-struct random_point_ordering {int policy(){return 2;} };
+/** \brief Re-ordering policies for a set of input points.
+  *
+  * \details <CODE>farthest_point_ordering<\CODE> re-orders points with a farthest 
+  * point strategy, 
+  * starting with point [0]. This strategy is the slowest but garantees the best 
+  * sparsification of the point set.
+  */
+struct farthest_point_ordering { int policy(){return 1;} };
+/** \brief Re-ordering policies for a set of input points.
+  *
+  * \details <CODE>random_ordering<\CODE> shuffles randomly the point set.
+  */
+struct random_point_ordering { int policy(){return 2;} };
 
 /** \brief Given a set of points \f$P = \{p_0 ... p_{n-1}\}\f$, 
   * computes the 1-skeleton-filtration corresponding to the oscillating Rips zigzag 
@@ -541,8 +523,12 @@ struct random_point_ordering {int policy(){return 2;} };
   *
   * @param[in] points A set of points in a metric space.
   * @param[in] distance The distance function of the metric space.
-  * @param[in] mu, nu Parameters of the zigzag Rips filtration
+  * @param[in] mu, nu Parameters of the oscillating Rips zigzag filtration 
+  *                   (see \cite DBLP:journals/focm/OudotS15).
   * @param[in] edge_filtration Where the 1-skeleton filtration is written.
+  * @param[in] order_policy Must be one of <CODE>already_ordered<\CODE>, 
+  *                         <CODE>farthest_point_ordering<\CODE>, or 
+  *                         <CODE>random_point_ordering<\CODE>.
   */
 template< typename PointRange,
           typename Distance, //furnish()
@@ -617,30 +603,33 @@ void zigzag_filtration_one_skeleton(PointRange      const  & points,
 }
 
 /** \brief Iterator over a flag zigzag filtration implicitly 
-  * represented by a list of Zigzag_edges. 
+  * represented by a list of <CODE>Zigzag_edge<\CODE>. 
   *
-  * Given an empty FlagZigzagFiltrationComplex and a range of insertions and 
+  * Given an empty <CODE>DynamicFilteredFlagComplex<\CODE> and a range of 
+  * insertions and 
   * deletion of vertices and edges, the iterator adds/removes on the fly the range 
   * of edges and 
-  * expand the complex in consequence to maintain the d-skeleton of the induced 
+  * expands the complex in consequence to maintain the d-skeleton of the induced 
   * flag complexes filtration. It traverses all the newly added/removed 
-  * simplices (induced by the new edge) before doing further modifications.
+  * simplices (induced by the insertion/removals of edges) before doing 
+  * further modifications.
   *
   * The iterator can also be initialized with a set of points with a distance 
   * function, in which case it computes an oscillating Rips zigzag filtration on 
-  * the point cloud. 
+  * the point cloud, using <CODE>zigzag_filtration_one_skeleton<\CODE>. 
   */
-template< class FlagZigzagFilteredComplex >
+template< class DynamicFilteredFlagComplex >
 class Flagzigzag_simplex_iterator 
 : public boost::iterator_facade<
-            Flagzigzag_simplex_iterator<FlagZigzagFilteredComplex>
-          , typename FlagZigzagFilteredComplex::Simplex_handle
+            Flagzigzag_simplex_iterator<DynamicFilteredFlagComplex>
+          , typename DynamicFilteredFlagComplex::Simplex_handle
           , boost::forward_traversal_tag >
 {
   public:
-  typedef typename FlagZigzagFilteredComplex::Simplex_handle   Simplex_handle;
-  typedef Zigzag_edge<FlagZigzagFilteredComplex>               Edge_type;
-  typedef typename FlagZigzagFilteredComplex::Filtration_value Filtration_value;
+  typedef DynamicFilteredFlagComplex         Complex;
+  typedef typename Complex::Simplex_handle   Simplex_handle;
+  typedef Zigzag_edge<Complex>               Edge_type;
+  typedef typename Complex::Filtration_value Filtration_value;
 
 /** Default constructor also encodes the end() iterator for any 
   * Flagzigzag_simplex_range.
@@ -656,20 +645,32 @@ class Flagzigzag_simplex_iterator
   , fil_(0)
   {
     sh_it_ = partial_zzfil_.begin(); edge_it_ = zigzag_edge_filtration_.begin();
-
-    // count_vertices = 0;
   }
 
 /** \brief Constructor from a point cloud and a distance function. 
   *
   * Constructs the d-skeleton of the oscillating Rips zigzag filtration on the 
   * ordered set of points with paramters mu and nu.
+  * 
+  * @param[in] cpx A pointer to an empty complex, model of 
+  *                <CODE>DynamicFilteredFlagComplex<\CODE>.
+  * @param[in] nu, mu Parameters for the oscillaitng Rips zigzag filtraiton.
+  * @param[in] dim_max Maximal dimension of expansion for the flag complexes of the
+  *                    filtration.
+  * @param[in] points A set of points.
+  * @param[in] distance A distance function that can be called on points.
+  * @param[in] order_policy Must be one of <CODE>already_ordered<\CODE>, 
+  *                         <CODE>farthest_point_ordering<\CODE>, or 
+  *                         <CODE>random_point_ordering<\CODE>.
+  * @param[in] edge_modifier Applied to edges after computation. Must be either 
+  *                          <CODE>identity_filtration<\CODE>, or 
+  *                          <CODE>sqrt_filtration<\CODE>.
   */
   template< typename PointRange,
             typename Distance,
             typename OrderPolicy,
             typename EdgeModifier >
-  Flagzigzag_simplex_iterator(FlagZigzagFilteredComplex    * cpx,
+  Flagzigzag_simplex_iterator(Complex    * cpx,
                               Filtration_value const         nu,
                               Filtration_value const         mu,
                               int                            dim_max,
@@ -678,7 +679,7 @@ class Flagzigzag_simplex_iterator
                               OrderPolicy order_policy,// = farthest_point_ordering()) 
                               EdgeModifier edge_modifier)
   {
-    //check that the model of FlagZigzagFilteredComplex is empty
+    //check that the model of Complex is empty
     GUDHI_CHECK(cpx->empty(), "complex must be empty");
 
     //compute the filtration of the 1-skeleton for the oRzz filtration
@@ -699,8 +700,8 @@ class Flagzigzag_simplex_iterator
     if(edge_modifier.do_something()) {
       for(auto &e : zigzag_edge_filtration_) { edge_modifier(e); }
     }
-
-    std::cout << "NUMBER OF EDGES = " << zigzag_edge_filtration_.size()+points.size() << "\n";
+    //order edges for better performance, without changing the persistence
+    canonical_sort_edge();
 
     dim_max_                = dim_max;
     are_we_done             = false;
@@ -715,10 +716,6 @@ class Flagzigzag_simplex_iterator
     arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
     GUDHI_CHECK(arrow_direction_, "cannot remove a simplex from an empty complex");
     
-    // count_vertices = 0; 
-    // std::cout << "  - vertex: " << count_vertices << "\n"; 
-
-
     cpx_->flag_add_edge( edge_it_->u(), edge_it_->v(), edge_it_->fil()
                        , dim_max_, partial_zzfil_);
     fil_ = edge_it_->fil();
@@ -730,9 +727,16 @@ class Flagzigzag_simplex_iterator
 
 /** \brief Constructor from a pre-computed 1-skeleton zigzag filtration.
   *
-  * The vector of Zigzag_edge must contain both vertices and edges.
+  * \details The vector of Zigzag_edge must contain both vertices and edges.
+  *
+  * @param[in] cpx A pointer to an empty complex, model of 
+  *                <CODE>DynamicFilteredFlagComplex<\CODE>.
+  * @param[in] dim_max Maximal dimension of expansion for the flag complexes of the
+  *                    filtration.
+  * @param[in] zz_edge_fil A vector of <CODE>Zigzag_edge<\CODE>.  
+
   */
-  Flagzigzag_simplex_iterator( FlagZigzagFilteredComplex * cpx 
+  Flagzigzag_simplex_iterator( Complex * cpx 
                              , std::vector< Edge_type >  & zz_edge_fil
                              , int                         dim_max )
   {
@@ -742,14 +746,13 @@ class Flagzigzag_simplex_iterator
     are_we_done             = false;
     cpx_                    = cpx;
     counter_insert          = 0;
-    // partial_zzfil_          = std::vector< Simplex_handle >(); //TODO?
+   
+    //order edges for better performance, without changing the persistence
+    canonical_sort_edge();
+
     edge_it_                = zigzag_edge_filtration_.begin();
     if(edge_it_ == zigzag_edge_filtration_.end()) 
     { cpx_ = nullptr; return; } //end() iterator
-    
-    // count_vertices = 0; 
-    // std::cout << "  - vertex: " << count_vertices << "\n"; 
-    // ++count_vertices;
 
     //add the first edge
     arrow_direction_ = edge_it_->type(); //must be true, i.e., an insertion
@@ -763,6 +766,60 @@ class Flagzigzag_simplex_iterator
     { cpx_->assign_key(sh,counter_insert); ++counter_insert; } 
   }
 
+private:
+  /* Reorders deterministically edges with same filtration values. Fixes a canonical order (lex), orders insertions of edges increasingly, and deletions decreasingly. This improves performances when computing zigzag persistence homology, avoiding to artificially densify the homology matrix with a poor choice of ordering of the cells.
+  */ 
+  void canonical_sort_edge() {
+    //canonical sort of the edges: as much as possible, edges should be removed in 
+    //the reverse order of their insertion. We decide to insert shorted edges first, 
+    //with increasing lexicographical order, and remove larger edges first, with 
+    //decreasing lexicographic order.
+    //first, u() <= v()
+    for(auto &e : zigzag_edge_filtration_) { 
+      if(e.u() > e.v()) { e.permute_vertices(); }
+    }
+    //filtration then dimension, then lex order for insertion
+    auto edge_cmp = [](Edge_type e1, Edge_type e2) { 
+      if(e1.fil() != e2.fil()) { return e1.fil() < e2.fil(); }//lower fil first
+      
+      if(e1.u() == e1.v()) {//e1 is a vertex, -> put vertices first
+        if(e2.u() == e2.v()) { return e1.u() < e2.u(); }//-> vertex of lower label
+        else { return true; }//-> always vertices before edges
+      }
+      else {//e1 is an edge
+        if(e2.u() == e2.v()) { return false; }//e2 vertex, -> put it first
+        else {//both are edges, lexigraphic compare
+          if(e1.u() != e2.u()) { return e1.u() < e2.u(); }//lex order
+          if(e1.v() != e2.v()) { return e1.v() < e2.v(); }
+          return false;//equality
+        }
+      }
+    };
+    //the inverse ordering for deletions
+    auto inv_edge_cmp = [&](Edge_type e1, Edge_type e2)
+    { 
+      if(e1.u() == e2.u() && e1.v() == e2.v()) { return false; }//== => false
+      return !(edge_cmp(e1,e2));//reverse order
+    };
+    //sort sequences of inclusions of same filtration with edge_cmp
+    //sort sequences of removals of same filtration with inv_edge_cmp
+    auto beg = zigzag_edge_filtration_.begin();
+    auto end = zigzag_edge_filtration_.begin();
+    auto curr_fil = beg->fil();
+    auto curr_type = beg->type();
+    while(beg != zigzag_edge_filtration_.end()) {
+      while(   end != zigzag_edge_filtration_.end() 
+            && end->fil() == curr_fil 
+            && end->type() == curr_type ) { ++end; }
+      if(curr_type) { sort(beg,end,edge_cmp); }//sequence of insertions
+      else { sort(beg,end,inv_edge_cmp); }//sequence of removals
+      beg = end;
+      curr_fil = beg->fil();
+      curr_type = beg->type();
+    }
+  }
+
+public:
   //because the iterator modifies a complex represented by pointer, the iterator 
   //must be non-copiable.
   // Flagzigzag_simplex_iterator(const Flagzigzag_simplex_iterator & ) = delete;
@@ -781,8 +838,6 @@ class Flagzigzag_simplex_iterator
     zigzag_edge_filtration_ = std::move(other.zigzag_edge_filtration_);
     partial_zzfil_.clear();
     partial_zzfil_ = std::move(other.partial_zzfil_);
-
-    // count_vertices = other.count_vertices;
   }
 /** Copy constructor can only be called if no increment has been called on the 
   * pointer (i.e., right after initialization).
@@ -812,14 +867,10 @@ class Flagzigzag_simplex_iterator
     if(!zigzag_edge_filtration_.empty()) { ++edge_it_; }//next edge
     partial_zzfil_          = other.partial_zzfil_;
     sh_it_                  = partial_zzfil_.begin();
-
-    // count_vertices = other.count_vertices;
-
   }
 
   // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& ) = 
-                                                                            // delete;
-
+                                                                            delete;
 
 
 //move assignement
@@ -876,7 +927,7 @@ private:
       { //The simplices in partial_zzfil_ come by decreasing keys, hence they
         //are all maximal when removing from left to right (it's a filtration 
         //read in reverse).  
-        //FlagZigzagFilteredComplex::Dictionary must not invalidate iterators
+        //Complex::Dictionary must not invalidate iterators
         //when inserting and removing (e.g., std::map<,>).
 
         //effectively remove all simplices from partial_zzfil_; must be sorted 
@@ -898,8 +949,8 @@ private:
           return; 
         } 
         else {//no edge left, remove the simplices remaining in the complex 
-          // fil_ = - std::numeric_limits<Filtration_value>::infinity();
-          fil_ = 0;
+          fil_ = - std::numeric_limits<Filtration_value>::infinity();
+          // fil_ = 0;
 
           are_we_done = true;//happens once
           //fills up zz_partial with the remaining simplices in complex, but 
@@ -913,103 +964,130 @@ private:
       }
       //partial_zzfil_ is empty and edge_it points to a new edge
       if( edge_it_->type() ) { //forward arrow //modify the complex
-
-        // if(edge_it_->u() == edge_it_->v()) {
-        //   std::cout << "  - vertex: " << count_vertices << "\n"; 
-        //   ++count_vertices;
-        // }
-
         //add the new edge and expand the flag complex. partial_zz_fil_ points to
         //all the newly inserted simplices, in filtration order.
         cpx_->flag_add_edge( edge_it_->u(), edge_it_->v()
                            , edge_it_->fil()
                            , dim_max_, partial_zzfil_ );
         arrow_direction_ = true; //the arrow is forward, these are insertions
-
-        //flag_add_edge output a SORTED sequence of simplices
+        //flag_add_edge outputs a SORTED sequence of simplices (subface 
+        //before coface)
         for(auto & sh : partial_zzfil_) //set key values
         { cpx_->assign_key(sh,counter_insert); ++counter_insert; }
+      
+        //partial_zzfil_ contains at least the new edge, i.e., is non-empty
+        fil_ = edge_it_->fil();
+        sh_it_ = partial_zzfil_.begin(); 
+        ++edge_it_; 
       }
       else { //backward arrow
         //record all simplices to remove, due to the removal of an edge, 
         //but do not actually remove them from the complex.
-        cpx_->flag_lazy_remove_edge( edge_it_->u(), edge_it_->v()
-                                   , partial_zzfil_ ); //does not modify cpx
+        //do so for all edges removed consecutively at a same filtration value. 
+        //this garanties better performances with Morse theory by avoiding to 
+        //break Morse pairs when not necessary.
+        size_t count = 0;
+        fil_ = edge_it_->fil();//new filtration value
+        do {       
+          ++count;//count the number of consecutive edges removed
+          //push back all cofaces in partial_zzfil_
+          cpx_->flag_lazy_remove_edge( edge_it_->u(), edge_it_->v()
+                                     , partial_zzfil_ ); //does not modify cpx
+          ++edge_it_; //next edge
+        } while(   edge_it_ != zigzag_edge_filtration_.end() //there are still edges
+                && !edge_it_->type() //still removals
+                && fil_ == edge_it_->fil() );//all of the same filtration value
 
+// sort by decreasing key values. Because keys increase with order of 
+// insertion, this ensures that only maximal simplices are considered 
+// when removing simplices read from left to right in zz_filtration 
+// Also, in Morse theory, a pair of simplices is inserted with consecutive keys. 
+// The decreasing key ordering for removals ensures that, if a Morse pair is removed 
+// in the same sequence of deletion, the two simplices are consecutive in the 
+// decreasing key ordering.  
+#ifdef GUDHI_USE_TBB
+        tbb::parallel_sort( partial_zzfil_.begin(), partial_zzfil_.end()
+        , [&](Simplex_handle sh1, Simplex_handle sh2)->bool {
+            return cpx_->key(sh1) > cpx_->key(sh2);
+        });
+#else
+        sort( partial_zzfil_.begin(), partial_zzfil_.end()
+        , [&](Simplex_handle sh1, Simplex_handle sh2)->bool {
+            return cpx_->key(sh1) > cpx_->key(sh2);
+        });
+#endif
+//if remove more than one edge, remove duplicate as edges may share same 
+//cofaces.      
+        if(count > 1) {//more than 1 edge inserted
+          auto last = std::unique(rg.begin(), rg.end(), 
+            [&](Simplex_handle sh1, Simplex_handle sh2)->bool {
+              return cpx_->key(sh1) == cpx_->key(sh2);
+            } );//equal simplex handles means equal key
+          partial_zzfil_.erase(last,partial_zzfil_.end());//remove duplicated cofaces
+        }
+        sh_it_ = partial_zzfil_.begin(); 
 //if partial_zzfil_ is empty after flag_lazy_remove (or flag_lazy_insert) ; in case
 //the edge or vertex in not in the complex. then *sh_it_ becomes invalid !!
 //throw an exception.
         arrow_direction_ = false; //the arrow is backward, these are removals
-//sort the simplices to remove by decreasing key values. This ensures that cofaces 
-//come before subfaces AND in case of Morse filtration, paired simplices that are 
-//removed together MUST have consecutive keys. Consequently, if a simplex that is 
-// not critical is removed, and the next simplex is NOT the simplex it's paired 
+//flag_lazy_remove_edge outputs a SORTED sequence of simplices, by decreasing 
+//key value. This ensures that cofaces come before subfaces, removal order is as 
+//close as possible as reverse insertion order, and, in case of Morse filtration, 
+//paired simplices that are 
+//removed together MUST have consecutive keys, and hence appear consecutively in 
+//partial_zz_fil_ if they are removed together. Indeed, if a simplex that is 
+//not critical is removed, and the next simplex is NOT the simplex it is paired 
 //with, then we need to make all simplices in the pair critical.
-#ifdef GUDHI_USE_TBB
-        tbb::parallel_sort( partial_zzfil_.begin(), partial_zzfil_.end()
-            , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
-                return sh1->second.key() > sh2->second.key();
-            });
-#else
-        sort( partial_zzfil_.begin(), partial_zzfil_.end()
-            , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
-                return sh1->second.key() > sh2->second.key();
-            });
-#endif
-        //if a paired Morse simplex s is removed, but not the paired simplex t, we 
-        //signal it using break_morse_pair()
+//if a paired Morse simplex s is removed, but not the paired simplex t, we 
+//signal it using break_morse_pair()
       }
-      //partial_zzfil_ contains at least the new edge, i.e., is non-empty
-      fil_ = edge_it_->fil();
-      sh_it_ = partial_zzfil_.begin(); 
-      ++edge_it_; 
     }
   }
 
-
 public:
-/* Return true iff sh_it is pointing to a backward arrow, with the removal of a   
- * simplex s, paired to a simplex t that is not removed in the current sequence 
- * encoded in partial_zzfil_. This is used to ``break a Morse pair'' in zigzag 
- * persistent homology.
- * Check simplex after and simplex before.
+/** \brief Indicates if a Morse pair \f$(\tau,\sigma)\f$ of non-critical cells is 
+ * removed at once in the zigzag filtration.
+ *
+ * \detail Returns <CODE>true</CODE> iff the iterator is pointing to the removal of 
+ * a cell \f$\sigma\f$, that is: 
+ * - non-critical, and paired with a cell \f$\tau\f$ of the complex, \f$\tau \prec 
+ * \sigma\f$, forming the Morse pair \f$(\tau,\sigma)\f$, and 
+ * - the next element, pointed by the iterator incremented once, is not \f$\tau\f$.
+ * 
+ * Otherwise, returns <CODE>false</CODE>.
+ *
+ * This is used to ``break a Morse pair'' in zigzag 
+ * persistent homology. Checks simplex after uniquely, knowing that a Morse pair 
+ * \f$(\tau,\sigma)\f$ must have 
+ * consecutive keys i and i+1, and that <CODE>partial_zz_fil_<\CODE> is ordered 
+ * by decreasing key 
+ * order.
  */
   bool break_morse_pair() {
-    if(arrow_direction_) { return false; }//no problem with insertions
-    if(cpx_->critical(*sh_it_)) { return false; }//no problem with critical faces
-    //are we paired with the next simplex?
-    auto sh_it_next = sh_it_;     ++sh_it_next;
-    if(sh_it_next != partial_zzfil_.end() //there's something after
-       && cpx_->is_paired_with(*sh_it_,*sh_it_next))//sh_it paired with next, ensured by design if both s and t are removed 
-    { return false; }//no problem, we remove both simplices
-
-    //are we paired with the previous simplex?
-    if(sh_it_ != partial_zzfil_.begin()) {
-      auto sh_it_prev = sh_it_;      --sh_it_prev;
-      if(cpx_->is_paired_with(*sh_it_,*sh_it_prev)) 
+    if constexpr(Complex::Options::store_morse_matching) {
+      if(arrow_direction_) { return false; }//no problem with insertions
+      if(cpx_->critical(*sh_it_)) { return false; }//no problem with critical faces
+      //are we paired with the next simplex?
+      auto sh_it_next = sh_it_;     ++sh_it_next;
+      if(sh_it_next != partial_zzfil_.end() //there's something after
+         && cpx_->is_paired_with(*sh_it_,*sh_it_next))//sh_it paired with next, ensured by design if both s and t are removed 
       { return false; }//no problem, we remove both simplices
+
+      // //are we paired with the previous simplex?
+      // if(sh_it_ != partial_zzfil_.begin()) {
+      //   auto sh_it_prev = sh_it_;      --sh_it_prev;
+      //   if(cpx_->is_paired_with(*sh_it_,*sh_it_prev)) 
+      //   { return false; }//no problem, we remove both simplices
+      // }
+      return true;//we are breaking a Morse pair
     }
-    return true;//we are breaking a Morse pair
-  }
-  
-/* If sh_it_ points to a non-critical simplex, make both sh_it_ and the simplex 
- * it's paired with critical. Useful if break_morse_pair == true;
- */
-  void make_critical() {
-    if(!cpx_->critical(*sh_it_)) {
-      auto sh_pair = cpx_->paired_with(*sh_it_);
-      cpx_->make_critical(*sh_it_);
-      cpx_->make_critical(sh_pair);
-    }
+    else { return false;} //no Morse matching = no problem
   }
 
 public:
-  // int count_vertices;
-
-
 /* Complex getting modified by the iterator, must be model of 
- * FlagZigzagFilteredComplex.*/
-  FlagZigzagFilteredComplex                      * cpx_; 
+ * Complex.*/
+  Complex                                        * cpx_; 
 /* List of insertion and deletion of vertices and edges representing the 
  * zigzag filtration of the 1-skeleton.*/
   std::vector< Edge_type >                         zigzag_edge_filtration_;
