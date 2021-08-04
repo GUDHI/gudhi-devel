@@ -2622,24 +2622,31 @@ public:
     return &(sh1->second) == &(sh2->second);
   }
 
-//   /** \brief Range over the cofaces of a simplex. */
-//   typedef std::vector<Simplex_handle>                   Morse_boundary_simplex_range;
-//   typedef typename Morse_boundary_simplex_range::iterator 
-//                                                      Morse_boundary_simplex_iterator;
+  /** \brief Iterator and range over the boundary of a critical simplex in a Morse complex (i.e., Simplex_tree with Morse matching). 
+   * 
+   * \detail If the simplex tree does not store a Morse matching, this is the 
+   * standard Boundary_simplex_range.
+   */
+  typedef typename std::conditional<Options::store_morse_matching,
+                    Simplex_tree_morse_boundary_simplex_iterator 
+                    Boundary_simplex_iterator>::type 
+                                                     Morse_boundary_simplex_iterator;
+  typedef typename std::conditional<Options::store_morse_matching, 
+                     boost::iterator_range<Morse_boundary_simplex_iterator>,
+                     Boundary_simplex_range>::type 
+                                                        Morse_boundary_simplex_range;
 
-// /** Compute the boundary of a critical simplex in a Morse complex.
-//  */
-//   Morse_boundary_simplex_range morse_boundary_simplex_range(Simplex_handle sh) {
-//     if constexpr(Options::store_morse_matching) {
-//       GUDHI_CHECK(critical(sh),
-//             std::invalid_argument("Simplex_tree::morse_boundary_simplex_range - simplex argument must be critical"));
+/** Compute the boundary of a critical simplex in a Morse complex.*/
+  Morse_boundary_simplex_range morse_boundary_simplex_range(Simplex_handle sh) {
+    if constexpr(Options::store_morse_matching) {
+      GUDHI_CHECK(critical(sh),
+            std::invalid_argument("Simplex_tree::morse_boundary_simplex_range - simplex argument must be critical"));
 
-//         Morse_boundary_simplex_range morse_boundary 
-//                                                  = boundary_morse_complex(this, sh);
-//         return morse_boundary;
-//     }//else return the standard complex boundary
-//     else { return Morse_boundary_simplex_range(boundary_simplex_range(sh)); }
-//   }
+        return Boundary_simplex_range(Boundary_simplex_iterator(this,sh),
+                                      Boundary_simplex_iterator(this));
+    }//else return the standard complex boundary
+    else { return boundary_simplex_range(sh); }
+  }
 
   struct cmp_simplices {
     bool operator()(Simplex_handle sh1, Simplex_handle sh2) {
