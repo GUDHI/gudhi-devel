@@ -1,0 +1,64 @@
+To discuss:
+
+- Non-copiability of Flagzigzag_simplex_iterator
+
+
+cmake -DWITH_GUDHI_EXAMPLE=ON -DCMAKE_BUILD_TYPE=Release -DGUDHI_USE_TBB=OFF -DWITH_GUDHI_PYTHON=OFF ..;
+make; 
+./src/Simplex_tree/example/Simplex_tree_rips_zigzag_filtration_from_points -n 2 -m 2.2 -d 3 ../data/points/grid_5_5_5_in_0_1.off;
+
+
+Non-zigzag vs zigzag: 
+
+- Mechanism to select different data structures: currently using std::conditional
+	    typedef typename std::conditional< Options::is_zigzag, 
+                      Zigzagfiltration_simplex_range,
+                      std::vector<Simplex_handle> >::type  Filtration_simplex_range;
+in order to select the right type of filtration iterator, and map structures for Siblings that do not invalidate iterators (Simplex_handle) during insertions.
+
+- Mechanism to select different methods: use of indexing_flags
+
+Q: can we merge the to mechanisms in order to provide only on option for zigzag vs non-zigzag filtrations ?
+
+- Some methods of the Simplex_tree should not be called in zigzag mode, such as 
+  Simplex_handle simplex(Simplex_key idx, linear_indexing_tag) const
+  that uses explicitly the filtration_vect_.
+
+
+
+TO DO:
+
+2/. Open and closed intervals in Zigzag Persistence. 
+  l.219   struct interval_t {...} <- add two bools ?
+
+3/. General field coefficients in zigzag persistence
+
+4/. insert a vertex 1, then a vertex 01 (in edge filtration, distinct entries) with SAME filtration value, that cannot be paired together in Morse theory (done in flag_add_edge, called for each edge entry)
+  -> while loop in iterator, accumulating + arrows, and - arrows, in a same zzfil_, as long as filtration values are the same. 
+
+don't clear partial zz fil all the time
+
+
+5/. do not do all these copies of edge_it in zz_iterators
+
+10/. parallelize
+  for( auto hook_u_it = ptr_list_u->begin(); hook_u_it != ptr_list_u->end(); 
+       ++hook_u_it ) in flag_add_edge
+
+
+1/. Do the update everywhere:
+		void update_simplex_tree_after_node_insertion(Simplex_handle sh)
+		void update_simplex_tree_before_node_removal(Simplex_handle sh)
+12/ update_simplex_tree_after_node_insertion and idem for node removal:
+ operator=
+ copy_from
+ rec_copy
+ move_from
+ root_members_recursive_deletion()
+ rec_delete(Siblings * sib)
+ extend_filtration
+
+ prune_above_filtration() / rec_prune_above_filtration()
+ remove_maximal_simplex()  DONE  these two may recompute dimension()...
+
+     i.e. set       dimension_to_be_lowered_ = true;
