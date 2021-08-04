@@ -2258,22 +2258,22 @@ public:
       }
     }
   }
-//sort zz_filtration appropriately, using reverse_lex_order (all new simplices have 
-//same filtration value)
-#ifdef GUDHI_USE_TBB
-  tbb::parallel_sort(zz_filtration.begin(), zz_filtration.end(), 
-                     reverse_lexigraphic_order(this));
-#else
-  sort(zz_filtration.begin(), zz_filtration.end(), reverse_lexigraphic_order(this));
-#endif
+// //sort zz_filtration appropriately, using reverse_lex_order (all new simplices have 
+// //same filtration value)
+// #ifdef GUDHI_USE_TBB
+//   tbb::parallel_sort(zz_filtration.begin(), zz_filtration.end(), 
+//                      reverse_lexigraphic_order(this));
+// #else
+//   sort(zz_filtration.begin(), zz_filtration.end(), reverse_lexigraphic_order(this));
+// #endif
 
   //update all extra data structures for the new nodes
   for(auto sh : zz_filtration) { update_simplex_tree_after_node_insertion(sh); }
 
   //compute a Morse matching
-  if constexpr(Options::store_morse_matching) {
-    compute_matching(zz_filtration,this);
-  }
+  // if constexpr(Options::store_morse_matching) {
+  //   compute_matching(zz_filtration);
+  // }
 
 }
 
@@ -2451,11 +2451,13 @@ private:
   }
 
 public:
- /* Computes all simplices that ought to be removed
+ /** \brief Computes all simplices that ought to be removed
   * if the edge {u,v} were to disappear (puts them in zz_filtration).
-  * This method does not modify the simplex tree. Simplices are not ordered.
+  * This method does not modify the simplex tree. Simplices are not ordered in the 
+  * output.
   *
-  * zz_filtration must be empty.
+  * \details zz_filtration is not necessarily empty, all newly removed simplices are 
+  * pushed at the back.
   */
   void flag_lazy_remove_edge( Vertex_handle u, Vertex_handle v 
                             , std::vector< Simplex_handle > & zz_filtration )
@@ -2489,20 +2491,20 @@ public:
       //record the removal of all cofaces of {u}, including vertex itself
       for(auto sh : star_simplex_range(sh_u)) { zz_filtration.push_back(sh); }
 
-    //sort by decreasing key values. Because keys increase with order of 
-    //insertion, this ensures that only maximal simplices are considered 
-    //when removing simplices read from left to right in zz_filtration
-#ifdef GUDHI_USE_TBB
-    tbb::parallel_sort( zz_filtration.begin(), zz_filtration.end()
-    , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
-        return sh1->second.key() > sh2->second.key();
-    });
-#else
-    sort( zz_filtration.begin(), zz_filtration.end()
-    , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
-        return sh1->second.key() > sh2->second.key();
-    });
-#endif
+//     //sort by decreasing key values. Because keys increase with order of 
+//     //insertion, this ensures that only maximal simplices are considered 
+//     //when removing simplices read from left to right in zz_filtration
+// #ifdef GUDHI_USE_TBB
+//     tbb::parallel_sort( zz_filtration.begin(), zz_filtration.end()
+//     , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
+//         return sh1->second.key() > sh2->second.key();
+//     });
+// #else
+//     sort( zz_filtration.begin(), zz_filtration.end()
+//     , [](Simplex_handle sh1, Simplex_handle sh2)->bool {
+//         return sh1->second.key() > sh2->second.key();
+//     });
+// #endif
 
       return;
     } 
@@ -2647,34 +2649,6 @@ public:
     }//else return the standard complex boundary
     else { return boundary_simplex_range(sh); }
   }
-
-  /** \brief Compute a Morse matching on a range of simplices given by two iterators.
-   * 
-   * \details SimplexHandleIterator is of value_type Simplex_handle. The simplices 
-   * in the input range must all be critical.
-   */ 
-  template<typename SimplexHandleIterator>
-  void compute_matching(SimplexHandleIterator beg, SimplexHandleIterator end) {
-    Gudhi::dmt::compute_matching(beg,end,this);
-  }
-  /** \brief Compute a Morse matching on a range of simplices.
-   * 
-   * \details SimplexHandleRange gives begin and end iterators of value_type 
-   * Simplex_handle. The simplices 
-   * in the input range must all be critical.
-   */
-  template<typename SimplexHandleRange>
-  void compute_matching(SimplexHandleRange &rg) {
-    compute_matching(rg.begin(),rg.end());
-  }
-  /** \brief Compute a Morse matching on all simplices of the complex.
-   *
-   * \details All simplices must be critical.
-   */ 
-  void compute_matching() {
-    compute_matching(complex_simplex_range());
-  }
-
 
   struct cmp_simplices {
     bool operator()(Simplex_handle sh1, Simplex_handle sh2) {

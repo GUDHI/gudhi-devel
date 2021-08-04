@@ -869,8 +869,7 @@ public:
     sh_it_                  = partial_zzfil_.begin();
   }
 
-  // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& ) = 
-                                                                            delete;
+  // Flagzigzag_simplex_iterator& operator=(const Flagzigzag_simplex_iterator& ) = delete;
 
 
 //move assignement
@@ -963,28 +962,50 @@ private:
         }
       }
       //partial_zzfil_ is empty and edge_it points to a new edge
-      if( edge_it_->type() ) { //forward arrow //modify the complex
-        //add the new edge and expand the flag complex. partial_zz_fil_ points to
+      if( edge_it_->type() ) { //forward arrow -> modify the complex
+        //add all new edges with same filtration value, and expand the flag complex 
+        //every time. partial_zz_fil_ points to
         //all the newly inserted simplices, in filtration order.
-        cpx_->flag_add_edge( edge_it_->u(), edge_it_->v()
-                           , edge_it_->fil()
-                           , dim_max_, partial_zzfil_ );
+        fil_ = edge_it_->fil();//new filtration value
+        do {
+          cpx_->flag_add_edge( edge_it_->u(), edge_it_->v()
+                             , edge_it_->fil()
+                             , dim_max_, partial_zzfil_ );
+          ++edge_it_; //next edge
+        } while(   edge_it_ != zigzag_edge_filtration_.end() //there are still edges
+                && edge_it_->type()//still an insertion
+                && fil_ == edge_it_->fil()  );//same filtration value
+
         arrow_direction_ = true; //the arrow is forward, these are insertions
-        //flag_add_edge outputs a SORTED sequence of simplices (subface 
-        //before coface)
+        
+        //if we store a Morse matching, compute one
+        if constexpr(Complex::Options::store_morse_matching) {
+      //orders partial_zzfil_ in filtration order plus compatible with Morse matching
+          Gudhi::dmt::compute_matching(partial_zzfil_, cpx_);
+        }
+        else { //otherwise, need to order partial_zzfil_
+//sort zz_filtration appropriately, using reverse_lex_order (all new simplices have 
+//same filtration value)
+#ifdef GUDHI_USE_TBB
+          tbb::parallel_sort(zz_filtration.begin(), zz_filtration.end(), 
+                             Complex::reverse_lexigraphic_order(cpx_));
+#else
+          sort(zz_filtration.begin(), zz_filtration.end(), 
+              Complex::reverse_lexigraphic_order(cpx_));
+#endif
+        }
+
         for(auto & sh : partial_zzfil_) //set key values
         { cpx_->assign_key(sh,counter_insert); ++counter_insert; }
       
         //partial_zzfil_ contains at least the new edge, i.e., is non-empty
-        fil_ = edge_it_->fil();
         sh_it_ = partial_zzfil_.begin(); 
-        ++edge_it_; 
       }
       else { //backward arrow
         //record all simplices to remove, due to the removal of an edge, 
         //but do not actually remove them from the complex.
         //do so for all edges removed consecutively at a same filtration value. 
-        //this garanties better performances with Morse theory by avoiding to 
+        //this garantees better performances with Morse theory by avoiding to 
         //break Morse pairs when not necessary.
         size_t count = 0;
         fil_ = edge_it_->fil();//new filtration value

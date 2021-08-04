@@ -1,11 +1,8 @@
-/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
- *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+/*    This file is a prototype for the Gudhi Library.
  *    Author(s):       Clément Maria
- *
- *    Copyright (C) 2020 Inria
- *
- *    Modification(s):
- *      - YYYY/MM Author: Description of the modification
+ *    Copyright (C) 2021 Inria
+ *    This version is under developement, please do not redistribute this software. 
+ *    This program is for academic research use only. 
  */
 
 #include <iostream>
@@ -13,10 +10,12 @@
 #include <gudhi/Discrete_morse_theory.h>
 
 //allows Morse matching
-using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
+using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_morse_zigzag_persistence>;
 using Vertex_handle = Simplex_tree::Vertex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
 using Simplex_handle = Simplex_tree::Simplex_handle;
+
+using namespace Gudhi::dmt;
 
 int main(int argc, char* argv[])
 {
@@ -65,8 +64,7 @@ int main(int argc, char* argv[])
   std::cout << std::endl;
   std::cout << "   Matching:\n";
 
-  Discrete_morse_theory<Simplex_tree> dmt;
-  dmt.compute_matching(sh_range, &st);
+  compute_matching(sh_range, &st);
 
   for(auto sh : st.complex_simplex_range()) {
     std::cout << "{ ";
@@ -82,10 +80,26 @@ int main(int argc, char* argv[])
     std::cout << std::endl; 
   }
 
+  std::cout << "   Morse boundaries:\n";
+  for(auto sh : st.complex_simplex_range()) {
+    if(st.critical(sh)) {
+      std::cout << "critical { ";
+        for(auto v : st.simplex_vertex_range(sh)) { std::cout << v << " "; }
+      std::cout << "} with Morse boundary: \n";
+
+      auto morse_bound = st.morse_boundary_simplex_range(sh);
+      for(auto mb_it = morse_bound.begin(); mb_it != morse_bound.end(); ++mb_it) {
+        std::cout << "     " << mb_it.coefficient() << " * { ";
+        for(auto v : st.simplex_vertex_range(*mb_it)) { std:: cout << v << " "; }
+          std::cout << "} + \n";
+      }
+    }
+  }
+
   std::cout << std::endl;
   std::cout << "Clear the Morse matching:\n";
 
-  dmt.clear_matching(&st);
+  clear_matching(&st);
 
   for(auto sh : st.complex_simplex_range()) {
     std::cout << "{ ";
@@ -116,7 +130,7 @@ int main(int argc, char* argv[])
   std::cout << std::endl;
   std::cout << "   Matching:\n";
 
-  dmt.compute_matching(it_beg, it_end, &st);
+  compute_matching(it_beg, it_end, &st);
 
   for(auto sh : st.complex_simplex_range()) {
     std::cout << "{ ";
@@ -129,6 +143,22 @@ int main(int argc, char* argv[])
       for(auto v : st.simplex_vertex_range(p_sh)) { std::cout << v << " "; }
       std::cout << "} \n";      
     } 
+  }
+
+  std::cout << "   Morse boundaries:\n";
+  for(auto sh : st.complex_simplex_range()) {
+    if(st.critical(sh)) {
+      std::cout << "critical { ";
+        for(auto v : st.simplex_vertex_range(sh)) { std::cout << v << " "; }
+      std::cout << "} with Morse boundary: \n";
+
+      auto morse_bound = st.morse_boundary_simplex_range(sh);
+      for(auto mb_it = morse_bound.begin(); mb_it != morse_bound.end(); ++mb_it) {
+        std::cout << "     " << mb_it.coefficient() << " * { ";
+        for(auto v : st.simplex_vertex_range(*mb_it)) { std:: cout << v << " "; }
+          std::cout << "} + \n";
+      }
+    }
   }
 
   return 0;
