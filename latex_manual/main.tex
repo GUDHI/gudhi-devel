@@ -102,7 +102,6 @@
 \newcommand{\reffig}[1]{Figure~\ref{Fig:#1}}
 
 \newcommand{\clem}[1]{ \color{red}{#1} \color{black}{}}
-\newcommand{\kris}[1]{ \color{blue}{#1} \color{black}{}}
 
 \title{Détails sur la branche zigzag-filtration-simplex-tree de gudhi-devel}
 \author{Cl\'ement Maria}
@@ -110,10 +109,6 @@
 \begin{document}
 
 \maketitle
-
-
-
-
 
 % SIMPLEX\_TREE\_STAR\_SIMPLEX\_ITERATORS\_ ok
 % SIMPLEX\_TREE\_H\_                      ...
@@ -158,7 +153,7 @@ et d'un std::conditional pour choisir celle que l'on veut (appelée {\tt Hooks\_
 
 \medskip
 
-Ce mécanisme est commandé par la nouvelle entrée {\tt static const bool link\_nodes\_by\_label = true} dans les modèles de {\tt SimplexTreeOptions} (fin du fichier {\tt Simplex_tree.h}).
+Ce mécanisme est commandé par la nouvelle entrée {\tt static const bool link\_nodes\_by\_label = true} dans les modèles de {\tt SimplexTreeOptions} (fin du fichier {\tt Simplex\_tree.h}).
 
 \item Si {\tt link\_nodes\_by\_label == true}, il faut également maintenir les listes intrusives. Cela est fait par l'introduction de deux structures :
 
@@ -302,53 +297,69 @@ Cet itérateur est de {\tt value\_type Simplex\_handle}. À noter que cet itéra
 
 \section{La partie géométrique de la construction de filtration zigzag : les oscillating Rips}
 
-Ces méthodes géométriques permettent de calculer l'oscillating Rips zigzag filtration du $1$-squelette du complexe, à partir d'un nuage de points.
+Ces méthodes géométriques permettent de calculer l'oscillating Rips zigzag filtration du $1$-squelette du complexe, à partir d'un nuage de points. 
 
-\clem{continuer}
+\begin{remarque}
+J'ai mis ces méthodes dans {\tt Simplex\_tree/Simplex\_tree\_zigzag\_iterator.h} car, bien que géométriques et assez différentes de la nature combinatoire de tout ce qui se trouve dans le simplex tree, elles ne semblent utiles que dans le contexte de l'oscillating Rips zigzag. Leur position dans le code est débattable.  
+\end{remarque}
 
+Nous avons donc :
+
+\begin{itemize}
+\item Deux versions de {\tt zigzag_filtration_one_skeleton}, l'une prend en entrée une matrice de distances et calcule l'oscillating Rips zigzag filtration du $1$-squelette, et l'autre qui prend en entrée des points et une fonction distance, pré-calcule l'ensemble des distance deux à deux en appelle la première fonction. Cette dernière fonction calcule un ordre sur les points du nuage, selon trois politiques : {\tt already\_ordered, farthest\_point\_ordering, random\_point_\_ordering}.
+%
+\item La fonction {\tt compute\_epsilon\_values} computes, for an ordered point cloud $P = \{p_0, \ldots ,p_{n-1}\}$, the values $\varepsilon_i = d_H(P, P_i)$, where $P_i = \{p_0, \ldots , p_i$.
+\end{itemize}
 
 
 
 \section{La théorie de Morse discrète}
 
-J'ai implémenté une bonne partie des mécanismes, mais il me manque le calcul de bord dans un complexe de Morse. Je décris les mécanismes :
+J'ai implémenté une bonne partie des mécanismes, mais il me manque le calcul de bord dans un complexe de Morse. Du coup, tout est en commentaire. Je décris quand même les mécanismes :
 
-La volonté de faire la théorie de Morse discrète est donnée par Options::store\_morse\_matching.
+La volonté de faire la théorie de Morse discrète est donnée par {\tt Options::store\_morse\_matching} dans le simplex tree. On a :
 
-- la possibilité de stocker un Simplex\_handle dans chaque Node, pour représenter le simplex avec lequel on forme une paire de Morse. Implémenté par les deux classes 
+\begin{itemize}
+\item la possibilité de stocker un {\tt Simplex\_handle} dans chaque Node, pour représenter le simplex avec lequel on forme une paire de Morse. Implémenté par les deux classes 
 
-Pairing\_simplex\_base\_dummy (vide) et Pairing\_simplex\_base\_morse (contient un membre Simplex\_handle) dont Simplex\_tree\_node\_explicit\_storage hérite.
+{\tt Pairing\_simplex\_base\_dummy} (vide) et {\tt Pairing\_simplex\_base\_morse} (contient un membre {\tt Simplex\_handle}) dont {\tt Simplex\_tree\_node\_explicit\_storage} hérite.
 
-- des méthodes "paired\_with, critical, assign\_pairing, make\_critical, is\_paired\_with" dans la classe Simpex\_tree pour atteindre l'information au sujet des paires de Morse.
+\item des méthodes "{\tt paired\_with, critical, assign\_pairing, make\_critical, is\_paired\_with}" dans la {\tt classe Simpex\_tree} pour atteindre l'information au sujet des paires de Morse.
 
-- un appel à "Discrete\_morse\_theory<Simplex\_tree>().compute\_matching" quand on insère un ensemble de simplexe avec la même valeur de filtration (par exemple dans flag\_add\_edge). Cette méthode calcul un appariement de Morse (c'est dans le paquetage Discrete\_morse\_theory) et stocke l'information dans les noeuds du simplex tree.
+\item un appel à "{\tt Discrete\_morse\_theory<Simplex\_tree>().compute\_matching}" quand on insère un ensemble de simplexe avec la même valeur de filtration (par exemple dans {\tt flag\_add\_edge}). Cette méthode calcule un appariement de Morse (c'est dans le paquetage {\tt Discrete\_morse\_theory} qui sera amené à contenir l'opération de bord) et stocke l'information dans les noeuds du simplex tree.
 
-- une mise à jour des noeuds dans les fonctions :
+\item une mise à jour des noeuds dans les fonctions :
 
-  void update\_simplex\_tree\_after\_node\_insertion(Simplex\_handle sh) -> un nouveau simplex est critique par défaut,
+  {\tt void update\_simplex\_tree\_after\_node\_insertion(Simplex\_handle sh)} -> un nouveau simplex est critique par défaut,
 
-  void update\_simplex\_tree\_before\_node\_removal(Simplex\_handle sh) -> en enlevant un simplex non-critique, il faut rendre le simplex, avec lequel il forme une paire de Morse, critique.
+  {\tt void update\_simplex\_tree\_before\_node\_removal(Simplex\_handle sh)} -> en enlevant un simplex non-critique, il faut rendre le simplex, avec lequel il forme une paire de Morse, critique.
 
-
-
-
-\clem{cf break morse pair dans st_zigzag_iterators}
+\item des fonctions de mise à jour dans les opérateurs de filtration zigzag du simplex tree.
 
 
 
+\section{Petites opérations sur les nuages de points}
 
-Il y a également de nouveaux fichiers :
+J'ai ajouté un dossier {\tt Computational\_geometry} avec un fichier {\tt Point\_cloud.h}, qui implémente des méthodes simples sur les nuages de points : chercher et éliminer les doublons, perturbations aléatoires, vérifier que deux paires de points (distincts) $x,y,z,t$ ne soient pas à la même distance, i.e., $d(x,y) \neq d(z,t)$. Cette dernière opération de généricité est très utile en persistence zigzag. Elle est également utile pour qu'un "farthest point sampling" d'un nuage de points soit unique une fois qu'on a choisi le premier point (utilisé dans ma construction de l'oscillating Rips zigzag filtration).
 
-Point\_cloud.h implémente des méthodes simples sur les nuages de points : chercher et éliminer les doublons, perturbations aléatoires, vérifier que deux paires de points (distincts) x,y,z,t ne soient pas à la même distance, i.e., d(x,y) != d(z,t).
 
-Cette dernière méthode peut paraître étrange, mais en réalité elle est utile pour qu'un "farthest point sampling" d'un nuage de points soit unique une fois qu'on a choisi le premier point. (utilisé dans ma construction de l'oscillating Rips zigzag filtration).
-
+\section{Homologie persistante zigzag}
 
 src/Zigzag\_persistence/
-  avec le fichier Zigzag\_persistence.h Implémente la persistence zigzag.
+  avec le fichier Zigzag\_persistence.h Implémente la persistence zigzag avec coefficients dans $\ZZ/2\ZZ$.
 
 
-data/points/S3\_in\_R4\_2k\_uniform.off Un échantillonage uniform de 2000 points sur la 3-sphère unité dans R4. C'est un cas intéressant pour la persistence zigzag qui permet de reconstruire et d'inférer l'homologie de 3-variétés.
+\section{Données}
 
+J'ai ajouté un jeu de données {\tt data/points/S3\_in\_R4\_2k\_uniform.off}. Il s'agit d'un échantillonage uniforme de $2000$ points sur la $3$-sphère unité dans $\RR4$. C'est un cas intéressant pour la persistence zigzag qui permet de reconstruire et d'inférer l'homologie de $3$-variétés.
+
+
+\section{To do et à débattre}
+
+\begin{itemize}
+\item Implémenter, dans le Simplex\_tree, un coefficient pour l'opérateur de bord. Dans un complexe simnplicial, c'est un +/- 1, qu'on connait d'avance dans le Simplex tree. Idée : ajouter une méthode {\tt .coefficient()} dans le {\tt Boundary\_simplex\_iterator} qui renvoie un {\tt int}.
+
+Concerne le calcul de bord dans {\tt Discrete\_morse\_theory}, le calcul de persistence avec coefficients.
+\end{itemize}
 
 \end{document}
