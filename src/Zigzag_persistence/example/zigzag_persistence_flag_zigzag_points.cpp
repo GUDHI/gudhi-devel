@@ -1,3 +1,10 @@
+/*    This file is a prototype for the Gudhi Library.
+ *    Author(s):       Clément Maria
+ *    Copyright (C) 2021 Inria
+ *    This version is under developement, please do not redistribute this software. 
+ *    This program is for academic research use only. 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <chrono>
@@ -59,17 +66,27 @@ int main(int argc, char* argv[])
   K k_d; 
 //squared Euclidean distance
   auto dist = k_d.squared_distance_d_object();
-//max and min distance between two distinct points
-  auto spread = max_min_distances<Filtration_value>(points_unique,dist);
-  std::cout << "Diameter: " << std::sqrt(spread.first) << "   closest points: " << std::sqrt(spread.second) << "    Points spread: " << std::sqrt((spread.first/spread.second)) << "\n";
-  std::cout << "Random perturbation of the points by diameter / 1000.\n";
-  //perturb the points by 0.001 of the diameter
-  auto dim = points_unique.begin()->size();
-  random_perturbation(points_unique, dim, 0.001 * spread.first);
 
   //check whether the point cloud is generic w.r.t. pairwise distances
-  auto min_delta = generic_distances<Filtration_value>(points_unique, dist);
-  std::cout << "Generic distances: " << (min_delta > 0.) << "\n";
+  Filtration_value min_delta = generic_distances<Filtration_value>(points_unique, dist);
+  std::cout << "Non-zero entries of the distance matrix are at least " << min_delta << " apart.\n";
+  if((min_delta > 0.)) { std::cout << "    => the distance function is generic.\n";}
+  else { std::cout << "    => the distance function is NOT generic.\n";}
+
+  while( min_delta == 0. ) {
+    std::cout << "Perturb the points:\n";
+  //max and min distance between two distinct points
+    auto spread = max_min_distances<Filtration_value>(points_unique,dist);
+    std::cout << "Diameter: " << std::sqrt(spread.first) << "   closest points: " << std::sqrt(spread.second) << "    Points spread: " << std::sqrt((spread.first/spread.second)) << "\n";
+    std::cout << "Random perturbation of the points by diameter / 100000.\n";
+    //perturb the points by 0.001 of the diameter
+    auto dim = points_unique.begin()->size();
+    random_perturbation(points_unique, dim, 0.00001 * spread.first);
+    //check whether the point cloud is generic w.r.t. pairwise distances
+    min_delta = generic_distances<Filtration_value>(points_unique, dist);
+    std::cout << "Generic distances: " << (min_delta > 0.) << "\n";
+  }
+
 
 {
   std::cout << "\n***** ZIGZAG PERSISTENT HOMOLOGY (columns as sets) *****\n";
