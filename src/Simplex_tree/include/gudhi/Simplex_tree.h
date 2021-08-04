@@ -2648,6 +2648,34 @@ public:
     else { return boundary_simplex_range(sh); }
   }
 
+  /** \brief Compute a Morse matching on a range of simplices given by two iterators.
+   * 
+   * \details SimplexHandleIterator is of value_type Simplex_handle. The simplices 
+   * in the input range must all be critical.
+   */ 
+  template<typename SimplexHandleIterator>
+  void compute_matching(SimplexHandleIterator beg, SimplexHandleIterator end) {
+    Gudhi::dmt::compute_matching(beg,end,this);
+  }
+  /** \brief Compute a Morse matching on a range of simplices.
+   * 
+   * \details SimplexHandleRange gives begin and end iterators of value_type 
+   * Simplex_handle. The simplices 
+   * in the input range must all be critical.
+   */
+  template<typename SimplexHandleRange>
+  void compute_matching(SimplexHandleRange &rg) {
+    compute_matching(rg.begin(),rg.end());
+  }
+  /** \brief Compute a Morse matching on all simplices of the complex.
+   *
+   * \details All simplices must be critical.
+   */ 
+  void compute_matching() {
+    compute_matching(complex_simplex_range());
+  }
+
+
   struct cmp_simplices {
     bool operator()(Simplex_handle sh1, Simplex_handle sh2) {
       return &(sh1->second) < &(sh2->second);
