@@ -396,8 +396,9 @@ TensorFlow
 Bug reports and contributions
 *****************************
 
-Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
+Please help us improving the quality of the GUDHI library.
+You may `report bugs <https://github.com/GUDHI/gudhi-devel/issues>`_ or
+`contact us <https://gudhi.inria.fr/contact/>`_ for any suggestions.
 
-    Contact: gudhi-users@lists.gforge.inria.fr
-
-GUDHI is open to external contributions. If you want to join our development team, please contact us.
+GUDHI is open to external contributions. If you want to join our development team, please take some time to read our
+`contributing guide <https://github.com/GUDHI/gudhi-devel/blob/master/.github/CONTRIBUTING.md>`_.
