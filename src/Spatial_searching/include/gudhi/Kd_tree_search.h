@@ -139,7 +139,7 @@ class Kd_tree_search {
     }
 
     template <typename Coord_iterator>
-      bool contains_point_given_as_coordinates(Coord_iterator pi, Coord_iterator CGAL_UNUSED) const {
+      bool contains_point_given_as_coordinates(Coord_iterator pi, Coord_iterator) const {
         FT distance = 0;
         auto ccci = traits.construct_cartesian_const_iterator_d_object();
         auto ci = ccci(c);
