@@ -72,13 +72,13 @@ namespace dmt {
     std::vector<typename Complex::Simplex_handle> new_filtration; 
     new_filtration.reserve(av_end-av_begin);
     //all available simplices
-    std::list< Simplex_handle > available_list(av_begin,av_end);
+    std::list< typename Complex::Simplex_handle > available_list(av_begin,av_end);
 
-    std::list< Simplex_handle >::iterator some_max_simplex;//record a max simplex
+    typename std::list< typename Complex::Simplex_handle >::iterator some_max_simplex;//record a max simplex
     while(!available_list.empty()) {
       bool found_free_pair = false;
 
-      for(auto it = available_set.begin(); it != available_set.end(); ++it) {
+      for(auto it = available_list.begin(); it != available_list.end(); ++it) {
         //when a simplex is not available, we mark it with a key==0 for a lazy remove
         if(cpx->key(*it) == 0) { //simplex mark -> effectively remove it form av_list
           auto tmp_it = it;  ++it;
@@ -195,15 +195,7 @@ namespace dmt {
 
   template<typename RangeCells, typename Complex>
   void compute_matching(RangeCells &available_cells, Complex *cpx) 
-  {
-    // std::cout << "Insert a coface before a subface: \n";
-    // std::cout << "make; ./src/Zigzag_persistence/example/zigzag_persistence_flag_zigzag_points -n 2.7 -m 2.75 -d 4 ~/Desktop/spiral_4d_2k.dxyz\n";
-    // std::cout << "At insertion 460. Before compute Morse:\n";
-    // std::cout << "1.28054 -> 11 9 \n1.28054 -> 11 10 9 \n1.28054 -> 11 9 2 \n1.28054 -> 11 9 3 2 \n1.28054 -> 11 9 3 \n1.28054 -> 11 10 9 3 \n1.28054 -> 11 8 \n";
-    // std::cout << "After compute Morse:\n";
-    // std::cout << "11 9 \n11 10 9 \n11 9 2 \n11 9 3 2 \n11 9 3 \n11 10 9 3 \n";
-
-    //compute the Morse matching, the output is in reverse inclusion order
+  { //compute the Morse matching, the output is in reverse inclusion order
     std::vector<typename Complex::Simplex_handle> new_order = 
             compute_matching(available_cells.begin(), available_cells.end(), cpx);
     auto it2 = new_order.rbegin();//read it in reverse

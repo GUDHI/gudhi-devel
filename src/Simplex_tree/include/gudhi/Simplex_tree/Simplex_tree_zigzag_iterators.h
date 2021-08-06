@@ -16,6 +16,7 @@
 #include <fstream>
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/pick_n_random_points.h>
+#include <gudhi/Discrete_morse_theory.h>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/tbb.h>
@@ -987,10 +988,10 @@ private:
 //sort zz_filtration appropriately, using reverse_lex_order (all new simplices have 
 //same filtration value)
 #ifdef GUDHI_USE_TBB
-          tbb::parallel_sort(zz_filtration.begin(), zz_filtration.end(), 
+          tbb::parallel_sort(partial_zzfil_.begin(), partial_zzfil_.end(), 
                              Complex::reverse_lexigraphic_order(cpx_));
 #else
-          sort(zz_filtration.begin(), zz_filtration.end(), 
+          sort(partial_zzfil_.begin(), partial_zzfil_.end(), 
               Complex::reverse_lexigraphic_order(cpx_));
 #endif
         }
@@ -1040,7 +1041,7 @@ private:
 //if remove more than one edge, remove duplicate as edges may share same 
 //cofaces.      
         if(count > 1) {//more than 1 edge inserted
-          auto last = std::unique(rg.begin(), rg.end(), 
+          auto last = std::unique(partial_zzfil_.begin(), partial_zzfil_.end(), 
             [&](Simplex_handle sh1, Simplex_handle sh2)->bool {
               return cpx_->key(sh1) == cpx_->key(sh2);
             } );//equal simplex handles means equal key
@@ -1048,8 +1049,8 @@ private:
         }
         sh_it_ = partial_zzfil_.begin(); 
 //if partial_zzfil_ is empty after flag_lazy_remove (or flag_lazy_insert) ; in case
-//the edge or vertex in not in the complex. then *sh_it_ becomes invalid !!
-//throw an exception.
+//the edge or vertex is not in the complex. Then *sh_it_ becomes invalid !!
+//todo throw an exception.
         arrow_direction_ = false; //the arrow is backward, these are removals
 //flag_lazy_remove_edge outputs a SORTED sequence of simplices, by decreasing 
 //key value. This ensures that cofaces come before subfaces, removal order is as 

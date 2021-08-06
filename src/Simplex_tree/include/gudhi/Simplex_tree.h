@@ -22,6 +22,7 @@
 #include <gudhi/Simplex_tree/Simplex_tree_zigzag_iterators.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
 #include <gudhi/Simplex_tree/Simplex_tree_star_simplex_iterators.h>
+#include <gudhi/Simplex_tree/Simplex_tree_morse_iterators.h>
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
@@ -2095,7 +2096,7 @@ private:
   //same label
   typedef typename std::conditional<Options::link_nodes_by_label,
                     nodes_by_label_intrusive_list<Simplex_tree>,
-                    nodes_by_label_dummy<Simplex_tree>>::type 
+                    nodes_by_label_dummy<Simplex_tree> >::type 
                                                       Nodes_by_label_data_structure;
 
   /** Only if Options::link_nodes_by_label is true, nodes_with_label_[u] returns a 
@@ -2630,12 +2631,12 @@ public:
    * standard Boundary_simplex_range.
    */
   typedef typename std::conditional<Options::store_morse_matching,
-                    Simplex_tree_morse_boundary_simplex_iterator 
-                    Boundary_simplex_iterator>::type 
+                    Simplex_tree_morse_boundary_simplex_iterator<Simplex_tree>, 
+                    Boundary_simplex_iterator >::type 
                                                      Morse_boundary_simplex_iterator;
   typedef typename std::conditional<Options::store_morse_matching, 
                      boost::iterator_range<Morse_boundary_simplex_iterator>,
-                     Boundary_simplex_range>::type 
+                     Boundary_simplex_range >::type 
                                                         Morse_boundary_simplex_range;
 
 /** Compute the boundary of a critical simplex in a Morse complex.*/

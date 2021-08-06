@@ -34,7 +34,7 @@ class Simplex_tree_morse_boundary_simplex_iterator : public boost::iterator_faca
     : st_(st) 
   {
     auto boundary_map = Gudhi::dmt::boundary_morse_complex(st_, sh);
-    boundary_(boundary.begin(),boundary_map.end());
+    boundary_(boundary_map.begin(),boundary_map.end());
     sh_it_ = boundary_.begin();
     if(sh_it_ == boundary_.end()) { end_ = true; }
     else { end_ = false; }
@@ -66,11 +66,11 @@ class Simplex_tree_morse_boundary_simplex_iterator : public boost::iterator_faca
     }
   }
 
-  Simplex_tree  * st_;//the simplex tree we are working in
+  SimplexTree  * st_;//the simplex tree we are working in
   //precomputed set of simplex handles for the boundary
   std::vector< std::pair<Simplex_handle,int> > boundary_;
   //iterator in boundry_ pointing to the current simplex handle
-  std::vector< Simplex_handle >::iterator      sh_it_;
+  typename std::vector< Simplex_handle >::iterator sh_it_;
   bool                                         end_;//true iff the iterator it end()
 
 };
