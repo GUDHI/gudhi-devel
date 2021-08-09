@@ -1278,8 +1278,10 @@ class Simplex_tree {
           intersection.emplace_back(next->first, Node(nullptr, filt));
         }
       }
+      std::clog << "Hind: after intersection insertion" << std::endl;
       if (intersection.size() != 0) {
         // Reverse the order to insert
+        std::clog << "Hind: declare new siblings" << std::endl;
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
                                           boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
@@ -1288,10 +1290,12 @@ class Simplex_tree {
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
              new_sib_member++) {
+           std::clog << "Hind: check the blocker result" << std::endl;
            bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
            // add it to the list to be removed - do not perform it while looping on it
            if (blocker_result) {
+             std::clog << "Hind: add to list of blocked sib to be removed" << std::endl;
              blocked_new_sib_vertex_list.push_back(new_sib_member->first);
            }
         }

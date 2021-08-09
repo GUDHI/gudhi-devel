@@ -18,6 +18,8 @@
 #include <boost/range/metafunctions.hpp>
 #include <boost/range/size.hpp>
 
+#include <CGAL/Epeck_d.h>
+
 #include <cmath>  // for std::sqrt
 #include <type_traits>  // for std::decay
 #include <iterator>  // for std::begin, std::end
@@ -63,6 +65,23 @@ class Euclidean_distance {
  * The points are assumed to have the same dimension. */
 class Minimal_enclosing_ball_radius {
  public:
+   /** \brief TODO
+   *
+   * @param[in] point_1
+   * @param[in] point_2
+   * @return
+   * \tparam Point
+   *
+   */
+  //typename FT = typename Kernel::FT,
+  template< typename Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>,
+            typename Point= typename Kernel::Point_d>
+  double operator()(const Point& point_1, const Point& point_2) const {
+    std::clog << "Added template: distance betw points 1 and 2" << std::endl;
+    Kernel kernel_;
+    return std::sqrt(CGAL::to_double(kernel_.squared_distance_d_object()(point_1, point_2))) / 2.;
+  }
+
   /** \brief Minimal_enclosing_ball_radius from two points.
    *
    * @param[in] point_1 First point.
@@ -75,8 +94,29 @@ class Minimal_enclosing_ball_radius {
   template< typename Point >
   typename std::iterator_traits<typename boost::range_iterator<Point>::type>::value_type
   operator()(const Point& point_1, const Point& point_2) const {
+    std::clog << "Hind: Minimal_enclosing_ball_radius point1 et 2; Euclidean" << std::endl;
+    std::clog << "#" << *point_1.begin() << "##" << *point_2.begin() << std::endl;
     return Euclidean_distance()(point_1, point_2) / 2.;
   }
+
+
+  /** \brief TODO
+   *
+   * @param[in] point_cloud The points.
+   * @return
+   * \tparam Point_cloud
+   *
+   */
+  //typename FT = typename Kernel::FT,
+  template< typename Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>,
+            typename Point= typename Kernel::Point_d,
+            typename Point_cloud = std::vector<Point>>
+  double operator()(const Point_cloud& point_cloud) const {
+    std::clog << "Added template: distance in point cloud" << std::endl;
+    Kernel kernel_;
+    return std::sqrt(CGAL::to_double(kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end())));
+  }
+
   /** \brief Minimal_enclosing_ball_radius from a point cloud.
    *
    * @param[in] point_cloud The points.
@@ -93,6 +133,8 @@ class Minimal_enclosing_ball_radius {
             typename Coordinate = typename std::iterator_traits<Coordinate_iterator>::value_type>
   Coordinate
   operator()(const Point_cloud& point_cloud) const {
+    std::clog << "Hind: Minimal_enclosing_ball_radius point cloud; Miniball" << std::endl;
+
     using Min_sphere = Miniball::Miniball<Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
     Min_sphere ms(boost::size(*point_cloud.begin()), point_cloud.begin(), point_cloud.end());

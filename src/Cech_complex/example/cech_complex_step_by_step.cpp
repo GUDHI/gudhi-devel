@@ -13,7 +13,9 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
-#include <gudhi/Miniball.hpp>
+#include <gudhi/Miniball.hpp> // TODO to remove ?
+
+#include <CGAL/Epeck_d.h>
 
 #include <boost/program_options.hpp>
 
@@ -34,16 +36,18 @@
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Simplex_handle = Simplex_tree::Simplex_handle;
 using Filtration_value = Simplex_tree::Filtration_value;
-using Point = std::vector<double>;
+// using Point = std::vector<double>;
+using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+using Point = typename Kernel::Point_d;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 
 class Cech_blocker {
  private:
   using Point_cloud = std::vector<Point>;
-  using Point_iterator = Point_cloud::const_iterator;
-  using Coordinate_iterator = Point::const_iterator;
-  using Min_sphere = Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+//   using Point_iterator = Point_cloud::const_iterator;
+//   using Coordinate_iterator = Point::const_iterator;
+//   using Min_sphere = Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
 
  public:
   bool operator()(Simplex_handle sh) {
@@ -63,14 +67,14 @@ class Cech_blocker {
   }
   Cech_blocker(Simplex_tree& simplex_tree, Filtration_value max_radius, const std::vector<Point>& point_cloud)
       : simplex_tree_(simplex_tree), max_radius_(max_radius), point_cloud_(point_cloud) {
-    dimension_ = point_cloud_[0].size();
+//     dimension_ = point_cloud_[0].size();
   }
 
  private:
   Simplex_tree simplex_tree_;
   Filtration_value max_radius_;
   std::vector<Point> point_cloud_;
-  int dimension_;
+//   int dimension_;
 };
 
 void program_options(int argc, char* argv[], std::string& off_file_points, Filtration_value& max_radius, int& dim_max);

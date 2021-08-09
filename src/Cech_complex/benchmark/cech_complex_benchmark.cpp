@@ -17,6 +17,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Miniball.hpp>
 
+#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+
 #include "boost/filesystem.hpp"  // includes all needed Boost.Filesystem declarations
 
 #include <string>
@@ -30,7 +32,8 @@ using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
+using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel>;
 
 class Minimal_enclosing_ball_radius {
  public:

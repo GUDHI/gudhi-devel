@@ -18,6 +18,8 @@
 #include <map>
 #include <tuple>  // for std::tie
 
+#include <iostream>
+
 namespace Gudhi {
 /** @file
  * @brief Graph simplicial complex methods
@@ -76,6 +78,7 @@ Proximity_graph<SimplicialComplexForProximityGraph> compute_proximity_graph(
   for (auto it_u = points.begin(); it_u != points.end(); ++it_u) {
     idx_v = idx_u + 1;
     for (auto it_v = it_u + 1; it_v != points.end(); ++it_v, ++idx_v) {
+      std::clog << "#idx_u" << idx_u << "#idx_v " << idx_v << std::endl;
       fil = distance(*it_u, *it_v);
       if (fil <= threshold) {
         edges.emplace_back(idx_u, idx_v);
