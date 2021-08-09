@@ -546,6 +546,7 @@ if(PYTHONINTERP_FOUND)
     # sklearn
     if(SKLEARN_FOUND)
       add_gudhi_py_test(test_sklearn_cubical_persistence)
+      add_gudhi_py_test(test_sklearn_post_processing)
     endif()
 
 
