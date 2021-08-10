@@ -30,7 +30,15 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     This is a class for computing the persistence diagrams from a cubical complex.
     """
 
-    def __init__(self, dimensions=None, max_persistence_dimension=0, only_this_dim=-1, homology_coeff_field=11, min_persistence=0., n_jobs=None):
+    def __init__(
+        self,
+        dimensions=None,
+        max_persistence_dimension=0,
+        only_this_dim=-1,
+        homology_coeff_field=11,
+        min_persistence=0.0,
+        n_jobs=None,
+    ):
         """
         Constructor for the CubicalPersistence class.
 
@@ -66,7 +74,9 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         cubical_complex.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
-        return [cubical_complex.persistence_intervals_in_dimension(dim) for dim in range(self.max_persistence_dimension + 1)]
+        return [
+            cubical_complex.persistence_intervals_in_dimension(dim) for dim in range(self.max_persistence_dimension + 1)
+        ]
 
     def __transform_only_this_dim(self, cells):
         cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.dimensions)
@@ -95,4 +105,6 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             return Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
         else:
             # threads is preferred as cubical construction and persistence computation releases the GIL
-            return Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform_only_this_dim)(cells) for cells in X)
+            return Parallel(n_jobs=self.n_jobs, prefer="threads")(
+                delayed(self.__transform_only_this_dim)(cells) for cells in X
+            )
