@@ -45,10 +45,12 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            new_X = BirthPersistenceTransform().fit_transform(X)
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+            # Error management when persitence is empty
+            if X[0].size != 0:
+                new_X = BirthPersistenceTransform().fit_transform(X)
+                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
+                [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+                self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
         return self
 
     def transform(self, X):
@@ -61,25 +63,29 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**): output persistence images.
         """
-        num_diag, Xfit = len(X), []
-        new_X = BirthPersistenceTransform().fit_transform(X)
+        Xfit = []
+        # Error management when persitence is empty
+        if X[0].size != 0:
+            new_X = BirthPersistenceTransform().fit_transform(X)
+    
+            for i in range(len(X)):
+                diagram, num_pts_in_diag = new_X[i], X[i].shape[0]
+    
+                if num_pts_in_diag != 0:
+                    w = np.empty(num_pts_in_diag)
+                    for j in range(num_pts_in_diag):
+                        w[j] = self.weight(diagram[j,:])
+    
+                    x_values, y_values = np.linspace(self.im_range[0], self.im_range[1], self.resolution[0]), np.linspace(self.im_range[2], self.im_range[3], self.resolution[1])
+                    Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
+                    image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
+    
+                    Xfit.append(image.flatten()[np.newaxis,:])
+        else:
+            Xfit.append(np.zeros((1, self.resolution[0] * self.resolution[1]), dtype=float))
 
-        for i in range(num_diag):
-
-            diagram, num_pts_in_diag = new_X[i], X[i].shape[0]
-
-            w = np.empty(num_pts_in_diag)
-            for j in range(num_pts_in_diag):
-                w[j] = self.weight(diagram[j,:])
-
-            x_values, y_values = np.linspace(self.im_range[0], self.im_range[1], self.resolution[0]), np.linspace(self.im_range[2], self.im_range[3], self.resolution[1])
-            Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
-            image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
-
-            Xfit.append(image.flatten()[np.newaxis,:])
 
         Xfit = np.concatenate(Xfit,0)
-
         return Xfit
 
     def __call__(self, diag):

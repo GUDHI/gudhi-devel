@@ -17,7 +17,7 @@ def test_representations_examples():
     return None
 
 
-from gudhi.representations.vector_methods import Atol
+from gudhi.representations.vector_methods import *
 from gudhi.representations.metrics import *
 from gudhi.representations.kernel_methods import *
 
@@ -89,7 +89,6 @@ def test_dummy_atol():
             atol_vectoriser.transform(X=[a, b, c])
 
 
-from gudhi.representations.vector_methods import BettiCurve
 
 
 def test_infinity():
@@ -98,3 +97,27 @@ def test_infinity():
     assert c[1] == 0
     assert c[7] == 3
     assert c[9] == 2
+
+
+def test_persistence_image_with_empty_persistence_image():
+    resolution = 50
+    persim = PersistenceImage(im_range=[0,resolution,0,resolution], resolution=[resolution, resolution])
+    empty_persistence = np.array([])
+    assert np.allclose(np.zeros((1, resolution * resolution)),
+                       persim.fit_transform([empty_persistence]))
+
+    persim = PersistenceImage(resolution=[resolution, resolution])
+    assert np.allclose(np.zeros((1, resolution * resolution)),
+                       persim.fit_transform([empty_persistence]))
+
+def test_persistence_image_consistency():
+    resolution = 50
+    persistence = np.array([[1., 2.], [2., 4.]])
+
+    persim = PersistenceImage(im_range=[0,resolution,0,resolution], resolution=[resolution, resolution])
+    pi = persim.fit_transform([persistence, persistence])
+    assert np.allclose(pi[0], pi[1])
+
+    persim = PersistenceImage(resolution=[resolution, resolution])
+    pi = persim.fit_transform([persistence, persistence])
+    assert np.allclose(pi[0], pi[1])
