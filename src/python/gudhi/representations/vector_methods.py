@@ -45,12 +45,10 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            # Error management when persitence is empty
-            if X[0].size != 0:
-                new_X = BirthPersistenceTransform().fit_transform(X)
-                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
-                [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-                self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+            new_X = BirthPersistenceTransform().fit_transform(X)
+            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
+            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
         return self
 
     def transform(self, X):
@@ -81,7 +79,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
                 Xfit.append(image.flatten()[np.newaxis,:])
             else:
-                # Error management when persitence is empty
+                # Error management when persitence is empty returns an empty image
                 Xfit.append(np.zeros((1, self.resolution[0] * self.resolution[1]), dtype=float))
 
         Xfit = np.concatenate(Xfit,0)
