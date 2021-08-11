@@ -443,6 +443,9 @@ if(PYTHONINTERP_FOUND)
       # Euclidean witness
       add_gudhi_py_test(test_euclidean_witness_complex)
 
+      # Datasets generators
+      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independant from CGAL ?
+
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
     # Cubical

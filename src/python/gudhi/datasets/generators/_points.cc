@@ -48,6 +48,10 @@ py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim,
 
 py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, std::string sample) {
 
+    if ( (sample != "random") && (sample != "grid")) {
+        throw pybind11::value_error("This sample type is not supported");
+    }
+
     std::vector<typename Kern::Point_d> points_generated;
 
     {

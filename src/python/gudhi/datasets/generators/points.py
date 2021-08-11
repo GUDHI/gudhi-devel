@@ -23,7 +23,7 @@ def _generate_random_points_on_torus(n_samples, dim):
 def _generate_grid_points_on_torus(n_samples, dim):
     
     # Generate points on a dim-torus as a grid
-    n_samples_grid = int(n_samples**(1./dim))
+    n_samples_grid = int((n_samples+.5)**(1./dim)) # add .5 to avoid rounding down with numerical approximations
     alpha = np.linspace(0, 2*np.pi, n_samples_grid, endpoint=False)
     
     array_points_inter = np.column_stack([np.cos(alpha), np.sin(alpha)])
@@ -45,12 +45,9 @@ def torus(n_samples, dim, sample='random'):
     """
     if sample == 'random':
         # Generate points randomly
-        print("Sample is random")
         return _generate_random_points_on_torus(n_samples, dim)
     elif sample == 'grid':
         # Generate points on a grid
-        print("Sample is grid")
         return _generate_grid_points_on_torus(n_samples, dim)
     else:
         raise ValueError("Sample type '{}' is not supported".format(sample))
-        return

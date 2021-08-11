@@ -227,7 +227,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
   std::vector<Point> points;
   points.reserve(num_points);
   if (sample == "grid") {
-    std::size_t num_slices = (std::size_t)std::pow(num_points, 1. / dim);
+    std::size_t num_slices = (std::size_t)std::pow(num_points + .5, 1. / dim); // add .5 to avoid rounding down with numerical approximations
     generate_grid_points_on_torus_d(
                                        k, dim, num_slices, std::back_inserter(points), radius_noise_percentage);
   } else {

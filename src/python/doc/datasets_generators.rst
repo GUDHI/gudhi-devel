@@ -60,6 +60,9 @@ Otherwise, if set to **'grid'**, the points are generated on a grid and would be
 
    ( [n\_samples^{1 \over {dim}}]^{dim}, 2*dim )
 
+
+**Note:** This version is recommended when the user wishes to use **'grid'** as sample type, or **'random'** with a relatively small number of samples (~ less than 150).
+
 Example
 """""""
 .. code-block:: python
@@ -80,6 +83,8 @@ Second module : **points**
 The user should provide the number of points to be generated on the torus :code:`n_samples` and the dimension :code:`dim` of the torus on which points would be generated in :math:`R^{2dim}`.
 The :code:`sample` argument is optional and is set to **'random'** by default.
 The other allowed value of sample type is **'grid'**.
+
+**Note:** This version is recommended when the user wishes to use **'random'** as sample type with a great number of samples and a low dimension.
 
 Example
 """""""
