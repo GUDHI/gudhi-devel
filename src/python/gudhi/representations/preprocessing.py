@@ -46,16 +46,16 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
             list of n x 2 numpy array: transformed persistence diagrams.
         """
         Xfit = []
-        # Error management when persitence is empty
-        if X[0].size != 0:
-            for diag in X:
+        for diag in X:
+            if diag.size !=0:
                 #new_diag = np.empty(diag.shape)
                 #np.copyto(new_diag, diag)
                 new_diag = np.copy(diag)
                 new_diag[:,1] = new_diag[:,1] - new_diag[:,0]
                 Xfit.append(new_diag)
-        else:
-            Xfit.append([])
+            else:
+                # Error management when persitence is empty - needs to reshape as it can be concatenated by callers
+                Xfit.append(np.array([], dtype=float).reshape(0,2))
         return Xfit
 
     def __call__(self, diag):

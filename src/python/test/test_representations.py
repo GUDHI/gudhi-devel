@@ -99,25 +99,23 @@ def test_infinity():
     assert c[9] == 2
 
 
-def test_persistence_image_with_empty_persistence_image():
-    resolution = 50
-    persim = PersistenceImage(im_range=[0,resolution,0,resolution], resolution=[resolution, resolution])
-    empty_persistence = np.array([])
-    assert np.allclose(np.zeros((1, resolution * resolution)),
-                       persim.fit_transform([empty_persistence]))
-
-    persim = PersistenceImage(resolution=[resolution, resolution])
-    assert np.allclose(np.zeros((1, resolution * resolution)),
-                       persim.fit_transform([empty_persistence]))
-
 def test_persistence_image_consistency():
     resolution = 50
-    persistence = np.array([[1., 2.], [2., 4.]])
+    persistence = np.array([[1., 2.], [2., 4.], [1.5, 6.]])
+    empty_persistence = np.array([])
 
+    # When im_range is set
     persim = PersistenceImage(im_range=[0,resolution,0,resolution], resolution=[resolution, resolution])
-    pi = persim.fit_transform([persistence, persistence])
-    assert np.allclose(pi[0], pi[1])
+    pi = persim.fit_transform([persistence, empty_persistence, persistence])
+    # test the same diagram produces the same image
+    assert np.allclose(pi[0], pi[2])
+    # test an empty diagram produces an empty image (all pixels set to zero)
+    assert np.allclose(np.zeros((1, resolution * resolution)), pi[1])
 
+    # When im_range is deduced from input
     persim = PersistenceImage(resolution=[resolution, resolution])
-    pi = persim.fit_transform([persistence, persistence])
-    assert np.allclose(pi[0], pi[1])
+    pi = persim.fit_transform([persistence, empty_persistence, persistence])
+    # test the same diagram produces the same image
+    assert np.allclose(pi[0], pi[2])
+    # test an empty diagram produces an empty image (all pixels set to zero)
+    assert np.allclose(np.zeros((1, resolution * resolution)), pi[1])
