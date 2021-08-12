@@ -55,7 +55,7 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
                 Xfit.append(new_diag)
             else:
                 # Error management when persitence is empty - needs to reshape as it can be concatenated by callers
-                Xfit.append(np.array([], dtype=float).reshape(0,2))
+                Xfit.append(np.empty((0,2), dtype=float))
         return Xfit
 
     def __call__(self, diag):
