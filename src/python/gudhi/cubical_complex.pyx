@@ -35,7 +35,7 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) nogil
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except+
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
         vector[int] betti_numbers() nogil
@@ -147,7 +147,7 @@ cdef class CubicalComplex:
         :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -169,7 +169,7 @@ cdef class CubicalComplex:
         """This function computes and returns the persistence of the complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int.
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
