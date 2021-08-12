@@ -79,7 +79,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
                 Xfit.append(image.flatten()[np.newaxis,:])
             else:
-                # Error management when persitence is empty returns an empty image
+                # Error management when persitence is empty returns a zero filled image
                 Xfit.append(np.zeros((1, self.resolution[0] * self.resolution[1]), dtype=float))
 
         Xfit = np.concatenate(Xfit,0)
