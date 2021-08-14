@@ -243,10 +243,12 @@ make \endverbatim
  * Witness_complex/example_nearest_landmark_table.cpp</a>
  *
  * \section Contributions Bug reports and contributions
- * Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
- * \verbatim  Contact: gudhi-users@lists.gforge.inria.fr \endverbatim
+ * Please help us improving the quality of the GUDHI library.
+ * You may <a href="https://github.com/GUDHI/gudhi-devel/issues">report bugs</a> or
+ * <a href="https://gudhi.inria.fr/contact/">contact us</a> for any suggestions.
  * 
- * GUDHI is open to external contributions. If you want to join our development team, please contact us.
+ * GUDHI is open to external contributions. If you want to join our development team, please take some time to read our
+ * <a href="https://github.com/GUDHI/gudhi-devel/blob/master/.github/CONTRIBUTING.md">contributing guide</a>.
  * 
 */
 

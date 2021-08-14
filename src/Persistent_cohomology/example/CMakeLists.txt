@@ -11,7 +11,7 @@ if (TBB_FOUND)
   target_link_libraries(persistence_from_simple_simplex_tree ${TBB_LIBRARIES})
 endif()
 add_test(NAME Persistent_cohomology_example_from_simple_simplex_tree COMMAND $<TARGET_FILE:persistence_from_simple_simplex_tree>
-    "1" "0")
+    "2" "0")
 
 if(TARGET Boost::program_options)
   add_executable(rips_persistence_step_by_step rips_persistence_step_by_step.cpp)
