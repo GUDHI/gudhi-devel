@@ -100,7 +100,7 @@ class Persistent_cohomology {
         ds_rank_(num_simplices_),                        // union-find
         ds_parent_(num_simplices_),                      // union-find
         ds_repr_(num_simplices_, NULL),                  // union-find -> annotation vectors
-        dsets_(&ds_rank_[0], &ds_parent_[0]),            // union-find
+        dsets_(ds_rank_.data(), ds_parent_.data()),      // union-find
         cam_(),                                          // collection of annotation vectors
         zero_cocycles_(),                                // union-find -> Simplex_key of creator for 0-homology
         transverse_idx_(),                               // key -> row

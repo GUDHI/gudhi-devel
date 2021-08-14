@@ -194,8 +194,10 @@ A complete configuration would be :
 Documentation
 =============
 
-To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
-`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
+To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
+`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+`sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
+`python-docs-theme <https://github.com/python/python-docs-theme>`_ are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
 `Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
 also mandatory to build the documentation.
@@ -401,8 +403,9 @@ mathematics, science, and engineering.
 Bug reports and contributions
 *****************************
 
-Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
+Please help us improving the quality of the GUDHI library.
+You may `report bugs <https://github.com/GUDHI/gudhi-devel/issues>`_ or
+`contact us <https://gudhi.inria.fr/contact/>`_ for any suggestions.
 
-    Contact: gudhi-users@lists.gforge.inria.fr
-
-GUDHI is open to external contributions. If you want to join our development team, please contact us.
+GUDHI is open to external contributions. If you want to join our development team, please take some time to read our
+`contributing guide <https://github.com/GUDHI/gudhi-devel/blob/master/.github/CONTRIBUTING.md>`_.

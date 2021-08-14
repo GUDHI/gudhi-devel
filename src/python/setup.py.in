@@ -71,7 +71,7 @@ setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
     author='GUDHI Editorial Board',
-    author_email='gudhi-contact@lists.gforge.inria.fr',
+    author_email='gudhi-contact@inria.fr',
     version='@GUDHI_VERSION@',
     url='https://gudhi.inria.fr/',
     project_urls={
