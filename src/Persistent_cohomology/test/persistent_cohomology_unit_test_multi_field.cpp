@@ -54,7 +54,7 @@ std::string test_rips_persistence(int min_coefficient, int max_coefficient, doub
   return strRips;
 }
 
-void test_rips_persistence_in_dimension(int min_dimension, int max_dimension) {
+void test_rips_persistence_with_coeff_field(int min_coefficient, int max_coefficient) {
   // there are 2 discontinued ensembles 
   std::string value0("  0 0.25 inf");
   std::string value1("  1 0.4 inf");
@@ -69,16 +69,16 @@ void test_rips_persistence_in_dimension(int min_dimension, int max_dimension) {
   std::string value7("  2 0.4 inf");
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_MULTI_FIELD MIN_DIM=" << min_dimension << " MAX_DIM=" << max_dimension << " MIN_PERS=0" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_MULTI_FIELD MIN_COEFF=" << min_coefficient << " MAX_COEFF=" << max_coefficient << " MIN_PERS=0" << std::endl;
 
-  std::string str_rips_persistence = test_rips_persistence(min_dimension, max_dimension, 0.0);
+  std::string str_rips_persistence = test_rips_persistence(min_coefficient, max_coefficient, 0.0);
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value2) != std::string::npos); // Check found
 
-  if ((min_dimension < 2) && (max_dimension < 2)) {
+  if ((min_coefficient < 2) && (max_coefficient < 2)) {
     BOOST_CHECK(str_rips_persistence.find(value3) != std::string::npos); // Check found
     BOOST_CHECK(str_rips_persistence.find(value4) != std::string::npos); // Check found
     BOOST_CHECK(str_rips_persistence.find(value5) != std::string::npos); // Check found
@@ -94,22 +94,34 @@ void test_rips_persistence_in_dimension(int min_dimension, int max_dimension) {
 
 }
 
-BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_dim_1_2) {
-  test_rips_persistence_in_dimension(0, 1);
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_0_0) {
+  test_rips_persistence_with_coeff_field(0, 0);
 }
 
-BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_dim_2_3) {
-  test_rips_persistence_in_dimension(1, 3);
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_0_1) {
+  test_rips_persistence_with_coeff_field(0, 1);
 }
 
-BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_dim_1_5) {
-  test_rips_persistence_in_dimension(1, 5);
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_0_6) {
+  test_rips_persistence_with_coeff_field(0, 6);
 }
 
-// TODO(VR): not working from 6
-// std::string str_rips_persistence = test_rips_persistence(6, 0);
-// TODO(VR): division by zero
-// std::string str_rips_persistence = test_rips_persistence(0, 0);
-// TODO(VR): is result OK of :
-// test_rips_persistence_in_dimension(3, 4);
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_1_2) {
+  test_rips_persistence_with_coeff_field(1, 2);
+}
 
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_1_3) {
+  test_rips_persistence_with_coeff_field(1, 3);
+}
+
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_1_5) {
+  test_rips_persistence_with_coeff_field(1, 5);
+}
+
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_2_3) {
+  test_rips_persistence_with_coeff_field(2, 3);
+}
+
+BOOST_AUTO_TEST_CASE(rips_persistent_cohomology_multi_field_coeff_3_4) {
+  test_rips_persistence_with_coeff_field(3, 4);
+}

@@ -53,7 +53,7 @@ std::string test_rips_persistence(int coefficient, int min_persistence) {
   return strInfinite;
 }
 
-void test_rips_persistence_in_dimension(int dimension) {
+void test_rips_persistence_with_coeff_field(int coeff_field) {
   std::string value0("  0 0.02 1.12");
   std::string value1("  0 0.03 1.13");
   std::string value2("  0 0.04 1.14");
@@ -65,21 +65,21 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::string value8("  0 0 inf"    );
   std::string value9("  0 0.01 inf" );
 
-  value0.insert(0,std::to_string(dimension));
-  value1.insert(0,std::to_string(dimension));
-  value2.insert(0,std::to_string(dimension));
-  value3.insert(0,std::to_string(dimension));
-  value4.insert(0,std::to_string(dimension));
-  value5.insert(0,std::to_string(dimension));
-  value6.insert(0,std::to_string(dimension));
-  value7.insert(0,std::to_string(dimension));
-  value8.insert(0,std::to_string(dimension));
-  value9.insert(0,std::to_string(dimension));
+  value0.insert(0,std::to_string(coeff_field));
+  value1.insert(0,std::to_string(coeff_field));
+  value2.insert(0,std::to_string(coeff_field));
+  value3.insert(0,std::to_string(coeff_field));
+  value4.insert(0,std::to_string(coeff_field));
+  value5.insert(0,std::to_string(coeff_field));
+  value6.insert(0,std::to_string(coeff_field));
+  value7.insert(0,std::to_string(coeff_field));
+  value8.insert(0,std::to_string(coeff_field));
+  value9.insert(0,std::to_string(coeff_field));
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=0" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=0" << std::endl;
 
-  std::string str_rips_persistence = test_rips_persistence(dimension, 0);
+  std::string str_rips_persistence = test_rips_persistence(coeff_field, 0);
   std::clog << str_rips_persistence << std::endl;
   
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
@@ -95,9 +95,9 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=1" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=1" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, 1);
+  str_rips_persistence = test_rips_persistence(coeff_field, 1);
 
   BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
   BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
@@ -112,9 +112,9 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=2" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=2" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, 2);
+  str_rips_persistence = test_rips_persistence(coeff_field, 2);
 
   BOOST_CHECK(str_rips_persistence.find(value0) == std::string::npos); // Check not found
   BOOST_CHECK(str_rips_persistence.find(value1) == std::string::npos); // Check not found
@@ -129,9 +129,9 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=Inf" << std::endl;
+  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=Inf" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, (std::numeric_limits<int>::max)());
+  str_rips_persistence = test_rips_persistence(coeff_field, (std::numeric_limits<int>::max)());
 
   BOOST_CHECK(str_rips_persistence.find(value0) == std::string::npos); // Check not found
   BOOST_CHECK(str_rips_persistence.find(value1) == std::string::npos); // Check not found
@@ -146,54 +146,54 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_0 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_0 )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(0), std::invalid_argument);
+  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(0), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_1 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_1 )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(1), std::invalid_argument);
+  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(1), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_2 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_2 )
 {
-  test_rips_persistence_in_dimension(2);
+  test_rips_persistence_with_coeff_field(2);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_3 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_3 )
 {
-  test_rips_persistence_in_dimension(3);
+  test_rips_persistence_with_coeff_field(3);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_4 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_4 )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(4), std::invalid_argument);
+  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(4), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_5 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_5 )
 {
-  test_rips_persistence_in_dimension(5);
+  test_rips_persistence_with_coeff_field(5);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_6 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_6 )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(6), std::invalid_argument);
+  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(6), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_11 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_11 )
 {
-  test_rips_persistence_in_dimension(11);
+  test_rips_persistence_with_coeff_field(11);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_13 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_13 )
 {
-  test_rips_persistence_in_dimension(13);
+  test_rips_persistence_with_coeff_field(13);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_46349 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_46349 )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_in_dimension(46349), std::invalid_argument);
+  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(46349), std::invalid_argument);
 }
 
 /** SimplexTree minimal options to test the limits.
