@@ -146,52 +146,19 @@ void test_rips_persistence_with_coeff_field(int coeff_field) {
   std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_0 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_not_prime )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(0), std::invalid_argument);
+  for (auto non_prime : {0, 1, 4, 6})
+    BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(non_prime), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_1 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_prime )
 {
-  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(1), std::invalid_argument);
+  for (auto prime : {2, 3, 5, 11, 13})
+    test_rips_persistence_with_coeff_field(prime);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_2 )
-{
-  test_rips_persistence_with_coeff_field(2);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_3 )
-{
-  test_rips_persistence_with_coeff_field(3);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_4 )
-{
-  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(4), std::invalid_argument);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_5 )
-{
-  test_rips_persistence_with_coeff_field(5);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_6 )
-{
-  BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(6), std::invalid_argument);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_11 )
-{
-  test_rips_persistence_with_coeff_field(11);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_13 )
-{
-  test_rips_persistence_with_coeff_field(13);
-}
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_46349 )
+BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_coeff_limit )
 {
   BOOST_CHECK_THROW(test_rips_persistence_with_coeff_field(46349), std::invalid_argument);
 }
