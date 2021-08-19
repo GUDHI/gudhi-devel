@@ -9,9 +9,6 @@
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-# joblib is required by scikit-learn
-from joblib import Parallel, delayed
-
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
 #     USER->>DimensionSelector: fit_transform(<br/>[[array( H0(X0) ), array( H1(X0) ), ...],<br/> [array( H0(X1) ), array( H1(X1) ), ...],<br/> ...])
