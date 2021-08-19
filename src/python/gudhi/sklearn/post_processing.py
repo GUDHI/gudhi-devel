@@ -26,7 +26,7 @@ class DimensionSelector(BaseEstimator, TransformerMixin):
     This is a class to select persistence diagrams in a specific dimension.
     """
 
-    def __init__(self, persistence_dimension=0, n_jobs=None):
+    def __init__(self, persistence_dimension=0):
         """
         Constructor for the DimensionSelector class.
 
@@ -34,7 +34,6 @@ class DimensionSelector(BaseEstimator, TransformerMixin):
             persistence_dimension (int): The returned persistence diagrams dimension. Default value is `0`.
         """
         self.persistence_dimension = persistence_dimension
-        self.n_jobs = n_jobs
 
     def fit(self, X, Y=None):
         """
