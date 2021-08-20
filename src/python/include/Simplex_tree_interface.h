@@ -178,7 +178,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     }
 
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
+      auto old_edges_size = edges.size();
       edges = Gudhi::collapse::flag_complex_collapse_edges(edges);
+      if (old_edges_size == edges.size())
+          break;
     }
     Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface();
     // Copy the original 0-skeleton
