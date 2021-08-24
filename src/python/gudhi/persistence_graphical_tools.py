@@ -60,7 +60,7 @@ def _array_handler(a):
                 persistence-compatible list (padding with 0), so that the
                 plot can be performed seamlessly.
     """
-    if isinstance(a[0][1], np.floating) or isinstance(a[0][1], float):
+    if isinstance(a[0][1], (np.floating, float)):
         return [[0, x] for x in a]
     else:
         return a
