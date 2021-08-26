@@ -278,6 +278,7 @@ if(PYTHONINTERP_FOUND)
 
     # Some files for pip package
     file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+    file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
     add_custom_command(
         OUTPUT gudhi.so
