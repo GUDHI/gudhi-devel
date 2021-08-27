@@ -257,6 +257,12 @@ class KNearestNeighbors:
             if ef is not None:
                 self.graph.set_ef(ef)
             neighbors, distances = self.graph.knn_query(X, k, num_threads=self.params["num_threads"])
+            if numpy.any(numpy.isnan(distances)):
+                import warnings
+                warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
+            if numpy.any(numpy.isinf(distances)):
+                import warnings
+                warnings.warn("Overflow value encountered while computing 'distances'", RuntimeWarning)
             # The k nearest neighbors are always sorted. I couldn't find it in the doc, but the code calls searchKnn,
             # which returns a priority_queue, and then fills the return array backwards with top/pop on the queue.
             if self.return_index:
@@ -290,6 +296,12 @@ class KNearestNeighbors:
             if self.return_index:
                 if self.return_distance:
                     distances, neighbors = mat.Kmin_argKmin(k, dim=1)
+                    if distances.isnan().any():
+                        import warnings
+                        warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
+                    if distances.isinf().any():
+                        import warnings
+                        warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                     if p != numpy.inf:
                         distances = distances ** (1.0 / p)
                     return neighbors, distances
@@ -298,6 +310,12 @@ class KNearestNeighbors:
                     return neighbors
             if self.return_distance:
                 distances = mat.Kmin(k, dim=1)
+                if distances.isnan().any():
+                    import warnings
+                    warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
+                if distances.isinf().any():
+                    import warnings
+                    warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                 if p != numpy.inf:
                     distances = distances ** (1.0 / p)
                 return distances
