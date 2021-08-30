@@ -296,10 +296,10 @@ class KNearestNeighbors:
             if self.return_index:
                 if self.return_distance:
                     distances, neighbors = mat.Kmin_argKmin(k, dim=1)
-                    if distances.isnan().any():
+                    if torch.isnan(distances).any():
                         import warnings
                         warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
-                    if distances.isinf().any():
+                    if torch.isinf(distances).any():
                         import warnings
                         warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                     if p != numpy.inf:
@@ -310,10 +310,10 @@ class KNearestNeighbors:
                     return neighbors
             if self.return_distance:
                 distances = mat.Kmin(k, dim=1)
-                if distances.isnan().any():
+                if torch.isnan(distances).any():
                     import warnings
                     warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
-                if distances.isinf().any():
+                if torch.isinf(distances).any():
                     import warnings
                     warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                 if p != numpy.inf:
