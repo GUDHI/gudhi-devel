@@ -102,7 +102,8 @@ class Cech_blocker {
     using Point_cloud =  std::vector<Point_d>;
     CGAL::NT_converter<FT, double> cast_to_double;
     Filtration_value radius = 0.;
-    std::string key_to_permute;
+//     std::string key_to_permute;
+    std::vector<std::string> faces_keys;
     
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     // std::set <Filtration_value> enclosing_ball_radii;
@@ -113,12 +114,12 @@ class Cech_blocker {
         auto longlist = sc_ptr_->simplex_vertex_range(sh);
         auto shortlist = sc_ptr_->simplex_vertex_range(face);
 
-        std::clog << "Hind debug: within FACE loop "<< std::endl;
+//         std::clog << "Hind debug: within FACE loop "<< std::endl;
         // TODO to remove
-        for (auto i = std::begin(longlist); i != std::end(longlist);++i)
-            std::clog << "Hind debug: longlist: " << cc_ptr_->get_point(*i) << std::endl;
-        for (auto i = std::begin(shortlist); i != std::end(shortlist);++i)
-            std::clog << "Hind debug: shortlist: " << cc_ptr_->get_point(*i) << std::endl;
+//         for (auto i = std::begin(longlist); i != std::end(longlist);++i)
+//             std::clog << "Hind debug: longlist: " << cc_ptr_->get_point(*i) << std::endl;
+//         for (auto i = std::begin(shortlist); i != std::end(shortlist);++i)
+//             std::clog << "Hind debug: shortlist: " << cc_ptr_->get_point(*i) << std::endl;
 
         auto longiter = std::begin(longlist);
         auto shortiter = std::begin(shortlist);
@@ -126,7 +127,7 @@ class Cech_blocker {
         while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
         auto extra = *longiter; // Vertex_handle
 
-        std::clog << "Hind debug: extra vertex: " << cc_ptr_->get_point(extra) << std::endl;
+//         std::clog << "Hind debug: extra vertex: " << cc_ptr_->get_point(extra) << std::endl;
         
         Point_cloud face_points;
         std::string key, key_extra;
@@ -139,10 +140,11 @@ class Cech_blocker {
         }
         key_extra = key;
         key_extra.append(std::to_string(extra));
-        key_to_permute = key_extra;
-        std::clog << "END OF VERTICES " << std::endl;
-        std::clog << "KEY is: " << key << std::endl;
-        std::clog << "KEY extra is: " << key_extra << std::endl;
+        faces_keys.push_back(key_extra);
+//         key_to_permute = key_extra;
+//         std::clog << "END OF VERTICES " << std::endl;
+//         std::clog << "KEY is: " << key << std::endl;
+//         std::clog << "KEY extra is: " << key_extra << std::endl;
         Sphere sph;
         auto it = cache_.find(key);
         if(it != cache_.end())
@@ -155,14 +157,14 @@ class Cech_blocker {
             #ifdef DEBUG_TRACES
                 std::clog << "circumcenter: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
-            std::clog << "distance FYI: " << kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) << " < " << cast_to_double(sph.second) << std::endl;
+//             std::clog << "distance FYI: " << kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) << " < " << cast_to_double(sph.second) << std::endl;
             // enclosing_ball_radii.insert(radius);
             enclosing_ball_spheres.insert(sph);
             cache_[key_extra] = sph;
         }
-        else {// TODO to remove
-            std::clog << "vertex not included BECAUSE DISTANCE: "<< kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) << " AND RAD SPHERE: " << sph.second << std::endl;
-        }
+//         else {// TODO to remove
+//             std::clog << "vertex not included BECAUSE DISTANCE: "<< kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) << " AND RAD SPHERE: " << sph.second << std::endl;
+//         }
     }
     // Get the minimal radius of all faces enclosing balls if exists
     if (!enclosing_ball_spheres.empty()) {
@@ -171,12 +173,21 @@ class Cech_blocker {
         radius = std::sqrt(cast_to_double(sph_min.second));
         // std::clog << "CHECK that radius of min sphere is min radius: " << std::sqrt(cast_to_double(sph_min.second)) << "; and RADIUS min: " << radius << std::endl;
         // Set all key_to_permute permutations to min sphere in cache
-        do
-        {
-            cache_[key_to_permute] = sph_min;
-        } while(std::next_permutation(key_to_permute.begin(), key_to_permute.end()));
+//         do
+//         {   
+//             if (cache_.find(key_to_permute) != cache_.end()) {
+//                 if (cast_to_double(cache_[key_to_permute].second) >  cast_to_double(sph_min.second))
+//                     cache_[key_to_permute] = sph_min;
+//             }
+//             else {
+//                 cache_[key_to_permute] = sph_min;
+//             }
+//         } while(std::next_permutation(key_to_permute.begin(), key_to_permute.end()));
+        for (auto k : faces_keys) {
+            cache_[k] = sph_min;
+        }
     }
-    std::clog << "END OF FACES ; radius = " << radius << std::endl;
+//     std::clog << "END OF FACES ; radius = " << radius << std::endl;
     
     if (radius == 0.) { // Spheres of each face don't contain the whole simplex
         Point_cloud points;
@@ -185,12 +196,21 @@ class Cech_blocker {
         }
         Sphere sph = get_sphere(points.cbegin(), points.cend());
         radius = std::sqrt(cast_to_double(sph.second));
-        std::clog << "GLOBAL SPHERE radius = " << radius << std::endl;
+//         std::clog << "GLOBAL SPHERE radius = " << radius << std::endl;
         // Set all key_to_permute permutations to sphere in cache
-        do
-        {
-            cache_[key_to_permute] = sph;
-        } while(std::next_permutation(key_to_permute.begin(), key_to_permute.end()));
+//         do
+//         {
+// //             if (cache_.find(key_to_permute) != cache_.end()) {
+// //                 if (cast_to_double(cache_[key_to_permute].second) >  cast_to_double(sph.second))
+// //                     cache_[key_to_permute] = sph;
+// //             }
+// //             else {
+// //                 cache_[key_to_permute] = sph;
+// //             }
+//         } while(std::next_permutation(key_to_permute.begin(), key_to_permute.end()));
+//         for (auto k : faces_keys) {
+//             cache_[k] = sph;
+//         }
     }
 
 
