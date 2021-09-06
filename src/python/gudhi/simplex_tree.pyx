@@ -412,7 +412,7 @@ cdef class SimplexTree:
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the
             persistence diagram point coordinates) to take into account (strictly greater than min_persistence).
@@ -449,7 +449,7 @@ cdef class SimplexTree:
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -472,7 +472,7 @@ cdef class SimplexTree:
         when you do not want the list :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
