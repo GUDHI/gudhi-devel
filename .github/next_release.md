@@ -6,8 +6,9 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.4.0:
 
-- [Module](link)
-     - ...
+- [Alpha complex](https://gudhi.inria.fr/python/latest/alpha_complex_user.html)
+     - the python weighted version for alpha complex is now available in any dimension D.
+     - `alpha_complex = gudhi.AlphaComplex(off_file='/data/points/tore3D_300.off')` is deprecated, please use [read_points_from_off_file](https://gudhi.inria.fr/python/latest/point_cloud.html#gudhi.read_points_from_off_file) instead.
 
 - [Module](link)
      - ...
