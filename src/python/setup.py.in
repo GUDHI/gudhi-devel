@@ -82,10 +82,10 @@ setup(
         },
     description='The Gudhi library is an open source library for ' \
         'Computational Topology and Topological Data Analysis (TDA).',
+    data_files=[('.', ['./introduction.rst'])],
     long_description_content_type='text/x-rst',
     long_description=long_description,
     ext_modules = ext_modules,
     install_requires = ['numpy >= 1.15.0',],
-    setup_requires = ['cython','numpy >= 1.15.0','pybind11',],
     package_data={"": ["*.dll"], },
 )
