@@ -259,9 +259,11 @@ class KNearestNeighbors:
             neighbors, distances = self.graph.knn_query(X, k, num_threads=self.params["num_threads"])
             if numpy.any(numpy.isnan(distances)):
                 import warnings
+                warnings.simplefilter("always")
                 warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
             if numpy.any(numpy.isinf(distances)):
                 import warnings
+                warnings.simplefilter("always")
                 warnings.warn("Overflow value encountered while computing 'distances'", RuntimeWarning)
             # The k nearest neighbors are always sorted. I couldn't find it in the doc, but the code calls searchKnn,
             # which returns a priority_queue, and then fills the return array backwards with top/pop on the queue.
@@ -298,9 +300,11 @@ class KNearestNeighbors:
                     distances, neighbors = mat.Kmin_argKmin(k, dim=1)
                     if torch.isnan(distances).any():
                         import warnings
+                        warnings.simplefilter("always")
                         warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
                     if torch.isinf(distances).any():
                         import warnings
+                        warnings.simplefilter("always")
                         warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                     if p != numpy.inf:
                         distances = distances ** (1.0 / p)
@@ -312,9 +316,11 @@ class KNearestNeighbors:
                 distances = mat.Kmin(k, dim=1)
                 if torch.isnan(distances).any():
                     import warnings
+                    warnings.simplefilter("always")
                     warnings.warn("NaN value encountered while computing 'distances'", RuntimeWarning)
                 if torch.isinf(distances).any():
                     import warnings
+                    warnings.simplefilter("always")
                     warnings.warn("Overflow encountered while computing 'distances'", RuntimeWarning)
                 if p != numpy.inf:
                     distances = distances ** (1.0 / p)
