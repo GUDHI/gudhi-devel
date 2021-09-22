@@ -40,9 +40,9 @@ if(TARGET Boost::program_options)
     target_link_libraries(persistence_from_file ${TBB_LIBRARIES})
   endif()
   add_test(NAME Persistent_cohomology_example_from_file_3_2_0 COMMAND $<TARGET_FILE:persistence_from_file>
-      "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc" "-p" "2" "-m" "0")
+      "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/Klein_bottle_complex.fsc" "-p" "2" "-m" "0")
   add_test(NAME Persistent_cohomology_example_from_file_3_3_100 COMMAND $<TARGET_FILE:persistence_from_file>
-      "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/bunny_5000_complex.fsc" "-p" "3" "-m" "100")
+      "${CMAKE_SOURCE_DIR}/data/filtered_simplicial_complex/Klein_bottle_complex.fsc" "-p" "3" "-m" "100")
 endif()
 
 if(GMP_FOUND)
