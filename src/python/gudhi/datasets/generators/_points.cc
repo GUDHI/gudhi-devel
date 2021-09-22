@@ -96,10 +96,10 @@ PYBIND11_MODULE(_points, m) {
           :returns: the generated points on a sphere.
           )pbdoc");
 
-    m.def("torus", &generate_points_on_torus,
+    m.def("ctorus", &generate_points_on_torus,
           py::arg("n_samples"), py::arg("dim"), py::arg("sample") = "random",
           R"pbdoc(
-          Generate random i.i.d. points on a d-torus in R^2d
+          Generate random i.i.d. points on a d-torus in R^2d or as a grid
 
           :param n_samples: The number of points to be generated.
           :type n_samples: integer
@@ -107,7 +107,10 @@ PYBIND11_MODULE(_points, m) {
           :type dim: integer
           :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
           :type sample: string
-          :rtype: numpy array of float
+          :rtype: numpy array of float.
+          The shape of returned numpy array is :
+              if sample is 'random' : (n_samples, 2*dim).
+              if sample is 'grid' : ([n_samples**(1./dim)]**dim, 2*dim).
           :returns: the generated points on a torus.
           )pbdoc");
 }

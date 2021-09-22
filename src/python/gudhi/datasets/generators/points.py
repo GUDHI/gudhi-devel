@@ -10,6 +10,9 @@
 import numpy as np
 import itertools
 
+from ._points import ctorus
+from ._points import sphere
+
 def _generate_random_points_on_torus(n_samples, dim):
 
     # Generate random angles of size n_samples*dim
