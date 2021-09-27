@@ -17,11 +17,12 @@ function(add_gudhi_module file_path)
 
 endfunction(add_gudhi_module)
 
-option(WITH_GUDHI_BENCHMARK "Activate/desactivate benchmark compilation" OFF)
-option(WITH_GUDHI_EXAMPLE "Activate/desactivate examples compilation and installation" OFF)
-option(WITH_GUDHI_PYTHON "Activate/desactivate python module compilation and installation" ON)
-option(WITH_GUDHI_TEST "Activate/desactivate examples compilation and installation" ON)
-option(WITH_GUDHI_UTILITIES "Activate/desactivate utilities compilation and installation" ON)
+option(WITH_GUDHI_BENCHMARK "Activate/deactivate benchmark compilation" OFF)
+option(WITH_GUDHI_EXAMPLE "Activate/deactivate examples compilation and installation" OFF)
+option(WITH_NETWORK "Activate/deactivate datasets fetching test which uses the Internet" OFF)
+option(WITH_GUDHI_PYTHON "Activate/deactivate python module compilation and installation" ON)
+option(WITH_GUDHI_TEST "Activate/deactivate examples compilation and installation" ON)
+option(WITH_GUDHI_UTILITIES "Activate/deactivate utilities compilation and installation" ON)
 
 if (WITH_GUDHI_BENCHMARK)
   set(GUDHI_SUB_DIRECTORIES "${GUDHI_SUB_DIRECTORIES};benchmark")

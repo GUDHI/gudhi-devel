@@ -543,7 +543,9 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Fetch remote datasets
-    add_gudhi_py_test(test_remote_datasets)
+    if(WITH_NETWORK)
+      add_gudhi_py_test(test_remote_datasets)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
