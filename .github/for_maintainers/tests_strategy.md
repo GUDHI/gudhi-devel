@@ -8,13 +8,14 @@ The aim is to help maintainers to anticipate third parties modifications, update
 
 ### Linux
 
-As all the third parties are already installed (thanks to docker), the compilations has been seperated by categories to be parallelized:
+As all the third parties are already installed (thanks to docker), the compilations has been separated by categories to be parallelized:
 
 * examples (C++)
 * tests (C++)
 * utils (C++)
 * doxygen (C++ documentation that is available in the artefacts)
 * python (including documentation and code coverage that are available in the artefacts)
+* python_tests_with_network (includes previous python with WITH_NETWORK option enabled which adds datasets fetching test)
 
 (cf. `.circleci/config.yml`)
 
@@ -45,6 +46,7 @@ The compilations has been seperated by categories to be parallelized, but I don'
 * tests (C++)
 * utils (C++)
 * python
+* python tests with network
 
 Doxygen (C++) is not tested.
 (cf. `.appveyor.yml`)
