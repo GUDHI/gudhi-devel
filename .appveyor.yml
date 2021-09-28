@@ -59,12 +59,12 @@ build_script:
   - mkdir build
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
-  - if or ([%target%]==[Python]) ([%target%]==[PythonTestsWithNetwork]) (
+  - if or ([%target%]==[Python]) ([%target%]==[PythonTestsWithNetwork]) {
       cd src/python &
       type setup.py &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release
-    ) else (
+    } else {
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release -E diff_files
-    )
+    }
