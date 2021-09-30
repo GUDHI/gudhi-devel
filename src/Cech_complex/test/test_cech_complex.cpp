@@ -24,26 +24,19 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Unitary_tests_utils.h>
-#include <gudhi/Miniball.hpp>
 
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
-
 
 // Type definitions
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
-//using Point = std::vector<Filtration_value>;
 using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
 using FT = typename Kernel::FT;
 using Point = typename Kernel::Point_d;
 
 using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel>;
-
-// using Point_iterator = Point_cloud::const_iterator;
-// using Coordinate_iterator = Point::const_iterator;
-// using Min_sphere = Gudhi::Miniball::Miniball<Gudhi::Miniball::CoordAccessor<Point_iterator, Coordinate_iterator>>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel, Simplex_tree>;
 
 BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   // ----------------------------------------------------------------------------
@@ -52,18 +45,6 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   //
   // ----------------------------------------------------------------------------
   Point_cloud points;
-//   points.push_back({1., 0.});                  // 0
-//   points.push_back({0., 1.});                  // 1
-//   points.push_back({2., 1.});                  // 2
-//   points.push_back({3., 2.});                  // 3
-//   points.push_back({0., 3.});                  // 4
-//   points.push_back({3. + std::sqrt(3.), 3.});  // 5
-//   points.push_back({1., 4.});                  // 6
-//   points.push_back({3., 4.});                  // 7
-//   points.push_back({2., 4. + std::sqrt(3.)});  // 8
-//   points.push_back({0., 4.});                  // 9
-//   points.push_back({-0.5, 2.});                // 10
-
 
   std::vector<FT> point0({1., 0.});
   points.emplace_back(point0.begin(), point0.end());
@@ -156,36 +137,32 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   for (std::size_t vertex = 0; vertex <= 2; vertex++) {
     points012.push_back(cech_complex_for_doc.get_point(vertex));
   }
-//   std::size_t dimension = points[0].end() - points[0].begin();
-//   Min_sphere ms012(dimension, points012.begin(), points012.end());
 
   Kernel kern;
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
+  std::clog << "f012= " << f012 << std::endl;
+
   CGAL::NT_converter<FT, double> cast_to_double;
-  std::clog << "f012= " << f012 << " | points012_radius= " << std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points012.begin(), points012.end()))) << std::endl;
-
-
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points012.begin(), points012.end()))));
 
   Point_cloud points1410;
   points1410.push_back(cech_complex_for_doc.get_point(1));
   points1410.push_back(cech_complex_for_doc.get_point(4));
   points1410.push_back(cech_complex_for_doc.get_point(10));
-//   Min_sphere ms1410(dimension, points1410.begin(), points1410.end());
 
   Simplex_tree::Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
-  std::clog << "f1410= " << f1410 << " | points1410_radius= " << std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points1410.begin(), points1410.end()))) << std::endl;
+  std::clog << "f1410= " << f1410 << std::endl;
 
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f1410, std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points1410.begin(), points1410.end()))));
+  // In this case, the computed sphere using CGAL kernel does not match the minimal enclosing ball; the filtration value check is therefore done against a hardcoded value
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f1410, 1.);
 
   Point_cloud points469;
   points469.push_back(cech_complex_for_doc.get_point(4));
   points469.push_back(cech_complex_for_doc.get_point(6));
   points469.push_back(cech_complex_for_doc.get_point(9));
-//   Min_sphere ms469(dimension, points469.begin(), points469.end());
 
   Simplex_tree::Filtration_value f469 = st2.filtration(st2.find({4, 6, 9}));
-  std::clog << "f469= " << f469 << " | points469_radius= " << std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points469.begin(), points469.end()))) << std::endl;
+  std::clog << "f469= " << f469 << std::endl;
 
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f469, std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points469.begin(), points469.end()))));
 

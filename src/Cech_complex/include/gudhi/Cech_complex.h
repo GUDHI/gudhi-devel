@@ -40,7 +40,7 @@ namespace cech_complex {
  * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
  * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
  */
-template <typename SimplicialComplexForProximityGraph, typename ForwardPointRange, typename Kernel>
+template <typename SimplicialComplexForProximityGraph, typename ForwardPointRange, typename Kernel, typename SimplicialComplexForCechComplex>
 class Cech_complex {
  private:
   // Required by compute_proximity_graph
@@ -48,17 +48,17 @@ class Cech_complex {
   using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
   using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForProximityGraph>;
 
-  // Retrieve Coordinate type from ForwardPointRange
-//   using Point_from_range_iterator = typename boost::range_const_iterator<ForwardPointRange>::type;
-//   using Point_from_range = typename std::iterator_traits<Point_from_range_iterator>::value_type;
-//   using Coordinate_iterator = typename boost::range_const_iterator<Point_from_range>::type;
-//   using Coordinate = typename std::iterator_traits<Coordinate_iterator>::value_type;
-
  public:
-  // Point and Point_cloud type definition
-  //using Point = std::vector<Coordinate>;
-  using Point = typename Kernel::Point_d;
-  using Point_cloud = std::vector<Point>;
+
+  using cech_blocker = Cech_blocker<SimplicialComplexForCechComplex, Cech_complex, Kernel>;
+
+  using Point_d = typename cech_blocker::Point_d;
+  using Point_cloud = std::vector<Point_d>;
+
+  // Numeric type of coordinates in the kernel
+  using FT = typename cech_blocker::FT;
+  // Sphere is a pair of point and squared radius.
+  using Sphere = typename std::pair<Point_d, FT>;
 
  public:
   /** \brief Cech_complex constructor from a list of points.
@@ -77,7 +77,6 @@ class Cech_complex {
 
     point_cloud_.assign(points.begin(), points.end());
 
-    std::clog << "Hind: Just before the graph compute" << std::endl;
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(
         point_cloud_, max_radius_, Gudhi::Minimal_enclosing_ball_radius());
   }
@@ -90,19 +89,14 @@ class Cech_complex {
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
-  template <typename SimplicialComplexForCechComplex>
   void create_complex(SimplicialComplexForCechComplex& complex, int dim_max) {
-    std::clog << "Hind: in create complex" << std::endl;
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Cech_complex::create_complex - simplicial complex is not empty"));
 
     // insert the proximity graph in the simplicial complex
-    std::clog << "Hind: before insert_graph" << std::endl;
     complex.insert_graph(cech_skeleton_graph_);
     // expand the graph until dimension dim_max
-    std::clog << "Hind: before expansion_with_blockers" << std::endl;
-    complex.expansion_with_blockers(dim_max,
-                                    Cech_blocker<SimplicialComplexForCechComplex, Cech_complex, Kernel>(&complex, this));
+    complex.expansion_with_blockers(dim_max, cech_blocker(&complex, this));
   }
 
   /** @return max_radius value given at construction. */
@@ -111,12 +105,18 @@ class Cech_complex {
   /** @param[in] vertex Point position in the range.
    * @return The point.
    */
-  const Point& get_point(Vertex_handle vertex) const { return point_cloud_[vertex]; }
+  const Point_d& get_point(Vertex_handle vertex) const { return point_cloud_[vertex]; }
+
+  /**
+   * @return Vector of cached spheres.
+   */
+  std::vector<Sphere> & get_cache() { return cache_; }
 
  private:
   Proximity_graph cech_skeleton_graph_;
   Filtration_value max_radius_;
   Point_cloud point_cloud_;
+  std::vector<Sphere> cache_;
 };
 
 }  // namespace cech_complex
