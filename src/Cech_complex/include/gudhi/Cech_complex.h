@@ -11,7 +11,7 @@
 #ifndef CECH_COMPLEX_H_
 #define CECH_COMPLEX_H_
 
-#include <gudhi/distance_functions.h>        // for Gudhi::Minimal_enclosing_ball_radius
+#include <gudhi/Cech_complex/Cech_kernel.h>  // for Gudhi::Minimal_enclosing_ball_radius
 #include <gudhi/graph_simplicial_complex.h>  // for Gudhi::Proximity_graph
 #include <gudhi/Debug_utils.h>               // for GUDHI_CHECK
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker

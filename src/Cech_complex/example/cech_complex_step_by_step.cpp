@@ -9,7 +9,7 @@
  */
 
 #include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/distance_functions.h>
+#include <gudhi/Cech_complex/Cech_kernel.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 

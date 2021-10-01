@@ -22,7 +22,7 @@
 // to construct Cech_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/distance_functions.h>
+#include <gudhi/Cech_complex/Cech_kernel.h>
 #include <gudhi/Unitary_tests_utils.h>
 
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
