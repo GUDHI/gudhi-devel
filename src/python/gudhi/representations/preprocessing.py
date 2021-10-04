@@ -1,10 +1,11 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Mathieu Carrière
+# Author(s):       Mathieu Carrière, Vincent Rouvreau
 #
 # Copyright (C) 2018-2019 Inria
 #
 # Modification(s):
+#   - 2021/10 Vincent Rouvreau: Add DimensionSelector
 #   - YYYY/MM Author: Description of the modification
 
 import numpy as np
@@ -363,3 +364,51 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
             n x 2 numpy array: extracted persistence diagram.
         """
         return self.fit_transform([diag])[0]
+
+
+# Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
+# sequenceDiagram
+#     USER->>DimensionSelector: fit_transform(<br/>[[array( Hi(X0) ), array( Hj(X0) ), ...],<br/> [array( Hi(X1) ), array( Hj(X1) ), ...],<br/> ...])
+#     DimensionSelector->>thread1: _transform([array( Hi(X0) ), array( Hj(X0) )], ...)
+#     DimensionSelector->>thread2: _transform([array( Hi(X1) ), array( Hj(X1) )], ...)
+#     Note right of DimensionSelector: ...
+#     thread1->>DimensionSelector: array( Hn(X0) )
+#     thread2->>DimensionSelector: array( Hn(X1) )
+#     Note right of DimensionSelector: ...
+#     DimensionSelector->>USER: [array( Hn(X0) ), <br/> array( Hn(X1) ), <br/> ...]
+
+class DimensionSelector(BaseEstimator, TransformerMixin):
+    """
+    This is a class to select persistence diagrams in a specific dimension from its index.
+    """
+
+    def __init__(self, index=0):
+        """
+        Constructor for the DimensionSelector class.
+
+        Parameters:
+            index (int): The returned persistence diagrams dimension index. Default value is `0`.
+        """
+        self.index = index
+
+    def fit(self, X, Y=None):
+        """
+        Nothing to be done, but useful when included in a scikit-learn Pipeline.
+        """
+        return self
+
+    def transform(self, X, Y=None):
+        """
+        Select persistence diagrams from its dimension.
+
+        Parameters:
+            X (list of list of pairs): List of list of persistence pairs, i.e.
+                `[[array( Hi(X0) ), array( Hj(X0) ), ...], [array( Hi(X1) ), array( Hj(X1) ), ...], ...]` 
+
+        Returns:
+            list of pairs:
+            Persistence diagrams in a specific dimension. i.e. if `index` was set to `m` and `Hn` is at index `n` of
+            the input, it returns `[array( Hn(X0) ), array( Hn(X1), ...]`
+        """
+
+        return [persistence[self.index] for persistence in X]

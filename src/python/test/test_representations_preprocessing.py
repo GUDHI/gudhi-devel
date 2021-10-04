@@ -8,13 +8,9 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.sklearn.post_processing import DimensionSelector
+from gudhi.representations.preprocessing import DimensionSelector
 import numpy as np
 import pytest
-
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2021 Inria"
-__license__ = "MIT"
 
 H0_0 = np.array([0.0, 0.0])
 H1_0 = np.array([1.0, 0.0])
@@ -26,18 +22,18 @@ H1_2 = np.array([1.0, 2.0])
 
 def test_dimension_selector():
     X = [[H0_0, H1_0], [H0_1, H1_1], [H0_2, H1_2]]
-    ds = DimensionSelector(persistence_dimension=0)
+    ds = DimensionSelector(index=0)
     h0 = ds.fit_transform(X)
     np.testing.assert_array_equal(h0[0], H0_0)
     np.testing.assert_array_equal(h0[1], H0_1)
     np.testing.assert_array_equal(h0[2], H0_2)
 
-    ds = DimensionSelector(persistence_dimension=1)
+    ds = DimensionSelector(index=1)
     h1 = ds.fit_transform(X)
     np.testing.assert_array_equal(h1[0], H1_0)
     np.testing.assert_array_equal(h1[1], H1_1)
     np.testing.assert_array_equal(h1[2], H1_2)
 
-    ds = DimensionSelector(persistence_dimension=2)
+    ds = DimensionSelector(index=2)
     with pytest.raises(IndexError):
         h2 = ds.fit_transform([[H0_0, H1_0], [H0_1, H1_1], [H0_2, H1_2]])
