@@ -1,4 +1,4 @@
-if (CGAL_FOUND)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   project(Cech_complex_utilities)
 
   if (TARGET Boost::program_options)
