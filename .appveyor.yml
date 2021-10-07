@@ -10,7 +10,7 @@ configuration:
 
 environment:
   # update the vcpkg cache even if build fails
-  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  #APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\Python39-x64"
   CMAKE_GMP_FLAGS: -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
   CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib"
@@ -44,7 +44,7 @@ install:
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
-  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   - python --version
   - pip --version
   - python -m pip install --user --upgrade pip
