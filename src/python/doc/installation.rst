@@ -359,7 +359,7 @@ Python Optimal Transport
 ------------------------
 
 The :doc:`Wasserstein distance </wasserstein_distance_user>`
-module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
+module requires `POT <https://pythonot.github.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
 
 PyTorch
