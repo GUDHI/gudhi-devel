@@ -16,54 +16,52 @@ environment:
   CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib"
   CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
-#  matrix:
-#      - target: Examples
-#        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
-#
-#      - target: UnitaryTests
-#        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
-#
-#      - target: Utilities
-#        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
-#
-#      - target: Python
-#        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
+  matrix:
+      - target: Examples
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+
+      - target: UnitaryTests
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
+
+      - target: Utilities
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+
+      - target: Python
+        CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
 #cache:
 #  - c:\Tools\vcpkg\installed
 #  - '%LOCALAPPDATA%\pip\Cache'
 
-#init:
-#  - echo %target%
+init:
+  - echo %target%
 
 # tbb:x64-windows 
 install:
-#  - git submodule update --init
-#  - vcpkg install boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
-#  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
-#  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - git submodule update --init
+  - vcpkg install boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
+  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   - python --version
   - pip --version
-  - '%PYTHON%\python.exe --version'
-  - '%PYTHON%\python.exe -m pip --version'
-#  - python -m pip install --user --upgrade pip
-#  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-#  # No PyKeOps on windows, let's workaround this one.
-#  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install --user  %%A
+  - python -m pip install --user --upgrade pip
+  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+  # No PyKeOps on windows, let's workaround this one.
+  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install --user  %%A
 
-#build_script:
-#  - mkdir build
-#  - cd build
-#  - cmake -G "Visual Studio 16 2019" -A x64 %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
-#  - if [%target%]==[Python] (
-#      cd src/python &
-#      type setup.py &
-#      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
-#      ctest -j 1 --output-on-failure -C Release
-#    ) else (
-#      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
-#      ctest -j 1 --output-on-failure -C Release -E diff_files
-#    )
+build_script:
+  - mkdir build
+  - cd build
+  - cmake -G "Visual Studio 16 2019" -A x64 %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+  - if [%target%]==[Python] (
+      cd src/python &
+      type setup.py &
+      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
+      ctest -j 1 --output-on-failure -C Release
+    ) else (
+      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
+      ctest -j 1 --output-on-failure -C Release -E diff_files
+    )
