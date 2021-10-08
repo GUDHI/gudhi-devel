@@ -9,6 +9,7 @@
 
 from .knn import KNearestNeighbors
 import numpy as np
+import warnings
 
 __author__ = "Marc Glisse"
 __copyright__ = "Copyright (C) 2020 Inria"
@@ -66,6 +67,11 @@ class DistanceToMeasure:
         distances = distances ** self.q
         dtm = distances.sum(-1) / self.k
         dtm = dtm ** (1.0 / self.q)
+        with warnings.catch_warnings():
+            import torch
+            if isinstance(dtm, torch.Tensor):
+                if not(torch.isfinite(dtm).all()):
+                    warnings.warn("Overflow/infinite value encountered while computing 'dtm'", RuntimeWarning)
         # We compute too many powers, 1/p in knn then q in dtm, 1/q in dtm then q or some log in the caller.
         # Add option to skip the final root?
         return dtm
@@ -163,6 +169,11 @@ class DTMDensity:
             distances = self.knn.transform(X)
         distances = distances ** q
         dtm = (distances * weights).sum(-1)
+        with warnings.catch_warnings():
+            import torch
+            if isinstance(dtm, torch.Tensor):
+                if not(torch.isfinite(dtm).all()):
+                    warnings.warn("Overflow/infinite value encountered while computing 'dtm' for density", RuntimeWarning)
         if self.normalize:
             dtm /= (np.arange(1, k + 1) ** (q / dim) * weights).sum()
         density = dtm ** (-dim / q)

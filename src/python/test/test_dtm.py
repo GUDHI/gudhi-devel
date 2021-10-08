@@ -97,7 +97,15 @@ def test_dtm_overflow_warnings():
         for impl in impl_warn:
             dtm = DistanceToMeasure(2, q=10000, implementation=impl)
             r = dtm.fit_transform(pts)
-        assert len(w) == 2
+        assert len(w) == 3
         for i in range(len(w)):
             assert issubclass(w[i].category, RuntimeWarning)
             assert "Overflow" in str(w[i].message)
+
+def test_density_overflow_warning():
+    distances = numpy.array([[10., 100.], [10000000000000., 10.]])
+    with warnings.catch_warnings(record=True) as w:
+        density = DTMDensity(k=2, q=100000, implementation="keops", dim=1).fit_transform(distances)
+        assert len(w) == 1
+        assert issubclass(w[0].category, RuntimeWarning)
+        assert "Overflow" in str(w[0].message)
