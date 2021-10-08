@@ -47,8 +47,8 @@ install:
   - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   - python --version
   - pip --version
-  - %PYTHON%\python.exe --version
-  - %PYTHON%\python.exe -m pip --version
+  - '%PYTHON%\python.exe --version'
+  - '%PYTHON%\python.exe -m pip --version'
 #  - python -m pip install --user --upgrade pip
 #  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
 #  # No PyKeOps on windows, let's workaround this one.
