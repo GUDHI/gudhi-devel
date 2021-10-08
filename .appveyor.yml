@@ -42,9 +42,9 @@ install:
   - git submodule update --init
   - vcpkg install boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
   - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
-  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
-  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
   - python --version
   - pip --version
   - python -m pip install --user --upgrade pip
