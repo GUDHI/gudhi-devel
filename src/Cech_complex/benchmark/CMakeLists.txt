@@ -1,6 +1,6 @@
 project(Cech_complex_benchmark)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
   # Do not forget to copy test files in current binary dir
   file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
