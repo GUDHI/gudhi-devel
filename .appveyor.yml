@@ -12,8 +12,6 @@ environment:
   # update the vcpkg cache even if build fails
   #APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python39-x64"
-  CMAKE_GMP_FLAGS: -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
-  CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib"
   CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
   matrix:
@@ -41,10 +39,11 @@ init:
 install:
   - git submodule update --init
   - vcpkg install boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
-  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
-  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
+  - SET PATH=c:/Tools/vcpkg/installed/x64-windows/bin;%PATH%
+  - dir "C:/Tools/vcpkg/installed/x64-windows/lib/"
+  - CALL "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat" amd64
+  - set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
+  - SET PYTHONPATH=%PYTHON%/Lib/site-packages;%PYTHONPATH%
   - python --version
   - pip --version
   - python -m pip install --user --upgrade pip
@@ -55,13 +54,15 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "Visual Studio 16 2019" -A x64 %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+  - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_VCPKG_FLAGS% ..
   - if [%target%]==[Python] (
       cd src/python &
+      dir . &
       type setup.py &
       MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release
     ) else (
+      dir . &
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release -E diff_files
     )
