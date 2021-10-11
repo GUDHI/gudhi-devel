@@ -10,7 +10,7 @@ configuration:
 
 environment:
   # update the vcpkg cache even if build fails
-  #APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python39-x64"
   CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
@@ -28,17 +28,16 @@ environment:
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
-#cache:
-#  - c:\Tools\vcpkg\installed
-#  - '%LOCALAPPDATA%\pip\Cache'
+cache:
+  - c:\Tools\vcpkg\installed
+  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
   - echo %target%
 
-# tbb:x64-windows 
 install:
   - git submodule update --init
-  - vcpkg install boost-filesystem:x64-windows boost-units:x64-windows boost-program-options:x64-windows eigen3:x64-windows cgal:x64-windows
+  - vcpkg install boost-filesystem:x64-windows-rel boost-units:x64-windows-rel boost-program-options:x64-windows-rel tbb:x64-windows-rel eigen3:x64-windows-rel cgal:x64-windows-rel
   - SET PATH=c:/Tools/vcpkg/installed/x64-windows/bin;%PATH%
   - dir "C:/Tools/vcpkg/installed/x64-windows/lib/"
   - CALL "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat" amd64
