@@ -12,7 +12,7 @@ environment:
   # update the vcpkg cache even if build fails
   #APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python39-x64"
-  CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+  CMAKE_VCPKG_FLAGS: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
   matrix:
       - target: Examples
