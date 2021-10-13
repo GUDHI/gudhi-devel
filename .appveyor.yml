@@ -12,10 +12,6 @@ environment:
   # update the vcpkg cache even if build fails
   #APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python39-x64"
-  # https://doc.cgal.org/latest/Manual/configurationvariables.html#title8
-  # Under Windows, auto-linking is used, so only the directory containing the libraries is needed and you would specify GMP|MPFR_LIBRARY_DIR rather than GMP|MPFR_LIBRARIES.
-  CMAKE_GMP_FLAGS: -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib"
-  CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES_DIR="c:/Tools/vcpkg/installed/x64-windows/lib"
   CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
   matrix:
@@ -57,7 +53,7 @@ install:
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+  - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_VCPKG_FLAGS% ..
   - if [%target%]==[Python] (
       cd src/python &
       dir . &
