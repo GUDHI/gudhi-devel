@@ -1,6 +1,6 @@
 project(Cech_complex_examples)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
   if (TARGET Boost::program_options)
     add_executable ( Cech_complex_example_step_by_step cech_complex_step_by_step.cpp )
     target_link_libraries(Cech_complex_example_step_by_step Boost::program_options)
