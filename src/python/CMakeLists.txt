@@ -176,6 +176,10 @@ if(PYTHONINTERP_FOUND)
     endif ()
 
     if(CGAL_FOUND)
+      if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
+        # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.
+        set(CGAL_HEADER_ONLY True)
+      endif(NOT CGAL_VERSION VERSION_LESS 5.3.0)
       # Add CGAL compilation args
       if(CGAL_HEADER_ONLY)
         add_gudhi_debug_info("CGAL header only version ${CGAL_VERSION}")
