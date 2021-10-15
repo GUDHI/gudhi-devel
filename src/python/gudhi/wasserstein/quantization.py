@@ -1,11 +1,17 @@
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Theo Lacombe
+#
+# Copyright (C) 2019 Université Gustave Eiffel
+#
+# Modification(s):
+#   - YYYY/MM Author: Description of the modification
+
+
 import numpy as np
 import scipy.spatial.distance as sc
 import warnings
 
-
-##############################
-### Quantization algorithm ###
-##############################
 
 def _dist_to_diag(X, internal_p):
     return ((X[:, 1] - X[:, 0]) * 2 ** (1. / internal_p - 1))
@@ -121,6 +127,10 @@ def _init_c(pdiagset, k, internal_p=2):
     c0 = dgm[s[-k:]]  # Elements in dgm with larger persistence are last
     return c0
 
+
+#####################
+###  Main method  ###
+#####################
 
 def quantization(pdiagset, k=2, c0=None, batch_size=1, order=2., internal_p=2.):
     """
