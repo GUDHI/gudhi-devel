@@ -6,6 +6,12 @@ import pytest
 
 from sklearn.cluster import KMeans
 
+from gudhi.representations import (DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
+  TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
+  PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
+  PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
+  SlicedWassersteinKernel, PersistenceFisherKernel, WassersteinDistance)
+
 
 def test_representations_examples():
     # Disable graphics for testing purposes
@@ -98,3 +104,34 @@ def test_infinity():
     assert c[1] == 0
     assert c[7] == 3
     assert c[9] == 2
+
+def pow(n):
+  return lambda x: np.power(x[1]-x[0],n)
+
+def test_vectorization_empty_diagrams():
+    empty_diag = np.empty(shape = [0, 2])
+    Landscape(resolution=1000)(empty_diag)
+    Silhouette(resolution=1000, weight=pow(2))(empty_diag)
+    BettiCurve(resolution=1000)(empty_diag)
+    ComplexPolynomial(threshold=-1, polynomial_type="T")(empty_diag)
+    TopologicalVector(threshold=-1)(empty_diag)
+    PersistenceImage(bandwidth=.1, weight=lambda x: x[1], im_range=[0,1,0,1], resolution=[100,100])(empty_diag)
+    #Entropy(mode="scalar")(empty_diag)
+    #Entropy(mode="vector", normalized=False)(empty_diag)
+
+#def arctan(C,p):
+#  return lambda x: C*np.arctan(np.power(x[1], p))
+#
+#def test_kernel_empty_diagrams():
+#    empty_diag = np.empty(shape = [0, 2])
+#    PersistenceWeightedGaussianKernel(bandwidth=1., kernel_approx=None, weight=arctan(1.,1.))(empty_diag, empty_diag)
+#    PersistenceWeightedGaussianKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])), weight=arctan(1.,1.))(empty_diag, empty_diag)
+#    PersistenceScaleSpaceKernel(bandwidth=1.)(empty_diag, empty_diag)
+#    PersistenceScaleSpaceKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
+#    SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag)
+#    SlicedWassersteinKernel(num_directions=100, bandwidth=1.)(empty_diag, empty_diag)
+#    WassersteinDistance(order=2, internal_p=2, mode="pot")(empty_diag, empty_diag)
+#    WassersteinDistance(order=2, internal_p=2, mode="hera", delta=0.0001)(empty_diag, empty_diag)
+#    BottleneckDistance(epsilon=.001)(empty_diag, empty_diag)
+#    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1.)(empty_diag, empty_diag)
+#    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1., kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
