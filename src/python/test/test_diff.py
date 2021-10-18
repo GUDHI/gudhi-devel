@@ -1,4 +1,4 @@
-from gudhi.differentiation import *
+from gudhi.tensorflow import *
 import numpy as np
 import tensorflow as tf
 import gudhi as gd
