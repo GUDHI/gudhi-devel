@@ -1,14 +1,10 @@
-.. table::
-   :widths: 30 40 30
+. list-table::
+   :widths: 40 30 30
+   :header-rows: 0
 
-   +------------------------------------------------------------------+----------------------------------------------------------------+-------------------------------------------------------------+
-   | .. figure::                                                      | Deep learning models for differentiating persistence diagrams. | :Author: Mathieu Carrière                                   |
-   |      img/ripsTF.png                                              |                                                                |                                                             |
-   |                                                                  |                                                                | :Since: GUDHI 3.1.0                                         |
-   |                                                                  |                                                                |                                                             |
-   |                                                                  |                                                                | :License: MIT                                               |
-   |                                                                  |                                                                |                                                             |
-   |                                                                  |                                                                | :Requires: `TensorFlow 2 <installation.html#tensorflow>`_   |
-   +------------------------------------------------------------------+----------------------------------------------------------------+-------------------------------------------------------------+
-   | * :doc:`differentiation`                                                                                                                                                                        |
-   +------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+   * - :Since: GUDHI 3.5.0
+     - :License: MIT
+     - :Requires: `TensorFlow <installation.html#tensorflow>`_
+
+We provide TensorFlow 2 models that can handle automatic differentiation for the computation of persistence diagrams from complexes available in the Gudhi library. 
+This includes simplex trees, cubical complexes and Vietoris-Rips complexes. 
