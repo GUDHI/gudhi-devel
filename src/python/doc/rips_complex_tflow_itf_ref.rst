@@ -11,6 +11,7 @@ Example of gradient computed from Vietoris-Rips persistence
 -----------------------------------------------------------
 
 .. code-block:: python
+
     from gudhi.tensorflow import *
     import numpy as np
     import tensorflow as tf
@@ -23,6 +24,7 @@ Example of gradient computed from Vietoris-Rips persistence
         dgm = rl.call(X)
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
+    print(grads[0].numpy())
 
 Documentation for RipsLayer
 ---------------------------

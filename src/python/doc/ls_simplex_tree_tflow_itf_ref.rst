@@ -11,6 +11,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
 -------------------------------------------------------------------------
 
 .. code-block:: python
+
     from gudhi.tensorflow import *
     import numpy as np
     import tensorflow as tf
@@ -47,6 +48,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
         dgm = sl.call(F)
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [F])
+    print(grads[0].numpy())
 
 Documentation for LowerStarSimplexTreeLayer
 -------------------------------------------
