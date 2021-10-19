@@ -9,7 +9,7 @@
  */
 
 #include <gudhi/Points_off_io.h>
-#include <gudhi/Cech_complex/Cech_kernel.h>
+#include <gudhi/distance_functions.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Clock.h>
 #include <gudhi/Rips_complex.h>
@@ -33,7 +33,10 @@ using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel, Simplex_tree>;
+using Point_cgal = typename Kernel::Point_d;
+using Point_cloud_cgal = std::vector<Point_cgal>;
+using Points_off_reader_cgal = Gudhi::Points_off_reader<Point_cgal>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud_cgal, Kernel, Simplex_tree>;
 
 class Minimal_enclosing_ball_radius {
  public:
@@ -65,6 +68,7 @@ int main(int argc, char* argv[]) {
 
   // Extract the points from the file filepoints
   Points_off_reader off_reader(off_file_points);
+  Points_off_reader_cgal off_reader_cgal(off_file_points);
 
   Gudhi::Clock euclidean_clock("Gudhi::Euclidean_distance");
   // Compute the proximity graph of the points
@@ -79,16 +83,16 @@ int main(int argc, char* argv[]) {
       off_reader.get_point_cloud(), threshold, Minimal_enclosing_ball_radius());
   std::clog << miniball_clock << std::endl;
 
-  Gudhi::Clock common_miniball_clock("Gudhi::Minimal_enclosing_ball_radius()");
+  Gudhi::Clock cgal_miniball_clock("Gudhi::Minimal_enclosing_ball_radius_cgal()");
   // Compute the proximity graph of the points
-  Proximity_graph common_miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
-      off_reader.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius());
-  std::clog << common_miniball_clock << std::endl;
+  Proximity_graph cgal_miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
+      off_reader_cgal.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius());
+  std::clog << cgal_miniball_clock << std::endl;
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
   std::clog << "Current path is : " << full_path << std::endl;
 
-  std::clog << "File name;Radius;Rips time;Cech time; Ratio Rips/Cech time;Rips nb simplices;Cech nb simplices;"
+  std::clog << "File name; Radius; Rips time; Cech time; Ratio Rips/Cech time; Rips nb simplices; Cech nb simplices;"
             << std::endl;
   boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
   for (boost::filesystem::directory_iterator itr(boost::filesystem::current_path()); itr != end_itr; ++itr) {
@@ -96,13 +100,15 @@ int main(int argc, char* argv[]) {
       if (itr->path().extension() == ".off")  // see below
       {
         Points_off_reader off_reader(itr->path().string());
+        Points_off_reader_cgal off_reader_cgal(itr->path().string());
+
         Point p0 = off_reader.get_point_cloud()[0];
 
         for (Filtration_value radius = 0.1; radius < 0.4; radius += 0.1) {
           std::clog << itr->path().stem() << ";";
           std::clog << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
-          Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius,
+          Rips_complex rips_complex_from_points(off_reader_cgal.get_point_cloud(), radius,
                                                 Gudhi::Minimal_enclosing_ball_radius());
           Simplex_tree rips_stree;
           rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
@@ -113,7 +119,7 @@ int main(int argc, char* argv[]) {
           std::clog << rips_sec << ";";
 
           Gudhi::Clock cech_clock("Cech computation");
-          Cech_complex cech_complex_from_points(off_reader.get_point_cloud(), radius);
+          Cech_complex cech_complex_from_points(off_reader_cgal.get_point_cloud(), radius);
           Simplex_tree cech_stree;
           cech_complex_from_points.create_complex(cech_stree, p0.size() - 1);
           // ------------------------------------------
