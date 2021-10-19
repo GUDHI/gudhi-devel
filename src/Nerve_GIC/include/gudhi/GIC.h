@@ -120,6 +120,8 @@ class Cover_complex {
   std::map<int, std::pair<int, double> >
       cover_color;  // size and coloring (induced by func_color) of the vertices of the output simplicial complex.
 
+  std::string distance_matrix_name = ""; // name of distance matrix, so that it can be read if the file already exists.
+
   int resolution_int = -1;
   double resolution_double = -1;
   double gain = -1;
@@ -171,6 +173,14 @@ class Cover_complex {
    *	
    */	
   void set_type(const std::string& t) { type = t; }
+
+public:	
+  /** \brief Specifies the name of the distance matrix file.	
+   *	
+   * @param[in] t std::string.
+   *	
+   */	
+  void set_distance_matrix_name(const std::string& t) { distance_matrix_name = t; }
 
  public:
   /** \brief Specifies whether the program should display information or not.
@@ -389,8 +399,7 @@ class Cover_complex {
     double d;
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
-    std::string distance = "dist";
-    std::ifstream input(distance, std::ios::out | std::ios::binary);
+    std::ifstream input(distance_matrix_name, std::ios::out | std::ios::binary);
 
     if (input.good()) {
       if (verbose) std::clog << "Reading distances..." << std::endl;
@@ -405,7 +414,7 @@ class Cover_complex {
     } else {
       if (verbose) std::clog << "Computing distances..." << std::endl;
       input.close();
-      std::ofstream output(distance, std::ios::out | std::ios::binary);
+      std::ofstream output(distance_matrix_name, std::ios::out | std::ios::binary);
       for (int i = 0; i < n; i++) {
         int state = (int)floor(100 * (i * 1.0 + 1) / n) % 10;
         if (state == 0 && verbose) std::clog << "\r" << state << "%" << std::flush;
@@ -413,10 +422,10 @@ class Cover_complex {
           double dis = ref_distance(point_cloud[i], point_cloud[j]);
           distances[i][j] = dis;
           distances[j][i] = dis;
-          output.write((char*)&dis, 8);
+          if (output.is_open()){ output.write((char*)&dis, 8); }
         }
       }
-      output.close();
+      if (output.is_open()){ output.close(); }
       if (verbose) std::clog << std::endl;
     }
   }

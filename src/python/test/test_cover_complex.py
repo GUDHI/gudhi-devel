@@ -8,7 +8,8 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import NGIComplex, CoverComplex
+from gudhi import NGIComplex
+from gudhi.sklearn import CoverComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -103,12 +104,11 @@ def test_cover_complex():
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
 
     M = CoverComplex(complex_type="gic", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
-         resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6).fit(X)
+         resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6, distance_matrix_name="distance_test", verbose=True).fit(X)
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([2, 3], 0.0)]
 
-    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=2, colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
-         resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6).fit(X)
+    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=2, colors=None, mask=0, graph='rips', rips_threshold=.6, distance_matrix_name="distance_test", verbose=True).fit(X)
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0)]
 
@@ -125,11 +125,3 @@ def test_cover_complex():
 
     assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
 
-    D, B = M.compute_topological_features()
-    try:
-        import networkx
-        assert D == [(0, (1.0, 2.0)), (1, (1.125, 1.875))]
-        assert B == [[0, 1, 2, 3, 4, 5], [2, 4, 3, 1]]
-    except ImportError:
-        assert D == [(0, (1.0, 2.0))]
-        assert B == [[0, 1, 2, 3, 4, 5]]
