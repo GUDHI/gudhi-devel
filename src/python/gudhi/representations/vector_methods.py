@@ -416,9 +416,12 @@ class Entropy(BaseEstimator, TransformerMixin):
         new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
-
             orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-            new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+            try:
+                new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                new_diagram = np.empty(shape = [0, 2])
 
             if self.mode == "scalar":
                 ent = - np.sum( np.multiply(new_diagram[:,1], np.log(new_diagram[:,1])) )
@@ -432,12 +435,11 @@ class Entropy(BaseEstimator, TransformerMixin):
                     max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                     for k in range(min_idx, max_idx):
                         ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
-                    if self.normalized:
-                        ent = ent / np.linalg.norm(ent, ord=1)
-                    Xfit.append(np.reshape(ent,[1,-1]))
+                if self.normalized:
+                    ent = ent / np.linalg.norm(ent, ord=1)
+                Xfit.append(np.reshape(ent,[1,-1]))
 
-        Xfit = np.concatenate(Xfit, 0)
-
+        Xfit = np.concatenate(Xfit, axis=0)
         return Xfit
 
     def __call__(self, diag):
