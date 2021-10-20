@@ -3,6 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+import random
 
 from sklearn.cluster import KMeans
 
@@ -127,29 +128,44 @@ def pow(n):
 
 def test_vectorization_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
-    assert not np.any(Landscape(resolution=1000)(empty_diag))
-    assert not np.any(Silhouette(resolution=1000, weight=pow(2))(empty_diag))
-    assert not np.any(BettiCurve(resolution=1000)(empty_diag))
-    assert not np.any(ComplexPolynomial(threshold=-1, polynomial_type="T")(empty_diag))
-    assert not np.any(TopologicalVector(threshold=-1)(empty_diag))
-    assert not np.any(PersistenceImage(bandwidth=.1, weight=lambda x: x[1], im_range=[0,1,0,1], resolution=[100,100])(empty_diag))
-    assert not np.any(Entropy(mode="scalar")(empty_diag))
-    assert not np.any(Entropy(mode="vector", normalized=False)(empty_diag))
+    random_resolution = random.randint(50,100)*10 # between 500 and 1000
+    print("resolution = ", random_resolution)
+    lsc = Landscape(resolution=random_resolution)(empty_diag)
+    assert not np.any(lsc)
+    assert lsc.shape[0]%random_resolution == 0
+    slt = Silhouette(resolution=random_resolution, weight=pow(2))(empty_diag)
+    assert not np.any(slt)
+    assert slt.shape[0] == random_resolution
+    btc = BettiCurve(resolution=random_resolution)(empty_diag)
+    assert not np.any(btc)
+    assert btc.shape[0] == random_resolution
+    cpp = ComplexPolynomial(threshold=random_resolution, polynomial_type="T")(empty_diag)
+    assert not np.any(cpp)
+    assert cpp.shape[0] == random_resolution
+    tpv = TopologicalVector(threshold=random_resolution)(empty_diag)
+    assert tpv.shape[0] == random_resolution
+    assert not np.any(tpv)
+    prmg = PersistenceImage(resolution=[random_resolution,random_resolution])(empty_diag)
+    assert not np.any(prmg)
+    assert prmg.shape[0] == random_resolution * random_resolution
+    sce = Entropy(mode="scalar", resolution=random_resolution)(empty_diag)
+    assert not np.any(sce)
+    assert sce.shape[0] == 1
+    scv = Entropy(mode="vector", normalized=False, resolution=random_resolution)(empty_diag)
+    assert not np.any(scv)
+    assert scv.shape[0] == random_resolution
 
-def arctan(C,p):
-  return lambda x: C*np.arctan(np.power(x[1], p))
-#
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
-#    PersistenceWeightedGaussianKernel(bandwidth=1., kernel_approx=None, weight=arctan(1.,1.))(empty_diag, empty_diag)
-#    PersistenceWeightedGaussianKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])), weight=arctan(1.,1.))(empty_diag, empty_diag)
-#    PersistenceScaleSpaceKernel(bandwidth=1.)(empty_diag, empty_diag)
-#    PersistenceScaleSpaceKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
     assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.
     assert SlicedWassersteinKernel(num_directions=100, bandwidth=1.)(empty_diag, empty_diag) == 1.
     assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.
     assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.
     assert BottleneckDistance(epsilon=.001)(empty_diag, empty_diag) == 0.
     assert BottleneckDistance()(empty_diag, empty_diag) == 0.
+#    PersistenceWeightedGaussianKernel(bandwidth=1., kernel_approx=None, weight=arctan(1.,1.))(empty_diag, empty_diag)
+#    PersistenceWeightedGaussianKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])), weight=arctan(1.,1.))(empty_diag, empty_diag)
+#    PersistenceScaleSpaceKernel(bandwidth=1.)(empty_diag, empty_diag)
+#    PersistenceScaleSpaceKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1.)(empty_diag, empty_diag)
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1., kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
