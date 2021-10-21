@@ -60,7 +60,7 @@ build_script:
       cd src/python &
       dir . &
       type setup.py &
-      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
+      python setup.py build_ext --inplace &
       ctest -j 1 --output-on-failure -C Release
     ) else (
       dir . &
