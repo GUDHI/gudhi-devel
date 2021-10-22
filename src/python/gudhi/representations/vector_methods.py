@@ -500,7 +500,11 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
             pers = 0.5 * (diagram[:,1]-diagram[:,0])
             min_pers = np.minimum(pers,np.transpose(pers))
-            distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
+            # Works fine with sklearn 1.0, but an ValueError exception is thrown on past versions
+            try:
+                distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
+            except ValueError:
+                distances = np.empty(shape = [0, 0])
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)
             dim = min(len(vect), thresh)
             Xfit[i, :dim] = vect[:dim]
