@@ -60,8 +60,9 @@ build_script:
       cd src/python &
       dir . &
       type setup.py &
-      python setup.py build_ext --inplace &
-      ctest -j 1 --output-on-failure -C Release
+      python -m pip install --user . &
+      ctest -j 1 --output-on-failure -C Release &
+      python -m pip uninstall gudhi
     ) else (
       dir . &
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
