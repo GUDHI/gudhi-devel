@@ -15,7 +15,7 @@ As all the third parties are already installed (thanks to docker), the compilati
 * utils (C++)
 * doxygen (C++ documentation that is available in the artefacts)
 * python (including documentation and code coverage that are available in the artefacts)
-* python_tests_with_network (includes previous python with WITH_NETWORK option enabled which adds datasets fetching test)
+* python_tests_with_network (includes previous python with WITH_GUDHI_REMOTE_TEST option enabled which adds datasets fetching test)
 
 (cf. `.circleci/config.yml`)
 

@@ -543,7 +543,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Fetch remote datasets
-    if(WITH_NETWORK)
+    if(WITH_GUDHI_REMOTE_TEST)
       add_gudhi_py_test(test_remote_datasets)
     endif()
 

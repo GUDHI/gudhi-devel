@@ -40,8 +40,8 @@ make \endverbatim
  * `make test` is using <a href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">Ctest</a> (CMake test driver
  * program). If some of the tests are failing, please send us the result of the following command:
  * \verbatim ctest --output-on-failure \endverbatim
- * Testing fetching datasets feature requires the use of the internet and is disabled by default. If you want to include this test, set WITH_NETWORK to ON when building in the previous step (note that this test is included in the python module):
- * \verbatim cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_TEST=ON -DWITH_NETWORK=ON --DWITH_GUDHI_PYTHON=ON .. \endverbatim
+ * Testing fetching datasets feature requires the use of the internet and is disabled by default. If you want to include this test, set WITH_GUDHI_REMOTE_TEST to ON when building in the previous step (note that this test is included in the python module):
+ * \verbatim cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_REMOTE_TEST=ON --DWITH_GUDHI_PYTHON=ON .. \endverbatim
  * 
  * \subsection documentationgeneration Documentation
  * To generate the documentation, <a target="_blank" href="http://www.doxygen.org/">Doxygen</a> is required.
