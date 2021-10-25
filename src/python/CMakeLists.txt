@@ -546,17 +546,17 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Tomato
-    if(SCIPY_FOUND AND SKLEARN_FOUND AND PYBIND11_FOUND AND TORCH_FOUND)
+    if(SCIPY_FOUND AND SKLEARN_FOUND AND PYBIND11_FOUND)
       add_gudhi_py_test(test_tomato)
     endif()
 
     # Weighted Rips
-    if(SCIPY_FOUND AND TORCH_FOUND)
+    if(SCIPY_FOUND)
       add_gudhi_py_test(test_weighted_rips_complex)
     endif()
 
     # DTM Rips
-    if(SCIPY_FOUND AND TORCH_FOUND)
+    if(SCIPY_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
