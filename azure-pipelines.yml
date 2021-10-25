@@ -30,7 +30,7 @@ jobs:
         source activate gudhi_build_env
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DWITH_GUDHI_REMOTE_TEST=ON ..
         make -j 4
         make doxygen
         ctest -j 4 --output-on-failure # -E sphinx remove sphinx build as it fails

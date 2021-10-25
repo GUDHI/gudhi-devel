@@ -61,7 +61,7 @@ jobs:
             cmake -DUSER_VERSION_DIR=version ..
             make user_version
             cd version
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
             python3 setup.py build_ext --inplace
             make sphinx
@@ -76,23 +76,6 @@ jobs:
       - store_artifacts:
           path: /tmp/htmlcov
           destination: htmlcov
-
-  python_tests_with_network:
-    docker:
-      - image: gudhi/ci_for_gudhi:latest
-    steps:
-      - checkout
-      - run:
-          name: Build and test python module with network
-          command: |
-            git submodule init
-            git submodule update
-            mkdir build
-            cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
-            cd src/python
-            python3 setup.py build_ext --inplace
-            ctest --output-on-failure
 
   doxygen:
     docker:
@@ -262,5 +245,4 @@ workflows:
       - tests
       - utils
       - python
-      - python_tests_with_network
       - doxygen

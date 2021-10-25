@@ -14,8 +14,7 @@ As all the third parties are already installed (thanks to docker), the compilati
 * tests (C++)
 * utils (C++)
 * doxygen (C++ documentation that is available in the artefacts)
-* python (including documentation and code coverage that are available in the artefacts)
-* python_tests_with_network (includes previous python with WITH_GUDHI_REMOTE_TEST option enabled which adds datasets fetching test)
+* python (including documentation and code coverage that are available in the artefacts; here the WITH_GUDHI_REMOTE_TEST option is enabled which adds datasets fetching test)
 
 (cf. `.circleci/config.yml`)
 
@@ -40,13 +39,12 @@ docker push gudhi/ci_for_gudhi_wo_cgal:latest
 
 ### Windows
 
-The compilations has been seperated by categories to be parallelized, but I don't know why builds are not run in parallel:
+The compilations has been separated by categories to be parallelized, but I don't know why builds are not run in parallel:
 
 * examples (C++)
 * tests (C++)
 * utils (C++)
-* python
-* python tests with network
+* python (here the WITH_GUDHI_REMOTE_TEST option is enabled which adds datasets fetching test)
 
 Doxygen (C++) is not tested.
 (cf. `.appveyor.yml`)
@@ -56,12 +54,12 @@ In case of installation issue, check in [vcpkg issues](https://github.com/micros
 
 ### OSx
 
-The compilations has been seperated by categories to be parallelized:
+The compilations has been separated by categories to be parallelized:
 
 * examples (C++)
 * tests (C++)
 * utils (C++)
-* python
+* python (here the WITH_GUDHI_REMOTE_TEST option is enabled which adds datasets fetching test)
 * Doxygen (C++)
 
 (cf. `azure-pipelines.yml`)
