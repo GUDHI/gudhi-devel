@@ -110,7 +110,7 @@ PYBIND11_MODULE(_points, m) {
           :rtype: numpy array of float.
           The shape of returned numpy array is :
               if sample is 'random' : (n_samples, 2*dim).
-              if sample is 'grid' : ([n_samples**(1./dim)]**dim, 2*dim).
+              if sample is 'grid' : (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
           :returns: the generated points on a torus.
           )pbdoc");
 }

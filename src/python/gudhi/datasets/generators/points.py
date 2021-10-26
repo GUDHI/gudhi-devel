@@ -36,15 +36,15 @@ def _generate_grid_points_on_torus(n_samples, dim):
 
 def torus(n_samples, dim, sample='random'):
     """ 
-    Generate points on a dim-torus in R^2dim either randomly or on a grid
+    Generate points on a flat dim-torus in R^2dim either randomly or on a grid
     
     :param n_samples: The number of points to be generated.
     :param dim: The dimension of the torus on which points would be generated in R^2*dim.
     :param sample: The sample type of the generated points. Can be 'random' or 'grid'.
     :returns: numpy array containing the generated points on a torus.
-        The shape of returned numpy array is :
+        The shape of returned numpy array is:
         if sample is 'random' : (n_samples, 2*dim).
-        if sample is 'grid' : ([n_samples**(1./dim)]**dim, 2*dim).
+        if sample is 'grid' : (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
     """
     if sample == 'random':
         # Generate points randomly

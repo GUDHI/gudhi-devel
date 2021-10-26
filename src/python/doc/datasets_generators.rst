@@ -48,22 +48,23 @@ You can also generate points on a torus.
 
 Two functions are available and give the same output: the first one depends on **CGAL** and the second does not and consists of full python code.
 
-On another hand, two sample types are provided : you can either generate i.i.d. points on a d-torus in :math:`R^{2d}` *randomly* or on a *grid*.
+On another hand, two sample types are provided: you can either generate i.i.d. points on a d-torus in :math:`R^{2d}` *randomly* or on a *grid*.
 
-First function : **ctorus**
+First function: **ctorus**
 """""""""""""""""""""""""""
 
 The user should provide the number of points to be generated on the torus :code:`n_samples`, and the dimension :code:`dim` of the torus on which points would be generated in :math:`R^{2dim}`.
 The :code:`sample` argument is optional and is set to **'random'** by default.
 In this case, the returned generated points would be an array of shape :math:`(n\_samples, 2*dim)`.
-Otherwise, if set to **'grid'**, the points are generated on a grid and would be given as an array of shape :
+Otherwise, if set to **'grid'**, the points are generated on a grid and would be given as an array of shape:
 
 .. math::
 
-   ( [n\_samples^{1 \over {dim}}]^{dim}, 2*dim )
+   ( ⌊n\_samples^{1 \over {dim}}⌋^{dim}, 2*dim )
 
+**Note 1:** The output array first shape is rounded down to the closest perfect :math:`dim^{th}` power.
 
-**Note:** This version is recommended when the user wishes to use **'grid'** as sample type, or **'random'** with a relatively small number of samples (~ less than 150).
+**Note 2:** This version is recommended when the user wishes to use **'grid'** as sample type, or **'random'** with a relatively small number of samples (~ less than 150).
 
 Example
 """""""
@@ -79,7 +80,7 @@ Example
 
 .. autofunction:: gudhi.datasets.generators.points.ctorus
 
-Second function : **torus**
+Second function: **torus**
 """""""""""""""""""""""""""
 
 The user should provide the number of points to be generated on the torus :code:`n_samples` and the dimension :code:`dim` of the torus on which points would be generated in :math:`R^{2dim}`.

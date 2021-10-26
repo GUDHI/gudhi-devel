@@ -23,6 +23,8 @@ def _basic_torus(impl):
     assert impl(n_samples = 64, dim = 3, sample = 'grid').shape == (64, 6)
 
     assert impl(n_samples = 10, dim = 4, sample = 'random').shape == (10, 8)
+
+    # Here 1**dim < n_samples < 2**dim, the output shape is therefore (1, 2*dim) = (1, 8), where shape[0] is rounded down to the closest perfect 'dim'th power
     assert impl(n_samples = 10, dim = 4, sample = 'grid').shape == (1, 8)
 
     with pytest.raises(ValueError):
