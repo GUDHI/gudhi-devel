@@ -8,7 +8,6 @@
 #   - YYYY/MM Author: Description of the modification
 
 import numpy as np
-import itertools
 
 from ._points import ctorus
 from ._points import sphere
@@ -29,10 +28,11 @@ def _generate_grid_points_on_torus(n_samples, dim):
     n_samples_grid = int((n_samples+.5)**(1./dim)) # add .5 to avoid rounding down with numerical approximations
     alpha = np.linspace(0, 2*np.pi, n_samples_grid, endpoint=False)
     
-    array_points_inter = np.column_stack([np.cos(alpha), np.sin(alpha)])
-    array_points = np.array(list(itertools.product(array_points_inter, repeat=dim))).reshape(-1, 2*dim)
-    
-    return array_points
+    array_points = np.column_stack([np.cos(alpha), np.sin(alpha)])
+    array_points_idx = np.empty([n_samples_grid]*dim + [dim], dtype=int)
+    for i, x in enumerate(np.ix_(*([np.arange(n_samples_grid)]*dim))):
+        array_points_idx[...,i] = x
+    return array_points[array_points_idx].reshape(-1, 2*dim)
 
 def torus(n_samples, dim, sample='random'):
     """ 
