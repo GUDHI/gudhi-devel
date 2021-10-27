@@ -33,3 +33,7 @@ def _basic_torus(impl):
 def test_torus():
     for torus_impl in [points.torus, points.ctorus]:
         _basic_torus(torus_impl)
+    # Check that the two versions (torus and ctorus) generate the same output
+    assert points.ctorus(n_samples = 64, dim = 3, sample = 'random').all() == points.torus(n_samples = 64, dim = 3, sample = 'random').all()
+    assert points.ctorus(n_samples = 64, dim = 3, sample = 'grid').all() == points.torus(n_samples = 64, dim = 3, sample = 'grid').all()
+    assert points.ctorus(n_samples = 10, dim = 3, sample = 'grid').all() == points.torus(n_samples = 10, dim = 3, sample = 'grid').all()
