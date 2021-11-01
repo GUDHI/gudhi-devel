@@ -10,7 +10,7 @@ TensorFlow layer for cubical persistence
 Example of gradient computed from cubical persistence
 -----------------------------------------------------
 
-.. code-block:: python
+.. testcode::
 
     from gudhi.tensorflow import *
     import numpy as np
@@ -23,8 +23,15 @@ Example of gradient computed from cubical persistence
     with tf.GradientTape() as tape:
         dgm = cl.call(X)
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
+
     grads = tape.gradient(loss, [X])
     print(grads[0].numpy())
+
+.. testoutput::
+
+    [[ 0.   0.   0. ]
+     [ 0.   0.5  0. ]
+     [ 0.   0.  -0.5]]
 
 Documentation for CubicalLayer
 ------------------------------

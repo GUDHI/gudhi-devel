@@ -10,7 +10,7 @@ TensorFlow layer for lower-star persistence on simplex trees
 Example of gradient computed from lower-star filtration of a simplex tree
 -------------------------------------------------------------------------
 
-.. code-block:: python
+.. testcode::
 
     from gudhi.tensorflow import *
     import numpy as np
@@ -47,8 +47,15 @@ Example of gradient computed from lower-star filtration of a simplex tree
     with tf.GradientTape() as tape:
         dgm = sl.call(F)
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
+
     grads = tape.gradient(loss, [F])
-    print(grads[0].numpy())
+    print(grads[0].indices.numpy())
+    print(grads[0].values.numpy())
+
+.. testoutput::
+
+    [2 4]
+    [-1. 1.]
 
 Documentation for LowerStarSimplexTreeLayer
 -------------------------------------------
