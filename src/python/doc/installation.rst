@@ -371,11 +371,10 @@ PyTorch
 TensorFlow
 ----------
 
-`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+:class:`~gudhi.tensorflow.perslay` from the :doc:`persistence representations </representations>` module
+requires `TensorFlow <https://https://www.tensorflow.org/install/>`_.
 
-:class:`~gudhi.representations.PerslayModel` in the :doc:`persistence representations </representations>` module requires
-`TensorFlow 2 <https://https://www.tensorflow.org/install/>`_.
-
+`TensorFlow <https://www.tensorflow.org>`_ is also used in some automatic differentiation tests.
 
 Scikit-learn
 ------------
