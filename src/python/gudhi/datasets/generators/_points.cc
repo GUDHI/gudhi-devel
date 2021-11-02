@@ -36,8 +36,12 @@ py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim,
     GUDHI_CHECK(ambient_dim == buf.shape[1], "Py array second dimension not matching the ambient space dimension");
 
 
-    py::gil_scoped_release release;
-    auto points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+    std::vector<typename Kern::Point_d> points_generated;
+
+    {
+        py::gil_scoped_release release;
+        points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+    }
 
     for (size_t i = 0; i < n_samples; i++)
         for (int j = 0; j < ambient_dim; j++)
