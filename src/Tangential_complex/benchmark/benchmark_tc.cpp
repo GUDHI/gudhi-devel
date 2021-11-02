@@ -704,7 +704,7 @@ int main() {
               points = Gudhi::generate_points_on_torus_d<Kernel>(
                                                                  num_points,
                                                                  intrinsic_dim,
-                                                                 param1 == "Y",  // uniform
+                                                                 (param1 == "Y") ? "grid" : "random",  // grid or random sample type
                                                                  std::atof(param2.c_str()));  // radius_noise_percentage
             } else if (input == "generate_klein_bottle_3D") {
               points = Gudhi::generate_points_on_klein_bottle_3D<Kernel>(
