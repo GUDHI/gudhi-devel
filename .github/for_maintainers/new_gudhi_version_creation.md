@@ -128,5 +128,5 @@ docker image on docker hub.
 
 ## Mail sending
 Send version mail to the following lists :
-* gudhi-devel@lists.gforge.inria.fr
-* gudhi-users@lists.gforge.inria.fr (not for release candidate)
+* gudhi-devel@inria.fr
+* gudhi-users@inria.fr (not for release candidate)
