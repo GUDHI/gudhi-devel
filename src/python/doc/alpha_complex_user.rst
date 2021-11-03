@@ -165,6 +165,9 @@ respect to inclusion).
 We fix that up by calling :func:`~gudhi.SimplexTree.make_filtration_non_decreasing` (cf.
 `C++ version <https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html>`_).
 
+.. note::
+    This is not the case in `exact` version, this is the reason why it is not called in this case.
+
 Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

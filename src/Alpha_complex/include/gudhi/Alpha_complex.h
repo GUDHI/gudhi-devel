@@ -435,8 +435,10 @@ class Alpha_complex {
       // --------------------------------------------------------------------------------------------
   
       // --------------------------------------------------------------------------------------------
-      // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-      complex.make_filtration_non_decreasing();
+      if (!exact)
+        // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+        // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
+        complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
       complex.prune_above_filtration(max_alpha_square);
       // --------------------------------------------------------------------------------------------
