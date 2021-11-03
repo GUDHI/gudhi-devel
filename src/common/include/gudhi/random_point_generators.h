@@ -185,7 +185,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t nu
 
 // "Private" function used by generate_points_on_torus_d
 template <typename Kernel, typename OutputIterator>
-static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::size_t num_slices,
+static void generate_grid_points_on_torus_d(const Kernel &k, int dim, std::size_t num_slices,
                                                OutputIterator out,
                                                double radius_noise_percentage = 0.,
                                                std::vector<typename Kernel::FT> current_point =
@@ -208,14 +208,14 @@ static void generate_uniform_points_on_torus_d(const Kernel &k, int dim, std::si
       double alpha = two_pi * slice_idx / num_slices;
       cp2.push_back(radius_noise_ratio * std::cos(alpha));
       cp2.push_back(radius_noise_ratio * std::sin(alpha));
-      generate_uniform_points_on_torus_d(
+      generate_grid_points_on_torus_d(
                                          k, dim, num_slices, out, radius_noise_percentage, cp2);
     }
   }
 }
 
 template <typename Kernel>
-std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num_points, int dim, bool uniform = false,
+std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num_points, int dim, std::string sample = "random",
                                                                  double radius_noise_percentage = 0.) {
   using namespace boost::math::double_constants;
 
@@ -226,9 +226,9 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
 
   std::vector<Point> points;
   points.reserve(num_points);
-  if (uniform) {
-    std::size_t num_slices = (std::size_t)std::pow(num_points, 1. / dim);
-    generate_uniform_points_on_torus_d(
+  if (sample == "grid") {
+    std::size_t num_slices = (std::size_t)std::pow(num_points + .5, 1. / dim); // add .5 to avoid rounding down with numerical approximations
+    generate_grid_points_on_torus_d(
                                        k, dim, num_slices, std::back_inserter(points), radius_noise_percentage);
   } else {
     for (std::size_t i = 0; i < num_points;) {

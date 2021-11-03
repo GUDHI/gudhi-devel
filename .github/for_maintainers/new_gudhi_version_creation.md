@@ -68,20 +68,18 @@ make -j 4 all && ctest -j 4 --output-on-failure
 
 ## Upload the documentation
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/doc/@GUDHI_VERSION@
+[GUDHI GitHub pages](https://gudhi.github.io/) is only used as a _"qualification"_ web hosting service.
+The _"production"_ web hosting service is https://files.inria.fr (cf. [this doc](https://doc-si.inria.fr/display/SU/Espace+web)
+or [this one](https://www.nextinpact.com/article/30325/109058-se-connecter-a-serveur-webdav-sous-linux-macos-ou-windows)).
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/python/@GUDHI_VERSION@
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on gudhi WebDAV in doc/@GUDHI_VERSION@
+Delete the directory doc/latest on gudhi WebDAV.
+Copy gudhi WebDAV doc/@GUDHI_VERSION@ as doc/latest (no symbolic link with WebDAV).
 
-Through ssh, make the **latest** link to your new version of the documentation:
-```bash
-ssh ForgeLogin@scm.gforge.inria.fr
-cd /home/groups/gudhi/htdocs/doc
-rm latest
-ln -s @GUDHI_VERSION@ latest
-cd /home/groups/gudhi/htdocs/python
-rm latest
-ln -s @GUDHI_VERSION@ latest
-```
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on gudhi WebDAV in python/@GUDHI_VERSION@
+Delete the directory python/latest on gudhi WebDAV.
+Copy gudhi WebDAV python/@GUDHI_VERSION@ as python/latest (no symbolic link with WebDAV).
+
 
 ## Put a version label on files
 
