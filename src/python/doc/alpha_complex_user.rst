@@ -163,7 +163,7 @@ As the squared radii computed by CGAL are an approximation, it might happen that
 :math:`\alpha^2` values do not quite define a proper filtration (i.e. non-decreasing with
 respect to inclusion).
 We fix that up by calling :func:`~gudhi.SimplexTree.make_filtration_non_decreasing` (cf.
-`C++ version <http://gudhi.gforge.inria.fr/doc/latest/index.html>`_).
+`C++ version <https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html>`_).
 
 Prune above given filtration value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
