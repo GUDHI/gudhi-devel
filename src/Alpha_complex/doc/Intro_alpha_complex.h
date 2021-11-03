@@ -152,6 +152,8 @@ Table of Contents
  * not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
  * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  *
+ * \note This is not the case in `exact` version, this is the reason why it is not called in this case.
+ *
  * \subsubsection pruneabove Prune above given filtration value
  *
  * The simplex tree is pruned from the given maximum \f$ \alpha^2 \f$ value (cf.
