@@ -44,15 +44,15 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        try:
-            if np.isnan(np.array(self.im_range)).any():
+        if np.isnan(np.array(self.im_range)).any():
+            try:
                 new_X = BirthPersistenceTransform().fit_transform(X)
                 pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
                 [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
-        except ValueError:
-            # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-            pass
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                pass
         return self
 
     def transform(self, X):
