@@ -13,7 +13,6 @@ Example of gradient computed from lower-star filtration of a simplex tree
 .. testcode::
 
     from gudhi.tensorflow import *
-    import numpy as np
     import tensorflow as tf
     import gudhi as gd
 
@@ -40,8 +39,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
     st.insert([8, 9]) 
     st.insert([9, 10]) 
 
-    Finit = np.array([6.,4.,3.,4.,5.,4.,3.,2.,3.,4.,5.], dtype=np.float32)
-    F = tf.Variable(initial_value=Finit, trainable=True)
+    F = tf.Variable([6.,4.,3.,4.,5.,4.,3.,2.,3.,4.,5.], dtype=tf.float32, trainable=True)
     sl = LowerStarSimplexTreeLayer(simplextree=st, dimension=0)
 
     with tf.GradientTape() as tape:

@@ -20,13 +20,6 @@ def _Cubical(X, dimension):
     except IndexError:
         cof = np.array([])
 
-    if len(cof) > 0:
-        # Sort points with distance-to-diagonal
-        Xs = X.shape
-        pers = [X[np.unravel_index(cof[idx,1], Xs)] - X[np.unravel_index(cof[idx,0], Xs)] for idx in range(len(cof))]
-        perm = np.argsort(pers)
-        cof = cof[perm[::-1]]
-    
     # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices
     D = len(Xs) if len(cof) > 0 else 1
     ocof = np.array([0 for _ in range(D*2*cof.shape[0])])
@@ -40,11 +33,14 @@ def _Cubical(X, dimension):
 class CubicalLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing cubical persistence out of a cubical complex
-
-    Attributes:
-        dimension (int): homology dimension
     """
     def __init__(self, dimension=1, **kwargs):
+        """
+        Constructor for the CubicalLayer class
+
+        Parameters:
+            dimension (int): homology dimension
+        """
         super().__init__(dynamic=True, **kwargs)
         self.dimension = dimension
 
@@ -57,6 +53,9 @@ class CubicalLayer(tf.keras.layers.Layer):
 
         Parameters:
             X (TensorFlow variable): pixel values of the cubical complex
+
+        Returns:
+            dgm (TensorFlow variable): cubical persistence diagram with shape [num_points, 2]
         """
         # Compute pixels associated to positive and negative simplices 
         # Don't compute gradient for this operation

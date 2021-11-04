@@ -13,11 +13,9 @@ Example of gradient computed from cubical persistence
 .. testcode::
 
     from gudhi.tensorflow import *
-    import numpy as np
     import tensorflow as tf
 
-    Xinit = np.array([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=np.float32)
-    X = tf.Variable(initial_value=Xinit, trainable=True)
+    X = tf.Variable([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=tf.float32, trainable=True)
     cl = CubicalLayer(dimension=0)
 
     with tf.GradientTape() as tape:

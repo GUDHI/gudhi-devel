@@ -13,11 +13,9 @@ Example of gradient computed from Vietoris-Rips persistence
 .. testcode::
 
     from gudhi.tensorflow import *
-    import numpy as np
     import tensorflow as tf
 
-    Xinit = np.array([[1.,1.],[2.,2.]], dtype=np.float32)
-    X = tf.Variable(initial_value=Xinit, trainable=True)
+    X = tf.Variable([[1.,1.],[2.,2.]], dtype=tf.float32, trainable=True)
     rl = RipsLayer(maximum_edge_length=2., dimension=0)
 
     with tf.GradientTape() as tape:

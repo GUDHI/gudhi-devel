@@ -21,7 +21,7 @@ def _LowerStarSimplexTree(simplextree, filtration, dimension):
     simplextree.make_filtration_non_decreasing()
     
     # Compute persistence diagram
-    dgm = simplextree.persistence()
+    dgm = simplextree.compute_persistence()
     
     # Get vertex pairs for optimization. First, get all simplex pairs
     pairs = simplextree.persistence_pairs()
@@ -37,24 +37,22 @@ def _LowerStarSimplexTree(simplextree, filtration, dimension):
             i2 = l2[np.argmax(filtration[l2])]
             indices.append(i1)
             indices.append(i2)
-            # Compute lifetime
-            pers.append(simplextree.filtration(s2)-simplextree.filtration(s1))
     
-    # Sort vertex pairs wrt lifetime
-    perm = np.argsort(pers)
-    indices = np.reshape(indices, [-1,2])[perm][::-1,:].flatten()
-    
+    indices = np.reshape(indices, [-1,2]).flatten()
     return np.array(indices, dtype=np.int32)
 
 class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
-
-    Attributes:
-        simplextree (gudhi.SimplexTree()): underlying simplex tree 
-        dimension (int): homology dimension
     """
     def __init__(self, simplextree, dimension=0, **kwargs):
+        """
+        Constructor for the LowerStarSimplexTreeLayer class
+  
+        Parameters:
+            simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n = number of vertices
+            dimension (int): homology dimension
+        """
         super().__init__(dynamic=True, **kwargs)
         self.dimension   = dimension
         self.simplextree = simplextree
@@ -67,7 +65,10 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         Compute lower-star persistence diagram associated to a function defined on the vertices of the simplex tree
 
         Parameters:
-            F (TensorFlow variable): filter function values over the vertices of the simplex tree
+            F (TensorFlow variable): filter function values over the vertices of the simplex tree. The ith entry of F corresponds to vertex i in self.simplextree
+
+        Returns:
+            dgm (TensorFlow variable): lower-star persistence diagram with shape [num_points, 2]
         """
         # Don't try to compute gradients for the vertex pairs
         indices = tf.stop_gradient(_LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimension))
