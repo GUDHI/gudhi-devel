@@ -282,7 +282,6 @@ cdef class PeriodicCubicalComplex:
         assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
         piid = np.array(self.pcohptr.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
-        if piid.shape[0] == 0:
+        if len(piid) == 0:
             return np.empty(shape = [0, 2])
-        else:
-            return piid
+        return piid
