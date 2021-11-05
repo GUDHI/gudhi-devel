@@ -763,8 +763,12 @@ class Simplex_tree {
     return insert_vertex_vector(copy, filtration);
   }
 
-    /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
+    /** \brief Insert a N-simplex and all its subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
+   *
+   * Inserting a simplex with filtration value NaN does not modify the
+   * filtration value of any pre-existing simplex. Pre-existing NaN may or may
+   * not be updated by an insertion with a real value.
    *
    * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
    * @param[in]  filtration the filtration value assigned to the new N-simplex.
@@ -819,6 +823,8 @@ class Simplex_tree {
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
+      // In order for an insertion to handle pre-existing NaN like +Inf, we would need
+      // filtration(simplex_one) > filt || (isnan(filtration(simplex_one)) && ! isnan(filt))
       if (filtration(simplex_one) > filt) {
         assign_filtration(simplex_one, filt);
       } else {
@@ -1355,7 +1361,8 @@ class Simplex_tree {
    * filtration values.
    * @return True if any filtration value was modified, false if the filtration was already non-decreasing.
    * 
-   * If a simplex has a `NaN` filtration value, it is considered lower than any other defined filtration value.
+   * If a simplex of dimension 1 or more has a `NaN` filtration value,
+   * it is considered lower than any other defined filtration value.
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
@@ -1382,6 +1389,7 @@ class Simplex_tree {
     for (auto& simplex : boost::adaptors::reverse(sib->members())) {
       // Find the maximum filtration value in the border
       Boundary_simplex_range boundary = boundary_simplex_range(&simplex);
+      // We would need a loop using fmax to get consistent results when a vertex has NaN.
       Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
                                                               [](Simplex_handle sh1, Simplex_handle sh2) {
                                                                 return filtration(sh1) < filtration(sh2);
