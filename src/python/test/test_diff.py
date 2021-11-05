@@ -7,10 +7,10 @@ def test_rips_diff():
 
     Xinit = np.array([[1.,1.],[2.,2.]], dtype=np.float32)
     X = tf.Variable(initial_value=Xinit, trainable=True)
-    rl = RipsLayer(maximum_edge_length=2., dimension=0)
+    rl = RipsLayer(maximum_edge_length=2., dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = rl.call(X)
+        dgm = rl.call(X)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
     assert np.abs(grads[0].numpy()-np.array([[-.5,-.5],[.5,.5]])).sum() <= 1e-6
@@ -20,10 +20,10 @@ def test_cubical_diff():
 
     Xinit = np.array([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=np.float32)
     X = tf.Variable(initial_value=Xinit, trainable=True)
-    cl = CubicalLayer(dimension=0)
+    cl = CubicalLayer(dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = cl.call(X)
+        dgm = cl.call(X)[0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
     assert np.abs(grads[0].numpy()-np.array([[0.,0.,0.],[0.,.5,0.],[0.,0.,-.5]])).sum() <= 1e-6
@@ -55,10 +55,10 @@ def test_st_diff():
 
     Finit = np.array([6.,4.,3.,4.,5.,4.,3.,2.,3.,4.,5.], dtype=np.float32)
     F = tf.Variable(initial_value=Finit, trainable=True)
-    sl = LowerStarSimplexTreeLayer(simplextree=st, dimension=0)
+    sl = LowerStarSimplexTreeLayer(simplextree=st, dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = sl.call(F)
+        dgm = sl.call(F)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [F])
 
