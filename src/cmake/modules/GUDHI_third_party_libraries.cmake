@@ -156,6 +156,8 @@ if( PYTHONINTERP_FOUND )
   find_python_module("eagerpy")
   find_python_module_no_version("hnswlib")
   find_python_module("tensorflow")
+  find_python_module("sphinx_paramlinks")
+  find_python_module_no_version("python_docs_theme")
 endif()
 
 if(NOT GUDHI_PYTHON_PATH)
