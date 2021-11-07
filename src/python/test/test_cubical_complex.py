@@ -174,3 +174,28 @@ def test_periodic_cofaces_of_persistence_pairs_when_pd_has_no_paired_birth_and_d
     assert np.array_equal(pairs[1][0], np.array([0]))
     assert np.array_equal(pairs[1][1], np.array([0, 1]))
     assert np.array_equal(pairs[1][2], np.array([1]))
+
+def test_cubical_persistence_intervals_in_dimension():
+    cub = CubicalComplex(
+        dimensions=[3, 3],
+        top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+    )
+    cub.compute_persistence()
+    H0 = cub.persistence_intervals_in_dimension(0)
+    assert np.array_equal(H0, np.array([[ 1., float("inf")]]))
+    assert cub.persistence_intervals_in_dimension(1).shape == (0, 2)
+
+def test_periodic_cubical_persistence_intervals_in_dimension():
+    cub = PeriodicCubicalComplex(
+        dimensions=[3, 3],
+        top_dimensional_cells=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        periodic_dimensions = [True, True]
+    )
+    cub.compute_persistence()
+    H0 = cub.persistence_intervals_in_dimension(0)
+    assert np.array_equal(H0, np.array([[ 1., float("inf")]]))
+    H1 = cub.persistence_intervals_in_dimension(1)
+    assert np.array_equal(H1, np.array([[ 3., float("inf")], [ 7., float("inf")]]))
+    H2 = cub.persistence_intervals_in_dimension(2)
+    assert np.array_equal(H2, np.array([[ 9., float("inf")]]))
+    assert cub.persistence_intervals_in_dimension(3).shape == (0, 2)
