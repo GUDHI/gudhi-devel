@@ -14,24 +14,26 @@ def _Cubical(X, dimensions):
 
     # Compute the persistence pairs with Gudhi
     Xs = X.shape
-    cc = CubicalComplex(dimensions=Xs, top_dimensional_cells=X.flatten())
-    cc.persistence()
+    cc = CubicalComplex(top_dimensional_cells=X)
+    cc.compute_persistence()
 
+    cof_pp = cc.cofaces_of_persistence_pairs()
+    
     L_cofs = []
     for dim in dimensions:
 
         try:
-            cof = cc.cofaces_of_persistence_pairs()[0][dim]
+            cof = cof_pp[0][dim]
         except IndexError:
             cof = np.array([])
 
         # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices
         D = len(Xs) if len(cof) > 0 else 1
-        ocof = np.array([0 for _ in range(D*2*cof.shape[0])])
+        ocof = np.zeros(D*2*cof.shape[0])
         count = 0
         for idx in range(0,2*cof.shape[0],2):
-            ocof[D*idx:D*(idx+1)]     = np.unravel_index(cof[count,0], Xs)
-            ocof[D*(idx+1):D*(idx+2)] = np.unravel_index(cof[count,1], Xs)
+            ocof[D*idx:D*(idx+1)]     = np.unravel_index(cof[count,0], Xs, order='F')
+            ocof[D*(idx+1):D*(idx+2)] = np.unravel_index(cof[count,1], Xs, order='F')
             count += 1
         L_cofs.append(np.array(ocof, dtype=np.int32))
 
@@ -41,7 +43,7 @@ class CubicalLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing cubical persistence out of a cubical complex
     """
-    def __init__(self, dimensions=[1], **kwargs):
+    def __init__(self, dimensions=[0], **kwargs):
         """
         Constructor for the CubicalLayer class
 
