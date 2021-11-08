@@ -88,9 +88,9 @@ make \endverbatim
  * Witness_complex/example_witness_complex_off.cpp</a>
  * \li <a href="example_witness_complex_sphere_8cpp-example.html">
  * Witness_complex/example_witness_complex_sphere.cpp</a>
- * \li <a href="alpha_complex_from_off_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="alpha_complex_from_points_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
@@ -100,15 +100,15 @@ make \endverbatim
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
  * \li <a href="bottleneck_basic_example_8cpp-example.html">
  * Bottleneck_distance/bottleneck_basic_example.cpp</a>
- * \li <a href="bottleneck_read_file_8cpp-example.html">
+ * \li <a href="bottleneck_distance_8cpp-example.html">
  * Bottleneck_distance/bottleneck_distance.cpp</a>
- * \li <a href="coord_g_i_c_8cpp-example.html">
+ * \li <a href="_coord_g_i_c_8cpp-example.html">
  * Nerve_GIC/CoordGIC.cpp</a>
- * \li <a href="func_g_i_c_8cpp-example.html">
+ * \li <a href="_func_g_i_c_8cpp-example.html">
  * Nerve_GIC/FuncGIC.cpp</a>
- * \li <a href="nerve_8cpp-example.html">
+ * \li <a href="_nerve_8cpp-example.html">
  * Nerve_GIC/Nerve.cpp</a>
- * \li <a href="voronoi_g_i_c_8cpp-example.html">
+ * \li <a href="_voronoi_g_i_c_8cpp-example.html">
  * Nerve_GIC/VoronoiGIC.cpp</a>
  * \li <a href="example_spatial_searching_8cpp-example.html">
  * Spatial_searching/example_spatial_searching.cpp</a>
@@ -122,10 +122,12 @@ make \endverbatim
  * Tangential_complex/example_basic.cpp</a>
  * \li <a href="example_with_perturb_8cpp-example.html">
  * Tangential_complex/example_with_perturb.cpp</a>
- * \li <a href="weighted_alpha_complex_3d_from_points_8cpp-example.html">
+ * \li <a href="_weighted_alpha_complex_3d_from_points_8cpp-example.html">
  * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
  * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
+ * \li <a href="_coxeter_triangulation_2manifold_tracing_flat_torus_with_boundary_8cpp-example.html">
+ * Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp</a>
  *
  * \subsection eigen Eigen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
@@ -134,15 +136,15 @@ make \endverbatim
  * 
  * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> and will not be
  * built if Eigen is not installed:
- * \li <a href="alpha_complex_from_off_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="alpha_complex_from_points_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
  * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="weighted_alpha_complex_3d_from_points_8cpp-example.html">
+ * \li <a href="_weighted_alpha_complex_3d_from_points_8cpp-example.html">
  * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
  * \li <a href="alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
  * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
@@ -170,6 +172,12 @@ make \endverbatim
  * Witness_complex/example_witness_complex_off.cpp</a>
  * \li <a href="example_witness_complex_sphere_8cpp-example.html">
  * Witness_complex/example_witness_complex_sphere.cpp</a>
+ * \li <a href="_coxeter_triangulation_2cell_complex_from_basic_circle_manifold_8cpp-example.html">
+ * Coxeter_triangulation/cell_complex_from_basic_circle_manifold.cpp</a>
+ * \li <a href="_coxeter_triangulation_2manifold_tracing_custom_function_8cpp-example.html">
+ * Coxeter_triangulation/manifold_tracing_custom_function.cpp</a>
+ * \li <a href="_coxeter_triangulation_2manifold_tracing_flat_torus_with_boundary_8cpp-example.html">
+ * Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp</a>
  *
  * \subsection tbb Threading Building Blocks
  * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
@@ -179,27 +187,27 @@ make \endverbatim
  * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
  * 
  * The following examples/utilities are using Intel&reg; TBB if installed:
- * \li <a href="alpha_complex_from_off_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="alpha_complex_from_points_8cpp-example.html">
+ * \li <a href="_alpha_complex_from_points_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_points.cpp</a>
  * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
  * \li <a href="alpha_complex_persistence_8cpp-example.html">
  * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="bitmap_cubical_complex_8cpp-example.html">
+ * \li <a href="cubical_complex_persistence_8cpp-example.html">
  * Bitmap_cubical_complex/cubical_complex_persistence.cpp</a>
- * \li <a href="bitmap_cubical_complex_periodic_boundary_conditions_8cpp-example.html">
+ * \li <a href="periodic_cubical_complex_persistence_8cpp-example.html">
  * Bitmap_cubical_complex/periodic_cubical_complex_persistence.cpp</a>
- * \li <a href="random_bitmap_cubical_complex_8cpp-example.html">
+ * \li <a href="_random_bitmap_cubical_complex_8cpp-example.html">
  * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
- * \li <a href="coord_g_i_c_8cpp-example.html">
+ * \li <a href="_coord_g_i_c_8cpp-example.html">
  * Nerve_GIC/CoordGIC.cpp</a>
- * \li <a href="func_g_i_c_8cpp-example.html">
+ * \li <a href="_func_g_i_c_8cpp-example.html">
  * Nerve_GIC/FuncGIC.cpp</a>
- * \li <a href="nerve_8cpp-example.html">
+ * \li <a href="_nerve_8cpp-example.html">
  * Nerve_GIC/Nerve.cpp</a>
- * \li <a href="voronoi_g_i_c_8cpp-example.html">
+ * \li <a href="_voronoi_g_i_c_8cpp-example.html">
  * Nerve_GIC/VoronoiGIC.cpp</a>
  * \li <a href="simple_simplex_tree_8cpp-example.html">
  * Simplex_tree/simple_simplex_tree.cpp</a>

@@ -8,6 +8,7 @@ Examples
 .. only:: builder_html
 
     * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`alpha_complex_from_generated_points_on_sphere_example.py <../example/alpha_complex_from_generated_points_on_sphere_example.py>`
     * :download:`alpha_complex_from_points_example.py <../example/alpha_complex_from_points_example.py>`
     * :download:`alpha_rips_persistence_bottleneck_distance.py <../example/alpha_rips_persistence_bottleneck_distance.py>`
     * :download:`bottleneck_basic_example.py <../example/bottleneck_basic_example.py>`

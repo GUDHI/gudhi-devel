@@ -13,6 +13,7 @@ import numpy
 import pytest
 import torch
 import math
+import warnings
 
 
 def test_dtm_compare_euclidean():
@@ -87,3 +88,16 @@ def test_density():
     assert density == pytest.approx(expected)
     density = DTMDensity(weights=[0.5, 0.5], metric="neighbors", dim=1).fit_transform(distances)
     assert density == pytest.approx(expected)
+
+def test_dtm_overflow_warnings():
+    pts = numpy.array([[10., 100000000000000000000000000000.], [1000., 100000000000000000000000000.]])
+    impl_warn = ["keops", "hnsw"]
+
+    with warnings.catch_warnings(record=True) as w:
+        for impl in impl_warn:
+            dtm = DistanceToMeasure(2, q=10000, implementation=impl)
+            r = dtm.fit_transform(pts)
+        assert len(w) == 2
+        for i in range(len(w)):
+            assert issubclass(w[i].category, RuntimeWarning)
+            assert "Overflow" in str(w[i].message)
