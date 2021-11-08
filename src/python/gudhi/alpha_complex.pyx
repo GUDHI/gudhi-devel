@@ -16,8 +16,6 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
-import errno
-import os
 import warnings
 
 from gudhi.simplex_tree cimport *
@@ -82,10 +80,7 @@ cdef class AlphaComplex:
         if off_file:
             warnings.warn("off_file is a deprecated parameter, please consider using gudhi.read_points_from_off_file",
                           DeprecationWarning)
-            if os.path.isfile(off_file):
-                points = read_points_from_off_file(off_file = off_file)
-            else:
-                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
+            points = read_points_from_off_file(off_file = off_file)
 
         # weights are set but is inconsistent with the number of points
         if weights != None and len(weights) != len(points):
