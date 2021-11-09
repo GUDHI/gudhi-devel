@@ -85,9 +85,7 @@ PYBIND11_MODULE(_points, m) {
     m.def("sphere", &generate_points_on_sphere,
           py::arg("n_samples"), py::arg("ambient_dim"),
           py::arg("radius") = 1., py::arg("sample") = "random",
-          R"pbdoc(
-          Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
-
+          R"pbdoc( Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
           :param n_samples: The number of points to be generated.
           :type n_samples: integer
           :param ambient_dim: The ambient dimension d.
@@ -102,19 +100,14 @@ PYBIND11_MODULE(_points, m) {
 
     m.def("ctorus", &generate_points_on_torus,
           py::arg("n_samples"), py::arg("dim"), py::arg("sample") = "random",
-          R"pbdoc(
-          Generate random i.i.d. points on a d-torus in R^2d or as a grid
-
+          R"pbdoc( Generate random i.i.d. points on a d-torus in R^2d or as a grid
           :param n_samples: The number of points to be generated.
           :type n_samples: integer
           :param dim: The dimension of the torus on which points would be generated in R^2*dim.
           :type dim: integer
           :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
           :type sample: string
-          :rtype: numpy array of float.
-          The shape of returned numpy array is :
-              if sample is 'random' : (n_samples, 2*dim).
-              if sample is 'grid' : (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
+          :rtype: numpy array of float. The shape of returned numpy array is: If sample is 'random': (n_samples, 2*dim). If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
           :returns: the generated points on a torus.
           )pbdoc");
 }
