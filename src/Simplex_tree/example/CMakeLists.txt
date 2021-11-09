@@ -51,3 +51,20 @@ if (TBB_FOUND)
 endif()
 
 add_test(NAME Simplex_tree_example_graph_expansion_with_blocker COMMAND $<TARGET_FILE:Simplex_tree_example_graph_expansion_with_blocker>)
+
+add_executable ( Simplex_tree_rips_zigzag_filtration_from_points rips_zigzag_filtration_from_points.cpp )
+  target_link_libraries(Simplex_tree_rips_zigzag_filtration_from_points Boost::program_options)
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_rips_zigzag_filtration_from_points ${TBB_LIBRARIES})
+endif()
+
+add_executable ( Simplex_tree_simple_optimized_cofaces_computation simple_optimized_cofaces_computation.cpp )
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_simple_optimized_cofaces_computation ${TBB_LIBRARIES})
+endif()
+
+add_executable ( Simplex_tree_simple_rips_zigzag_filtration simple_rips_zigzag_filtration.cpp )
+if (TBB_FOUND)
+  target_link_libraries(Simplex_tree_simple_rips_zigzag_filtration ${TBB_LIBRARIES})
+endif()
+

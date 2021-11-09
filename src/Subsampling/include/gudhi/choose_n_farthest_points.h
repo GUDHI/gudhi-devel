@@ -147,3 +147,4 @@ void choose_n_farthest_points(Distance dist,
 }  // namespace Gudhi
 
 #endif  // CHOOSE_N_FARTHEST_POINTS_H_
+

@@ -1,0 +1,22 @@
+project(Zigzag_persistence_examples)
+
+add_executable ( zigzag_persistence_flag_zigzag_points zigzag_persistence_flag_zigzag_points.cpp )
+if (TBB_FOUND)
+  target_link_libraries(zigzag_persistence_flag_zigzag_points ${TBB_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+else()
+  target_link_libraries(zigzag_persistence_flag_zigzag_points ${Boost_PROGRAM_OPTIONS_LIBRARY})
+endif()
+
+add_executable ( zigzag_persistence_flag_zigzag_edges zigzag_persistence_flag_zigzag_edges.cpp )
+if (TBB_FOUND)
+  target_link_libraries(zigzag_persistence_flag_zigzag_edges ${TBB_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+else()
+  target_link_libraries(zigzag_persistence_flag_zigzag_edges ${Boost_PROGRAM_OPTIONS_LIBRARY})
+endif()
+
+# add_executable ( zigzag_rips_compare_dionysus zigzag_rips_compare_dionysus.cpp )
+# if (TBB_FOUND)
+#   target_link_libraries(zigzag_rips_compare_dionysus ${TBB_LIBRARIES} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+# else()
+#   target_link_libraries(zigzag_rips_compare_dionysus ${Boost_PROGRAM_OPTIONS_LIBRARY})
+# endif()

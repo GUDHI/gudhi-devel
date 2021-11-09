@@ -16,6 +16,7 @@
 #include <vector>
 #include <fstream>
 #include <map>
+#include <set>
 
 namespace Gudhi {
 
