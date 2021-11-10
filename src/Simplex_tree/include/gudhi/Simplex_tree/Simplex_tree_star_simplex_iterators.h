@@ -15,6 +15,7 @@
 #include <boost/iterator/filter_iterator.hpp>
 
 #include <vector>
+#include <queue>
 
 namespace Gudhi {
 

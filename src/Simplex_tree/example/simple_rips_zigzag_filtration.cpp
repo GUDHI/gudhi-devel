@@ -45,8 +45,7 @@ int main(int argc, char* argv[])
                                   nu, 
                                   mu, 
                                   edge_filtration,
-                                  Gudhi::farthest_point_ordering(),
-                                  Gudhi::do_nothing() );
+                                  Gudhi::farthest_point_ordering());
 
   //Print the zigzag filtration of the 1-skeleton
   std::cout << "-----Edge filtration: \n";

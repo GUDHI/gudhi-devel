@@ -13,6 +13,7 @@
 
 #include <set>
 #include <map>
+#include <list>
 #include <gudhi/Simplex_tree.h>
 
 #ifdef GUDHI_USE_TBB

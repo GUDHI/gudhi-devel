@@ -42,6 +42,7 @@ add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 add_gudhi_module(Discrete_morse_theory)
+add_gudhi_module(Computational_geometry)
 
 
 # Include module CMake subdirectories
@@ -54,7 +55,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-# add_subdirectory(src/GudhUI)
+add_subdirectory(src/GudhUI)
 
 if (WITH_GUDHI_PYTHON)
   # specific for cython module

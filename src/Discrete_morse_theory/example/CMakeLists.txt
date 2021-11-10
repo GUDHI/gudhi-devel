@@ -4,3 +4,5 @@ add_executable(simple_discrete_morse_theory simple_discrete_morse_theory.cpp)
 if (TBB_FOUND)
   target_link_libraries(simple_discrete_morse_theory ${TBB_LIBRARIES})
 endif()
+
+add_test(NAME Discrete_morse_theory_example_basic COMMAND $<TARGET_FILE:simple_discrete_morse_theory>)

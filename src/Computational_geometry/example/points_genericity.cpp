@@ -7,8 +7,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "gudhi/reader_utils.h"
-#include <gudhi/distance_functions.h>
+#include <gudhi/reader_utils.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Point_cloud.h>
 #include <CGAL/Epick_d.h>

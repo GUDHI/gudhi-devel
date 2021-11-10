@@ -10,7 +10,7 @@
 #include <fstream>
 #include <chrono>
 #include <gudhi/Simplex_tree.h>
-#include "gudhi/reader_utils.h"
+#include <gudhi/reader_utils.h>
 #include <gudhi/Points_off_io.h>
 #include <boost/program_options.hpp>
 #include <CGAL/Epick_d.h>
