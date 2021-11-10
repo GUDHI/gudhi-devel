@@ -140,8 +140,8 @@ def quantization(pdiagset, k=2, c0=None, batch_size=1, order=2., internal_p=2.):
     expected persistence diagram underneath the diagrams in ``pdiagset``.
     The codebook is iteratively updated by going through (batches of) persistence diagrams.
 
-    :param pdiagset: A list of ``numpy.array`` of shape (n x 2) (``n`` can variate) representing a
-                     set of persistence diagrams that we want to quantize.
+    :param pdiagset: a set of persistence diagrams that we want to quantize.
+    :type pdiagset: list of n x 2 numpy arrays
     :param k: number of centroids. Default is ``2``. A naive heuristic is used to initialize the codebook.
               Not used if an initial codebook ``c0`` has been provided.
     :type k: ``int``
