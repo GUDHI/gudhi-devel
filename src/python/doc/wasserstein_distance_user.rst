@@ -196,6 +196,9 @@ The output is:
 Quantization
 ------------
 
+:Since: GUDHI 3.5.0
+:Requires: `SciPy <installation.html#scipy>`_
+
 The quantization problem consists, given a measure :math:`\mu` (e.g. a persistence diagram) and a budget :math:`k`,
 in finding a measure :math:`\nu` supported on :math:`k` points that is the best approximation possible of :math:`\mu` ;
 the :math:`k`-means problem is a particular example of quantization problem.
