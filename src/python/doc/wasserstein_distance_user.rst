@@ -193,6 +193,16 @@ The output is:
      [0.7375     0.7625    ]
      [0.2375     0.2625    ]]
 
+
+
+Tutorial
+********
+
+This
+`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
+presents the concept of barycenter, or Fréchet mean, of a family of persistence diagrams.
+
+
 Quantization
 ------------
 
@@ -255,12 +265,10 @@ an improvment over using vanilla :math:`k`-mean (Lloyd algorithm) to quantize pe
      [0.      3.00125]]
 
 
-Tutorials
----------
+Tutorial
+********
 
-This
-`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
-presents the concept of barycenter, or Fréchet mean, of a family of persistence diagrams.
 
 This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Quantization-of-persistence-diagrams.ipynb>`_
 presents the concept of quantization, or codebooks, of a family of persistence diagrams.
+
