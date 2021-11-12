@@ -8,13 +8,14 @@ from ..cubical_complex  import CubicalComplex
 
 # The parameters of the model are the pixel values.
 
-def _Cubical(X, dimensions):
-    # Parameters: X (image),
+def _Cubical(Xflat, Xdim, dimensions):
+    # Parameters: Xflat (flattened image),
+    #             Xdim (shape of non-flattened image)
     #             dimensions (homology dimensions)
 
     # Compute the persistence pairs with Gudhi
-    Xs = X.shape
-    cc = CubicalComplex(top_dimensional_cells=X)
+    # We reverse the dimensions because CubicalComplex uses Fortran ordering
+    cc = CubicalComplex(dimensions=Xdim[::-1], top_dimensional_cells=Xflat)
     cc.compute_persistence()
 
     # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices    
@@ -61,7 +62,9 @@ class CubicalLayer(tf.keras.layers.Layer):
         """
         # Compute pixels associated to positive and negative simplices 
         # Don't compute gradient for this operation
-        indices = _Cubical(X.numpy(), self.dimensions)
+        Xflat = tf.reshape(X, [-1])
+        Xdim = X.shape
+        indices = _Cubical(Xflat.numpy(), Xdim, self.dimensions)
         # Get persistence diagram by simply picking the corresponding entries in the image
-        self.dgms = [tf.reshape(tf.gather(  tf.reshape(tf.transpose(X), [-1]), indice  ), [-1,2]) for indice in indices]
+        self.dgms = [tf.reshape(tf.gather(Xflat, indice), [-1,2]) for indice in indices]
         return self.dgms
