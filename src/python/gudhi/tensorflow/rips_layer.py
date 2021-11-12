@@ -16,7 +16,7 @@ def _Rips(DX, max_edge, dimensions):
     # Compute the persistence pairs with Gudhi
     rc = RipsComplex(distance_matrix=DX, max_edge_length=max_edge)
     st = rc.create_simplex_tree(max_dimension=max(dimensions)+1)
-    st.persistence()
+    st.compute_persistence()
     pairs = st.flag_persistence_generators()
 
     L_indices = []
@@ -40,7 +40,7 @@ class RipsLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing Rips persistence out of a point cloud
     """
-    def __init__(self, maximum_edge_length=12, dimensions=[0], **kwargs):
+    def __init__(self, maximum_edge_length=12, dimensions, **kwargs):
         """
         Constructor for the RipsLayer class
 

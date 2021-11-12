@@ -43,7 +43,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
     """
-    def __init__(self, simplextree, dimensions=[0], **kwargs):
+    def __init__(self, simplextree, dimensions, **kwargs):
         """
         Constructor for the LowerStarSimplexTreeLayer class
   

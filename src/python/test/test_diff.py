@@ -15,7 +15,6 @@ def test_rips_diff():
     grads = tape.gradient(loss, [X])
     assert np.abs(grads[0].numpy()-np.array([[-.5,-.5],[.5,.5]])).sum() <= 1e-6
 
-
 def test_cubical_diff():
 
     Xinit = np.array([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=np.float32)
@@ -27,6 +26,18 @@ def test_cubical_diff():
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
     assert np.abs(grads[0].numpy()-np.array([[0.,0.,0.],[0.,.5,0.],[0.,0.,-.5]])).sum() <= 1e-6
+
+def test_nonsquare_cubical_diff():
+
+    Xinit = np.array([[-1.,1.,0.],[1.,1.,1.]], dtype=np.float32)
+    X = tf.Variable(initial_value=Xinit, trainable=True)
+    cl = CubicalLayer(dimensions=[0])
+
+    with tf.GradientTape() as tape:
+        dgm = cl.call(X)[0]
+        loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
+    grads = tape.gradient(loss, [X])
+    assert np.abs(grads[0].numpy()-np.array([[0.,0.5,-0.5],[0.,0.,0.]])).sum() <= 1e-6
 
 def test_st_diff():
 
