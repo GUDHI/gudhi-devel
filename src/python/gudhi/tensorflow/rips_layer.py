@@ -40,7 +40,7 @@ class RipsLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing Rips persistence out of a point cloud
     """
-    def __init__(self, maximum_edge_length=12, dimensions, **kwargs):
+    def __init__(self, dimensions, maximum_edge_length=12, **kwargs):
         """
         Constructor for the RipsLayer class
 
