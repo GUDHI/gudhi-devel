@@ -12,7 +12,7 @@ Example of gradient computed from cubical persistence
 
 .. testcode::
 
-    from gudhi.tensorflow import *
+    from gudhi.tensorflow import CubicalLayer
     import tensorflow as tf
 
     X = tf.Variable([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=tf.float32, trainable=True)

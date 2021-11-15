@@ -12,7 +12,7 @@ Example of gradient computed from Vietoris-Rips persistence
 
 .. testcode::
 
-    from gudhi.tensorflow import *
+    from gudhi.tensorflow import RipsLayer
     import tensorflow as tf
 
     X = tf.Variable([[1.,1.],[2.,2.]], dtype=tf.float32, trainable=True)

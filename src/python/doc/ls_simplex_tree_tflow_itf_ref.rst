@@ -12,7 +12,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
 
 .. testcode::
 
-    from gudhi.tensorflow import *
+    from gudhi.tensorflow import LowerStarSimplexTreeLayer
     import tensorflow as tf
     import gudhi as gd
 
