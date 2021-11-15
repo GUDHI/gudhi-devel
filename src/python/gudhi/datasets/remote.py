@@ -39,7 +39,7 @@ def _checksum_sha256(file_path):
             sha256_hash.update(buffer)
     return sha256_hash.hexdigest()
 
-def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
+def fetch(url, filename, dirname = "remote_datasets", file_checksum = None, accept_license = False):
     """
     Fetch the wanted dataset from the given url and save it in file_path
 
@@ -54,6 +54,9 @@ def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
     file_checksum : string
         The file checksum using sha256 to check against the one computed on the downloaded file.
         Default is 'None'.
+    accept_license : boolean
+        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
+        Default is False
 
     Returns
     -------
@@ -69,6 +72,7 @@ def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
         if not exists(dirname):
             makedirs(dirname)
 
+        # Get the file
         urlretrieve(url, file_path)
 
     if file_checksum is not None:
@@ -77,6 +81,13 @@ def fetch(url, filename, dirname = "remote_datasets", file_checksum = None):
             raise IOError("{} has a SHA256 checksum : {}, "
                         "different from expected : {}."
                         "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum))
+
+    # Print license terms unless accept_license is set to True
+    if not accept_license:
+        license_file = join(dirname, "LICENSE")
+        if exists(license_file) and (file_path != license_file):
+            with open(license_file, 'r') as f:
+                print(f.read())
 
     return file_path
 
@@ -98,3 +109,28 @@ def fetch_spiral_2d(filename = "spiral_2d.csv", dirname = "remote_datasets"):
     """
     return fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", filename, dirname,
                  '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
+
+def fetch_bunny(filename = "bunny.off", dirname = "remote_datasets/bunny", accept_license = False):
+    """
+    Fetch bunny.off remotely and its LICENSE file
+
+    Parameters
+    ----------
+    filename : string
+        The name to give to downloaded file. Default is "bunny.off"
+    dirname : string
+        The directory to save the file to. Default is "remote_datasets/bunny".
+    accept_license : boolean
+        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
+        Default is False
+
+    Returns
+    -------
+    files_paths: list of strings
+        Full paths of the created file and its LICENSE.
+    """
+
+    return [fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points//bunny/LICENSE", "LICENSE", dirname,
+                 'aeb1bad319b7d74fa0b8076358182f9c6b1284c67cc07dc67cbc9bc73025d956'),
+            fetch("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points//bunny/bunny.off", filename, dirname,
+                 '11852d5e73e2d4bd7b86a2c5cc8a5884d0fbb72539493e8cec100ea922b19f5b', accept_license)]
