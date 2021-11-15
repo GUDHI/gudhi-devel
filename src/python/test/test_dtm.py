@@ -94,7 +94,7 @@ def test_dtm_overflow_warnings():
 
     with warnings.catch_warnings(record=True) as w:
         # TODO Test "keops" implementation as well when next version of pykeops (current is 1.5) is released (should fix the problem (cf. issue #543))
-        dtm = DistanceToMeasure(2, q=10000, implementation="hnsw")
+        dtm = DistanceToMeasure(2, implementation="hnsw")
         r = dtm.fit_transform(pts)
         assert len(w) == 1
         assert issubclass(w[0].category, RuntimeWarning)
