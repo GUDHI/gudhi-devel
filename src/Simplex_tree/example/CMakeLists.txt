@@ -29,7 +29,7 @@ if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
     target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${TBB_LIBRARIES})
   endif()
   add_test(NAME Simplex_tree_example_alpha_shapes_3_from_off COMMAND $<TARGET_FILE:Simplex_tree_example_alpha_shapes_3_from_off>
-      "${CMAKE_SOURCE_DIR}/data/points/bunny_5000.off")
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off")
 
 endif()
 
