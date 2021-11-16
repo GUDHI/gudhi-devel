@@ -49,7 +49,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
   
         Parameters:
             simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n = number of vertices
-            dimensions (int): homology dimensions
+            dimensions (List[int]): homology dimensions
         """
         super().__init__(dynamic=True, **kwargs)
         self.dimensions  = dimensions

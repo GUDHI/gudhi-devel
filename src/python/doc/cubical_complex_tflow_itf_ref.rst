@@ -16,7 +16,7 @@ Example of gradient computed from cubical persistence
     import tensorflow as tf
 
     X = tf.Variable([[0.,2.,2.],[2.,2.,2.],[2.,2.,1.]], dtype=tf.float32, trainable=True)
-    cl = CubicalLayer(dimension=0)
+    cl = CubicalLayer(dimensions=[0])
 
     with tf.GradientTape() as tape:
         dgm = cl.call(X)

@@ -42,7 +42,7 @@ class CubicalLayer(tf.keras.layers.Layer):
         Constructor for the CubicalLayer class
 
         Parameters:
-            dimensions (list of int): homology dimensions
+            dimensions (List[int]): homology dimensions
         """
         super().__init__(dynamic=True, **kwargs)
         self.dimensions = dimensions

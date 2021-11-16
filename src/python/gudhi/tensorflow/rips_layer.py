@@ -46,7 +46,7 @@ class RipsLayer(tf.keras.layers.Layer):
 
         Parameters:
             maximum_edge_length (float): maximum edge length for the Rips complex 
-            dimensions (int): homology dimensions
+            dimensions (List[int]): homology dimensions
         """
         super().__init__(dynamic=True, **kwargs)
         self.max_edge = maximum_edge_length

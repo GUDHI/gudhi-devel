@@ -16,7 +16,7 @@ Example of gradient computed from Vietoris-Rips persistence
     import tensorflow as tf
 
     X = tf.Variable([[1.,1.],[2.,2.]], dtype=tf.float32, trainable=True)
-    rl = RipsLayer(maximum_edge_length=2., dimension=0)
+    rl = RipsLayer(maximum_edge_length=2., dimensions=[0])
 
     with tf.GradientTape() as tape:
         dgm = rl.call(X)
