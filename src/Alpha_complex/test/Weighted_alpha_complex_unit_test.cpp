@@ -13,10 +13,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <CGAL/Epick_d.h>
 #include <CGAL/Epeck_d.h>
 
-#include <cmath>  // float comparison
 #include <vector>
 #include <random>
 #include <array>
@@ -25,69 +23,6 @@
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Unitary_tests_utils.h>
-
-using list_of_exact_kernel_variants = boost::mpl::list<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >,
-                                                       CGAL::Epeck_d< CGAL::Dimension_tag<4> >
-                                                       > ;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_exact_kernel_variants) {
-  // Check that in exact mode for static dimension 4 the code for dD unweighted and for dD weighted with all weights
-  // 0 give exactly the same simplex tree (simplices and filtration values).
-
-  // Random points construction
-  using Point_d = typename Kernel::Point_d;
-  std::vector<Point_d> points;
-  std::uniform_real_distribution<double> rd_pts(-10., 10.);
-  std::random_device rand_dev;
-  std::mt19937 rand_engine(rand_dev());
-  for (int idx = 0; idx < 20; idx++) {
-    std::vector<double> point {rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine)};
-    points.emplace_back(point.begin(), point.end());
-  }
-  
-  // Alpha complex from points
-  Gudhi::alpha_complex::Alpha_complex<Kernel, false> alpha_complex_from_points(points);
-  Gudhi::Simplex_tree<> simplex;
-  Gudhi::Simplex_tree<>::Filtration_value infty = std::numeric_limits<Gudhi::Simplex_tree<>::Filtration_value>::infinity();
-  BOOST_CHECK(alpha_complex_from_points.create_complex(simplex, infty, true));
-  std::clog << "Iterator on alpha complex simplices in the filtration order, with [filtration value]:"
-            << std::endl;
-  for (auto f_simplex : simplex.filtration_simplex_range()) {
-    std::clog << "   ( ";
-    for (auto vertex : simplex.simplex_vertex_range(f_simplex)) {
-      std::clog << vertex << " ";
-    }
-    std::clog << ") -> " << "[" << simplex.filtration(f_simplex) << "] " << std::endl;
-  }
-
-  // Alpha complex from zero weighted points
-  std::vector<typename Kernel::FT> weights(20, 0.);
-  Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_zero_weighted_points(points, weights);
-  Gudhi::Simplex_tree<> zw_simplex;
-  BOOST_CHECK(alpha_complex_from_zero_weighted_points.create_complex(zw_simplex, infty, true));
-
-  std::clog << "Iterator on zero weighted alpha complex simplices in the filtration order, with [filtration value]:"
-            << std::endl;
-  for (auto f_simplex : zw_simplex.filtration_simplex_range()) {
-    std::clog << "   ( ";
-    for (auto vertex : zw_simplex.simplex_vertex_range(f_simplex)) {
-      std::clog << vertex << " ";
-    }
-    std::clog << ") -> " << "[" << zw_simplex.filtration(f_simplex) << "] " << std::endl;
-  }
-
-  BOOST_CHECK(zw_simplex == simplex);
-}
-
-template <typename Point_d>
-bool cgal_3d_point_sort (Point_d a,Point_d b) {
-  if (a[0] != b[0])
-    return a[0] < b[0];
-  if (a[1] != b[1])
-    return a[1] < b[1];
-  return a[2] < b[2];
-}
 
 BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   // check that for random weighted 3d points in safe mode the 3D and dD codes give the same result with some tolerance
@@ -189,41 +124,4 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
     }
     ++dD_itr;
   }
-}
-
-using list_of_1d_kernel_variants = boost::mpl::list<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >,
-                                                    CGAL::Epeck_d< CGAL::Dimension_tag<1>>,
-                                                    CGAL::Epick_d< CGAL::Dynamic_dimension_tag >,
-                                                    CGAL::Epick_d< CGAL::Dimension_tag<1>>
-                                                    >;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Weighted_alpha_complex_non_visible_points, Kernel, list_of_1d_kernel_variants) {
-  // check that for 2 closed weighted 1-d points, one with a high weight to hide the second one with a small weight,
-  // that the point with a small weight has the same high filtration value than the edge formed by the 2 points
-  using Point_d = typename Kernel::Point_d;
-  std::vector<Point_d> points;
-  std::vector<double> p1 {0.};
-  points.emplace_back(p1.begin(), p1.end());
-  // closed enough points
-  std::vector<double> p2 {0.1};
-  points.emplace_back(p2.begin(), p2.end());
-  std::vector<typename Kernel::FT> weights {100., 0.01};
-
-  Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex(points, weights);
-  Gudhi::Simplex_tree<> stree;
-  BOOST_CHECK(alpha_complex.create_complex(stree));
-
-  std::clog << "Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:"
-            << std::endl;
-  for (auto f_simplex : stree.filtration_simplex_range()) {
-    std::clog << "   ( ";
-    for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
-      std::clog << vertex << " ";
-    }
-    std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "] " << std::endl;
-  }
-
-  BOOST_CHECK(stree.filtration(stree.find({0})) == -100.);
-  BOOST_CHECK(stree.filtration(stree.find({1})) == stree.filtration(stree.find({0, 1})));
-  BOOST_CHECK(stree.filtration(stree.find({1})) > 100000);
 }

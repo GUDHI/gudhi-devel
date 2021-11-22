@@ -83,7 +83,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the simplicial complex.
  *
- * \include Alpha_complex/Alpha_complex_from_points.cpp
+ * \include Alpha_complex_from_points.cpp
  *
  * When launching:
  *
@@ -92,7 +92,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_60.txt
+ * \include alphaoffreader_for_doc_60.txt
  *
  * \section createcomplexalgorithm Create complex algorithm
  *
@@ -152,6 +152,8 @@ Table of Contents
  * not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
  * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  *
+ * \note This is not the case in `exact` version, this is the reason why it is not called in this case.
+ *
  * \subsubsection pruneabove Prune above given filtration value
  *
  * The simplex tree is pruned from the given maximum \f$ \alpha^2 \f$ value (cf.
@@ -171,7 +173,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Weighted_alpha_complex_from_points.cpp
+ * \include Weighted_alpha_complex_from_points.cpp
  *
  * When launching:
  *
@@ -180,7 +182,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ * \include weightedalpha3dfrompoints_for_doc.txt
  *
  *
  * \section offexample Example from OFF file
@@ -190,7 +192,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Alpha_complex_from_off.cpp
+ * \include Alpha_complex_from_off.cpp
  *
  * When launching:
  *
@@ -199,7 +201,7 @@ Table of Contents
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_32.txt
+ * \include alphaoffreader_for_doc_32.txt
  *
  *
  * \section weighted3dexample 3d specific version
@@ -215,7 +217,7 @@ Table of Contents
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
+ * \include Weighted_alpha_complex_3d_from_points.cpp
  *
  * The results will be the same as in \ref weightedversion .
  *

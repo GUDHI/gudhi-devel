@@ -34,16 +34,21 @@ make -j 4 all && ctest -j 4 --output-on-failure
 ## Create the documentation
 ```bash
 mkdir gudhi.doc.@GUDHI_VERSION@
+```
+
+***[Check there are no error and the warnings]***
+
+```bash
+cd gudhi.@GUDHI_VERSION@
+rm -rf build; mkdir build; cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
 make doxygen  2>&1 | tee dox.log && grep warning dox.log
 ```
 
 ***[Check there are no error and the warnings]***
 
 ```bash
-cp -R gudhi.@GUDHI_VERSION@/doc/html gudhi.doc.@GUDHI_VERSION@/cpp
-cd gudhi.@GUDHI_VERSION@
-rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+cp -R html ../../gudhi.doc.@GUDHI_VERSION@/cpp
 export LC_ALL=en_US.UTF-8  # cf. bug https://github.com/GUDHI/gudhi-devel/issues/111
 make sphinx
 ```
@@ -63,20 +68,18 @@ make -j 4 all && ctest -j 4 --output-on-failure
 
 ## Upload the documentation
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/doc/@GUDHI_VERSION@
+[GUDHI GitHub pages](https://gudhi.github.io/) is only used as a _"qualification"_ web hosting service.
+The _"production"_ web hosting service is https://files.inria.fr (cf. [this doc](https://doc-si.inria.fr/display/SU/Espace+web)
+or [this one](https://www.nextinpact.com/article/30325/109058-se-connecter-a-serveur-webdav-sous-linux-macos-ou-windows)).
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/python/@GUDHI_VERSION@
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on gudhi WebDAV in doc/@GUDHI_VERSION@
+Delete the directory doc/latest on gudhi WebDAV.
+Copy gudhi WebDAV doc/@GUDHI_VERSION@ as doc/latest (no symbolic link with WebDAV).
 
-Through ssh, make the **latest** link to your new version of the documentation:
-```bash
-ssh ForgeLogin@scm.gforge.inria.fr
-cd /home/groups/gudhi/htdocs/doc
-rm latest
-ln -s @GUDHI_VERSION@ latest
-cd /home/groups/gudhi/htdocs/python
-rm latest
-ln -s @GUDHI_VERSION@ latest
-```
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on gudhi WebDAV in python/@GUDHI_VERSION@
+Delete the directory python/latest on gudhi WebDAV.
+Copy gudhi WebDAV python/@GUDHI_VERSION@ as python/latest (no symbolic link with WebDAV).
+
 
 ## Put a version label on files
 
@@ -90,7 +93,8 @@ ln -s @GUDHI_VERSION@ latest
 
 ## Pip package
 
-The pip package construction shall be started on release creation, you just have to check [gudhi github actions](https://github.com/GUDHI/gudhi-devel/actions) results.
+The pip package construction shall be started on release creation, you just have to check
+[gudhi github actions](https://github.com/GUDHI/gudhi-devel/actions) results.
 The version number must be conform to [pep440](https://www.python.org/dev/peps/pep-0440/#pre-releases)
 
 ## Conda package
@@ -105,30 +109,22 @@ If you need to update conda tools (conda-build, conda-smithy, ...), add a commen
 
 ## Docker image
 
-You have to modify the `Dockerfile_gudhi_installation` at the root of this repository in order to use the last release, cf. lines:
+You have to modify the
+[Dockerfile_gudhi_installation](https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_gudhi_installation)
+in gudhi-deploy repository in order to use the last release, cf. lines:
 ```
 ...
-RUN curl -LO "https://github.com/GUDHI/gudhi-devel/releases/download/tags%2Fgudhi-release-@GUDHI_VERSION@/gudhi.@GUDHI_VERSION@.tar.gz" \
-&& tar xf gudhi.@GUDHI_VERSION@.tar.gz \
-&& cd gudhi.@GUDHI_VERSION@ \
+ARG GUDHI_VERSION="3.X.X"
 ...
 ```
 
-Build and push images to docker hub:
-```
-docker build -f Dockerfile_gudhi_installation -t gudhi/latest_gudhi_version:@GUDHI_VERSION@ .
-docker run --rm -it gudhi/latest_gudhi_version:@GUDHI_VERSION@ 
-```
+After pushing the changes the docker image build will be automatically performed for
+[latest_gudhi_version](https://hub.docker.com/repository/docker/gudhi/latest_gudhi_version)
+docker image on docker hub.
 
-***[Check there are no error with utils and python version]***
-
-```
-docker tag gudhi/latest_gudhi_version:@GUDHI_VERSION@ gudhi/latest_gudhi_version:latest
-docker push gudhi/latest_gudhi_version:latest
-docker push gudhi/latest_gudhi_version:@GUDHI_VERSION@
-```
+***[Check there are no error]***
 
 ## Mail sending
 Send version mail to the following lists :
-* gudhi-devel@lists.gforge.inria.fr
-* gudhi-users@lists.gforge.inria.fr (not for release candidate)
+* gudhi-devel@inria.fr
+* gudhi-users@inria.fr (not for release candidate)

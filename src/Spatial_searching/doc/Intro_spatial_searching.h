@@ -36,7 +36,7 @@ namespace spatial_searching {
  * 
  * This example generates 500 random points, then performs all-near-neighbors searches, and queries for nearest and furthest neighbors using different methods.
  * 
- * \include Spatial_searching/example_spatial_searching.cpp
+ * \include example_spatial_searching.cpp
  * 
  */
 /** @} */  // end defgroup spatial_searching

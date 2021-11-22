@@ -1,3 +1,6 @@
 [submodule "ext/hera"]
 	path = ext/hera
 	url = https://github.com/grey-narn/hera.git
+[submodule "ext/gudhi-deploy"]
+	path = ext/gudhi-deploy
+	url = https://github.com/GUDHI/gudhi-deploy

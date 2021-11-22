@@ -7,6 +7,7 @@
 # Modification(s):
 #   - 2020/06 Martin: ATOL integration
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
+#   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
 import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
@@ -47,10 +48,14 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            new_X = BirthPersistenceTransform().fit_transform(X)
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+            try:
+                new_X = BirthPersistenceTransform().fit_transform(X)
+                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
+                [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+                self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                pass
         return self
 
     def transform(self, X):
@@ -96,6 +101,28 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         """
         return self.fit_transform([diag])[0,:]
 
+def _automatic_sample_range(sample_range, X, y):
+        """
+        Compute and returns sample range from the persistence diagrams if one of the sample_range values is numpy.nan.
+
+        Parameters:
+            sample_range (a numpy array of 2 float): minimum and maximum of all piecewise-linear function domains, of
+                the form [x_min, x_max].
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+            y (n x 1 array): persistence diagram labels (unused).
+        """
+        nan_in_range = np.isnan(sample_range)
+        if nan_in_range.any():
+            try:
+                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+                [mx,my] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]]
+                [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+                return np.where(nan_in_range, np.array([mx, My]), sample_range)
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                pass
+        return sample_range
+
 class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
@@ -121,10 +148,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if self.nan_in_range.any():
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.sample_range = np.where(self.nan_in_range, np.array([mx, My]), np.array(self.sample_range))
+        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
         return self
 
     def transform(self, X):
@@ -220,10 +244,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.sample_range)).any():
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
+        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
         return self
 
     def transform(self, X):
@@ -349,6 +370,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         else:
             self.grid_ = np.array(self.predefined_grid)
 
+
+        #self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+
         return self
 
 
@@ -473,10 +497,7 @@ class Entropy(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if np.isnan(np.array(self.sample_range)).any():
-            pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
-            [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-            self.sample_range = np.where(np.isnan(np.array(self.sample_range)), np.array([mx, My]), np.array(self.sample_range))
+        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
         return self
 
     def transform(self, X):
@@ -495,9 +516,13 @@ class Entropy(BaseEstimator, TransformerMixin):
         new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
-
             orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-            new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+            try:
+                new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                assert len(diagram) == 0
+                new_diagram = np.empty(shape = [0, 2])
 
             if self.mode == "scalar":
                 ent = - np.sum( np.multiply(new_diagram[:,1], np.log(new_diagram[:,1])) )
@@ -511,12 +536,11 @@ class Entropy(BaseEstimator, TransformerMixin):
                     max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                     for k in range(min_idx, max_idx):
                         ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
-                    if self.normalized:
-                        ent = ent / np.linalg.norm(ent, ord=1)
-                    Xfit.append(np.reshape(ent,[1,-1]))
+                if self.normalized:
+                    ent = ent / np.linalg.norm(ent, ord=1)
+                Xfit.append(np.reshape(ent,[1,-1]))
 
-        Xfit = np.concatenate(Xfit, 0)
-
+        Xfit = np.concatenate(Xfit, axis=0)
         return Xfit
 
     def __call__(self, diag):
@@ -577,7 +601,13 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
             pers = 0.5 * (diagram[:,1]-diagram[:,0])
             min_pers = np.minimum(pers,np.transpose(pers))
-            distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
+            # Works fine with sklearn 1.0, but an ValueError exception is thrown on past versions
+            try:
+                distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
+            except ValueError:
+                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
+                assert len(diagram) == 0
+                distances = np.empty(shape = [0, 0])
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)
             dim = min(len(vect), thresh)
             Xfit[i, :dim] = vect[:dim]
@@ -704,18 +734,19 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     >>> c = np.array([[3, 2, -1], [1, 2, -1]])
     >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
-    >>> atol_vectoriser.fit(X=[a, b, c]).centers
-    array([[ 2.        ,  0.66666667,  3.33333333],
-           [ 2.6       ,  2.8       , -0.4       ]])
+    >>> atol_vectoriser.fit(X=[a, b, c]).centers # doctest: +SKIP
+    >>> # array([[ 2.        ,  0.66666667,  3.33333333],
+    >>> #        [ 2.6       ,  2.8       , -0.4       ]])
     >>> atol_vectoriser(a)
-    array([1.18168665, 0.42375966])
+    >>> # array([1.18168665, 0.42375966]) # doctest: +SKIP
     >>> atol_vectoriser(c)
-    array([0.02062512, 1.25157463])
-    >>> atol_vectoriser.transform(X=[a, b, c])
-    array([[1.18168665, 0.42375966],
-           [0.29861028, 1.06330156],
-           [0.02062512, 1.25157463]])
+    >>> # array([0.02062512, 1.25157463]) # doctest: +SKIP
+    >>> atol_vectoriser.transform(X=[a, b, c]) # doctest: +SKIP
+    >>> # array([[1.18168665, 0.42375966],
+    >>> #        [0.29861028, 1.06330156],
+    >>> #        [0.02062512, 1.25157463]])
     """
+    # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
         """
         Constructor for the Atol measure vectorisation class.
