@@ -311,12 +311,14 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
 class BettiCurve(BaseEstimator, TransformerMixin):
     """
-    Compute Betti curves from persistence diagrams. There are two modes of operation: with a predefined grid, and without. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams changes Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line.
+    Compute Betti curves from persistence diagrams. There are several modes of operation: with a given resolution (with or without a sample_range), with a predefined grid, and with none of the previous. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, if the resolution is set to None, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams changes Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line. Otherwise, if the resolution is given, the Betti curve is obtained by sampling evenly using either the given sample_range or based on the persistence diagrams.
 
     Parameters
     ----------
-    predefined_grid: 1d array, triple or None, default=None
-        Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are OK. If a triple of the form (l, u, n), the grid will be uniform from l to u in n steps. If None (default), a grid will be computed that captures all changes in Betti numbers in the provided data.
+    resolution (int): number of sample for the piecewise-constant function (default 100).
+    sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+    predefined_grid: 1d array or None, default=None
+        Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are OK. If None (default), and resolution is given, the grid will be uniform from x_min to x_max in 'resolution' steps, otherwise a grid will be computed that captures all changes in Betti numbers in the provided data.
 
     Attributes
     ----------
@@ -326,34 +328,31 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     Examples
     --------
     If pd is a persistence diagram and xs is a nonempty grid of finite values such that xs[0] >= pd.min(), then the result of
-    >>> bc = BettiCurve(xs)
+    >>> bc = BettiCurve(predefined_grid=xs)
     >>> result = bc(pd)
     and
     >>> from scipy.interpolate import interp1d
-    >>> bc = BettiCurve(None)
+    >>> bc = BettiCurve(resolution=None, predefined_grid=None)
     >>> bettis = bc.fit_transform([pd])
     >>> interp = interp1d(bc.grid_, bettis[0, :], kind="previous", fill_value="extrapolate")
     >>> result = np.array(interp(xs), dtype=int)
     are the same.
     """
 
-    def __init__(self, predefined_grid = None):
-        if isinstance(predefined_grid, tuple):
-            if len(predefined_grid) != 3:
-                raise ValueError("Expected array, None or triple.")
+    def __init__(self, resolution=100, sample_range=[np.nan, np.nan], predefined_grid=None):
+        if (predefined_grid is not None) and (not isinstance(predefined_grid, np.ndarray)):
+            raise ValueError("Expected array or None.")
 
-            self.predefined_grid = np.linspace(predefined_grid[0], predefined_grid[1], predefined_grid[2])
-        else:
-            self.predefined_grid = predefined_grid
+        self.predefined_grid = predefined_grid
+        self.resolution = resolution
+        self.sample_range = sample_range
 
-        
     def is_fitted(self):
         return hasattr(self, "grid_")
 
-
     def fit(self, X, y = None):
         """
-        Compute a filtration grid that captures all changes in Betti numbers for all the given persistence diagrams, unless a predefined grid was provided.
+        Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams. When no predefined grid is provided and resolution set to None, compute a filtration grid that captures all changes in Betti numbers for all the given persistence diagrams.
 
         Parameters
         ----------
@@ -365,59 +364,16 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
 
         if self.predefined_grid is None:
-            events = np.unique(np.concatenate([pd.flatten() for pd in X] + [[-np.inf]], axis=0))
-            self.grid_ = np.array(events)
+            if self.resolution is None: # Flexible/exact version
+                events = np.unique(np.concatenate([pd.flatten() for pd in X] + [[-np.inf]], axis=0))
+                self.grid_ = np.array(events)
+            else:
+                self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+                self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
         else:
-            self.grid_ = np.array(self.predefined_grid)
-
-
-        #self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+            self.grid_ = self.predefined_grid # Get the predefined grid from user
 
         return self
-
-
-    def fit_transform(self, X):
-        """
-        Find a sampling grid that captures all changes in Betti numbers, and compute those Betti numbers. The result is the same as fit(X) followed by transform(X), but potentially faster.
-        """
-
-        if self.predefined_grid is None:
-            if not X:
-                X = [np.zeros((0, 2))]
-            
-            N = len(X)
-
-            events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
-            sorting = np.argsort(events)
-            offsets = np.zeros(1 + N, dtype=int)
-            for i in range(0, N):
-                offsets[i+1] = offsets[i] + 2*X[i].shape[0]
-            starts = offsets[0:N]
-            ends = offsets[1:N + 1] - 1
-
-            xs = [-np.inf]
-            bettis = [[0] for i in range(0, N)]
-            
-            for i in sorting:
-                j = np.searchsorted(ends, i)
-                delta = 1 if i - starts[j] < len(X[j]) else -1
-                if events[i] == xs[-1]:
-                    bettis[j][-1] += delta
-                else:
-                    xs.append(events[i])
-                    for k in range(0, j):
-                        bettis[k].append(bettis[k][-1])
-                    bettis[j].append(bettis[j][-1] + delta)
-                    for k in range(j+1, N):
-                        bettis[k].append(bettis[k][-1])
-
-            self.grid_ = np.array(xs)
-            return np.array(bettis, dtype=int)
-
-        else:
-            self.grid_ = self.predefined_grid
-            return self.transform(X)
-
 
     def transform(self, X):
         """
@@ -464,12 +420,52 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         return np.array(bettis, dtype=int)[:, 0:-1]
 
+    def fit_transform(self, X):
+        """
+        Find a sampling grid that captures all changes in Betti numbers, and compute those Betti numbers. The result is the same as fit(X) followed by transform(X), but potentially faster.
+        """
+
+        if self.predefined_grid is None and self.resolution is None:
+            if not X:
+                X = [np.zeros((0, 2))]
+
+            N = len(X)
+
+            events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
+            sorting = np.argsort(events)
+            offsets = np.zeros(1 + N, dtype=int)
+            for i in range(0, N):
+                offsets[i+1] = offsets[i] + 2*X[i].shape[0]
+            starts = offsets[0:N]
+            ends = offsets[1:N + 1] - 1
+
+            xs = [-np.inf]
+            bettis = [[0] for i in range(0, N)]
+
+            for i in sorting:
+                j = np.searchsorted(ends, i)
+                delta = 1 if i - starts[j] < len(X[j]) else -1
+                if events[i] == xs[-1]:
+                    bettis[j][-1] += delta
+                else:
+                    xs.append(events[i])
+                    for k in range(0, j):
+                        bettis[k].append(bettis[k][-1])
+                    bettis[j].append(bettis[j][-1] + delta)
+                    for k in range(j+1, N):
+                        bettis[k].append(bettis[k][-1])
+
+            self.grid_ = np.array(xs)
+            return np.array(bettis, dtype=int)
+
+        else:
+            return self.fit(X).transform(X)
 
     def __call__(self, diag):
         """
         Shorthand for transform on a single persistence diagram.
         """
-        return self.transform([diag])[0, :]
+        return self.fit_transform([diag])[0, :]
 
 
 
