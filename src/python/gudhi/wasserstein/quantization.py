@@ -2,7 +2,7 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Theo Lacombe
 #
-# Copyright (C) 2019 Université Gustave Eiffel
+# Copyright (C) 2021 Université Gustave Eiffel
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
