@@ -63,10 +63,10 @@ build_script:
       dir . &
       type setup.py &
       cmake --build . &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/mpfr-6.dll gudhi/ &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/gmp.dll gudhi/ &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/tbb.dll gudhi/ &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/tbbmalloc.dll gudhi/ &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\" &
       ctest -j 1 --output-on-failure -C Release &
     ) else (
       dir . &
