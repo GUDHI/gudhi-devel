@@ -30,7 +30,7 @@ environment:
 
 #cache:
 #  - c:\Tools\vcpkg\installed
-#  - C:\Users\appveyor\AppData\Roaming\Python\Python39\site-packages
+#  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
   - echo %target%
@@ -42,17 +42,16 @@ install:
   - vcpkg integrate install
   - CALL "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat" amd64
   - set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
-  - dir "C:\Users\appveyor\AppData\Roaming\Python\Python39\site-packages/"
   - SET PYTHONPATH=%PYTHON%/Lib/site-packages;%PYTHONPATH%
   - python --version
   - pip --version
-  - python -m pip install --user --upgrade pip
-  - python -m pip install --user --upgrade setuptools
-  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade setuptools
+  - python -m pip install -r ext/gudhi-deploy/build-requirements.txt
   # No PyKeOps on windows, let's workaround this one.
-  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install --user  %%A
-  - dir "C:\Users\appveyor\AppData\Roaming\Python\Python39\site-packages/"
-  - SET PATH=C:\Users\appveyor\AppData\Roaming\Python\Python39\site-packages;%PATH%
+  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install  %%A
+  - dir "c:\python39-x64\lib\site-packages"
+  - dir "%LOCALAPPDATA%\pip\Cache"
   - python -c "from scipy import spatial; print(spatial.cKDTree)"
 
 build_script:
@@ -64,8 +63,8 @@ build_script:
       dir . &
       type setup.py &
       cmake --build . &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/mpfr.dll gudhi/ &
-      cp C:/Tools/vcpkg/installed/x64-windows/bin/mpir.dll gudhi/ &
+      cp C:/Tools/vcpkg/installed/x64-windows/bin/mpfr-6.dll gudhi/ &
+      cp C:/Tools/vcpkg/installed/x64-windows/bin/gmp.dll gudhi/ &
       cp C:/Tools/vcpkg/installed/x64-windows/bin/tbb.dll gudhi/ &
       cp C:/Tools/vcpkg/installed/x64-windows/bin/tbbmalloc.dll gudhi/ &
       ctest -j 1 --output-on-failure -C Release &
