@@ -8,7 +8,7 @@ from ..rips_complex     import RipsComplex
 
 # The parameters of the model are the point coordinates.
 
-def _Rips(DX, max_edge, dimensions):
+def _Rips(DX, max_edge, dimensions, min_persistence):
     # Parameters: DX (distance matrix), 
     #             max_edge (maximum edge length for Rips filtration), 
     #             dimensions (homology dimensions)
@@ -16,7 +16,7 @@ def _Rips(DX, max_edge, dimensions):
     # Compute the persistence pairs with Gudhi
     rc = RipsComplex(distance_matrix=DX, max_edge_length=max_edge)
     st = rc.create_simplex_tree(max_dimension=max(dimensions)+1)
-    st.compute_persistence()
+    st.compute_persistence(min_persistence=min_persistence)
     pairs = st.flag_persistence_generators()
 
     L_indices = []
@@ -40,7 +40,7 @@ class RipsLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing Rips persistence out of a point cloud
     """
-    def __init__(self, dimensions, maximum_edge_length=12, **kwargs):
+    def __init__(self, dimensions, maximum_edge_length=12, min_persistence=0., **kwargs):
         """
         Constructor for the RipsLayer class
 
@@ -51,9 +51,7 @@ class RipsLayer(tf.keras.layers.Layer):
         super().__init__(dynamic=True, **kwargs)
         self.max_edge = maximum_edge_length
         self.dimensions = dimensions
-
-    def build(self):
-        super.build()
+        self.min_persistence = min_persistence
         
     def call(self, X):
         """
@@ -69,7 +67,7 @@ class RipsLayer(tf.keras.layers.Layer):
         DX = tf.math.sqrt(tf.reduce_sum((tf.expand_dims(X, 1)-tf.expand_dims(X, 0))**2, 2))
         # Compute vertices associated to positive and negative simplices 
         # Don't compute gradient for this operation
-        indices = _Rips(DX.numpy(), self.max_edge, self.dimensions)
+        indices = _Rips(DX.numpy(), self.max_edge, self.dimensions, self.min_persistence)
         # Get persistence diagrams by simply picking the corresponding entries in the distance matrix
         self.dgms = []
         for idx_dim, dimension in enumerate(self.dimensions):

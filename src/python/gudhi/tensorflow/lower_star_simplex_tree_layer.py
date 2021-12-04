@@ -7,7 +7,7 @@ import tensorflow          as tf
 
 # The parameters of the model are the vertex function values of the simplex tree.
 
-def _LowerStarSimplexTree(simplextree, filtration, dimensions):
+def _LowerStarSimplexTree(simplextree, filtration, dimensions, min_persistence):
     # Parameters: simplextree (simplex tree on which to compute persistence)
     #             filtration (function values on the vertices of st),
     #             dimensions (homology dimensions),
@@ -21,7 +21,7 @@ def _LowerStarSimplexTree(simplextree, filtration, dimensions):
     simplextree.make_filtration_non_decreasing()
     
     # Compute persistence diagram
-    simplextree.compute_persistence()
+    simplextree.compute_persistence(min_persistence=min_persistence)
     
     # Get vertex pairs for optimization. First, get all simplex pairs
     pairs = simplextree.lower_star_persistence_generators()
@@ -43,7 +43,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
     """
-    def __init__(self, simplextree, dimensions, **kwargs):
+    def __init__(self, simplextree, dimensions, min_persistence=0., **kwargs):
         """
         Constructor for the LowerStarSimplexTreeLayer class
   
@@ -54,10 +54,8 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         super().__init__(dynamic=True, **kwargs)
         self.dimensions  = dimensions
         self.simplextree = simplextree
-    
-    def build(self):
-        super.build()
-    
+        self.min_persistence = min_persistence
+        
     def call(self, filtration):
         """
         Compute lower-star persistence diagram associated to a function defined on the vertices of the simplex tree
@@ -69,7 +67,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
             dgms (list of tuple of TensorFlow variables): list of lower-star persistence diagrams of length self.dimensions, where each element of the list is a tuple that contains the finite and essential persistence diagrams of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
         """
         # Don't try to compute gradients for the vertex pairs
-        indices = _LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimensions)
+        indices = _LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimensions, self.min_persistence)
         # Get persistence diagrams
         self.dgms = []
         for idx_dim, dimension in enumerate(self.dimensions):
