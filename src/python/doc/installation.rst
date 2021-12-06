@@ -156,7 +156,7 @@ You shall have something like:
     + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
         euclidean_strong_witness_complex;
 
-Here, you can see that are requiring CGAL are missing because CGAL is not installed.
+Here, you can see that the modules that need CGAL are missing, because CGAL is not installed.
 :code:`persistence_graphical_tools` is installed, but 
 `its functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_ will produce an error as
 matplotlib is not available.
