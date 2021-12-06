@@ -62,11 +62,13 @@ build_script:
       cd src/python &
       dir . &
       type setup.py &
-      cmake --build . &
       copy "C:\Tools\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\" &
       copy "C:\Tools\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\" &
       copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\" &
       copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\" &
+      python setup.py build_ext --inplace &
+      SET PYTHONPATH=%CD%;%PYTHONPATH% &
+      echo %PYTHONPATH% &
       ctest -j 1 --output-on-failure -C Release
     ) else (
       dir . &
