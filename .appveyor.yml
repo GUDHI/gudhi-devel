@@ -29,8 +29,8 @@ environment:
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
-#cache:
-#  - c:\Tools\vcpkg\installed
+cache:
+  - c:\Tools\vcpkg\installed
 #  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
