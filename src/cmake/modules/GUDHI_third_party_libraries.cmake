@@ -6,6 +6,10 @@ find_package(Boost 1.56.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framewo
 if(NOT Boost_VERSION)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_VERSION)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
+message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
+
 
 find_package(GMP)
 if(GMP_FOUND)
@@ -88,9 +92,6 @@ add_definitions(-DBOOST_ALL_NO_LIB)
 add_definitions( -DBOOST_ALL_DYN_LINK )
 # problem on Mac with boost_system and boost_thread
 add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
-
-message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
-message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 # Find the correct Python interpreter.
 # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.

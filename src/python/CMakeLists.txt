@@ -175,6 +175,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
     endif ()
 
+    add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
       # Add CGAL compilation args
       if(CGAL_HEADER_ONLY)

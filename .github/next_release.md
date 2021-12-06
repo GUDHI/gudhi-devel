@@ -9,6 +9,9 @@ Below is a list of changes made since GUDHI 3.4.0:
 - [Coxeter triangulation](https://gudhi.inria.fr/doc/latest/group__coxeter__triangulation.html)
      - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation. 
 
+- [Python installation](link)
+     - Python >= 3.5 and cython >= 0.27 are now required for Python typing purpose.
+
 - [Module](link)
      - ...
 
