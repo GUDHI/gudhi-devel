@@ -31,7 +31,7 @@ environment:
 
 cache:
   - c:\Tools\vcpkg\installed
-#  - '%LOCALAPPDATA%\pip\Cache'
+  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
   - echo %target%
