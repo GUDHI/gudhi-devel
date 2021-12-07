@@ -42,7 +42,7 @@ Example
 .. autofunction:: gudhi.datasets.generators.points.sphere
 
 Points on a flat torus
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 You can also generate points on a torus.
 
