@@ -380,6 +380,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
     def get_networkx(self, get_attrs=False):
         """
         Turn the 1-skeleton of the cover complex computed after calling fit() method into a networkx graph.
+        This function requires networkx (https://networkx.org/documentation/stable/install.html).
 
         Parameters:
             get_attrs (bool): if True, the color functions will be used as attributes for the networkx graph.
