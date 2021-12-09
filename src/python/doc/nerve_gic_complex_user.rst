@@ -9,8 +9,8 @@ Definition
 
 .. include:: nerve_gic_complex_sum.inc
 
-We provide two classes for computing cover complexes: one is CoverComplex, which can compute Mapper, Nerve and Graph Induced complexes in a scikit-learn format, 
-the other is NGIComplex, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
+We provide two classes for computing cover complexes: one is :class:`~gudhi.sklearn.CoverComplex`, which can compute Mapper, Nerve and Graph Induced complexes in a scikit-learn format, 
+the other is :class:`~gudhi.NGIComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
 while CoverComplex needs the inputs to be stored in memory).
   
 Both classes can print output files, which can then be visualized with either
@@ -18,7 +18,7 @@ neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/MLWave/kepler-mapper>`_.
 Input point clouds (when they are read from files in NGIComplex) are assumed to be stored in OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
-In the following, we provide examples for NGIComplex, and we refer to `this notebook <https://github.com/MathieuCarriere/tda-tutorials/blob/mapper/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of CoverComplex.
+In the following, we provide examples for NGIComplex, and we refer to `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of CoverComplex.
 
 
 Covers

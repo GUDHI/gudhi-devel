@@ -433,7 +433,6 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
                -f human.off -n 700 -v)
 
-      add_gudhi_py_test(test_cover_complex)
     endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
@@ -559,6 +558,11 @@ if(PYTHONINTERP_FOUND)
     # DTM Rips
     if(SCIPY_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
+    endif()
+
+    # Cover complex
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_cover_complex)
     endif()
 
 

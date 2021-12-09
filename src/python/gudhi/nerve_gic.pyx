@@ -421,7 +421,7 @@ cdef class NGIComplex:
         """
         return self.thisptr.subcolor(c)
 
-    def write_info(self, dataname, covername, colorname):
+    def write_info(self, dataname=b"covercomplex", covername=b"cover", colorname=b"color"):
         """Creates a .txt file called SC.txt describing the 1-skeleton, which can
         then be plotted with e.g. KeplerMapper.
         """

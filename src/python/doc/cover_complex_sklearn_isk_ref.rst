@@ -28,8 +28,20 @@ Example of Mapper cover complex computed from a point cloud
     X = np.array([[1,1],[1,1.5],[1,2],[1,2.5],[1,3],[1.5,2],[1.5,3],[2,2],[2,2.5],[2,3],[2,3.5],[2,4]])
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
 
-    Mapper = CoverComplex(complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6))
 
+    Mapper = CoverComplex(
+        complex_type="mapper",
+        input_type="point cloud",
+        cover="functional",
+        colors=None,
+        mask=0,
+        filters=F,
+        filter_bnds=np.array([[0.5, 2.5], [0.5, 4.5]]),
+        resolutions=np.array([2, 4]),
+        gains=np.array([0.3, 0.3]),
+        clustering=AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=0.6),
+    )
+    
     _ = Mapper.fit(X)
 
     print(list(Mapper.simplex_tree.get_filtration()))

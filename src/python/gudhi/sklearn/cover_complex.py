@@ -66,7 +66,7 @@ class _MapperComplex(BaseEstimator, TransformerMixin):
             delta (double): optimal scale that can be used with agglomerative clustering.
             resolutions (numpy array of shape (num_filters): optimal resolutions associated to each filter.
         """
-        num_pts, num_filt, delta = X.shape[0], self.filters.shape[1], 0
+        num_filt, delta = self.filters.shape[1], 0
         delta = self.estimate_scale(X=X, N=N, inp=self.input, C=C, beta=beta)
 
         pairwise = pairwise_distances(X, metric="euclidean") if self.input == "point cloud" else X
@@ -86,7 +86,7 @@ class _MapperComplex(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         
-        num_pts, num_filters, num_colors = self.filters.shape[0], self.filters.shape[1], self.colors.shape[1]
+        num_pts, num_filters = self.filters.shape[0], self.filters.shape[1]
 
         # If some resolutions are not specified, automatically compute them
         if self.resolutions is None or self.clustering is None:
@@ -216,31 +216,9 @@ class _MapperComplex(BaseEstimator, TransformerMixin):
 
 class CoverComplex(BaseEstimator, TransformerMixin):
     """
-    Constructor for the CoverComplex class. This class wraps Mapper, Nerve and Graph Induced complexes in a single interface. Graph Induced and Nerve complexes can still be called from the class NGIComplex (with a few more functionalities, such as defining datasets or graphs through files). Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5, meaning that the arguments "resolutions" and "gains" should have length 1. If you have more than one scalar filter, or if the gain is more than 0.5, the cover should be computed beforehand and fed to the class with the "assignments" argument. On the other hand, Mapper and Nerve complexes accept "resolutions" and "gains" with any length. 
+    This class wraps Mapper, Nerve and Graph Induced complexes in a single interface. Graph Induced and Nerve complexes can still be called from the class NGIComplex (with a few more functionalities, such as defining datasets or graphs through files). Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5, meaning that the arguments "resolutions" and "gains" should have length 1. If you have more than one scalar filter, or if the gain is more than 0.5, the cover should be computed beforehand and fed to the class with the "assignments" argument. On the other hand, Mapper and Nerve complexes accept "resolutions" and "gains" with any length. 
 
     Attributes:
-        complex_type (string): type of cover complex. Either "mapper", "gic" or "nerve". 
-        input_type (string): type of input data. Either "point cloud" or "distance matrix".
-        cover (string): specifies the cover. Either "functional" (preimages of filter function), "voronoi" or "precomputed".
-        colors (numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
-        mask (int): threshold on the size of the cover complex nodes (default 0). Any node associated to a subpopulation with less than **mask** points will be removed.
-        voronoi_samples (int): number of Voronoi germs used for partitioning the input dataset. Used only if complex_type = "gic" and cover = "voronoi".
-        assignments (list of length (num_points) of lists of integers): cover assignment for each point. Used only if complex_type = "gic" or "nerve" and cover = "precomputed".
-        filters (numpy array of shape (num_points) x (num_filters)): filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points. Used only if cover = "functional".
-        filter_bnds (numpy array of shape (num_filters) x 2): limits of each filter, of the form [[f_1^min, f_1^max], ..., [f_n^min, f_n^max]]. If one of the values is numpy.nan, it can be computed from the dataset with the fit() method. Used only if cover = "functional".
-        resolutions (numpy array of shape num_filters containing integers): resolution of each filter function, ie number of intervals required to cover each filter image. Must be of length 1 if complex_type = "gic". Used only if cover = "functional". If None, it is estimated from data.
-        gains (numpy array of shape num_filters containing doubles in [0,1]): gain of each filter function, ie overlap percentage of the intervals covering each filter image. Must be of length 1 if complex_type = "gic". Used only if cover = "functional".
-        N (int): subsampling iterations (default 100) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-        beta (double): exponent parameter (default 0.) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-        C (double): constant parameter (default 10.) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-        clustering (class): clustering class (default sklearn.cluster.DBSCAN()). Common clustering classes can be found in the scikit-learn library (such as AgglomerativeClustering for instance). Used only if complex_type = "mapper". If None, it is set to hierarchical clustering, with scale estimated from data.
-        graph (string): type of graph to use for GIC. Used only if complex_type = "gic". Currently accepts "rips" only.
-        rips_threshold (float): Rips parameter. Used only if complex_type = "gic" and graph = "rips".
-        input_name (string): name of dataset. Used when generating plots.
-        cover_name (string): name of cover. Used when generating plots.
-        color_name (string): name of color function. Used when generating plots.
-        verbose (bool): whether to display info while computing.
- 
         simplex_tree (gudhi SimplexTree): simplicial complex representing the cover complex computed after calling the fit() method.
         node_info_ (dictionary): various information associated to the nodes of the cover complex. 
     """
@@ -249,6 +227,33 @@ class CoverComplex(BaseEstimator, TransformerMixin):
                        clustering=None,
                        graph="rips", rips_threshold=None, 
                        distance_matrix_name="", input_name="data", cover_name="cover", color_name="color", verbose=False):
+        """
+        Constructor for the CoverComplex class.
+
+        Parameters:
+            complex_type (string): type of cover complex. Either "mapper", "gic" or "nerve". 
+            input_type (string): type of input data. Either "point cloud" or "distance matrix".
+            cover (string): specifies the cover. Either "functional" (preimages of filter function), "voronoi" or "precomputed".
+            colors (numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
+            mask (int): threshold on the size of the cover complex nodes (default 0). Any node associated to a subpopulation with less than **mask** points will be removed.
+            voronoi_samples (int): number of Voronoi germs used for partitioning the input dataset. Used only if complex_type = "gic" and cover = "voronoi".
+            assignments (list of length (num_points) of lists of integers): cover assignment for each point. Used only if complex_type = "gic" or "nerve" and cover = "precomputed".
+            filters (numpy array of shape (num_points) x (num_filters)): filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points. Used only if cover = "functional".
+            filter_bnds (numpy array of shape (num_filters) x 2): limits of each filter, of the form [[f_1^min, f_1^max], ..., [f_n^min, f_n^max]]. If one of the values is numpy.nan, it can be computed from the dataset with the fit() method. Used only if cover = "functional".
+            resolutions (numpy array of shape num_filters containing integers): resolution of each filter function, ie number of intervals required to cover each filter image. Must be of length 1 if complex_type = "gic". Used only if cover = "functional". If None, it is estimated from data.
+            gains (numpy array of shape num_filters containing doubles in [0,1]): gain of each filter function, ie overlap percentage of the intervals covering each filter image. Must be of length 1 if complex_type = "gic". Used only if cover = "functional".
+            N (int): subsampling iterations (default 100) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            beta (double): exponent parameter (default 0.) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            C (double): constant parameter (default 10.) for estimating scale and resolutions. Used only if cover = "functional" and clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            clustering (class): clustering class (default sklearn.cluster.DBSCAN()). Common clustering classes can be found in the scikit-learn library (such as AgglomerativeClustering for instance). Used only if complex_type = "mapper". If None, it is set to hierarchical clustering, with scale estimated from data.
+            graph (string): type of graph to use for GIC. Used only if complex_type = "gic". Currently accepts "rips" only.
+            rips_threshold (float): Rips parameter. Used only if complex_type = "gic" and graph = "rips".
+            distance_matrix_name (string): name of distance matrix. Used when generating plots.
+            input_name (string): name of dataset. Used when generating plots.
+            cover_name (string): name of cover. Used when generating plots.
+            color_name (string): name of color function. Used when generating plots.
+            verbose (bool): whether to display info while computing.
+        """
 
         self.complex_type, self.input_type, self.cover, self.colors, self.mask = complex_type, input_type, cover, colors, mask
         self.voronoi_samples, self.assignments, self.filters, self.filter_bnds, self.resolutions, self.gains, self.clustering = voronoi_samples, assignments, filters, filter_bnds, resolutions, gains, clustering
@@ -279,7 +284,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
         if self.complex_type == "gic" or self.complex_type == "nerve":
 
-            if self.complex_type is not "nerve" or self.cover is not "functional": # Nerve + functional cover is a special case where it's better to use Mapper than C++ code
+            if self.complex_type != "nerve" or self.cover != "functional": # Nerve + functional cover is a special case where it's better to use Mapper than C++ code
 
                 ct = "GIC" if self.complex_type == "gic" else "Nerve"
                 self.complex = NGIComplex()
@@ -303,7 +308,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
                             self.complex.set_graph_from_automatic_rips(self.N)
 
             if self.cover == "voronoi":
-                assert self.complex_type is not "nerve"
+                assert self.complex_type != "nerve"
                 self.complex.set_cover_from_Voronoi(self.voronoi_samples)
 
             elif self.cover == "functional":
@@ -335,7 +340,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
             elif self.cover == "precomputed":
                 self.complex.set_cover_from_range(self.assignments)
 
-            if self.complex_type is not "nerve" or self.cover is not "functional":
+            if self.complex_type != "nerve" or self.cover != "functional":
 
                 self.complex.set_mask(self.mask)
 
@@ -362,7 +367,7 @@ class CoverComplex(BaseEstimator, TransformerMixin):
 
         elif self.complex_type == "mapper":
 
-            assert self.cover is not "voronoi"
+            assert self.cover != "voronoi"
             self.complex = _MapperComplex(filters=self.filters, filter_bnds=self.filter_bnds, colors=self.colors, 
                                          resolutions=self.resolutions, gains=self.gains, inp=self.input_type, 
                                          clustering=self.clustering, mask=self.mask, N=self.N, beta=self.beta, C=self.C)
@@ -413,7 +418,6 @@ class CoverComplex(BaseEstimator, TransformerMixin):
         st = self.simplex_tree 
         node_info = self.node_info
 
-        threshold = 0.
         maxv, minv = max([node_info[k]["colors"][0] for k in node_info.keys()]), min([node_info[k]["colors"][0] for k in node_info.keys()])
         maxs, mins = max([node_info[k]["size"]      for k in node_info.keys()]), min([node_info[k]["size"]      for k in node_info.keys()])  
 
