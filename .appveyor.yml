@@ -38,7 +38,6 @@ init:
 
 install:
   - git submodule update --init
-  - vcpkg remove boost-disjoint-sets:x64-windows gmp:x64-windows --recurse
   - vcpkg update
   - vcpkg remove --outdated
   - vcpkg upgrade --no-dry-run
