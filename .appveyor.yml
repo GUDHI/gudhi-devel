@@ -38,7 +38,7 @@ init:
 
 install:
   - git submodule update --init
-  - vcpkg remove boost-disjoint-sets:x64-windows --recurse
+  - vcpkg remove boost-disjoint-sets:x64-windows gmp:x64-windows --recurse
   - vcpkg update
   - vcpkg upgrade --no-dry-run
   - vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
