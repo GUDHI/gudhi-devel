@@ -38,6 +38,8 @@ init:
 
 install:
   - git submodule update --init
+  - vcpkg update
+  - vcpkg upgrade
   - vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
   - dir "C:\Tools\vcpkg\installed\x64-windows\bin\"
   - vcpkg integrate install
