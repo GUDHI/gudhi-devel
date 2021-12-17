@@ -1,5 +1,5 @@
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
 
 build:
   parallel: true
@@ -10,11 +10,10 @@ configuration:
 
 environment:
   # update the vcpkg cache even if build fails
-  APPVEYOR_SAVE_CACHE_ON_ERROR: true
-  PYTHON: "C:\\Python37-x64"
-  CMAKE_GMP_FLAGS: -DGMP_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DGMP_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpir.lib"
-  CMAKE_MPFR_FLAGS: -DMPFR_INCLUDE_DIR="c:/Tools/vcpkg/installed/x64-windows/include" -DMPFR_LIBRARIES="c:/Tools/vcpkg/installed/x64-windows/lib/mpfr.lib"
-  CMAKE_VCPKG_FLAGS: -DCMAKE_TOOLCHAIN_FILE=c:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+  #APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  PYTHON: "C:\\Python39-x64"
+  PYTHONPATH: "C:\\Python39-x64\\lib\\site-packages"
+  CMAKE_VCPKG_FLAGS: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
 
   matrix:
       - target: Examples
@@ -30,38 +29,49 @@ environment:
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
-cache:
-  - c:\Tools\vcpkg\installed
-  - '%LOCALAPPDATA%\pip\Cache'
+#cache:
+#  - c:\Tools\vcpkg\installed
+#  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
   - echo %target%
 
-# tbb:x64-windows 
 install:
   - git submodule update --init
-  - vcpkg install boost-disjoint-sets:x64-windows boost-serialization:x64-windows boost-date-time:x64-windows boost-system:x64-windows boost-filesystem:x64-windows boost-units:x64-windows boost-thread:x64-windows boost-program-options:x64-windows eigen3:x64-windows mpfr:x64-windows mpir:x64-windows cgal:x64-windows
-  - SET PATH=c:\Tools\vcpkg\installed\x64-windows\bin;%PATH%
-  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PYTHON%\Library\bin;%PATH%
-  - SET PYTHONPATH=%PYTHON%\\Lib\\site-packages;%PYTHONPATH%
-  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
+  - dir "C:\Tools\vcpkg\installed\x64-windows\bin\"
+  - vcpkg integrate install
+  - CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  - "set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - python --version
   - pip --version
-  - python -m pip install --user --upgrade pip
-  - python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade setuptools
+  - python -m pip install -r ext\gudhi-deploy\build-requirements.txt
   # No PyKeOps on windows, let's workaround this one.
-  - for /F "tokens=*" %%A in (ext/gudhi-deploy/test-requirements.txt) do python -m pip install --user  %%A
+  - for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
+  - dir "c:\python39-x64\lib\site-packages"
+  - dir "%LOCALAPPDATA%\pip\Cache"
+  - python -c "from scipy import spatial; print(spatial.cKDTree)"
 
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "Visual Studio 15 2017 Win64" %CMAKE_FLAGS% %CMAKE_GMP_FLAGS% %CMAKE_MPFR_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+  - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_VCPKG_FLAGS% ..
   - if [%target%]==[Python] (
-      cd src/python &
+      cd src\python &
+      dir . &
       type setup.py &
-      MSBuild Cython.sln /m /p:Configuration=Release /p:Platform=x64 &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\" &
+      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\" &
+      python setup.py build_ext --inplace &
+      SET PYTHONPATH=%CD%;%PYTHONPATH% &
+      echo %PYTHONPATH% &
       ctest -j 1 --output-on-failure -C Release
     ) else (
+      dir . &
       MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
       ctest -j 1 --output-on-failure -C Release -E diff_files
     )
