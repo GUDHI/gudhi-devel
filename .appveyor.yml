@@ -10,7 +10,7 @@ configuration:
 
 environment:
   # update the vcpkg cache even if build fails
-  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  # APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python39-x64"
   PYTHONPATH: "C:\\Python39-x64\\lib\\site-packages"
   CMAKE_VCPKG_FLAGS: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
@@ -29,8 +29,8 @@ environment:
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
-cache:
-  - c:\Tools\vcpkg\installed
+#cache:
+#  - c:\Tools\vcpkg\installed
 #  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
@@ -38,6 +38,9 @@ init:
 
 install:
   - git submodule update --init
+  - vcpkg update
+  - vcpkg remove --outdated
+  - vcpkg upgrade --no-dry-run
   - vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
   - dir "C:\Tools\vcpkg\installed\x64-windows\bin\"
   - vcpkg integrate install
