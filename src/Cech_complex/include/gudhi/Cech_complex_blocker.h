@@ -63,16 +63,6 @@ class Cech_blocker {
     return std::make_pair(std::move(c), std::move(r));
   }
 
-  template<typename Sphere>
-  class CompareSpheresRadii
-  {
-    public:
-      CGAL::NT_converter<FT, double> cast_to_double;
-      bool operator()(const Sphere& firstSphere, const Sphere& secondSphere)
-      {
-        return cast_to_double(firstSphere.second) < cast_to_double(secondSphere.second);
-      }
-  };
 
   /** \internal \brief Čech complex blocker operator() - the oracle - assigns the filtration value from the simplex
    * radius and returns if the simplex expansion must be blocked.
@@ -84,7 +74,10 @@ class Cech_blocker {
     Filtration_value radius = 0.;
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
-    std::set <Sphere, CompareSpheresRadii<Sphere>> enclosing_ball_spheres;
+    Sphere min_enclos_ball;
+    CGAL::NT_converter<double, FT> cast_to_FT;
+    min_enclos_ball.second = cast_to_FT(std::numeric_limits<double>::max());
+    Point_cloud face_points;
     for (auto face : sc_ptr_->boundary_simplex_range(sh)) {
         // Find which vertex of sh is missing in face. We rely on the fact that simplex_vertex_range is sorted.
         auto longlist = sc_ptr_->simplex_vertex_range(sh);
@@ -96,7 +89,6 @@ class Cech_blocker {
         while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
         auto extra = *longiter; // Vertex_handle
 
-        Point_cloud face_points;
         for (auto vertex : sc_ptr_->simplex_vertex_range(face)) {
             face_points.push_back(cc_ptr_->get_point(vertex));
     #ifdef DEBUG_TRACES
@@ -104,30 +96,30 @@ class Cech_blocker {
     #endif  // DEBUG_TRACES
         }
         Sphere sph;
-        auto face_sh = sc_ptr_->find(sc_ptr_->simplex_vertex_range(face));
-        auto k = sc_ptr_->key(face_sh);
+        auto k = sc_ptr_->key(face);
         if(k != sc_ptr_->null_key()) {
             sph = cc_ptr_->get_cache().at(k);
         }
         else {
             sph = get_sphere(face_points.cbegin(), face_points.cend());
         }
+        face_points.clear();
 
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) <= sph.second) {
             radius = std::sqrt(cast_to_double(sph.second));
             #ifdef DEBUG_TRACES
                 std::clog << "circumcenter: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
-            enclosing_ball_spheres.insert(sph);
+            if (cast_to_double(sph.second) < cast_to_double(min_enclos_ball.second))
+                min_enclos_ball = sph;
         }
     }
     // Get the minimal radius of all faces enclosing balls if exists
-    if (!enclosing_ball_spheres.empty()) {
-        Sphere sph_min = *enclosing_ball_spheres.begin();
-        radius = std::sqrt(cast_to_double(sph_min.second));
+    if(cast_to_double(min_enclos_ball.second) != std::numeric_limits<double>::max()) {
+        radius = std::sqrt(cast_to_double(min_enclos_ball.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
-        cc_ptr_->get_cache().push_back(sph_min);
+        cc_ptr_->get_cache().push_back(min_enclos_ball);
     }
 
     if (radius == 0.) { // Spheres of each face don't contain the whole simplex
