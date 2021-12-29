@@ -49,7 +49,7 @@ class Minimal_enclosing_ball_radius {
     point_cloud.push_back(p1);
     point_cloud.push_back(p2);
 
-    GUDHI_CHECK((p1.end() - p1.begin()) != (p2.end() - p2.begin()), "inconsistent point dimensions");
+    GUDHI_CHECK((p1.end() - p1.begin()) == (p2.end() - p2.begin()), "inconsistent point dimensions");
     Min_sphere min_sphere(p1.end() - p1.begin(), point_cloud.begin(), point_cloud.end());
 
     return std::sqrt(min_sphere.squared_radius());
