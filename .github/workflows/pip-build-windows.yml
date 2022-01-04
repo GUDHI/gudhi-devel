@@ -45,4 +45,5 @@ jobs:
           Get-Location
           dir
           python -m pip install --user pytest
+          python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest ".\src\python\test\test_alpha_complex.py"

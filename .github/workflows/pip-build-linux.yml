@@ -23,4 +23,5 @@ jobs:
       - name: Install and test wheel for Python 3.10
         run: |
           $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
+          $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
