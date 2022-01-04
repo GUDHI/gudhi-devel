@@ -1,16 +1,17 @@
 We are pleased to announce the release 3.5.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers ...
+As a major new feature, the GUDHI library now offers Coxeter triangulations and points generators.
+The support for python 3.10 is available.
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
 Below is a list of changes made since GUDHI 3.4.1:
 
-- [Coxeter triangulation](https://gudhi.inria.fr/doc/latest/group__coxeter__triangulation.html)
+- [Coxeter triangulation](https://gudhi.inria.fr/doc/3.5.0rc2/group__coxeter__triangulation.html)
      - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation. 
 
-- [Datasets generators](https://gudhi.inria.fr/python/latest/datasets_generators.html)
-     - the python module `points` enables the generation of random points on a sphere, random points on a torus and as a grid.
+- [Datasets generators](https://gudhi.inria.fr/python/3.5.0rc2/datasets_generators.html)
+     - the python module `points` enables the generation of points on a sphere or a flat torus.
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.4.1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.5.0+is%3Aclosed) is available on GitHub.
