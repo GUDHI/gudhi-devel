@@ -18,7 +18,6 @@
 
 #include <iostream>
 #include <stdexcept>  // for exception management
-#include <vector>
 
 namespace Gudhi {
 
@@ -78,7 +77,7 @@ class Cech_complex {
     point_cloud_.assign(points.begin(), points.end());
 
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(
-        point_cloud_, max_radius_, Gudhi::Minimal_enclosing_ball_radius());
+        point_cloud_, max_radius_, Gudhi::Minimal_enclosing_ball_radius<Kernel>());
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal

@@ -17,7 +17,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Miniball.hpp>
 
-#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+#include <CGAL/Epick_d.h>
 
 #include "boost/filesystem.hpp"  // includes all needed Boost.Filesystem declarations
 
@@ -32,7 +32,7 @@ using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
-using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+using Kernel =  CGAL::Epick_d<CGAL::Dimension_tag<3>>;
 using Point_cgal = typename Kernel::Point_d;
 using Point_cloud_cgal = std::vector<Point_cgal>;
 using Points_off_reader_cgal = Gudhi::Points_off_reader<Point_cgal>;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
   Gudhi::Clock cgal_miniball_clock("Gudhi::Minimal_enclosing_ball_radius_cgal()");
   // Compute the proximity graph of the points
   Proximity_graph cgal_miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
-      off_reader_cgal.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius());
+      off_reader_cgal.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius<Kernel>());
   std::clog << cgal_miniball_clock << std::endl;
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
           std::clog << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
           Rips_complex rips_complex_from_points(off_reader_cgal.get_point_cloud(), radius,
-                                                Gudhi::Minimal_enclosing_ball_radius());
+                                                Gudhi::Minimal_enclosing_ball_radius<Kernel>());
           Simplex_tree rips_stree;
           rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
           // ------------------------------------------

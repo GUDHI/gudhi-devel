@@ -11,9 +11,10 @@
 #ifndef CECH_KERNEL_H_
 #define CECH_KERNEL_H_
 
-#include <CGAL/Epeck_d.h>
+#include <CGAL/Epeck_d.h> // for #include <CGAL/NewKernel_d/KernelD_converter.h>
 
 #include <cmath>  // for std::sqrt
+#include <vector>
 
 namespace Gudhi {
 
@@ -21,8 +22,14 @@ namespace Gudhi {
 
 /** @brief Compute the radius of the minimal enclosing ball between Points given by a range of coordinates.
  * The points are assumed to have the same dimension. */
+template<typename Kernel>
 class Minimal_enclosing_ball_radius {
+ private:
+    Kernel kernel_;
  public:
+    using Point = typename Kernel::Point_d;
+    using Point_cloud = typename std::vector<Point>;
+
    /** \brief Enclosing ball radius from two points using CGAL.
    *
    * @param[in] point_1
@@ -31,10 +38,7 @@ class Minimal_enclosing_ball_radius {
    * \tparam Point must be a Kernel::Point_d from CGAL.
    *
    */
-  template< typename Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>,
-            typename Point= typename Kernel::Point_d>
   double operator()(const Point& point_1, const Point& point_2) const {
-    Kernel kernel_;
     return std::sqrt(CGAL::to_double(kernel_.squared_distance_d_object()(point_1, point_2))) / 2.;
   }
 
@@ -46,11 +50,7 @@ class Minimal_enclosing_ball_radius {
    * \tparam Point_cloud must be a range of Kernel::Point_d points from CGAL.
    *
    */
-  template< typename Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>,
-            typename Point= typename Kernel::Point_d,
-            typename Point_cloud = std::vector<Point>>
   double operator()(const Point_cloud& point_cloud) const {
-    Kernel kernel_;
     return std::sqrt(CGAL::to_double(kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end())));
   }
 

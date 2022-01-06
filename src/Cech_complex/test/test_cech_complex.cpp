@@ -108,11 +108,11 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
         std::clog << vertex << ",";
         vp.push_back(points.at(vertex));
       }
-      std::clog << ") - distance =" << Gudhi::Minimal_enclosing_ball_radius()(vp.at(0), vp.at(1))
+      std::clog << ") - distance =" << Gudhi::Minimal_enclosing_ball_radius<Kernel>()(vp.at(0), vp.at(1))
                 << " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex),
-                                      Gudhi::Minimal_enclosing_ball_radius()(vp.at(0), vp.at(1)));
+                                      Gudhi::Minimal_enclosing_ball_radius<Kernel>()(vp.at(0), vp.at(1)));
     }
   }
 
