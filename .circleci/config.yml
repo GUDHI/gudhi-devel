@@ -147,7 +147,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make VERBOSE=1 all
             ctest --output-on-failure
 
   python_without_cgal_eigen:
