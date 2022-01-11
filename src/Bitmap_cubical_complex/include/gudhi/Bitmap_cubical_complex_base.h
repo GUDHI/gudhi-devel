@@ -525,38 +525,36 @@ class Bitmap_cubical_complex_base {
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(std::size_t number_of_bins) {
-  bool dbg = false;
 
   std::pair<T, T> min_max = this->min_max_filtration();
   T dx = (min_max.second - min_max.first) / (T)number_of_bins;
 
   // now put the data into the appropriate bins:
   for (std::size_t i = 0; i != this->data.size(); ++i) {
-    if (dbg) {
-      std::clog << "Before binning : " << this->data[i] << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "Before binning : " << this->data[i] << std::endl;
+#endif
     this->data[i] = min_max.first + dx * (this->data[i] - min_max.first) / number_of_bins;
-    if (dbg) {
-      std::clog << "After binning : " << this->data[i] << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "After binning : " << this->data[i] << std::endl;
+#endif
   }
 }
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::put_data_to_bins(T diameter_of_bin) {
-  bool dbg = false;
   std::pair<T, T> min_max = this->min_max_filtration();
 
   std::size_t number_of_bins = (min_max.second - min_max.first) / diameter_of_bin;
   // now put the data into the appropriate bins:
   for (std::size_t i = 0; i != this->data.size(); ++i) {
-    if (dbg) {
-      std::clog << "Before binning : " << this->data[i] << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "Before binning : " << this->data[i] << std::endl;
+#endif
     this->data[i] = min_max.first + diameter_of_bin * (this->data[i] - min_max.first) / number_of_bins;
-    if (dbg) {
-      std::clog << "After binning : " << this->data[i] << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "After binning : " << this->data[i] << std::endl;
+#endif
   }
 }
 
@@ -635,15 +633,14 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus_style_file) {
-  bool dbg = false;
   std::ifstream inFiltration;
   inFiltration.open(perseus_style_file);
   unsigned dimensionOfData;
   inFiltration >> dimensionOfData;
 
-  if (dbg) {
-    std::clog << "dimensionOfData : " << dimensionOfData << std::endl;
-  }
+#ifdef DEBUG_TRACES
+  std::clog << "dimensionOfData : " << dimensionOfData << std::endl;
+#endif
 
   std::vector<unsigned> sizes;
   sizes.reserve(dimensionOfData);
@@ -654,9 +651,9 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
     inFiltration >> size_in_this_dimension;
     sizes.push_back(size_in_this_dimension);
     dimensions *= size_in_this_dimension;
-    if (dbg) {
-      std::clog << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
+#endif
   }
   this->set_up_containers(sizes);
 
@@ -675,11 +672,11 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
         throw std::ios_base::failure(perseus_error.c_str());
       }
 
-      if (dbg) {
-        std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
-                  << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
-                  << " get the value : " << filtrationLevel << std::endl;
-      }
+#ifdef DEBUG_TRACES
+      std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
+                << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
+                << " get the value : " << filtrationLevel << std::endl;
+#endif
       this->get_cell_data(*it) = filtrationLevel;
       ++it;
       ++filtration_counter;
@@ -778,21 +775,24 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cel
 
 template <typename T>
 unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(std::size_t cell) const {
-  bool dbg = false;
-  if (dbg) std::clog << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
+#ifdef DEBUG_TRACES
+  std::clog << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
+#endif
   unsigned dimension = 0;
   for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell / this->multipliers[i - 1];
 
-    if (dbg) {
-      std::clog << "i-1 :" << i - 1 << std::endl;
-      std::clog << "cell : " << cell << std::endl;
-      std::clog << "position : " << position << std::endl;
-      std::clog << "multipliers[" << i - 1 << "] = " << this->multipliers[i - 1] << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "i-1 :" << i - 1 << std::endl;
+    std::clog << "cell : " << cell << std::endl;
+    std::clog << "position : " << position << std::endl;
+    std::clog << "multipliers[" << i - 1 << "] = " << this->multipliers[i - 1] << std::endl;
+#endif
 
     if (position % 2 == 1) {
-      if (dbg) std::clog << "Nonzero length in this direction \n";
+#ifdef DEBUG_TRACES
+      std::clog << "Nonzero length in this direction \n";
+#endif
       dimension++;
     }
     cell = cell % this->multipliers[i - 1];
@@ -807,7 +807,6 @@ inline T& Bitmap_cubical_complex_base<T>::get_cell_data(std::size_t cell) {
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
-  bool dbg = false;
 
   // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
   std::vector<bool> is_this_cell_considered(this->data.size(), false);
@@ -827,27 +826,27 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   }
 
   while (indices_to_consider.size()) {
-    if (dbg) {
-      std::clog << "indices_to_consider in this iteration \n";
-      for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-        std::clog << indices_to_consider[i] << "  ";
-      }
+#ifdef DEBUG_TRACES
+    std::clog << "indices_to_consider in this iteration \n";
+    for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
+      std::clog << indices_to_consider[i] << "  ";
     }
+#endif
     std::vector<std::size_t> new_indices_to_consider;
     for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
       std::vector<std::size_t> bd = this->get_boundary_of_a_cell(indices_to_consider[i]);
       for (std::size_t boundaryIt = 0; boundaryIt != bd.size(); ++boundaryIt) {
-        if (dbg) {
-          std::clog << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
-                    << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
-                    << std::endl;
-        }
+#ifdef DEBUG_TRACES
+        std::clog << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
+                  << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
+                  << std::endl;
+#endif
         if (this->data[bd[boundaryIt]] > this->data[indices_to_consider[i]]) {
           this->data[bd[boundaryIt]] = this->data[indices_to_consider[i]];
-          if (dbg) {
-            std::clog << "Setting the value of a cell : " << bd[boundaryIt]
-                      << " to : " << this->data[indices_to_consider[i]] << std::endl;
-          }
+#ifdef DEBUG_TRACES
+          std::clog << "Setting the value of a cell : " << bd[boundaryIt]
+                    << " to : " << this->data[indices_to_consider[i]] << std::endl;
+#endif
         }
         if (is_this_cell_considered[bd[boundaryIt]] == false) {
           new_indices_to_consider.push_back(bd[boundaryIt]);

@@ -207,7 +207,6 @@ template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
     const char* perseus_style_file) {
   // for Perseus style files:
-  bool dbg = false;
 
   std::ifstream inFiltration;
   inFiltration.open(perseus_style_file);
@@ -236,11 +235,11 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     inFiltration >> filtrationLevel;
     if (inFiltration.eof()) break;
 
-    if (dbg) {
-      std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
-                << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
-                << " get the value : " << filtrationLevel << std::endl;
-    }
+#ifdef DEBUG_TRACES
+    std::clog << "Cell of an index : " << it.compute_index_in_bitmap()
+              << " and dimension: " << this->get_dimension_of_a_cell(it.compute_index_in_bitmap())
+              << " get the value : " << filtrationLevel << std::endl;
+#endif
     this->get_cell_data(*it) = filtrationLevel;
     ++it;
   }
@@ -276,10 +275,9 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 template <typename T>
 std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::get_boundary_of_a_cell(
     std::size_t cell) const {
-  bool dbg = false;
-  if (dbg) {
-    std::clog << "Computations of boundary of a cell : " << cell << std::endl;
-  }
+#ifdef DEBUG_TRACES
+  std::clog << "Computations of boundary of a cell : " << cell << std::endl;
+#endif
 
   std::vector<std::size_t> boundary_elements;
   boundary_elements.reserve(this->dimension() * 2);
@@ -299,9 +297,9 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
           boundary_elements.push_back(cell + this->multipliers[i - 1]);
           boundary_elements.push_back(cell - this->multipliers[i - 1]);
         }
-        if (dbg) {
-          std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
-        }
+#ifdef DEBUG_TRACES
+        std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+#endif
       } else {
         // in this direction we have to do boundary conditions. Therefore, we need to check if we are not at the end.
         if (position != 2 * this->sizes[i - 1] - 1) {
@@ -312,9 +310,9 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell + this->multipliers[i - 1]);
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
-          if (dbg) {
-            std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
-          }
+#ifdef DEBUG_TRACES
+          std::clog << cell - this->multipliers[i - 1] << " " << cell + this->multipliers[i - 1] << " ";
+#endif
         } else {
           if (sum_of_dimensions % 2) {
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
@@ -323,10 +321,10 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
             boundary_elements.push_back(cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1]);
             boundary_elements.push_back(cell - this->multipliers[i - 1]);
           }
-          if (dbg) {
-            std::clog << cell - this->multipliers[i - 1] << " "
-                      << cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1] << " ";
-          }
+#ifdef DEBUG_TRACES
+          std::clog << cell - this->multipliers[i - 1] << " "
+                    << cell - (2 * this->sizes[i - 1] - 1) * this->multipliers[i - 1] << " ";
+#endif
         }
       }
       ++sum_of_dimensions;
