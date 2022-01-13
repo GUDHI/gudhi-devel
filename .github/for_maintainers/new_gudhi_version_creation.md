@@ -26,7 +26,7 @@ md5sum gudhi.@GUDHI_VERSION@.tar.gz > md5sum.txt
 sha256sum gudhi.@GUDHI_VERSION@.tar.gz > sha256sum.txt
 sha512sum gudhi.@GUDHI_VERSION@.tar.gz > sha512sum.txt
 
-make -j 4 all && ctest -j 4 --output-on-failure
+make && ctest --output-on-failure
 ```
 
 ***[Check there are no error]***
@@ -61,7 +61,7 @@ cd ../..
 tar -czvf gudhi.doc.@GUDHI_VERSION@.tar.gz gudhi.doc.@GUDHI_VERSION@
 
 cd gudhi.@GUDHI_VERSION@/build
-make -j 4 all && ctest -j 4 --output-on-failure
+make && ctest --output-on-failure
 ```
 
 ***[Check there are no error]***
