@@ -6,6 +6,7 @@ find_package(Boost 1.56.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framewo
 if(NOT Boost_VERSION)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_VERSION)
+include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(GMP)
 if(GMP_FOUND)
