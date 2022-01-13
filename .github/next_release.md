@@ -7,10 +7,10 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.4.1:
 
-- [Coxeter triangulation](https://gudhi.inria.fr/doc/3.5.0rc2/group__coxeter__triangulation.html)
+- [Coxeter triangulation](https://gudhi.inria.fr/doc/latest/group__coxeter__triangulation.html)
      - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation. 
 
-- [Datasets generators](https://gudhi.inria.fr/python/3.5.0rc2/datasets_generators.html)
+- [Datasets generators](https://gudhi.inria.fr/python/latest/datasets_generators.html)
      - the python module `points` enables the generation of points on a sphere or a flat torus.
 
 - Miscellaneous
