@@ -16,16 +16,16 @@ environment:
   CMAKE_VCPKG_FLAGS: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
 
   matrix:
-      - target: Examples
+      - job_name: Examples
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
 
-      - target: UnitaryTests
+      - job_name: UnitaryTests
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF
 
-      - target: Utilities
+      - job_name: Utilities
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
 
-      - target: Python
+      - job_name: Python
         CMAKE_FLAGS: -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON
 
 
@@ -34,7 +34,7 @@ environment:
 #  - '%LOCALAPPDATA%\pip\Cache'
 
 init:
-  - echo %target%
+  - echo %job_name%
 
 install:
   - git submodule update --init
@@ -57,24 +57,40 @@ install:
   - dir "%LOCALAPPDATA%\pip\Cache"
   - python -c "from scipy import spatial; print(spatial.cKDTree)"
 
-build_script:
-  - mkdir build
-  - cd build
-  - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_VCPKG_FLAGS% ..
-  - if [%target%]==[Python] (
-      cd src\python &
-      dir . &
-      type setup.py &
-      copy "C:\Tools\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\" &
-      copy "C:\Tools\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\" &
-      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\" &
-      copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\" &
-      python setup.py build_ext --inplace &
-      SET PYTHONPATH=%CD%;%PYTHONPATH% &
-      echo %PYTHONPATH% &
-      ctest -j 1 --output-on-failure -C Release
-    ) else (
-      dir . &
-      MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64 &
-      ctest -j 1 --output-on-failure -C Release -E diff_files
-    )
+for:
+
+  -
+    matrix:
+      only:
+        - job_name: Examples
+        - job_name: UnitaryTests
+        - job_name: Utilities
+
+    build_script:
+    - mkdir build
+    - cd build
+    - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+    - dir .
+    - MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+    - ctest -j 1 --output-on-failure -C Release -E diff_files
+
+  -
+    matrix:
+      only:
+        - job_name: Python
+
+    build_script:
+    - mkdir build
+    - cd build
+    - cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release %CMAKE_FLAGS% %CMAKE_VCPKG_FLAGS% ..
+    - cd src\python
+    - dir .
+    - type setup.py
+    - copy "C:\Tools\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\"
+    - copy "C:\Tools\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\"
+    - copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\"
+    - copy "C:\Tools\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\"
+    - python setup.py build_ext --inplace
+    - SET PYTHONPATH=%CD%;%PYTHONPATH%
+    - echo %PYTHONPATH%
+    - ctest -j 1 --output-on-failure -C Release
