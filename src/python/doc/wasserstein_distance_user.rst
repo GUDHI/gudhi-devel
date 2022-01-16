@@ -212,7 +212,7 @@ Quantization
 The quantization problem consists, given a measure :math:`\mu` (e.g. a persistence diagram) and a budget :math:`k`,
 in finding a measure :math:`\nu` supported on :math:`k` points that is the best approximation possible of :math:`\mu` ;
 the :math:`k`-means problem is a particular example of quantization problem.
-The output of a quantization algorithm is often referred to a codebook; it consists of :math:`k` points (centroids)
+The output of a quantization algorithm is often referred to as a codebook; it consists of :math:`k` points (centroids)
 optimally positioned to summarize the input measure :math:`\mu`.
 
 If one has access to a sample of measures instead, one may perform online quantization: given a sample
