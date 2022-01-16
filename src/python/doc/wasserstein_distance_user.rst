@@ -245,7 +245,7 @@ This example outputs a codebook for a set of diagrams with two proeminent modes 
 Diagrams, as often, also contain points near the diagonal. As we compare the codebook and the input diagrams
 using the standard :math:`2`-Wasserstein metric between persistence diagram (which maps points to the diagonal rather
 than any centroids if it reduces the matching cost), those points do not influence the centroids positions,
-an improvment over using vanilla :math:`k`-mean (Lloyd algorithm) to quantize persistence diagrams.
+an improvement over using vanilla :math:`k`-mean (Lloyd algorithm) to quantize persistence diagrams.
 
 .. testcode::
 
