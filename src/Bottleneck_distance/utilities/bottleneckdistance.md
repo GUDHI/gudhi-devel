@@ -10,14 +10,14 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 {:/comment}
 
 
-## bottleneck_read_file_example ##
+## bottleneck_distance ##
 
 This program computes the Bottleneck distance between two persistence diagram files.
 
 **Usage**
 
 ```
-   bottleneck_read_file_example <file_1.pers> <file_2.pers> [<tolerance>]
+   bottleneck_distance <file_1.pers> <file_2.pers> [<tolerance>]
 ```
 
 where
