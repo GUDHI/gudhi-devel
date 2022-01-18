@@ -312,36 +312,40 @@ class Silhouette(BaseEstimator, TransformerMixin):
 class BettiCurve(BaseEstimator, TransformerMixin):
     """
     Compute Betti curves from persistence diagrams. There are several modes of operation: with a given resolution (with or without a sample_range), with a predefined grid, and with none of the previous. With a predefined grid, the class computes the Betti numbers at those grid points. Without a predefined grid, if the resolution is set to None, it can be fit to a list of persistence diagrams and produce a grid that consists of (at least) the filtration values at which at least one of those persistence diagrams changes Betti numbers, and then compute the Betti numbers at those grid points. In the latter mode, the exact Betti curve is computed for the entire real line. Otherwise, if the resolution is given, the Betti curve is obtained by sampling evenly using either the given sample_range or based on the persistence diagrams.
-
-    Parameters
-    ----------
-    resolution (int): number of sample for the piecewise-constant function (default 100).
-    sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
-    predefined_grid: 1d array or None, default=None
-        Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are OK. If None (default), and resolution is given, the grid will be uniform from x_min to x_max in 'resolution' steps, otherwise a grid will be computed that captures all changes in Betti numbers in the provided data.
-
-    Attributes
-    ----------
-    grid_: 1d array
-        The grid on which the Betti numbers are computed. If predefined_grid was specified, grid_ will always be that grid, independently of data. If not, the grid is fitted to capture all filtration values at which the Betti numbers change.
-
-    Examples
-    --------
-    If pd is a persistence diagram and xs is a nonempty grid of finite values such that xs[0] >= pd.min(), then the result of
-    >>> bc = BettiCurve(predefined_grid=xs)
-    >>> result = bc(pd)
-    and
-    >>> from scipy.interpolate import interp1d
-    >>> bc = BettiCurve(resolution=None, predefined_grid=None)
-    >>> bettis = bc.fit_transform([pd])
-    >>> interp = interp1d(bc.grid_, bettis[0, :], kind="previous", fill_value="extrapolate")
-    >>> result = np.array(interp(xs), dtype=int)
-    are the same.
     """
 
     def __init__(self, resolution=100, sample_range=[np.nan, np.nan], predefined_grid=None):
+        """
+        Constructor for the BettiCurve class.
+
+        Parameters:
+            resolution (int): number of sample for the piecewise-constant function (default 100).
+            sample_range ([double, double]): minimum and maximum of the piecewise-constant function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
+            predefined_grid (1d array or None, default=None): Predefined filtration grid points at which to compute the Betti curves. Must be strictly ordered. Infinities are ok. If None (default), and resolution is given, the grid will be uniform from x_min to x_max in 'resolution' steps, otherwise a grid will be computed that captures all changes in Betti numbers in the provided data.
+
+        Attributes:
+            grid_ (1d array): The grid on which the Betti numbers are computed. If predefined_grid was specified, `grid_` will always be that grid, independently of data. If not, the grid is fitted to capture all filtration values at which the Betti numbers change.
+
+        Examples
+        --------
+        If pd is a persistence diagram and xs is a nonempty grid of finite values such that xs[0] >= pd.min(), then the results of:
+
+        >>> bc = BettiCurve(predefined_grid=xs) # doctest: +SKIP
+        >>> result = bc(pd) # doctest: +SKIP
+
+        and
+
+        >>> from scipy.interpolate import interp1d # doctest: +SKIP
+        >>> bc = BettiCurve(resolution=None, predefined_grid=None) # doctest: +SKIP
+        >>> bettis = bc.fit_transform([pd]) # doctest: +SKIP
+        >>> interp = interp1d(bc.grid_, bettis[0, :], kind="previous", fill_value="extrapolate") # doctest: +SKIP
+        >>> result = np.array(interp(xs), dtype=int) # doctest: +SKIP
+
+        are the same.
+        """
+
         if (predefined_grid is not None) and (not isinstance(predefined_grid, np.ndarray)):
-            raise ValueError("Expected array or None.")
+            raise ValueError("Expected predefined_grid as array or None.")
 
         self.predefined_grid = predefined_grid
         self.resolution = resolution
@@ -354,13 +358,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
         Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams. When no predefined grid is provided and resolution set to None, compute a filtration grid that captures all changes in Betti numbers for all the given persistence diagrams.
 
-        Parameters
-        ----------
-        X: list of 2d arrays
-             Persistence diagrams.
-
-        y: None.
-             Ignored.
+        Parameters:
+            X (list of 2d arrays): Persistence diagrams.
+            y (None): Ignored.
         """
 
         if self.predefined_grid is None:
@@ -379,15 +379,11 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
         Compute Betti curves.
 
-        Parameters
-        ----------
-        X: list of 2d arrays
-            Persistence diagrams.
+        Parameters:
+            X (list of 2d arrays): Persistence diagrams.
 
-        Returns
-        -------
-        (len(X))x(len(self.grid_)) array of ints
-             Betti numbers of the given persistence diagrams at the grid points given in self.grid_.
+        Returns:
+            `len(X).len(self.grid_)` array of ints: Betti numbers of the given persistence diagrams at the grid points given in `self.grid_`
         """
 
         if not self.is_fitted():
@@ -422,7 +418,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
     def fit_transform(self, X):
         """
-        Find a sampling grid that captures all changes in Betti numbers, and compute those Betti numbers. The result is the same as fit(X) followed by transform(X), but potentially faster.
+        The result is the same as fit(X) followed by transform(X), but potentially faster.
         """
 
         if self.predefined_grid is None and self.resolution is None:
