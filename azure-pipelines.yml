@@ -1,13 +1,13 @@
 jobs:
   
-  - job: 'Test'
+  - job: 'OSx'
     displayName: "Build and test"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
       vmImage: macOS-10.15
     variables:
-      pythonVersion: '3.6'
+      pythonVersion: '3.7'
       cmakeBuildType: Release
 
     steps:
@@ -30,8 +30,44 @@ jobs:
     - bash: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
-        make -j 4
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON ..
+        make
         make doxygen
-        ctest -j 4 --output-on-failure # -E sphinx remove sphinx build as it fails
+        ctest --output-on-failure
+      displayName: 'Build, test and documentation generation'
+
+  - job: 'Windows'
+    displayName: "Build and test"
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 60
+    pool:
+      vmImage: windows-latest
+    variables:
+      pythonVersion: '3.7'
+      cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
+      cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON
+
+    steps:
+    # Use a specific Python version
+    - task: UsePythonVersion@0
+      displayName: Use Python $(pythonVersion)
+      inputs:
+        versionSpec: $(pythonVersion)
+        addToPath: true
+        architecture: 'x64'
+
+    - pwsh: |
+        git submodule update --init
+        python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+        # No PyKeOps on windows, let's workaround this one.
+        for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
+        vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
+      displayName: 'Install build dependencies'
+    - pwsh: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+        ctest --output-on-failure -C Release -E diff_files
       displayName: 'Build, test and documentation generation'
