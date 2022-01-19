@@ -179,8 +179,8 @@ Weighted version
 A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
 `CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_.
 
-This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
-it. This example is taken from
+This example builds the weighted alpha-complex of a small molecule, where atoms have different sizes.
+It is taken from
 `CGAL 3d weighted alpha shapes <https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13>`_.
 
 Then, it is asked to display information about the alpha complex.
