@@ -34,8 +34,6 @@ class Field_Zp {
   }
 
   void init(int charac) {
-    assert(charac > 0);  // division by zero + non negative values
-
     Prime = charac;
 
     // Check that the provided prime is less than the maximum allowed as int, calculation below, and 'plus_times_equal' function : 46337 ; i.e (max_prime-1)*max_prime <= INT_MAX
