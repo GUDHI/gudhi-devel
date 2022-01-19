@@ -118,15 +118,12 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
                                              typename Kernel::Point_d>;
 
  public:
-  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
-    : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
   }
 
-  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points,
-                           const std::vector<double>& weights, bool exact_version)
-    : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
+  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
@@ -135,11 +132,10 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
   }
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
   }
 
  private:
-  bool exact_version_;
   Alpha_complex<Kernel, Weighted> alpha_complex_;
 };
 
