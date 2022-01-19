@@ -1,7 +1,7 @@
 jobs:
   
   - job: 'OSx'
-    displayName: "Build and test"
+    displayName: "Build and test OSx"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
@@ -37,7 +37,7 @@ jobs:
       displayName: 'Build, test and documentation generation'
 
   - job: 'Windows'
-    displayName: "Build and test"
+    displayName: "Build and test Windows"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
@@ -56,14 +56,14 @@ jobs:
         addToPath: true
         architecture: 'x64'
 
-    - pwsh: |
+    - batch: |
         git submodule update --init
         python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
         # No PyKeOps on windows, let's workaround this one.
         for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
         vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
       displayName: 'Install build dependencies'
-    - pwsh: |
+    - batch: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         mkdir build
         cd build
