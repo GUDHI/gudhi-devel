@@ -67,6 +67,10 @@ jobs:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         mkdir build
         cd build
+        copy "C:\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\src\python\gudhi\" &
+        copy "C:\vcpkg\installed\x64-windows\bin\gmp.dll" ".\src\python\gudhi\" &
+        copy "C:\vcpkg\installed\x64-windows\bin\tbb.dll" ".\src\python\gudhi\" &
+        copy "C:\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\src\python\gudhi\" &
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release $(cmakeVcpkgFlags) $(cmakeFlags) ..
         MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
         ctest --output-on-failure -C Release -E diff_files
