@@ -79,5 +79,5 @@ jobs:
         python setup.py build_ext --inplace
         SET PYTHONPATH=%CD%;%PYTHONPATH%
         echo %PYTHONPATH%
-        ctest --output-on-failure -C Release -E sphinx
+        ctest --output-on-failure -C Release
       displayName: 'Build and test'
