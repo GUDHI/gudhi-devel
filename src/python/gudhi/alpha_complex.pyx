@@ -51,7 +51,7 @@ cdef class AlphaComplex:
     cdef Alpha_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file='', weights=[], precision='safe'):
+    def __init__(self, points=[], off_file='', weights=None, precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
@@ -72,7 +72,7 @@ cdef class AlphaComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points = [], off_file = '', weights=[], precision = 'safe'):
+    def __cinit__(self, points = [], off_file = '', weights=None, precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
@@ -83,14 +83,15 @@ cdef class AlphaComplex:
             points = read_points_from_off_file(off_file = off_file)
 
         # weights are set but is inconsistent with the number of points
-        if len(weights) != 0 and len(weights) != len(points):
+        if weights != None and len(weights) != len(points):
             raise ValueError("Inconsistency between the number of points and weights")
 
         # need to copy the points to use them without the gil
         cdef vector[vector[double]] pts
         cdef vector[double] wgts
         pts = points
-        wgts = weights
+        if weights != None:
+            wgts = weights
         with nogil:
             self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
 
