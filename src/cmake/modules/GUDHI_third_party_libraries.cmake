@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
-
 find_package(GMP)
 if(GMP_FOUND)
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})

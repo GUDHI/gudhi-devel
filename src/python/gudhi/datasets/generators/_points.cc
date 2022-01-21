@@ -96,7 +96,6 @@ PYBIND11_MODULE(_points, m) {
           :type radius: float
           :param sample: The sample type. Default and only available value is `"random"`.
           :type sample: string
-          :rtype: numpy array of float
           :returns: the generated points on a sphere.
           )pbdoc");
 
@@ -111,10 +110,12 @@ PYBIND11_MODULE(_points, m) {
           :type dim: integer
           :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
           :type sample: string
-          :rtype: numpy array of float.
-          The shape of returned numpy array is :
-              if sample is 'random' : (n_samples, 2*dim).
-              if sample is 'grid' : (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
           :returns: the generated points on a torus.
+
+          The shape of returned numpy array is:
+
+          If sample is 'random': (n_samples, 2*dim).
+
+          If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
           )pbdoc");
 }
