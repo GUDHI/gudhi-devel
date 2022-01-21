@@ -39,22 +39,24 @@ docker push gudhi/ci_for_gudhi_wo_cgal:latest
 
 ### Windows
 
-The compilations has been seperated by categories to be parallelized, but I don't know why builds are not run in parallel:
+The compilations are not parallelized, as installation time (about 30 minutes) is too much compare to
+build and tests timings (about 30 minutes). Builds and tests include:
 
 * examples (C++)
 * tests (C++)
 * utils (C++)
 * python
 
-Doxygen (C++) is not tested.
-(cf. `.appveyor.yml`)
+Doxygen (C++) is not generated.
+(cf. `azure-pipelines.yml`)
 
 C++ third parties installation are done thanks to [vcpkg](https://github.com/microsoft/vcpkg/).
 In case of installation issue, check in [vcpkg issues](https://github.com/microsoft/vcpkg/issues).
 
 ### OSx
 
-The compilations has been seperated by categories to be parallelized:
+The compilations are not parallelized, but they should, as installation time (about 4 minutes) is
+negligeable compare to build and tests timings (about 30 minutes). Builds and tests include:
 
 * examples (C++)
 * tests (C++)
