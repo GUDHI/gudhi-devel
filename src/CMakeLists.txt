@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(GUDHI)
 
-include(CMakeGUDHIVersion.txt)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
+include(CMakeGUDHIVersion.txt)
+include(GUDHI_options)
 
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
