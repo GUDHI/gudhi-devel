@@ -21,7 +21,7 @@ using namespace boost::unit_test;
 
 typedef Simplex_tree<> typeST;
 
-std::string test_rips_persistence(int coefficient, int min_persistence) {
+std::string test_persistence(int coefficient, int min_persistence) {
   // file is copied in CMakeLists.txt
   std::ifstream simplex_tree_stream;
   simplex_tree_stream.open("simplex_tree_file_for_unit_test.txt");
@@ -44,16 +44,16 @@ std::string test_rips_persistence(int coefficient, int min_persistence) {
   Persistent_cohomology<Simplex_tree<>, Field_Zp> pcoh(st);
 
   pcoh.init_coefficients( coefficient );  // initializes the coefficient field for homology
-  // Check infinite rips
+  // Compute the persistent homology of the complex
   pcoh.compute_persistent_cohomology( min_persistence );  // Minimal lifetime of homology feature to be recorded.
-  std::ostringstream ossInfinite;
+  std::ostringstream ossPers;
 
-  pcoh.output_diagram(ossInfinite);
-  std::string strInfinite = ossInfinite.str();
-  return strInfinite;
+  pcoh.output_diagram(ossPers);
+  std::string strPers = ossPers.str();
+  return strPers;
 }
 
-void test_rips_persistence_in_dimension(int dimension) {
+void test_persistence_with_coeff_field(int coeff_field) {
   std::string value0("  0 0.02 1.12");
   std::string value1("  0 0.03 1.13");
   std::string value2("  0 0.04 1.14");
@@ -65,111 +65,103 @@ void test_rips_persistence_in_dimension(int dimension) {
   std::string value8("  0 0 inf"    );
   std::string value9("  0 0.01 inf" );
 
-  value0.insert(0,std::to_string(dimension));
-  value1.insert(0,std::to_string(dimension));
-  value2.insert(0,std::to_string(dimension));
-  value3.insert(0,std::to_string(dimension));
-  value4.insert(0,std::to_string(dimension));
-  value5.insert(0,std::to_string(dimension));
-  value6.insert(0,std::to_string(dimension));
-  value7.insert(0,std::to_string(dimension));
-  value8.insert(0,std::to_string(dimension));
-  value9.insert(0,std::to_string(dimension));
+  value0.insert(0,std::to_string(coeff_field));
+  value1.insert(0,std::to_string(coeff_field));
+  value2.insert(0,std::to_string(coeff_field));
+  value3.insert(0,std::to_string(coeff_field));
+  value4.insert(0,std::to_string(coeff_field));
+  value5.insert(0,std::to_string(coeff_field));
+  value6.insert(0,std::to_string(coeff_field));
+  value7.insert(0,std::to_string(coeff_field));
+  value8.insert(0,std::to_string(coeff_field));
+  value9.insert(0,std::to_string(coeff_field));
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=0" << std::endl;
+  std::clog << "TEST OF PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=0" << std::endl;
 
-  std::string str_rips_persistence = test_rips_persistence(dimension, 0);
-  std::clog << str_rips_persistence << std::endl;
+  std::string str_persistence = test_persistence(coeff_field, 0);
+  std::clog << str_persistence << std::endl;
   
-  BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value2) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value3) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value4) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value5) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value6) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value7) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  BOOST_CHECK(str_persistence.find(value0) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value1) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value2) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value3) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value4) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value5) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value6) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value7) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value8) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value9) != std::string::npos); // Check found
+  std::clog << "str_persistence=" << str_persistence << std::endl;
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=1" << std::endl;
+  std::clog << "TEST OF PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=1" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, 1);
+  str_persistence = test_persistence(coeff_field, 1);
 
-  BOOST_CHECK(str_rips_persistence.find(value0) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value1) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value2) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value3) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value4) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value5) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value6) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value7) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
-
-  std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=2" << std::endl;
-
-  str_rips_persistence = test_rips_persistence(dimension, 2);
-
-  BOOST_CHECK(str_rips_persistence.find(value0) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value1) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value2) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value3) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value4) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value5) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value6) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value7) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  BOOST_CHECK(str_persistence.find(value0) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value1) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value2) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value3) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value4) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value5) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value6) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value7) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value8) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value9) != std::string::npos); // Check found
+  std::clog << "str_persistence=" << str_persistence << std::endl;
 
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF RIPS_PERSISTENT_COHOMOLOGY_SINGLE_FIELD DIM=" << dimension << " MIN_PERS=Inf" << std::endl;
+  std::clog << "TEST OF PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=2" << std::endl;
 
-  str_rips_persistence = test_rips_persistence(dimension, (std::numeric_limits<int>::max)());
+  str_persistence = test_persistence(coeff_field, 2);
 
-  BOOST_CHECK(str_rips_persistence.find(value0) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value1) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value2) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value3) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value4) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value5) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value6) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value7) == std::string::npos); // Check not found
-  BOOST_CHECK(str_rips_persistence.find(value8) != std::string::npos); // Check found
-  BOOST_CHECK(str_rips_persistence.find(value9) != std::string::npos); // Check found
-  std::clog << "str_rips_persistence=" << str_rips_persistence << std::endl;
+  BOOST_CHECK(str_persistence.find(value0) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value1) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value2) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value3) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value4) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value5) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value6) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value7) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value8) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value9) != std::string::npos); // Check found
+  std::clog << "str_persistence=" << str_persistence << std::endl;
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF PERSISTENT_COHOMOLOGY_SINGLE_FIELD COEFF_FIELD=" << coeff_field << " MIN_PERS=Inf" << std::endl;
+
+  str_persistence = test_persistence(coeff_field, (std::numeric_limits<int>::max)());
+
+  BOOST_CHECK(str_persistence.find(value0) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value1) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value2) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value3) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value4) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value5) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value6) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value7) == std::string::npos); // Check not found
+  BOOST_CHECK(str_persistence.find(value8) != std::string::npos); // Check found
+  BOOST_CHECK(str_persistence.find(value9) != std::string::npos); // Check found
+  std::clog << "str_persistence=" << str_persistence << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_1 )
+BOOST_AUTO_TEST_CASE( persistent_cohomology_single_field_coeff_not_prime )
 {
-  test_rips_persistence_in_dimension(1);
+  for (auto non_prime : {0, 1, 4, 6})
+    BOOST_CHECK_THROW(test_persistence_with_coeff_field(non_prime), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_2 )
+BOOST_AUTO_TEST_CASE( persistent_cohomology_single_field_coeff_prime )
 {
-  test_rips_persistence_in_dimension(2);
+  for (auto prime : {2, 3, 5, 11, 13})
+    test_persistence_with_coeff_field(prime);
 }
 
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_3 )
+BOOST_AUTO_TEST_CASE( persistent_cohomology_single_field_coeff_limit )
 {
-  test_rips_persistence_in_dimension(3);
+  BOOST_CHECK_THROW(test_persistence_with_coeff_field(46349), std::invalid_argument);
 }
-
-BOOST_AUTO_TEST_CASE( rips_persistent_cohomology_single_field_dim_5 )
-{
-  test_rips_persistence_in_dimension(5);
-}
-
-// TODO(VR): not working from 6
-// std::string str_rips_persistence = test_rips_persistence(6, 0);
-// TODO(VR): division by zero
-// std::string str_rips_persistence = test_rips_persistence(0, 0);
 
 /** SimplexTree minimal options to test the limits.
  * 

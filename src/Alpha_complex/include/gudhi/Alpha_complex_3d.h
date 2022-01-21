@@ -554,8 +554,10 @@ Weighted_alpha_complex_3d::Weighted_point_3 wp0(Weighted_alpha_complex_3d::Bare_
     std::clog << "cells \t\t" << count_cells << std::endl;
 #endif  // DEBUG_TRACES
     // --------------------------------------------------------------------------------------------
-    // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-    complex.make_filtration_non_decreasing();
+    if (Complexity == complexity::FAST)
+      // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+      // Only in FAST version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
+      complex.make_filtration_non_decreasing();
     // Remove all simplices that have a filtration value greater than max_alpha_square
     complex.prune_above_filtration(max_alpha_square);
     // --------------------------------------------------------------------------------------------

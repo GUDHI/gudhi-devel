@@ -41,10 +41,9 @@ for module in cython_modules:
         libraries=libraries,
         library_dirs=library_dirs,
         include_dirs=include_dirs,
-        runtime_library_dirs=runtime_library_dirs,
-        cython_directives = {'language_level': str(sys.version_info[0])},))
+        runtime_library_dirs=runtime_library_dirs,))
 
-ext_modules = cythonize(ext_modules)
+ext_modules = cythonize(ext_modules, compiler_directives={'language_level': str(sys.version_info[0])})
 
 for module in pybind11_modules:
     my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
@@ -72,7 +71,7 @@ setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
     author='GUDHI Editorial Board',
-    author_email='gudhi-contact@lists.gforge.inria.fr',
+    author_email='gudhi-contact@inria.fr',
     version='@GUDHI_VERSION@',
     url='https://gudhi.inria.fr/',
     project_urls={
@@ -83,10 +82,10 @@ setup(
         },
     description='The Gudhi library is an open source library for ' \
         'Computational Topology and Topological Data Analysis (TDA).',
+    data_files=[('.', ['./introduction.rst'])],
     long_description_content_type='text/x-rst',
     long_description=long_description,
     ext_modules = ext_modules,
-    install_requires = ['numpy >= 1.9',],
-    setup_requires = ['cython','numpy >= 1.9','pybind11',],
+    install_requires = ['numpy >= 1.15.0',],
     package_data={"": ["*.dll"], },
 )

@@ -26,7 +26,7 @@ md5sum gudhi.@GUDHI_VERSION@.tar.gz > md5sum.txt
 sha256sum gudhi.@GUDHI_VERSION@.tar.gz > sha256sum.txt
 sha512sum gudhi.@GUDHI_VERSION@.tar.gz > sha512sum.txt
 
-make -j 4 all && ctest -j 4 --output-on-failure
+make && ctest --output-on-failure
 ```
 
 ***[Check there are no error]***
@@ -34,16 +34,21 @@ make -j 4 all && ctest -j 4 --output-on-failure
 ## Create the documentation
 ```bash
 mkdir gudhi.doc.@GUDHI_VERSION@
+```
+
+***[Check there are no error and the warnings]***
+
+```bash
+cd gudhi.@GUDHI_VERSION@
+rm -rf build; mkdir build; cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
 make doxygen  2>&1 | tee dox.log && grep warning dox.log
 ```
 
 ***[Check there are no error and the warnings]***
 
 ```bash
-cp -R gudhi.@GUDHI_VERSION@/doc/html gudhi.doc.@GUDHI_VERSION@/cpp
-cd gudhi.@GUDHI_VERSION@
-rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+cp -R html ../../gudhi.doc.@GUDHI_VERSION@/cpp
 export LC_ALL=en_US.UTF-8  # cf. bug https://github.com/GUDHI/gudhi-devel/issues/111
 make sphinx
 ```
@@ -56,27 +61,25 @@ cd ../..
 tar -czvf gudhi.doc.@GUDHI_VERSION@.tar.gz gudhi.doc.@GUDHI_VERSION@
 
 cd gudhi.@GUDHI_VERSION@/build
-make -j 4 all && ctest -j 4 --output-on-failure
+make && ctest --output-on-failure
 ```
 
 ***[Check there are no error]***
 
 ## Upload the documentation
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/doc/@GUDHI_VERSION@
+[GUDHI GitHub pages](https://gudhi.github.io/) is only used as a _"qualification"_ web hosting service.
+The _"production"_ web hosting service is https://files.inria.fr (cf. [this doc](https://doc-si.inria.fr/display/SU/Espace+web)
+or [this one](https://www.nextinpact.com/article/30325/109058-se-connecter-a-serveur-webdav-sous-linux-macos-ou-windows)).
 
-Upload by ftp the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on ForgeLogin@scm.gforge.inria.fr:/home/groups/gudhi/htdocs/python/@GUDHI_VERSION@
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/cpp in a new directory on gudhi WebDAV in doc/@GUDHI_VERSION@
+Delete the directory doc/latest on gudhi WebDAV.
+Copy gudhi WebDAV doc/@GUDHI_VERSION@ as doc/latest (no symbolic link with WebDAV).
 
-Through ssh, make the **latest** link to your new version of the documentation:
-```bash
-ssh ForgeLogin@scm.gforge.inria.fr
-cd /home/groups/gudhi/htdocs/doc
-rm latest
-ln -s @GUDHI_VERSION@ latest
-cd /home/groups/gudhi/htdocs/python
-rm latest
-ln -s @GUDHI_VERSION@ latest
-```
+Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new directory on gudhi WebDAV in python/@GUDHI_VERSION@
+Delete the directory python/latest on gudhi WebDAV.
+Copy gudhi WebDAV python/@GUDHI_VERSION@ as python/latest (no symbolic link with WebDAV).
+
 
 ## Put a version label on files
 
@@ -123,5 +126,5 @@ docker image on docker hub.
 
 ## Mail sending
 Send version mail to the following lists :
-* gudhi-devel@lists.gforge.inria.fr
-* gudhi-users@lists.gforge.inria.fr (not for release candidate)
+* gudhi-devel@inria.fr
+* gudhi-users@inria.fr (not for release candidate)

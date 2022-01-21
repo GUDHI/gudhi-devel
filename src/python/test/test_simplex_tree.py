@@ -9,6 +9,7 @@
 """
 
 from gudhi import SimplexTree, __GUDHI_USE_EIGEN3
+import numpy as np
 import pytest
 
 __author__ = "Vincent Rouvreau"
@@ -404,6 +405,48 @@ def test_boundaries_iterator():
 
     with pytest.raises(RuntimeError):
         list(st.get_boundaries([6])) # (6) does not exist
+
+def test_persistence_intervals_in_dimension():
+    # Here is our triangulation of a 2-torus - taken from https://dioscuri-tda.org/Paris_TDA_Tutorial_2021.html
+    #   0-----3-----4-----0
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |    \|   \ | 
+    #   1-----8-----7-----1
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |   \ |   \ |
+    #   2-----5-----6-----2
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |   \ |   \ |
+    #   0-----3-----4-----0
+    st = SimplexTree()
+    st.insert([0,1,8])
+    st.insert([0,3,8])
+    st.insert([3,7,8])
+    st.insert([3,4,7])
+    st.insert([1,4,7])
+    st.insert([0,1,4])
+    st.insert([1,2,5])
+    st.insert([1,5,8])
+    st.insert([5,6,8])
+    st.insert([6,7,8])
+    st.insert([2,6,7])
+    st.insert([1,2,7])
+    st.insert([0,2,3])
+    st.insert([2,3,5])
+    st.insert([3,4,5])
+    st.insert([4,5,6])
+    st.insert([0,4,6])
+    st.insert([0,2,6])
+    st.compute_persistence(persistence_dim_max=True)
+    
+    H0 = st.persistence_intervals_in_dimension(0)
+    assert np.array_equal(H0, np.array([[ 0., float("inf")]]))
+    H1 = st.persistence_intervals_in_dimension(1)
+    assert np.array_equal(H1, np.array([[ 0., float("inf")], [ 0., float("inf")]]))
+    H2 = st.persistence_intervals_in_dimension(2)
+    assert np.array_equal(H2, np.array([[ 0., float("inf")]]))
+    # Test empty case
+    assert st.persistence_intervals_in_dimension(3).shape == (0, 2)
 
 def test_equality_operator():
     st1 = SimplexTree()

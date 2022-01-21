@@ -8,14 +8,47 @@ if(DOXYGEN_FOUND)
     get_property(DOXYGEN_EXECUTABLE TARGET Doxygen::doxygen PROPERTY IMPORTED_LOCATION)
   endif()
 
-  add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${GUDHI_USER_VERSION_DIR}/Doxyfile
-                    WORKING_DIRECTORY ${GUDHI_USER_VERSION_DIR}
-                    COMMENT "Generating API documentation with Doxygen in ${GUDHI_USER_VERSION_DIR}/doc/html/" VERBATIM)
-
-  if(TARGET user_version)
-    # In dev version, doxygen target depends on user_version target. Not existing in user version
-    add_dependencies(doxygen user_version)
+  message("++ Project = ${CMAKE_PROJECT_NAME}")
+  if (CMAKE_PROJECT_NAME STREQUAL "GUDHIdev")
+    # Set Doxyfile.in variables for the developer version
+    set(GUDHI_DOXYGEN_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}/src")
+    foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/doc/")
+        set(GUDHI_DOXYGEN_IMAGE_PATH "${GUDHI_DOXYGEN_IMAGE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/doc/ \\  \n")
+      endif()
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/example/")
+        set(GUDHI_DOXYGEN_EXAMPLE_PATH "${GUDHI_DOXYGEN_EXAMPLE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/example/ \\  \n")
+      endif()
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/utilities/")
+        set(GUDHI_DOXYGEN_EXAMPLE_PATH "${GUDHI_DOXYGEN_EXAMPLE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/${GUDHI_MODULE}/utilities/ \\  \n")
+      endif()
+    endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+    set(GUDHI_DOXYGEN_COMMON_DOC_PATH "${GUDHI_DOXYGEN_SOURCE_PREFIX}/common/doc")
+    set(GUDHI_DOXYGEN_UTILS_PATH "*/utilities")
+    endif()
+  if (CMAKE_PROJECT_NAME STREQUAL "GUDHI")
+    # Set Doxyfile.in variables for the user version
+    set(GUDHI_DOXYGEN_SOURCE_PREFIX "${CMAKE_SOURCE_DIR}")
+    foreach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/doc/${GUDHI_MODULE}")
+        set(GUDHI_DOXYGEN_IMAGE_PATH "${GUDHI_DOXYGEN_IMAGE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/doc/${GUDHI_MODULE}/ \\  \n")
+      endif()
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/example/${GUDHI_MODULE}")
+        set(GUDHI_DOXYGEN_EXAMPLE_PATH "${GUDHI_DOXYGEN_EXAMPLE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/example/${GUDHI_MODULE}/ \\  \n")
+      endif()
+      if(EXISTS "${GUDHI_DOXYGEN_SOURCE_PREFIX}/utilities/${GUDHI_MODULE}")
+        set(GUDHI_DOXYGEN_EXAMPLE_PATH "${GUDHI_DOXYGEN_EXAMPLE_PATH}    ${GUDHI_DOXYGEN_SOURCE_PREFIX}/utilities/${GUDHI_MODULE}/ \\  \n")
+      endif()
+    endforeach(GUDHI_MODULE ${GUDHI_MODULES_FULL_LIST})
+    set(GUDHI_DOXYGEN_COMMON_DOC_PATH "${GUDHI_DOXYGEN_SOURCE_PREFIX}/doc/common")
+    set(GUDHI_DOXYGEN_UTILS_PATH "utilities/*")
   endif()
+
+  configure_file(${GUDHI_DOXYGEN_SOURCE_PREFIX}/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
+
+  add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                    COMMENT "Generating API documentation with Doxygen in 'html' directory" VERBATIM)
 else()
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "cpp-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 endif()

@@ -44,7 +44,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 
 
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
-        Simplex_tree() nogil
+        Simplex_tree_interface_full_featured() nogil
         double simplex_filtration(vector[int] simplex) nogil
         void assign_simplex_filtration(vector[int] simplex, double filtration) nogil
         void initialize_filtration() nogil
@@ -79,7 +79,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":
         Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) nogil
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil

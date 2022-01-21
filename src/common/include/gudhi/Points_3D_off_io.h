@@ -125,7 +125,7 @@ class Points_3D_off_visitor_reader {
  * This example loads points from an OFF file and builds a vector of CGAL points in dimension 3.
  * Then, it is asked to display the points.
  * 
- * @include common/example_CGAL_3D_points_off_reader.cpp
+ * @include example_CGAL_3D_points_off_reader.cpp
  * 
  * When launching:
  * 
@@ -134,7 +134,7 @@ class Points_3D_off_visitor_reader {
  *
  * the program output is:
  * 
- * @include common/cgal3Doffreader_result.txt
+ * @include cgal3Doffreader_result.txt
  */
 template<typename Point_3>
 class Points_3D_off_reader {

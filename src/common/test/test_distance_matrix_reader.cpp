@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( full_square_distance_matrix )
 {
   Distance_matrix from_full_square;
   // Read full_square_distance_matrix.csv file where the separator is the default one ';'
-  from_full_square = Gudhi::read_lower_triangular_matrix_from_csv_file<double>("full_square_distance_matrix.csv");
+  from_full_square = Gudhi::read_lower_triangular_matrix_from_csv_file<double>("full_square_distance_matrix.csv", ';');
   for (auto& i : from_full_square) {
     for (auto j : i) {
       std::clog << j << " ";
