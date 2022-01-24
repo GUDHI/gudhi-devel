@@ -6,8 +6,8 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.5.0:
 
-- [Module](link)
-     - ...
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.BettiCurve)
+     - A more flexible Betti curve class capable of computing exact curves
 
 - [Python installation](link)
      - Python >= 3.5 and cython >= 0.27 are now required.
