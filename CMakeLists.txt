@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(GUDHIdev)
 
-include(CMakeGUDHIVersion.txt)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
+include(CMakeGUDHIVersion.txt)
+include(GUDHI_options)
 
 # Reset cache
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")

@@ -1,0 +1,5 @@
+option(WITH_GUDHI_BENCHMARK "Activate/desactivate benchmark compilation" OFF)
+option(WITH_GUDHI_EXAMPLE "Activate/desactivate examples compilation and installation" OFF)
+option(WITH_GUDHI_PYTHON "Activate/desactivate python module compilation and installation" ON)
+option(WITH_GUDHI_TEST "Activate/desactivate examples compilation and installation" ON)
+option(WITH_GUDHI_UTILITIES "Activate/desactivate utilities compilation and installation" ON)
