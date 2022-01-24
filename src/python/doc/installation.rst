@@ -33,8 +33,8 @@ Compiling
 These instructions are for people who want to compile gudhi from source, they are
 unnecessary if you installed a binary package of Gudhi as above. They assume that
 you have downloaded a `release <https://github.com/GUDHI/gudhi-devel/releases>`_,
-with a name like `gudhi.3.X.X.tar.gz`, then run `tar xf gudhi.3.X.X.tar.gz`, which
-created a directory `gudhi.3.X.X`, hereinafter referred to as `/path-to-gudhi/`.
+with a name like `gudhi.3.X.Y.tar.gz`, then run `tar xf gudhi.3.X.Y.tar.gz`, which
+created a directory `gudhi.3.X.Y`, hereinafter referred to as `/path-to-gudhi/`.
 If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
@@ -136,10 +136,10 @@ If :code:`import gudhi` succeeds, please have a look to debug information:
 
 .. code-block:: python
 
-    import gudhi
-print(gudhi.__debug_info__)
-print("+ Installed modules are: " + gudhi.__available_modules)
-print("+ Missing modules are: " + gudhi.__missing_modules)
+    import gudhi as gd
+    print(gd.__debug_info__)
+    print("+ Installed modules are: " + gd.__available_modules)
+    print("+ Missing modules are: " + gd.__missing_modules)
 
 You shall have something like:
 
@@ -150,7 +150,6 @@ You shall have something like:
     Cython version 0.29.25 
     Numpy version 1.21.4 
     Boost version 1.77.0
-    print("+ Installed modules are: " + gudhi.__available_modules)
     + Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
     + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
@@ -349,8 +348,8 @@ You can still deactivate LaTeX rendering by saying:
 
 .. code-block:: python
 
-    import gudhi
-    gudhi.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
+    import gudhi as gd
+    gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
 
 PyKeOps
 -------
