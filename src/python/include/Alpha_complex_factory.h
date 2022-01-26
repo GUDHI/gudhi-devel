@@ -70,6 +70,8 @@ class Abstract_alpha_complex {
 
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) = 0;
+  
+  virtual std::size_t num_vertices() const = 0;
 
   virtual ~Abstract_alpha_complex() = default;
 };
@@ -104,6 +106,10 @@ class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
+  virtual std::size_t num_vertices() const {
+    return alpha_complex_.num_vertices();
+  }
+
  private:
   bool exact_version_;
   Alpha_complex<Kernel, Weighted> alpha_complex_;
@@ -133,6 +139,10 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
+  }
+
+  virtual std::size_t num_vertices() const {
+    return alpha_complex_.num_vertices();
   }
 
  private:

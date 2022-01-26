@@ -29,8 +29,7 @@ class Alpha_complex_interface {
  public:
   Alpha_complex_interface(const std::vector<std::vector<double>>& points,
                           const std::vector<double>& weights,
-                          bool fast_version, bool exact_version)
-  : empty_point_set_(points.size() == 0) {
+                          bool fast_version, bool exact_version) {
     const bool weighted = (weights.size() > 0);
     if (fast_version) {
       if (weighted) {
@@ -54,13 +53,12 @@ class Alpha_complex_interface {
   void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                            bool default_filtration_value) {
     // Nothing to be done in case of an empty point set
-    if (!empty_point_set_)
+    if (alpha_ptr_->num_vertices() > 0)
       alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
   }
 
  private:
   std::unique_ptr<Abstract_alpha_complex> alpha_ptr_;
-  bool empty_point_set_;
 };
 
 }  // namespace alpha_complex
