@@ -10,6 +10,9 @@ Below is a list of changes made since GUDHI 3.5.0:
      - the python weighted version for alpha complex is now available in any dimension D.
      - `alpha_complex = gudhi.AlphaComplex(off_file='/data/points/tore3D_300.off')` is deprecated, please use [read_points_from_off_file](https://gudhi.inria.fr/python/latest/point_cloud.html#gudhi.read_points_from_off_file) instead.
 
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.BettiCurve)
+     - A more flexible Betti curve class capable of computing exact curves
+
 - [Module](link)
      - ...
 
