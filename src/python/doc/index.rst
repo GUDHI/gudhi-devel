@@ -92,7 +92,7 @@ Clustering
 
 .. include:: clustering.inc
 
-Datasets generators
-*******************
+Datasets
+********
 
-.. include:: datasets_generators.inc
+.. include:: datasets.inc

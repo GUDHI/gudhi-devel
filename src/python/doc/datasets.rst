@@ -3,12 +3,14 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-===========================
-Datasets generators manual
-===========================
+================
+Datasets manual
+================
+
+Datasets generators
+===================
 
 We provide the generation of different customizable datasets to use as inputs for Gudhi complexes and data structures.
-
 
 Points generators
 ------------------
@@ -103,3 +105,14 @@ Example
 
 
 .. autofunction:: gudhi.datasets.generators.points.torus
+
+
+Fetching datasets
+=================
+
+We provide some ready-to-use datasets that are not available by default when getting GUDHI, and need to be fetched explicitly.
+
+.. automodule:: gudhi.datasets.remote
+   :members:
+   :special-members:
+   :show-inheritance:
