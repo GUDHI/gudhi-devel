@@ -105,14 +105,12 @@ def test_dummy_atol():
 
 from gudhi.representations.vector_methods import BettiCurve
 
-
 def test_infinity():
     a = np.array([[1.0, 8.0], [2.0, np.inf], [3.0, 4.0]])
     c = BettiCurve(20, [0.0, 10.0])(a)
     assert c[1] == 0
     assert c[7] == 3
     assert c[9] == 2
-
 
 def test_preprocessing_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
@@ -169,3 +167,4 @@ def test_kernel_empty_diagrams():
 #    PersistenceScaleSpaceKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1.)(empty_diag, empty_diag)
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1., kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
+
