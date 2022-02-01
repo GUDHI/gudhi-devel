@@ -85,7 +85,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         Compute all the cubical complexes and their associated persistence diagrams.
 
         Parameters:
-            X (list of list of double OR list of numpy.ndarray): List of cells filtration values that should be flatten
+            X (list of list of float OR list of numpy.ndarray): List of cells filtration values that should be flatten
                 if `dimensions` is set in the constructor, or already with the correct shape in a numpy.ndarray (and
                 `dimensions` must not be set).
 

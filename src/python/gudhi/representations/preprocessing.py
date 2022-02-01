@@ -76,7 +76,7 @@ class Clamping(BaseEstimator, TransformerMixin):
         Constructor for the Clamping class.
 
         Parameters:
-            limit (double): clamping value (default np.inf).
+            limit (float): clamping value (default np.inf).
         """
         self.minimum = minimum
         self.maximum = maximum
@@ -235,7 +235,7 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
             use (bool): whether to use the class or not (default False).
             location (string): either "upper" or "lower" (default "upper"). Whether to keep the points that are far away ("upper") or close ("lower") to the diagonal.
             num_pts (int): cardinality threshold (default 10). If location == "upper", keep the top **num_pts** points that are the farthest away from the diagonal. If location == "lower", keep the top **num_pts** points that are the closest to the diagonal. 
-            threshold (double): distance-to-diagonal threshold (default -1). If location == "upper", keep the points that are at least at a distance **threshold** from the diagonal. If location == "lower", keep the points that are at most at a distance **threshold** from the diagonal. 
+            threshold (float): distance-to-diagonal threshold (default -1). If location == "upper", keep the points that are at least at a distance **threshold** from the diagonal. If location == "lower", keep the points that are at most at a distance **threshold** from the diagonal. 
         """
         self.num_pts    = num_pts
         self.threshold  = threshold
@@ -318,7 +318,7 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
 
         Parameters:
             use (bool): whether to use the class or not (default False).
-            limit (double): second coordinate value that is the criterion for being an essential point (default numpy.inf).
+            limit (float): second coordinate value that is the criterion for being an essential point (default numpy.inf).
             point_type (string): either "finite" or "essential". The type of the points that are going to be extracted.
         """
         self.use, self.limit, self.point_type = use, limit, point_type
