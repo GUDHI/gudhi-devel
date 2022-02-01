@@ -9,7 +9,7 @@ Definition
 
 .. include:: alpha_complex_sum.inc
 
-:doc:`AlphaComplex <alpha_complex_ref>` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
+:class:`~gudhi.AlphaComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
@@ -33,9 +33,6 @@ Remarks
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
-* For performances reasons, it is advised to use Alpha_complex with `CGAL <installation.html#cgal>`_ :math:`\geq` 5.0.0.
-* The vertices in the output simplex tree are not guaranteed to match the order of the input points. One can use
-  :func:`~gudhi.AlphaComplex.get_point` to get the initial point back.
 
 Example from points
 -------------------
@@ -44,23 +41,22 @@ This example builds the alpha-complex from the given points:
 
 .. testcode::
 
-    import gudhi
-    alpha_complex = gudhi.AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
+    from gudhi import AlphaComplex
+    ac = AlphaComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]])
 
-    simplex_tree = alpha_complex.create_simplex_tree()
-    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
+    stree = ac.create_simplex_tree()
+    print('Alpha complex is of dimension ', stree.dimension(), ' - ',
+      stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
+
     fmt = '%s -> %.2f'
-    for filtered_value in simplex_tree.get_filtration():
+    for filtered_value in stree.get_filtration():
         print(fmt % tuple(filtered_value))
 
 The output is:
 
 .. testoutput::
 
-   Alpha complex is of dimension 2 - 25 simplices - 7 vertices.
+   Alpha complex is of dimension  2  -  25  simplices -  7  vertices.
    [0] -> 0.00
    [1] -> 0.00
    [2] -> 0.00
@@ -177,11 +173,75 @@ of speed-up, since we always first build the full filtered complex, so it is rec
 :paramref:`~gudhi.AlphaComplex.create_simplex_tree.max_alpha_square`.
 In the following example, a threshold of :math:`\alpha^2 = 32.0` is used.
 
+Weighted version
+^^^^^^^^^^^^^^^^
+
+A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
+`CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_.
+
+This example builds the weighted alpha-complex of a small molecule, where atoms have different sizes.
+It is taken from
+`CGAL 3d weighted alpha shapes <https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13>`_.
+
+Then, it is asked to display information about the alpha complex.
+
+.. testcode::
+
+    from gudhi import AlphaComplex
+    wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
+                                  [-1.,  1., -1.],
+                                  [-1., -1.,  1.],
+                                  [ 1.,  1.,  1.],
+                                  [ 2.,  2.,  2.]],
+                          weights = [4., 4., 4., 4., 1.])
+
+    stree = wgt_ac.create_simplex_tree()
+    print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',
+          stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
+    fmt = '%s -> %.2f'
+    for simplex in stree.get_simplices():
+        print(fmt % tuple(simplex))
+
+The output is:
+
+.. testoutput::
+
+   Weighted alpha complex is of dimension  3  -  29  simplices -  5  vertices.
+   [0, 1, 2, 3] -> -1.00
+   [0, 1, 2] -> -1.33
+   [0, 1, 3, 4] -> 95.00
+   [0, 1, 3] -> -1.33
+   [0, 1, 4] -> 95.00
+   [0, 1] -> -2.00
+   [0, 2, 3, 4] -> 95.00
+   [0, 2, 3] -> -1.33
+   [0, 2, 4] -> 95.00
+   [0, 2] -> -2.00
+   [0, 3, 4] -> 23.00
+   [0, 3] -> -2.00
+   [0, 4] -> 23.00
+   [0] -> -4.00
+   [1, 2, 3, 4] -> 95.00
+   [1, 2, 3] -> -1.33
+   [1, 2, 4] -> 95.00
+   [1, 2] -> -2.00
+   [1, 3, 4] -> 23.00
+   [1, 3] -> -2.00
+   [1, 4] -> 23.00
+   [1] -> -4.00
+   [2, 3, 4] -> 23.00
+   [2, 3] -> -2.00
+   [2, 4] -> 23.00
+   [2] -> -4.00
+   [3, 4] -> -1.00
+   [3] -> -4.00
+   [4] -> -1.00
 
 Example from OFF file
 ^^^^^^^^^^^^^^^^^^^^^
 
-This example builds the alpha complex from 300 random points on a 2-torus.
+This example builds the alpha complex from 300 random points on a 2-torus, given by an
+`OFF file <fileformats.html#off-file-format>`_.
 
 Then, it computes the persistence diagram and displays it:
 
@@ -189,14 +249,10 @@ Then, it computes the persistence diagram and displays it:
    :include-source:
 
     import matplotlib.pyplot as plt
-    import gudhi
-    alpha_complex = gudhi.AlphaComplex(off_file=gudhi.__root_source_dir__ + \
-        '/data/points/tore3D_300.off')
-    simplex_tree = alpha_complex.create_simplex_tree()
-    result_str = 'Alpha complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
-    diag = simplex_tree.persistence()
-    gudhi.plot_persistence_diagram(diag)
+    import gudhi as gd
+    off_file = gd.__root_source_dir__ + '/data/points/tore3D_300.off'
+    points = gd.read_points_from_off_file(off_file = off_file)
+    stree = gd.AlphaComplex(points = points).create_simplex_tree()
+    dgm = stree.persistence()
+    gd.plot_persistence_diagram(dgm, legend = True)
     plt.show()
