@@ -51,21 +51,21 @@ def _get_bunny_license_print(accept_license = False):
 def test_fetch_remote_datasets():
     # Test fetch with a wrong checksum
     with pytest.raises(OSError):
-        _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", "spiral_2d.csv", file_checksum = 'XXXXXXXXXX')
+        _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy", "spiral_2d.npy", file_checksum = 'XXXXXXXXXX')
 
     # Test files download from given urls with checksums provided
-    _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", "spiral_2d.csv",
-                                file_checksum = '37530355d980d957c4ec06b18c775f90a91e446107d06c6201c9b4000b077f38')
+    _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy", "spiral_2d.npy",
+                                file_checksum = '88312ffd6df2e2cb2bde9c0e1f962d7d644c6f58dc369c7b377b298dacdc4eaf')
 
     _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/sphere3D_pts_on_grid.off", "sphere3D_pts_on_grid.off",
                                 file_checksum = '32f96d2cafb1177f0dd5e0a019b6ff5658e14a619a7815ae55ad0fc5e8bd3f88')
 
     # Test files download from given urls without checksums
-    _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d.csv", "spiral_2d.csv")
+    _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy", "spiral_2d.npy")
 
     _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/sphere3D_pts_on_grid.off", "sphere3D_pts_on_grid.off")
 
-    # Test spiral_2d.csv wrapping function
+    # Test fetch_spiral_2d wrapping function
     spiral_2d_arr = remote.fetch_spiral_2d()
     assert spiral_2d_arr.shape == (114562, 2)
 
@@ -74,9 +74,9 @@ def test_fetch_remote_datasets():
     if not exists("remote_datasets/bunny"):
         makedirs("remote_datasets/bunny")
     remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/LICENSE", "LICENSE", "remote_datasets/bunny",
-                 'aeb1bad319b7d74fa0b8076358182f9c6b1284c67cc07dc67cbc9bc73025d956')
+                 'b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a')
     with open("remote_datasets/bunny/LICENSE") as f:
-        assert f.read() == _get_bunny_license_print().getvalue().rstrip("\n")
+        assert f.read().rstrip("\n") == _get_bunny_license_print().getvalue().rstrip("\n")
 
     # Test not printing bunny.npy LICENSE when accept_license = True
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
