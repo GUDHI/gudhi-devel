@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-import gudhi
+import gudhi as gd
 import argparse
 import math
-import errno
-import os
 import numpy as np
 
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
@@ -37,70 +35,60 @@ parser.add_argument("-t", "--threshold", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
 
 args = parser.parse_args()
-with open(args.file, "r") as f:
-    first_line = f.readline()
-    if (first_line == "OFF\n") or (first_line == "nOFF\n"):
-        point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
-        print("##############################################################")
-        print("RipsComplex creation from points read in a OFF file")
+point_cloud = gd.read_points_from_off_file(off_file=args.file)
+print("##############################################################")
+print("RipsComplex creation from points read in a OFF file")
 
-        message = "RipsComplex with max_edge_length=" + repr(args.threshold)
-        print(message)
+message = "RipsComplex with max_edge_length=" + repr(args.threshold)
+print(message)
 
-        rips_complex = gudhi.RipsComplex(
-            points=point_cloud, max_edge_length=args.threshold
-        )
+rips_complex = gd.RipsComplex(
+    points=point_cloud, max_edge_length=args.threshold
+)
 
-        rips_stree = rips_complex.create_simplex_tree(
-            max_dimension=args.max_dimension)
+rips_stree = rips_complex.create_simplex_tree(
+    max_dimension=args.max_dimension)
 
-        message = "Number of simplices=" + repr(rips_stree.num_simplices())
-        print(message)
+message = "Number of simplices=" + repr(rips_stree.num_simplices())
+print(message)
 
-        rips_stree.compute_persistence()
+rips_stree.compute_persistence()
 
-        print("##############################################################")
-        print("AlphaComplex creation from points read in a OFF file")
+print("##############################################################")
+print("AlphaComplex creation from points read in a OFF file")
 
-        message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
-        print(message)
+message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
+print(message)
 
-        alpha_complex = gudhi.AlphaComplex(points=point_cloud)
-        alpha_stree = alpha_complex.create_simplex_tree(
-            max_alpha_square=(args.threshold * args.threshold)
-        )
+alpha_complex = gd.AlphaComplex(points=point_cloud)
+alpha_stree = alpha_complex.create_simplex_tree(
+    max_alpha_square=(args.threshold * args.threshold)
+)
 
-        message = "Number of simplices=" + repr(alpha_stree.num_simplices())
-        print(message)
+message = "Number of simplices=" + repr(alpha_stree.num_simplices())
+print(message)
 
-        alpha_stree.compute_persistence()
+alpha_stree.compute_persistence()
 
-        max_b_distance = 0.0
-        for dim in range(args.max_dimension):
-            # Alpha persistence values needs to be transform because filtration
-            # values are alpha square values
-            alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
+max_b_distance = 0.0
+for dim in range(args.max_dimension):
+    # Alpha persistence values needs to be transform because filtration
+    # values are alpha square values
+    alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
 
-            rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
-            bottleneck_distance = gudhi.bottleneck_distance(
-                rips_intervals, alpha_intervals
-            )
-            message = (
-                "In dimension "
-                + repr(dim)
-                + ", bottleneck distance = "
-                + repr(bottleneck_distance)
-            )
-            print(message)
-            max_b_distance = max(bottleneck_distance, max_b_distance)
+    rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
+    bottleneck_distance = gd.bottleneck_distance(
+        rips_intervals, alpha_intervals
+    )
+    message = (
+        "In dimension "
+        + repr(dim)
+        + ", bottleneck distance = "
+        + repr(bottleneck_distance)
+    )
+    print(message)
+    max_b_distance = max(bottleneck_distance, max_b_distance)
 
-        print("==============================================================")
-        message = "Bottleneck distance is " + repr(max_b_distance)
-        print(message)
-
-    else:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                args.file)
-
-
-    f.close()
+print("==============================================================")
+message = "Bottleneck distance is " + repr(max_b_distance)
+print(message)

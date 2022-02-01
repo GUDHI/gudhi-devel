@@ -25,6 +25,7 @@ jobs:
       - name: Install and test wheel for Python 3.6
         run: |
           $PYTHON36/bin/python -m pip install --user pytest build_36/src/python/dist/*.whl
+          $PYTHON36/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON36/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Build wheel for Python 3.7
         run: |
@@ -37,6 +38,7 @@ jobs:
       - name: Install and test wheel for Python 3.7
         run: |
           $PYTHON37/bin/python -m pip install --user pytest build_37/src/python/dist/*.whl
+          $PYTHON37/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON37/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Build wheel for Python 3.8
         run: |
@@ -49,6 +51,7 @@ jobs:
       - name: Install and test wheel for Python 3.8
         run: |
           $PYTHON38/bin/python -m pip install --user pytest build_38/src/python/dist/*.whl
+          $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON38/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Build wheel for Python 3.9
         run: |
@@ -61,6 +64,7 @@ jobs:
       - name: Install and test wheel for Python 3.9
         run: |
           $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
+          $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Build wheel for Python 3.10
         run: |
@@ -73,6 +77,7 @@ jobs:
       - name: Install and test wheel for Python 3.10
         run: |
           $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
+          $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Publish on PyPi
         env:

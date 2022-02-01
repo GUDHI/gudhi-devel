@@ -14,13 +14,16 @@ function( add_GUDHI_PYTHON_lib THE_LIB )
   endif(EXISTS ${THE_LIB})
 endfunction( add_GUDHI_PYTHON_lib )
 
-function( add_GUDHI_PYTHON_lib_dir THE_LIB_DIR )
-  # deals when it is not set - error on windows
-  if(EXISTS ${THE_LIB_DIR})
-    set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${THE_LIB_DIR}', " PARENT_SCOPE)
-  else()
-    message("add_GUDHI_PYTHON_lib_dir - '${THE_LIB_DIR}' does not exist")
-  endif()
+function( add_GUDHI_PYTHON_lib_dir)
+  # Argument may be a list (specifically on windows with release/debug paths)
+  foreach(THE_LIB_DIR IN LISTS ARGN)
+    # deals when it is not set - error on windows
+    if(EXISTS ${THE_LIB_DIR})
+      set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${THE_LIB_DIR}', " PARENT_SCOPE)
+    else()
+      message("add_GUDHI_PYTHON_lib_dir - '${THE_LIB_DIR}' does not exist")
+    endif()
+  endforeach()
 endfunction( add_GUDHI_PYTHON_lib_dir )
 
 # THE_TEST is the python test file name (without .py extension) containing tests functions
@@ -168,14 +171,20 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     endif ()
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
     endif ()
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
+    endif ()
 
     if(CGAL_FOUND)
+      if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
+        # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.
+        set(CGAL_HEADER_ONLY True)
+      endif(NOT CGAL_VERSION VERSION_LESS 5.3.0)
       # Add CGAL compilation args
       if(CGAL_HEADER_ONLY)
         add_gudhi_debug_info("CGAL header only version ${CGAL_VERSION}")
@@ -183,7 +192,7 @@ if(PYTHONINTERP_FOUND)
       else(CGAL_HEADER_ONLY)
         add_gudhi_debug_info("CGAL version ${CGAL_VERSION}")
         add_GUDHI_PYTHON_lib("${CGAL_LIBRARY}")
-        add_GUDHI_PYTHON_lib_dir("${CGAL_LIBRARIES_DIR}")
+        add_GUDHI_PYTHON_lib_dir(${CGAL_LIBRARIES_DIR})
         message("** Add CGAL ${CGAL_LIBRARIES_DIR}")
         # If CGAL is not header only, CGAL library may link with boost system,
         if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -191,7 +200,7 @@ if(PYTHONINTERP_FOUND)
         else()
           add_GUDHI_PYTHON_lib("${Boost_SYSTEM_LIBRARY_RELEASE}")
         endif()
-        add_GUDHI_PYTHON_lib_dir("${Boost_LIBRARY_DIRS}")
+        add_GUDHI_PYTHON_lib_dir(${Boost_LIBRARY_DIRS})
         message("** Add Boost ${Boost_LIBRARY_DIRS}")
       endif(CGAL_HEADER_ONLY)
       # GMP and GMPXX are not required, but if present, CGAL will link with them.
@@ -203,13 +212,13 @@ if(PYTHONINTERP_FOUND)
           get_filename_component(GMP_LIBRARIES_DIR ${GMP_LIBRARIES} PATH)
           message("GMP_LIBRARIES_DIR from GMP_LIBRARIES set to ${GMP_LIBRARIES_DIR}")
         endif(NOT GMP_LIBRARIES_DIR)
-        add_GUDHI_PYTHON_lib_dir("${GMP_LIBRARIES_DIR}")
+        add_GUDHI_PYTHON_lib_dir(${GMP_LIBRARIES_DIR})
         message("** Add gmp ${GMP_LIBRARIES_DIR}")
         if(GMPXX_FOUND)
           add_gudhi_debug_info("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
           set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
           add_GUDHI_PYTHON_lib("${GMPXX_LIBRARIES}")
-          add_GUDHI_PYTHON_lib_dir("${GMPXX_LIBRARIES_DIR}")
+          add_GUDHI_PYTHON_lib_dir(${GMPXX_LIBRARIES_DIR})
           message("** Add gmpxx ${GMPXX_LIBRARIES_DIR}")
         endif(GMPXX_FOUND)
       endif(GMP_FOUND)
@@ -222,7 +231,7 @@ if(PYTHONINTERP_FOUND)
           get_filename_component(MPFR_LIBRARIES_DIR ${MPFR_LIBRARIES} PATH)
           message("MPFR_LIBRARIES_DIR from MPFR_LIBRARIES set to ${MPFR_LIBRARIES_DIR}")
         endif(NOT MPFR_LIBRARIES_DIR)
-        add_GUDHI_PYTHON_lib_dir("${MPFR_LIBRARIES_DIR}")
+        add_GUDHI_PYTHON_lib_dir(${MPFR_LIBRARIES_DIR})
         message("** Add mpfr ${MPFR_LIBRARIES_DIR}")
       endif(MPFR_FOUND)
     endif(CGAL_FOUND)
@@ -243,14 +252,14 @@ if(PYTHONINTERP_FOUND)
     if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
       add_gudhi_debug_info("TBB version ${TBB_INTERFACE_VERSION} found and used")
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
-      if(CMAKE_BUILD_TYPE MATCHES Debug)
+      if((CMAKE_BUILD_TYPE MATCHES Debug) AND TBB_DEBUG_LIBRARY)
         add_GUDHI_PYTHON_lib("${TBB_DEBUG_LIBRARY}")
         add_GUDHI_PYTHON_lib("${TBB_MALLOC_DEBUG_LIBRARY}")
       else()
         add_GUDHI_PYTHON_lib("${TBB_RELEASE_LIBRARY}")
         add_GUDHI_PYTHON_lib("${TBB_MALLOC_RELEASE_LIBRARY}")
       endif()
-      add_GUDHI_PYTHON_lib_dir("${TBB_LIBRARY_DIRS}")
+      add_GUDHI_PYTHON_lib_dir(${TBB_LIBRARY_DIRS})
       message("** Add tbb ${TBB_LIBRARY_DIRS}")
       set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
     endif()
@@ -291,7 +300,12 @@ if(PYTHONINTERP_FOUND)
     add_custom_target(python ALL DEPENDS gudhi.so
                       COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
-  set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
+  # Path separator management for windows
+  if (WIN32)
+    set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR};$ENV{PYTHONPATH}")
+  else(WIN32)
+    set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
+  endif(WIN32)
   # Documentation generation is available through sphinx - requires all modules
   # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
   if(SPHINX_PATH)
@@ -302,7 +316,7 @@ if(PYTHONINTERP_FOUND)
             if(SCIPY_FOUND)
               if(SKLEARN_FOUND)
                 if(OT_FOUND)
-                  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                     set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                     # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
                     # Images and biblio warnings because not found on developper version
@@ -322,10 +336,10 @@ if(PYTHONINTERP_FOUND)
                              ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
                     # Set missing or not modules
                     set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                  else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                    message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                  else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                    message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
                     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                 else(OT_FOUND)
                   message("++ Python documentation module will not be compiled because POT was not found")
                   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -361,13 +375,15 @@ if(PYTHONINTERP_FOUND)
 
 
     # Test examples
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Bottleneck and Alpha
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
                -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Tangential
       add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -435,7 +451,7 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_cover_complex)
     endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -451,7 +467,7 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
       add_gudhi_py_test(test_alpha_complex)
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Euclidean witness
@@ -534,6 +550,11 @@ if(PYTHONINTERP_FOUND)
     # Representations
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
       add_gudhi_py_test(test_representations)
+    endif()
+
+    # Betti curves
+    if(SKLEARN_FOUND AND SCIPY_FOUND)
+      add_gudhi_py_test(test_betti_curve_representations)
     endif()
 
     # Representations preprocessing
