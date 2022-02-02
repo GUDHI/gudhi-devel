@@ -58,17 +58,18 @@ PersLay
     import tensorflow        as tf
     from sklearn.preprocessing import MinMaxScaler
     import gudhi.representations as gdr
+    import gudhi.tensorflow as gdtf
 
     diagrams = [np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])]
     diagrams = gdr.DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]).fit_transform(diagrams)
     diagrams = tf.RaggedTensor.from_tensor(tf.constant(diagrams, dtype=tf.float32))
 
     rho = tf.identity 
-    phi = gdr.GaussianPerslayPhi((100, 100), ((-.5, 1.5), (-.5, 1.5)), .1)
-    weight = gdr.PowerPerslayWeight(1.,0.)
+    phi = gdtf.GaussianPerslayPhi((100, 100), ((-.5, 1.5), (-.5, 1.5)), .1)
+    weight = gdtf.PowerPerslayWeight(1.,0.)
     perm_op = tf.math.reduce_sum
     
-    perslay = gdr.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
+    perslay = gdtf.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
     vectors = perslay(diagrams)
     print(vectors)
 
