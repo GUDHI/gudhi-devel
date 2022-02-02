@@ -32,7 +32,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
     sl = LowerStarSimplexTreeLayer(simplextree=st, dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = sl.call(F)
+        dgm = sl.call(F)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
 
     grads = tape.gradient(loss, [F])

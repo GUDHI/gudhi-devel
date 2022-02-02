@@ -12,8 +12,7 @@ def _LowerStarSimplexTree(simplextree, filtration, dimensions):
     #             filtration (function values on the vertices of st),
     #             dimensions (homology dimensions),
     
-    for s,_ in simplextree.get_filtration():
-        simplextree.assign_filtration(s, -1e10)
+    simplextree.reset_filtration(-np.inf, 0)
 
     # Assign new filtration values
     for i in range(simplextree.num_vertices()):

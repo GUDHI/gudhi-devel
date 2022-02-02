@@ -556,6 +556,7 @@ if(PYTHONINTERP_FOUND)
     # Differentiation
     if(TENSORFLOW_FOUND)
       add_gudhi_py_test(test_diff)
+    endif()
 
     # Betti curves
     if(SKLEARN_FOUND AND SCIPY_FOUND)
