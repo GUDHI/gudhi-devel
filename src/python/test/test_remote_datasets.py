@@ -66,14 +66,6 @@ def test_fetch_remote_datasets():
 
     _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/sphere3D_pts_on_grid.off", "sphere3D_pts_on_grid.off")
 
-    # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
-    for i in range(2):
-        spiral_2d_arr = remote.fetch_spiral_2d()
-        assert spiral_2d_arr.shape == (114562, 2)
-
-        bunny_arr = remote.fetch_bunny()
-        assert bunny_arr.shape == (35947, 3)
-
     # Test printing existing LICENSE file when fetching bunny.npy with accept_license = False (default)
     # Fetch LICENSE file
     if not exists("remote_datasets/bunny"):
@@ -85,3 +77,11 @@ def test_fetch_remote_datasets():
 
     # Test not printing bunny.npy LICENSE when accept_license = True
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
+
+    # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
+    for i in range(2):
+        spiral_2d_arr = remote.fetch_spiral_2d()
+        assert spiral_2d_arr.shape == (114562, 2)
+
+        bunny_arr = remote.fetch_bunny()
+        assert bunny_arr.shape == (35947, 3)
