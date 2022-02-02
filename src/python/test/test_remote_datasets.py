@@ -40,8 +40,6 @@ def _get_bunny_license_print(accept_license = False):
     # Redirect stdout
     sys.stdout = capturedOutput
 
-    if not exists("remote_datasets/bunny"):
-        makedirs("remote_datasets/bunny")
     remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy", "bunny.npy", "remote_datasets/bunny",
                  '13f7842ebb4b45370e50641ff28c88685703efa5faab14edf0bb7d113a965e1b', accept_license)
     # Reset redirect
@@ -65,22 +63,17 @@ def test_fetch_remote_datasets():
 
     _check_fetch_output("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/sphere3D_pts_on_grid.off", "sphere3D_pts_on_grid.off")
 
-    # Test fetch_spiral_2d wrapping function
-    spiral_2d_arr = remote.fetch_spiral_2d()
-    assert spiral_2d_arr.shape == (114562, 2)
+    # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
+    for i in range(2):
+        spiral_2d_arr = remote.fetch_spiral_2d()
+        assert spiral_2d_arr.shape == (114562, 2)
+
+        bunny_arr = remote.fetch_bunny()
+        assert bunny_arr.shape == (35947, 3)
 
     # Test printing existing LICENSE file when fetching bunny.npy with accept_license = False (default)
-    # Fetch LICENSE file
-    if not exists("remote_datasets/bunny"):
-        makedirs("remote_datasets/bunny")
-    remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/LICENSE", "LICENSE", "remote_datasets/bunny",
-                 'b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a')
     with open("remote_datasets/bunny/LICENSE") as f:
         assert f.read().rstrip("\n") == _get_bunny_license_print().getvalue().rstrip("\n")
 
     # Test not printing bunny.npy LICENSE when accept_license = True
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
-
-    # Test fetch_bunny wrapping function
-    bunny_arr = remote.fetch_bunny()
-    assert bunny_arr.shape == (35947, 3)
