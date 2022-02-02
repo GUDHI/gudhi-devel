@@ -582,7 +582,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Cover complex
-    if(SKLEARN_FOUND)
+    if(SKLEARN_FOUND AND CGAL_FOUND)
       add_gudhi_py_test(test_cover_complex)
     endif()
 
