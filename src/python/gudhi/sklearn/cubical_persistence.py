@@ -81,19 +81,17 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         return cubical_complex.persistence_intervals_in_dimension(self.persistence_dimension)
 
     def transform(self, X, Y=None):
-        """
-        Compute all the cubical complexes and their associated persistence diagrams.
+        """Compute all the cubical complexes and their associated persistence diagrams.
 
-        Parameters:
-            X (list of list of float OR list of numpy.ndarray): List of cells filtration values that should be flatten
-                if `dimensions` is set in the constructor, or already with the correct shape in a numpy.ndarray (and
-                `dimensions` must not be set).
+        :param X: List of cells filtration values that should be flatten if `dimensions` is set in the constructor, or
+            already with the correct shape in a numpy.ndarray (and `dimensions` must not be set).
+        :type X: list of list of float OR list of numpy.ndarray
 
-        Returns:
-            list of pairs or list of list of pairs:
-            Persistence diagrams in the format:
+        :return: Persistence diagrams in the format:
+
               - If `persistence_dimension` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
               - If `persistence_dimension` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
+        :rtype: list of pairs or list of list of pairs
         """
 
         # Depends on persistence_dimension is an integer or a list of integer (else case)
