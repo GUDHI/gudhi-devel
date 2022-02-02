@@ -9,8 +9,7 @@
 
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
-import numpy
-from numpy import array as np_array
+import numpy as np
 cimport gudhi.simplex_tree
 
 __author__ = "Vincent Rouvreau"
@@ -412,7 +411,7 @@ cdef class SimplexTree:
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the
             persistence diagram point coordinates) to take into account (strictly greater than min_persistence).
@@ -449,7 +448,7 @@ cdef class SimplexTree:
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -472,7 +471,7 @@ cdef class SimplexTree:
         when you do not want the list :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -542,7 +541,11 @@ cdef class SimplexTree:
             function to be launched first.
         """
         assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
-        return np_array(self.pcohptr.intervals_in_dimension(dimension))
+        piid = np.array(self.pcohptr.intervals_in_dimension(dimension))
+        # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
+        if len(piid) == 0:
+            return np.empty(shape = [0, 2])
+        return piid
 
     def persistence_pairs(self):
         """This function returns a list of persistence birth and death simplices pairs.
@@ -583,8 +586,8 @@ cdef class SimplexTree:
         """
         assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
         gen = self.pcohptr.lower_star_generators()
-        normal = [np_array(d).reshape(-1,2) for d in gen.first]
-        infinite = [np_array(d) for d in gen.second]
+        normal = [np.array(d).reshape(-1,2) for d in gen.first]
+        infinite = [np.array(d) for d in gen.second]
         return (normal, infinite)
 
     def flag_persistence_generators(self):
@@ -602,19 +605,19 @@ cdef class SimplexTree:
         assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
         gen = self.pcohptr.flag_generators()
         if len(gen.first) == 0:
-            normal0 = numpy.empty((0,3))
+            normal0 = np.empty((0,3))
             normals = []
         else:
             l = iter(gen.first)
-            normal0 = np_array(next(l)).reshape(-1,3)
-            normals = [np_array(d).reshape(-1,4) for d in l]
+            normal0 = np.array(next(l)).reshape(-1,3)
+            normals = [np.array(d).reshape(-1,4) for d in l]
         if len(gen.second) == 0:
-            infinite0 = numpy.empty(0)
+            infinite0 = np.empty(0)
             infinites = []
         else:
             l = iter(gen.second)
-            infinite0 = np_array(next(l))
-            infinites = [np_array(d).reshape(-1,2) for d in l]
+            infinite0 = np.array(next(l))
+            infinites = [np.array(d).reshape(-1,2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
     def collapse_edges(self, nb_iterations = 1):

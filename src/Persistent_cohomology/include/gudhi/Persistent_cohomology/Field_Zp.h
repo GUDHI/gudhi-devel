@@ -13,6 +13,7 @@
 
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 namespace Gudhi {
 
@@ -33,15 +34,28 @@ class Field_Zp {
   }
 
   void init(int charac) {
-    assert(charac > 0);  // division by zero + non negative values
     Prime = charac;
+
+    // Check that the provided prime is less than the maximum allowed as int, calculation below, and 'plus_times_equal' function : 46337 ; i.e (max_prime-1)*max_prime <= INT_MAX
+    if(Prime > 46337)
+        throw std::invalid_argument("Maximum homology_coeff_field allowed value is 46337");
+
+    // Check for primality
+    if (Prime <= 1)
+        throw std::invalid_argument("homology_coeff_field must be a prime number");
+
     inverse_.clear();
     inverse_.reserve(charac);
     inverse_.push_back(0);
     for (int i = 1; i < Prime; ++i) {
       int inv = 1;
-      while (((inv * i) % Prime) != 1)
+      int mult = inv * i;
+      while ( (mult % Prime) != 1) {
         ++inv;
+        if(mult == Prime)
+            throw std::invalid_argument("homology_coeff_field must be a prime number");
+        mult = inv * i;
+      }
       inverse_.push_back(inv);
     }
   }

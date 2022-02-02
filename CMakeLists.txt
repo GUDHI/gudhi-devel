@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(GUDHIdev)
 
-include(CMakeGUDHIVersion.txt)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake/modules/")
+include(CMakeGUDHIVersion.txt)
+include(GUDHI_options)
 
 # Reset cache
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
@@ -27,6 +27,7 @@ add_gudhi_module(Bitmap_cubical_complex)
 add_gudhi_module(Bottleneck_distance)
 add_gudhi_module(Collapse)
 add_gudhi_module(Contraction)
+add_gudhi_module(Coxeter_triangulation)
 add_gudhi_module(Cech_complex)
 add_gudhi_module(Hasse_complex)
 add_gudhi_module(Persistence_representations)
