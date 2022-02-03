@@ -78,6 +78,9 @@ def test_fetch_remote_datasets():
     # Test not printing bunny.npy LICENSE when accept_license = True
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
 
+    # Remove "remote_datasets" directory and all its content
+    import shutil
+    shutil.rmtree("remote_datasets")
     # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
     for i in range(2):
         spiral_2d_arr = remote.fetch_spiral_2d()
