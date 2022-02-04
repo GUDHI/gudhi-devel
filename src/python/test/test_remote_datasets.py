@@ -90,7 +90,7 @@ def test_fetch_remote_datasets():
     assert isdir(expanduser("~/remote_datasets")) == True
 
     # Test clear_data_home
-    clear_data_home()
+    remote.clear_data_home()
     assert isdir(expanduser("~/remote_datasets")) == False
 
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default
@@ -103,5 +103,5 @@ def test_fetch_remote_datasets():
     assert isdir(expanduser("~/test")) == True
 
     # Test clear_data_home with data directory different from default
-    clear_data_home("~/test")
+    remote.clear_data_home("~/test")
     assert isdir(expanduser("~/test")) == False
