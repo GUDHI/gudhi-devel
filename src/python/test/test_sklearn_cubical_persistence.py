@@ -44,7 +44,7 @@ def test_simple_constructor_from_flattened_cells():
     # Not squared (extended) flatten cells
     cells = np.hstack((cells, np.zeros((cells.shape[0], 2)))).flatten()
     
-    cp = CubicalPersistence(persistence_dimension=0, dimensions=[10, 8])
+    cp = CubicalPersistence(persistence_dimension=0, newshape=[10, 8])
     diags = cp.fit_transform([cells])
 
     np.testing.assert_array_equal(diags[0], CUBICAL_PERSISTENCE_H0_IMG0)

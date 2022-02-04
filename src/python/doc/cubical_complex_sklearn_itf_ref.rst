@@ -54,9 +54,9 @@ two holes in :math:`\mathbf{H}_1`, or, like in this example, three connected com
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=0)
     pipe = Pipeline(
         [
-            ("cub_pers", CubicalPersistence(persistence_dimension=0, dimensions=[28, 28], n_jobs=-2)),
+            ("cub_pers", CubicalPersistence(persistence_dimension=0, newshape=[28, 28], n_jobs=-2)),
             # Or for multiple persistence dimension computation
-            # ("cub_pers", CubicalPersistence(persistence_dimension=[0, 1], dimensions=[28, 28], n_jobs=-2)),
+            # ("cub_pers", CubicalPersistence(persistence_dimension=[0, 1], newshape=[28, 28], n_jobs=-2)),
             # ("H0_diags", DimensionSelector(index=0), # where index is the index in persistence_dimension array
             ("finite_diags", DiagramSelector(use=True, point_type="finite")),
             (
@@ -78,7 +78,7 @@ two holes in :math:`\mathbf{H}_1`, or, like in this example, three connected com
 
     There are 6825 eights out of 70000 numbers.
     Classification report for TDA pipeline Pipeline(steps=[('cub_pers',
-                     CubicalPersistence(dimensions=[28, 28], n_jobs=-2)),
+                     CubicalPersistence(newshape=[28, 28], n_jobs=-2)),
                     ('finite_diags', DiagramSelector(use=True)),
                     ('pers_img',
                      PersistenceImage(bandwidth=50, im_range=[0, 256, 0, 256],

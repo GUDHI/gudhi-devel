@@ -32,7 +32,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        dimensions=None,
+        newshape=None,
         persistence_dimension=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
@@ -42,7 +42,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         Constructor for the CubicalPersistence class.
 
         Parameters:
-            dimensions (list of int): A list of number of top dimensional cells if cells filtration values will require
+            newshape (list of int): A list of number of top dimensional cells if cells filtration values will require
                 to be reshaped (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`)
             persistence_dimension (int or list of int): The returned persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
@@ -52,7 +52,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
-        self.dimensions = dimensions
+        self.newshape = newshape
         self.persistence_dimension = persistence_dimension
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
@@ -65,7 +65,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, cells):
-        cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.dimensions)
+        cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.newshape)
         cubical_complex.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
@@ -74,7 +74,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         ]
 
     def __transform_only_this_dim(self, cells):
-        cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.dimensions)
+        cubical_complex = CubicalComplex(top_dimensional_cells=cells, dimensions=self.newshape)
         cubical_complex.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
@@ -83,8 +83,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
 
-        :param X: List of cells filtration values that should be flatten if `dimensions` is set in the constructor, or
-            already with the correct shape in a numpy.ndarray (and `dimensions` must not be set).
+        :param X: List of cells filtration values that should be flatten if `newshape` is set in the constructor, or
+            already with the correct shape in a numpy.ndarray (and `newshape` must not be set).
         :type X: list of list of float OR list of numpy.ndarray
 
         :return: Persistence diagrams in the format:
