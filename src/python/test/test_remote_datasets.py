@@ -87,21 +87,20 @@ def test_fetch_remote_datasets():
         assert bunny_arr.shape == (35947, 3)
 
     # Check that default dir was created
-    assert isdir(expanduser("~/remote_datasets")) == True
-
-    # Test clear_data_home
-    remote.clear_data_home()
-    assert isdir(expanduser("~/remote_datasets")) == False
+    assert isdir(expanduser("~/remote_datasets"))
 
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default
-    spiral_2d_arr = remote.fetch_spiral_2d(dirname = "~/test")
+    spiral_2d_arr = remote.fetch_spiral_2d(dirname = "~/another_fetch_folder")
     assert spiral_2d_arr.shape == (114562, 2)
 
-    bunny_arr = remote.fetch_bunny(dirname = "~/test")
+    bunny_arr = remote.fetch_bunny(dirname = "~/another_fetch_folder")
     assert bunny_arr.shape == (35947, 3)
 
-    assert isdir(expanduser("~/test")) == True
+    assert isdir(expanduser("~/another_fetch_folder"))
 
-    # Test clear_data_home with data directory different from default
-    remote.clear_data_home("~/test")
-    assert isdir(expanduser("~/test")) == False
+    # Test get_data_home and clear_data_home on new empty folder
+    empty_data_home = remote.get_data_home(data_home="empty_folder")
+    assert isdir(empty_data_home)
+
+    remote.clear_data_home(data_home=empty_data_home)
+    assert not isdir(empty_data_home)
