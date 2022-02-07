@@ -7,14 +7,16 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-
 from gudhi.datasets import remote
+
 import re
-from os.path import isfile, isdir, expanduser
-from os import makedirs
+import shutil
 import io
 import sys
 import pytest
+
+from os.path import isfile, isdir, expanduser
+from os import makedirs
 
 def _check_dir_file_names(path_file_dw, filename, dirname):
     assert isfile(path_file_dw)
@@ -76,8 +78,9 @@ def test_fetch_remote_datasets():
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
 
     # Remove "remote_datasets" directory and all its content
-    import shutil
     shutil.rmtree("remote_datasets")
+
+def test_fetch_remote_datasets_wrapped():
     # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
     for i in range(2):
         spiral_2d_arr = remote.fetch_spiral_2d()
@@ -98,6 +101,14 @@ def test_fetch_remote_datasets():
 
     assert isdir(expanduser("~/another_fetch_folder"))
 
+    # Remove test folders
+    shutil.rmtree(expanduser("~/remote_datasets"))
+    shutil.rmtree(expanduser("~/another_fetch_folder"))
+
+    assert not isdir(expanduser("~/remote_datasets"))
+    assert not isdir(expanduser("~/another_fetch_folder"))
+
+def test_data_home():
     # Test get_data_home and clear_data_home on new empty folder
     empty_data_home = remote.get_data_home(data_home="empty_folder")
     assert isdir(empty_data_home)
