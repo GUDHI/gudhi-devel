@@ -102,6 +102,8 @@ def test_fetch_remote_datasets_wrapped():
     assert isdir(expanduser("~/another_fetch_folder"))
 
     # Remove test folders
+    del spiral_2d_arr
+    del bunny_arr
     shutil.rmtree(expanduser("~/remote_datasets"))
     shutil.rmtree(expanduser("~/another_fetch_folder"))
 
