@@ -45,6 +45,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree_interface_full_featured() nogil
+        Simplex_tree_interface_full_featured(Simplex_tree_interface_full_featured&) nogil
         double simplex_filtration(vector[int] simplex) nogil
         void assign_simplex_filtration(vector[int] simplex, double filtration) nogil
         void initialize_filtration() nogil

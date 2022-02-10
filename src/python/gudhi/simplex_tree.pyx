@@ -63,6 +63,20 @@ cdef class SimplexTree:
          """
         return self.pcohptr != NULL
 
+    def copy(self):
+        """ 
+        :returns: A simplex tree that is a deep copy itself.
+        :rtype: SimplexTree
+        """
+        stree = SimplexTree()
+        cdef Simplex_tree_interface_full_featured* stree_ptr
+        cdef Simplex_tree_interface_full_featured* self_ptr=self.get_ptr()
+        with nogil:
+            stree_ptr = new Simplex_tree_interface_full_featured(dereference(self_ptr))
+
+        stree.thisptr = <intptr_t>(stree_ptr)
+        return stree
+
     def filtration(self, simplex):
         """This function returns the filtration value for a given N-simplex in
         this simplicial complex, or +infinity if it is not in the complex.

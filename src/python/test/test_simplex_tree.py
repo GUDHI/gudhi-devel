@@ -447,4 +447,21 @@ def test_persistence_intervals_in_dimension():
     assert np.array_equal(H2, np.array([[ 0., float("inf")]]))
     # Test empty case
     assert st.persistence_intervals_in_dimension(3).shape == (0, 2)
-    
+
+def test_simplex_tree_copy():
+    st = SimplexTree()
+    st .insert([1,2,3], 0.)
+    a = st.copy()
+    # TODO(VR): when #463 is merged, replace with
+    # assert a == st
+    assert a.num_vertices() == st.num_vertices()
+    assert a.num_simplices() == st.num_simplices()
+    st_filt_list = list(st.get_filtration())
+    assert list(a.get_filtration()) == st_filt_list
+
+    a.remove_maximal_simplex([1, 2, 3])
+    a_filt_list = list(a.get_filtration())
+    assert len(a_filt_list) < len(st_filt_list)
+
+    for a_splx in a_filt_list:
+        assert a_splx in st_filt_list
