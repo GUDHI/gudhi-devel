@@ -12,7 +12,6 @@
 #ifndef ALPHA_COMPLEX_3D_H_
 #define ALPHA_COMPLEX_3D_H_
 
-#include <boost/version.hpp>
 #include <boost/variant.hpp>
 #include <boost/range/size.hpp>
 #include <boost/range/combine.hpp>
