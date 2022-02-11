@@ -30,6 +30,7 @@ cdef class SimplexTree:
     # unfortunately 'cdef public Simplex_tree_interface_full_featured* thisptr' is not possible
     # Use intptr_t instead to cast the pointer
     cdef public intptr_t thisptr
+    cdef bool __thisptr_to_be_deleted
 
     # Get the pointer casted as it should be
     cdef Simplex_tree_interface_full_featured* get_ptr(self) nogil:
@@ -38,17 +39,36 @@ cdef class SimplexTree:
     cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self):
+    def __init__(self, other = None, copy = True):
         """SimplexTree constructor.
+        :param other: If `other` is a SimplexTree (default = None), the SimplexTree is constructed from a deep/shallow copy of `other`.
+        :type other: SimplexTree
+        :param copy: If `True`, the copy will be deep and if `False, the copy will be shallow. Default is `True`.
+        :type copy: bool
+        :returns: A simplex tree that is a (deep or shallow) copy of itself.
+        :rtype: SimplexTree
+        :note: copy constructor requires :func:`compute_persistence` to be launched again as the result is not copied.
         """
 
     # The real cython constructor
-    def __cinit__(self):
-        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+    def __cinit__(self, other = None, copy = True):
+        cdef SimplexTree ostr
+        if other and type(other) is SimplexTree:
+            ostr = <SimplexTree> other
+            if copy:
+                self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured(dereference(ostr.get_ptr())))
+            else:
+                self.thisptr = ostr.thisptr
+                # Avoid double free - The original is in charge of deletion
+                self.__thisptr_to_be_deleted = False
+        else:
+            self.__thisptr_to_be_deleted = True
+            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
-        if ptr != NULL:
+        # Avoid double free - The original is in charge of deletion
+        if ptr != NULL and self.__thisptr_to_be_deleted:
             del ptr
         if self.pcohptr != NULL:
             del self.pcohptr
@@ -63,19 +83,33 @@ cdef class SimplexTree:
          """
         return self.pcohptr != NULL
 
-    def copy(self):
+    def copy(self, deep=True):
         """ 
-        :returns: A simplex tree that is a deep copy itself.
+        :param deep: If `True`, the copy will be deep and if `False`, the copy will be shallow. Default is `True`.
+        :type deep: bool
+        :returns: A simplex tree that is a (deep or shallow) copy of itself.
         :rtype: SimplexTree
+        :note: copy requires :func:`compute_persistence` to be launched again as the result is not copied.
         """
         stree = SimplexTree()
         cdef Simplex_tree_interface_full_featured* stree_ptr
         cdef Simplex_tree_interface_full_featured* self_ptr=self.get_ptr()
-        with nogil:
-            stree_ptr = new Simplex_tree_interface_full_featured(dereference(self_ptr))
-
-        stree.thisptr = <intptr_t>(stree_ptr)
+        if deep:
+            with nogil:
+                stree_ptr = new Simplex_tree_interface_full_featured(dereference(self_ptr))
+    
+            stree.thisptr = <intptr_t>(stree_ptr)
+        else:
+            stree.thisptr = self.thisptr
+            # Avoid double free - The original is in charge of deletion
+            stree.__thisptr_to_be_deleted = False
         return stree
+
+    def __copy__(self):
+        return self.copy(deep=False)
+
+    def __deepcopy__(self):
+        return self.copy(deep=True)
 
     def filtration(self, simplex):
         """This function returns the filtration value for a given N-simplex in
