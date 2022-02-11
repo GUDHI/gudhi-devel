@@ -46,11 +46,11 @@ int main() {
   // ----------------------------------------------------------------------------
   // Init of a Cech complex from points
   // ----------------------------------------------------------------------------
-  Filtration_value max_radius = 100.; //100.;
+  Filtration_value max_radius = 1.;
   Cech_complex cech_complex_from_points(points, max_radius);
 
   Simplex_tree stree;
-  cech_complex_from_points.create_complex(stree, 6); //6
+  cech_complex_from_points.create_complex(stree, 2);
   // ----------------------------------------------------------------------------
   // Display information about the one skeleton Cech complex
   // ----------------------------------------------------------------------------
