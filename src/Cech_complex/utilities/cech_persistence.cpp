@@ -9,7 +9,7 @@
  */
 
 #include <gudhi/Cech_complex.h>
-#include <gudhi/Cech_complex/Cech_kernel.h>
+#include <gudhi/sphere_circumradius.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
@@ -28,9 +28,8 @@ using Filtration_value = Simplex_tree::Filtration_value;
 
 using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
 using Point = typename Kernel::Point_d;
-using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel, Simplex_tree>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 

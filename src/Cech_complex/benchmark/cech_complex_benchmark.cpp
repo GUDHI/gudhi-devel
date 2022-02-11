@@ -34,9 +34,8 @@ using Proximity_graph = Gudhi::Proximity_graph<Simplex_tree>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Kernel =  CGAL::Epick_d<CGAL::Dimension_tag<3>>;
 using Point_cgal = typename Kernel::Point_d;
-using Point_cloud_cgal = std::vector<Point_cgal>;
 using Points_off_reader_cgal = Gudhi::Points_off_reader<Point_cgal>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud_cgal, Kernel, Simplex_tree>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 
 class Minimal_enclosing_ball_radius {
  public:
@@ -83,11 +82,11 @@ int main(int argc, char* argv[]) {
       off_reader.get_point_cloud(), threshold, Minimal_enclosing_ball_radius());
   std::clog << miniball_clock << std::endl;
 
-  Gudhi::Clock cgal_miniball_clock("Gudhi::Minimal_enclosing_ball_radius_cgal()");
+  Gudhi::Clock cgal_circumsphere_clock("Gudhi::cech_complex::Sphere_circumradius_cgal()");
   // Compute the proximity graph of the points
-  Proximity_graph cgal_miniball_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
-      off_reader_cgal.get_point_cloud(), threshold, Gudhi::Minimal_enclosing_ball_radius<Kernel>());
-  std::clog << cgal_miniball_clock << std::endl;
+  Proximity_graph cgal_circumsphere_prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(
+      off_reader_cgal.get_point_cloud(), threshold, Gudhi::cech_complex::Sphere_circumradius<Kernel>());
+  std::clog << cgal_circumsphere_clock << std::endl;
 
   boost::filesystem::path full_path(boost::filesystem::current_path());
   std::clog << "Current path is : " << full_path << std::endl;
@@ -109,7 +108,7 @@ int main(int argc, char* argv[]) {
           std::clog << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
           Rips_complex rips_complex_from_points(off_reader_cgal.get_point_cloud(), radius,
-                                                Gudhi::Minimal_enclosing_ball_radius<Kernel>());
+                                                Gudhi::cech_complex::Sphere_circumradius<Kernel>());
           Simplex_tree rips_stree;
           rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
           // ------------------------------------------

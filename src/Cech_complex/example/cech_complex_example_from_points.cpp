@@ -16,7 +16,7 @@ int main() {
   using FT = typename Kernel::FT;
   using Point = typename Kernel::Point_d;
   using Point_cloud = std::vector<Point>;
-  using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel, Simplex_tree>;
+  using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 
   Point_cloud points;
 

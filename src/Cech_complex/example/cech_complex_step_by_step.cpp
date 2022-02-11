@@ -9,7 +9,7 @@
  */
 
 #include <gudhi/graph_simplicial_complex.h>
-#include <gudhi/Cech_complex/Cech_kernel.h>
+#include <gudhi/sphere_circumradius.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 
@@ -52,7 +52,7 @@ class Cech_blocker {
       std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
     }
-    Filtration_value radius = Gudhi::Minimal_enclosing_ball_radius<Kernel>()(points);
+    Filtration_value radius = Gudhi::cech_complex::Sphere_circumradius<Kernel>()(points);
 #ifdef DEBUG_TRACES
     std::clog << "radius = " << radius << " - " << (radius > max_radius_) << std::endl;
 #endif  // DEBUG_TRACES
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 
   // Compute the proximity graph of the points
   Proximity_graph prox_graph = Gudhi::compute_proximity_graph<Simplex_tree>(off_reader.get_point_cloud(), max_radius,
-                                                                            Gudhi::Minimal_enclosing_ball_radius<Kernel>());
+                                                                            Gudhi::cech_complex::Sphere_circumradius<Kernel>());
 
   // Construct the Cech complex in a Simplex Tree
   Simplex_tree st;

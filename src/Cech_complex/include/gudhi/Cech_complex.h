@@ -11,7 +11,7 @@
 #ifndef CECH_COMPLEX_H_
 #define CECH_COMPLEX_H_
 
-#include <gudhi/Cech_complex/Cech_kernel.h>  // for Gudhi::Minimal_enclosing_ball_radius
+#include <gudhi/sphere_circumradius.h>       // for Gudhi::cech_complex::Sphere_circumradius
 #include <gudhi/graph_simplicial_complex.h>  // for Gudhi::Proximity_graph
 #include <gudhi/Debug_utils.h>               // for GUDHI_CHECK
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker
@@ -31,23 +31,21 @@ namespace cech_complex {
  *
  * \details
  * The data structure is a proximity graph, containing edges when the edge length is less or equal
- * to a given max_radius. Edge length is computed from `Gudhi::Minimal_enclosing_ball_radius` distance function.
+ * to a given max_radius. Edge length is computed from `Gudhi::cech_complex::Sphere_circumradius` distance function.
  *
- * \tparam SimplicialComplexForProximityGraph furnishes `Vertex_handle` and `Filtration_value` type definition required
- * by `Gudhi::Proximity_graph`.
+ * \tparam Kernel CGAL kernel.
  *
- * \tparam ForwardPointRange must be a range for which `std::begin()` and `std::end()` methods return input
- * iterators on a point. `std::begin()` and `std::end()` methods are also required for a point.
+ * \tparam SimplicialComplexForCechComplex furnishes `Vertex_handle` and `Filtration_value` type definition required
+ * by `Gudhi::Proximity_graph` and Cech blocker.
+ *
  */
-template <typename SimplicialComplexForProximityGraph, typename ForwardPointRange, typename Kernel, typename SimplicialComplexForCechComplex>
+template <typename Kernel, typename SimplicialComplexForCechComplex>
 class Cech_complex {
  private:
   // Required by compute_proximity_graph
-  using Vertex_handle = typename SimplicialComplexForProximityGraph::Vertex_handle;
-  using Filtration_value = typename SimplicialComplexForProximityGraph::Filtration_value;
-  using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForProximityGraph>;
-
- public:
+  using Vertex_handle = typename SimplicialComplexForCechComplex::Vertex_handle;
+  using Filtration_value = typename SimplicialComplexForCechComplex::Filtration_value;
+  using Proximity_graph = Gudhi::Proximity_graph<SimplicialComplexForCechComplex>;
 
   using cech_blocker = Cech_blocker<SimplicialComplexForCechComplex, Cech_complex, Kernel>;
 
@@ -57,27 +55,21 @@ class Cech_complex {
   // Numeric type of coordinates in the kernel
   using FT = typename cech_blocker::FT;
   // Sphere is a pair of point and squared radius.
-  using Sphere = typename std::pair<Point_d, FT>;
+  using Sphere = typename cech_blocker::Sphere;
 
- public:
+  public:
   /** \brief Cech_complex constructor from a list of points.
    *
-   * @param[in] points Range of points.
+   * @param[in] points Vector of points where each point is defined as `kernel::Point_d`.
    * @param[in] max_radius Maximal radius value.
    *
-   * \tparam ForwardPointRange must be a range of Point. Point must be a range of <b>copyable</b> Cartesian coordinates.
-   *
    */
-  Cech_complex(const ForwardPointRange& points, Filtration_value max_radius) : max_radius_(max_radius) {
-    // Point cloud deep copy
-
-//     point_cloud_.reserve(boost::size(points));
-//     for (auto&& point : points) point_cloud_.emplace_back(point.cartesian_begin(), point.cartesian_end());
+  Cech_complex(const Point_cloud & points, Filtration_value max_radius) : max_radius_(max_radius) {
 
     point_cloud_.assign(points.begin(), points.end());
 
-    cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForProximityGraph>(
-        point_cloud_, max_radius_, Gudhi::Minimal_enclosing_ball_radius<Kernel>());
+    cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForCechComplex>(
+        point_cloud_, max_radius_, Sphere_circumradius<Kernel>());
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal

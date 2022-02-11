@@ -31,17 +31,15 @@ namespace cech_complex {
  * \details
  * Čech blocker is an oracle constructed from a Cech_complex and a simplicial complex.
  *
- * \tparam SimplicialComplexForProximityGraph furnishes `Simplex_handle` and `Filtration_value` type definition,
+ * \tparam SimplicialComplexForCech furnishes `Simplex_handle` and `Filtration_value` type definition,
  * `simplex_vertex_range(Simplex_handle sh)`and `assign_filtration(Simplex_handle sh, Filtration_value filt)` methods.
  *
- * \tparam Chech_complex is required by the blocker.
+ * \tparam Cech_complex is required by the blocker.
+ *
+ * \tparam Kernel CGAL kernel.
  */
 template <typename SimplicialComplexForCech, typename Cech_complex, typename Kernel>
 class Cech_blocker {
- private:
-
-  using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
-  using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
 
  public:
 
@@ -51,10 +49,10 @@ class Cech_blocker {
   // Sphere is a pair of point and squared radius.
   using Sphere = typename std::pair<Point_d, FT>;
 
-  template<class PointIterator>
-  FT get_squared_radius(PointIterator begin, PointIterator end) const {
-    return kernel_.compute_squared_radius_d_object()(begin, end);
-  }
+ private:
+
+  using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
+  using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
 
   template<class PointIterator>
   Sphere get_sphere(PointIterator begin, PointIterator end) const {
@@ -63,6 +61,7 @@ class Cech_blocker {
     return std::make_pair(std::move(c), std::move(r));
   }
 
+ public:
 
   /** \internal \brief Čech complex blocker operator() - the oracle - assigns the filtration value from the simplex
    * radius and returns if the simplex expansion must be blocked.
@@ -108,10 +107,11 @@ class Cech_blocker {
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) <= sph.second) {
             radius = std::sqrt(cast_to_double(sph.second));
             #ifdef DEBUG_TRACES
-                std::clog << "circumcenter: " << sph.first << ", radius: " <<  radius << std::endl;
+                std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
             if (cast_to_double(sph.second) < cast_to_double(min_enclos_ball.second))
                 min_enclos_ball = sph;
+            break;
         }
     }
     // Get the minimal radius of all faces enclosing balls if exists

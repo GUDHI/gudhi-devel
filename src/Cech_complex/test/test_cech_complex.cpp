@@ -22,7 +22,7 @@
 // to construct Cech_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Cech_complex/Cech_kernel.h>
+#include <gudhi/sphere_circumradius.h>
 #include <gudhi/Unitary_tests_utils.h>
 
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
@@ -36,7 +36,7 @@ using Point = typename Kernel::Point_d;
 
 using Point_cloud = std::vector<Point>;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud, Kernel, Simplex_tree>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 
 BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   // ----------------------------------------------------------------------------
@@ -108,11 +108,11 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
         std::clog << vertex << ",";
         vp.push_back(points.at(vertex));
       }
-      std::clog << ") - distance =" << Gudhi::Minimal_enclosing_ball_radius<Kernel>()(vp.at(0), vp.at(1))
+      std::clog << ") - distance =" << Gudhi::cech_complex::Sphere_circumradius<Kernel>()(vp.at(0), vp.at(1))
                 << " - filtration =" << st.filtration(f_simplex) << std::endl;
       BOOST_CHECK(vp.size() == 2);
       GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex),
-                                      Gudhi::Minimal_enclosing_ball_radius<Kernel>()(vp.at(0), vp.at(1)));
+                                      Gudhi::cech_complex::Sphere_circumradius<Kernel>()(vp.at(0), vp.at(1)));
     }
   }
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   Simplex_tree::Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
   std::clog << "f1410= " << f1410 << std::endl;
 
-  // In this case, the computed sphere using CGAL kernel does not match the minimal enclosing ball; the filtration value check is therefore done against a hardcoded value
+  // In this case, the computed circumsphere using CGAL kernel does not match the minimal enclosing ball; the filtration value check is therefore done against a hardcoded value
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f1410, 1.);
 
   Point_cloud points469;
