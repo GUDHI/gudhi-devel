@@ -180,6 +180,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
 
+    add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
       if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
         # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.

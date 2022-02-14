@@ -5,6 +5,7 @@
    Copyright (C) 2019  Inria
 
    Modification(s):
+     - 2021/12 Vincent Rouvreau: Python 3.5 as minimal version
      - YYYY/MM Author: Description of the modification
 """
 
@@ -43,7 +44,7 @@ for module in cython_modules:
         include_dirs=include_dirs,
         runtime_library_dirs=runtime_library_dirs,))
 
-ext_modules = cythonize(ext_modules, compiler_directives={'language_level': str(sys.version_info[0])})
+ext_modules = cythonize(ext_modules, compiler_directives={'language_level': '3'})
 
 for module in pybind11_modules:
     my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
@@ -86,6 +87,7 @@ setup(
     long_description_content_type='text/x-rst',
     long_description=long_description,
     ext_modules = ext_modules,
+    python_requires='>=3.5.0',
     install_requires = ['numpy >= 1.15.0',],
     package_data={"": ["*.dll"], },
 )
