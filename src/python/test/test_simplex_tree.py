@@ -447,4 +447,15 @@ def test_persistence_intervals_in_dimension():
     assert np.array_equal(H2, np.array([[ 0., float("inf")]]))
     # Test empty case
     assert st.persistence_intervals_in_dimension(3).shape == (0, 2)
-    
+
+def test_equality_operator():
+    st1 = SimplexTree()
+    st2 = SimplexTree()
+
+    assert st1 == st2
+
+    st1.insert([1,2,3], 4.)
+    assert st1 != st2
+
+    st2.insert([1,2,3], 4.)
+    assert st1 == st2

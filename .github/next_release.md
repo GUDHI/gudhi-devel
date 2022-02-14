@@ -6,10 +6,15 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.5.0:
 
+- [Alpha complex](https://gudhi.inria.fr/python/latest/alpha_complex_user.html)
+     - the python weighted version for alpha complex is now available in any dimension D.
+     - `alpha_complex = gudhi.AlphaComplex(off_file='/data/points/tore3D_300.off')` is deprecated, please use [read_points_from_off_file](https://gudhi.inria.fr/python/latest/point_cloud.html#gudhi.read_points_from_off_file) instead.
+
 - [Representations](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.BettiCurve)
      - A more flexible Betti curve class capable of computing exact curves
 
-- [Python installation](link)
+- Installation
+     - Boost &ge; 1.66.0 is now required (was &ge; 1.56.0).
      - Python >= 3.5 and cython >= 0.27 are now required.
 
 - [Module](link)
