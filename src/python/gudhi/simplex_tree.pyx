@@ -642,3 +642,10 @@ cdef class SimplexTree:
             self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
             # Delete old pointer
             del ptr
+
+    def __eq__(self, other:SimplexTree):
+        """Test for structural equality
+        :returns: True if the 2 simplex trees are equal, False otherwise.
+        :rtype: bool
+        """
+        return dereference(self.get_ptr()) == dereference(other.get_ptr())
