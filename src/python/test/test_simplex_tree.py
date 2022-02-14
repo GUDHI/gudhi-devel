@@ -511,3 +511,7 @@ def test_simplex_tree_deep_copy_constructor():
     # test double free
     del st
     del st_copy
+
+def test_simplex_tree_constructor_exception():
+    with pytest.raises(TypeError):
+        st = SimplexTree(other = "Construction from a string shall raise an exception")

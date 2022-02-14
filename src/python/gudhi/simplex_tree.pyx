@@ -47,6 +47,7 @@ cdef class SimplexTree:
         :returns: An empty or a copy simplex tree.
         :rtype: SimplexTree
 
+        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
         :note: If the `SimplexTree` is a copy, it requires :func:`compute_persistence` to be launched again as the
             persistence result is not copied.
         """
@@ -54,9 +55,12 @@ cdef class SimplexTree:
     # The real cython constructor
     def __cinit__(self, other = None):
         cdef SimplexTree ostr
-        if other and type(other) is SimplexTree:
-            ostr = <SimplexTree> other
-            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured(dereference(ostr.get_ptr())))
+        if other:
+            if type(other) is SimplexTree:
+                ostr = <SimplexTree> other
+                self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured(dereference(ostr.get_ptr())))
+            else:
+                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
             self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
