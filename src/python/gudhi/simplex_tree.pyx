@@ -62,7 +62,6 @@ cdef class SimplexTree:
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
-        # Avoid double free - The original is in charge of deletion
         if ptr != NULL:
             del ptr
         if self.pcohptr != NULL:
