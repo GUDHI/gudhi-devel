@@ -41,9 +41,9 @@ cdef class SimplexTree:
     def __init__(self, other = None):
         """SimplexTree constructor.
 
-        :param other: If `other` is a `None` (default value), an empty `SimplexTree` is created.
+        :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
             If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
-        :type other: SimplexTree
+        :type other: SimplexTree (Optional)
         :returns: An empty or a copy simplex tree.
         :rtype: SimplexTree
 

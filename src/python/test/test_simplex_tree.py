@@ -463,20 +463,18 @@ def test_equality_operator():
 def test_simplex_tree_deep_copy():
     st = SimplexTree()
     st.insert([1, 2, 3], 0.)
-    # persistence is not copied
+    # compute persistence only on the original
     st.compute_persistence()
 
     st_copy = st.copy()
-    # TODO(VR): when #463 is merged, replace with
-    # assert st_copy == st
-    assert st_copy.num_vertices() == st.num_vertices()
-    assert st_copy.num_simplices() == st.num_simplices()
+    assert st_copy == st
     st_filt_list = list(st.get_filtration())
-    assert list(st_copy.get_filtration()) == st_filt_list
 
+    # check persistence is not copied
     assert st.__is_persistence_defined() == True
     assert st_copy.__is_persistence_defined() == False
 
+    # remove something in the copy and check the copy is included in the original
     st_copy.remove_maximal_simplex([1, 2, 3])
     a_filt_list = list(st_copy.get_filtration())
     assert len(a_filt_list) < len(st_filt_list)
@@ -491,20 +489,18 @@ def test_simplex_tree_deep_copy():
 def test_simplex_tree_deep_copy_constructor():
     st = SimplexTree()
     st.insert([1, 2, 3], 0.)
-    # persistence is not copied
+    # compute persistence only on the original
     st.compute_persistence()
 
     st_copy = SimplexTree(st)
-    # TODO(VR): when #463 is merged, replace with
-    # assert st_copy == st
-    assert st_copy.num_vertices() == st.num_vertices()
-    assert st_copy.num_simplices() == st.num_simplices()
+    assert st_copy == st
     st_filt_list = list(st.get_filtration())
-    assert list(st_copy.get_filtration()) == st_filt_list
 
+    # check persistence is not copied
     assert st.__is_persistence_defined() == True
     assert st_copy.__is_persistence_defined() == False
 
+    # remove something in the copy and check the copy is included in the original
     st_copy.remove_maximal_simplex([1, 2, 3])
     a_filt_list = list(st_copy.get_filtration())
     assert len(a_filt_list) < len(st_filt_list)
