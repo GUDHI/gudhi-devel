@@ -65,14 +65,12 @@ class DenseRaggedBlock(tf.keras.layers.Layer):
         Constructor for the DenseRagged class.
 
         Parameters:
-        dense_ragged_layers (list): a list of DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged.
+        dense_ragged_layers (list): a list of DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged`.
         input_dim (int): dimension of the pointcloud, if the input consists of pointclouds.
         """
         super().__init__(dynamic=True, **kwargs)
         self._supports_ragged_inputs = True
         self.dr_layers = dense_ragged_layers
-
-    #         self.input_dim = input_dim
 
     def build(self, input_shape):
         return self
