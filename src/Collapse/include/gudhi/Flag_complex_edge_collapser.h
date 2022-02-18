@@ -280,7 +280,7 @@ end_move:
 };
 
 /** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent
- * homology and returns the remaining edges as a range.
+ * homology and returns the remaining edges as a range. The filtration value of vertices is irrelevant to this function.
  *
  * \param[in] edges Range of Filtered edges. There is no need for the range to be sorted, as it will be done internally.
  *
@@ -292,6 +292,10 @@ end_move:
  * 
  * \ingroup edge_collapse
  * 
+ * \note
+ * Advanced: Defining the macro GUDHI_COLLAPSE_USE_DENSE_ARRAY tells gudhi to allocate a square table of size the
+ * maximum vertex index. This usually speeds up the computation for dense graphs. However, for sparse graphs, the memory
+ * use may be problematic and initializing this large table may be slow.
  */
 template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {
   // Would it help to label the points according to some spatial sorting?

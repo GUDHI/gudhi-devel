@@ -17,7 +17,7 @@ namespace collapse {
 
 /**  \defgroup edge_collapse Edge collapse
  * 
- * \author    Siddharth Pritam
+ * \author    Siddharth Pritam and Marc Glisse
  * 
  * @{
  * 
