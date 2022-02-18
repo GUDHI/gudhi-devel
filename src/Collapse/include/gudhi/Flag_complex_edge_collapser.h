@@ -112,7 +112,8 @@ struct Flag_complex_edge_collapser {
   }
 
   // Open neighborhood
-    __attribute__((noinline)) // otherwise +50% on the running time on one example!
+  // At some point it helped gcc to add __attribute__((noinline)) here, otherwise we had +50% on the running time
+  // on one example. It looks ok now, or I forgot which example that was.
   void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Vertex u, Vertex v, Filtration_value f_event){
     // Using neighbors_dense here seems to hurt, even if we loop on the smaller of nu and nv.
     Ngb_list const&nu = neighbors[u];
