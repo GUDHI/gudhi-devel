@@ -74,16 +74,11 @@ struct Flag_complex_edge_collapser {
 #endif
   }
   void remove_neighbor(Vertex u, Vertex v) {
-#ifndef NO_REMOVE_NGB
     neighbors[u].erase(v);
     neighbors[v].erase(u);
-# ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
+#ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
     neighbors_dense(u,v)=std::numeric_limits<Filtration_value>::infinity();
     neighbors_dense(v,u)=std::numeric_limits<Filtration_value>::infinity();
-# endif
-#else
-    // This adds 50% to the running time in some cases, but could be useful for parallelism
-    delay_neighbor(u, v, std::numeric_limits<Filtration_value>::infinity());
 #endif
   }
 
@@ -134,13 +129,9 @@ struct Flag_complex_edge_collapser {
       // nu and nv are closed, so we need to exclude e here.
       if(w != u && w != v) {
         Filtration_value f = std::max(ui->second, vi->second);
-        if(f > f_event) {
-#ifdef NO_REMOVE_NGB
-          // if we don't remove neighbors but set their appearance to infinity, we need this test
-          if(f != std::numeric_limits<Filtration_value>::infinity())
-#endif
-            e_ngb_later.emplace_back(f, w);
-        } else
+        if(f > f_event)
+          e_ngb_later.emplace_back(f, w);
+        else
           e_ngb.insert(e_ngb.end(), w);
       }
       ++ui; ++vi;
