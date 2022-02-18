@@ -279,6 +279,9 @@ end_move:
 
 };
 
+template<class R> R to_range(R&& r) { return std::move(r); }
+template<class R, class T> R to_range(T&& t) { R r; r.insert(r.end(), t.begin(), t.end()); return r; }
+
 template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {
   // Would it help to label the points according to some spatial sorting?
   auto first_edge_itr = std::begin(edges);
@@ -286,11 +289,7 @@ template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges(
   using Filtration_value = std::decay_t<decltype(std::get<2>(*first_edge_itr))>;
   using Edge_collapser = Flag_complex_edge_collapser<Vertex, Filtration_value>;
   if (first_edge_itr != std::end(edges)) {
-    std::vector<typename Edge_collapser::Filtered_edge> edges2;
-    if(std::is_same<FilteredEdgeRange, std::vector<typename Edge_collapser::Filtered_edge>>::value)
-      edges2 = std::move(edges);
-    else
-      edges2.insert(edges2.end(), edges.begin(), edges.end());
+    auto edges2 = to_range<std::vector<typename Edge_collapser::Filtered_edge>>(std::forward<FilteredEdgeRange>(edges));
     std::sort(edges2.begin(), edges2.end(), [](auto const&a, auto const&b){return std::get<2>(a)>std::get<2>(b);});
     Edge_collapser edge_collapser;
     edge_collapser.process_edges(edges2, std::forward<Delay>(delay));
