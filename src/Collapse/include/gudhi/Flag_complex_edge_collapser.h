@@ -141,7 +141,8 @@ struct Flag_complex_edge_collapser {
   // Test if the neighborhood of e is included in the closed neighborhood of c
   template<class Ngb>
   bool is_dominated_by(Ngb const& e_ngb, Vertex c, Filtration_value f){
-    // The best strategy probably depends on the distribution, how sparse / dense the adjacency matrix is, how (un)balanced the sizes of e_ngb and nc are.
+    // The best strategy probably depends on the distribution, how sparse / dense the adjacency matrix is,
+    // how (un)balanced the sizes of e_ngb and nc are.
     // Some efficient operations on sets work best with bitsets, although the need for a map complicates things.
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
     for(auto v : e_ngb) {
@@ -151,25 +152,10 @@ struct Flag_complex_edge_collapser {
     return true;
 #else
     auto&&nc = neighbors[c];
-#if 0
     // if few neighbors, use dichotomy? Seems slower.
-    auto ci = nc.begin();
-    auto ce = nc.end();
-    for(auto v : e_ngb) {
-      if(v==c)continue;
-      ci = std::lower_bound(ci, ce, v, [](auto a, auto b){return a.first < b;});
-      if(ci == nc.end() || ci->first != v || ci->second > f) return false;
-    }
-    return true;
-#elif 0
-    // I tried storing a copy of neighbors as a vector<absl::flat_hash_map> and using it for nc, but it was a bit slower here. It did help with neighbors[dominator].find(w) in the main function though, sometimes enough, sometimes not.
-    for(auto v : e_ngb) {
-      if(v==c)continue;
-      auto it = nc.find(v);
-      if(it == nc.end() || it->second > f) return false;
-    }
-    return true;
-#else
+    // I tried storing a copy of neighbors as a vector<absl::flat_hash_map> and using it for nc, but it was
+    // a bit slower here. It did help with neighbors[dominator].find(w) in the main function though,
+    // sometimes enough, sometimes not.
     auto ci = nc.begin();
     auto ce = nc.end();
     auto eni = e_ngb.begin();
@@ -194,10 +180,8 @@ struct Flag_complex_edge_collapser {
       if(++ci == ce) return false;
     }
 #endif
-#endif
   }
 
-  // delay = [](double d){return d*1.05;}
   template<class FilteredEdgeRange, class Delay>
   void process_edges(FilteredEdgeRange const& edges, Delay&& delay) {
     {
@@ -215,9 +199,7 @@ struct Flag_complex_edge_collapser {
 
     boost::container::flat_set<Vertex> e_ngb;
     e_ngb.reserve(num_vertices);
-    //std::multimap<Filtration_value, Vertex> e_ngb_later;
     std::vector<std::pair<Filtration_value, Vertex>> e_ngb_later;
-    // do not use reverse_iterator, it behaves badly with erase.
     for(auto&e:edges) {
       {
         Vertex u = std::get<0>(e);
@@ -228,14 +210,8 @@ struct Flag_complex_edge_collapser {
         e_ngb.clear();
         e_ngb_later.clear();
         common_neighbors(e_ngb, e_ngb_later, u, v, time);
-        /* If we identify a good candidate (the first common neighbor) for being a dominator of e until infinity, we can check that a bit more cheaply. It does not seem to help for a sequential execution, but it could be interesting for parallelism: for many edges in parallel, find a dominator, and remove marked edges sequentially as long as their dominator is not the extremity of an edge already removed. For some input, such a rough heuristic may detect a negligible number of removable edges.
-        for(auto w : e_ngb) {
-          if(neighbors_dense(candidate, w) > time->first) goto try_harder;
-        }
-        for(auto&& fw : e_ngb_later) {
-          if(neighbors_dense(candidate, fw.second) > fw.first) goto try_harder;
-        }
-        */
+        // If we identify a good candidate (the first common neighbor) for being a dominator of e until infinity,
+        // we could check that a bit more cheaply. It does not seem to help though.
         auto cmp1=[](auto const&a, auto const&b){return a.first > b.first;};
         auto e_ngb_later_begin=e_ngb_later.begin();
         auto e_ngb_later_end=e_ngb_later.end();
@@ -246,7 +222,9 @@ struct Flag_complex_edge_collapser {
           Vertex dominator = -1;
           // special case for size 1
           // if(e_ngb.size()==1){dominator=*e_ngb.begin();}else
-          // it is tempting to test the dominators in increasing order of filtration value, which is likely to reduce the number of calls to is_dominated_by before finding a dominator, but sorting, even partially / lazily, is very expensive.
+          // It is tempting to test the dominators in increasing order of filtration value, which is likely to reduce
+          // the number of calls to is_dominated_by before finding a dominator, but sorting, even partially / lazily,
+          // is very expensive.
           for(auto c : e_ngb){
             if(is_dominated_by(e_ngb, c, time)){
               dominator = c;
@@ -283,7 +261,6 @@ struct Flag_complex_edge_collapser {
           } while (still_dominated); // this doesn't seem to help that much...
         }
 end_move:
-        // Use an output functor? The edges won't come sorted, but that shouldn't matter.
         if(dead) {
           remove_neighbor(u, v);
         } else if(start_time != time){
@@ -305,11 +282,10 @@ end_move:
 /** \brief Implicitly constructs a flag complex from edges as an input, collapses edges while preserving the persistent
  * homology and returns the remaining edges as a range.
  *
- * \param[in] edges Range of Filtered edges.There is no need the range to be sorted, as it will be performed.
+ * \param[in] edges Range of Filtered edges. There is no need for the range to be sorted, as it will be done internally.
  *
- * \tparam FilteredEdgeRange furnishes `std::begin` and `std::end` methods and returns an iterator on a
- * FilteredEdge of type `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>` where `Vertex_handle` is the type
- * of a vertex index and `Filtration_value` is the type of an edge filtration value.
+ * \tparam FilteredEdgeRange Range of `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`
+ * where `Vertex_handle` is the type of a vertex index.
  *
  * \return Remaining edges after collapse as a range of
  * `std::tuple<Vertex_handle, Vertex_handle, Filtration_value>`.
@@ -329,7 +305,6 @@ template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges(
       edges2 = std::move(edges);
     else
       edges2.insert(edges2.end(), edges.begin(), edges.end());
-    // The sorting was not necessary, but inserting in the map was faster if done in order. It is necessary now.
     std::sort(edges2.begin(), edges2.end(), [](auto const&a, auto const&b){return std::get<2>(a)>std::get<2>(b);});
     Edge_collapser edge_collapser;
     edge_collapser.process_edges(edges2, std::forward<Delay>(delay));
