@@ -62,7 +62,7 @@ class DenseRaggedBlock(tf.keras.layers.Layer):
 
     def __init__(self, dense_ragged_layers, **kwargs):
         """
-        Constructor for the DenseRagged class.
+        Constructor for the DenseRaggedBlock class.
 
         Parameters:
         dense_ragged_layers (list): a list of DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged`.
@@ -135,7 +135,7 @@ class PermopRagged(tf.keras.layers.Layer):
         Constructor for the PermopRagged class.
 
         Parameters:
-            perm_op: permutation invariant function, such as `tf.math.reduce_sum`, `tf.math.reduce_mean`, `tf.math.reduce_max`, `tf.math.reduce_min`, or a custom function.
+            perm_op: permutation invariant function, such as `tf.math.reduce_sum`, `tf.math.reduce_mean`.
         """
         super().__init__(dynamic=True, **kwargs)
         self._supports_ragged_inputs = True
@@ -158,21 +158,24 @@ class RipsNet(tf.keras.Model):
     This class implements the RipsNet described in the following article <https://arxiv.org/abs/2202.01725>.
     """
 
-    def __init__(self, phi_1, perm_op, phi_2, input_dim, **kwargs):
+    def __init__(self, phi_1, phi_2, input_dim, perm_op='mean', **kwargs):
         """
         Constructor for the RipsNet class.
 
         Parameters:
             phi_1 (layers): any block of DenseRagged layers. Can be :class:`~gudhi.tensorflow.DenseRaggedBlock`, or a custom block built from :class:`~gudhi.tensorflow.DenseRagged` layers.
-            perm_op (layer): layer for the permutation invariant function. Can be :class:`~gudhi.tensorflow.PermopRagged`.
             phi_2 (layers): Can be any (block of) TensorFlow layer(s),  e.g. :class:`~gudhi.tensorflow.TFBlock`.
             input_dim (int): dimension of the input point clouds.
+            perm_op (str): Permutation invariant operation. Can be 'mean' or 'sum'.
         """
         super().__init__(dynamic=True, **kwargs)
         self.phi_1 = phi_1
         self.pop = perm_op
         self.phi_2 = phi_2
         self.input_dim = input_dim
+
+        if perm_op not in ['mean', 'sum']:
+            raise ValueError(f'Permutation invariant operation: {self.pop} is not allowed, must be "mean" or "sum".')
 
     def build(self, input_shape):
         return self
@@ -187,9 +190,16 @@ class RipsNet(tf.keras.Model):
         Returns:
             output (n x output_shape): tensor containing predicted vectorizations of the persistence diagrams of pointclouds.
         """
+        if self.pop == 'mean':
+            pop_ragged = PermopRagged(tf.math.reduce_mean)
+        elif self.pop == 'sum':
+            pop_ragged = PermopRagged(tf.math.reduce_sum)
+        else:
+            raise ValueError(f'Permutation invariant operation: {self.pop} is not allowed, must be "mean" or "sum".')
+
         inputs = tf.keras.layers.InputLayer(input_shape=(None, self.input_dim), dtype="float32", ragged=True)(
             pointclouds)
         output = self.phi_1(inputs)
-        output = self.pop(output)
+        output = pop_ragged(output)
         output = self.phi_2(output)
         return output
