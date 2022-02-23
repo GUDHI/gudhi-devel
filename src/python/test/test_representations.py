@@ -160,17 +160,7 @@ def test_entropy_miscalculation():
         l = l/sum(l)
         return -np.dot(l, np.log(l))
     sce = Entropy(mode="scalar")
-    assert [[pe(diag_ex)]] == sce.fit_transform([diag_ex])
-    sce = Entropy(mode="vector", resolution=4, normalized=False)
-    pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
-           -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
-           -1/2*np.log(1/2), 
-           0.0]
-    assert all(([pef] == sce.fit_transform([diag_ex]))[0])
-    sce = Entropy(mode="vector", resolution=4, normalized=True)
-    pefN = (sce.fit_transform([diag_ex]))[0]
-    area = np.linalg.norm(pefN, ord=1)
-    assert area==1
+    assert [[pe_max(diag_ex)]] == sce.fit_transform([diag_ex])
     
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])

@@ -532,7 +532,7 @@ class Entropy(BaseEstimator, TransformerMixin):
                     for k in range(min_idx, max_idx):
                         ent[k] += (-1) * p[j] * np.log(p[j])
                 if self.normalized:
-                    ent = ent / (np.linalg.norm(ent, ord=1))
+                    ent = ent / np.linalg.norm(ent, ord=1)
                 Xfit.append(np.reshape(ent,[1,-1]))
 
         Xfit = np.concatenate(Xfit, axis=0)
