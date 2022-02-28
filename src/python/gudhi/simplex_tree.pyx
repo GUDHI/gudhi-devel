@@ -48,8 +48,8 @@ cdef class SimplexTree:
         :rtype: SimplexTree
 
         :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
-        :note: If the `SimplexTree` is a copy, it requires :func:`compute_persistence` to be launched again as the
-            persistence result is not copied.
+        :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
+            you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
 
     # The real cython constructor
@@ -86,7 +86,8 @@ cdef class SimplexTree:
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
 
-        :note: copy requires :func:`compute_persistence` to be launched again as the persistence result is not copied.
+        :note: The persistence information is not copied. If you need it in the clone, you have to call
+            :func:`compute_persistence` on it even if you had already computed it in the original.
         """
         stree = SimplexTree()
         cdef Simplex_tree_interface_full_featured* stree_ptr
