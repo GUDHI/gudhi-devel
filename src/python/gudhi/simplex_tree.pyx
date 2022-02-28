@@ -54,11 +54,9 @@ cdef class SimplexTree:
 
     # The real cython constructor
     def __cinit__(self, other = None):
-        cdef SimplexTree ostr
         if other:
             if isinstance(other, SimplexTree):
-                ostr = <SimplexTree> other
-                self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured(dereference(ostr.get_ptr())))
+                self.thisptr = _get_copy_intptr(other)
             else:
                 raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
@@ -90,12 +88,7 @@ cdef class SimplexTree:
             :func:`compute_persistence` on it even if you had already computed it in the original.
         """
         stree = SimplexTree()
-        cdef Simplex_tree_interface_full_featured* stree_ptr
-        cdef Simplex_tree_interface_full_featured* self_ptr=self.get_ptr()
-        with nogil:
-            stree_ptr = new Simplex_tree_interface_full_featured(dereference(self_ptr))
-
-        stree.thisptr = <intptr_t>(stree_ptr)
+        stree.thisptr = _get_copy_intptr(self)
         return stree
 
     def __deepcopy__(self):
@@ -687,3 +680,6 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+
+cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
+    return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))
