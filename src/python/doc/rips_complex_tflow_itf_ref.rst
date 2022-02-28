@@ -10,6 +10,11 @@ TensorFlow layer for Vietoris-Rips persistence
 Example of gradient computed from Vietoris-Rips persistence
 -----------------------------------------------------------
 
+.. testsetup::
+    :hide:
+    import numpy
+    numpy.set_printoptions(precision=4)
+
 .. testcode::
 
     from gudhi.tensorflow import RipsLayer
