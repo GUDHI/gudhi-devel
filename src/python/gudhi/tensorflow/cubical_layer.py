@@ -35,7 +35,7 @@ def _Cubical(Xflat, Xdim, dimensions):
 
 class CubicalLayer(tf.keras.layers.Layer):
     """
-    TensorFlow layer for computing cubical persistence out of a cubical complex
+    TensorFlow layer for computing the persistent homology of a cubical complex
     """
     def __init__(self, dimensions, min_persistence=None, **kwargs):
         """

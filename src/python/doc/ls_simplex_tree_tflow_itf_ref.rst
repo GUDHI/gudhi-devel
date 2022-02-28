@@ -42,7 +42,7 @@ Example of gradient computed from lower-star filtration of a simplex tree
 .. testoutput::
 
     [2 4]
-    [-1. 1.]
+    [-1.  1.]
 
 Documentation for LowerStarSimplexTreeLayer
 -------------------------------------------
