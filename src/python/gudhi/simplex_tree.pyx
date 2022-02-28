@@ -56,7 +56,7 @@ cdef class SimplexTree:
     def __cinit__(self, other = None):
         cdef SimplexTree ostr
         if other:
-            if type(other) is SimplexTree:
+            if isinstance(other, SimplexTree):
                 ostr = <SimplexTree> other
                 self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured(dereference(ostr.get_ptr())))
             else:
