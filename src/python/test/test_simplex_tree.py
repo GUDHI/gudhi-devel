@@ -459,3 +459,59 @@ def test_equality_operator():
 
     st2.insert([1,2,3], 4.)
     assert st1 == st2
+
+def test_simplex_tree_deep_copy():
+    st = SimplexTree()
+    st.insert([1, 2, 3], 0.)
+    # compute persistence only on the original
+    st.compute_persistence()
+
+    st_copy = st.copy()
+    assert st_copy == st
+    st_filt_list = list(st.get_filtration())
+
+    # check persistence is not copied
+    assert st.__is_persistence_defined() == True
+    assert st_copy.__is_persistence_defined() == False
+
+    # remove something in the copy and check the copy is included in the original
+    st_copy.remove_maximal_simplex([1, 2, 3])
+    a_filt_list = list(st_copy.get_filtration())
+    assert len(a_filt_list) < len(st_filt_list)
+
+    for a_splx in a_filt_list:
+        assert a_splx in st_filt_list
+    
+    # test double free
+    del st
+    del st_copy
+
+def test_simplex_tree_deep_copy_constructor():
+    st = SimplexTree()
+    st.insert([1, 2, 3], 0.)
+    # compute persistence only on the original
+    st.compute_persistence()
+
+    st_copy = SimplexTree(st)
+    assert st_copy == st
+    st_filt_list = list(st.get_filtration())
+
+    # check persistence is not copied
+    assert st.__is_persistence_defined() == True
+    assert st_copy.__is_persistence_defined() == False
+
+    # remove something in the copy and check the copy is included in the original
+    st_copy.remove_maximal_simplex([1, 2, 3])
+    a_filt_list = list(st_copy.get_filtration())
+    assert len(a_filt_list) < len(st_filt_list)
+
+    for a_splx in a_filt_list:
+        assert a_splx in st_filt_list
+    
+    # test double free
+    del st
+    del st_copy
+
+def test_simplex_tree_constructor_exception():
+    with pytest.raises(TypeError):
+        st = SimplexTree(other = "Construction from a string shall raise an exception")
