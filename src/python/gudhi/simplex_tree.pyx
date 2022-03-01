@@ -38,13 +38,29 @@ cdef class SimplexTree:
     cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self):
+    def __init__(self, other = None):
         """SimplexTree constructor.
+
+        :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
+            If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
+        :type other: SimplexTree (Optional)
+        :returns: An empty or a copy simplex tree.
+        :rtype: SimplexTree
+
+        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
+        :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
+            you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
 
     # The real cython constructor
-    def __cinit__(self):
-        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+    def __cinit__(self, other = None):
+        if other:
+            if isinstance(other, SimplexTree):
+                self.thisptr = _get_copy_intptr(other)
+            else:
+                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
+        else:
+            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
@@ -62,6 +78,21 @@ cdef class SimplexTree:
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
+
+    def copy(self):
+        """ 
+        :returns: A simplex tree that is a deep copy of itself.
+        :rtype: SimplexTree
+
+        :note: The persistence information is not copied. If you need it in the clone, you have to call
+            :func:`compute_persistence` on it even if you had already computed it in the original.
+        """
+        stree = SimplexTree()
+        stree.thisptr = _get_copy_intptr(self)
+        return stree
+
+    def __deepcopy__(self):
+        return self.copy()
 
     def filtration(self, simplex):
         """This function returns the filtration value for a given N-simplex in
@@ -649,3 +680,6 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+
+cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
+    return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))
