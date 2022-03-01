@@ -14,7 +14,7 @@ class DenseRagged(tf.keras.layers.Layer):
     This is a class for the ragged layer in the RipsNet architecture, processing the input pointclouds.
     """
 
-    def __init__(self, units, input_dim=None, use_bias=True, activation='gelu', **kwargs):
+    def __init__(self, units, input_dim=None, use_bias=True, activation='gelu', kernel_initializer=None, bias_initializer=None, **kwargs):
         """
         Constructor for the DenseRagged class.
 
@@ -22,18 +22,22 @@ class DenseRagged(tf.keras.layers.Layer):
             units (int): number of units in the layer.
             use_bias (bool): flag, indicating whether to use bias or not.
             activation (string or function): identifier of a keras activation function, e.g. 'relu'.
+            kernel_initializer: tensorflow kernel initializer.
+            bias_initializer: tensorflow bias initializer.
         """
         super().__init__(dynamic=True, **kwargs)
         self._supports_ragged_inputs = True
         self.units = units
         self.use_bias = use_bias
         self.activation = tf.keras.activations.get(activation)
+        self.kernel_initializer = kernel_initializer
+        self.bias_initializer = bias_initializer
 
     def build(self, input_shape):
         last_dim = input_shape[-1]
-        self.kernel = self.add_weight('kernel', shape=[last_dim, self.units], trainable=True)
+        self.kernel = self.add_weight('kernel', shape=[last_dim, self.units], trainable=True, initializer=self.kernel_initializer)
         if self.use_bias:
-            self.bias = self.add_weight('bias', shape=[self.units, ], trainable=True)
+            self.bias = self.add_weight('bias', shape=[self.units, ], trainable=True, initializer=self.bias_initializer)
         else:
             self.bias = None
         super().build(input_shape)
