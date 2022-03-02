@@ -22,7 +22,7 @@ def _check_dir_file_names(path_file_dw, filename, dirname):
     assert isfile(path_file_dw)
 
     names_dw = re.split(r' |/|\\', path_file_dw)
-    # Case where inner directories are created in "remote_datasets/"; e.g: "remote_datasets/bunny"
+    # Case where inner directories are created in "test_gudhi_data/"; e.g: "test_gudhi_data/bunny"
     if len(names_dw) >= 3:
         for i in range(len(names_dw)-1):
             assert re.split(r' |/|\\', dirname)[i] == names_dw[i]
@@ -31,7 +31,7 @@ def _check_dir_file_names(path_file_dw, filename, dirname):
         assert dirname == names_dw[0]
         assert filename == names_dw[1]
 
-def _check_fetch_output(url, filename, dirname = "remote_datasets", file_checksum = None):
+def _check_fetch_output(url, filename, dirname = "test_gudhi_data", file_checksum = None):
     makedirs(dirname, exist_ok=True)
     path_file_dw = remote._fetch_remote(url, filename, dirname, file_checksum)
     _check_dir_file_names(path_file_dw, filename, dirname)
@@ -41,9 +41,9 @@ def _get_bunny_license_print(accept_license = False):
     # Redirect stdout
     sys.stdout = capturedOutput
 
-    makedirs("remote_datasets/bunny", exist_ok=True)
+    makedirs("test_gudhi_data/bunny", exist_ok=True)
 
-    remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy", "bunny.npy", "remote_datasets/bunny",
+    remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy", "bunny.npy", "test_gudhi_data/bunny",
                  '13f7842ebb4b45370e50641ff28c88685703efa5faab14edf0bb7d113a965e1b', accept_license)
     # Reset redirect
     sys.stdout = sys.__stdout__
@@ -68,19 +68,21 @@ def test_fetch_remote_datasets():
 
     # Test printing existing LICENSE file when fetching bunny.npy with accept_license = False (default)
     # Fetch LICENSE file
-    makedirs("remote_datasets/bunny", exist_ok=True)
-    remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/LICENSE", "LICENSE", "remote_datasets/bunny",
+    makedirs("test_gudhi_data/bunny", exist_ok=True)
+    remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/LICENSE", "LICENSE", "test_gudhi_data/bunny",
                  'b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a')
-    with open("remote_datasets/bunny/LICENSE") as f:
+    with open("test_gudhi_data/bunny/LICENSE") as f:
         assert f.read().rstrip("\n") == _get_bunny_license_print().getvalue().rstrip("\n")
 
     # Test not printing bunny.npy LICENSE when accept_license = True
     assert "" == _get_bunny_license_print(accept_license = True).getvalue()
 
-    # Remove "remote_datasets" directory and all its content
-    shutil.rmtree("remote_datasets")
+    # Remove "test_gudhi_data" directory and all its content
+    shutil.rmtree("test_gudhi_data")
 
 def test_fetch_remote_datasets_wrapped():
+    # Check if gudhi_data default dir exists already
+    to_be_removed = not isdir(expanduser("~/gudhi_data"))
     # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
     for i in range(2):
         spiral_2d_arr = remote.fetch_spiral_2d()
@@ -90,29 +92,27 @@ def test_fetch_remote_datasets_wrapped():
         assert bunny_arr.shape == (35947, 3)
 
     # Check that default dir was created
-    assert isdir(expanduser("~/remote_datasets"))
+    assert isdir(expanduser("~/gudhi_data"))
 
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default
-    spiral_2d_arr = remote.fetch_spiral_2d(dirname = "~/another_fetch_folder")
+    spiral_2d_arr = remote.fetch_spiral_2d(dirname = "./another_fetch_folder_for_test")
     assert spiral_2d_arr.shape == (114562, 2)
 
-    bunny_arr = remote.fetch_bunny(dirname = "~/another_fetch_folder")
+    bunny_arr = remote.fetch_bunny(dirname = "./another_fetch_folder_for_test")
     assert bunny_arr.shape == (35947, 3)
 
-    assert isdir(expanduser("~/another_fetch_folder"))
+    assert isdir(expanduser("./another_fetch_folder_for_test"))
 
     # Remove test folders
     del spiral_2d_arr
     del bunny_arr
-    shutil.rmtree(expanduser("~/remote_datasets"))
-    shutil.rmtree(expanduser("~/another_fetch_folder"))
-
-    assert not isdir(expanduser("~/remote_datasets"))
-    assert not isdir(expanduser("~/another_fetch_folder"))
+    if to_be_removed:
+        shutil.rmtree(expanduser("~/gudhi_data"))
+    shutil.rmtree(expanduser("./another_fetch_folder_for_test"))
 
 def test_data_home():
     # Test get_data_home and clear_data_home on new empty folder
-    empty_data_home = remote.get_data_home(data_home="empty_folder")
+    empty_data_home = remote.get_data_home(data_home="empty_folder_for_test")
     assert isdir(empty_data_home)
 
     remote.clear_data_home(data_home=empty_data_home)
