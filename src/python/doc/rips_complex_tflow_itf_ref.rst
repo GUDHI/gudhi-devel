@@ -11,6 +11,7 @@ Example of gradient computed from Vietoris-Rips persistence
 -----------------------------------------------------------
 
 .. testsetup::
+
     import numpy
     numpy.set_printoptions(precision=4)
 
@@ -30,6 +31,7 @@ Example of gradient computed from Vietoris-Rips persistence
     print(grads[0].numpy())
 
 .. testcleanup::
+
     numpy.set_printoptions(precision=8)
 
 .. testoutput::
