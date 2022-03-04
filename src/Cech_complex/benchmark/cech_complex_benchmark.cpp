@@ -107,8 +107,7 @@ int main(int argc, char* argv[]) {
           std::clog << itr->path().stem() << ";";
           std::clog << radius << ";";
           Gudhi::Clock rips_clock("Rips computation");
-          Rips_complex rips_complex_from_points(off_reader_cgal.get_point_cloud(), radius,
-                                                Gudhi::cech_complex::Sphere_circumradius<Kernel>());
+          Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius, Gudhi::Euclidean_distance());
           Simplex_tree rips_stree;
           rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
           // ------------------------------------------
