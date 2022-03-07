@@ -20,7 +20,7 @@ Example
 This example instantiates a RipsNet model which can then be trained as any tensorflow model.
 
 .. testcode::
-    from gudhi import ripsnet
+    from gudhi.tensorflow import *
     from tensorflow.keras import regularizers, layers
 
     ragged_layers_size    = [30,20,10]
@@ -35,14 +35,14 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     dense_layers = []
 
     for n_units in ragged_layers_size:
-            ragged_layers.append(DenseRagged(units=n_units, use_bias=True, activation=activation_fct))
+            ragged_layers.append(ripsnet.DenseRagged(units=n_units, use_bias=True, activation=activation_fct))
 
     for n_units in dense_layers_size:
-        dense_layers.append(tf.keras.layers.Dense(n_units, activation=activation_fct,
+        dense_layers.append(layers.Dense(n_units, activation=activation_fct,
                                 kernel_regularizer=regularizers.l2(kernel_regularization)))
-        dense_layers.append(tf.keras.layers.Dropout(dropout))
+        dense_layers.append(layers.Dropout(dropout))
 
-    dense_layers.append(tf.keras.layers.Dense(output_units, activation=output_activation))
+    dense_layers.append(layers.Dense(output_units, activation=output_activation))
 
     phi_1     = DenseRaggedBlock(ragged_layers)
     perm_op   = 'mean' # can also be 'sum'.
