@@ -50,3 +50,11 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     input_dim = 2
 
     RN = ripsnet.RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
+
+
+Detailed documentation
+----------------------
+.. automodule:: gudhi.tensorflow.ripsnet
+   :members:
+   :special-members:
+   :show-inheritance:
