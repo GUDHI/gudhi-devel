@@ -1,7 +1,6 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/sparsify_point_set.h>
-//#include <gudhi/Fake_simplex_tree.h>
-
+#include <gudhi/Simplex_tree.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
@@ -39,7 +38,6 @@ int main(void) {
 
   // Export the TC into a Simplex_tree
   Gudhi::Simplex_tree<> stree;
-  //Gudhi::Fake_simplex_tree stree;
   tc.create_complex(stree);
 
   // Display stats about inconsistencies
