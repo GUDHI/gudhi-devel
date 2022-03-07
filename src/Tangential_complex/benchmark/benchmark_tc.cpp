@@ -33,6 +33,7 @@ const std::size_t ONLY_LOAD_THE_FIRST_N_POINTS = 20000000;
 #include <gudhi/sparsify_point_set.h>
 #include <gudhi/random_point_generators.h>
 #include <gudhi/Tangential_complex/utilities.h>
+#include <gudhi/Simplex_tree.h>
 
 #include <CGAL/assertions_behaviour.h>
 #include <CGAL/Epick_d.h>
