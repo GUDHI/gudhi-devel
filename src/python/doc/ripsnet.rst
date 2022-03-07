@@ -44,9 +44,9 @@ This example instantiates a RipsNet model which can then be trained as any tenso
 
     dense_layers.append(layers.Dense(output_units, activation=output_activation))
 
-    phi_1     = DenseRaggedBlock(ragged_layers)
+    phi_1     = ripsnet.DenseRaggedBlock(ragged_layers)
     perm_op   = 'mean' # can also be 'sum'.
     phi_2     = TFBlock(dense_layers)
     input_dim = 2
 
-    RN = RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
+    RN = ripsnet.RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
