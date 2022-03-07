@@ -518,8 +518,7 @@ class Entropy(BaseEstimator, TransformerMixin):
                 new_diagram = np.empty(shape = [0, 2])
                 
             p = new_diagram[:,1]
-            L = sum(p)
-            p = p/L
+            p = p/np.sum(p)
             if self.mode == "scalar":
                 ent = -np.dot(p, np.log(p))
                 Xfit.append(np.array([[ent]]))
@@ -529,8 +528,7 @@ class Entropy(BaseEstimator, TransformerMixin):
                     [px,py] = orig_diagram[j,:2]
                     min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                     max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                    for k in range(min_idx, max_idx):
-                        ent[k] += (-1) * p[j] * np.log(p[j])
+                    ent[min_idx:max_idx]-=p[j]*np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
                 Xfit.append(np.reshape(ent,[1,-1]))
