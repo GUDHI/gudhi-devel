@@ -1,5 +1,6 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/sparsify_point_set.h>
+#include <gudhi/Simplex_tree.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Random.h>
