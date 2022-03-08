@@ -81,7 +81,7 @@ namespace collapse {
  * Then it collapses edges and displays a new list of `Filtered_edge` (with less edges)
  * that will preserve the persistence homology computation.
  * 
- * \include Collapse/edge_collapse_basic_example.cpp
+ * \include edge_collapse_basic_example.cpp
  * 
  * When launching the example:
  * 
@@ -90,7 +90,7 @@ namespace collapse {
  *
  * the program output is:
  * 
- * \include Collapse/edge_collapse_example_basic.txt
+ * \include edge_collapse_example_basic.txt
  */
 /** @} */  // end defgroup strong_collapse
 

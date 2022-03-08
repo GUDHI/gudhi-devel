@@ -271,7 +271,7 @@ class Tomato:
         l = self.max_weight_per_cc_.min()
         r = self.max_weight_per_cc_.max()
         if self.diagram_.size > 0:
-            plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "ro")
+            plt.plot(self.diagram_[:, 0], self.diagram_[:, 1], "o", color="red")
             l = min(l, self.diagram_[:, 1].min())
             r = max(r, self.diagram_[:, 0].max())
         if l == r:
@@ -283,7 +283,7 @@ class Tomato:
                 l, r = -1.0, 1.0
         plt.plot([l, r], [l, r])
         plt.plot(
-            self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "ro", color="green"
+            self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "o", color="green"
         )
         plt.show()
 

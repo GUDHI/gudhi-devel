@@ -53,7 +53,7 @@ namespace cover_complex {
  * covering the height function (coordinate 2),
  * which are then refined into their connected components using the triangulation of the .OFF file.
  *
- * \include Nerve_GIC/Nerve.cpp
+ * \include Nerve.cpp
  *
  * When launching:
  *
@@ -62,7 +62,7 @@ namespace cover_complex {
  *
  * the program output is:
  *
- * \include Nerve_GIC/Nerve.txt
+ * \include Nerve.txt
  *
  * The program also writes a file ../../data/points/human_sc.txt. The first three lines in this file are the location
  * of the input point cloud and the function used to compute the cover.
@@ -96,7 +96,7 @@ namespace cover_complex {
  * comes from the triangulation of the human shape. Note that the resulting simplicial complex is in dimension 3
  * in this example.
  *
- * \include Nerve_GIC/VoronoiGIC.cpp
+ * \include VoronoiGIC.cpp
  *
  * When launching:
  *
@@ -129,7 +129,7 @@ namespace cover_complex {
  * with automatic resolution and gain. Note that automatic threshold, resolution and gain
  * can be computed as well for the Nerve.
  *
- * \include Nerve_GIC/CoordGIC.cpp
+ * \include CoordGIC.cpp
  *
  * When launching:
  *
@@ -152,7 +152,7 @@ namespace cover_complex {
  * The function is now the first eigenfunction given by PCA, whose values
  * are written in a file (lucky_cat_PCA1). Threshold, resolution and gain are automatically selected as before.
  *
- * \include Nerve_GIC/FuncGIC.cpp
+ * \include FuncGIC.cpp
  *
  * When launching:
  *

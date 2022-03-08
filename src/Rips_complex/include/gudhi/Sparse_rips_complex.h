@@ -15,10 +15,69 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/choose_n_farthest_points.h>
 
-#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <boost/range/metafunctions.hpp>
+#include <boost/iterator/counting_iterator.hpp>
 
 #include <vector>
+
+namespace Gudhi {
+namespace rips_complex {
+// A custom graph class, because boost::adjacency_list does not conveniently allow to choose vertex descriptors
+template <class Vertex_handle, class Filtration_value>
+struct Graph {
+  typedef std::vector<Vertex_handle> VList;
+  typedef std::vector<std::tuple<Vertex_handle, Vertex_handle, Filtration_value>> EList;
+  typedef typename VList::const_iterator vertex_iterator;
+  typedef boost::counting_iterator<std::size_t> edge_iterator;
+  VList vlist;
+  EList elist;
+};
+template <class Vertex_handle, class Filtration_value>
+void add_vertex(Vertex_handle v, Graph<Vertex_handle, Filtration_value>&g) { g.vlist.push_back(v); }
+template <class Vertex_handle, class Filtration_value>
+void add_edge(Vertex_handle u, Vertex_handle v, Filtration_value f, Graph<Vertex_handle, Filtration_value>&g) { g.elist.emplace_back(u, v, f); }
+template <class Vertex_handle, class Filtration_value>
+std::size_t num_vertices(Graph<Vertex_handle, Filtration_value> const&g) { return g.vlist.size(); }
+template <class Vertex_handle, class Filtration_value>
+std::size_t num_edges(Graph<Vertex_handle, Filtration_value> const&g) { return g.elist.size(); }
+template <class Vertex_handle, class Filtration_value, class Iter = typename Graph<Vertex_handle, Filtration_value>::vertex_iterator>
+std::pair<Iter, Iter>
+vertices(Graph<Vertex_handle, Filtration_value> const&g) {
+  return { g.vlist.begin(), g.vlist.end() };
+}
+template <class Vertex_handle, class Filtration_value>
+std::pair<boost::counting_iterator<std::size_t>, boost::counting_iterator<std::size_t>>
+edges(Graph<Vertex_handle, Filtration_value> const&g) {
+  typedef boost::counting_iterator<std::size_t> I;
+  return { I(0), I(g.elist.size()) };
+}
+template <class Vertex_handle, class Filtration_value>
+Vertex_handle source(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<0>(g.elist[e]); }
+template <class Vertex_handle, class Filtration_value>
+Vertex_handle target(std::size_t e, Graph<Vertex_handle, Filtration_value> const&g) { return std::get<1>(g.elist[e]); }
+template <class Vertex_handle, class Filtration_value>
+Filtration_value get(vertex_filtration_t, Graph<Vertex_handle, Filtration_value> const&, Vertex_handle) { return 0; }
+template <class Vertex_handle, class Filtration_value>
+Filtration_value get(edge_filtration_t, Graph<Vertex_handle, Filtration_value> const&g, std::size_t e) { return std::get<2>(g.elist[e]); }
+}  // namespace rips_complex
+}  // namespace Gudhi
+namespace boost {
+template <class Vertex_handle, class Filtration_value>
+struct graph_traits<Gudhi::rips_complex::Graph<Vertex_handle, Filtration_value>> {
+  typedef Gudhi::rips_complex::Graph<Vertex_handle, Filtration_value> G;
+  struct traversal_category : vertex_list_graph_tag, edge_list_graph_tag {};
+  typedef Vertex_handle vertex_descriptor;
+  typedef typename G::vertex_iterator vertex_iterator;
+  typedef std::size_t vertices_size_type;
+  typedef std::size_t edge_descriptor;
+  typedef typename G::edge_iterator edge_iterator;
+  typedef std::size_t edges_size_type;
+  typedef directed_tag directed_category;
+  typedef disallow_parallel_edge_tag edge_parallel_category;
+};
+// Etc, since we don't expose this graph to the world, we know we are not going to query property_traits for instance.
+}
 
 namespace Gudhi {
 
@@ -45,12 +104,8 @@ template <typename Filtration_value>
 class Sparse_rips_complex {
  private:
   // TODO(MG): use a different graph where we know we can safely insert in parallel.
-  typedef typename boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-                                         boost::property<vertex_filtration_t, Filtration_value>,
-                                         boost::property<edge_filtration_t, Filtration_value>>
-      Graph;
-
   typedef int Vertex_handle;
+  typedef rips_complex::Graph<Vertex_handle, Filtration_value> Graph;
 
  public:
   /** \brief Sparse_rips_complex constructor from a list of points.
@@ -63,12 +118,12 @@ class Sparse_rips_complex {
    *
    */
   template <typename RandomAccessPointRange, typename Distance>
-  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
+  Sparse_rips_complex(const RandomAccessPointRange& points, Distance distance, double const epsilon, Filtration_value const mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value const maxi=std::numeric_limits<Filtration_value>::infinity())
       : epsilon_(epsilon) {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
-    Ker<decltype(dist_fun)> kernel(dist_fun);
-    subsampling::choose_n_farthest_points(kernel, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
+    // TODO: stop choose_n_farthest_points once it reaches mini or 0?
+    subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
                                           std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
   }
@@ -84,7 +139,7 @@ class Sparse_rips_complex {
    * @param[in] maxi Maximal filtration value. Ignore anything above this scale.
    */
   template <typename DistanceMatrix>
-  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double epsilon, Filtration_value mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value maxi=std::numeric_limits<Filtration_value>::infinity())
+  Sparse_rips_complex(const DistanceMatrix& distance_matrix, double const epsilon, Filtration_value const mini=-std::numeric_limits<Filtration_value>::infinity(), Filtration_value const maxi=std::numeric_limits<Filtration_value>::infinity())
       : Sparse_rips_complex(boost::irange<Vertex_handle>(0, boost::size(distance_matrix)),
                             [&](Vertex_handle i, Vertex_handle j) { return (i==j) ? 0 : (i<j) ? distance_matrix[j][i] : distance_matrix[i][j]; },
                             epsilon, mini, maxi) {}
@@ -100,7 +155,7 @@ class Sparse_rips_complex {
    *
    */
   template <typename SimplicialComplexForRips>
-  void create_complex(SimplicialComplexForRips& complex, int dim_max) {
+  void create_complex(SimplicialComplexForRips& complex, int const dim_max) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Sparse_rips_complex::create_complex - simplicial complex is not empty"));
 
@@ -109,17 +164,17 @@ class Sparse_rips_complex {
       complex.expansion(dim_max);
       return;
     }
-    const int n = boost::size(params);
-    std::vector<Filtration_value> lambda(n);
+    const std::size_t n = num_vertices(graph_);
+    std::vector<Filtration_value> lambda(max_v + 1);
     // lambda[original_order]=params[sorted_order]
-    for(int i=0;i<n;++i)
+    for(std::size_t i=0;i<n;++i)
       lambda[sorted_points[i]] = params[i];
     double cst = epsilon_ * (1 - epsilon_) / 2;
     auto block = [cst,&complex,&lambda](typename SimplicialComplexForRips::Simplex_handle sh){
       auto filt = complex.filtration(sh);
-      auto mini = filt * cst;
+      auto min_f = filt * cst;
       for(auto v : complex.simplex_vertex_range(sh)){
-        if(lambda[v] < mini)
+        if(lambda[v] < min_f)
           return true; // v died before this simplex could be born
       }
       return false;
@@ -128,45 +183,36 @@ class Sparse_rips_complex {
   }
 
  private:
-  // choose_n_farthest_points wants the distance function in this form...
-  template <class Distance>
-  struct Ker {
-    typedef std::size_t Point_d;  // index into point range
-    Ker(Distance& d) : dist(d) {}
-    // Despite the name, this is not squared...
-    typedef Distance Squared_distance_d;
-    Squared_distance_d& squared_distance_d_object() const { return dist; }
-    Distance& dist;
-  };
-
   // PointRange must be random access.
   template <typename Distance>
-  void compute_sparse_graph(Distance& dist, double epsilon, Filtration_value mini, Filtration_value maxi) {
+  void compute_sparse_graph(Distance& dist, double const epsilon, Filtration_value const mini, Filtration_value const maxi) {
     const auto& points = sorted_points; // convenience alias
-    const int n = boost::size(points);
+    std::size_t n = boost::size(points);
     double cst = epsilon * (1 - epsilon) / 2;
-    graph_.~Graph();
-    new (&graph_) Graph(n);
-    // for(auto v : vertices(g)) // doesn't work :-(
-    typename boost::graph_traits<Graph>::vertex_iterator v_i, v_e;
-    for (std::tie(v_i, v_e) = vertices(graph_); v_i != v_e; ++v_i) {
-      auto v = *v_i;
-      // This whole loop might not be necessary, leave it until someone investigates if it is safe to remove.
-      put(vertex_filtration_t(), graph_, v, 0);
+    max_v = -1; // Useful for the size of the map lambda.
+    for (std::size_t i = 0; i < n; ++i) {
+      if ((params[i] < mini || params[i] <= 0) && i != 0) break;
+      // The parameter of the first point is not very meaningful, it is supposed to be infinite,
+      // but if the type does not support it...
+      // It would be better to do this reduction of the number of points earlier, around choose_n_farthest_points.
+      add_vertex(points[i], graph_);
+      max_v = std::max(max_v, points[i]);
     }
+    n = num_vertices(graph_);
 
     // TODO(MG):
     // - make it parallel
     // - only test near-enough neighbors
-    for (int i = 0; i < n; ++i) {
+    for (std::size_t i = 0; i < n; ++i) {
       auto&& pi = points[i];
       auto li = params[i];
-      if (li < mini) break;
-      for (int j = i + 1; j < n; ++j) {
+      // If we inserted all the points, points with multiplicity would get connected to their first representative,
+      // no need to handle the redundant ones in the outer loop.
+      // if (li <= 0 && i != 0) break;
+      for (std::size_t j = i + 1; j < n; ++j) {
         auto&& pj = points[j];
         auto d = dist(pi, pj);
         auto lj = params[j];
-        if (lj < mini) break;
         GUDHI_CHECK(lj <= li, "Bad furthest point sorting");
         Filtration_value alpha;
 
@@ -190,6 +236,7 @@ class Sparse_rips_complex {
 
   Graph graph_;
   double epsilon_;
+  Vertex_handle max_v;
   // Because of the arbitrary split between constructor and create_complex
   // sorted_points[sorted_order]=original_order
   std::vector<Vertex_handle> sorted_points;

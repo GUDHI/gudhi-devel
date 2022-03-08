@@ -22,6 +22,18 @@ namespace alpha_complex {
  *
  * @{
  *
+<div class="toc">
+Table of Contents
+<ul>
+<li class="level1"><a href="#definition">Definition</a></li>
+<li class="level1"><a href="#pointsexample">Example from points</a></li>
+<li class="level1"><a href="#createcomplexalgorithm">Create complex algorithm</a></li>
+<li class="level1"><a href="#weightedversion">Weighted specific version</a></li>
+<li class="level1"><a href="#offexample">Example from OFF file</a></li>
+<li class="level1"><a href="#weighted3dexample">3d specific version</a></li>
+</ul>
+</div>
+
  * \section definition Definition
  *
  * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
@@ -62,7 +74,7 @@ namespace alpha_complex {
  * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
  * exact, but the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still
  * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
- * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
+ * - For performances reasons, it is advised to use \ref eigen &ge; 3.3.5 and \ref cgal &ge; 5.2.0.
  *
  * \section pointsexample Example from points
  *
@@ -71,7 +83,7 @@ namespace alpha_complex {
  *
  * Then, it is asked to display information about the simplicial complex.
  *
- * \include Alpha_complex/Alpha_complex_from_points.cpp
+ * \include Alpha_complex_from_points.cpp
  *
  * When launching:
  *
@@ -80,7 +92,7 @@ namespace alpha_complex {
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_60.txt
+ * \include alphaoffreader_for_doc_60.txt
  *
  * \section createcomplexalgorithm Create complex algorithm
  *
@@ -140,11 +152,37 @@ namespace alpha_complex {
  * not quite define a proper filtration (i.e. non-decreasing with respect to inclusion).
  * We fix that up by calling `SimplicialComplexForAlpha::make_filtration_non_decreasing()`.
  *
+ * \note This is not the case in `exact` version, this is the reason why it is not called in this case.
+ *
  * \subsubsection pruneabove Prune above given filtration value
  *
  * The simplex tree is pruned from the given maximum \f$ \alpha^2 \f$ value (cf.
  * `SimplicialComplexForAlpha::prune_above_filtration()`).
  * In the following example, the value is given by the user as argument of the program.
+ *
+ * \section weightedversion Weighted specific version
+ * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
+ * 
+ * A weighted version for Alpha complex is available (cf. Alpha_complex). It is like a usual Alpha complex, but based
+ * on a <a href="https://doc.cgal.org/latest/Triangulation/index.html#title20">CGAL regular triangulation</a> instead
+ * of Delaunay.
+ *
+ * This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
+ * weighted alpha shapes</a>.
+ *
+ * Then, it is asked to display information about the alpha complex.
+ *
+ * \include Weighted_alpha_complex_from_points.cpp
+ *
+ * When launching:
+ *
+ * \code $> ./Weighted_alpha_complex_example_from_points
+ * \endcode
+ *
+ * the program output is:
+ *
+ * \include weightedalpha3dfrompoints_for_doc.txt
  *
  *
  * \section offexample Example from OFF file
@@ -154,7 +192,7 @@ namespace alpha_complex {
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Alpha_complex_from_off.cpp
+ * \include Alpha_complex_from_off.cpp
  *
  * When launching:
  *
@@ -163,10 +201,10 @@ namespace alpha_complex {
  *
  * the program output is:
  *
- * \include Alpha_complex/alphaoffreader_for_doc_32.txt
+ * \include alphaoffreader_for_doc_32.txt
  *
  *
- * \section weighted3dexample 3d specific example
+ * \section weighted3dexample 3d specific version
  *
  * A specific module for Alpha complex is available in 3d (cf. Alpha_complex_3d) and allows to construct standard,
  * weighted, periodic or weighted and periodic versions of alpha complexes. Alpha values computation can be
@@ -179,16 +217,9 @@ namespace alpha_complex {
  *
  * Then, it is asked to display information about the alpha complex.
  *
- * \include Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp
+ * \include Weighted_alpha_complex_3d_from_points.cpp
  *
- * When launching:
- *
- * \code $> ./Alpha_complex_example_weighted_3d_from_points
- * \endcode
- *
- * the program output is:
- *
- * \include Alpha_complex/weightedalpha3dfrompoints_for_doc.txt
+ * The results will be the same as in \ref weightedversion .
  *
  */
 /** @} */  // end defgroup alpha_complex

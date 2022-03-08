@@ -25,3 +25,15 @@ def test_basic_bottleneck():
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+    import numpy as np
+
+    # Translating both diagrams along the diagonal should not affect the distance,
+    # checks that negative numbers are not an issue
+    diag1 = np.array(diag1) - 100
+    diag2 = np.array(diag2) - 100
+
+    assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
+    assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)

@@ -14,7 +14,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
-#include <boost/function_output_iterator.hpp>
+# include <boost/iterator/function_output_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>

@@ -1,5 +1,5 @@
-Alpha complex is of dimension 3 - 29 simplices - 5 vertices.
-Iterator on alpha complex simplices in the filtration order, with [filtration value]:
+Weighted alpha complex is of dimension 3 - 29 simplices - 5 vertices.
+Iterator on weighted alpha complex simplices in the filtration order, with [filtration value]:
    ( 0 ) -> [-4] 
    ( 1 ) -> [-4] 
    ( 2 ) -> [-4] 

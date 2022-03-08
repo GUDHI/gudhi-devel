@@ -9,9 +9,8 @@
 
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
-import numpy
-from numpy import array as np_array
-cimport simplex_tree
+import numpy as np
+cimport gudhi.simplex_tree
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -42,13 +41,29 @@ cdef class SimplexTree:
     cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self):
+    def __init__(self, other = None):
         """SimplexTree constructor.
+
+        :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
+            If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
+        :type other: SimplexTree (Optional)
+        :returns: An empty or a copy simplex tree.
+        :rtype: SimplexTree
+
+        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
+        :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
+            you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
 
     # The real cython constructor
-    def __cinit__(self):
-        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+    def __cinit__(self, other = None):
+        if other:
+            if isinstance(other, SimplexTree):
+                self.thisptr = _get_copy_intptr(other)
+            else:
+                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
+        else:
+            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
@@ -66,6 +81,21 @@ cdef class SimplexTree:
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
+
+    def copy(self):
+        """ 
+        :returns: A simplex tree that is a deep copy of itself.
+        :rtype: SimplexTree
+
+        :note: The persistence information is not copied. If you need it in the clone, you have to call
+            :func:`compute_persistence` on it even if you had already computed it in the original.
+        """
+        stree = SimplexTree()
+        stree.thisptr = _get_copy_intptr(self)
+        return stree
+
+    def __deepcopy__(self):
+        return self.copy()
 
     def filtration(self, simplex):
         """This function returns the filtration value for a given N-simplex in
@@ -288,6 +318,22 @@ cdef class SimplexTree:
             ct.append((v, filtered_simplex.second))
         return ct
 
+    def get_boundaries(self, simplex):
+        """This function returns a generator with the boundaries of a given N-simplex.
+        If you do not need the filtration values, the boundary can also be obtained as
+        :code:`itertools.combinations(simplex,len(simplex)-1)`.
+
+        :param simplex: The N-simplex, represented by a list of vertex.
+        :type simplex: list of int.
+        :returns:  The (simplices of the) boundary of a simplex
+        :rtype:  generator with tuples(simplex, filtration)
+        """
+        cdef pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] it =  self.get_ptr().get_boundary_iterators(simplex)
+
+        while it.first != it.second:
+            yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
+            preincrement(it.first)
+
     def remove_maximal_simplex(self, simplex):
         """This function removes a given maximal N-simplex from the simplicial
         complex.
@@ -331,7 +377,7 @@ cdef class SimplexTree:
         return self.get_ptr().prune_above_filtration(filtration)
 
     def expansion(self, max_dim):
-        """Expands the Simplex_tree containing only its one skeleton
+        """Expands the simplex tree containing only its one skeleton
         until dimension max_dim.
 
         The expanded simplicial complex until dimension :math:`d`
@@ -341,7 +387,7 @@ cdef class SimplexTree:
         The filtration value assigned to a simplex is the maximal filtration
         value of one of its edges.
 
-        The Simplex_tree must contain no simplex of dimension bigger than
+        The simplex tree must contain no simplex of dimension bigger than
         1 when calling the method.
 
         :param max_dim: The maximal dimension.
@@ -361,38 +407,54 @@ cdef class SimplexTree:
         """
         return self.get_ptr().make_filtration_non_decreasing()
 
+    def reset_filtration(self, filtration, min_dim = 0):
+        """This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all the
+        simplex tree when `min_dim = 0`.
+        `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
+        make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+        afterwards for instance).
+
+        :param filtration: New threshold value.
+        :type filtration: float.
+        :param min_dim: The minimal dimension. Default value is 0.
+        :type min_dim: int.
+        """
+        self.get_ptr().reset_filtration(filtration, min_dim)
+
     def extend_filtration(self):
-        """ Extend filtration for computing extended persistence. This function only uses the 
-        filtration values at the 0-dimensional simplices, and computes the extended persistence 
-        diagram induced by the lower-star filtration computed with these values. 
+        """ Extend filtration for computing extended persistence. This function only uses the filtration values at the
+        0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration
+        computed with these values.
 
         .. note::
 
-            Note that after calling this function, the filtration 
-            values are actually modified within the Simplex_tree. 
-            The function :func:`extended_persistence`
-            retrieves the original values.
+            Note that after calling this function, the filtration values are actually modified within the simplex tree.
+            The function :func:`extended_persistence` retrieves the original values.
 
         .. note::
 
-            Note that this code creates an extra vertex internally, so you should make sure that
-            the Simplex_tree does not contain a vertex with the largest possible value (i.e., 4294967295). 
+            Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does
+            not contain a vertex with the largest possible value (i.e., 4294967295).
+
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        explains how to compute an extension of persistence called extended persistence.
         """
         self.get_ptr().compute_extended_filtration()
 
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
-        """This function retrieves good values for extended persistence, and separate the diagrams 
-        into the Ordinary, Relative, Extended+ and Extended- subdiagrams.
+        """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
+        Relative, Extended+ and Extended- subdiagrams.
 
-        :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
-        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the persistence diagram point coordinates) to take into
-            account (strictly greater than min_persistence). Default value is
-            0.0.
-            Sets min_persistence to -1.0 to see all values.
+        :param min_persistence: The minimum persistence value (i.e., the absolute value of the difference between the
+            persistence diagram point coordinates) to take into account (strictly greater than min_persistence).
+            Default value is 0.0. Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float
-        :returns: A list of four persistence diagrams in the format described in :func:`persistence`. The first one is Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-. See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
+        :returns: A list of four persistence diagrams in the format described in :func:`persistence`. The first one is
+            Ordinary, the second one is Relative, the third one is Extended+ and the fourth one is Extended-.
+            See https://link.springer.com/article/10.1007/s10208-008-9027-z and/or section 2.2 in
+            https://link.springer.com/article/10.1007/s10208-017-9370-z for a description of these subtypes.
 
         .. note::
 
@@ -403,6 +465,9 @@ cdef class SimplexTree:
             The coordinates of the persistence diagram points might be a little different than the
             original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
             performed on these values during the computation of extended persistence.
+
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        explains how to compute an extension of persistence called extended persistence.
         """
         cdef vector[pair[int, pair[double, double]]] persistence_result
         if self.pcohptr != NULL:
@@ -436,7 +501,7 @@ cdef class SimplexTree:
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -459,7 +524,7 @@ cdef class SimplexTree:
         when you do not want the list :func:`persistence` returns.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
-            prime number. Default value is 11.
+            prime number. Default value is 11. Max is 46337.
         :type homology_coeff_field: int
         :param min_persistence: The minimum persistence value to take into
             account (strictly greater than min_persistence). Default value is
@@ -529,7 +594,11 @@ cdef class SimplexTree:
             function to be launched first.
         """
         assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
-        return np_array(self.pcohptr.intervals_in_dimension(dimension))
+        piid = np.array(self.pcohptr.intervals_in_dimension(dimension))
+        # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
+        if len(piid) == 0:
+            return np.empty(shape = [0, 2])
+        return piid
 
     def persistence_pairs(self):
         """This function returns a list of persistence birth and death simplices pairs.
@@ -570,8 +639,8 @@ cdef class SimplexTree:
         """
         assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
         gen = self.pcohptr.lower_star_generators()
-        normal = [np_array(d).reshape(-1,2) for d in gen.first]
-        infinite = [np_array(d) for d in gen.second]
+        normal = [np.array(d).reshape(-1,2) for d in gen.first]
+        infinite = [np.array(d) for d in gen.second]
         return (normal, infinite)
 
     def flag_persistence_generators(self):
@@ -589,19 +658,19 @@ cdef class SimplexTree:
         assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
         gen = self.pcohptr.flag_generators()
         if len(gen.first) == 0:
-            normal0 = numpy.empty((0,3))
+            normal0 = np.empty((0,3))
             normals = []
         else:
             l = iter(gen.first)
-            normal0 = np_array(next(l)).reshape(-1,3)
-            normals = [np_array(d).reshape(-1,4) for d in l]
+            normal0 = np.array(next(l)).reshape(-1,3)
+            normals = [np.array(d).reshape(-1,4) for d in l]
         if len(gen.second) == 0:
-            infinite0 = numpy.empty(0)
+            infinite0 = np.empty(0)
             infinites = []
         else:
             l = iter(gen.second)
-            infinite0 = np_array(next(l))
-            infinites = [np_array(d).reshape(-1,2) for d in l]
+            infinite0 = np.array(next(l))
+            infinites = [np.array(d).reshape(-1,2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
     def collapse_edges(self, nb_iterations = 1):
@@ -614,6 +683,9 @@ cdef class SimplexTree:
 
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
+
+        :note: collapse_edges method requires `Eigen <installation.html#eigen>`_ >= 3.1.0 and an exception is thrown
+            if this method is not available.
         """
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
@@ -623,3 +695,13 @@ cdef class SimplexTree:
             self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
             # Delete old pointer
             del ptr
+
+    def __eq__(self, other:SimplexTree):
+        """Test for structural equality
+        :returns: True if the 2 simplex trees are equal, False otherwise.
+        :rtype: bool
+        """
+        return dereference(self.get_ptr()) == dereference(other.get_ptr())
+
+cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
+    return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))
