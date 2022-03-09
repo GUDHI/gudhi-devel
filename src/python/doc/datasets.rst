@@ -112,6 +112,12 @@ Fetching datasets
 
 We provide some ready-to-use datasets that are not available by default when getting GUDHI, and need to be fetched explicitly.
 
+.. figure:: ./img/bunny.png
+     :figclass: align-center
+
+     3D Stanford bunny with 35947 vertices.
+
+
 .. automodule:: gudhi.datasets.remote
    :members:
    :special-members:
