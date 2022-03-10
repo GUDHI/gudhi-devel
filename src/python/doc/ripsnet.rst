@@ -19,7 +19,8 @@ Example
 This example instantiates a RipsNet model which can then be trained as any tensorflow model.
 
 .. testcode::
-    from gudhi.tensorflow.ripsnet import DenseRagged, DenseRaggedBlock, RipsNet, TFBlock
+
+    from gudhi.tensorflow import *
     import tensorflow as tf
     from tensorflow.keras import regularizers, layers
     import numpy as np
