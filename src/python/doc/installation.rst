@@ -395,6 +395,8 @@ TensorFlow
 
 `TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
 
+:doc:`RipsNet <ripsnet>` module requires `TensorFlow <https://https://www.tensorflow.org/install/>`_.
+
 Bug reports and contributions
 *****************************
 

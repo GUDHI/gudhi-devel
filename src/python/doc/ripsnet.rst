@@ -11,8 +11,7 @@ Definition
 
 :class:`~gudhi.ripsnet` constructs a Tensorflow model for fast and robust estimation of persistent homology of
 point clouds.
-RipsNet is based on a `Deep Sets  <https://papers.nips.cc/paper/2017/file/f22e4747da1aa27e363d86d40ff442fe-Paper.pdf>`_
-architecture :cite:`DeepSets17`, for details see the paper `RipsNet  <https://arxiv.org/abs/2202.01725>`_ :cite:`RipsNet_arXiv`.
+RipsNet is based on a Deep Sets architecture :cite:`DeepSets17`, for details see the paper RipsNet :cite:`RipsNet_arXiv`.
 
 Example
 -------------------
