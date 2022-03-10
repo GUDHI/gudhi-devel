@@ -105,6 +105,6 @@ def test_ripsnet():
 
     assert(clean_prediction.shape == model.predict(tf_clean_data_test).shape)
     assert(noisy_prediction.shape == model.predict(tf_noisy_data_test).shape)
-    assert(np.linalg.norm(clean_prediction - model.predict(tf_clean_data_test)) <= 1e-7)
-    assert(np.linalg.norm(noisy_prediction - model.predict(tf_noisy_data_test)) <= 1e-7)
+    assert(np.linalg.norm(clean_prediction - model.predict(tf_clean_data_test)) <= 1e-6)
+    assert(np.linalg.norm(noisy_prediction - model.predict(tf_noisy_data_test)) <= 1e-6)
     return
