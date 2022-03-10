@@ -555,7 +555,7 @@ if(PYTHONINTERP_FOUND)
 
     # Differentiation
     if(TENSORFLOW_FOUND)
-      add_gudhi_py_test(test_diff)
+      add_gudhi_py_test(test_ripsnet)
     endif()
 
     # Betti curves
