@@ -8,7 +8,7 @@
 
 import numpy             as np
 import tensorflow        as tf
-from gudhi.tensorflow.ripsnet import *
+from gudhi.tensorflow.ripsnet import DenseRagged, DenseRaggedBlock, RipsNet
 
 
 def test_ripsnet():
