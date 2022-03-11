@@ -73,7 +73,7 @@ This example instantiates a RipsNet model which can then be trained as any tenso
 Once RN is properly trained (which we skip in this documentation) it can be used to make predictions.
 A possible output is:
 
-.. testoutput::
+.. code-block::
 
     [[0.58554363 0.6054868  0.44672886 0.5216672  0.5814481  0.48068565
       0.49626726 0.5285395  0.4805212  0.37918684 0.49745193 0.49247316
