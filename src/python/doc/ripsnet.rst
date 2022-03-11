@@ -68,7 +68,7 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     tf_data_test = tf.ragged.constant([
         [list(c) for c in list(data_test[i])] for i in range(len(data_test))], ragged_rank=1)
 
-    print(RN.predict(tf_data_test))
+    RN.predict(tf_data_test)
 
 Once RN is properly trained (which we skip in this documentation) it can be used to make predictions.
 A possible output is:
