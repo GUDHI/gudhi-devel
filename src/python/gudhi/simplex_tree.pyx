@@ -471,9 +471,7 @@ cdef class SimplexTree:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
         self.pcohptr.compute_persistence(homology_coeff_field, -1.)
-        persistence_result = self.pcohptr.get_persistence()
-        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
-
+        return self.pcohptr.compute_extended_persistence_subdiagrams(min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.
