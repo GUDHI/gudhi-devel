@@ -133,36 +133,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     return;
   }
 
-  std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> compute_extended_persistence_subdiagrams(const std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>& dgm, Filtration_value min_persistence){
-    std::vector<std::vector<std::pair<int, std::pair<Filtration_value, Filtration_value>>>> new_dgm(4);
-    for (unsigned int i = 0; i < dgm.size(); i++){
-      std::pair<Filtration_value, Extended_simplex_type> px = this->decode_extended_filtration(dgm[i].second.first, this->efd);
-      std::pair<Filtration_value, Extended_simplex_type> py = this->decode_extended_filtration(dgm[i].second.second, this->efd);
-      std::pair<int, std::pair<Filtration_value, Filtration_value>> pd_point = std::make_pair(dgm[i].first, std::make_pair(px.first, py.first));
-      if(std::abs(px.first - py.first) > min_persistence){
-        //Ordinary
-        if (px.second == Extended_simplex_type::UP && py.second == Extended_simplex_type::UP){
-          new_dgm[0].push_back(pd_point);
-        }
-        // Relative
-        else if (px.second == Extended_simplex_type::DOWN && py.second == Extended_simplex_type::DOWN){
-          new_dgm[1].push_back(pd_point);
-        }
-        else{
-          // Extended+
-          if (px.first < py.first){
-            new_dgm[2].push_back(pd_point);
-          }
-          //Extended-
-          else{
-            new_dgm[3].push_back(pd_point);
-          }
-        }
-      }
-    }
-    return new_dgm;
-  }
-
   Simplex_tree_interface* collapse_edges(int nb_collapse_iteration) {
 #ifdef GUDHI_USE_EIGEN3
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
