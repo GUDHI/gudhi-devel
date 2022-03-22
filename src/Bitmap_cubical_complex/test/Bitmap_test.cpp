@@ -39,30 +39,48 @@ BOOST_AUTO_TEST_CASE(check_dimension) {
   BOOST_CHECK(increasing.dimension() == 2);
 }
 
-BOOST_AUTO_TEST_CASE(topDimensionalCellsIterator_test) {
+BOOST_AUTO_TEST_CASE(cellsIterator_test) {
   std::vector<double> expectedFiltrationValues1({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
   std::vector<double> expectedFiltrationValues2({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
-  std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
+  std::vector<double> increasingFiltration({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<double> oneDimensionalCycle({0, 0, 0, 0, 100, 0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({3, 3});
 
-  Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
-  Bitmap_cubical_complex hole(dimensions, oneDimensionalCycle);
+  Bitmap_cubical_complex increasing_top_cells(dimensions, increasingFiltration);
+  Bitmap_cubical_complex hole_top_cells(dimensions, oneDimensionalCycle);
 
+  // Test top dimensional cells
   int i = 0;
-  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = increasing.top_dimensional_cells_iterator_begin();
-       it != increasing.top_dimensional_cells_iterator_end(); ++it) {
-    BOOST_CHECK(increasing.get_cell_data(*it) == expectedFiltrationValues2[i]);
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = increasing_top_cells.top_dimensional_cells_iterator_begin();
+       it != increasing_top_cells.top_dimensional_cells_iterator_end(); ++it) {
+    BOOST_CHECK(increasing_top_cells.get_cell_data(*it) == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
-  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = hole.top_dimensional_cells_iterator_begin();
-       it != hole.top_dimensional_cells_iterator_end(); ++it) {
-    BOOST_CHECK(hole.get_cell_data(*it) == expectedFiltrationValues1[i]);
+  for (Bitmap_cubical_complex::Top_dimensional_cells_iterator it = hole_top_cells.top_dimensional_cells_iterator_begin();
+       it != hole_top_cells.top_dimensional_cells_iterator_end(); ++it) {
+    BOOST_CHECK(hole_top_cells.get_cell_data(*it) == expectedFiltrationValues1[i]);
+    ++i;
+  }
+
+  // Test vertices
+  Bitmap_cubical_complex increasing_vertices(dimensions, increasingFiltration, false);
+  Bitmap_cubical_complex hole_vertices(dimensions, oneDimensionalCycle, false);
+
+  i = 0;
+  for (Bitmap_cubical_complex::Vertices_cells_iterator it = increasing_vertices.vertices_cells_iterator_begin();
+       it != increasing_vertices.vertices_cells_iterator_end(); ++it) {
+    BOOST_CHECK(increasing_vertices.get_cell_data(*it) == expectedFiltrationValues2[i]);
+    ++i;
+  }
+  i = 0;
+  for (Bitmap_cubical_complex::Vertices_cells_iterator it = hole_vertices.vertices_cells_iterator_begin();
+       it != hole_vertices.vertices_cells_iterator_end(); ++it) {
+    BOOST_CHECK(hole_vertices.get_cell_data(*it) == expectedFiltrationValues1[i]);
     ++i;
   }
 }

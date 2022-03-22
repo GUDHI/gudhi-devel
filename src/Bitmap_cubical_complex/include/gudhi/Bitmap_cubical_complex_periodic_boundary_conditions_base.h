@@ -68,8 +68,9 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * periodic boundary conditions will not be imposed in the direction i.
    */
   Bitmap_cubical_complex_periodic_boundary_conditions_base(
-      const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
-      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
+      const std::vector<unsigned>& dimensions, const std::vector<T>& cells,
+      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
+      const bool& input_top_cells);
 
   /**
    * Destructor of the Bitmap_cubical_complex_periodic_boundary_conditions_base class.
@@ -170,13 +171,16 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   }
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
-                                                           const std::vector<T>& topDimensionalCells);
+                                                           const std::vector<T>& cells,
+                                                           const bool& input_top_cells);
 
   /**
-   * A procedure used to construct the data structures in the class.
+   * Procedures used to construct the data structures in the class.
   **/
   void construct_complex_based_on_top_dimensional_cells(
       const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
+      const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
+  void construct_complex_based_on_vertices(const std::vector<unsigned>& dimensions, const std::vector<T>& vertices,
       const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed);
 };
 
@@ -193,6 +197,25 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
     ++i;
   }
   this->impose_lower_star_filtration();
+}
+
+template <typename T>
+void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_complex_based_on_vertices(
+    const std::vector<unsigned>& dimensions, const std::vector<T>& vertices,
+    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
+  this->directions_in_which_periodic_b_cond_are_to_be_imposed = directions_in_which_periodic_b_cond_are_to_be_imposed;
+
+  std::vector<unsigned> top_cells_sizes;
+  std::transform (dimensions.begin(), dimensions.end(), std::back_inserter(top_cells_sizes),
+               [](int i){ return --i;});
+  this->set_up_containers(top_cells_sizes);
+
+  std::size_t i = 0;
+  for (auto it = this->vertices_cells_iterator_begin(); it != this->vertices_cells_iterator_end(); ++it) {
+    this->get_cell_data(*it) = vertices[i];
+    ++i;
+  }
+  this->impose_lower_star_filtration_from_vertices();
 }
 
 template <typename T>
@@ -256,18 +279,31 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 
 template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
-    const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells) {
+    const std::vector<unsigned>& dimensions, const std::vector<T>& cells, const bool& input_top_cells) {
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed = std::vector<bool>(dimensions.size(), false);
-  this->construct_complex_based_on_top_dimensional_cells(dimensions, topDimensionalCells,
-                                                         directions_in_which_periodic_b_cond_are_to_be_imposed);
+  if (input_top_cells) {
+    this->construct_complex_based_on_top_dimensional_cells(dimensions, cells,
+                                                           directions_in_which_periodic_b_cond_are_to_be_imposed);
+  }
+  else {
+    this->construct_complex_based_on_vertices(dimensions, cells,
+                                              directions_in_which_periodic_b_cond_are_to_be_imposed);
+  }
 }
 
 template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
-    const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
-    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
-  this->construct_complex_based_on_top_dimensional_cells(dimensions, topDimensionalCells,
-                                                         directions_in_which_periodic_b_cond_are_to_be_imposed);
+    const std::vector<unsigned>& dimensions, const std::vector<T>& cells,
+    const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
+    const bool& input_top_cells) {
+  if(input_top_cells) {
+    this->construct_complex_based_on_top_dimensional_cells(dimensions, cells,
+                                                           directions_in_which_periodic_b_cond_are_to_be_imposed);
+  }
+  else {
+    this->construct_complex_based_on_vertices(dimensions, cells,
+                                              directions_in_which_periodic_b_cond_are_to_be_imposed);
+  }
 }
 
 // ***********************Methods************************ //

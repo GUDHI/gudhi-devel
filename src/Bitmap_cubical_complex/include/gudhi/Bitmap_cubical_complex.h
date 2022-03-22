@@ -57,7 +57,7 @@ class Bitmap_cubical_complex : public T {
   // Over here we need to define various input types. I am proposing the following ones:
   // Perseus style
   // TODO(PD) H5 files?
-  // TODO(PD) binary files with little endiangs / big endians ?
+  // TODO(PD) binary files with little endians / big endians ?
   // TODO(PD) constructor from a vector of elements of a type T. ?
 
   /**
@@ -78,13 +78,15 @@ class Bitmap_cubical_complex : public T {
   }
 
   /**
-   * Constructor that requires vector of elements of type unsigned, which gives number of top dimensional cells
-   * in the following directions and vector of element of a type T
-   * with filtration on top dimensional cells.
+   * Constructor that requires vector of elements of type unsigned, which gives number of cells,
+   * either top dimensional or vertices depending on the input flag,
+   * and vector of elements of a type T with filtration on these cells.
+   * Default value of input_top_cells is true, meaning that the given cells are top dimensional.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
-                         const std::vector<Filtration_value>& top_dimensional_cells)
-      : T(dimensions, top_dimensional_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
+                         const std::vector<Filtration_value>& cells,
+                         const bool& input_top_cells = true)
+      : T(dimensions, cells, input_top_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
     for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
     }
@@ -102,9 +104,10 @@ class Bitmap_cubical_complex : public T {
    * If the position i on this vector is true, then we impose periodic boundary conditions in this direction.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
-                         const std::vector<Filtration_value>& top_dimensional_cells,
-                         std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed)
-      : T(dimensions, top_dimensional_cells, directions_in_which_periodic_b_cond_are_to_be_imposed),
+                         const std::vector<Filtration_value>& cells,
+                         std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed,
+                         const bool& input_top_cells = true)
+      : T(dimensions, cells, directions_in_which_periodic_b_cond_are_to_be_imposed, input_top_cells),
         key_associated_to_simplex(this->total_number_of_cells + 1) {
     for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
