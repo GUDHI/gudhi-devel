@@ -603,14 +603,17 @@ class Bitmap_cubical_complex_base {
   std::vector<T> data;
   std::size_t total_number_of_cells;
 
-  void set_up_containers(const std::vector<unsigned>& sizes) {
+  void set_up_containers(const std::vector<unsigned>& sizes, const bool& is_pos_inf) {
     unsigned multiplier = 1;
     for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
       this->multipliers.push_back(multiplier);
       multiplier *= 2 * sizes[i] + 1;
     }
-    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
+    if(is_pos_inf)
+      this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
+    else
+      this->data = std::vector<T>(multiplier, -std::numeric_limits<T>::infinity());
     this->total_number_of_cells = multiplier;
   }
 
@@ -699,13 +702,13 @@ std::ostream& operator<<(std::ostream& out, const Bitmap_cubical_complex_base<K>
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes) {
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 }
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(
     const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
-  this->set_up_containers(sizes_in_following_directions);
+  this->set_up_containers(sizes_in_following_directions, true);
 
   std::size_t number_of_top_dimensional_elements = 1;
   for (std::size_t i = 0; i != sizes_in_following_directions.size(); ++i) {
@@ -739,7 +742,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
   std::transform (sizes_in_following_directions.begin(), sizes_in_following_directions.end(), std::back_inserter(top_cells_sizes),
                [](int i){ return --i;});
 
-  this->set_up_containers(top_cells_sizes);
+  this->set_up_containers(top_cells_sizes, false);
 
   std::size_t number_of_vertices = 1;
   for (std::size_t i = 0; i != sizes_in_following_directions.size(); ++i) {
@@ -814,7 +817,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
     std::clog << "size_in_this_dimension : " << size_in_this_dimension << std::endl;
 #endif
   }
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 
   Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
   it = this->top_dimensional_cells_iterator_begin();
@@ -867,7 +870,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 }
 
 template <typename T>

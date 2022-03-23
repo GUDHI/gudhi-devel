@@ -153,7 +153,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
  protected:
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed;
 
-  void set_up_containers(const std::vector<unsigned>& sizes) {
+  void set_up_containers(const std::vector<unsigned>& sizes, const bool& is_pos_inf) {
     unsigned multiplier = 1;
     for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
@@ -166,7 +166,10 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
       }
     }
     // std::reverse( this->sizes.begin() , this->sizes.end() );
-    this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
+    if (is_pos_inf)
+      this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
+    else
+      this->data = std::vector<T>(multiplier, -std::numeric_limits<T>::infinity());
     this->total_number_of_cells = multiplier;
   }
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
@@ -189,7 +192,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
     const std::vector<unsigned>& dimensions, const std::vector<T>& topDimensionalCells,
     const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = directions_in_which_periodic_b_cond_are_to_be_imposed;
-  this->set_up_containers(dimensions);
+  this->set_up_containers(dimensions, true);
 
   std::size_t i = 0;
   for (auto it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
@@ -208,7 +211,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   std::vector<unsigned> top_cells_sizes;
   std::transform (dimensions.begin(), dimensions.end(), std::back_inserter(top_cells_sizes),
                [](int i){ return --i;});
-  this->set_up_containers(top_cells_sizes);
+  this->set_up_containers(top_cells_sizes, false);
 
   std::size_t i = 0;
   for (auto it = this->vertices_cells_iterator_begin(); it != this->vertices_cells_iterator_end(); ++it) {
@@ -223,7 +226,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     const std::vector<unsigned>& sizes,
     const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed(directions_in_which_periodic_b_cond_are_to_be_imposed);
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 }
 
 template <typename T>
@@ -248,7 +251,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
     }
     sizes.push_back(abs(size_in_this_dimension));
   }
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 
   typename Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Top_dimensional_cells_iterator it(*this);
   it = this->top_dimensional_cells_iterator_begin();
@@ -274,7 +277,7 @@ template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
     const std::vector<unsigned>& sizes) {
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = std::vector<bool>(sizes.size(), false);
-  this->set_up_containers(sizes);
+  this->set_up_containers(sizes, true);
 }
 
 template <typename T>
