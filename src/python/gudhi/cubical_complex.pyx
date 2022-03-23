@@ -27,7 +27,7 @@ __license__ = "MIT"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
-        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells) nogil
+        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil
         Bitmap_cubical_complex_base_interface(string perseus_file) nogil
         int num_simplices() nogil
         int dimension() nogil
@@ -53,21 +53,30 @@ cdef class CubicalComplex:
     cdef Cubical_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, dimensions=None, top_dimensional_cells=None,
+    def __init__(self, dimensions=None, cells=None, input_top_cells=True,
                  perseus_file=''):
         """CubicalComplex constructor from dimensions and
-        top_dimensional_cells or from a Perseus-style file name.
+        cells (either vertices or top dimensional depending on
+        the input_top_cells flag to set) or from a Perseus-style file name.
 
-        :param dimensions: A list of number of top dimensional cells.
+        :param dimensions: A list of number of cells.
         :type dimensions: list of int
-        :param top_dimensional_cells: A list of cells filtration values.
-        :type top_dimensional_cells: list of double
+        :param cells: A list of cells filtration values.
+        :type cells: list of double
+        :param input_top_cells: A flag to indicate if the given cells as input
+         are vertices or top dimensional.
+         Default is 'True' meaning that the given cells should be top dimensional.
+        :type input_top_cells: bool
 
         Or
 
-        :param top_dimensional_cells: A multidimensional array of cells
+        :param cells: A multidimensional array of cells
             filtration values.
-        :type top_dimensional_cells: anything convertible to a numpy ndarray
+        :type cells: anything convertible to a numpy ndarray
+        :param input_top_cells: A flag to indicate if the given cells as input
+         are vertices or top dimensional.
+         Default is 'True' meaning that the given cells should be top dimensional.
+        :type input_top_cells: bool
 
         Or
 
@@ -76,20 +85,21 @@ cdef class CubicalComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
+    def __cinit__(self, dimensions=None, cells=None,
+                  input_top_cells=True,
                   perseus_file=''):
-        if ((dimensions is not None) and (top_dimensional_cells is not None)
+        if ((dimensions is not None) and (cells is not None)
             and (perseus_file == '')):
-            self._construct_from_cells(dimensions, top_dimensional_cells)
-        elif ((dimensions is None) and (top_dimensional_cells is not None)
+            self._construct_from_cells(dimensions, cells, input_top_cells)
+        elif ((dimensions is None) and (cells is not None)
             and (perseus_file == '')):
-            top_dimensional_cells = np.array(top_dimensional_cells,
-                                             copy = False,
-                                             order = 'F')
-            dimensions = top_dimensional_cells.shape
-            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            self._construct_from_cells(dimensions, top_dimensional_cells)
-        elif ((dimensions is None) and (top_dimensional_cells is None)
+            cells = np.array(cells,
+                             copy = False,
+                             order = 'F')
+            dimensions = cells.shape
+            cells = cells.ravel(order='F')
+            self._construct_from_cells(dimensions, cells, input_top_cells)
+        elif ((dimensions is None) and (cells is None)
             and (perseus_file != '')):
             if os.path.isfile(perseus_file):
                 self._construct_from_file(perseus_file.encode('utf-8'))
@@ -98,12 +108,12 @@ cdef class CubicalComplex:
                                         perseus_file)
         else:
             print("CubicalComplex can be constructed from dimensions and "
-                "top_dimensional_cells or from a Perseus-style file name.",
+                "cells or from a Perseus-style file name.",
                 file=sys.stderr)
 
-    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] top_dimensional_cells):
+    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, bool input_top_cells):
         with nogil:
-            self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
+            self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, cells, input_top_cells)
 
     def _construct_from_file(self, string filename):
         with nogil:

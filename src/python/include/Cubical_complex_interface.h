@@ -27,14 +27,16 @@ template<typename CubicalComplexOptions = Bitmap_cubical_complex_base<double>>
 class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOptions> {
  public:
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
-                            const std::vector<double>& top_dimensional_cells)
-  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells) {
+                            const std::vector<double>& cells,
+                            const bool input_top_cells = true)
+  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, cells, input_top_cells) {
   }
 
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
-                            const std::vector<double>& top_dimensional_cells,
-                            const std::vector<bool>& periodic_dimensions)
-  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells, periodic_dimensions) {
+                            const std::vector<double>& cells,
+                            const std::vector<bool>& periodic_dimensions,
+                            const bool input_top_cells = true)
+  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, cells, periodic_dimensions, input_top_cells) {
   }
 
   Cubical_complex_interface(const std::string& perseus_file)
