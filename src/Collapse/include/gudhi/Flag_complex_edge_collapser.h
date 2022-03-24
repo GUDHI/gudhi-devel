@@ -15,19 +15,14 @@
 
 #include <gudhi/Debug_utils.h>
 
-#include <boost/functional/hash.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
 
 #include <utility>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <set>
 #include <tuple>
 #include <algorithm>
-#include <iterator>
-#include <type_traits>
+#include <limits>
 
 namespace Gudhi {
 
