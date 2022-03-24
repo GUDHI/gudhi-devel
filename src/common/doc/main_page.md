@@ -234,10 +234,9 @@
     \cite edgecollapsesocg2020.
     </td>
     <td width="15%">
-      <b>Author:</b> Siddharth Pritam<br>
+      <b>Author:</b> Siddharth Pritam, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 3.3.0<br>
-      <b>Copyright:</b> MIT<br>
-      <b>Requires:</b> \ref eigen
+      <b>Copyright:</b> MIT
     </td>
  </tr>
  <tr>
