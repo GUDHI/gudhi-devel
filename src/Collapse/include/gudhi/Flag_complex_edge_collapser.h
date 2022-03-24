@@ -83,22 +83,23 @@ struct Flag_complex_edge_collapser {
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
     init_neighbors_dense();
 #endif
-    std::vector<typename Ngb_list::sequence_type> neighbors2(num_vertices);
+    // Use the raw sequence to avoid maintaining the order
+    std::vector<typename Ngb_list::sequence_type> neighbors_seq(num_vertices);
     for(auto&&e : r){
       using std::get;
       Vertex u = get<0>(e);
       Vertex v = get<1>(e);
       Filtration_value f = get<2>(e);
-      neighbors2[u].emplace_back(v, f);
-      neighbors2[v].emplace_back(u, f);
+      neighbors_seq[u].emplace_back(v, f);
+      neighbors_seq[v].emplace_back(u, f);
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
       neighbors_dense(u,v)=f;
       neighbors_dense(v,u)=f;
 #endif
     }
-    for(int i=0;i<neighbors2.size();++i){
-      neighbors2[i].emplace_back(i, -std::numeric_limits<Filtration_value>::infinity());
-      neighbors[i].adopt_sequence(std::move(neighbors2[i])); // calls sort
+    for(std::size_t i=0;i<neighbors_seq.size();++i){
+      neighbors_seq[i].emplace_back(i, -std::numeric_limits<Filtration_value>::infinity());
+      neighbors[i].adopt_sequence(std::move(neighbors_seq[i])); // calls sort
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
       neighbors_dense(i,i)=-std::numeric_limits<Filtration_value>::infinity();
 #endif
