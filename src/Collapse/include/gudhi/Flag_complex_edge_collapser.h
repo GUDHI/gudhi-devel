@@ -103,7 +103,6 @@ struct Flag_complex_edge_collapser {
       neighbors_dense(i,i)=-std::numeric_limits<Filtration_value>::infinity();
 #endif
     }
-    neighbors2.clear();
   }
 
   // Open neighborhood
