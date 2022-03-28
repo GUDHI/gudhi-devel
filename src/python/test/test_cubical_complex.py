@@ -58,9 +58,6 @@ def test_dimension_or_perseus_file_constructor():
 
 
 def simple_constructor(cub):
-    cub = CubicalComplex(
-        dimensions=[3, 3], cells=[1, 2, 3, 4, 5, 6, 7, 8, 9]
-    )
     assert cub.__is_defined() == True
     assert cub.__is_persistence_defined() == False
     assert cub.persistence() == [(0, (1.0, float("inf")))]
@@ -80,6 +77,14 @@ def test_simple_constructor_from_numpy_array():
         cells=np.array([[1, 2, 3],
                         [4, 5, 6],
                         [7, 8, 9]])
+    )
+    simple_constructor(cub)
+
+def test_constructor_from_vertices():
+    cub = CubicalComplex(
+        dimensions=[4, 4],
+        cells=[1, 1, 2, 3, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9],
+        input_top_cells=False
     )
     simple_constructor(cub)
 
