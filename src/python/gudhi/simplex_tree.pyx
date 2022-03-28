@@ -487,6 +487,11 @@ cdef class SimplexTree:
         with this new simplex (represented as a list of int). If `blocker_func` returns `True`, the simplex is removed,
         otherwise it is kept. The algorithm then proceeds with the next candidate.
 
+        .. warning::
+            Several candidates of the same dimension may be inserted simultaneously before calling `block_simplex`, so
+            if you examine the complex in `block_simplex`, you may hit a few simplices of the same dimension that have
+            not been vetted by `block_simplex` yet, or have already been rejected but not yet removed.
+
         :param max_dim: Expansion maximal dimension value.
         :type max_dim: int
         :param blocker_func: Blocker oracle.
