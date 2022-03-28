@@ -85,7 +85,7 @@ class Bitmap_cubical_complex : public T {
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& cells,
-                         const bool& input_top_cells = true)
+                         bool input_top_cells = true)
       : T(dimensions, cells, input_top_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
     for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
       this->key_associated_to_simplex[i] = i;
@@ -105,8 +105,8 @@ class Bitmap_cubical_complex : public T {
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& cells,
-                         std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed,
-                         const bool& input_top_cells = true)
+                         const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
+                         bool input_top_cells = true)
       : T(dimensions, cells, directions_in_which_periodic_b_cond_are_to_be_imposed, input_top_cells),
         key_associated_to_simplex(this->total_number_of_cells + 1) {
     for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {

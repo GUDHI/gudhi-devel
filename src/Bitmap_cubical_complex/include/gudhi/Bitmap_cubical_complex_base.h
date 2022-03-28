@@ -74,7 +74,7 @@ class Bitmap_cubical_complex_base {
    * The last constructor of a Bitmap_cubical_complex_base class accepts vector of dimensions (as the first one)
    * with vector of filtration values of vertices or top dimensional cells depending on the input_top_cells flag.
    **/
-  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& cells, const bool& input_top_cells = true);
+  Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& cells, bool input_top_cells = true);
 
   /**
    * Destructor of the Bitmap_cubical_complex_base class.
@@ -640,10 +640,10 @@ class Bitmap_cubical_complex_base {
                                                         const std::vector<T>& top_dimensional_cells);
   void setup_bitmap_based_on_vertices(const std::vector<unsigned>& sizes_in_following_directions,
                                       const std::vector<T>& vertices);
-  Bitmap_cubical_complex_base(const char* perseus_style_file, std::vector<bool> directions);
-  Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes, std::vector<bool> directions);
+  Bitmap_cubical_complex_base(const char* perseus_style_file, const std::vector<bool>& directions);
+  Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes, const std::vector<bool>& directions);
   Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions, const std::vector<T>& cells,
-                              std::vector<bool> directions, const bool& input_top_cells);
+                              const std::vector<bool>& directions, bool input_top_cells);
 };
 
 template <typename T>
@@ -784,7 +784,7 @@ size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes_in_following_directions,
-                                                            const std::vector<T>& cells, const bool& input_top_cells) {
+                                                            const std::vector<T>& cells, bool input_top_cells) {
   if (input_top_cells) {
     this->setup_bitmap_based_on_top_dimensional_cells_list(sizes_in_following_directions, cells);
   }
@@ -857,7 +857,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_style_file,
-                                                            std::vector<bool> directions) {
+                                                            const std::vector<bool>& directions) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.
@@ -866,7 +866,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes,
-                                                            std::vector<bool> directions) {
+                                                            const std::vector<bool>& directions) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.
@@ -876,8 +876,8 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions,
                                                             const std::vector<T>& cells,
-                                                            std::vector<bool> directions,
-                                                            const bool& input_top_cells) {
+                                                            const std::vector<bool>& directions,
+                                                            bool input_top_cells) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.

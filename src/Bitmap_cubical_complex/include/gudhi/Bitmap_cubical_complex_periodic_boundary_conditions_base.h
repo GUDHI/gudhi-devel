@@ -70,7 +70,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   Bitmap_cubical_complex_periodic_boundary_conditions_base(
       const std::vector<unsigned>& dimensions, const std::vector<T>& cells,
       const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
-      const bool& input_top_cells);
+      bool input_top_cells);
 
   /**
    * Destructor of the Bitmap_cubical_complex_periodic_boundary_conditions_base class.
@@ -175,7 +175,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& sizes);
   Bitmap_cubical_complex_periodic_boundary_conditions_base(const std::vector<unsigned>& dimensions,
                                                            const std::vector<T>& cells,
-                                                           const bool& input_top_cells);
+                                                           bool input_top_cells);
 
   /**
    * Procedures used to construct the data structures in the class.
@@ -282,7 +282,7 @@ Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_comp
 
 template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
-    const std::vector<unsigned>& dimensions, const std::vector<T>& cells, const bool& input_top_cells) {
+    const std::vector<unsigned>& dimensions, const std::vector<T>& cells, bool input_top_cells) {
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed = std::vector<bool>(dimensions.size(), false);
   if (input_top_cells) {
     this->construct_complex_based_on_top_dimensional_cells(dimensions, cells,
@@ -298,7 +298,7 @@ template <typename T>
 Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::Bitmap_cubical_complex_periodic_boundary_conditions_base(
     const std::vector<unsigned>& dimensions, const std::vector<T>& cells,
     const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
-    const bool& input_top_cells) {
+    bool input_top_cells) {
   if(input_top_cells) {
     this->construct_complex_based_on_top_dimensional_cells(dimensions, cells,
                                                            directions_in_which_periodic_b_cond_are_to_be_imposed);

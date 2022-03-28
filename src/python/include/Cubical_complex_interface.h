@@ -28,14 +28,14 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
  public:
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
                             const std::vector<double>& cells,
-                            const bool input_top_cells = true)
+                            bool input_top_cells = true)
   : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, cells, input_top_cells) {
   }
 
   Cubical_complex_interface(const std::vector<unsigned>& dimensions,
                             const std::vector<double>& cells,
                             const std::vector<bool>& periodic_dimensions,
-                            const bool input_top_cells = true)
+                            bool input_top_cells = true)
   : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, cells, periodic_dimensions, input_top_cells) {
   }
 
