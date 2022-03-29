@@ -230,8 +230,9 @@ struct Flag_complex_edge_collapser {
             }
           }
           if(dominator==-1) break;
-          bool still_dominated;
-          do {
+          // Push as long as dominator remains a dominator.
+          // Iterate on times where at least one neighbor appears.
+          for (bool still_dominated = true; still_dominated; ) {
             if(e_ngb_later_begin == e_ngb_later_end) {
               dead = true; goto end_move;
             }
@@ -241,7 +242,7 @@ struct Flag_complex_edge_collapser {
               heapified=true;
             }
             time = e_ngb_later_begin->first; // first place it may become critical
-            still_dominated = true;
+            // Update the neighborhood for this new time, while checking if any of the new neighbors break domination.
             while (e_ngb_later_begin != e_ngb_later_end && e_ngb_later_begin->first <= time) {
               Vertex w = e_ngb_later_begin->second;
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
@@ -256,12 +257,12 @@ struct Flag_complex_edge_collapser {
               e_ngb.insert(w);
               std::pop_heap(e_ngb_later_begin, e_ngb_later_end--, cmp1);
             }
-          } while (still_dominated); // this doesn't seem to help that much...
+          } // this doesn't seem to help that much...
         }
 end_move:
         if(dead) {
           remove_neighbor(u, v);
-        } else if(start_time != time){
+        } else if(start_time != time) {
           delay_neighbor(u, v, time);
           res.emplace_back(u, v, time);
         } else {
