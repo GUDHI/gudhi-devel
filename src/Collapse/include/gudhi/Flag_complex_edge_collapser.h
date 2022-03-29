@@ -109,7 +109,9 @@ struct Flag_complex_edge_collapser {
   // Open neighborhood
   // At some point it helped gcc to add __attribute__((noinline)) here, otherwise we had +50% on the running time
   // on one example. It looks ok now, or I forgot which example that was.
-  void common_neighbors(boost::container::flat_set<Vertex>& e_ngb, std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later, Vertex u, Vertex v, Filtration_value f_event){
+  void common_neighbors(boost::container::flat_set<Vertex>& e_ngb,
+      std::vector<std::pair<Filtration_value, Vertex>>& e_ngb_later,
+      Vertex u, Vertex v, Filtration_value f_event){
     // Using neighbors_dense here seems to hurt, even if we loop on the smaller of nu and nv.
     Ngb_list const&nu = neighbors[u];
     Ngb_list const&nv = neighbors[v];
@@ -278,7 +280,8 @@ end_move:
 template<class R> R to_range(R&& r) { return std::move(r); }
 template<class R, class T> R to_range(T&& t) { R r; r.insert(r.end(), t.begin(), t.end()); return r; }
 
-template<class FilteredEdgeRange, class Delay> auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {
+template<class FilteredEdgeRange, class Delay>
+auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {
   // Would it help to label the points according to some spatial sorting?
   auto first_edge_itr = std::begin(edges);
   using Vertex = std::decay_t<decltype(std::get<0>(*first_edge_itr))>;
