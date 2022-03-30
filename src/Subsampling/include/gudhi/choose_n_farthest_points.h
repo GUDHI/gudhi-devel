@@ -38,32 +38,35 @@ enum : std::size_t {
  *  \ingroup subsampling
  *  \brief Subsample by a greedy strategy of iteratively adding the farthest point from the
  *  current chosen point set to the subsampling. 
- *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`, with a random landmark.
- *  \tparam Kernel must provide a type Kernel::Squared_distance_d which is a model of the 
- *          concept <a target="_blank"
- *   href="http://doc.cgal.org/latest/Kernel_d/classKernel__d_1_1Squared__distance__d.html">Kernel_d::Squared_distance_d</a> (despite the name, taken from CGAL, this can be any kind of metric or proximity measure).
- *  It must also contain a public member `squared_distance_d_object()` that returns an object of this type.
- *  \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
- *         via `operator[]` and the points should be stored contiguously in memory.
- *  \tparam PointOutputIterator Output iterator whose value type is Kernel::Point_d.
- *  \tparam DistanceOutputIterator Output iterator for distances.
- *  \details It chooses `final_size` points from a random access range
- *  `input_pts` and outputs them in the output iterator `output_it`. It also
+ *  \details
+ *  The iteration starts with the landmark `starting point` or, if `starting point==random_starting_point`,
+ *  with a random landmark.
+ *  It chooses `final_size` points from a random access range
+ *  `input_pts` (or the number of input points if `final_size` is larger)
+ *  and outputs them in the output iterator `output_it`. It also
  *  outputs the distance from each of those points to the set of previous
  *  points in `dist_it`.
- * @param[in] k A kernel object.
- * @param[in] input_pts Const reference to the input points.
+ *  \tparam Distance must provide an operator() that takes 2 points (value type of the range)
+ *  and returns their distance (or some more general proximity measure) as a `double`.
+ *  \tparam Point_range Random access range of points.
+ *  \tparam PointOutputIterator Output iterator whose value type is the point type.
+ *  \tparam DistanceOutputIterator Output iterator for distances.
+ * @param[in] dist A distance function.
+ * @param[in] input_pts The input points.
  * @param[in] final_size The size of the subsample to compute.
  * @param[in] starting_point The seed in the farthest point algorithm.
  * @param[out] output_it The output iterator for points.
  * @param[out] dist_it The optional output iterator for distances.
+ *
+ * \warning Older versions of this function took a CGAL kernel as argument. Users need to replace `k` with
+ * `k.squared_distance_d_object()` in the first argument of every call to `choose_n_farthest_points`.
  *  
  */
-template < typename Kernel,
+template < typename Distance,
 typename Point_range,
 typename PointOutputIterator,
 typename DistanceOutputIterator = Null_output_iterator>
-void choose_n_farthest_points(Kernel const &k,
+void choose_n_farthest_points(Distance dist,
                               Point_range const &input_pts,
                               std::size_t final_size,
                               std::size_t starting_point,
@@ -85,32 +88,57 @@ void choose_n_farthest_points(Kernel const &k,
     starting_point = dis(gen);
   }
 
-  typename Kernel::Squared_distance_d sqdist = k.squared_distance_d_object();
+  // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
+  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
 
-  std::size_t current_number_of_landmarks = 0;  // counter for landmarks
-  const double infty = std::numeric_limits<double>::infinity();  // infinity (see next entry)
-  std::vector< double > dist_to_L(nb_points, infty);  // vector of current distances to L from input_pts
+  *output_it++ = input_pts[starting_point];
+  *dist_it++ = std::numeric_limits<double>::infinity();
+  if (final_size == 1) return;
+
+  std::vector<std::size_t> points(nb_points);  // map from remaining points to indexes in input_pts
+  std::vector< double > dist_to_L(nb_points);  // vector of current distances to L from points
+  for(std::size_t i = 0; i < nb_points; ++i) {
+    points[i] = i;
+    dist_to_L[i] = dist(input_pts[i], input_pts[starting_point]);
+  }
+  // The indirection through points makes the program a bit slower. Some alternatives:
+  // - the original code never removed points and counted on them not
+  //   reappearing because of a self-distance of 0. This causes unnecessary
+  //   computations when final_size is large. It also causes trouble if there are
+  //   input points at distance 0 from each other.
+  // - copy input_pts and update the local copy when removing points.
 
   std::size_t curr_max_w = starting_point;
 
-  for (current_number_of_landmarks = 0; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
-    // curr_max_w at this point is the next landmark
-    *output_it++ = input_pts[curr_max_w];
-    *dist_it++ = dist_to_L[curr_max_w];
+  for (std::size_t current_number_of_landmarks = 1; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
+    std::size_t latest_landmark = points[curr_max_w];
+    // To remove the latest landmark at index curr_max_w, replace it
+    // with the last point and reduce the length of the vector.
+    std::size_t last = points.size() - 1;
+    if (curr_max_w != last) {
+      points[curr_max_w] = points[last];
+      dist_to_L[curr_max_w] = dist_to_L[last];
+    }
+    points.pop_back();
+
+    // Update distances to L.
     std::size_t i = 0;
-    for (auto&& p : input_pts) {
-      double curr_dist = sqdist(p, *(std::begin(input_pts) + curr_max_w));
+    for (auto p : points) {
+      double curr_dist = dist(input_pts[p], input_pts[latest_landmark]);
       if (curr_dist < dist_to_L[i])
         dist_to_L[i] = curr_dist;
       ++i;
     }
-    // choose the next curr_max_w
-    double curr_max_dist = 0;  // used for defining the furhest point from L
-    for (i = 0; i < dist_to_L.size(); i++)
+    // choose the next landmark
+    curr_max_w = 0;
+    double curr_max_dist = dist_to_L[curr_max_w];  // used for defining the furthest point from L
+    for (i = 1; i < points.size(); i++)
       if (dist_to_L[i] > curr_max_dist) {
         curr_max_dist = dist_to_L[i];
         curr_max_w = i;
       }
+    *output_it++ = input_pts[points[curr_max_w]];
+    *dist_it++ = dist_to_L[curr_max_w];
   }
 }
 

@@ -14,7 +14,6 @@
 #include <gudhi/Debug_utils.h>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/version.hpp>
 #include <boost/container/static_vector.hpp>
 
 #include <vector>
@@ -84,6 +83,12 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   typedef typename SimplexTree::Simplex_handle Simplex_handle;
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
   typedef typename SimplexTree::Siblings Siblings;
+
+  // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is overwritten.
+  Simplex_tree_boundary_simplex_iterator()
+      : sib_(nullptr),
+        st_(nullptr)  {
+  }
 
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)

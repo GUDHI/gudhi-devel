@@ -15,6 +15,4 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_test(NAME Tangential_complex_example_with_perturb
       COMMAND $<TARGET_FILE:Tangential_complex_example_with_perturb>)
 
-  install(TARGETS Tangential_complex_example_basic DESTINATION bin)
-  install(TARGETS Tangential_complex_example_with_perturb DESTINATION bin)
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

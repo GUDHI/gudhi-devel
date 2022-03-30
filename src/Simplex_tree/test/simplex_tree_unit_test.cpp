@@ -940,3 +940,54 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(generators, typeST, list_of_tested_variants) {
     BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
   }
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST RESET FILTRATION" << std::endl;
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({3, 0}, 2.);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  for (auto f_simplex : st.skeleton_simplex_range(3)) {
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+    }
+    std::clog << ") - filtration = " << st.filtration(f_simplex);
+    std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+    // Guaranteed by construction
+    BOOST_CHECK(st.filtration(f_simplex) >= 2.);
+  }
+
+  // dimension until 5 even if simplex tree is of dimension 3 to test the limits
+  for(int dimension = 5; dimension >= 0; dimension --) {
+    std::clog << "### reset_filtration - dimension = " << dimension << "\n";
+    st.reset_filtration(0., dimension);
+    for (auto f_simplex : st.skeleton_simplex_range(3)) {
+      std::clog << "vertex = (";
+      for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+        std::clog << vertex << ",";
+      }
+      std::clog << ") - filtration = " << st.filtration(f_simplex);
+      std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+      if (st.dimension(f_simplex) < dimension)
+        BOOST_CHECK(st.filtration(f_simplex) >= 2.);
+      else
+        BOOST_CHECK(st.filtration(f_simplex) == 0.);
+    }
+  }
+
+}
+

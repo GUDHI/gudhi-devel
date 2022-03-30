@@ -71,7 +71,7 @@ namespace cech_complex {
  * \ref rips_complex but it offers more topological guarantees.
  *
  * If the Cech_complex interfaces are not detailed enough for your need, please refer to
- * <a href="_cech_complex_2cech_complex_step_by_step_8cpp-example.html">
+ * <a href="cech_complex_step_by_step_8cpp-example.html">
  * cech_complex_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
  *
  * \subsection cechpointscloudexample Example from a point cloud
@@ -81,7 +81,7 @@ namespace cech_complex {
  * 
  * Then, it is asked to display information about the simplicial complex.
  * 
- * \include Cech_complex/cech_complex_example_from_points.cpp
+ * \include cech_complex_example_from_points.cpp
  * 
  * When launching (maximal enclosing ball radius is 1., is expanded until dimension 2):
  * 
@@ -90,7 +90,7 @@ namespace cech_complex {
  *
  * the program output is:
  * 
- * \include Cech_complex/cech_complex_example_from_points_for_doc.txt
+ * \include cech_complex_example_from_points_for_doc.txt
  * 
  */
 /** @} */  // end defgroup cech_complex

@@ -33,25 +33,19 @@ Compiling
 These instructions are for people who want to compile gudhi from source, they are
 unnecessary if you installed a binary package of Gudhi as above. They assume that
 you have downloaded a `release <https://github.com/GUDHI/gudhi-devel/releases>`_,
-with a name like `gudhi.3.2.0.tar.gz`, then run `tar xf gudhi.3.2.0.tar.gz`, which
-created a directory `gudhi.3.2.0`, hereinafter referred to as `/path-to-gudhi/`.
+with a name like `gudhi.3.X.Y.tar.gz`, then run `tar xf gudhi.3.X.Y.tar.gz`, which
+created a directory `gudhi.3.X.Y`, hereinafter referred to as `/path-to-gudhi/`.
 If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
 
-The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.1  to generate makefiles,
-`NumPy <http://numpy.org>`_, `Cython <https://www.cython.org/>`_ and
-`pybind11 <https://github.com/pybind/pybind11>`_ to compile
-the GUDHI Python module.
-It is a multi-platform library and compiles on Linux, Mac OSX and Visual
-Studio 2017 or later.
+The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
+Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
+:math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
+It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
-On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
-:math:`\geq` 3.5 are available because of the required Visual Studio version.
-
-On other systems, if you have several Python/python installed, the version 2.X
-will be used by default, but you can force it by adding
+If you have several Python/python installed, the version 2.X may be used by default, but you can force it by adding
 :code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
 GUDHI Python module compilation
@@ -65,7 +59,7 @@ one can build the GUDHI Python module, by running the following commands in a te
     cd /path-to-gudhi/
     mkdir build
     cd build/
-    cmake ..
+    cmake -DCMAKE_BUILD_TYPE=Release ..
     cd python
     make
 
@@ -99,20 +93,14 @@ Or install it definitely in your Python packages folder:
 .. code-block:: bash
 
     cd /path-to-gudhi/build/python
-    # May require sudo or administrator privileges
-    make install
+    python setup.py install # add --user to the command if you do not have the permission
+    # Or 'pip install .'
 
 .. note::
 
-    :code:`make install` is only a
-    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
-    to shortcut :code:`python setup.py install` command.
     It does not take into account :code:`CMAKE_INSTALL_PREFIX`.
-    But one can use :code:`python setup.py install ...` specific options in the python directory:
-
-.. code-block:: bash
-
-    python setup.py install --prefix /home/gudhi  # Install in /home/gudhi directory
+    But one can use
+    `alternate location installation <https://docs.python.org/3/install/#alternate-installation>`_.
 
 Test suites
 ===========
@@ -148,60 +136,71 @@ If :code:`import gudhi` succeeds, please have a look to debug information:
 
 .. code-block:: python
 
-    import gudhi
-    print(gudhi.__debug_info__)
+    import gudhi as gd
+    print(gd.__debug_info__)
+    print("+ Installed modules are: " + gd.__available_modules)
+    print("+ Missing modules are: " + gd.__missing_modules)
 
 You shall have something like:
 
 .. code-block:: none
 
-    Python version 2.7.15
-    Cython version 0.26.1
-    Numpy version 1.14.1
-    Eigen3 version 3.1.1
-    Installed modules are: off_reader;simplex_tree;rips_complex;
-        cubical_complex;periodic_cubical_complex;reader_utils;witness_complex;
-        strong_witness_complex;alpha_complex;
-    Missing modules are: bottleneck_distance;nerve_gic;subsampling;
-        tangential_complex;persistence_graphical_tools;
-        euclidean_witness_complex;euclidean_strong_witness_complex;
-    CGAL version 4.7.1000
-    GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
-    GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
-    TBB version 9107 found and used
+    Pybind11 version 2.8.1 
+    Python version 3.7.12
+    Cython version 0.29.25 
+    Numpy version 1.21.4 
+    Boost version 1.77.0
+    + Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
+    + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
+        euclidean_strong_witness_complex;
 
-Here, you can see that bottleneck_distance, nerve_gic, subsampling and
-tangential_complex are missing because of the CGAL version.
-persistence_graphical_tools is not available as matplotlib is not
-available.
+Here, you can see that the modules that need CGAL are missing, because CGAL is not installed.
+:code:`persistence_graphical_tools` is installed, but 
+`its functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_ will produce an error as
+matplotlib is not available.
 Unitary tests cannot be run as pytest is missing.
 
 A complete configuration would be :
 
 .. code-block:: none
 
-    Python version 3.6.5
-    Cython version 0.28.2
-    Pytest version 3.3.2
-    Matplotlib version 2.2.2
-    Numpy version 1.14.5
-    Eigen3 version 3.3.4
-    Installed modules are: off_reader;simplex_tree;rips_complex;
-        cubical_complex;periodic_cubical_complex;persistence_graphical_tools;
-        reader_utils;witness_complex;strong_witness_complex;
-        persistence_graphical_tools;bottleneck_distance;nerve_gic;subsampling;
-        tangential_complex;alpha_complex;euclidean_witness_complex;
-        euclidean_strong_witness_complex;
-    CGAL header only version 4.11.0
+    Pybind11 version 2.8.1 
+    Python version 3.9.7
+    Cython version 0.29.24 
+    Pytest version 6.2.5 
+    Matplotlib version 3.5.0 
+    Numpy version 1.21.4 
+    Scipy version 1.7.3 
+    Scikit-learn version 1.0.1 
+    POT version 0.8.0 
+    HNSWlib found
+    PyKeOps version [pyKeOps]: 1.5 
+    EagerPy version 0.30.0 
+    TensorFlow version 2.7.0 
+    Sphinx version 4.3.0 
+    Sphinx-paramlinks version 0.5.2 
+    python_docs_theme found
+    Eigen3 version 3.4.0
+    Boost version 1.74.0
+    CGAL version 5.3
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
+    MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 9107 found and used
+    + Installed modules are: bottleneck;off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
+        tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
+    + Missing modules are: 
+
 
 Documentation
 =============
 
-To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_ and
-`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_ are
+To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
+`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+`sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
+`python-docs-theme <https://github.com/python/python-docs-theme>`_ are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
 `Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
 also mandatory to build the documentation.
@@ -323,6 +322,35 @@ The following examples require the `Matplotlib <http://matplotlib.org>`_:
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
+LaTeX
+~~~~~
+
+If a sufficiently complete LaTeX toolchain is available (including dvipng and ghostscript), the LaTeX option of
+matplotlib is enabled for prettier captions (cf.
+`matplotlib text rendering with LaTeX <https://matplotlib.org/3.3.0/tutorials/text/usetex.html>`_).
+It also requires `type1cm` LaTeX package (not detected by matplotlib).
+
+If you are facing issues with LaTeX rendering, like this one:
+
+.. code-block:: none
+
+    Traceback (most recent call last):
+      File "/usr/lib/python3/dist-packages/matplotlib/texmanager.py", line 302, in _run_checked_subprocess
+        report = subprocess.check_output(command,
+    ...
+    ! LaTeX Error: File `type1cm.sty' not found.
+    ...
+
+This is because the LaTeX package is not installed on your system. On Ubuntu systems you can install texlive-full
+(for all LaTeX packages), or more specific packages like texlive-latex-extra, cm-super.
+
+You can still deactivate LaTeX rendering by saying:
+
+.. code-block:: python
+
+    import gudhi as gd
+    gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
+
 PyKeOps
 -------
 
@@ -334,7 +362,7 @@ Python Optimal Transport
 ------------------------
 
 The :doc:`Wasserstein distance </wasserstein_distance_user>`
-module requires `POT <https://pot.readthedocs.io/>`_, a library that provides
+module requires `POT <https://pythonot.github.io/>`_, a library that provides
 several solvers for optimization problems related to Optimal Transport.
 
 PyTorch
@@ -365,11 +393,17 @@ mathematics, science, and engineering.
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
 
+TensorFlow
+----------
+
+`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+
 Bug reports and contributions
 *****************************
 
-Please help us improving the quality of the GUDHI library. You may report bugs or suggestions to:
+Please help us improving the quality of the GUDHI library.
+You may `report bugs <https://github.com/GUDHI/gudhi-devel/issues>`_ or
+`contact us <https://gudhi.inria.fr/contact/>`_ for any suggestions.
 
-    Contact: gudhi-users@lists.gforge.inria.fr
-
-GUDHI is open to external contributions. If you want to join our development team, please contact us.
+GUDHI is open to external contributions. If you want to join our development team, please take some time to read our
+`contributing guide <https://github.com/GUDHI/gudhi-devel/blob/master/.github/CONTRIBUTING.md>`_.

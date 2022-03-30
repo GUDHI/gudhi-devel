@@ -92,11 +92,11 @@ int main(int argc, char * const argv[]) {
 
   // Choose landmarks (one can choose either of the two methods below)
   // Gudhi::subsampling::pick_n_random_points(point_vector, nbL, std::back_inserter(landmarks));
-  Gudhi::subsampling::choose_n_farthest_points(K(), point_vector, nbL, Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
+  Gudhi::subsampling::choose_n_farthest_points(K().squared_distance_d_object(), point_vector, nbL,
+      Gudhi::subsampling::random_starting_point, std::back_inserter(landmarks));
 
   // Compute witness complex
-  Witness_complex witness_complex(landmarks,
-                                  point_vector);
+  Witness_complex witness_complex(landmarks, point_vector);
 
   witness_complex.create_complex(simplex_tree, alpha2, lim_dim);
 }
@@ -108,14 +108,14 @@ int main(int argc, char * const argv[]) {
 
    Here is an example of constructing a strong witness complex filtration and computing persistence on it:
 
-   \include Witness_complex/strong_witness_persistence.cpp
+   \include strong_witness_persistence.cpp
 
    \section witnessexample3 Example3: Computing relaxed witness complex persistence from a distance matrix 
 
    In this example we compute the relaxed witness complex persistence from a given matrix of closest landmarks to each witness.
    Each landmark is given as the couple (index, distance).
 
-   \include Witness_complex/example_nearest_landmark_table.cpp
+   \include example_nearest_landmark_table.cpp
 
  */
 

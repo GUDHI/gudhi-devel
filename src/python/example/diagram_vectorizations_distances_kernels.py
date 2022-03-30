@@ -5,11 +5,11 @@ import numpy as np
 from sklearn.kernel_approximation import RBFSampler
 from sklearn.preprocessing import MinMaxScaler
 
-from gudhi.representations import DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
+from gudhi.representations import (DiagramSelector, Clamping, Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
   TopologicalVector, DiagramScaler, BirthPersistenceTransform,\
   PersistenceImage, PersistenceWeightedGaussianKernel, Entropy, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
-  SlicedWassersteinKernel, BottleneckDistance, PersistenceFisherKernel, WassersteinDistance
+  SlicedWassersteinKernel, PersistenceFisherKernel, WassersteinDistance)
 
 D1 = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.], [0., np.inf], [5., np.inf]])
 
@@ -93,14 +93,21 @@ print("SW distance is " + str(sW(D1, D2)))
 SW = SlicedWassersteinKernel(num_directions=100, bandwidth=1.)
 print("SW kernel is " + str(SW(D1, D2)))
 
-W = WassersteinDistance(order=2, internal_p=2, mode="pot")
-print("Wasserstein distance (POT) is " + str(W(D1, D2)))
+try:
+    W = WassersteinDistance(order=2, internal_p=2, mode="pot")
+    print("Wasserstein distance (POT) is " + str(W(D1, D2)))
+except ImportError:
+    print("WassersteinDistance (POT) is not available, you may be missing pot.")
 
 W = WassersteinDistance(order=2, internal_p=2, mode="hera", delta=0.0001)
 print("Wasserstein distance (hera) is " + str(W(D1, D2)))
 
-W = BottleneckDistance(epsilon=.001)
-print("Bottleneck distance is " + str(W(D1, D2)))
+try:
+    from gudhi.representations import BottleneckDistance
+    W = BottleneckDistance(epsilon=.001)
+    print("Bottleneck distance is " + str(W(D1, D2)))
+except ImportError:
+    print("BottleneckDistance is not available, you may be missing CGAL.")
 
 PF = PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1.)
 print("PF kernel is " + str(PF(D1, D2)))

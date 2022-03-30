@@ -90,3 +90,14 @@ If you want more information on a specific dimension, for instance:
     gudhi.plot_persistence_density(persistence=pers_diag,
         dimension=1, legend=True, axes=axes[1])
     plt.show()
+
+LaTeX support
+-------------
+
+If you are facing issues with `LaTeX <installation.html#latex>`_ rendering, you can still deactivate LaTeX rendering by
+saying:
+
+.. code-block:: python
+
+    import gudhi
+    gudhi.persistence_graphical_tools._gudhi_matplotlib_use_tex=False

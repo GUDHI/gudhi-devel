@@ -7,8 +7,6 @@ endif()
 add_test(NAME Witness_complex_example_nearest_landmark_table
     COMMAND $<TARGET_FILE:Witness_complex_example_nearest_landmark_table>)
 
-install(TARGETS Witness_complex_example_nearest_landmark_table DESTINATION bin)
-
 # CGAL and Eigen3 are required for Euclidean version of Witness
 if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable( Witness_complex_example_off example_witness_complex_off.cpp )
@@ -33,10 +31,5 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_test(NAME Witness_complex_example_strong_off_test_torus
       COMMAND $<TARGET_FILE:Witness_complex_example_strong_off>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "20" "1.0" "3")
-      
-  install(TARGETS Witness_complex_example_off DESTINATION bin)
-  install(TARGETS Witness_complex_example_sphere DESTINATION bin)
-  install(TARGETS Witness_complex_example_strong_off DESTINATION bin)
-
 
 endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)

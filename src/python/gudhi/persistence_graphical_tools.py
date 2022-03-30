@@ -20,6 +20,7 @@ __author__ = "Vincent Rouvreau, Bertrand Michel, Theo Lacombe"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+_gudhi_matplotlib_use_tex = True
 
 def __min_birth_max_death(persistence, band=0.0):
     """This function returns (min_birth, max_death) from the persistence.
@@ -117,10 +118,13 @@ def plot_persistence_barcode(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -263,10 +267,13 @@ def plot_persistence_diagram(
     try:
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if path.isfile(persistence_file):
@@ -436,10 +443,13 @@ def plot_persistence_density(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
         from scipy.stats import kde
-        if _matplotlib_can_use_tex():
-            from matplotlib import rc
+        from matplotlib import rc
+        if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
+        else:
+            plt.rc('text', usetex=False)
+            plt.rc('font', family='DejaVu Sans')
 
         if persistence_file != "":
             if dimension is None:

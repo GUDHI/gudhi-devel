@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 project(GUDHI)
 
-include(CMakeGUDHIVersion.txt)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
+include(CMakeGUDHIVersion.txt)
+include(GUDHI_options)
 
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -27,6 +27,7 @@ add_gudhi_module(Bottleneck_distance)
 add_gudhi_module(Cech_complex)
 add_gudhi_module(Contraction)
 add_gudhi_module(Collapse)
+add_gudhi_module(Coxeter_triangulation)
 add_gudhi_module(Hasse_complex)
 add_gudhi_module(Persistence_representations)
 add_gudhi_module(Persistent_cohomology)
@@ -50,6 +51,14 @@ include_directories(include)
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
+if (WITH_GUDHI_PYTHON)
+  # specific for cython module
+  add_subdirectory(${GUDHI_PYTHON_PATH})
+else()
+  message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")
+endif()
+
 foreach(GUDHI_MODULE ${GUDHI_MODULES})
   foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
     if(EXISTS ${CMAKE_SOURCE_DIR}/${GUDHI_SUB_DIRECTORY}/${GUDHI_MODULE}/CMakeLists.txt)
@@ -59,14 +68,6 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
 endforeach()
 
 add_subdirectory(GudhUI)
-
-if (WITH_GUDHI_PYTHON)
-  # specific for cython module
-  add_subdirectory(${GUDHI_PYTHON_PATH})
-else()
-  message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
-  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")
-endif()
 
 message("++ GUDHI_MODULES list is:\"${GUDHI_MODULES}\"")
 message("++ GUDHI_MISSING_MODULES list is:\"${GUDHI_MISSING_MODULES}\"")
