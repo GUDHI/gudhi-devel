@@ -15,6 +15,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import sys
 import os
+import errno
 
 import numpy as np
 
@@ -50,32 +51,39 @@ cdef class PeriodicCubicalComplex:
     cdef Periodic_cubical_complex_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, dimensions=None, cells=None, input_top_cells=True,
-                 periodic_dimensions=None, perseus_file=''):
-        """PeriodicCubicalComplex constructor from dimensions and
-        cells (either vertices or top dimensional depending on
-        the input_top_cells flag to set) or from a Perseus-style file name.
+    def __init__(self, dimensions=None, top_dimensional_cells=None,
+                 vertices=None, periodic_dimensions=None, perseus_file=''):
+        """PeriodicCubicalComplex constructor from dimensions and cells
+        (either vertices or top dimensional) or from a Perseus-style file name.
 
-        :param dimensions: A list of number of cells.
+        :param dimensions: A list of number of top dimensional cells.
         :type dimensions: list of int
-        :param cells: A list of cells filtration values.
-        :type cells: list of double
-        :param input_top_cells: A flag to indicate if the given cells as input
-         are vertices or top dimensional.
-         Default is 'True' meaning that the given cells should be top dimensional.
-        :type input_top_cells: bool
+        :param top_dimensional_cells: A list of top dimensional cells filtration values.
+        :type top_dimensional_cells: list of double
         :param periodic_dimensions: A list of cells periodicity value.
         :type periodic_dimensions: list of boolean
 
         Or
 
-        :param cells: A multidimensional array of cells
-            filtration values.
-        :type cells: anything convertible to a numpy ndarray
-        :param input_top_cells: A flag to indicate if the given cells as input
-         are vertices or top dimensional.
-         Default is 'True' meaning that the given cells should be top dimensional.
-        :type input_top_cells: bool
+        :param dimensions: A list of number of vertices.
+        :type dimensions: list of int
+        :param vertices: A list of vertices filtration values.
+        :type vertices: list of double
+        :param periodic_dimensions: A list of cells periodicity value.
+        :type periodic_dimensions: list of boolean
+
+        Or
+
+        :param top_dimensional_cells: A multidimensional array of top
+            dimensional cells filtration values.
+        :type top_dimensional_cells: anything convertible to a numpy ndarray
+        :param periodic_dimensions: A list of cells periodicity value.
+        :type periodic_dimensions: list of boolean
+
+        Or
+
+        :param vertices: A multidimensional array vertices filtration values.
+        :type vertices: anything convertible to a numpy ndarray
         :param periodic_dimensions: A list of cells periodicity value.
         :type periodic_dimensions: list of boolean
 
@@ -86,30 +94,45 @@ cdef class PeriodicCubicalComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, dimensions=None, cells=None, input_top_cells=True,
+    def __cinit__(self, dimensions=None, top_dimensional_cells=None, vertices=None,
                   periodic_dimensions=None, perseus_file=''):
-        if ((dimensions is not None) and (cells is not None)
-            and (periodic_dimensions is not None) and (perseus_file == '')):
-            self._construct_from_cells(dimensions, cells, periodic_dimensions, input_top_cells)
-        elif ((dimensions is None) and (cells is not None)
-            and (periodic_dimensions is not None) and (perseus_file == '')):
-            cells = np.array(cells,
-                             copy = False,
-                             order = 'F')
-            dimensions = cells.shape
-            cells = cells.ravel(order='F')
-            self._construct_from_cells(dimensions, cells, periodic_dimensions, input_top_cells)
-        elif ((dimensions is None) and (cells is None)
-            and (periodic_dimensions is None) and (perseus_file != '')):
+        if ((dimensions is not None) and (top_dimensional_cells is not None)
+            and (vertices is None) and (periodic_dimensions is not None)
+            and (perseus_file == '')):
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions, True)
+        elif ((dimensions is not None) and (vertices is not None)
+            and (top_dimensional_cells is None) and (periodic_dimensions is not None)
+            and (perseus_file == '')):
+            self._construct_from_cells(dimensions, vertices, periodic_dimensions, False)
+        elif ((dimensions is None) and (top_dimensional_cells is not None)
+            and (vertices is None) and (periodic_dimensions is not None)
+            and (perseus_file == '')):
+            top_dimensional_cells = np.array(top_dimensional_cells,
+                                             copy = False,
+                                             order = 'F')
+            dimensions = top_dimensional_cells.shape
+            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
+            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions, True)
+        elif ((dimensions is None) and (vertices is not None)
+            and (top_dimensional_cells is None) and (periodic_dimensions is not None)
+            and (perseus_file == '')):
+            vertices = np.array(vertices,
+                                copy = False,
+                                order = 'F')
+            dimensions = vertices.shape
+            vertices = vertices.ravel(order='F')
+            self._construct_from_cells(dimensions, vertices, periodic_dimensions, False)
+        elif ((dimensions is None) and (top_dimensional_cells is None)
+            and (vertices is None) and (periodic_dimensions is None)
+            and (perseus_file != '')):
             if os.path.isfile(perseus_file):
                 self._construct_from_file(perseus_file.encode('utf-8'))
             else:
-                print("file " + perseus_file + " not found.", file=sys.stderr)
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                        perseus_file)
         else:
-            print("CubicalComplex can be constructed from dimensions, "
-              "cells and periodic_dimensions, or from "
-              "cells and periodic_dimensions or from "
-              "a Perseus-style file name.", file=sys.stderr)
+            raise ValueError("CubicalComplex can be constructed either from top_dimensional_cells"
+                "and periodic_dimensions, vertices and periodic_dimensions, or a Perseus-style file name.")
 
     def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells):
         with nogil:

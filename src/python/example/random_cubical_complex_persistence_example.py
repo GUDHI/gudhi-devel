@@ -39,7 +39,7 @@ if dimension_multiplication > 1:
     print("CubicalComplex creation")
     cubical_complex = gudhi.CubicalComplex(
         dimensions=args.dimension,
-        cells=numpy.random.rand(dimension_multiplication),
+        top_dimensional_cells=numpy.random.rand(dimension_multiplication),
     )
 
     print("persistence(homology_coeff_field=2, min_persistence=0)=")
