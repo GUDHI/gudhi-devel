@@ -18,6 +18,10 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_sort.h>
+#endif
+
 #include <utility>
 #include <vector>
 #include <tuple>
@@ -290,7 +294,13 @@ auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {
   using Edge_collapser = Flag_complex_edge_collapser<Vertex, Filtration_value>;
   if (first_edge_itr != std::end(edges)) {
     auto edges2 = to_range<std::vector<typename Edge_collapser::Filtered_edge>>(std::forward<FilteredEdgeRange>(edges));
+#ifdef GUDHI_USE_TBB
+    // I think this sorting is always negligible compared to the collapse, but parallelizing it shouldn't hurt.
+    tbb::parallel_sort(edges2.begin(), edges2.end(),
+        [](auto const&a, auto const&b){return std::get<2>(a)>std::get<2>(b);});
+#else
     std::sort(edges2.begin(), edges2.end(), [](auto const&a, auto const&b){return std::get<2>(a)>std::get<2>(b);});
+#endif
     Edge_collapser edge_collapser;
     edge_collapser.process_edges(edges2, std::forward<Delay>(delay));
     return edge_collapser.output();
