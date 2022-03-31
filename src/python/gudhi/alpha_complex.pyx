@@ -32,9 +32,9 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
         @staticmethod
-        void set_float_relative_precision(double precision) nogil
+        void set_float_relative_precision(double precision)
         @staticmethod
-        double get_float_relative_precision() nogil
+        double get_float_relative_precision()
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -157,7 +157,8 @@ cdef class AlphaComplex:
     def get_float_relative_precision():
         """
         :returns: The float relative precision of filtration values computation in
-            :func:`~gudhi.AlphaComplex.create_simplex_tree`.
+            :func:`~gudhi.AlphaComplex.create_simplex_tree` when the AlphaComplex is constructed with
+            :code:`precision = 'safe'` (the default).
         :rtype: float
         """
         return Alpha_complex_interface.get_float_relative_precision()
