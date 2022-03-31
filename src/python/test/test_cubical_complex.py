@@ -28,7 +28,7 @@ def test_non_existing_perseus_file_constructor():
         cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
 
 
-def test_dimension_or_perseus_file_constructor():
+def test_dimensions_one_cells_type_or_perseus_file_constructor():
     # Create test file
     test_file = open("CubicalOneSphere.txt", "w")
     test_file.write("2\n3\n3\n0\n0\n0\n0\n100\n0\n0\n0\n0\n")
@@ -49,6 +49,41 @@ def test_dimension_or_perseus_file_constructor():
     with pytest.raises(ValueError):
         cub = CubicalComplex(dimensions=[3, 3],
                              perseus_file="CubicalOneSphere.txt")
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            dimensions=[3, 3],
+            top_dimensional_cells=[1, 2, 3, 4],
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+            perseus_file="CubicalOneSphere.txt",
+        )
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            top_dimensional_cells=[1, 2, 3, 4],
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+            perseus_file="CubicalOneSphere.txt",
+        )
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            dimensions=[3, 3],
+            top_dimensional_cells=[1, 2, 3, 4],
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        )
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            top_dimensional_cells=[1, 2, 3, 4],
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+        )
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            dimensions=[3, 3],
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+            perseus_file="CubicalOneSphere.txt",
+        )
+    with pytest.raises(ValueError):
+        cub = CubicalComplex(
+            vertices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+            perseus_file="CubicalOneSphere.txt",
+        )
 
 def simple_constructor(cub):
     assert cub.__is_defined() == True
