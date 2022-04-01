@@ -268,9 +268,10 @@ cdef class SimplexTree:
     def insert_edges_from_coo_matrix(self, edges):
         """Inserts edges given by a sparse matrix in `COOrdinate format
         <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
-        Duplicate entries are not allowed. Missing entries are not inserted. Diagonal entries are interpreted as
-        vertices, although this is only useful if you want to insert vertices with a smaller filtration value than
-        the smallest edge containing it, since vertices are implicitly inserted together with the edges.
+        If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
+        Diagonal entries are interpreted as vertices, although this is only useful if you want to insert
+        vertices with a smaller filtration value than the smallest edge containing it, since vertices are
+        implicitly inserted together with the edges.
 
         :param edges: the edges to insert and their filtration values.
         :type edges: scipy.sparse.coo_matrix of shape (n,n)
@@ -284,7 +285,7 @@ cdef class SimplexTree:
     def insert_batch(self, some_int[:,:] vertex_array, some_float[:] filtrations):
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
-        Duplicate entries are not allowed. Missing entries are not inserted.
+        If a simplex is repeated, the smallest filtration value is used.
         Simplices with a repeated vertex are currently interpreted as lower
         dimensional simplices, but we do not guarantee this behavior in the
         future. Any time a simplex is inserted, its faces are inserted as well
@@ -301,11 +302,12 @@ cdef class SimplexTree:
         cdef Py_ssize_t i
         cdef Py_ssize_t j
         cdef vector[int] v
-        for i in range(n):
-            for j in range(k):
-                v.push_back(vertex_array[j, i])
-            self.get_ptr().insert(v, filtrations[i])
-            v.clear()
+        with nogil:
+            for i in range(n):
+                for j in range(k):
+                    v.push_back(vertex_array[j, i])
+                self.get_ptr().insert(v, filtrations[i])
+                v.clear()
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
