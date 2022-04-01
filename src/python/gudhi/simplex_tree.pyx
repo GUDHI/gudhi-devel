@@ -8,13 +8,22 @@
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
-from libc.stdint cimport intptr_t
+from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
+cimport cython
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+ctypedef fused some_int:
+    int32_t
+    int64_t
+
+ctypedef fused some_float:
+    float
+    double
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -226,6 +235,7 @@ cdef class SimplexTree:
         return self.get_ptr().insert(simplex, <double>filtration)
 
     @staticmethod
+    @cython.boundscheck(False)
     def create_from_array(filtrations, double max_filtration=np.inf):
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
@@ -265,9 +275,37 @@ cdef class SimplexTree:
         :param edges: the edges to insert and their filtration values.
         :type edges: scipy.sparse.coo_matrix of shape (n,n)
         """
-        # TODO: optimize this
+        # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             self.get_ptr().insert((edge[0], edge[1]), edge[2])
+
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    def insert_batch(self, some_int[:,:] vertex_array, some_float[:] filtrations):
+        """Inserts k-simplices given by a sparse array in a format similar
+        to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
+        Duplicate entries are not allowed. Missing entries are not inserted.
+        Simplices with a repeated vertex are currently interpreted as lower
+        dimensional simplices, but we do not guarantee this behavior in the
+        future. Any time a simplex is inserted, its faces are inserted as well
+        if needed to preserve a simplicial complex.
+
+        :param vertex_array: the k-simplices to insert.
+        :type vertex_array: numpy.array of shape (k+1,n)
+        :param filtrations: the filtration values.
+        :type filtrations: numpy.array of shape (n,)
+        """
+        cdef Py_ssize_t k = vertex_array.shape[0]
+        cdef Py_ssize_t n = vertex_array.shape[1]
+        assert filtrations.shape[0] == n
+        cdef Py_ssize_t i
+        cdef Py_ssize_t j
+        cdef vector[int] v
+        for i in range(n):
+            for j in range(k):
+                v.push_back(vertex_array[j, i])
+            self.get_ptr().insert(v, filtrations[i])
+            v.clear()
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given

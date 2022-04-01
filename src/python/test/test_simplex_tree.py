@@ -345,9 +345,10 @@ def test_simplices_iterator():
         print("filtration is: ", simplex[1])
         assert st.filtration(simplex[0]) == simplex[1]
 
+
 def test_collapse_edges():
     st = SimplexTree()
-    
+
     assert st.insert([0, 1], filtration=1.0) == True
     assert st.insert([1, 2], filtration=1.0) == True
     assert st.insert([2, 3], filtration=1.0) == True
@@ -362,33 +363,35 @@ def test_collapse_edges():
         assert st.num_simplices() == 9
         assert st.find([1, 3]) == False
         for simplex in st.get_skeleton(0):
-            assert simplex[1] == 1.
+            assert simplex[1] == 1.0
     else:
         # If no Eigen3, collapse_edges throws an exception
         with pytest.raises(RuntimeError):
             st.collapse_edges()
 
+
 def test_reset_filtration():
     st = SimplexTree()
-    
-    assert st.insert([0, 1, 2], 3.) == True
-    assert st.insert([0, 3], 2.) == True
-    assert st.insert([3, 4, 5], 3.) == True
-    assert st.insert([0, 1, 6, 7], 4.) == True
+
+    assert st.insert([0, 1, 2], 3.0) == True
+    assert st.insert([0, 3], 2.0) == True
+    assert st.insert([3, 4, 5], 3.0) == True
+    assert st.insert([0, 1, 6, 7], 4.0) == True
 
     # Guaranteed by construction
     for simplex in st.get_simplices():
-        assert st.filtration(simplex[0]) >= 2.
-    
+        assert st.filtration(simplex[0]) >= 2.0
+
     # dimension until 5 even if simplex tree is of dimension 3 to test the limits
     for dimension in range(5, -1, -1):
-        st.reset_filtration(0., dimension)
+        st.reset_filtration(0.0, dimension)
         for simplex in st.get_skeleton(3):
             print(simplex)
             if len(simplex[0]) < (dimension) + 1:
-                assert st.filtration(simplex[0]) >= 2.
+                assert st.filtration(simplex[0]) >= 2.0
             else:
-                assert st.filtration(simplex[0]) == 0.
+                assert st.filtration(simplex[0]) == 0.0
+
 
 def test_boundaries_iterator():
     st = SimplexTree()
@@ -404,16 +407,17 @@ def test_boundaries_iterator():
         list(st.get_boundaries([]))
 
     with pytest.raises(RuntimeError):
-        list(st.get_boundaries([0, 4])) # (0, 4) does not exist
+        list(st.get_boundaries([0, 4]))  # (0, 4) does not exist
 
     with pytest.raises(RuntimeError):
-        list(st.get_boundaries([6])) # (6) does not exist
+        list(st.get_boundaries([6]))  # (6) does not exist
+
 
 def test_persistence_intervals_in_dimension():
     # Here is our triangulation of a 2-torus - taken from https://dioscuri-tda.org/Paris_TDA_Tutorial_2021.html
     #   0-----3-----4-----0
     #   | \   | \   | \   | \   |
-    #   |   \ |   \ |    \|   \ | 
+    #   |   \ |   \ |    \|   \ |
     #   1-----8-----7-----1
     #   | \   | \   | \   | \   |
     #   |   \ |   \ |   \ |   \ |
@@ -422,34 +426,35 @@ def test_persistence_intervals_in_dimension():
     #   |   \ |   \ |   \ |   \ |
     #   0-----3-----4-----0
     st = SimplexTree()
-    st.insert([0,1,8])
-    st.insert([0,3,8])
-    st.insert([3,7,8])
-    st.insert([3,4,7])
-    st.insert([1,4,7])
-    st.insert([0,1,4])
-    st.insert([1,2,5])
-    st.insert([1,5,8])
-    st.insert([5,6,8])
-    st.insert([6,7,8])
-    st.insert([2,6,7])
-    st.insert([1,2,7])
-    st.insert([0,2,3])
-    st.insert([2,3,5])
-    st.insert([3,4,5])
-    st.insert([4,5,6])
-    st.insert([0,4,6])
-    st.insert([0,2,6])
+    st.insert([0, 1, 8])
+    st.insert([0, 3, 8])
+    st.insert([3, 7, 8])
+    st.insert([3, 4, 7])
+    st.insert([1, 4, 7])
+    st.insert([0, 1, 4])
+    st.insert([1, 2, 5])
+    st.insert([1, 5, 8])
+    st.insert([5, 6, 8])
+    st.insert([6, 7, 8])
+    st.insert([2, 6, 7])
+    st.insert([1, 2, 7])
+    st.insert([0, 2, 3])
+    st.insert([2, 3, 5])
+    st.insert([3, 4, 5])
+    st.insert([4, 5, 6])
+    st.insert([0, 4, 6])
+    st.insert([0, 2, 6])
     st.compute_persistence(persistence_dim_max=True)
-    
+
     H0 = st.persistence_intervals_in_dimension(0)
-    assert np.array_equal(H0, np.array([[ 0., float("inf")]]))
+    assert np.array_equal(H0, np.array([[0.0, float("inf")]]))
     H1 = st.persistence_intervals_in_dimension(1)
-    assert np.array_equal(H1, np.array([[ 0., float("inf")], [ 0., float("inf")]]))
+    assert np.array_equal(H1, np.array([[0.0, float("inf")], [0.0, float("inf")]]))
     H2 = st.persistence_intervals_in_dimension(2)
-    assert np.array_equal(H2, np.array([[ 0., float("inf")]]))
+    assert np.array_equal(H2, np.array([[0.0, float("inf")]]))
     # Test empty case
     assert st.persistence_intervals_in_dimension(3).shape == (0, 2)
+
 
 def test_equality_operator():
     st1 = SimplexTree()
@@ -457,15 +462,16 @@ def test_equality_operator():
 
     assert st1 == st2
 
-    st1.insert([1,2,3], 4.)
+    st1.insert([1, 2, 3], 4.0)
     assert st1 != st2
 
-    st2.insert([1,2,3], 4.)
+    st2.insert([1, 2, 3], 4.0)
     assert st1 == st2
+
 
 def test_simplex_tree_deep_copy():
     st = SimplexTree()
-    st.insert([1, 2, 3], 0.)
+    st.insert([1, 2, 3], 0.0)
     # compute persistence only on the original
     st.compute_persistence()
 
@@ -484,14 +490,15 @@ def test_simplex_tree_deep_copy():
 
     for a_splx in a_filt_list:
         assert a_splx in st_filt_list
-    
+
     # test double free
     del st
     del st_copy
 
+
 def test_simplex_tree_deep_copy_constructor():
     st = SimplexTree()
-    st.insert([1, 2, 3], 0.)
+    st.insert([1, 2, 3], 0.0)
     # compute persistence only on the original
     st.compute_persistence()
 
@@ -510,19 +517,22 @@ def test_simplex_tree_deep_copy_constructor():
 
     for a_splx in a_filt_list:
         assert a_splx in st_filt_list
-    
+
     # test double free
     del st
     del st_copy
 
+
 def test_simplex_tree_constructor_exception():
     with pytest.raises(TypeError):
-        st = SimplexTree(other = "Construction from a string shall raise an exception")
+        st = SimplexTree(other="Construction from a string shall raise an exception")
+
 
 def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
     st = SimplexTree.create_from_array(a, max_filtration=5)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
+
 
 def test_insert_edges_from_coo_matrix():
     try:
@@ -561,3 +571,32 @@ def test_insert_edges_from_coo_matrix():
     st = SimplexTree()
     st.insert_edges_from_coo_matrix(edges)
     assert 100 < st.num_simplices() < 1000
+
+
+def test_insert_batch():
+    st = SimplexTree()
+    # vertices
+    st.insert_batch(np.array([[6, 1, 5]]), np.array([-5.0, 2.0, -3.0]))
+    # triangles
+    st.insert_batch(np.array([[2, 10], [5, 0], [6, 11]]), np.array([4.0, 0.0]))
+    # edges
+    st.insert_batch(np.array([[1, 5], [2, 5]]), np.array([1.0, 3.0]))
+
+    assert list(st.get_filtration()) == [
+        ([6], -5.0),
+        ([5], -3.0),
+        ([0], 0.0),
+        ([10], 0.0),
+        ([0, 10], 0.0),
+        ([11], 0.0),
+        ([0, 11], 0.0),
+        ([10, 11], 0.0),
+        ([0, 10, 11], 0.0),
+        ([1], 1.0),
+        ([2], 1.0),
+        ([1, 2], 1.0),
+        ([2, 5], 4.0),
+        ([2, 6], 4.0),
+        ([5, 6], 4.0),
+        ([2, 5, 6], 4.0),
+    ]
