@@ -32,9 +32,9 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
         @staticmethod
-        void set_float_relative_precision(double precision)
+        void set_float_relative_precision(double precision) nogil
         @staticmethod
-        double get_float_relative_precision()
+        double get_float_relative_precision() nogil
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
