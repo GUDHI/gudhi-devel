@@ -65,19 +65,26 @@ jobs:
       displayName: 'Install build dependencies'
     - script: |
         call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cmake  -DWITH_GUDHI_PYTHON=ON .
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd src\python
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr-6.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\gmp.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\tbb.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\tbbmalloc.dll" ".\gudhi\"
         python setup.py build_ext --inplace
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         SET PYTHONPATH=%CD%;%PYTHONPATH%
         echo %PYTHONPATH%
         ctest --output-on-failure -C Release
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
       displayName: 'Build and test'
