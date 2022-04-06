@@ -9,6 +9,7 @@
 """
 
 from gudhi import SimplexTree, __GUDHI_USE_EIGEN3
+import numpy as np
 import pytest
 
 __author__ = "Vincent Rouvreau"
@@ -404,3 +405,158 @@ def test_boundaries_iterator():
 
     with pytest.raises(RuntimeError):
         list(st.get_boundaries([6])) # (6) does not exist
+
+def test_persistence_intervals_in_dimension():
+    # Here is our triangulation of a 2-torus - taken from https://dioscuri-tda.org/Paris_TDA_Tutorial_2021.html
+    #   0-----3-----4-----0
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |    \|   \ | 
+    #   1-----8-----7-----1
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |   \ |   \ |
+    #   2-----5-----6-----2
+    #   | \   | \   | \   | \   |
+    #   |   \ |   \ |   \ |   \ |
+    #   0-----3-----4-----0
+    st = SimplexTree()
+    st.insert([0,1,8])
+    st.insert([0,3,8])
+    st.insert([3,7,8])
+    st.insert([3,4,7])
+    st.insert([1,4,7])
+    st.insert([0,1,4])
+    st.insert([1,2,5])
+    st.insert([1,5,8])
+    st.insert([5,6,8])
+    st.insert([6,7,8])
+    st.insert([2,6,7])
+    st.insert([1,2,7])
+    st.insert([0,2,3])
+    st.insert([2,3,5])
+    st.insert([3,4,5])
+    st.insert([4,5,6])
+    st.insert([0,4,6])
+    st.insert([0,2,6])
+    st.compute_persistence(persistence_dim_max=True)
+    
+    H0 = st.persistence_intervals_in_dimension(0)
+    assert np.array_equal(H0, np.array([[ 0., float("inf")]]))
+    H1 = st.persistence_intervals_in_dimension(1)
+    assert np.array_equal(H1, np.array([[ 0., float("inf")], [ 0., float("inf")]]))
+    H2 = st.persistence_intervals_in_dimension(2)
+    assert np.array_equal(H2, np.array([[ 0., float("inf")]]))
+    # Test empty case
+    assert st.persistence_intervals_in_dimension(3).shape == (0, 2)
+
+def test_equality_operator():
+    st1 = SimplexTree()
+    st2 = SimplexTree()
+
+    assert st1 == st2
+
+    st1.insert([1,2,3], 4.)
+    assert st1 != st2
+
+    st2.insert([1,2,3], 4.)
+    assert st1 == st2
+
+def test_simplex_tree_deep_copy():
+    st = SimplexTree()
+    st.insert([1, 2, 3], 0.)
+    # compute persistence only on the original
+    st.compute_persistence()
+
+    st_copy = st.copy()
+    assert st_copy == st
+    st_filt_list = list(st.get_filtration())
+
+    # check persistence is not copied
+    assert st.__is_persistence_defined() == True
+    assert st_copy.__is_persistence_defined() == False
+
+    # remove something in the copy and check the copy is included in the original
+    st_copy.remove_maximal_simplex([1, 2, 3])
+    a_filt_list = list(st_copy.get_filtration())
+    assert len(a_filt_list) < len(st_filt_list)
+
+    for a_splx in a_filt_list:
+        assert a_splx in st_filt_list
+    
+    # test double free
+    del st
+    del st_copy
+
+def test_simplex_tree_deep_copy_constructor():
+    st = SimplexTree()
+    st.insert([1, 2, 3], 0.)
+    # compute persistence only on the original
+    st.compute_persistence()
+
+    st_copy = SimplexTree(st)
+    assert st_copy == st
+    st_filt_list = list(st.get_filtration())
+
+    # check persistence is not copied
+    assert st.__is_persistence_defined() == True
+    assert st_copy.__is_persistence_defined() == False
+
+    # remove something in the copy and check the copy is included in the original
+    st_copy.remove_maximal_simplex([1, 2, 3])
+    a_filt_list = list(st_copy.get_filtration())
+    assert len(a_filt_list) < len(st_filt_list)
+
+    for a_splx in a_filt_list:
+        assert a_splx in st_filt_list
+    
+    # test double free
+    del st
+    del st_copy
+
+def test_simplex_tree_constructor_exception():
+    with pytest.raises(TypeError):
+        st = SimplexTree(other = "Construction from a string shall raise an exception")
+
+def test_expansion_with_blocker():
+    st=SimplexTree()
+    st.insert([0,1],0)
+    st.insert([0,2],1)
+    st.insert([0,3],2)
+    st.insert([1,2],3)
+    st.insert([1,3],4)
+    st.insert([2,3],5)
+    st.insert([2,4],6)
+    st.insert([3,6],7)
+    st.insert([4,5],8)
+    st.insert([4,6],9)
+    st.insert([5,6],10)
+    st.insert([6],10)
+
+    def blocker(simplex):
+        try:
+            # Block all simplices that countains vertex 6
+            simplex.index(6)
+            print(simplex, ' is blocked')
+            return True
+        except ValueError:
+            print(simplex, ' is accepted')
+            st.assign_filtration(simplex, st.filtration(simplex) + 1.)
+            return False
+
+    st.expansion_with_blocker(2, blocker)
+    assert st.num_simplices() == 22
+    assert st.dimension() == 2
+    assert st.find([4,5,6]) == False
+    assert st.filtration([0,1,2]) == 4.
+    assert st.filtration([0,1,3]) == 5.
+    assert st.filtration([0,2,3]) == 6.
+    assert st.filtration([1,2,3]) == 6.
+
+    st.expansion_with_blocker(3, blocker)
+    assert st.num_simplices() == 23
+    assert st.dimension() == 3
+    assert st.find([4,5,6]) == False
+    assert st.filtration([0,1,2]) == 4.
+    assert st.filtration([0,1,3]) == 5.
+    assert st.filtration([0,2,3]) == 6.
+    assert st.filtration([1,2,3]) == 6.
+    assert st.filtration([0,1,2,3]) == 7.

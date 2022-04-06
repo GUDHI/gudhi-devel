@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <math.h>  // isnan, fmax
 #include <memory>  // for std::unique_ptr
+#include <cstddef>  // for std::size_t
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Regular_triangulation.h>  // aka. Weighted Delaunay triangulation
@@ -213,6 +214,15 @@ class Alpha_complex {
   Alpha_complex (Alpha_complex&& other) = delete;
   Alpha_complex& operator= (Alpha_complex&& other) = delete;
 
+  /** \brief Returns the number of finite vertices in the triangulation.
+   */
+  std::size_t num_vertices() const {
+    if (triangulation_ == nullptr)
+      return 0;
+    else
+      return triangulation_->number_of_vertices();
+  }
+
   /** \brief get_point returns the point corresponding to the vertex given as parameter.
    *
    * @param[in] vertex Vertex handle of the point to retrieve.
@@ -373,7 +383,7 @@ class Alpha_complex {
 
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
-    if (triangulation_->number_of_vertices() > 0) {
+    if (num_vertices() > 0) {
       for (auto cit = triangulation_->finite_full_cells_begin();
            cit != triangulation_->finite_full_cells_end();
            ++cit) {
@@ -435,8 +445,10 @@ class Alpha_complex {
       // --------------------------------------------------------------------------------------------
   
       // --------------------------------------------------------------------------------------------
-      // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
-      complex.make_filtration_non_decreasing();
+      if (!exact)
+        // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
+        // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
+        complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
       complex.prune_above_filtration(max_alpha_square);
       // --------------------------------------------------------------------------------------------

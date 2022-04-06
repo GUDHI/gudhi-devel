@@ -14,7 +14,6 @@
 #include <gudhi/Debug_utils.h>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/version.hpp>
 #include <boost/container/static_vector.hpp>
 
 #include <vector>

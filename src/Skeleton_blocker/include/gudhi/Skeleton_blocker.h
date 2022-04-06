@@ -52,8 +52,7 @@ when \f$ \tau \neq \sigma\f$ we say that \f$ \tau\f$ is a proper-face of \f$ \si
 An abstract simplicial complex is a set of simplices that contains all the faces of its simplices.
 The 1-skeleton of a simplicial complex (or its graph) consists of its elements of dimension lower than 2.
 
- *\image html "ds_representation.png" "Skeleton-blocker representation" width=20cm
-
+\image html "ds_representation.png" "Skeleton-blocker representation"
 
 To encode, a simplicial complex, one can encodes all its simplices. 
 In case when this number gets too large,
@@ -73,11 +72,7 @@ For instance, the numbers of blockers is depicted for random 3-dimensional spher
 in next figure. Storing the graph and blockers of such simplicial complexes is much compact in this case than storing 
 their simplices.
 
-
- *\image html "blockers_curve.png" "Number of blockers of random triangulations of 3-spheres" width=10cm
-
-
-
+\image html "blockers_curve.png" "Number of blockers of random triangulations of 3-spheres"
 
 \section API
 
