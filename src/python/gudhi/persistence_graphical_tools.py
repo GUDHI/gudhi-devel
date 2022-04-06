@@ -97,8 +97,8 @@ def _matplotlib_can_use_tex():
         from matplotlib import checkdep_usetex
 
         return checkdep_usetex(True)
-    except ImportError:
-        warnings.warn("This function is not available, you may be missing matplotlib.")
+    except ImportError as import_error:
+        warnings.warn(f"This function is not available.\nModuleNotFoundError: No module named '{import_error.name}'.")
 
 
 def plot_persistence_barcode(
@@ -233,8 +233,8 @@ def plot_persistence_barcode(
             axes.axis([axis_start, infinity, 0, ind])
         return axes
 
-    except ImportError:
-        warnings.warn("This function is not available, you may be missing matplotlib.")
+    except ImportError as import_error:
+        warnings.warn(f"This function is not available.\nModuleNotFoundError: No module named '{import_error.name}'.")
 
 
 def plot_persistence_diagram(
@@ -384,8 +384,8 @@ def plot_persistence_diagram(
         axes.axis([axis_start, axis_end, axis_start, infinity + delta / 2])
         return axes
 
-    except ImportError:
-        warnings.warn("This function is not available, you may be missing matplotlib.")
+    except ImportError as import_error:
+        warnings.warn(f"This function is not available.\nModuleNotFoundError: No module named '{import_error.name}'.")
 
 
 def plot_persistence_density(
@@ -549,5 +549,5 @@ def plot_persistence_density(
 
         return axes
 
-    except ImportError:
-        warnings.warn("This function is not available, you may be missing matplotlib and/or scipy.")
+    except ImportError as import_error:
+        warnings.warn(f"This function is not available.\nModuleNotFoundError: No module named '{import_error.name}'.")
