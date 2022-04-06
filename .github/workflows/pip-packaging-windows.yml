@@ -24,37 +24,30 @@ jobs:
         run: |
           set VCPKG_BUILD_TYPE=release
           vcpkg install eigen3 cgal --triplet x64-windows
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
           vcpkg version
           ls "C:\vcpkg\installed\x64-windows\bin\"
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
           python -m pip install --user twine
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
           python -m pip list
       - name: Build python wheel and install it
         run: |
           mkdir build
           cd ".\build\"
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
           Get-Location
           dir
           cd ".\src\python\"
           cp "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
           cp "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
           python setup.py bdist_wheel
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
           ls ".\dist\"
           cd ".\dist\"
           Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
       - name: Test python wheel
         run: |
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest ".\src\python\test\test_alpha_complex.py"
-          IF %errorlevel% NEQ 0 exit /b %errorlevel%
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
