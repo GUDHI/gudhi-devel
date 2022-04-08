@@ -244,7 +244,7 @@ cdef class SimplexTree:
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
 
-            filtrations[np.diag_indices_from(filtrations)] = filtrations.min(1)
+            filtrations[np.diag_indices_from(filtrations)] = filtrations.min(axis=1)
 
         or::
 
@@ -263,7 +263,7 @@ cdef class SimplexTree:
         cdef double[:,:] F = filtrations
         ret = SimplexTree()
         cdef int n = F.shape[0]
-        assert n == F.shape[1]
+        assert n == F.shape[1], 'create_from_array() expects a square array'
         with nogil:
             ret.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
         return ret
@@ -301,7 +301,7 @@ cdef class SimplexTree:
         """
         cdef Py_ssize_t k = vertex_array.shape[0]
         cdef Py_ssize_t n = vertex_array.shape[1]
-        assert filtrations.shape[0] == n
+        assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
         cdef Py_ssize_t i
         cdef Py_ssize_t j
         cdef vector[int] v
