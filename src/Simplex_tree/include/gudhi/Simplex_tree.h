@@ -302,17 +302,16 @@ class Simplex_tree {
                                   Boundary_simplex_iterator(this));
   }
 
-  /** \brief Returns a range over the simplices of the boundary and its opposite vertex of a simplex.
+  /** \brief Given a simplex, returns a range over the simplices of its boundary and their opposite vertices.
    *
-   * The boundary and its opposite vertex of a simplex is the set of codimension \f$1\f$ subsimplices of the simplex.
+   * The boundary of a simplex is the set of codimension \f$1\f$ subsimplices of the simplex.
    * If the simplex is \f$[v_0, \cdots ,v_d]\f$, with canonical orientation induced by \f$ v_0 < \cdots < v_d \f$, the
    * iterator enumerates the simplices of the boundary in the order:
    * \f$[v_0,\cdots,\widehat{v_i},\cdots,v_d]\f$ for \f$i\f$ from \f$0\f$ to \f$d\f$, where \f$\widehat{v_i}\f$ means
-   * that the vertex \f$v_i\f$ is omitted from boundary, but returned as the second element of the pair, known as the
-   * the opposite vertex of the boundary.
+   * that the vertex \f$v_i\f$, known as the opposite vertex, is omitted from boundary, but returned as the second element of a pair.
    *
-   * @param[in] sh Simplex for which the boundary and its opposite vertex is computed.
-   * @return Iterator on a pair of SimplexHandle (a boundary) and a VertexHandle (its opposite vertex). */
+   * @param[in] sh Simplex for which the boundary is computed.
+   */
   template<class SimplexHandle>
   Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) {
     return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
