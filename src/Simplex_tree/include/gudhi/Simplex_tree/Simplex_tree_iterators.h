@@ -251,6 +251,21 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
     Siblings * for_sib = sib_;
     Siblings * new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
+    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr) {
+      // We reached the root, use a short-cut to find a vertex.
+      if (rit == suffix_.rend()) {
+        baov_.second = baov_.first->first;
+        // Segment, this vertex is the last boundary simplex
+        baov_.first = for_sib->members_.begin()+last_;
+        sib_ = nullptr;
+        return;
+      } else {
+        // Dim >= 2, initial step of the descent
+        baov_.first = for_sib->members_.begin()+*rit;
+        for_sib = baov_.first->second.children();
+        ++rit;
+      }
+    }
     for (; rit != suffix_.rend(); ++rit) {
       baov_.first = for_sib->find(*rit);
       for_sib = baov_.first->second.children();
