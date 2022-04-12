@@ -259,10 +259,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
     suffix_.push_back(next_);
     next_ = sib_->parent();
     sib_ = new_sib;
-    if (suffix_.empty())
-      baov_.second = last_;
-    else
-      baov_.second = suffix_.back();
+    baov_.second = suffix_.back();
   }
 
   // Most of the storage should be moved to the range, iterators should be light.
