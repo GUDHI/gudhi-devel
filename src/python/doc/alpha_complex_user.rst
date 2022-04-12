@@ -27,7 +27,8 @@ Remarks
   If you pass :code:`precision = 'exact'` to :func:`~gudhi.AlphaComplex.__init__`, the filtration values are the exact
   ones converted to float. This can be very slow.
   If you pass :code:`precision = 'safe'` (the default), the filtration values are only
-  guaranteed to have a small multiplicative error compared to the exact value.
+  guaranteed to have a small multiplicative error compared to the exact value, see
+  :func:`~gudhi.AlphaComplex.set_float_relative_precision` to modify the precision.
   A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
   non-empty approximate interval [10^12,10^12+10^6].
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
