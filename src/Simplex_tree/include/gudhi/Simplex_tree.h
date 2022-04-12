@@ -307,8 +307,9 @@ class Simplex_tree {
    * The boundary of a simplex is the set of codimension \f$1\f$ subsimplices of the simplex.
    * If the simplex is \f$[v_0, \cdots ,v_d]\f$, with canonical orientation induced by \f$ v_0 < \cdots < v_d \f$, the
    * iterator enumerates the simplices of the boundary in the order:
-   * \f$[v_0,\cdots,\widehat{v_i},\cdots,v_d]\f$ for \f$i\f$ from \f$0\f$ to \f$d\f$, where \f$\widehat{v_i}\f$ means
-   * that the vertex \f$v_i\f$, known as the opposite vertex, is omitted from boundary, but returned as the second element of a pair.
+   * \f$[v_0,\cdots,\widehat{v_i},\cdots,v_d]\f$ for \f$i\f$ from \f$d\f$ to \f$0\f$, where \f$\widehat{v_i}\f$ means
+   * that the vertex \f$v_i\f$, known as the opposite vertex, is omitted from boundary, but returned as the second
+   * element of a pair.
    *
    * @param[in] sh Simplex for which the boundary is computed.
    */
