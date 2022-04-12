@@ -72,5 +72,5 @@ class CubicalLayer(tf.keras.layers.Layer):
             if min_pers >= 0:
                 finite_dgm = self.dgms[idx_dim]
                 persistent_indices = tf.where(tf.math.abs(finite_dgm[:,1]-finite_dgm[:,0]) > min_pers)
-                self.dgms[idx_dim] = tf.gather(finite_dgm, indices=persistent_indices)
+                self.dgms[idx_dim] = tf.reshape(tf.gather(finite_dgm, indices=persistent_indices), [-1,2])
         return self.dgms
