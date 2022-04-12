@@ -191,7 +191,7 @@ class Simplex_tree {
    *
    * 'value_type' is std::pair<Simplex_handle, Vertex_handle>. */
   typedef Simplex_tree_boundary_opposite_vertex_simplex_iterator<Simplex_tree> Boundary_opposite_vertex_simplex_iterator;
-  /** \brief Range over the simplices of the boundary and its opposite vertex of a simplex. */
+  /** \brief Range over the simplices of the boundary of a simplex and their opposite vertices. */
   typedef boost::iterator_range<Boundary_opposite_vertex_simplex_iterator> Boundary_opposite_vertex_simplex_range;
   /** \brief Iterator over the simplices of the simplicial complex.
    *

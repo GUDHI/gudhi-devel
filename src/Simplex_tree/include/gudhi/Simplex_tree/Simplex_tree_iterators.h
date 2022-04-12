@@ -181,7 +181,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   SimplexTree * st_;  // simplex containing the simplicial complex
 };
 
-/* \brief Iterator over the simplices of the boundary and opposite vertex of a simplex.
+/* \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
  *
  * Forward iterator, value_type is std::pair<SimplexTree::Simplex_handle, SimplexTree::Vertex_handle>.*/
 template<class SimplexTree>
