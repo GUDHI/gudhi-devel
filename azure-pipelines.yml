@@ -68,7 +68,7 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_USE_GMPXX=OFF $(cmakeVcpkgFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
         IF %errorlevel% NEQ 0 exit /b %errorlevel%

@@ -20,6 +20,8 @@ if(GMP_FOUND)
     if(GMPXX_FOUND)
       INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
     endif()
+  else()
+    unset(GMPXX_FOUND)
   endif()
 endif()
 
