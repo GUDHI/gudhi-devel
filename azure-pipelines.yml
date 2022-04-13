@@ -30,7 +30,7 @@ jobs:
     - bash: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON ..
         make
         make doxygen
         ctest --output-on-failure
