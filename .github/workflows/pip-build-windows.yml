@@ -30,8 +30,8 @@ jobs:
         run: |
           mkdir build
           cd ".\build\"
-          Write-Host "-DCGAL_WITH_GMPXX=OFF is here starting from eigen 3.4.0#2 that makes build fail with error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'"
-          cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_WITH_GMPXX=OFF -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
+          Write-Host "-DWITH_GUDHI_USE_GMPXX=OFF is here starting from eigen 3.4.0#2 that makes build fail with error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'"
+          cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_USE_GMPXX=OFF -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
           Get-Location
           dir
           cd ".\src\python\"
