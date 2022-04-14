@@ -1003,13 +1003,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
   std::vector<bool> is_this_cell_considered(this->data.size(), false);
 
-  std::size_t size_to_reserve = 1;
-  for (std::size_t i = 0; i != this->multipliers.size(); ++i) {
-    size_to_reserve *= (std::size_t)((this->multipliers[i] - 1) / 2);
-  }
-
   std::vector<std::size_t> indices_to_consider;
-  indices_to_consider.reserve(size_to_reserve);
   // we assume here that we already have a filtration on the top dimensional cells and
   // we have to extend it to lower ones.
   typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
