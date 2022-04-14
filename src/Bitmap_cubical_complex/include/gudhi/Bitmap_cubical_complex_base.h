@@ -120,6 +120,17 @@ class Bitmap_cubical_complex_base {
   inline size_t get_top_dimensional_coface_of_a_cell(size_t splx);
 
   /**
+   * This function finds a vertex that is incident to the input cell and has
+   * the same filtration value. In case several cells are suitable, an arbitrary one is
+   * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
+   * On the other hand, the output is always indicating the position of
+   * a vertex in the data structure.
+   * \pre The filtration values are assigned as per `impose_lower_star_filtration()` or
+   * `impose_lower_star_filtration_from_vertices()`.
+   **/
+  inline size_t get_vertex_of_a_cell(size_t splx);
+
+  /**
   * This procedure compute incidence numbers between cubes. For a cube \f$A\f$ of
   * dimension n and a cube \f$B \subset A\f$ of dimension n-1, an incidence
   * between \f$A\f$ and \f$B\f$ is the integer with which \f$B\f$ appears in the boundary of \f$A\f$.
@@ -776,6 +787,19 @@ size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size
     for (auto v : this->get_coboundary_of_a_cell(splx)){
       if(this->get_cell_data(v) == this->get_cell_data(splx)){
         return this->get_top_dimensional_coface_of_a_cell(v);
+      }
+    }
+  }
+  BOOST_UNREACHABLE_RETURN(-2);
+}
+
+template <typename T>
+size_t Bitmap_cubical_complex_base<T>::get_vertex_of_a_cell(size_t splx) {
+  if (this->get_dimension_of_a_cell(splx) == 0){return splx;}
+  else{
+    for (auto v : this->get_boundary_of_a_cell(splx)){
+      if(this->get_cell_data(v) == this->get_cell_data(splx)){
+        return this->get_vertex_of_a_cell(v);
       }
     }
   }

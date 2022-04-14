@@ -179,7 +179,7 @@ def test_connected_sublevel_sets():
     assert cub.persistence() == [(0, (2.0, float("inf")))]
     assert cub.betti_numbers() == [1, 0, 0]
 
-def test_cubical_generators():
+def test_cubical_generators_from_top_dimensional_cells():
     cub = CubicalComplex(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]])
     cub.persistence()
     g = cub.cofaces_of_persistence_pairs()
@@ -188,6 +188,26 @@ def test_cubical_generators():
     assert np.array_equal(g[0][0], np.empty(shape=[0,2]))
     assert np.array_equal(g[0][1], np.array([[7, 4]]))
     assert np.array_equal(g[1][0], np.array([8]))
+
+def test_cubical_generators_from_vertices():
+    cub = CubicalComplex(vertices = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]])
+    cub.persistence()
+    g = cub.vertices_of_persistence_pairs()
+    assert len(g[0]) == 2
+    assert len(g[1]) == 1
+    assert np.array_equal(g[0][0], np.empty(shape=[0,2]))
+    assert np.array_equal(g[0][1], np.array([[14, 10]]))
+    assert np.array_equal(g[1][0], np.array([14]))
+
+def test_periodic_cubical_generators_from_vertices():
+    cub = PeriodicCubicalComplex(vertices = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]], periodic_dimensions=[True, True])
+    cub.persistence()
+    g = cub.vertices_of_persistence_pairs()
+    assert len(g[0]) == 0
+    assert len(g[1]) == 3
+    assert np.array_equal(g[1][0], np.array([0]))
+    assert np.array_equal(g[1][1], np.array([0, 0]))
+    assert np.array_equal(g[1][2], np.array([10]))
 
 def test_cubical_cofaces_of_persistence_pairs_when_pd_has_no_paired_birth_and_death():
     cubCpx = CubicalComplex(dimensions=[1,2], top_dimensional_cells=[0.0, 1.0])
