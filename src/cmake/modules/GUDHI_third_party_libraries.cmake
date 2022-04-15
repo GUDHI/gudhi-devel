@@ -10,19 +10,21 @@ include_directories(${Boost_INCLUDE_DIRS})
 message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
 message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
-option(WITH_GUDHI_USE_GMPXX "Build GUDHI with GMPXX - C++ classes of GNU MP" ON)
-
 find_package(GMP)
 if(GMP_FOUND)
   INCLUDE_DIRECTORIES(${GMP_INCLUDE_DIR})
-  if(WITH_GUDHI_USE_GMPXX)
-    find_package(GMPXX)
-    if(GMPXX_FOUND)
-      INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
-    endif()
-  else()
-    unset(GMPXX_FOUND)
+  find_package(GMPXX)
+  if(GMPXX_FOUND)
+    INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
   endif()
+endif()
+
+# from windows vcpkg eigen 3.4.0#2 : build fails with
+# error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+# Patch to force CGAL to not link with GMPXX
+if (FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX)
+  message("++ User explicit demand to build CGAL without GMPXX - this will lead in lower performances for Epick_d/Epeck_d")
+  add_definitions(-UCGAL_USE_GMPXX)
 endif()
 
 # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
