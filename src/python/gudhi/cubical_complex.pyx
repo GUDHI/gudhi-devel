@@ -60,6 +60,11 @@ cdef class CubicalComplex:
         cells (either vertices or top dimensional)
         or from a Perseus-style file name.
 
+        Note that in case the cubical complex is constructed from
+        'top_dimensional_cells' or 'vertices', without setting 'dimensions',
+        fortran ordering (column-major order) will be used.
+
+
         :param dimensions: A list of number of top dimensional cells.
         :type dimensions: list of int
         :param top_dimensional_cells: A list of top dimensional cells filtration values.
