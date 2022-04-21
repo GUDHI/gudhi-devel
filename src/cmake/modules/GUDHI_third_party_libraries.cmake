@@ -21,10 +21,11 @@ endif()
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
 # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
-# Patch to force CGAL to not link with GMPXX
-if (FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX)
-  message("++ User explicit demand to build CGAL without GMPXX - this will lead in lower performances for Epick_d/Epeck_d")
-  add_definitions(-UCGAL_USE_GMPXX)
+# cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+# Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+  message("++ User explicit demand to force EIGEN_DEFAULT_DENSE_INDEX_TYPE to int")
+  add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
 endif()
 
 # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
