@@ -181,7 +181,7 @@
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Includes:</b> [Miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html)<br>
+      <b>Requires:</b> \ref cgal
     </td>
  </tr>
  <tr>
