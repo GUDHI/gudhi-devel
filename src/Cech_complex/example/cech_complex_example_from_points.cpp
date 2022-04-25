@@ -6,42 +6,28 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
 
 int main() {
   // Type definitions
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
-  using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-  using FT = typename Kernel::FT;
+  using Kernel = CGAL::Epeck_d<CGAL::Dimension_tag<2>>;
   using Point = typename Kernel::Point_d;
   using Point_cloud = std::vector<Point>;
   using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 
   Point_cloud points;
-
-  std::vector<FT> point0({1., 0.});
-  points.emplace_back(point0.begin(), point0.end());
-  std::vector<FT> point1({0., 1.});
-  points.emplace_back(point1.begin(), point1.end());
-  std::vector<FT> point2({2., 1.});
-  points.emplace_back(point2.begin(), point2.end());
-  std::vector<FT> point3({3., 2.});
-  points.emplace_back(point3.begin(), point3.end());
-  std::vector<FT> point4({0., 3.});
-  points.emplace_back(point4.begin(), point4.end());
-  std::vector<FT> point5({3. + std::sqrt(3.), 3.});
-  points.emplace_back(point5.begin(), point5.end());
-  std::vector<FT> point6({1., 4.});
-  points.emplace_back(point6.begin(), point6.end());
-  std::vector<FT> point7({3., 4.});
-  points.emplace_back(point7.begin(), point7.end());
-  std::vector<FT> point8({2., 4. + std::sqrt(3.)});
-  points.emplace_back(point8.begin(), point8.end());
-  std::vector<FT> point9({0., 4.});
-  points.emplace_back(point9.begin(), point9.end());
-  std::vector<FT> point10({-0.5, 2.});
-  points.emplace_back(point10.begin(), point10.end());
+  points.emplace_back(1., 0.);                    // 0
+  points.emplace_back(0., 1.);                    // 1
+  points.emplace_back(2., 1.);                    // 2
+  points.emplace_back(3., 2.);                    // 3
+  points.emplace_back(0., 3.);                    // 4
+  points.emplace_back(3. + std::sqrt(3.), 3.);    // 5
+  points.emplace_back(1., 4.);                    // 6
+  points.emplace_back(3., 4.);                    // 7
+  points.emplace_back(2., 4. + std::sqrt(3.));    // 8
+  points.emplace_back(0., 4.);                    // 9
+  points.emplace_back(-0.5, 2.);                  // 10
 
   // ----------------------------------------------------------------------------
   // Init of a Cech complex from points
