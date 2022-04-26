@@ -11,7 +11,7 @@
 #ifndef CECH_COMPLEX_H_
 #define CECH_COMPLEX_H_
 
-#include <gudhi/sphere_circumradius.h>       // for Gudhi::cech_complex::Sphere_circumradius
+#include <gudhi/Sphere_circumradius.h>       // for Gudhi::cech_complex::Sphere_circumradius
 #include <gudhi/graph_simplicial_complex.h>  // for Gudhi::Proximity_graph
 #include <gudhi/Debug_utils.h>               // for GUDHI_CHECK
 #include <gudhi/Cech_complex_blocker.h>      // for Gudhi::cech_complex::Cech_blocker
@@ -25,15 +25,15 @@ namespace cech_complex {
 
 /**
  * \class Cech_complex
- * \brief Cech complex data structure.
+ * \brief Cech complex class.
  *
  * \ingroup cech_complex
  *
  * \details
- * The data structure is a proximity graph, containing edges when the edge length is less or equal
- * to a given max_radius. Edge length is computed from `Gudhi::cech_complex::Sphere_circumradius` distance function.
+ * Cech complex is a simplicial complex constructed from a proximity graph, where the set of all simplices is filtered
+ * by the radius of their minimal enclosing ball and bounded by the given max_radius.
  *
- * \tparam Kernel CGAL kernel.
+ * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
  *
  * \tparam SimplicialComplexForCechComplex furnishes `Vertex_handle` and `Filtration_value` type definition required
  * by `Gudhi::Proximity_graph` and Cech blocker.
@@ -58,15 +58,16 @@ class Cech_complex {
   using Sphere = typename cech_blocker::Sphere;
 
   public:
-  /** \brief Cech_complex constructor from a list of points.
+  /** \brief Cech_complex constructor from a range of points.
    *
-   * @param[in] points Vector of points where each point is defined as `kernel::Point_d`.
+   * @param[in] points Range of points where each point is defined as `kernel::Point_d`.
    * @param[in] max_radius Maximal radius value.
    *
    */
-  Cech_complex(const Point_cloud & points, Filtration_value max_radius) : max_radius_(max_radius) {
+  template<typename InputPointRange >
+  Cech_complex(const InputPointRange & points, Filtration_value max_radius) : max_radius_(max_radius) {
 
-    point_cloud_.assign(points.begin(), points.end());
+    point_cloud_.assign(std::begin(points), std::end(points));
 
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForCechComplex>(
         point_cloud_, max_radius_, Sphere_circumradius<Kernel>());

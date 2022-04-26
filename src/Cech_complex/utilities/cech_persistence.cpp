@@ -9,7 +9,6 @@
  */
 
 #include <gudhi/Cech_complex.h>
-#include <gudhi/sphere_circumradius.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>

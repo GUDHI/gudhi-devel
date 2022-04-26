@@ -20,7 +20,7 @@ namespace Gudhi {
 
 namespace cech_complex {
 
-/** @brief Compute the circumradius of the sphere passing through points given by a range of coordinates.
+/** \private @brief Compute the circumradius of the sphere passing through points given by a range of coordinates.
  * The points are assumed to have the same dimension. */
 template<typename Kernel>
 class Sphere_circumradius {

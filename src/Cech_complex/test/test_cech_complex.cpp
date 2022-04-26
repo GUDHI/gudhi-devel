@@ -22,7 +22,6 @@
 // to construct Cech_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/sphere_circumradius.h>
 #include <gudhi/Unitary_tests_utils.h>
 
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
@@ -139,18 +138,18 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   }
 
   Kernel kern;
-  Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
+  Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::clog << "f012= " << f012 << std::endl;
 
-  CGAL::NT_converter<FT, double> cast_to_double;
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points012.begin(), points012.end()))));
+  CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::sqrt(cast_to_fv(kern.compute_squared_radius_d_object()(points012.begin(), points012.end()))));
 
   Point_cloud points1410;
   points1410.push_back(cech_complex_for_doc.get_point(1));
   points1410.push_back(cech_complex_for_doc.get_point(4));
   points1410.push_back(cech_complex_for_doc.get_point(10));
 
-  Simplex_tree::Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
+  Filtration_value f1410 = st2.filtration(st2.find({1, 4, 10}));
   std::clog << "f1410= " << f1410 << std::endl;
 
   // In this case, the computed circumsphere using CGAL kernel does not match the minimal enclosing ball; the filtration value check is therefore done against a hardcoded value
@@ -161,10 +160,10 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   points469.push_back(cech_complex_for_doc.get_point(6));
   points469.push_back(cech_complex_for_doc.get_point(9));
 
-  Simplex_tree::Filtration_value f469 = st2.filtration(st2.find({4, 6, 9}));
+  Filtration_value f469 = st2.filtration(st2.find({4, 6, 9}));
   std::clog << "f469= " << f469 << std::endl;
 
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f469, std::sqrt(cast_to_double(kern.compute_squared_radius_d_object()(points469.begin(), points469.end()))));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(f469, std::sqrt(cast_to_fv(kern.compute_squared_radius_d_object()(points469.begin(), points469.end()))));
 
   BOOST_CHECK((st2.find({6, 7, 8}) == st2.null_simplex()));
   BOOST_CHECK((st2.find({3, 5, 7}) == st2.null_simplex()));
@@ -246,7 +245,7 @@ BOOST_AUTO_TEST_CASE(Cech_create_complex_throw) {
   //
   // ----------------------------------------------------------------------------
   std::string off_file_name("alphacomplexdoc.off");
-  double max_radius = 12.0;
+  Filtration_value max_radius = 12.0;
   std::clog << "========== OFF FILE NAME = " << off_file_name << " - Cech max_radius=" << max_radius
             << "==========" << std::endl;
 

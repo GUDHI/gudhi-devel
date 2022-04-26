@@ -11,7 +11,7 @@
 #ifndef CECH_COMPLEX_BLOCKER_H_
 #define CECH_COMPLEX_BLOCKER_H_
 
-#include <CGAL/NT_converter.h> // for casting from FT to double
+#include <CGAL/NT_converter.h> // for casting from FT to Filtration_value and double to FT
 
 #include <iostream>
 #include <vector>
@@ -36,7 +36,7 @@ namespace cech_complex {
  *
  * \tparam Cech_complex is required by the blocker.
  *
- * \tparam Kernel CGAL kernel.
+ * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
  */
 template <typename SimplicialComplexForCech, typename Cech_complex, typename Kernel>
 class Cech_blocker {
@@ -69,8 +69,8 @@ class Cech_blocker {
    *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
   bool operator()(Simplex_handle sh) {
     using Point_cloud =  std::vector<Point_d>;
-    CGAL::NT_converter<FT, double> cast_to_double;
-    Filtration_value radius = 0.;
+    CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
+    Filtration_value radius = 0;
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     Sphere min_enclos_ball;
@@ -105,18 +105,18 @@ class Cech_blocker {
         face_points.clear();
 
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) <= sph.second) {
-            radius = std::sqrt(cast_to_double(sph.second));
+            radius = std::sqrt(cast_to_fv(sph.second));
             #ifdef DEBUG_TRACES
                 std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
-            if (cast_to_double(sph.second) < cast_to_double(min_enclos_ball.second))
+            if (sph.second < min_enclos_ball.second)
                 min_enclos_ball = sph;
             break;
         }
     }
     // Get the minimal radius of all faces enclosing balls if exists
-    if(cast_to_double(min_enclos_ball.second) != std::numeric_limits<double>::max()) {
-        radius = std::sqrt(cast_to_double(min_enclos_ball.second));
+    if(min_enclos_ball.second != std::numeric_limits<double>::max()) {
+        radius = std::sqrt(cast_to_fv(min_enclos_ball.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
         cc_ptr_->get_cache().push_back(min_enclos_ball);
@@ -128,7 +128,7 @@ class Cech_blocker {
             points.push_back(cc_ptr_->get_point(vertex));
         }
         Sphere sph = get_sphere(points.cbegin(), points.cend());
-        radius = std::sqrt(cast_to_double(sph.second));
+        radius = std::sqrt(cast_to_fv(sph.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
         cc_ptr_->get_cache().push_back(sph);
