@@ -175,8 +175,8 @@ class RipsNet(tf.keras.Model):
         Constructor for the RipsNet class.
 
         Parameters:
-            phi_1 (layers): any block of DenseRagged layers. Can be :class:`~gudhi.tensorflow.DenseRaggedBlock`, or a custom block built from :class:`~gudhi.tensorflow.DenseRagged` layers.
-            phi_2 (layers): Can be any (block of) TensorFlow layer(s),  e.g. :class:`~gudhi.tensorflow.TFBlock`.
+            phi_1 (layers): any block of DenseRagged layers. Can be a custom block built from :class:`~gudhi.tensorflow.DenseRagged` layers.
+            phi_2 (layers): Can be any (block of) TensorFlow layer(s), e.g. :class:`~gudhi.tensorflow.TFBlock`.
             input_dim (int): dimension of the input point clouds.
             perm_op (str): Permutation invariant operation. Can be 'mean' or 'sum'.
         """
