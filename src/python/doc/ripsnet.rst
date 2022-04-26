@@ -23,7 +23,6 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     from gudhi.tensorflow import *
     import tensorflow as tf
     from tensorflow.keras import regularizers, layers
-    import numpy as np
 
     ragged_layers_size = [20, 10]
     dense_layers_size = [10, 20]
@@ -53,24 +52,24 @@ This example instantiates a RipsNet model which can then be trained as any tenso
 
     RN = RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
 
-    data_test = [np.array([[-7.04493841, 9.60285858],
-                           [-13.14389003, -13.21854157],
-                           [-3.21137961, -1.28593644]]),
-                 np.array([[10.40324933, -0.80540584],
-                           [16.54752459, 0.70355361],
-                           [6.410207, -10.63175183],
-                           [2.96613799, -11.97463568]]),
-                 np.array([[4.85041719, -2.93820024],
-                           [2.15379915, -5.39669696],
-                           [5.83968556, -5.67350982],
-                           [5.25955172, -6.36860269]])]
+    data_test = [[[-7.04493841, 9.60285858],
+                  [-13.14389003, -13.21854157],
+                  [-3.21137961, -1.28593644]],
+                 [[10.40324933, -0.80540584],
+                  [16.54752459, 0.70355361],
+                  [6.410207, -10.63175183],
+                  [2.96613799, -11.97463568]],
+                 [[4.85041719, -2.93820024],
+                  [2.15379915, -5.39669696],
+                  [5.83968556, -5.67350982],
+                  [5.25955172, -6.36860269]]]
 
-    tf_data_test = tf.ragged.constant([
-        [list(c) for c in list(data_test[i])] for i in range(len(data_test))], ragged_rank=1)
+    tf_data_test = tf.ragged.constant(data_test, ragged_rank=1)
 
     RN.predict(tf_data_test)
 
 Once RN is properly trained (which we skip in this documentation) it can be used to make predictions.
+In this example RipsNet estimates persistence vectorizations (of output size 25) of a list of point clouds (of 3 points) in 2D.
 A possible output is:
 
 .. code-block::
