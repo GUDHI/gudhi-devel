@@ -48,17 +48,19 @@ def test_ripsnet():
                               [ 0.6206032   , -0.20880768  ,  0.14528894  ,  0.18696047  ]]),
                     np.array([-0.17761804, -0.6905532 ,  0.64367545, -0.2173939 ])]
 
-    phi_1 = DenseRaggedBlock(ragged_layers)
+    phi_1 = TFBlock(ragged_layers) #DenseRaggedBlock(ragged_layers)
     perm_op = 'mean'
     phi_2 = TFBlock(dense_layers)
     input_dim = 2
 
     model = RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
 
-    test_input_raw = [np.array([[1.,2.],[3.,4.]])]
+    #test_input_raw = [np.array([[1.,2.],[3.,4.]])]
+    # test_input = tf.ragged.constant([
+    #     [list(c) for c in list(test_input_raw[i])] for i in range(len(test_input_raw))], ragged_rank=1)
 
-    test_input = tf.ragged.constant([
-        [list(c) for c in list(test_input_raw[i])] for i in range(len(test_input_raw))], ragged_rank=1)
+    test_input_raw = [[[1., 2.], [3., 4.]]]
+    test_input = tf.ragged.constant(test_input_raw, ragged_rank=1)
 
     model.predict(test_input)
 
