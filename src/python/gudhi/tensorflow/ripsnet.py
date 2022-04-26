@@ -143,7 +143,7 @@ class PermopRagged(tf.keras.layers.Layer):
         """
         super().__init__(dynamic=True, **kwargs)
         self._supports_ragged_inputs = True
-        self.pop = perm_op
+        self.perm_op = perm_op
 
     def build(self, input_shape):
         super().build(input_shape)
@@ -152,7 +152,7 @@ class PermopRagged(tf.keras.layers.Layer):
         """
         Apply PermopRagged on an input tensor.
         """
-        out = self.pop(inputs, axis=1)
+        out = self.perm_op(inputs, axis=1)
         return out
 
 
@@ -174,12 +174,12 @@ class RipsNet(tf.keras.Model):
         """
         super().__init__(dynamic=True, **kwargs)
         self.phi_1 = phi_1
-        self.pop = perm_op
+        self.perm_op = perm_op
         self.phi_2 = phi_2
         self.input_dim = input_dim
 
         if perm_op not in ['mean', 'sum']:
-            raise ValueError(f'Permutation invariant operation: {self.pop} is not allowed, must be "mean" or "sum".')
+            raise ValueError(f'Permutation invariant operation: {self.perm_op} is not allowed, must be "mean" or "sum".')
 
     def build(self, input_shape):
         return self
@@ -194,16 +194,16 @@ class RipsNet(tf.keras.Model):
         Returns:
             output (n x output_shape): tensor containing predicted vectorizations of the persistence diagrams of pointclouds.
         """
-        if self.pop == 'mean':
-            pop_ragged = PermopRagged(tf.math.reduce_mean)
-        elif self.pop == 'sum':
-            pop_ragged = PermopRagged(tf.math.reduce_sum)
+        if self.perm_op == 'mean':
+            perm_op_ragged = PermopRagged(tf.math.reduce_mean)
+        elif self.perm_op == 'sum':
+            perm_op_ragged = PermopRagged(tf.math.reduce_sum)
         else:
-            raise ValueError(f'Permutation invariant operation: {self.pop} is not allowed, must be "mean" or "sum".')
+            raise ValueError(f'Permutation invariant operation: {self.perm_op} is not allowed, must be "mean" or "sum".')
 
         inputs = tf.keras.layers.InputLayer(input_shape=(None, self.input_dim), dtype="float32", ragged=True)(
             pointclouds)
         output = self.phi_1(inputs)
-        output = pop_ragged(output)
+        output = perm_op_ragged(output)
         output = self.phi_2(output)
         return output
