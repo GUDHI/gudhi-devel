@@ -18,3 +18,11 @@ data/points/human.off_sc.txt
 .idea/
 cmake-build-debug/
 
+# Poetry files
+*.lock
+*.toml
+
+# Ripsnet files
+ripsnet_doc_test.py
+src/python/gudhi/tensorflow/tutorial.ipynb
+
