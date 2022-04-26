@@ -59,45 +59,50 @@ class DenseRagged(tf.keras.layers.Layer):
         return outputs
 
 
-class DenseRaggedBlock(tf.keras.layers.Layer):
-    """
-    This is a block of DenseRagged layers.
-    """
-
-    def __init__(self, dense_ragged_layers, **kwargs):
-        """
-        Constructor for the DenseRaggedBlock class.
-
-        Parameters:
-        dense_ragged_layers (list): a list of DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged`.
-        input_dim (int): dimension of the pointcloud, if the input consists of pointclouds.
-        """
-        super().__init__(dynamic=True, **kwargs)
-        self._supports_ragged_inputs = True
-        self.dr_layers = dense_ragged_layers
-
-    def build(self, input_shape):
-        return self
-
-    def call(self, inputs):
-        """
-        Apply the sequence of DenseRagged layers on a ragged input tensor.
-
-        Parameters:
-        ragged tensor (e.g. containing a point cloud).
-
-        Returns:
-        ragged tensor containing the output of the sequence of layers.
-        """
-        outputs = inputs
-        for dr_layer in self.dr_layers:
-            outputs = dr_layer(outputs)
-        return outputs
+# class DenseRaggedBlock(tf.keras.layers.Layer):
+#     """
+#     This is a block of DenseRagged layers.
+#     """
+#
+#     def __init__(self, dense_ragged_layers, **kwargs):
+#         """
+#         Constructor for the DenseRaggedBlock class.
+#
+#         Parameters:
+#         dense_ragged_layers (list): a list of DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged`.
+#         input_dim (int): dimension of the pointcloud, if the input consists of pointclouds.
+#         """
+#         super().__init__(dynamic=True, **kwargs)
+#         self._supports_ragged_inputs = True
+#         self.dr_layers = dense_ragged_layers
+#
+#     def build(self, input_shape):
+#         return self
+#
+#     def call(self, inputs):
+#         """
+#         Apply the sequence of DenseRagged layers on a ragged input tensor.
+#
+#         Parameters:
+#         ragged tensor (e.g. containing a point cloud).
+#
+#         Returns:
+#         ragged tensor containing the output of the sequence of layers.
+#         """
+#         outputs = inputs
+#         for dr_layer in self.dr_layers:
+#             outputs = dr_layer(outputs)
+#         return outputs
 
 
 class TFBlock(tf.keras.layers.Layer):
     """
     This class is a block of tensorflow layers.
+    If the first layer is an instance of DenseRagged, it will automatically support ragged inputs.
+
+    Parameters:
+    layers (list): a list of either tensorflow layers or DenseRagged layers :class:`~gudhi.tensorflow.DenseRagged`.
+    input_dim (int): dimension of the point cloud, if the input consists of point clouds.
     """
 
     def __init__(self, layers, **kwargs):
@@ -109,9 +114,12 @@ class TFBlock(tf.keras.layers.Layer):
         """
         super().__init__(dynamic=True, **kwargs)
         self.layers = layers
+        if isinstance(layers[0], DenseRagged):
+            self._supports_ragged_inputs = True
 
     def build(self, input_shape):
-        super().build(input_shape)
+        # super().build(input_shape)
+        return self
 
     def call(self, inputs):
         """
