@@ -11,8 +11,7 @@
 #ifndef CECH_COMPLEX_BLOCKER_H_
 #define CECH_COMPLEX_BLOCKER_H_
 
-#include <CGAL/NT_converter.h> // for casting from FT to Filtration_value and double to FT
-#include <boost/optional.hpp>
+#include <CGAL/NT_converter.h> // for casting from FT to Filtration_value
 
 #include <iostream>
 #include <vector>
@@ -72,9 +71,9 @@ class Cech_blocker {
     using Point_cloud =  std::vector<Point_d>;
     CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
     Filtration_value radius = 0;
+    bool is_min_enclos_ball = false;
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
-    boost::optional<Sphere const&> min_enclos_ball;
     for (auto face : sc_ptr_->boundary_simplex_range(sh)) {
         // Find which vertex of sh is missing in face. We rely on the fact that simplex_vertex_range is sorted.
         auto longlist = sc_ptr_->simplex_vertex_range(sh);
@@ -107,15 +106,15 @@ class Cech_blocker {
             #ifdef DEBUG_TRACES
                 std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
+            is_min_enclos_ball = true;
             radius = std::sqrt(cast_to_fv(sph.second));
             sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
             cc_ptr_->get_cache().push_back(sph);
-            min_enclos_ball.emplace(cc_ptr_->get_cache().back());
             break;
         }
     }
     // Spheres of each face don't contain the whole simplex
-    if(!min_enclos_ball) {
+    if(!is_min_enclos_ball) {
         Point_cloud points;
         for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
             points.push_back(cc_ptr_->get_point(vertex));
