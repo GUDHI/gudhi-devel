@@ -13,7 +13,7 @@ def test_rips_diff():
         dgm = rl.call(X)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
-    assert np.abs(grads[0].numpy()-np.array([[-.5,-.5],[.5,.5]])).sum() <= 1e-6
+    assert tf.norm(grads[0]-tf.constant([[-.5,-.5],[.5,.5]]),1) <= 1e-6
 
 def test_cubical_diff():
 
@@ -25,7 +25,7 @@ def test_cubical_diff():
         dgm = cl.call(X)[0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
-    assert np.abs(grads[0].numpy()-np.array([[0.,0.,0.],[0.,.5,0.],[0.,0.,-.5]])).sum() <= 1e-6
+    assert tf.norm(grads[0]-tf.constant([[0.,0.,0.],[0.,.5,0.],[0.,0.,-.5]]),1) <= 1e-6
 
 def test_nonsquare_cubical_diff():
 
@@ -37,7 +37,7 @@ def test_nonsquare_cubical_diff():
         dgm = cl.call(X)[0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
-    assert np.abs(grads[0].numpy()-np.array([[0.,0.5,-0.5],[0.,0.,0.]])).sum() <= 1e-6
+    assert tf.norm(grads[0]-tf.constant([[0.,0.5,-0.5],[0.,0.,0.]]),1) <= 1e-6
 
 def test_st_diff():
 
@@ -73,6 +73,6 @@ def test_st_diff():
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [F])
 
-    assert np.array_equal(np.array(grads[0].indices), np.array([2,4])) 
-    assert np.array_equal(np.array(grads[0].values), np.array([-1,1]))
+    assert tf.math.reduce_all(tf.math.equal(grads[0].indices, tf.constant([2,4])))
+    assert tf.math.reduce_all(tf.math.equal(grads[0].values, tf.constant([-1.,1.])))
 

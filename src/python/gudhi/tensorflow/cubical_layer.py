@@ -58,7 +58,7 @@ class CubicalLayer(tf.keras.layers.Layer):
             X (TensorFlow variable): pixel values of the cubical complex
 
         Returns:
-            dgms (list of TensorFlow variables): list of cubical persistence diagrams of length self.dimensions, where each element contains a finite persistence diagram of shape [num_finite_points, 2]
+            dgms (list of TensorFlow variables): list of cubical persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, each element of this list is an array containing the finite part of the corresponding persistence diagram, of shape [num_finite_points, 2]. Note that there is no essential part since this part is always empty in cubical persistence diagrams, except in homology dimension zero, where the essential part always contains a single point, with abscissa equal to the smallest value in the complex, and infinite ordinate.
         """
         # Compute pixels associated to positive and negative simplices 
         # Don't compute gradient for this operation

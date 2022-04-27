@@ -65,7 +65,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
             F (TensorFlow variable): filter function values over the vertices of the simplex tree. The ith entry of F corresponds to vertex i in self.simplextree
 
         Returns:
-            dgms (list of tuple of TensorFlow variables): list of lower-star persistence diagrams of length self.dimensions, where each element of the list is a tuple that contains the finite and essential persistence diagrams of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
+            dgms (list of tuple of TensorFlow variables): list of lower-star persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, the finite and essential parts of the persistence diagrams are provided separately: each element of this list is a tuple of size two that contains the finite and essential parts of the corresponding persistence diagram, of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
         """
         # Don't try to compute gradients for the vertex pairs
         indices = _LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimensions)
