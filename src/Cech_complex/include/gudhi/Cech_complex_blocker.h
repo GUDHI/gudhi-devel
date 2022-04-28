@@ -99,6 +99,10 @@ class Cech_blocker {
                 #endif  // DEBUG_TRACES
             }
             sph = get_sphere(face_points.cbegin(), face_points.cend());
+            // Put edge sphere in cache
+            sc_ptr_->assign_key(face, cc_ptr_->get_cache().size());
+            cc_ptr_->get_cache().push_back(sph);
+            // Clear face_points
             face_points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point
