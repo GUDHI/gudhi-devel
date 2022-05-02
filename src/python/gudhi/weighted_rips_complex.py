@@ -12,9 +12,11 @@ from gudhi import SimplexTree
 class WeightedRipsComplex:
     """
     Class to generate a weighted Rips complex from a distance matrix and weights on vertices, 
-    in the way described in :cite:`dtmfiltrations`.
+    in the way described in :cite:`dtmfiltrations` with `p=1`. The filtration value of vertex `i` is `2*weights[i]`,
+    and the filtration value of edge `ij` is `distance_matrix[i][j]+weights[i]+weights[j]`,
+    or the maximum of the filtrations of its extremities, whichever is largest.
     Remark that all the filtration values are doubled compared to the definition in the paper 
-    for the consistency with RipsComplex.
+    for consistency with RipsComplex.
     """
     def __init__(self, 
                 distance_matrix, 

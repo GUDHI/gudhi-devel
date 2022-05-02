@@ -45,6 +45,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
 
     cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
         Simplex_tree_interface_full_featured() nogil
+        Simplex_tree_interface_full_featured(Simplex_tree_interface_full_featured&) nogil
         double simplex_filtration(vector[int] simplex) nogil
         void assign_simplex_filtration(vector[int] simplex, double filtration) nogil
         void initialize_filtration() nogil
@@ -65,6 +66,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[vector[pair[int, pair[double, double]]]] compute_extended_persistence_subdiagrams(vector[pair[int, pair[double, double]]] dgm, double min_persistence) nogil
         Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil except +
         void reset_filtration(double filtration, int dimension) nogil
+        bint operator==(Simplex_tree_interface_full_featured) nogil
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex) nogil
         Simplex_tree_simplices_iterator get_simplices_iterator_begin() nogil
@@ -74,6 +76,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension) nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
         pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] get_boundary_iterators(vector[int] simplex) nogil except +
+        # Expansion with blockers
+        ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
+        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>":

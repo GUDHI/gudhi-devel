@@ -12,7 +12,6 @@
 #ifndef ALPHA_COMPLEX_3D_H_
 #define ALPHA_COMPLEX_3D_H_
 
-#include <boost/version.hpp>
 #include <boost/variant.hpp>
 #include <boost/range/size.hpp>
 #include <boost/range/combine.hpp>
@@ -57,8 +56,6 @@
 namespace Gudhi {
 
 namespace alpha_complex {
-
-thread_local double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
 
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //

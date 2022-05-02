@@ -16,6 +16,9 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+cdef bool callback(vector[int] simplex, void *blocker_func):
+    return (<object>blocker_func)(simplex)
+
 # SimplexTree python interface
 cdef class SimplexTree:
     """The simplex tree is an efficient and flexible data structure for
@@ -38,13 +41,29 @@ cdef class SimplexTree:
     cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self):
+    def __init__(self, other = None):
         """SimplexTree constructor.
+
+        :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
+            If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
+        :type other: SimplexTree (Optional)
+        :returns: An empty or a copy simplex tree.
+        :rtype: SimplexTree
+
+        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
+        :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
+            you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
 
     # The real cython constructor
-    def __cinit__(self):
-        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+    def __cinit__(self, other = None):
+        if other:
+            if isinstance(other, SimplexTree):
+                self.thisptr = _get_copy_intptr(other)
+            else:
+                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
+        else:
+            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
 
     def __dealloc__(self):
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
@@ -62,6 +81,21 @@ cdef class SimplexTree:
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
+
+    def copy(self):
+        """ 
+        :returns: A simplex tree that is a deep copy of itself.
+        :rtype: SimplexTree
+
+        :note: The persistence information is not copied. If you need it in the clone, you have to call
+            :func:`compute_persistence` on it even if you had already computed it in the original.
+        """
+        stree = SimplexTree()
+        stree.thisptr = _get_copy_intptr(self)
+        return stree
+
+    def __deepcopy__(self):
+        return self.copy()
 
     def filtration(self, simplex):
         """This function returns the filtration value for a given N-simplex in
@@ -443,6 +477,27 @@ cdef class SimplexTree:
         persistence_result = self.pcohptr.get_persistence()
         return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
 
+    def expansion_with_blocker(self, max_dim, blocker_func):
+        """Expands the Simplex_tree containing only a graph. Simplices corresponding to cliques in the graph are added
+        incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `blocker_func`
+        returns `True` for this simplex.
+
+        The function identifies a candidate simplex whose faces are all already in the complex, inserts it with a
+        filtration value corresponding to the maximum of the filtration values of the faces, then calls `blocker_func`
+        with this new simplex (represented as a list of int). If `blocker_func` returns `True`, the simplex is removed,
+        otherwise it is kept. The algorithm then proceeds with the next candidate.
+
+        .. warning::
+            Several candidates of the same dimension may be inserted simultaneously before calling `block_simplex`, so
+            if you examine the complex in `block_simplex`, you may hit a few simplices of the same dimension that have
+            not been vetted by `block_simplex` yet, or have already been rejected but not yet removed.
+
+        :param max_dim: Expansion maximal dimension value.
+        :type max_dim: int
+        :param blocker_func: Blocker oracle.
+        :type blocker_func: Callable[[List[int]], bool]
+        """
+        self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.
@@ -642,3 +697,13 @@ cdef class SimplexTree:
             self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
             # Delete old pointer
             del ptr
+
+    def __eq__(self, other:SimplexTree):
+        """Test for structural equality
+        :returns: True if the 2 simplex trees are equal, False otherwise.
+        :rtype: bool
+        """
+        return dereference(self.get_ptr()) == dereference(other.get_ptr())
+
+cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
+    return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

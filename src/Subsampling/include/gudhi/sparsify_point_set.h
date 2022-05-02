@@ -11,12 +11,7 @@
 #ifndef SPARSIFY_POINT_SET_H_
 #define SPARSIFY_POINT_SET_H_
 
-#include <boost/version.hpp>
-#if BOOST_VERSION < 106600
-# include <boost/function_output_iterator.hpp>
-#else
 # include <boost/iterator/function_output_iterator.hpp>
-#endif
 
 #include <gudhi/Kd_tree_search.h>
 #ifdef GUDHI_SUBSAMPLING_PROFILING
