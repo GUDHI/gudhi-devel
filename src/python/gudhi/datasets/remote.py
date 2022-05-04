@@ -7,7 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from os.path import join, exists, expanduser
+from os.path import join, split, exists, expanduser
 from os import makedirs, remove
 
 from urllib.request import urlretrieve
@@ -60,7 +60,7 @@ def _checksum_sha256(file_path):
     Parameters
     ----------
     file_path: string
-        Full path of the created file.
+        Full path of the created file including filename.
 
     Returns
     -------
@@ -77,7 +77,7 @@ def _checksum_sha256(file_path):
             sha256_hash.update(buffer)
     return sha256_hash.hexdigest()
 
-def _fetch_remote(url, filename, dirname, file_checksum = None, accept_license = False):
+def _fetch_remote(url, file_path, file_checksum = None):
     """
     Fetch the wanted dataset from the given url and save it in file_path.
 
@@ -85,29 +85,17 @@ def _fetch_remote(url, filename, dirname, file_checksum = None, accept_license =
     ----------
     url : string
         The url to fetch the dataset from.
-    filename : string
-        The name to give to downloaded file.
-    dirname : string
-        The directory to save the file to.
+    file_path : string
+        Full path of the downloaded file including filename.
     file_checksum : string
         The file checksum using sha256 to check against the one computed on the downloaded file.
         Default is 'None', which means the checksum is not checked.
-    accept_license : boolean
-        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
-        Default is False.
-
-    Returns
-    -------
-    file_path: string
-        Full path of the created file.
 
     Raises
     ------
     IOError
         If the computed SHA256 checksum of file does not match the one given by the user.
     """
-
-    file_path = join(dirname, filename)
 
     # Get the file
     urlretrieve(url, file_path)
@@ -121,36 +109,41 @@ def _fetch_remote(url, filename, dirname, file_checksum = None, accept_license =
                         "different from expected : {}."
                         "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum))
 
-    # Print license terms unless accept_license is set to True
-    if not accept_license:
-        license_file = join(dirname, "LICENSE")
-        if exists(license_file) and (file_path != license_file):
-            with open(license_file, 'r') as f:
-                print(f.read())
+def _get_archive_path(file_path, label):
+    """
+    Get archive path based on file_path given by user and label.
 
-    return file_path
+    Parameters
+    ----------
+    file_path: string
+        Full path of the file to get including filename, or None.
+    label: string
+        Label used along with 'data_home' to get archive path, in case 'file_path' is None.
 
-def _get_archive_and_dir(dirname, filename, label):
-    if dirname is None:
-        dirname = join(get_data_home(dirname), label)
+    Returns
+    -------
+        Full path of archive including filename.
+    """
+    if file_path is None:
+        archive_path = join(get_data_home(), label)
+        dirname = split(archive_path)[0]
         makedirs(dirname, exist_ok=True)
     else:
-        dirname = get_data_home(dirname)
+        archive_path = file_path
+        dirname = split(archive_path)[0]
+        makedirs(dirname, exist_ok=True)
 
-    archive_path = join(dirname, filename)
+    return archive_path
 
-    return archive_path, dirname
-
-def fetch_spiral_2d(filename = "spiral_2d.npy", dirname = None):
+def fetch_spiral_2d(file_path = None):
     """
     Fetch spiral_2d dataset remotely.
 
     Parameters
     ----------
-    filename : string
-        The name to give to downloaded file. Default is "spiral_2d.npy".
-    dirname : string
-        The directory to save the file to. Default is None, meaning that the downloaded file will be put in "~/gudhi_data/points/spiral_2d".
+    file_path : string
+        Full path of the downloaded file including filename.
+        Default is None, meaning that it's set to "data_home/points/spiral_2d/spiral_2d.npy".
 
     Returns
     -------
@@ -158,28 +151,25 @@ def fetch_spiral_2d(filename = "spiral_2d.npy", dirname = None):
         Array of shape (114562, 2).
     """
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy"
-    file_checksum = '88312ffd6df2e2cb2bde9c0e1f962d7d644c6f58dc369c7b377b298dacdc4eaf'
+    file_checksum = '2226024da76c073dd2f24b884baefbfd14928b52296df41ad2d9b9dc170f2401'
 
-    archive_path, dirname = _get_archive_and_dir(dirname, filename, "points/spiral_2d")
+    archive_path = _get_archive_path(file_path, "points/spiral_2d/spiral_2d.npy")
 
     if not exists(archive_path):
-        file_path_pkl = _fetch_remote(file_url, filename, dirname, file_checksum)
+        _fetch_remote(file_url, archive_path, file_checksum)
 
-        return np.load(file_path_pkl, mmap_mode='r')
-    else:
-        return np.load(archive_path, mmap_mode='r')
+    return np.load(archive_path, mmap_mode='r')
 
-def fetch_bunny(filename = "bunny.npy", dirname = None, accept_license = False):
+def fetch_bunny(file_path = None, accept_license = False):
     """
     Fetch Stanford bunny dataset remotely and its LICENSE file.
     This dataset contains 35947 vertices.
 
     Parameters
     ----------
-    filename : string
-        The name to give to downloaded file. Default is "bunny.npy".
-    dirname : string
-        The directory to save the file to. Default is None, meaning that the downloaded files will be put in "~/gudhi_data/points/bunny".
+    file_path : string
+        Full path of the downloaded file including filename.
+        Default is None, meaning that it's set to "data_home/points/bunny/bunny.npy".
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
         Default is False.
@@ -191,16 +181,20 @@ def fetch_bunny(filename = "bunny.npy", dirname = None, accept_license = False):
     """
 
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy"
-    file_checksum = '13f7842ebb4b45370e50641ff28c88685703efa5faab14edf0bb7d113a965e1b'
-    license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/LICENSE"
+    file_checksum = 'f382482fd89df8d6444152dc8fd454444fe597581b193fd139725a85af4a6c6e'
+    license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.LICENSE"
     license_checksum = 'b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a'
 
-    archive_path, dirname = _get_archive_and_dir(dirname, filename, "points/bunny")
+    archive_path = _get_archive_path(file_path, "points/bunny/bunny.npy")
 
     if not exists(archive_path):
-        license_path = _fetch_remote(license_url, "LICENSE", dirname, license_checksum)
-        file_path_pkl = _fetch_remote(file_url, filename, dirname, file_checksum, accept_license)
+        _fetch_remote(file_url, archive_path, file_checksum)
+        license_path = join(split(archive_path)[0], "bunny.LICENSE")
+        _fetch_remote(license_url, license_path, license_checksum)
+        # Print license terms unless accept_license is set to True
+        if not accept_license:
+            if exists(license_path):
+                with open(license_path, 'r') as f:
+                    print(f.read())
 
-        return np.load(file_path_pkl, mmap_mode='r')
-    else:
-        return np.load(archive_path, mmap_mode='r')
+    return np.load(archive_path, mmap_mode='r')
