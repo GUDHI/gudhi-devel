@@ -53,30 +53,16 @@ def test_print_bunny_license():
     shutil.rmtree("./tmp_for_test")
 
 def test_fetch_remote_datasets_wrapped():
-    # Check if gudhi_data default dir exists already
-    to_be_removed = not isdir(expanduser("~/gudhi_data"))
-    # Test fetch_spiral_2d and fetch_bunny wrapping functions (twice, to test case of already fetched files)
+    # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default (twice, to test case of already fetched files)
+    # Default case is not tested because it would fail in case the user sets the 'GUDHI_DATA' environment variable locally
     for i in range(2):
-        spiral_2d_arr = remote.fetch_spiral_2d()
+        spiral_2d_arr = remote.fetch_spiral_2d("./another_fetch_folder_for_test/spiral_2d.npy")
         assert spiral_2d_arr.shape == (114562, 2)
 
-        bunny_arr = remote.fetch_bunny()
+        bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
 
-    # Check that default dir was created
-    assert isdir(expanduser("~/gudhi_data"))
-    # Check downloaded files
-    assert exists(expanduser("~/gudhi_data/points/spiral_2d/spiral_2d.npy"))
-    assert exists(expanduser("~/gudhi_data/points/bunny/bunny.npy"))
-    assert exists(expanduser("~/gudhi_data/points/bunny/bunny.LICENSE"))
-
-    # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default
-    spiral_2d_arr = remote.fetch_spiral_2d("./another_fetch_folder_for_test/spiral_2d.npy")
-    assert spiral_2d_arr.shape == (114562, 2)
-
-    bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
-    assert bunny_arr.shape == (35947, 3)
-
+    # Check that the directory was created
     assert isdir("./another_fetch_folder_for_test")
     # Check downloaded files
     assert exists("./another_fetch_folder_for_test/spiral_2d.npy")
@@ -86,8 +72,6 @@ def test_fetch_remote_datasets_wrapped():
     # Remove test folders
     del spiral_2d_arr
     del bunny_arr
-    if to_be_removed:
-        shutil.rmtree(expanduser("~/gudhi_data"))
     shutil.rmtree("./another_fetch_folder_for_test")
 
 def test_gudhi_data_env():
