@@ -15,7 +15,7 @@ import sys
 import pytest
 
 from os.path import isdir, expanduser, exists
-from os import remove
+from os import remove, environ
 
 def test_data_home():
     # Test get_data_home and clear_data_home on new empty folder
@@ -89,3 +89,14 @@ def test_fetch_remote_datasets_wrapped():
     if to_be_removed:
         shutil.rmtree(expanduser("~/gudhi_data"))
     shutil.rmtree("./another_fetch_folder_for_test")
+
+def test_gudhi_data_env():
+    # Set environment variable "GUDHI_DATA"
+    environ["GUDHI_DATA"] = "./test_folder_from_env_var"
+    bunny_arr = remote.fetch_bunny()
+    assert bunny_arr.shape == (35947, 3)
+    assert exists("./test_folder_from_env_var/points/bunny/bunny.npy")
+    assert exists("./test_folder_from_env_var/points/bunny/bunny.LICENSE")
+    # Remove test folder
+    del bunny_arr
+    shutil.rmtree("./test_folder_from_env_var")

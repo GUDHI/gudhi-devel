@@ -8,7 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from os.path import join, split, exists, expanduser
-from os import makedirs, remove
+from os import makedirs, remove, environ
 
 from urllib.request import urlretrieve
 import hashlib
@@ -21,13 +21,16 @@ def get_data_home(data_home = None):
     Return the path of the remote datasets directory.
     This folder is used to store remotely fetched datasets.
     By default the datasets directory is set to a folder named 'gudhi_data' in the user home folder.
-    Alternatively, it can be set by giving an explicit folder path. The '~' symbol is expanded to the user home folder.
+    Alternatively, it can be set by the 'GUDHI_DATA' environment variable.
+    The '~' symbol is expanded to the user home folder.
     If the folder does not already exist, it is automatically created.
 
     Parameters
     ----------
     data_home : string
-        The path to remote datasets directory. Default is `None`, meaning that the data home directory will be set to "~/gudhi_data".
+        The path to remote datasets directory.
+        Default is `None`, meaning that the data home directory will be set to "~/gudhi_data",
+        if the 'GUDHI_DATA' environment variable does not exist.
 
     Returns
     -------
@@ -35,7 +38,7 @@ def get_data_home(data_home = None):
         The path to remote datasets directory.
     """
     if data_home is None:
-        data_home = join("~", "gudhi_data")
+        data_home = environ.get("GUDHI_DATA", join("~", "gudhi_data"))
     data_home = expanduser(data_home)
     makedirs(data_home, exist_ok=True)
     return data_home
@@ -48,7 +51,9 @@ def clear_data_home(data_home = None):
     Parameters
     ----------
     data_home : string, default is None.
-        The path to remote datasets directory. If `None`, the default directory to be removed is set to "~/gudhi_data".
+        The path to remote datasets directory.
+        If `None` and the 'GUDHI_DATA' environment variable does not exist,
+        the default directory to be removed is set to "~/gudhi_data".
     """
     data_home = get_data_home(data_home)
     shutil.rmtree(data_home)
@@ -170,6 +175,7 @@ def fetch_bunny(file_path = None, accept_license = False):
     file_path : string
         Full path of the downloaded file including filename.
         Default is None, meaning that it's set to "data_home/points/bunny/bunny.npy".
+        In this case, the LICENSE file would be downloaded as "data_home/points/bunny/bunny.LICENSE".
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
         Default is False.
