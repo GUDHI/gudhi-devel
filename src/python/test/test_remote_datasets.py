@@ -38,6 +38,7 @@ def _get_bunny_license_print(accept_license = False):
 
     bunny_arr = remote.fetch_bunny("./tmp_for_test/bunny.npy", accept_license)
     assert bunny_arr.shape == (35947, 3)
+    del bunny_arr
     remove("./tmp_for_test/bunny.npy")
 
     # Reset redirect
