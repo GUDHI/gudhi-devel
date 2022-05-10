@@ -15,7 +15,7 @@ import pytest
 
 
 def test_array_handler():
-    diags = np.array([[1, 2], [3, 4], [5, 6]], np.float)
+    diags = np.array([[1, 2], [3, 4], [5, 6]], float)
     arr_diags = gd.persistence_graphical_tools._array_handler(diags)
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
@@ -98,7 +98,11 @@ def test_limit_to_max_intervals():
 def _limit_plot_persistence(function):
     pplot = function(persistence=[()])
     assert issubclass(type(pplot), plt.axes.SubplotBase)
+    pplot = function(persistence=[()], legend=True)
+    assert issubclass(type(pplot), plt.axes.SubplotBase)
     pplot = function(persistence=[(0, float("inf"))])
+    assert issubclass(type(pplot), plt.axes.SubplotBase)
+    pplot = function(persistence=[(0, float("inf"))], legend=True)
     assert issubclass(type(pplot), plt.axes.SubplotBase)
 
 
