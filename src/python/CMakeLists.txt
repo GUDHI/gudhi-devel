@@ -601,6 +601,10 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_cover_complex)
     endif()
 
+    # persistence graphical tools
+    if(MATPLOTLIB_FOUND)
+      add_gudhi_py_test(test_persistence_graphical_tools)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
