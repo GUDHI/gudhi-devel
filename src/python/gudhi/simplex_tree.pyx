@@ -705,5 +705,28 @@ cdef class SimplexTree:
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
 
+    def euler_characteristic(self) -> int:
+        """
+        :returns: the Euler characteristic of the simplicial complex.
+        :rtype: int
+        """
+        cdef int ret
+        with nogil:
+            ret = self.get_ptr().euler_characteristic()
+        return ret
+
+    def magnitude(self, t: float) -> float:
+        """
+        :param t: parameter of the magnitude.
+        :type t: int
+        :returns: the magnitude of the filtration.
+        :rtype: float
+        """
+        cdef double t_ = t
+        cdef double ret
+        with nogil:
+            ret = self.get_ptr().magnitude(t_)
+        return ret
+
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

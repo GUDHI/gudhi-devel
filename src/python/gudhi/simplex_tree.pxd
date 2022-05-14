@@ -67,6 +67,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil except +
         void reset_filtration(double filtration, int dimension) nogil
         bint operator==(Simplex_tree_interface_full_featured) nogil
+        int euler_characteristic() nogil
+        double magnitude(double) nogil
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex) nogil
         Simplex_tree_simplices_iterator get_simplices_iterator_begin() nogil

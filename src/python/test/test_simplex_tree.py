@@ -560,3 +560,9 @@ def test_expansion_with_blocker():
     assert st.filtration([0,2,3]) == 6.
     assert st.filtration([1,2,3]) == 6.
     assert st.filtration([0,1,2,3]) == 7.
+
+def test_euler():
+    st = SimplexTree()
+    st.insert([0, 1], 2)
+    assert st.euler_characteristic() == 1
+    assert st.magnitude(-0.5) == pytest.approx(np.e)
