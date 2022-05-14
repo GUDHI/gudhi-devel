@@ -1701,6 +1701,71 @@ class Simplex_tree {
     }
   }
 
+ public:
+  /** \brief Returns a quantity similar to the Euler characteristic. It computes the image by `func`
+   * of the filtration value for each simplex, multiplies with \f$(-1)^{dim}\f$ and sums them all.
+   * The Euler characteristic corresponds to the case \f$func(f)=1\f$, while magnitude uses \f$func(f)=e^{-t\cdot f}\f$.
+   * @param[in] func function that takes a Filtration_value and returns a number.
+   */
+  template<class Func>
+  auto euler(Func&& func){
+    return rec_euler(&root_, func);
+  }
+  /** \brief Returns the Euler characteristic of the simplicial complex. */
+  size_t euler_characteristic(){
+    return euler([](auto){return 1;});
+  }
+  /** \brief Returns the magnitude of the filtration.
+   * @param[in] t parameter of the magnitude.
+   */
+  Filtration_value magnitude(Filtration_value t){
+    return euler([=](Filtration_value f){using std::exp; return exp(-t*f);});
+  }
+ private:
+  template<class F>
+  auto rec_euler(Siblings* sib, F& f) -> std::decay_t<decltype(f(std::declval<Filtration_value>()))> {
+    // We could use a style closer to visitors and pass the current value as argument of f.
+    std::decay_t<decltype(f(std::declval<Filtration_value>()))> ret = 0;
+    // TODO: use parallel_reduce or similar
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+      ret += f(filtration(sh));
+      if (has_children(sh))
+        ret -= rec_euler(sh->second.children(), f);
+    }
+    return ret;
+  }
+
+// Print a Simplex_tree in os.
+  friend std::ostream& operator<<(std::ostream& os, Simplex_tree& st) {
+    for (auto sh : st.filtration_simplex_range()) {
+      os << st.dimension(sh) << " ";
+      for (auto v : st.simplex_vertex_range(sh)) {
+        os << v << " ";
+      }
+      os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
+    }
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream& is, Simplex_tree& st) {
+    std::vector<Vertex_handle> simplex;
+    Filtration_value fil;
+    int max_dim = -1;
+    while (read_simplex(is, simplex, fil)) {
+      // read all simplices in the file as a list of vertices
+      // Warning : simplex_size needs to be casted in int - Can be 0
+      int dim = static_cast<int> (simplex.size() - 1);
+      if (max_dim < dim) {
+        max_dim = dim;
+      }
+      // insert every simplex in the simplex tree
+      st.insert_simplex(simplex, fil);
+      simplex.clear();
+    }
+    st.set_dimension(max_dim);
+    return is;
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
@@ -1713,45 +1778,10 @@ class Simplex_tree {
   bool dimension_to_be_lowered_ = false;
 };
 
-// Print a Simplex_tree in os.
-template<typename...T>
-std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
-  for (auto sh : st.filtration_simplex_range()) {
-    os << st.dimension(sh) << " ";
-    for (auto v : st.simplex_vertex_range(sh)) {
-      os << v << " ";
-    }
-    os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
-  }
-  return os;
-}
-
-template<typename...T>
-std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
-  typedef Simplex_tree<T...> ST;
-  std::vector<typename ST::Vertex_handle> simplex;
-  typename ST::Filtration_value fil;
-  int max_dim = -1;
-  while (read_simplex(is, simplex, fil)) {
-    // read all simplices in the file as a list of vertices
-    // Warning : simplex_size needs to be casted in int - Can be 0
-    int dim = static_cast<int> (simplex.size() - 1);
-    if (max_dim < dim) {
-      max_dim = dim;
-    }
-    // insert every simplex in the simplex tree
-    st.insert_simplex(simplex, fil);
-    simplex.clear();
-  }
-  st.set_dimension(max_dim);
-
-  return is;
-}
-
 /** Model of SimplexTreeOptions.
  * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
+ * (about 4 billion simplices). */
 struct Simplex_tree_options_full_featured {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
@@ -1766,7 +1796,7 @@ struct Simplex_tree_options_full_featured {
  * `contiguous_vertices` option.
  * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
+ * (about 4 billion simplices). */
 
 struct Simplex_tree_options_fast_persistence {
   typedef linear_indexing_tag Indexing_tag;
