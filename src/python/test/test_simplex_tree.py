@@ -11,6 +11,7 @@
 from gudhi import SimplexTree, __GUDHI_USE_EIGEN3
 import numpy as np
 import pytest
+import math
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -561,8 +562,15 @@ def test_expansion_with_blocker():
     assert st.filtration([1,2,3]) == 6.
     assert st.filtration([0,1,2,3]) == 7.
 
+class Magn:
+    def __init__(self, tt):
+        self.t = tt
+    def __call__(self, f):
+        return math.exp(-f*self.t)
+
 def test_euler():
     st = SimplexTree()
     st.insert([0, 1], 2)
     assert st.euler_characteristic() == 1
     assert st.magnitude(-0.5) == pytest.approx(np.e)
+    assert st.euler(Magn(-0.5)) == pytest.approx(np.e)

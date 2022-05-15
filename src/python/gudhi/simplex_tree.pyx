@@ -16,8 +16,11 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-cdef bool callback(vector[int] simplex, void *blocker_func):
+cdef bool callback_blocker(vector[int] simplex, void *blocker_func):
     return (<object>blocker_func)(simplex)
+
+cdef double callback_euler(void* fun, double filt):
+    return (<object>fun)(filt)
 
 # SimplexTree python interface
 cdef class SimplexTree:
@@ -497,7 +500,7 @@ cdef class SimplexTree:
         :param blocker_func: Blocker oracle.
         :type blocker_func: Callable[[List[int]], bool]
         """
-        self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
+        self.get_ptr().expansion_with_blockers_callback(max_dim, callback_blocker, <void*>blocker_func)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.
@@ -700,10 +703,24 @@ cdef class SimplexTree:
 
     def __eq__(self, other:SimplexTree):
         """Test for structural equality
+
         :returns: True if the 2 simplex trees are equal, False otherwise.
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+
+    def euler(self, fun):
+        """
+        Computes a quantity similar to the Euler characteristic. It computes the image by `fun`
+        of the filtration value for each simplex, negates it for odd dimensions and sums them all.
+        The Euler characteristic corresponds to the case `lambda _:1` while magnitude uses `lambda f:math.exp(-t*f)`.
+
+        :param fun: callback that computes some number from a filtration value.
+        :type fun: Callable[[float], float]
+        :returns: the quantity defined above.
+        :rtype: float
+        """
+        return self.get_ptr().euler_wrap(callback_euler, <void*>fun)
 
     def euler_characteristic(self) -> int:
         """
