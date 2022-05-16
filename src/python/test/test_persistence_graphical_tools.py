@@ -96,9 +96,9 @@ def test_limit_to_max_intervals():
 
 
 def _limit_plot_persistence(function):
-    pplot = function(persistence=[()])
+    pplot = function(persistence=[])
     assert issubclass(type(pplot), plt.axes.SubplotBase)
-    pplot = function(persistence=[()], legend=True)
+    pplot = function(persistence=[], legend=True)
     assert issubclass(type(pplot), plt.axes.SubplotBase)
     pplot = function(persistence=[(0, float("inf"))])
     assert issubclass(type(pplot), plt.axes.SubplotBase)

@@ -190,17 +190,13 @@ def plot_persistence_barcode(
         if colormap == None:
             colormap = plt.cm.Set1.colors
 
-        non_empty_diagram = len(persistence[0]) > 0
-        if non_empty_diagram:
-            x=[birth for (dim,(birth,death)) in persistence]
-            y=[(death - birth) if death != float("inf") else (infinity - birth) for (dim,(birth,death)) in persistence]
-            c=[colormap[dim] for (dim,(birth,death)) in persistence]
-        else:
-            x, y, c = [], [], []
+        x=[birth for (dim,(birth,death)) in persistence]
+        y=[(death - birth) if death != float("inf") else (infinity - birth) for (dim,(birth,death)) in persistence]
+        c=[colormap[dim] for (dim,(birth,death)) in persistence]
 
         axes.barh(list(reversed(range(len(x)))), y, height=0.8, left=x, alpha=alpha, color=c, linewidth=0)
 
-        if non_empty_diagram and legend:
+        if legend:
             dimensions = list(set(item[0] for item in persistence))
             axes.legend(
                 handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions], loc="lower right",
@@ -326,16 +322,12 @@ def plot_persistence_diagram(
         # line display of equation : birth = death
         axes.plot([axis_start, axis_end], [axis_start, axis_end], linewidth=1.0, color="k")
 
-        non_empty_diagram = len(persistence[0]) > 0
-        if non_empty_diagram:
-            x=[birth for (dim,(birth,death)) in persistence]
-            y=[death if death != float("inf") else infinity for (dim,(birth,death)) in persistence]
-            c=[colormap[dim] for (dim,(birth,death)) in persistence]
-        else:
-            x, y, c = [], [], []
+        x=[birth for (dim,(birth,death)) in persistence]
+        y=[death if death != float("inf") else infinity for (dim,(birth,death)) in persistence]
+        c=[colormap[dim] for (dim,(birth,death)) in persistence]
 
         axes.scatter(x,y,alpha=alpha,color=c)
-        if non_empty_diagram and float("inf") in (death for (dim,(birth,death)) in persistence):
+        if float("inf") in (death for (dim,(birth,death)) in persistence):
             # infinity line and text
             axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
             # Infinity label
@@ -347,7 +339,7 @@ def plot_persistence_diagram(
             axes.set_yticks(yt)
             axes.set_yticklabels(ytl)
 
-        if non_empty_diagram and legend:
+        if legend:
             dimensions = list(set(item[0] for item in persistence))
             axes.legend(handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions])
 
@@ -459,16 +451,15 @@ def plot_persistence_density(
             _, axes = plt.subplots(1, 1)
 
         try:
-            if len(persistence) > 0:
-                # if not read from file but given by an argument
-                persistence = _array_handler(persistence)
-                persistence_dim = np.array(
-                    [
-                        (dim_interval[1][0], dim_interval[1][1])
-                        for dim_interval in persistence
-                        if (dim_interval[0] == dimension) or (dimension is None)
-                    ]
-                )
+            # if not read from file but given by an argument
+            persistence = _array_handler(persistence)
+            persistence_dim = np.array(
+                [
+                    (dim_interval[1][0], dim_interval[1][1])
+                    for dim_interval in persistence
+                    if (dim_interval[0] == dimension) or (dimension is None)
+                ]
+            )
             persistence_dim = persistence_dim[np.isfinite(persistence_dim[:, 1])]
             persistence_dim = np.array(
                 _limit_to_max_intervals(
@@ -492,7 +483,7 @@ def plot_persistence_density(
             zi = k(np.vstack([xi.flatten(), yi.flatten()]))
             # Make the plot
             img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap, shading="auto")
-            non_empty_diagram = True
+            plot_success = True
 
         # IndexError on empty diagrams, ValueError on only inf death values
         except (IndexError, ValueError):
@@ -500,7 +491,7 @@ def plot_persistence_density(
             birth_max = 1.0
             death_min = 0.0
             death_max = 1.0
-            non_empty_diagram = False
+            plot_success = False
             pass
 
         # line display of equation : birth = death
@@ -516,7 +507,7 @@ def plot_persistence_density(
                 )
             )
 
-        if non_empty_diagram and legend:
+        if plot_success and legend:
             plt.colorbar(img, ax=axes)
 
         axes.set_xlabel("Birth", fontsize=fontsize)
