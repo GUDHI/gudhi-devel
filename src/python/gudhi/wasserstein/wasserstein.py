@@ -9,7 +9,7 @@
 
 import numpy as np
 import warnings
-from _utils import _dist_to_diag, _build_dist_matrix
+from gudhi import _utils
 
 try:
     import ot
@@ -31,7 +31,7 @@ def _perstot_autodiff(X, order, internal_p):
     '''
     Version of _perstot that works on eagerpy tensors.
     '''
-    return _dist_to_diag(X, internal_p).norms.lp(order)
+    return _utils._dist_to_diag(X, internal_p).norms.lp(order)
 
 
 def _perstot(X, order, internal_p, enable_autodiff):
@@ -52,7 +52,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
 
         return _perstot_autodiff(ep.astensor(X), order, internal_p).raw
     else:
-        return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
+        return np.linalg.norm(_utils._dist_to_diag(X, internal_p), ord=order)
 
 
 def _get_essential_parts(a):
@@ -272,7 +272,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     n = len(X)
     m = len(Y)
 
-    M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
+    M = _utils._build_dist_matrix(X, Y, order=order, internal_p=internal_p)
     a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
     a[-1] = m
     b = np.ones(m+1) # weight vector of the input diagram. Uniform here.

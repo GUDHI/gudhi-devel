@@ -9,7 +9,7 @@
 
 
 import numpy as np
-from _utils import _dist_to_diag, _build_dist_matrix
+from gudhi import _utils
 import warnings
 
 
@@ -46,7 +46,7 @@ def _get_cells(X, c, withdiag, internal_p):
     if X.shape[1] != 2:
         raise ValueError("Input batch must be of shape (n x 2), not (%s,%s)" %(X.shape))
 
-    M = _build_dist_matrix(X, c, order=2, internal_p=internal_p)  # Note: Order is useless here
+    M = _utils._build_dist_matrix(X, c, order=2, internal_p=internal_p)  # Note: Order is useless here
                                                                   # we just need nearest neighbors.
 
     if withdiag:
@@ -93,7 +93,7 @@ def _init_c(pdiagset, k, internal_p=2):
 
     """
     dgm = pdiagset[0]
-    w = _dist_to_diag(dgm, internal_p)
+    w = _utils._dist_to_diag(dgm, internal_p)
     s = np.argsort(w)
     c0 = dgm[s[-k:]]  # Elements in dgm with larger persistence are last
     return c0
