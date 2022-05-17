@@ -9,39 +9,8 @@
 
 
 import numpy as np
-import scipy.spatial.distance as sc
+from _utils import _dist_to_diag, _build_dist_matrix
 import warnings
-
-
-def _dist_to_diag(X, internal_p):
-    return ((X[:, 1] - X[:, 0]) * 2 ** (1. / internal_p - 1))
-
-
-def _build_dist_matrix(X, Y, order=2., internal_p=2):
-    '''
-    :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
-    :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param order: exponent for the Wasserstein metric.
-    :param internal_p: Ground metric (i.e. norm L^p).
-    :returns: (n+1) x (m+1) np.array encoding the cost matrix C.
-                For 0 <= i < n, 0 <= j < m, C[i,j] encodes the distance between X[i] and Y[j],
-                while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j])
-                and its orthogonal projection onto the diagonal.
-                note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
-    '''
-    Cxd = _dist_to_diag(X, internal_p=internal_p)**order #((X[:, 1] - X[:,0]) * 2 ** (1./internal_p - 1))**order
-    Cdy = _dist_to_diag(Y, internal_p=internal_p)**order #((Y[:, 1] - Y[:,0]) * 2 ** (1./internal_p - 1))**order
-    if np.isinf(internal_p):
-        C = sc.cdist(X, Y, metric='chebyshev') ** order
-    else:
-        C = sc.cdist(X, Y, metric='minkowski', p=internal_p) ** order
-
-    Cf = np.hstack((C, Cxd[:, None]))
-    Cdy = np.append(Cdy, 0)
-
-    Cf = np.vstack((Cf, Cdy[None, :]))
-
-    return Cf
 
 
 def _get_cells(X, c, withdiag, internal_p):
@@ -77,7 +46,8 @@ def _get_cells(X, c, withdiag, internal_p):
     if X.shape[1] != 2:
         raise ValueError("Input batch must be of shape (n x 2), not (%s,%s)" %(X.shape))
 
-    M = _build_dist_matrix(X, c, internal_p=internal_p)  # Note: Order is useless here
+    M = _build_dist_matrix(X, c, order=2, internal_p=internal_p)  # Note: Order is useless here
+                                                                  # we just need nearest neighbors.
 
     if withdiag:
         a = np.argmin(M[:-1, :], axis=1)
@@ -106,6 +76,7 @@ def _from_batch(pdiagset, batches_indices):
     else:
         return np.array([])
 
+
 def _init_c(pdiagset, k, internal_p=2):
     """
     A naive heuristic to initialize a codebook: we take the k points with largest distances to the diagonal
@@ -132,7 +103,7 @@ def _init_c(pdiagset, k, internal_p=2):
 ###  Main method  ###
 #####################
 
-def quantization(pdiagset, k=2, c0=None, batch_size=1, order=2., internal_p=2.):
+def quantization(pdiagset, k=2, init=None, batch_size=1, order=2., internal_p=2.):
     """
     This quantization algorithm takes a list of diagrams ``pdiagset``, an integer ``k``
     (or an initial codebook guess ``c0``)
@@ -145,9 +116,9 @@ def quantization(pdiagset, k=2, c0=None, batch_size=1, order=2., internal_p=2.):
     :param k: number of centroids. Default is ``2``. A naive heuristic is used to initialize the codebook.
               Not used if an initial codebook ``c0`` has been provided.
     :type k: ``int``
-    :param c0: If provided, overwrite the provided ``k`` (which is now ``c0.shape[0]``), and is used as an
+    :param init: If provided, overwrite the provided ``k`` (which is now ``c0.shape[0]``), and is used as an
                 initialization for the algorithm. Default is ``None``.
-    :type c0: (n x 2) ``numpy.array``, or ``None``.
+    :type init: (n x 2) ``numpy.array``, or ``None``.
     :param batch_size: Size of batches used during the online exploration of the ``pdiagset``.
                         Default is ``1``.
     :type batch_size: ``int``
@@ -174,13 +145,13 @@ def quantization(pdiagset, k=2, c0=None, batch_size=1, order=2., internal_p=2.):
     if not pdiagset:
         raise ValueError("Input pdiagset is empty.")
     # If no codebook has been provided, we propose an initialization.
-    if c0 is None:
-        c0 = _init_c(pdiagset, k)
+    if init is None:
+        init = _init_c(pdiagset, k)
     # Number of centroids in the codebook (updated in the case c0 was provided by the user).
-    k = c0.shape[0]
+    k = init.shape[0]
 
     # Variable that will store the centroid evolution.
-    c_current = c0.copy()
+    c_current = init.copy()
 
     # number of diagrams
     n = len(pdiagset)
