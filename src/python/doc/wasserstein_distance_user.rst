@@ -225,7 +225,7 @@ The Figure below showcases the use of the online-quantization approach provided 
 In this experiment, Rips persistence diagrams (in homology dimension 1) are built from random point clouds supported on
 different tori with some additional noise.
 Starting from an initial codebook ``c0``, centroids are iteratively updated as new diagrams are provided.
-As we use the standard metrics between persistence diagrams (denoted here by :math:`\mathrm{OT}_2`), points in the
+As we use the Wasserstein metrics between persistence diagrams (denoted here by :math:`\mathrm{OT}_2`), points in the
 diagrams that are close to the diagonal do not interfere in the codebook update process.
 Doing so, the final codebook is able to properly retrieve the two 1-dimensional features of the underlying points clouds
 (the two loops generating the tori).
