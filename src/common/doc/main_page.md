@@ -231,7 +231,7 @@
     homology of the input sequence. The resulting method is simple and extremely efficient.
 
     Computation of edge collapse and persistent homology of a filtered flag complex via edge collapse as described in
-    \cite edgecollapsesocg2020.
+    \cite edgecollapsearxiv.
     </td>
     <td width="15%">
       <b>Author:</b> Siddharth Pritam, Marc Glisse<br>
