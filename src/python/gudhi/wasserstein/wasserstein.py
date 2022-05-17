@@ -9,7 +9,7 @@
 
 import numpy as np
 import warnings
-from gudhi import _utils
+from gudhi.wasserstein import _utils
 
 try:
     import ot

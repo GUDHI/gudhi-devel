@@ -9,7 +9,7 @@
 
 
 import numpy as np
-from gudhi import _utils
+from gudhi.wasserstein import _utils
 import warnings
 
 
