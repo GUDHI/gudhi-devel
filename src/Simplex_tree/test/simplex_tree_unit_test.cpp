@@ -1015,14 +1015,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
   // simplices must be kept sorted by vertex number for std::vector to use operator== - cf. last BOOST_CHECK
   std::vector<Simplex> simplices = {{0, 1, 2}, {0, 3}, {0, 1, 6, 7}, {3, 4, 5}, {3, 5}, {2}};
   for (auto simplex : simplices) {
-    std::size_t range_size = std::distance(st.boundary_opposite_vertex_simplex_range(st.find(simplex)).begin(),
-                                           st.boundary_opposite_vertex_simplex_range(st.find(simplex)).end());
-    std::cout << "Range size = " << range_size << " - " << simplex.size() << std::endl;
-    if (simplex.size() > 1) {
-      BOOST_CHECK(range_size == simplex.size());
-    } else {
-      BOOST_CHECK(range_size == 0);
-    }
+    Simplex opposite_vertices;
     for(auto boundary_and_opposite_vertex : st.boundary_opposite_vertex_simplex_range(st.find(simplex))) {
       Simplex output;
       for (auto vertex : st.simplex_vertex_range(boundary_and_opposite_vertex.first)) {
@@ -1030,9 +1023,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
         output.emplace_back(vertex);
       }
       std::clog << " - opposite vertex = " << boundary_and_opposite_vertex.second << std::endl;
+      // Check that boundary simplex + opposite vertex = simplex given as input
       output.emplace_back(boundary_and_opposite_vertex.second);
       std::sort(output.begin(), output.end());
       BOOST_CHECK(simplex == output);
+      opposite_vertices.emplace_back(boundary_and_opposite_vertex.second);
     }
+    // Check that the list of all opposite vertices = simplex given as input
+    // no opposite vertices if simplex given as input is of dimension 1
+    std::sort(opposite_vertices.begin(), opposite_vertices.end());
+    if (simplex.size() > 1)
+      BOOST_CHECK(simplex == opposite_vertices);
+    else
+      BOOST_CHECK(opposite_vertices.size() == 0);
   }
 }
