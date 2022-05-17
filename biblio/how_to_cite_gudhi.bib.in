@@ -78,7 +78,7 @@
 }
 
 @incollection{gudhi:SubSampling
-, author =  "Cl\'ement Jamin, Siargey Kachanovich"
+, author =  "Cl\'ement Jamin and Siargey Kachanovich"
 , title =   "Subsampling"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -108,7 +108,7 @@
 }
 
 @incollection{gudhi:RipsComplex
-, author =  "Cl\'ement Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse"
+, author =  "Cl\'ement Maria and Pawel Dlotko and Vincent Rouvreau and Marc Glisse"
 , title =   "Rips complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -158,7 +158,7 @@
 }
 
 @incollection{gudhi:Collapse
-, author =  "Siddharth Pritam"
+, author =  "Siddharth Pritam and Marc Glisse"
 , title =   "Edge collapse"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"

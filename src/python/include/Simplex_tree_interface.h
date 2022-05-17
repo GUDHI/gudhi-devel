@@ -40,6 +40,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
   using Extended_filtration_data = typename Base::Extended_filtration_data;
   using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
+  typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
 
  public:
 
@@ -187,6 +188,13 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
       collapsed_stree_ptr->insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
     }
     return collapsed_stree_ptr;
+  }
+
+  void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) {
+    Base::expansion_with_blockers(dimension, [&](Simplex_handle sh){
+      Simplex simplex(Base::simplex_vertex_range(sh).begin(), Base::simplex_vertex_range(sh).end());
+      return user_func(simplex, user_data);
+    });
   }
 
   // Iterator over the simplex tree

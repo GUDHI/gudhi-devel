@@ -57,8 +57,6 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-thread_local double RELATIVE_PRECISION_OF_TO_DOUBLE = 0.00001;
-
 // Value_from_iterator returns the filtration value from an iterator on alpha shapes values
 //
 // FAST                         SAFE                         EXACT

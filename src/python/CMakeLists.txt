@@ -176,6 +176,15 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
 
+    # from windows vcpkg eigen 3.4.0#2 : build fails with
+    # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+    # cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+    # Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+    if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int', ")
+    endif()
+
+
     add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
       if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
@@ -211,13 +220,14 @@ if(PYTHONINTERP_FOUND)
         endif(NOT GMP_LIBRARIES_DIR)
         add_GUDHI_PYTHON_lib_dir(${GMP_LIBRARIES_DIR})
         message("** Add gmp ${GMP_LIBRARIES_DIR}")
+        # When FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX is set, not defining CGAL_USE_GMPXX is sufficient enough
         if(GMPXX_FOUND)
           add_gudhi_debug_info("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
           set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
           add_GUDHI_PYTHON_lib("${GMPXX_LIBRARIES}")
           add_GUDHI_PYTHON_lib_dir(${GMPXX_LIBRARIES_DIR})
           message("** Add gmpxx ${GMPXX_LIBRARIES_DIR}")
-        endif(GMPXX_FOUND)
+        endif()
       endif(GMP_FOUND)
       if(MPFR_FOUND)
         add_gudhi_debug_info("MPFR_LIBRARIES = ${MPFR_LIBRARIES}")
@@ -581,6 +591,10 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
+    # persistence graphical tools
+    if(MATPLOTLIB_FOUND)
+      add_gudhi_py_test(test_persistence_graphical_tools)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
