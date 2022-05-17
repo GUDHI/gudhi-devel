@@ -17,6 +17,8 @@
 #include <limits>
 #include <functional>  // greater
 #include <tuple>  // std::tie
+#include <iterator>  // for std::distance
+#include <cstddef>  // for std::size_t
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree"
@@ -1011,8 +1013,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
   /*            5             */
   using Simplex = std::vector<typename typeST::Vertex_handle>;
   // simplices must be kept sorted by vertex number for std::vector to use operator== - cf. last BOOST_CHECK
-  std::vector<Simplex> simplices = {{0, 1, 2}, {0, 3}, {0, 1, 6, 7}, {3, 4, 5}, {3, 5}};
+  std::vector<Simplex> simplices = {{0, 1, 2}, {0, 3}, {0, 1, 6, 7}, {3, 4, 5}, {3, 5}, {2}};
   for (auto simplex : simplices) {
+    std::size_t range_size = std::distance(st.boundary_opposite_vertex_simplex_range(st.find(simplex)).begin(),
+                                           st.boundary_opposite_vertex_simplex_range(st.find(simplex)).end());
+    std::cout << "Range size = " << range_size << " - " << simplex.size() << std::endl;
+    if (simplex.size() > 1) {
+      BOOST_CHECK(range_size == simplex.size());
+    } else {
+      BOOST_CHECK(range_size == 0);
+    }
     for(auto boundary_and_opposite_vertex : st.boundary_opposite_vertex_simplex_range(st.find(simplex))) {
       Simplex output;
       for (auto vertex : st.simplex_vertex_range(boundary_and_opposite_vertex.first)) {
