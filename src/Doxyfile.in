@@ -700,7 +700,7 @@ LAYOUT_FILE            =
 
 CITE_BIB_FILES         = @CMAKE_SOURCE_DIR@/biblio/bibliography.bib \
                          @CMAKE_SOURCE_DIR@/biblio/how_to_cite_cgal.bib \
-                         @CMAKE_CURRENT_BINARY_DIR@/biblio/how_to_cite_gudhi.bib
+                         @CMAKE_SOURCE_DIR@/biblio/how_to_cite_gudhi.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -868,7 +868,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = @CMAKE_CURRENT_BINARY_DIR@ \
+EXAMPLE_PATH           = @CMAKE_SOURCE_DIR@ \
                          @CMAKE_SOURCE_DIR@/data/ \
                          @GUDHI_DOXYGEN_EXAMPLE_PATH@
 
