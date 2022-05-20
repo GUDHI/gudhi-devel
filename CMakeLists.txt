@@ -1,5 +1,5 @@
 
-option(build_documentation_only    "Build only the documentation with doxygen." OFF)
+option(WITH_GUDHI_CPP_DOCUMENTATION_ONLY    "Build only the GUDHI C++ documentation (with doxygen)." OFF)
 
 cmake_minimum_required(VERSION 3.5)
 
@@ -16,7 +16,7 @@ set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 # This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "src/python")
 
-if (NOT build_documentation_only)
+if (NOT WITH_GUDHI_CPP_DOCUMENTATION_ONLY)
   # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
   include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
 endif()
@@ -57,7 +57,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-if (NOT build_documentation_only)
+if (NOT WITH_GUDHI_CPP_DOCUMENTATION_ONLY)
   add_subdirectory(src/GudhUI)
 endif()
 
