@@ -36,6 +36,7 @@ class Simplex_tree_siblings {
   template<class T> friend class Simplex_tree_boundary_simplex_iterator;
   template<class T> friend class Simplex_tree_complex_simplex_iterator;
   template<class T> friend class Simplex_tree_skeleton_simplex_iterator;
+  template<class T> friend class Simplex_tree_boundary_opposite_vertex_simplex_iterator;
 
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
   typedef typename SimplexTree::Filtration_value Filtration_value;

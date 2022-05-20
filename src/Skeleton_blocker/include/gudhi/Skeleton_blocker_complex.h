@@ -1071,7 +1071,6 @@ class Skeleton_blocker_complex {
 
   /**
    * Removes all the popable blockers of the complex and delete them.
-   * @returns the number of popable blockers deleted
    */
   void remove_popable_blockers();
 
@@ -1103,7 +1102,6 @@ class Skeleton_blocker_complex {
  public:
   /**
    * Remove the star of the edge connecting vertices a and b.
-   * @returns the number of blocker that have been removed
    */
   void remove_star(Vertex_handle a, Vertex_handle b);
 
