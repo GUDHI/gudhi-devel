@@ -42,6 +42,10 @@
 
 namespace Gudhi {
 
+/** \addtogroup simplex_tree 
+ *  @{
+ */
+
 /**
  * \class Extended_simplex_type Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Extended simplex type data structure for representing the type of simplices in an extended filtration.
@@ -97,8 +101,7 @@ class Simplex_tree {
   // Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  /* \brief Set of nodes sharing a same parent in the simplex tree. */
-  /* \brief Set of nodes sharing a same parent in the simplex tree. */
+  /** \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
 
@@ -1338,7 +1341,7 @@ class Simplex_tree {
     }
   }
 
-  /* \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
+  /** \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
    * Vertex_handle if the Vertex_handle is found in the Simplex_handle children list.
    * Returns null_simplex() if it does not exist
   */
@@ -1801,7 +1804,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool contiguous_vertices = true;
 };
 
-/** @} */  // end defgroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
 
 }  // namespace Gudhi
 
