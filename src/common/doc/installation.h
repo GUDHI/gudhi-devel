@@ -5,8 +5,8 @@
  * Examples of GUDHI headers inclusion can be found in \ref utilities.
  * 
  * \section compiling Compiling
- * The library uses c++14 and requires <a target="_blank" href="http://www.boost.org/">Boost</a>  &ge; 1.66.0
- * and <a target="_blank" href="https://www.cmake.org/">CMake</a> &ge; 3.5.
+ * The library uses c++14 and requires <a target="_blank" href="https://www.boost.org/">Boost</a>  &ge; 1.66.0
+ * and <a target="_blank" href="https://cmake.org/">CMake</a> &ge; 3.5.
  * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
  * 
  * \subsection utilities Utilities and examples
@@ -56,7 +56,7 @@ make \endverbatim
  * The multi-field persistent homology algorithm requires GMP which is a free library for arbitrary-precision
  * arithmetic, operating on signed integers, rational numbers, and floating point numbers.
  * 
- * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
+ * The following example requires the <a target="_blank" href="https://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
  * \li <a href="rips_multifield_persistence_8cpp-example.html">
  * Persistent_cohomology/rips_multifield_persistence.cpp</a>
@@ -131,10 +131,10 @@ make \endverbatim
  *
  * \subsection eigen Eigen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
- * <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> is a C++ template library for linear algebra:
+ * <a target="_blank" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following examples/utilities require the <a target="_blank" href="http://eigen.tuxfamily.org/">Eigen</a> and will not be
+ * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> and will not be
  * built if Eigen is not installed:
  * \li <a href="_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
@@ -180,7 +180,7 @@ make \endverbatim
  * Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp</a>
  *
  * \subsection tbb Threading Building Blocks
- * <a target="_blank" href="https://www.threadingbuildingblocks.org/">Intel&reg; TBB</a> lets you easily write parallel
+ * <a target="_blank" href="https://github.com/oneapi-src/oneTBB">Intel&reg; TBB</a> lets you easily write parallel
  * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
  * future-proof scalability.
  * 
