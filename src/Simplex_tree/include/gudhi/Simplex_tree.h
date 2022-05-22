@@ -965,7 +965,7 @@ class Simplex_tree {
         // If we reached the end of the vertices, and the simplex has more vertices than the given simplex
         // => we found a coface
 
-        // Add a coface if we wan't the star or if the number of vertices of the current simplex matches with nbVertices
+        // Add a coface if we want the star or if the number of vertices of the current simplex matches with nbVertices
         bool addCoface = (star || curr_nbVertices == nbVertices);
         if (addCoface)
           cofaces.push_back(simplex);
@@ -1491,7 +1491,7 @@ class Simplex_tree {
 
       int sh_dimension = dimension(sh);
       if (sh_dimension >= dimension_)
-        // Stop browsing as soon as the dimension is reached, no need to go furter
+        // Stop browsing as soon as the dimension is reached, no need to go further
         return false;
       new_dimension = (std::max)(new_dimension, sh_dimension);
     }

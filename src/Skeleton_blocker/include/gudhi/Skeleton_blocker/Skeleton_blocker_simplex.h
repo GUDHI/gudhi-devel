@@ -134,7 +134,7 @@ class Skeleton_blocker_simplex {
   }
 
   /**
-   * Substracts a from the simplex.
+   * Subtracts a from the simplex.
    */
   void difference(const Skeleton_blocker_simplex & a) {
     std::vector<T> v;

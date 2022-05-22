@@ -109,7 +109,7 @@ class Persistence_intervals {
   std::vector<size_t> cumulative_histogram_of_lengths(size_t number_of_bins = 10) const;
 
   /**
-   * In this procedure we assume that each barcode is a characteristic function of a hight equal to its length. The
+   * In this procedure we assume that each barcode is a characteristic function of a height equal to its length. The
    *persistence diagram is a sum of such a functions. The procedure below construct a function being a
    * sum of the characteristic functions of persistence intervals. The first two parameters are the range in which the
    *function is to be computed and the last parameter is the number of bins in
@@ -207,7 +207,7 @@ class Persistence_intervals {
   /**
    * This is a simple function projecting the persistence intervals to a real number. The function we use here is a sum
    *of squared lengths of intervals. It can be naturally interpreted as
-   * sum of step function, where the step hight it equal to the length of the interval.
+   * sum of step function, where the step height it equal to the length of the interval.
    * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when
    *using it, keep in mind that it
    * will be most likely changed in the next versions.

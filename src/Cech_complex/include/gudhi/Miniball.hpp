@@ -1,4 +1,4 @@
-//    Copright (C) 1999-2013, Bernd Gaertner
+//    Copyright (C) 1999-2013, Bernd Gaertner
 //    $Rev: 3581 $
 //
 //    This program is free software: you can redistribute it and/or modify

@@ -43,7 +43,7 @@ namespace cubical_complex {
  * Each cell is represented by a single
  * bit (in case of black and white bitmaps, or by a single element of a type T
  * (here T is a filtration type of a bitmap, typically a double).
- * All the informations needed for homology and
+ * All the information needed for homology and
  * persistent homology computations (like dimension of a cell, boundary and
  * coboundary elements of a cell, are then obtained from the
  * position of the element in C.
