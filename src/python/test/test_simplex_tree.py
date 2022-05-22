@@ -528,7 +528,7 @@ def test_expansion_with_blocker():
 
     def blocker(simplex):
         try:
-            # Block all simplices that contains vertex 6
+            # Block all simplices that contain vertex 6
             simplex.index(6)
             print(simplex, ' is blocked')
             return True
