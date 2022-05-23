@@ -212,7 +212,7 @@ Table of Contents
  * Gudhi::alpha_complex::complexity::EXACT.
  *
  * This example builds the CGAL 3d weighted alpha shapes from a small molecule, and initializes the alpha complex with
- * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#AlphaShape_3DBuildingBasicAlphaShapesForManyPoints">CGAL 3d
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#AlphaShape_3DExampleforWeightedAlphaShapes">CGAL 3d
  * weighted alpha shapes</a>.
  *
  * Then, it is asked to display information about the alpha complex.
