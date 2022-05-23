@@ -27,8 +27,7 @@ pip install -r ext/gudhi-deploy/test-requirements.txt  # pytorch can be painful 
 In order to compile all c++ utilities, examples, benchmarks, unitary tests, and python module:
 ```bash
 cd /workdir/gudhi
-rm -rf build
-mkdir build
+rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # To build all even examples and benchmarks
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON ..
@@ -39,8 +38,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_
 In order to compile only python module
 ```bash
 cd /workdir/gudhi
-rm -rf build
-mkdir build
+rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # To build all even examples and benchmarks
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ..
@@ -60,8 +58,7 @@ PYTHONPATH=/workdir/gudhi/build/src/python python # or ipython, jupyter, ...
 
 ```bash
 cd /workdir/gudhi
-rm -rf build
-mkdir build
+rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # python OFF to prevent python modules search makes cmake faster
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..
@@ -80,8 +77,7 @@ firefox html/index.html # [optional] To display the c++ documentation. Anything 
 
 ```bash
 cd /workdir/gudhi
-rm -rf build
-mkdir build
+rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # python OFF to prevent python modules search makes cmake faster - it is the next one in user version that matters
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..
