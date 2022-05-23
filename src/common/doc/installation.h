@@ -134,7 +134,7 @@ make \endverbatim
  * <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> and will not be
+ * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> and will not be
  * built if Eigen is not installed:
  * \li <a href="_alpha_complex_from_off_8cpp-example.html">
  * Alpha_complex/Alpha_complex_from_off.cpp</a>
