@@ -131,7 +131,7 @@ make \endverbatim
  *
  * \subsection eigen Eigen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
- * <a target="_blank" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> is a C++ template library for linear algebra:
+ * <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
  * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> and will not be
