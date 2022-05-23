@@ -142,7 +142,7 @@ diagram.
 3  1 0.104347 inf 
 3  2 0.138335 inf \endcode
 
-More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
+More details on the <a href="https://gudhi.inria.fr/ripscomplex/" target="gudhi_web">Rips complex utilities</a> dedicated page.
 
 \li <a href="rips_multifield_persistence_8cpp-example.html">
 Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its
@@ -156,7 +156,7 @@ The file should contain square or lower triangular distance matrix with semicolo
 The code do not check if it is dealing with a distance matrix. It is the user responsibility to provide a valid input.
 Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an example of a file.
 
-More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
+More details on the <a href="https://gudhi.inria.fr/ripscomplex/" target="gudhi_web">Rips complex utilities</a> dedicated page.
 
 \li <a href="rips_correlation_matrix_persistence_8cpp-example.html">
 Rips_complex/rips_correlation_matrix_persistence.cpp</a>
@@ -167,7 +167,7 @@ It is the user responsibility to ensure that this is the case. The input is to b
 triangular matrix.
 Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv for an example of a file.
 
-More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
+More details on the <a href="https://gudhi.inria.fr/ripscomplex/" target="gudhi_web">Rips complex utilities</a> dedicated page.
 
 \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
 Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
@@ -179,7 +179,7 @@ Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homol
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
+More details on the <a href="https://gudhi.inria.fr/alphacomplex/" target="gudhi_web">Alpha complex utilities</a> dedicated page.
 
 CGAL can be forced to compute the exact values, it is slower, but it is necessary when points are on a grid
 for instance (the fast version `--fast` would give incorrect values).
@@ -246,7 +246,7 @@ Simplex_tree dim: 3
 2  1 0.0934117 1.00003 
 2  2 0.56444 1.03938 \endcode
 
-More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
+More details on the <a href="https://gudhi.inria.fr/alphacomplex/" target="gudhi_web">Alpha complex utilities</a> dedicated page.
 
 \li <a href="plain_homology_8cpp-example.html">
 Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
