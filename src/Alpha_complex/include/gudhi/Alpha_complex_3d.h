@@ -98,7 +98,7 @@ struct Value_from_iterator<complexity::EXACT> {
  * \tparam Periodic Boolean used to set/unset the periodic version of Alpha_complex_3d. Default value is false.
  *
  * For the weighted version, weights values are explained on CGAL
- * <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0">Alpha shapes 3d</a> and
+ * <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#Alpha_shapes_3Definitions">Alpha shapes 3d</a> and
  * <a href="https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation">Regular
  * triangulation</a> documentation.
  *

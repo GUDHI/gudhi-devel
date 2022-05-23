@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  o---o
   //  0   3
   edges.emplace_back(0, 2, 2.);
-  edges.emplace_back(1, 3, 2.);
-  trace_and_check_collapse(edges, {{1, 3, 2.}});
+  edges.emplace_back(1, 3, 2.1);
+  trace_and_check_collapse(edges, {{1, 3, 2.1}});
 
   //  1   2   4
   //  o---o---o
@@ -121,8 +121,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  o---o---o
   //  0   3   5
   edges.emplace_back(2, 5, 4.);
-  edges.emplace_back(4, 3, 4.);
-  trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.}});
+  edges.emplace_back(4, 3, 4.1);
+  trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.1}});
 
   //  1   2   4
   //  o---o---o
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE(collapse) {
   //  o---o---o
   //  0   3   5
   edges.emplace_back(1, 5, 5.);
-  edges.emplace_back(0, 4, 5.);
-  trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.}, {0, 4, 5.}});
+  edges.emplace_back(0, 4, 5.1);
+  trace_and_check_collapse(edges, {{1, 3, 2.}, {4, 3, 4.}, {0, 4, 5.1}});
 }
 
 BOOST_AUTO_TEST_CASE(collapse_from_array) {
@@ -150,8 +150,8 @@ BOOST_AUTO_TEST_CASE(collapse_from_array) {
                                                 {2, 3, 1.},
                                                 {3, 0, 1.},
                                                 {0, 2, 2.},
-                                                {1, 3, 2.}}};
-  trace_and_check_collapse(f_edge_array, {{1, 3, 2.}});
+                                                {1, 3, 2.1}}};
+  trace_and_check_collapse(f_edge_array, {{1, 3, 2.1}});
 }
 
 BOOST_AUTO_TEST_CASE(collapse_from_proximity_graph) {

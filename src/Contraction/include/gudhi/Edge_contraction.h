@@ -26,6 +26,7 @@ namespace contraction {
 
 
 /** \defgroup contr Edge contraction
+@{
 
 \author David Salinas
 
@@ -194,7 +195,6 @@ int main (int argc, char *argv[])
 	std::clog << "Time to simplify and enumerate simplices:\n";
 
 	return EXIT_SUCCESS;
-}
 }
   \endcode
 
