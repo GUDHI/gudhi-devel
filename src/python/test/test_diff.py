@@ -22,7 +22,7 @@ def test_cubical_diff():
     cl = CubicalLayer(dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = cl.call(X)[0]
+        dgm = cl.call(X)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
     assert tf.norm(grads[0]-tf.constant([[0.,0.,0.],[0.,.5,0.],[0.,0.,-.5]]),1) <= 1e-6
@@ -34,7 +34,7 @@ def test_nonsquare_cubical_diff():
     cl = CubicalLayer(dimensions=[0])
 
     with tf.GradientTape() as tape:
-        dgm = cl.call(X)[0]
+        dgm = cl.call(X)[0][0]
         loss = tf.math.reduce_sum(tf.square(.5*(dgm[:,1]-dgm[:,0])))
     grads = tape.gradient(loss, [X])
     assert tf.norm(grads[0]-tf.constant([[0.,0.5,-0.5],[0.,0.,0.]]),1) <= 1e-6

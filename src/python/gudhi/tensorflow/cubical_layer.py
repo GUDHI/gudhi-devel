@@ -58,19 +58,23 @@ class CubicalLayer(tf.keras.layers.Layer):
             X (TensorFlow variable): pixel values of the cubical complex
 
         Returns:
-            dgms (list of TensorFlow variables): list of cubical persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, each element of this list is an array containing the finite part of the corresponding persistence diagram, of shape [num_finite_points, 2]. Note that there is no essential part since this part is always empty in cubical persistence diagrams, except in homology dimension zero, where the essential part always contains a single point, with abscissa equal to the smallest value in the complex, and infinite ordinate.
+            dgms (list of tuple of TensorFlow variables): list of cubical persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, the finite and essential parts of the persistence diagrams are provided separately: each element of this list is a tuple of size two that contains the finite and essential parts of the corresponding persistence diagram, of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively. Note that the essential part is always empty in cubical persistence diagrams, except in homology dimension zero, where the essential part always contains a single point, with abscissa equal to the smallest value in the complex, and infinite ordinate
         """
         # Compute pixels associated to positive and negative simplices 
         # Don't compute gradient for this operation
         Xflat = tf.reshape(X, [-1])
-        Xdim = X.shape
-        indices_list = _Cubical(Xflat.numpy(), Xdim, self.dimensions)
+        Xdim, Xflat_numpy = X.shape, Xflat.numpy()
+        indices_list = _Cubical(Xflat_numpy, Xdim, self.dimensions)
+        index_essential = np.argmin(Xflat_numpy) # index of minimum pixel value for essential persistence diagram
         # Get persistence diagram by simply picking the corresponding entries in the image
-        self.dgms = [tf.reshape(tf.gather(Xflat, indices), [-1,2]) for indices in indices_list]
-        for idx_dim in range(len(self.min_persistence)):
+        self.dgms = []
+        for idx_dim, dimension in enumerate(self.dimensions):
+            finite_dgm = tf.reshape(tf.gather(Xflat, indices_list[idx_dim]), [-1,2])
+            essential_dgm = tf.reshape(tf.gather(Xflat, index_essential), [-1,1]) if dimension == 0 else tf.zeros([0, 1])
             min_pers = self.min_persistence[idx_dim]
             if min_pers >= 0:
-                finite_dgm = self.dgms[idx_dim]
                 persistent_indices = tf.where(tf.math.abs(finite_dgm[:,1]-finite_dgm[:,0]) > min_pers)
-                self.dgms[idx_dim] = tf.reshape(tf.gather(finite_dgm, indices=persistent_indices), [-1,2])
+                self.dgms.append((tf.reshape(tf.gather(finite_dgm, indices=persistent_indices), [-1,2]), essential_dgm))
+            else:
+                self.dgms.append((finite_dgm, essential_dgm))
         return self.dgms
