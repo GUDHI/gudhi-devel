@@ -164,11 +164,11 @@ Table of Contents
  * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
  * 
  * A weighted version for Alpha complex is available (cf. Alpha_complex). It is like a usual Alpha complex, but based
- * on a <a href="https://doc.cgal.org/latest/Triangulation/index.html#title20">CGAL regular triangulation</a> instead
+ * on a <a href="https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT">CGAL regular triangulation</a> instead
  * of Delaunay.
  *
  * This example builds the CGAL weighted alpha shapes from a small molecule, and initializes the alpha complex with
- * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#AlphaShape_3DExampleforWeightedAlphaShapes">CGAL 3d
  * weighted alpha shapes</a>.
  *
  * Then, it is asked to display information about the alpha complex.
@@ -212,7 +212,7 @@ Table of Contents
  * Gudhi::alpha_complex::complexity::EXACT.
  *
  * This example builds the CGAL 3d weighted alpha shapes from a small molecule, and initializes the alpha complex with
- * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13">CGAL 3d
+ * it. This example is taken from <a href="https://doc.cgal.org/latest/Alpha_shapes_3/index.html#AlphaShape_3DExampleforWeightedAlphaShapes">CGAL 3d
  * weighted alpha shapes</a>.
  *
  * Then, it is asked to display information about the alpha complex.
