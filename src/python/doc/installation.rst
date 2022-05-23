@@ -33,25 +33,19 @@ Compiling
 These instructions are for people who want to compile gudhi from source, they are
 unnecessary if you installed a binary package of Gudhi as above. They assume that
 you have downloaded a `release <https://github.com/GUDHI/gudhi-devel/releases>`_,
-with a name like `gudhi.3.2.0.tar.gz`, then run `tar xf gudhi.3.2.0.tar.gz`, which
-created a directory `gudhi.3.2.0`, hereinafter referred to as `/path-to-gudhi/`.
+with a name like `gudhi.3.X.Y.tar.gz`, then run `tar xf gudhi.3.X.Y.tar.gz`, which
+created a directory `gudhi.3.X.Y`, hereinafter referred to as `/path-to-gudhi/`.
 If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
 
-The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.56.0,
+The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
-`NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_ and
-`pybind11 <https://github.com/pybind/pybind11>`_ to compile
-the GUDHI Python module.
-It is a multi-platform library and compiles on Linux, Mac OSX and Visual
-Studio 2017 or later.
+Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
+:math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
+It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
-On `Windows <https://wiki.python.org/moin/WindowsCompilers>`_ , only Python
-:math:`\geq` 3.5 are available because of the required Visual Studio version.
-
-On other systems, if you have several Python/python installed, the version 2.X
-will be used by default, but you can force it by adding
+If you have several Python/python installed, the version 2.X may be used by default, but you can force it by adding
 :code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
 
 GUDHI Python module compilation
@@ -142,54 +136,63 @@ If :code:`import gudhi` succeeds, please have a look to debug information:
 
 .. code-block:: python
 
-    import gudhi
-    print(gudhi.__debug_info__)
+    import gudhi as gd
+    print(gd.__debug_info__)
+    print("+ Installed modules are: " + gd.__available_modules)
+    print("+ Missing modules are: " + gd.__missing_modules)
 
 You shall have something like:
 
 .. code-block:: none
 
-    Python version 2.7.15
-    Cython version 0.26.1
-    Numpy version 1.14.1
-    Eigen3 version 3.1.1
-    Installed modules are: off_reader;simplex_tree;rips_complex;
-        cubical_complex;periodic_cubical_complex;reader_utils;witness_complex;
-        strong_witness_complex;alpha_complex;
-    Missing modules are: bottleneck_distance;nerve_gic;subsampling;
-        tangential_complex;persistence_graphical_tools;
-        euclidean_witness_complex;euclidean_strong_witness_complex;
-    CGAL version 4.7.1000
-    GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
-    GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
-    TBB version 9107 found and used
+    Pybind11 version 2.8.1 
+    Python version 3.7.12
+    Cython version 0.29.25 
+    Numpy version 1.21.4 
+    Boost version 1.77.0
+    + Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
+    + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
+        euclidean_strong_witness_complex;
 
-Here, you can see that bottleneck_distance, nerve_gic, subsampling and
-tangential_complex are missing because of the CGAL version.
-persistence_graphical_tools is not available as matplotlib is not
-available.
+Here, you can see that the modules that need CGAL are missing, because CGAL is not installed.
+:code:`persistence_graphical_tools` is installed, but 
+`its functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_ will produce an error as
+matplotlib is not available.
 Unitary tests cannot be run as pytest is missing.
 
 A complete configuration would be :
 
 .. code-block:: none
 
-    Python version 3.6.5
-    Cython version 0.28.2
-    Pytest version 3.3.2
-    Matplotlib version 2.2.2
-    Numpy version 1.14.5
-    Eigen3 version 3.3.4
-    Installed modules are: off_reader;simplex_tree;rips_complex;
-        cubical_complex;periodic_cubical_complex;persistence_graphical_tools;
-        reader_utils;witness_complex;strong_witness_complex;
-        persistence_graphical_tools;bottleneck_distance;nerve_gic;subsampling;
-        tangential_complex;alpha_complex;euclidean_witness_complex;
-        euclidean_strong_witness_complex;
-    CGAL header only version 4.11.0
+    Pybind11 version 2.8.1 
+    Python version 3.9.7
+    Cython version 0.29.24 
+    Pytest version 6.2.5 
+    Matplotlib version 3.5.0 
+    Numpy version 1.21.4 
+    Scipy version 1.7.3 
+    Scikit-learn version 1.0.1 
+    POT version 0.8.0 
+    HNSWlib found
+    PyKeOps version [pyKeOps]: 1.5 
+    EagerPy version 0.30.0 
+    TensorFlow version 2.7.0 
+    Sphinx version 4.3.0 
+    Sphinx-paramlinks version 0.5.2 
+    python_docs_theme found
+    Eigen3 version 3.4.0
+    Boost version 1.74.0
+    CGAL version 5.3
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
+    MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 9107 found and used
+    + Installed modules are: bottleneck;off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
+        tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
+    + Missing modules are: 
+
 
 Documentation
 =============
@@ -345,8 +348,8 @@ You can still deactivate LaTeX rendering by saying:
 
 .. code-block:: python
 
-    import gudhi
-    gudhi.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
+    import gudhi as gd
+    gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
 
 PyKeOps
 -------

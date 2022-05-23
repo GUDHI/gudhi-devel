@@ -13,6 +13,13 @@ Below is a list of changes made since GUDHI 3.5.0:
 - [Representations](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.BettiCurve)
      - A more flexible Betti curve class capable of computing exact curves
 
+- [Simplex tree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - `__deepcopy__`, `copy` and copy constructors
+
+- Installation
+     - Boost &ge; 1.66.0 is now required (was &ge; 1.56.0).
+     - Python >= 3.5 and cython >= 0.27 are now required.
+
 - [Module](link)
      - ...
 

@@ -57,6 +57,16 @@ class Alpha_complex_interface {
       alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
   }
 
+  static void set_float_relative_precision(double precision) {
+    // cf. Exact_alpha_complex_dD kernel type in Alpha_complex_factory.h
+    CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::set_relative_precision_of_to_double(precision);
+  }
+
+  static double get_float_relative_precision() {
+    // cf. Exact_alpha_complex_dD kernel type in Alpha_complex_factory.h
+    return CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::get_relative_precision_of_to_double();
+  }
+
  private:
   std::unique_ptr<Abstract_alpha_complex> alpha_ptr_;
 };

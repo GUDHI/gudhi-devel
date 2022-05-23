@@ -31,6 +31,10 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
         Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
+        @staticmethod
+        void set_float_relative_precision(double precision) nogil
+        @staticmethod
+        double get_float_relative_precision() nogil
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
@@ -133,3 +137,28 @@ cdef class AlphaComplex:
             self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
                                               mas, compute_filtration)
         return stree
+
+    @staticmethod
+    def set_float_relative_precision(precision):
+        """
+        :param precision: When the AlphaComplex is constructed with :code:`precision = 'safe'` (the default),
+            one can set the float relative precision of filtration values computed in
+            :func:`~gudhi.AlphaComplex.create_simplex_tree`.
+            Default is :code:`1e-5` (cf. :func:`~gudhi.AlphaComplex.get_float_relative_precision`).
+            For more details, please refer to
+            `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
+        :type precision: float
+        """
+        if precision <=0. or precision >= 1.:
+            raise ValueError("Relative precision value must be strictly greater than 0 and strictly lower than 1")
+        Alpha_complex_interface.set_float_relative_precision(precision)
+    
+    @staticmethod
+    def get_float_relative_precision():
+        """
+        :returns: The float relative precision of filtration values computation in
+            :func:`~gudhi.AlphaComplex.create_simplex_tree` when the AlphaComplex is constructed with
+            :code:`precision = 'safe'` (the default).
+        :rtype: float
+        """
+        return Alpha_complex_interface.get_float_relative_precision()

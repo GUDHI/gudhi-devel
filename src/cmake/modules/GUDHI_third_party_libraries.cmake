@@ -1,12 +1,14 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.56.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framework program_options)
+find_package(Boost 1.66.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framework program_options)
 
 # Boost_FOUND is not reliable
 if(NOT Boost_VERSION)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_VERSION)
 include_directories(${Boost_INCLUDE_DIRS})
+message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
+message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 find_package(GMP)
 if(GMP_FOUND)
@@ -15,6 +17,15 @@ if(GMP_FOUND)
   if(GMPXX_FOUND)
     INCLUDE_DIRECTORIES(${GMPXX_INCLUDE_DIR})
   endif()
+endif()
+
+# from windows vcpkg eigen 3.4.0#2 : build fails with
+# error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+# cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+# Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+  message("++ User explicit demand to force EIGEN_DEFAULT_DENSE_INDEX_TYPE to int")
+  add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
 endif()
 
 # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
@@ -89,9 +100,6 @@ add_definitions(-DBOOST_ALL_NO_LIB)
 add_definitions( -DBOOST_ALL_DYN_LINK )
 # problem on Mac with boost_system and boost_thread
 add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
-
-message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
-message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 if (WITH_GUDHI_PYTHON)
   # Find the correct Python interpreter.

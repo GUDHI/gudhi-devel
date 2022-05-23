@@ -27,7 +27,8 @@ Remarks
   If you pass :code:`precision = 'exact'` to :func:`~gudhi.AlphaComplex.__init__`, the filtration values are the exact
   ones converted to float. This can be very slow.
   If you pass :code:`precision = 'safe'` (the default), the filtration values are only
-  guaranteed to have a small multiplicative error compared to the exact value.
+  guaranteed to have a small multiplicative error compared to the exact value, see
+  :func:`~gudhi.AlphaComplex.set_float_relative_precision` to modify the precision.
   A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
   non-empty approximate interval [10^12,10^12+10^6].
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
@@ -177,11 +178,11 @@ Weighted version
 ^^^^^^^^^^^^^^^^
 
 A weighted version for Alpha complex is available. It is like a usual Alpha complex, but based on a
-`CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#title20>`_.
+`CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT>`_.
 
 This example builds the weighted alpha-complex of a small molecule, where atoms have different sizes.
 It is taken from
-`CGAL 3d weighted alpha shapes <https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title13>`_.
+`CGAL 3d weighted alpha shapes <https://doc.cgal.org/latest/Alpha_shapes_3/index.html#AlphaShape_3DExampleforWeightedAlphaShapes>`_.
 
 Then, it is asked to display information about the alpha complex.
 
