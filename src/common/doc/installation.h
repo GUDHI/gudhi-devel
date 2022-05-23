@@ -58,8 +58,7 @@ make \endverbatim
  * 
  * The following example requires the <a target="_blank" href="http://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="rips_multifield_persistence_8cpp-example.html">
- * Persistent_cohomology/rips_multifield_persistence.cpp</a>
+ * \li \gudhi_example_link{Persistent_cohomology,rips_multifield_persistence.cpp}
  *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
