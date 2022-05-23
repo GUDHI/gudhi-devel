@@ -44,7 +44,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ..
 cd src/python
 # To build python module in parallel
-python setup.py build_ext -j 16 --inplace
+python setup.py build_ext -j 16 --inplace  # 16 is the number of CPUthat are used to compile the python module. Can be any other value.
 # to clean the build
 # python setup.py clean --all
 ```
@@ -88,6 +88,6 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ..
 cd python
 # To build python module in parallel
-python setup.py build_ext -j 16 --inplace
+python setup.py build_ext -j 16 --inplace  # 16 is the number of CPUthat are used to compile the python module. Can be any other value.
 firefox sphinx/index.html # [optional] To display the python documentation. Anything else than firefox can be used.
 ```
