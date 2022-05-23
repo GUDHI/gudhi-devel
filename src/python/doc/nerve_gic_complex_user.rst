@@ -16,10 +16,9 @@ while CoverComplex needs the inputs to be stored in memory).
 Both classes can print output files, which can then be visualized with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
-`KeplerMapper <https://github.com/MLWave/kepler-mapper>`_.
-Input point clouds (when they are read from files in NGIComplex) are assumed to be stored in OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
+`KeplerMapper <https://github.com/scikit-tda/kepler-mapper>`_.
+Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
 In the following, we provide examples for NGIComplex, and we refer to `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of CoverComplex.
-
 
 Covers
 ------
