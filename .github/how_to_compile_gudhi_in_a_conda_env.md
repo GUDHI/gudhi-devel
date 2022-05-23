@@ -40,7 +40,6 @@ In order to compile only python module
 cd /workdir/gudhi
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
-# To build all even examples and benchmarks
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ..
 cd src/python
 # To build python module in parallel
