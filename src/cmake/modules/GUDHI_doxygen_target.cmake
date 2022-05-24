@@ -44,6 +44,7 @@ if(DOXYGEN_FOUND)
     set(GUDHI_DOXYGEN_UTILS_PATH "utilities/*")
   endif()
 
+  message("++ Doxygen version ${DOXYGEN_VERSION}")
   if (DOXYGEN_VERSION VERSION_LESS 1.9.2)
     set(GUDHI_DOXYGEN_MATHJAX_VERSION "MATHJAX_VERSION = MathJax_2")
     set(GUDHI_DOXYGEN_MATHJAX_EXTENSIONS "TeX/AMSmath TeX/AMSsymbols")
