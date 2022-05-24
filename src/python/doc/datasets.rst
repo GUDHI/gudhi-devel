@@ -112,13 +112,21 @@ Fetching datasets
 
 We provide some ready-to-use datasets that are not available by default when getting GUDHI, and need to be fetched explicitly.
 
+.. autofunction:: gudhi.datasets.remote.fetch_bunny
+
 .. figure:: ./img/bunny.png
      :figclass: align-center
 
      3D Stanford bunny with 35947 vertices.
 
 
-.. automodule:: gudhi.datasets.remote
-   :members:
-   :special-members:
-   :show-inheritance:
+.. autofunction:: gudhi.datasets.remote.fetch_spiral_2d
+
+.. figure:: ./img/spiral_2d.png
+     :figclass: align-center
+
+     2D spiral with 114562 vertices.
+
+.. autofunction:: gudhi.datasets.remote.get_data_home
+
+.. autofunction:: gudhi.datasets.remote.clear_data_home
