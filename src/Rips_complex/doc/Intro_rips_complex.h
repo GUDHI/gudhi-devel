@@ -63,9 +63,8 @@ namespace rips_complex {
  * value set with \f$max(filtration(4,5), filtration(4,6), filtration(5,6))\f$.
  * And so on for simplex (0,1,2,3).
  * 
- * If the Rips_complex interfaces are not detailed enough for your need, please refer to
- * <a href="rips_persistence_step_by_step_8cpp-example.html">
- * rips_persistence_step_by_step.cpp</a> example, where the constructions of the graph and
+ * If the Rips_complex interfaces are not detailed enough for your need, please refer to the example
+ * \gudhi_example_link{Persistent_cohomology,rips_persistence_step_by_step.cpp} , where the constructions of the graph and
  * the Simplex_tree are more detailed.
  *
  * \section sparserips Sparse Rips complex
