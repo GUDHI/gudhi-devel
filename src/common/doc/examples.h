@@ -1,6 +1,6 @@
 // List of GUDHI examples and utils - Doxygen needs at least a file tag to analyse comments
 // Generated from scripts/cpp_examples_for_doxygen.py
-/*! @file Examples
+/*! @file
  * \section Witness_complex_example_section Witness_complex
  * @example strong_witness_persistence.cpp
  * @example weak_witness_persistence.cpp
