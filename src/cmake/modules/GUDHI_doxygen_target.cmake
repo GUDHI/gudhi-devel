@@ -44,6 +44,12 @@ if(DOXYGEN_FOUND)
     set(GUDHI_DOXYGEN_UTILS_PATH "utilities/*")
   endif()
 
+  if (DOXYGEN_VERSION VERSION_LESS 1.9.3)
+    set(GUDHI_DOXYGEN_CLASS_DIAGRAMS "CLASS_DIAGRAMS = NO")
+  else()
+    set(GUDHI_DOXYGEN_CLASS_DIAGRAMS "")
+  endif()
+
   configure_file(${GUDHI_DOXYGEN_SOURCE_PREFIX}/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
 
   add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
