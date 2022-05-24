@@ -18,8 +18,8 @@ from os.path import isdir, expanduser, exists
 from os import remove, environ
 
 def test_data_home():
-    # Test get_data_home and clear_data_home on new empty folder
-    empty_data_home = remote.get_data_home(data_home="empty_folder_for_test")
+    # Test _get_data_home and clear_data_home on new empty folder
+    empty_data_home = remote._get_data_home(data_home="empty_folder_for_test")
     assert isdir(empty_data_home)
 
     remote.clear_data_home(data_home=empty_data_home)

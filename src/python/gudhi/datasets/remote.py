@@ -16,7 +16,7 @@ import shutil
 
 import numpy as np
 
-def get_data_home(data_home = None):
+def _get_data_home(data_home = None):
     """
     Return the path of the remote datasets directory.
     This folder is used to store remotely fetched datasets.
@@ -55,7 +55,7 @@ def clear_data_home(data_home = None):
         If `None` and the 'GUDHI_DATA' environment variable does not exist,
         the default directory to be removed is set to "~/gudhi_data".
     """
-    data_home = get_data_home(data_home)
+    data_home = _get_data_home(data_home)
     shutil.rmtree(data_home)
 
 def _checksum_sha256(file_path):
@@ -130,7 +130,7 @@ def _get_archive_path(file_path, label):
         Full path of archive including filename.
     """
     if file_path is None:
-        archive_path = join(get_data_home(), label)
+        archive_path = join(_get_data_home(), label)
         dirname = split(archive_path)[0]
         makedirs(dirname, exist_ok=True)
     else:

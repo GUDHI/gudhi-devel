@@ -127,6 +127,4 @@ We provide some ready-to-use datasets that are not available by default when get
 
      2D spiral with 114562 vertices.
 
-.. autofunction:: gudhi.datasets.remote.get_data_home
-
 .. autofunction:: gudhi.datasets.remote.clear_data_home
