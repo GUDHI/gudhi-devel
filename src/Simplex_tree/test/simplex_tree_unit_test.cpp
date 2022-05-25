@@ -17,6 +17,8 @@
 #include <limits>
 #include <functional>  // greater
 #include <tuple>  // std::tie
+#include <iterator>  // for std::distance
+#include <cstddef>  // for std::size_t
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree"
@@ -991,3 +993,48 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
 
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterator, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF BOUNDARIES AND OPPOSITE VERTEX ITERATORS" << std::endl;
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({3, 0}, 2.);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+  using Simplex = std::vector<typename typeST::Vertex_handle>;
+  // simplices must be kept sorted by vertex number for std::vector to use operator== - cf. last BOOST_CHECK
+  std::vector<Simplex> simplices = {{0, 1, 2}, {0, 3}, {0, 1, 6, 7}, {3, 4, 5}, {3, 5}, {2}};
+  for (auto simplex : simplices) {
+    Simplex opposite_vertices;
+    for(auto boundary_and_opposite_vertex : st.boundary_opposite_vertex_simplex_range(st.find(simplex))) {
+      Simplex output;
+      for (auto vertex : st.simplex_vertex_range(boundary_and_opposite_vertex.first)) {
+        std::clog << vertex << " ";
+        output.emplace_back(vertex);
+      }
+      std::clog << " - opposite vertex = " << boundary_and_opposite_vertex.second << std::endl;
+      // Check that boundary simplex + opposite vertex = simplex given as input
+      output.emplace_back(boundary_and_opposite_vertex.second);
+      std::sort(output.begin(), output.end());
+      BOOST_CHECK(simplex == output);
+      opposite_vertices.emplace_back(boundary_and_opposite_vertex.second);
+    }
+    // Check that the list of all opposite vertices = simplex given as input
+    // no opposite vertices if simplex given as input is of dimension 1
+    std::sort(opposite_vertices.begin(), opposite_vertices.end());
+    if (simplex.size() > 1)
+      BOOST_CHECK(simplex == opposite_vertices);
+    else
+      BOOST_CHECK(opposite_vertices.size() == 0);
+  }
+}

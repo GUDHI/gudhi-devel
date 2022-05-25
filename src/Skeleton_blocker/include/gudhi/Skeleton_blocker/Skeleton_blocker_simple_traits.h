@@ -28,7 +28,7 @@ namespace skeleton_blocker {
  */
 struct Skeleton_blocker_simple_traits {
   /**
-   * @brief Global and local handle similar to <a href="http://www.boost.org/doc/libs/1_38_0/libs/graph/doc/subgraph.html">boost subgraphs</a>.
+   * @brief Global and local handle similar to <a href="https://www.boost.org/doc/libs/release/libs/graph/doc/subgraph.html">boost subgraphs</a>.
    * Vertices are stored in a vector.
    * For the root simplicial complex, the local and global descriptors are the same.
    * For a subcomplex L and one of its vertices 'v', the local descriptor of 'v' is its position in
