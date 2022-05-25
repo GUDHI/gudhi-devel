@@ -112,6 +112,9 @@ Fetching datasets
 
 We provide some ready-to-use datasets that are not available by default when getting GUDHI, and need to be fetched explicitly.
 
+By **default**, the fetched datasets directory is set to a folder named **'gudhi_data'** in the **user home folder**.
+Alternatively, it can be set using the **'GUDHI_DATA'** environment variable.
+
 .. autofunction:: gudhi.datasets.remote.fetch_bunny
 
 .. figure:: ./img/bunny.png

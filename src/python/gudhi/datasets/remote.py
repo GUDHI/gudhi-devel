@@ -143,6 +143,7 @@ def _get_archive_path(file_path, label):
 def fetch_spiral_2d(file_path = None):
     """
     Fetch spiral_2d dataset remotely.
+
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding array is returned from cache.
 
@@ -150,7 +151,11 @@ def fetch_spiral_2d(file_path = None):
     ----------
     file_path : string
         Full path of the downloaded file including filename.
+
         Default is None, meaning that it's set to "data_home/points/spiral_2d/spiral_2d.npy".
+
+        The "data_home" directory is set by default to "~/gudhi_data",
+        unless the 'GUDHI_DATA' environment variable is set.
 
     Returns
     -------
@@ -170,7 +175,9 @@ def fetch_spiral_2d(file_path = None):
 def fetch_bunny(file_path = None, accept_license = False):
     """
     Fetch Stanford bunny dataset remotely and its LICENSE file.
+
     This dataset contains 35947 vertices.
+
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding array is returned from cache.
 
@@ -178,10 +185,16 @@ def fetch_bunny(file_path = None, accept_license = False):
     ----------
     file_path : string
         Full path of the downloaded file including filename.
+
         Default is None, meaning that it's set to "data_home/points/bunny/bunny.npy".
         In this case, the LICENSE file would be downloaded as "data_home/points/bunny/bunny.LICENSE".
+
+        The "data_home" directory is set by default to "~/gudhi_data",
+        unless the 'GUDHI_DATA' environment variable is set.
+
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
+
         Default is False.
 
     Returns
