@@ -267,8 +267,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             weights = np.array([self.weight(point) for point in diag])
             total_weight = np.sum(weights)
 
-            tent_functions = heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :])
-            tent_functions[tent_functions < 0.] = 0.
+            tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
             silhouette = np.sum(weights[None, :]/total_weight * tent_functions, axis=1)
             Xfit.append(silhouette * np.sqrt(2))
 
