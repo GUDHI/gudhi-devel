@@ -63,7 +63,7 @@ class RipsLayer(tf.keras.layers.Layer):
             X (TensorFlow variable): point cloud of shape [number of points, number of dimensions]
 
         Returns:
-            dgms (list of tuple of TensorFlow variables): list of Rips persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, the finite and essential parts of the persistence diagrams are provided separately: each element of this list is a tuple of size two that contains the finite and essential parts of the corresponding persistence diagram, of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
+            List[Tuple[tf.Tensor,tf.Tensor]]: List of Rips persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, the finite and essential parts of the persistence diagrams are provided separately: each element of this list is a tuple of size two that contains the finite and essential parts of the corresponding persistence diagram, of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
         """    
         # Compute distance matrix
         DX = tf.norm(tf.expand_dims(X, 1)-tf.expand_dims(X, 0), axis=2)
