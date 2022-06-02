@@ -221,5 +221,4 @@ def test_landscape_numeric():
     lds_ref *= np.sqrt(2)
     lds = Landscape(num_landscapes=2, resolution=9, sample_range=[2., 6.])
     lds_dgm = lds(dgm)
-    print(lds.sample_range, lds.new_resolution, lds_dgm.shape)
     assert np.all(np.isclose(lds_dgm, lds_ref))
