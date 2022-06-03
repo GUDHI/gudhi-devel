@@ -19,7 +19,7 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/** \brief Auxillary iterator class for sizes of parts in an ordered set partition.
+/** \brief Auxiliary iterator class for sizes of parts in an ordered set partition.
  */
 template <class T_it>
 class Size_iterator

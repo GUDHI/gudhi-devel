@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
                                                                                  Gudhi::Euclidean_distance());
 
   if (num_edges(proximity_graph) <= 0) {
-    std::cerr << "Total number of egdes are zero." << std::endl;
+    std::cerr << "Total number of edges is zero." << std::endl;
     exit(-1);
   }
 

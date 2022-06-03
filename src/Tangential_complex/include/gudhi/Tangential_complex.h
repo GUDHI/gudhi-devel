@@ -1152,7 +1152,7 @@ class Tangential_complex {
 
 #ifdef GUDHI_TC_VERY_VERBOSE
     std::cerr << "Inserted " << num_inserted_points << " points / " << num_attempts_to_insert_points
-              << " attemps to compute the star\n";
+              << " attempts to compute the star\n";
 #endif
 
     update_star(i);
