@@ -29,7 +29,7 @@ template <typename Point> class Error_quadric {
    * Quadric corresponding to the L2 distance to the plane.
    *
    * According to the notation of Garland Heckbert, they
-   * denote a quadric symetric matrix as :
+   * denote a quadric symmetric matrix as :
    * Q = [ q11 q12 q13 q14]
    *     [ q12 q22 q23 q24]
    *     [ q13 q23 q33 q34]

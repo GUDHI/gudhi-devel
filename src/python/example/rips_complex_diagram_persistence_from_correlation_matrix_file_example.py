@@ -40,7 +40,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if not (-1.0 < args.min_edge_correlation < 1.0):
-    print("Wrong value of the treshold corelation (should be between -1 and 1).")
+    print("Wrong value of the threshold corelation (should be between -1 and 1).")
     sys.exit(1)
 
 print("#####################################################################")

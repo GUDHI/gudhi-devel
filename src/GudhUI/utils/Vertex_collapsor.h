@@ -31,7 +31,7 @@ template<typename SkBlComplex> class Vertex_collapsor {
 
   /**
    * @brief Modify complex to be the expansion of the k-nearest neighbor
-   * symetric graph.
+   * symmetric graph.
    */
   Vertex_collapsor(SkBlComplex& complex, size_t num_collapses) :
       complex_(complex), num_collapses_(num_collapses) {

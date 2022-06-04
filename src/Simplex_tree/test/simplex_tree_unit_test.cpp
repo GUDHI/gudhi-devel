@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   set_and_test_simplex_tree_dim_fil(st, eighthSimplexVector.size(), eighthSimplex.second);
   BOOST_CHECK(st.num_vertices() == (size_t) 4);
 
-  // ++ NINETH
+  // ++ NINTH
   std::clog << "   - INSERT (3,0)" << std::endl;
   typeVectorVertex ninethSimplexVector{3, 0};
   BOOST_CHECK(ninethSimplexVector.size() == 2);
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   test_simplex_tree_contains(st, seventhSimplex, 8); // (2,1,0) -> 8
   std::clog << "simplex_tree_insertion - eighth - 3" << std::endl;
   test_simplex_tree_contains(st, eighthSimplex, 3); // (3) -> 3
-  std::clog << "simplex_tree_insertion - nineth - 7" << std::endl;
+  std::clog << "simplex_tree_insertion - ninth - 7" << std::endl;
   test_simplex_tree_contains(st, ninethSimplex, 7); // (3,0) -> 7
 
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
