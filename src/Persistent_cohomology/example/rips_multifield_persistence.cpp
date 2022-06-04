@@ -104,7 +104,7 @@ void program_options(int argc, char * argv[]
       ("min-field-charac,p", po::value<int>(&min_p)->default_value(2),
        "Minimal characteristic p of the coefficient field Z/pZ.")
       ("max-field-charac,q", po::value<int>(&max_p)->default_value(1223),
-       "Minimial characteristic q of the coefficient field Z/pZ.")
+       "Maximal characteristic q of the coefficient field Z/pZ.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
        "Minimal lifetime of homology feature to be recorded. Default is 0");
 

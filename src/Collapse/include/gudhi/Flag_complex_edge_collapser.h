@@ -53,7 +53,7 @@ struct Flag_complex_edge_collapser {
 #ifdef GUDHI_COLLAPSE_USE_DENSE_ARRAY
   // Minimal matrix interface
   // Using this matrix generally helps performance, but the memory use may be excessive for a very sparse graph
-  // (and in extreme cases the constant initialization of the matrix may start to dominate the runnning time).
+  // (and in extreme cases the constant initialization of the matrix may start to dominate the running time).
   // Are there cases where the matrix is too big but a hash table would help?
   std::vector<Filtration_value> neighbors_data;
   void init_neighbors_dense(){
