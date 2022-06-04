@@ -27,7 +27,7 @@ template<typename SkBlComplex> class Furthest_point_epsilon_net {
 
   /**
    * Let V be the set of vertices.
-   * Initially v0 is one arbitrarly vertex and the set V0 is {v0}.
+   * Initially v0 is one, arbitrary, vertex and the set V0 is {v0}.
    * Then Vk is computed as follows.
    * First we compute the vertex pk that is the furthest from Vk
    * then Vk = Vk \cup pk.
@@ -54,7 +54,7 @@ template<typename SkBlComplex> class Furthest_point_epsilon_net {
 
   /**
    * @brief Modify complex to be the expansion of the k-nearest neighbor
-   * symetric graph.
+   * symmetric graph.
    */
   Furthest_point_epsilon_net(SkBlComplex& complex) :
       complex_(complex) {

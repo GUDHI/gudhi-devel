@@ -129,7 +129,7 @@ int main(int argc, char* const argv[]) {
     std::clog << "   - 3 NOT INSERTED" << std::endl;
   }
 
-  // ++ NINETH
+  // ++ NINTH
   std::clog << "   * INSERT (3,0)" << std::endl;
   typeVectorVertex ninethSimplexVector = {3, 0};
   returnValue = simplexTree.insert_simplex(ninethSimplexVector, Filtration_value(SECOND_FILTRATION_VALUE));

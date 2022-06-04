@@ -69,7 +69,7 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * \ingroup alpha_complex
  * 
  * \details
- * The data structure is constructing a CGAL Delaunay triangulation (for more informations on CGAL Delaunay 
+ * The data structure is constructing a CGAL Delaunay triangulation (for more information on CGAL Delaunay 
  * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
  * range of points or from an OFF file (cf. Points_off_reader).
  * 
