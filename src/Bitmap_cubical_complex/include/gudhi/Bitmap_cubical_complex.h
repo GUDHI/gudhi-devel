@@ -237,7 +237,7 @@ class Bitmap_cubical_complex : public T {
    * Filtration_simplex_iterator class provides an iterator though the whole structure in the order of filtration.
    * Secondary criteria for filtration are:
    * (1) Dimension of a cube (lower dimensional comes first).
-   * (2) Position in the data structure (the ones that are earlies in the data structure comes first).
+   * (2) Position in the data structure (the ones that are earliest in the data structure come first).
    **/
   class Filtration_simplex_range;
 

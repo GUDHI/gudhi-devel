@@ -86,7 +86,7 @@ class Neighbors_finder {
 };
 
 /** \internal \brief data structure used to find any point (including projections) in V near to a query point from U
- * (which can be a projection) in a layered graph layer given as parmeter.
+ * (which can be a projection) in a layered graph layer given as parameter.
  *
  * V points have to be added manually using their index and before the first pull. A neighbor pulled is automatically
  * removed.

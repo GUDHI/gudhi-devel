@@ -29,7 +29,7 @@ double wasserstein_distance(
   if(std::isinf(internal_p)) internal_p = hera::get_infinity<double>();
   params.internal_p = internal_p;
   params.delta = delta;
-  // The extra parameters are purposedly not exposed for now.
+  // The extra parameters are purposely not exposed for now.
   return hera::wasserstein_dist(diag1, diag2, params);
 }
 
