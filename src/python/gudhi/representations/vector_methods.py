@@ -10,7 +10,6 @@
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
 import numpy as np
-from pykeops.numpy import Genred
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
@@ -218,6 +217,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
         self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
         self.im_range = None
 
+        from pykeops.numpy import Genred
         silhouette_formula = "normalized_weights * ReLU(heights - Abs(x_values - midpoints))"
         variables = [
             "normalized_weights = Vi(1)",
