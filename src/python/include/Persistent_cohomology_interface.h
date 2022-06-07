@@ -12,6 +12,8 @@
 #define INCLUDE_PERSISTENT_COHOMOLOGY_INTERFACE_H_
 
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Simplex_tree.h>  // for Extended_simplex_type
+
 
 #include <cstdlib>
 #include <vector>
@@ -221,6 +223,44 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
       }
     }
     return out;
+  }
+
+  using Filtration_value = typename FilteredComplex::Filtration_value;
+  using Birth_death = std::pair<Filtration_value, Filtration_value>;
+  using Persistence_subdiagrams = std::vector<std::vector<std::pair<int, Birth_death>>>;
+
+  Persistence_subdiagrams compute_extended_persistence_subdiagrams(Filtration_value min_persistence){
+    Persistence_subdiagrams pers_subs(4);
+    auto const& persistent_pairs = Base::get_persistent_pairs();
+    for (auto pair : persistent_pairs) {
+      std::pair<Filtration_value, Extended_simplex_type> px = stptr_->decode_extended_filtration(stptr_->filtration(get<0>(pair)),
+                                                                                                        stptr_->efd);
+      std::pair<Filtration_value, Extended_simplex_type> py = stptr_->decode_extended_filtration(stptr_->filtration(get<1>(pair)),
+                                                                                                        stptr_->efd);
+      std::pair<int, Birth_death> pd_point = std::make_pair(stptr_->dimension(get<0>(pair)),
+                                                            std::make_pair(px.first, py.first));
+      if(std::abs(px.first - py.first) > min_persistence){
+        //Ordinary
+        if (px.second == Extended_simplex_type::UP && py.second == Extended_simplex_type::UP){
+          pers_subs[0].push_back(pd_point);
+        }
+        // Relative
+        else if (px.second == Extended_simplex_type::DOWN && py.second == Extended_simplex_type::DOWN){
+          pers_subs[1].push_back(pd_point);
+        }
+        else{
+          // Extended+
+          if (px.first < py.first){
+            pers_subs[2].push_back(pd_point);
+          }
+          //Extended-
+          else{
+            pers_subs[3].push_back(pd_point);
+          }
+        }
+      }
+    }
+    return pers_subs;
   }
 
  private:
