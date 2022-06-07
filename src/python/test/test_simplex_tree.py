@@ -320,6 +320,10 @@ def test_extend_filtration():
     ]
 
     dgms = st.extended_persistence(min_persistence=-1.)
+    assert len(dgms) == 4
+    # Sort by (death-birth) descending - we are only interested in those with the longest life span
+    for idx in range(4):
+        dgms[idx] = sorted(dgms[idx], key=lambda x:(-abs(x[1][0]-x[1][1])))
 
     assert dgms[0][0][1][0] == pytest.approx(2.)
     assert dgms[0][0][1][1] == pytest.approx(3.)
