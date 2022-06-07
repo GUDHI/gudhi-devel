@@ -142,7 +142,7 @@ def _get_archive_path(file_path, label):
 
 def fetch_spiral_2d(file_path = None):
     """
-    Fetch spiral_2d dataset remotely.
+    Load the spiral_2d dataset.
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding array is returned from cache.
@@ -174,7 +174,7 @@ def fetch_spiral_2d(file_path = None):
 
 def fetch_bunny(file_path = None, accept_license = False):
     """
-    Fetch Stanford bunny dataset remotely and its LICENSE file.
+    Load the Stanford bunny dataset.
 
     This dataset contains 35947 vertices.
 
