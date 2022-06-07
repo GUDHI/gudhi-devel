@@ -474,8 +474,7 @@ cdef class SimplexTree:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
         self.pcohptr.compute_persistence(homology_coeff_field, -1.)
-        persistence_result = self.pcohptr.get_persistence()
-        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
+        return self.pcohptr.compute_extended_persistence_subdiagrams(min_persistence)
 
     def expansion_with_blocker(self, max_dim, blocker_func):
         """Expands the Simplex_tree containing only a graph. Simplices corresponding to cliques in the graph are added
@@ -676,18 +675,17 @@ cdef class SimplexTree:
         return (normal0, normals, infinite0, infinites)
 
     def collapse_edges(self, nb_iterations = 1):
-        """Assuming the simplex tree is a 1-skeleton graph, this method collapse edges (simplices of higher dimension
-        are ignored) and resets the simplex tree from the remaining edges.
-        A good candidate is to build a simplex tree on top of a :class:`~gudhi.RipsComplex` of dimension 1 before
-        collapsing edges
+        """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
+        interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
+        expansion has the same persistent homology, using a technique known as edge collapses
+        (see :cite:`edgecollapsearxiv`).
+
+        A natural application is to get a simplex tree of dimension 1 from :class:`~gudhi.RipsComplex`,
+        then collapse edges, perform :meth:`expansion()` and finally compute persistence
         (cf. :download:`rips_complex_edge_collapse_example.py <../example/rips_complex_edge_collapse_example.py>`).
-        For implementation details, please refer to :cite:`edgecollapsesocg2020`.
 
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
-
-        :note: collapse_edges method requires `Eigen <installation.html#eigen>`_ >= 3.1.0 and an exception is thrown
-            if this method is not available.
         """
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()

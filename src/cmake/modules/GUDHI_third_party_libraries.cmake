@@ -174,7 +174,7 @@ if (WITH_GUDHI_PYTHON)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
   endif(NOT GUDHI_PYTHON_PATH)
   
-  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
   
   if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(SPHINX_FOUND)

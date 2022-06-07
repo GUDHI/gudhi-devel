@@ -95,7 +95,7 @@ class Hasse_diagram_cell {
         deleted_(false) {}
 
   /**
-   * Construcor of a cell of dimension dim having given additional information.
+   * Constructor of a cell of dimension dim having given additional information.
    **/
   Hasse_diagram_cell(Additional_information ai, int dim)
       : dimension(dim), additional_info(ai), position(0), deleted_(false) {}
@@ -125,7 +125,7 @@ class Hasse_diagram_cell {
   inline Additional_information& get_additional_information() { return this->additional_info; }
 
   /**
-   * Procedure to retrive position of the cell in the structure. It is used in
+   * Procedure to retrieve the position of the cell in the structure. It is used in
    * the implementation of Hasse diagram and set by it. Note that removal of
    * cell and subsequent call of clean_up_the_structure will change those
    * positions.
@@ -186,7 +186,7 @@ class Hasse_diagram_cell {
   friend std::ostream& operator<<(
       std::ostream& out, const Hasse_diagram_cell<Incidence_type, Filtration_type, Additional_information>& c) {
     // cout << "position : " << c.position << ", dimension : " << c.dimension << ", filtration: " << c.filtration << ",
-    // size of boudary : " <<  c.boundary.size() << "\n";
+    // size of boundary : " <<  c.boundary.size() << "\n";
     out << c.position << " " << c.dimension << " " << c.filtration << std::endl;
     for (std::size_t bd = 0; bd != c.boundary.size(); ++bd) {
       // do not write out the cells that has been deleted

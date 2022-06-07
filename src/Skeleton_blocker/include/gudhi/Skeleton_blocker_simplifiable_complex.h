@@ -39,7 +39,6 @@ bool Skeleton_blocker_complex<SkeletonBlockerDS>::is_popable_blocker(Blocker_han
 
 /**
  * Removes all the popable blockers of the complex and delete them.
- * @returns the number of popable blockers deleted
  */
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_popable_blockers() {
@@ -160,7 +159,6 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_s
 
 /**
  * Remove the star of the edge connecting vertices a and b.
- * @returns the number of blocker that have been removed
  */
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(Vertex_handle a, Vertex_handle b) {

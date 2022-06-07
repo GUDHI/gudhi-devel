@@ -211,7 +211,7 @@ class Persistent_cohomology {
   /** \brief Update the cohomology groups under the insertion of an edge.
    *
    * The 0-homology is maintained with a simple Union-Find data structure, which
-   * explains the existance of a specific function of edge insertions. */
+   * explains the existence of a specific function of edge insertions. */
   void update_cohomology_groups_edge(Simplex_handle sigma) {
     Simplex_handle u, v;
     boost::tie(u, v) = cpx_->endpoints(sigma);

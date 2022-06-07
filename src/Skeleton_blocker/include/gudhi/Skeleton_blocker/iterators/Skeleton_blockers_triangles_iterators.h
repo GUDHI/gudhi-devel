@@ -21,7 +21,7 @@ namespace skeleton_blocker {
 /**
  * \brief Iterator over the triangles that are
  * adjacent to a vertex of the simplicial complex.
- * \remark Will be removed soon -> dont look
+ * \remark Will be removed soon -> don't look
  */
 template<typename Complex, typename LinkType>
 class Triangle_around_vertex_iterator : public boost::iterator_facade
@@ -95,7 +95,7 @@ class Triangle_around_vertex_iterator : public boost::iterator_facade
 /**
  * \brief Iterator over the triangles of the
  * simplicial complex.
- * \remark Will be removed soon -> dont look
+ * \remark Will be removed soon -> don't look
  *
  */
 template<typename SkeletonBlockerComplex>

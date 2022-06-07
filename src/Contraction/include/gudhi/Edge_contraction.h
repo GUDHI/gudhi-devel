@@ -26,6 +26,7 @@ namespace contraction {
 
 
 /** \defgroup contr Edge contraction
+@{
 
 \author David Salinas
 
@@ -45,7 +46,7 @@ the operations needed for edge contraction algorithms have polynomial complexity
 Therefore, the simplification can be done without enumerating the set of simplices that is often non tracktable in high-dimension and is then very efficient
 (sub-linear with regards to the number of simplices in practice).
 
-A typical application of this package is homology group computation. It is illustrated in the next figure where a Rips complex is built uppon a set of high-dimensional points and
+A typical application of this package is homology group computation. It is illustrated in the next figure where a Rips complex is built upon a set of high-dimensional points and
 simplified with edge contractions.
 It has initially a big number of simplices (around 20 millions) but simplifying it to a much reduced form with only 15 vertices (and 714 simplices) takes only few seconds on a desktop machine (see the example bellow).
 One can then compute homology group with a simplicial complex having very few simplices instead of running the homology algorithm on the much bigger initial set of 
@@ -64,7 +65,7 @@ This class design is policy based and heavily inspired from the similar edge col
 Four policies can be customized in this package:
 
 \li Cost_policy: specify how much cost an edge contraction of a given edge. The edge with lowest cost is iteratively picked and contracted if valid.
-\li Valid_contraction_policy: specify if a given edge contraction is valid. For instance, this policy can check the link condition which ensures that the homotopy type is preserved afer the edge contraction.
+\li Valid_contraction_policy: specify if a given edge contraction is valid. For instance, this policy can check the link condition which ensures that the homotopy type is preserved after the edge contraction.
 \li Placement_policy: every time an edge is contracted, its points are merge to one point specified by this policy. This may be the middle of the edge of some more sophisticated point such as the minimum of a cost as in 
 \cite Garland.
 
@@ -91,7 +92,7 @@ Despite this package is able to deal with \a arbitrary simplicial complexes (any
 it is still \a 65% times faster than the CGAL package which is focused on 2-manifold. 
 The main reason is that few blockers appears during the simplification and hence,
 the algorithm only have to deal with the graph and not higher-dimensional simplices
-(in this case triangles). However, we recall that higher-dimensional simplices are \a implicitely 
+(in this case triangles). However, we recall that higher-dimensional simplices are \a implicitly 
 stored in the \ref skbl data-structure. Hence, one has to store
 simplices in an external map if some information needs to be associated with them (information that could be a filtration value or 
 an orientation for instance).
@@ -152,7 +153,7 @@ void build_rips(ComplexType& complex, double offset){
 int main (int argc, char *argv[])
 {
 	if (argc!=3){
-		std::cerr << "Usage "<<argv[0]<<" ../../data/SO3_10000.off 0.3 to load the file ../../data/SO3_10000.off and contract the Rips complex built with paremeter 0.3.\n";
+		std::cerr << "Usage "<<argv[0]<<" ../../data/SO3_10000.off 0.3 to load the file ../../data/SO3_10000.off and contract the Rips complex built with parameter 0.3.\n";
 		return -1;
 	}
 
@@ -194,7 +195,6 @@ int main (int argc, char *argv[])
 	std::clog << "Time to simplify and enumerate simplices:\n";
 
 	return EXIT_SUCCESS;
-}
 }
   \endcode
 

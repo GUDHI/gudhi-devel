@@ -41,7 +41,7 @@ template<typename SkBlComplex> class K_nearest_builder {
  public:
   /**
    * @brief Modify complex to be the expansion of the k-nearest neighbor
-   * symetric graph.
+   * symmetric graph.
    */
   K_nearest_builder(SkBlComplex& complex, unsigned k) : complex_(complex) {
     complex.keep_only_vertices();

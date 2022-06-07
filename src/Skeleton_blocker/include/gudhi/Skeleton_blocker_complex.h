@@ -438,7 +438,7 @@ class Skeleton_blocker_complex {
   }
 
   /**
-   * return the id of a vertex of adress local present in the graph
+   * return the id of a vertex of address local present in the graph
    */
   Root_vertex_handle get_id(Vertex_handle local) const {
     assert(0 <= local.vertex && local.vertex < boost::num_vertices(skeleton));
@@ -740,7 +740,7 @@ class Skeleton_blocker_complex {
    * complex to the smallest flag complex that contains it.
    */
   void remove_blockers() {
-    // Desallocate the blockers
+    // Deallocate the blockers
     while (!blocker_map_.empty()) {
       delete_blocker(blocker_map_.begin()->second);
     }
@@ -764,8 +764,8 @@ class Skeleton_blocker_complex {
 
  public:
   /**
-   * Removes the simplex s from the set of blockers
-   * and desallocate s.
+   * Removes the simplex sigma from the set of blockers
+   * and deallocate sigma.
    */
   void delete_blocker(Blocker_handle sigma) {
     if (visitor)
@@ -960,7 +960,7 @@ class Skeleton_blocker_complex {
   }
 
   /*
-   * @brief returnrs true iff the complex is empty.
+   * @brief returns true iff the complex is empty.
    */
   bool empty() const {
     return num_vertices() == 0;
@@ -1043,7 +1043,7 @@ class Skeleton_blocker_complex {
     if (num_vertices() == 1)
       return true;
     for (auto vi : vertex_range()) {
-      // xxx todo faire une methode bool is_in_blocker(Vertex_handle)
+      // xxx todo create a method: bool is_in_blocker(Vertex_handle)
       if (blocker_map_.find(vi) == blocker_map_.end()) {
         // no blocker passes through the vertex, we just need to
         // check if the current vertex is linked to all others vertices of the complex
@@ -1071,7 +1071,6 @@ class Skeleton_blocker_complex {
 
   /**
    * Removes all the popable blockers of the complex and delete them.
-   * @returns the number of popable blockers deleted
    */
   void remove_popable_blockers();
 
@@ -1103,7 +1102,6 @@ class Skeleton_blocker_complex {
  public:
   /**
    * Remove the star of the edge connecting vertices a and b.
-   * @returns the number of blocker that have been removed
    */
   void remove_star(Vertex_handle a, Vertex_handle b);
 

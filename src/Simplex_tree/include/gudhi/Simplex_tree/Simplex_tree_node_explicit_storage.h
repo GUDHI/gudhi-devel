@@ -24,7 +24,7 @@ namespace Gudhi {
  * \brief Node of a simplex tree with filtration value
  * and simplex key.
  *
- * It stores explicitely its own filtration value and its own Simplex_key.
+ * It stores explicitly its own filtration value and its own Simplex_key.
  */
 template<class SimplexTree>
 struct Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base, SimplexTree::Key_simplex_base {

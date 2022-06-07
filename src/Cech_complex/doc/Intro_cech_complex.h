@@ -70,9 +70,8 @@ namespace cech_complex {
  * This radius computation is the reason why the Cech_complex is taking much more time to be computed than the
  * \ref rips_complex but it offers more topological guarantees.
  *
- * If the Cech_complex interfaces are not detailed enough for your need, please refer to
- * <a href="cech_complex_step_by_step_8cpp-example.html">
- * cech_complex_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
+ * If the Cech_complex interfaces are not detailed enough for your need, please refer to the example
+ * \gudhi_example_link{Cech_complex,cech_complex_step_by_step.cpp}, where the graph construction over the Simplex_tree is more detailed.
  *
  * \subsection cechpointscloudexample Example from a point cloud
  * 

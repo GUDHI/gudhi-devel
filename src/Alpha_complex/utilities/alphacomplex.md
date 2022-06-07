@@ -64,7 +64,7 @@ N.B.:
 * Weights values are explained on CGAL
 [dD Triangulations](https://doc.cgal.org/latest/Triangulation/index.html)
 and
-[Regular triangulation](https://doc.cgal.org/latest/Triangulation/index.html#title20) documentation.
+[Regular triangulation](https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT) documentation.
 
 
 ## alpha_complex_3d_persistence ##
@@ -131,6 +131,6 @@ N.B.:
 * `alpha_complex_3d_persistence` only accepts OFF files in dimension 3.
 * Filtration values are alpha square values.
 * Weights values are explained on CGAL
-[Alpha shape](https://doc.cgal.org/latest/Alpha_shapes_3/index.html#title0)
+[Alpha shape](https://doc.cgal.org/latest/Alpha_shapes_3/index.html#Alpha_shapes_3Definitions)
 and
 [Regular triangulation](https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation) documentation.

@@ -148,10 +148,6 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_EIGEN3', ")
-      set(GUDHI_USE_EIGEN3 "True")
-    else (EIGEN3_FOUND)
-      set(GUDHI_USE_EIGEN3 "False")
     endif (EIGEN3_FOUND)
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_reader', ")
@@ -333,9 +329,9 @@ if(PYTHONINTERP_FOUND)
                   if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                     set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                     # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                    # Images and biblio warnings because not found on developper version
+                    # Images and biblio warnings because not found on developer version
                     if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
                     endif()
                     # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
                     add_custom_target(sphinx
@@ -488,7 +484,7 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_euclidean_witness_complex)
 
       # Datasets generators
-      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independant from CGAL ?
+      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independent from CGAL ?
 
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 

@@ -103,7 +103,7 @@ template<typename SkBlComplex> class Critical_points {
       // reduced to one point -> contractible
       return 1;
     else
-      // we dont know
+      // we don't know
       return 2;
   }
 
