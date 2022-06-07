@@ -8,7 +8,7 @@ from ..cubical_complex  import CubicalComplex
 
 # The parameters of the model are the pixel values.
 
-def _Cubical(Xflat, Xdim, dimensions):
+def _Cubical(Xflat, Xdim, dimensions, homology_coeff_field=11):
     # Parameters: Xflat (flattened image),
     #             Xdim (shape of non-flattened image)
     #             dimensions (homology dimensions)
@@ -16,7 +16,7 @@ def _Cubical(Xflat, Xdim, dimensions):
     # Compute the persistence pairs with Gudhi
     # We reverse the dimensions because CubicalComplex uses Fortran ordering
     cc = CubicalComplex(dimensions=Xdim[::-1], top_dimensional_cells=Xflat)
-    cc.compute_persistence()
+    cc.compute_persistence(homology_coeff_field=homology_coeff_field)
 
     # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices    
     cof_pp = cc.cofaces_of_persistence_pairs()
@@ -37,17 +37,19 @@ class CubicalLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing the persistent homology of a cubical complex
     """
-    def __init__(self, dimensions, min_persistence=None, **kwargs):
+    def __init__(self, dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
         """
         Constructor for the CubicalLayer class
 
         Parameters:
             dimensions (List[int]): homology dimensions
             min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
+            homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
         """
         super().__init__(dynamic=True, **kwargs)
         self.dimensions = dimensions
         self.min_persistence = min_persistence if min_persistence != None else [0.] * len(self.dimensions)
+        self.hcf = homology_coeff_field
         assert len(self.min_persistence) == len(self.dimensions)
 
     def call(self, X):
@@ -64,7 +66,7 @@ class CubicalLayer(tf.keras.layers.Layer):
         # Don't compute gradient for this operation
         Xflat = tf.reshape(X, [-1])
         Xdim, Xflat_numpy = X.shape, Xflat.numpy()
-        indices_list = _Cubical(Xflat_numpy, Xdim, self.dimensions)
+        indices_list = _Cubical(Xflat_numpy, Xdim, self.dimensions, self.hcf)
         index_essential = np.argmin(Xflat_numpy) # index of minimum pixel value for essential persistence diagram
         # Get persistence diagram by simply picking the corresponding entries in the image
         self.dgms = []

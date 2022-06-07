@@ -7,10 +7,11 @@ import tensorflow          as tf
 
 # The parameters of the model are the vertex function values of the simplex tree.
 
-def _LowerStarSimplexTree(simplextree, filtration, dimensions):
+def _LowerStarSimplexTree(simplextree, filtration, dimensions, homology_coeff_field=11):
     # Parameters: simplextree (simplex tree on which to compute persistence)
     #             filtration (function values on the vertices of st),
     #             dimensions (homology dimensions),
+    #             homology_coeff_field (homology field coefficient)
     
     simplextree.reset_filtration(-np.inf, 0)
 
@@ -20,7 +21,7 @@ def _LowerStarSimplexTree(simplextree, filtration, dimensions):
     simplextree.make_filtration_non_decreasing()
     
     # Compute persistence diagram
-    simplextree.compute_persistence()
+    simplextree.compute_persistence(homology_coeff_field=homology_coeff_field)
     
     # Get vertex pairs for optimization. First, get all simplex pairs
     pairs = simplextree.lower_star_persistence_generators()
@@ -42,19 +43,21 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
     """
-    def __init__(self, simplextree, dimensions, min_persistence=None, **kwargs):
+    def __init__(self, simplextree, dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
         """
         Constructor for the LowerStarSimplexTreeLayer class
   
         Parameters:
-            simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n = number of vertices. Note that its filtration values are modified in each call of the class.
+            simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n-1, where n is its number of vertices. Note that its filtration values are modified in each call of the class.
             dimensions (List[int]): homology dimensions
             min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
+            homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
         """
         super().__init__(dynamic=True, **kwargs)
         self.dimensions  = dimensions
         self.simplextree = simplextree
-        self.min_persistence = min_persistence if min_persistence != None else [0. for _ in range(len(self.dimensions))] 
+        self.min_persistence = min_persistence if min_persistence != None else [0. for _ in range(len(self.dimensions))]
+        self.hcf = homology_coeff_field
         assert len(self.min_persistence) == len(self.dimensions)
 
     def call(self, filtration):
@@ -68,7 +71,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
             List[Tuple[tf.Tensor,tf.Tensor]]: List of lower-star persistence diagrams. The length of this list is the same than that of dimensions, i.e., there is one persistence diagram per homology dimension provided in the input list dimensions. Moreover, the finite and essential parts of the persistence diagrams are provided separately: each element of this list is a tuple of size two that contains the finite and essential parts of the corresponding persistence diagram, of shapes [num_finite_points, 2] and [num_essential_points, 1] respectively
         """
         # Don't try to compute gradients for the vertex pairs
-        indices = _LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimensions)
+        indices = _LowerStarSimplexTree(self.simplextree, filtration.numpy(), self.dimensions, self.hcf)
         # Get persistence diagrams
         self.dgms = []
         for idx_dim, dimension in enumerate(self.dimensions):
