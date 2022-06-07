@@ -508,14 +508,7 @@ class Entropy(BaseEstimator, TransformerMixin):
         new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
-            orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-            try:
-                #new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
-                new_diagram = DiagramScaler().fit_transform([diagram])[0]
-            except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                assert len(diagram) == 0
-                new_diagram = np.empty(shape = [0, 2])
+            orig_diagram, new_diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
                 
             p = new_diagram[:,1]
             p = p/np.sum(p)
