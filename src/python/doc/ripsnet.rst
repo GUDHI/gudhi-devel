@@ -20,7 +20,7 @@ This example instantiates a RipsNet model which can then be trained as any tenso
 
 .. testcode::
 
-    from gudhi.tensorflow import *
+    import gudhi.tensorflow as gtf
     import tensorflow as tf
     from tensorflow.keras import regularizers, layers
 
@@ -36,7 +36,7 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     dense_layers = []
 
     for n_units in ragged_layers_size:
-        ragged_layers.append(DenseRagged(units=n_units, use_bias=True, activation=activation_fct))
+        ragged_layers.append(gtf.DenseRagged(units=n_units, use_bias=True, activation=activation_fct))
 
     for n_units in dense_layers_size:
         dense_layers.append(layers.Dense(n_units, activation=activation_fct,
@@ -45,12 +45,12 @@ This example instantiates a RipsNet model which can then be trained as any tenso
 
     dense_layers.append(layers.Dense(output_units, activation=output_activation))
 
-    phi_1 = TFBlock(ragged_layers)
-    perm_op = 'mean'  # can also be 'sum'.
-    phi_2 = TFBlock(dense_layers)
+    phi_1 = gtf.TFBlock(ragged_layers)
+    perm_op = 'mean'  # can also be 'sum' (or a user specified function).
+    phi_2 = gtf.TFBlock(dense_layers)
     input_dim = 2
 
-    RN = RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
+    RN = gtf.RipsNet(phi_1, phi_2, input_dim, perm_op=perm_op)
 
     data_test = [[[-7.04493841, 9.60285858],
                   [-13.14389003, -13.21854157],
@@ -69,7 +69,11 @@ This example instantiates a RipsNet model which can then be trained as any tenso
     RN.predict(tf_data_test)
 
 Once RN is properly trained (which we skip in this documentation) it can be used to make predictions.
-In this example RipsNet estimates persistence vectorizations (of output size 25) of a list of point clouds (of 3 points) in 2D.
+In this example RipsNet estimates persistence vectorizations (of output size 25) of a list of 3 point clouds
+of 3 points each) in 2D.
+It yields an output of shape 'nb_input_pointclouds x output_units'.
+The 'ragged_layers_size' and 'dense_layers_size' define the architecture of the network.
+To reach best performance, they should be tuned depending on the dataset.
 A possible output is:
 
 .. code-block::
