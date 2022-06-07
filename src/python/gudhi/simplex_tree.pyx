@@ -474,8 +474,7 @@ cdef class SimplexTree:
             del self.pcohptr
         self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
         self.pcohptr.compute_persistence(homology_coeff_field, -1.)
-        persistence_result = self.pcohptr.get_persistence()
-        return self.get_ptr().compute_extended_persistence_subdiagrams(persistence_result, min_persistence)
+        return self.pcohptr.compute_extended_persistence_subdiagrams(min_persistence)
 
     def expansion_with_blocker(self, max_dim, blocker_func):
         """Expands the Simplex_tree containing only a graph. Simplices corresponding to cliques in the graph are added
