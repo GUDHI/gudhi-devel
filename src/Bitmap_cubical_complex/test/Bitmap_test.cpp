@@ -72,14 +72,14 @@ BOOST_AUTO_TEST_CASE(cellsIterator_test) {
   Bitmap_cubical_complex hole_vertices(dimensions, oneDimensionalCycle, false);
 
   i = 0;
-  for (Bitmap_cubical_complex::Vertices_cells_iterator it = increasing_vertices.vertices_cells_iterator_begin();
-       it != increasing_vertices.vertices_cells_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex::Vertices_iterator it = increasing_vertices.vertices_iterator_begin();
+       it != increasing_vertices.vertices_iterator_end(); ++it) {
     BOOST_CHECK(increasing_vertices.get_cell_data(*it) == expectedFiltrationValues2[i]);
     ++i;
   }
   i = 0;
-  for (Bitmap_cubical_complex::Vertices_cells_iterator it = hole_vertices.vertices_cells_iterator_begin();
-       it != hole_vertices.vertices_cells_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex::Vertices_iterator it = hole_vertices.vertices_iterator_begin();
+       it != hole_vertices.vertices_iterator_end(); ++it) {
     BOOST_CHECK(hole_vertices.get_cell_data(*it) == expectedFiltrationValues1[i]);
     ++i;
   }

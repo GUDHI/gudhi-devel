@@ -123,7 +123,7 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
 
     // Gather all vertices and store their simplex handles
     std::vector<std::size_t> max_splx;
-    for (auto splx : stptr_->vertices_cells_range())
+    for (auto splx : stptr_->vertices_range())
       max_splx.push_back(splx);
     // Sort these simplex handles and compute the ordering function
     // This function allows to go directly from the simplex handle to the position of the corresponding vertex in the input data

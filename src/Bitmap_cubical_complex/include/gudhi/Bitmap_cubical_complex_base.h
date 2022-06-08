@@ -213,7 +213,7 @@ class Bitmap_cubical_complex_base {
   /**
    * Set cells filtrations given those of the vertices, and based on lower star filtration.
    **/
-  void impose_lower_star_filtration_from_vertices();  // assume that vertices cells are already set.
+  void impose_lower_star_filtration_from_vertices();  // assume that vertices are already set.
 
   /**
    * Returns dimension of a complex.
@@ -485,13 +485,13 @@ class Bitmap_cubical_complex_base {
   //****************************************************************************************************************//
   //****************************************************************************************************************//
   //****************************************************************************************************************//
-  class Vertices_cells_iterator : std::iterator<std::input_iterator_tag, T> {
+  class Vertices_iterator : std::iterator<std::input_iterator_tag, T> {
     public:
-    Vertices_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
+    Vertices_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<std::size_t>(b.dimension());
     }
 
-    Vertices_cells_iterator operator++() {
+    Vertices_iterator operator++() {
       // first find first element of the counter that can be increased:
       std::size_t dim = 0;
       while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim])) ++dim;
@@ -507,19 +507,19 @@ class Bitmap_cubical_complex_base {
       return *this;
     }
 
-    Vertices_cells_iterator operator++(int) {
-      Vertices_cells_iterator result = *this;
+    Vertices_iterator operator++(int) {
+      Vertices_iterator result = *this;
       ++(*this);
       return result;
     }
 
-    Vertices_cells_iterator& operator=(const Vertices_cells_iterator& rhs) {
+    Vertices_iterator& operator=(const Vertices_iterator& rhs) {
       this->counter = rhs.counter;
       this->b = rhs.b;
       return *this;
     }
 
-    bool operator==(const Vertices_cells_iterator& rhs) const {
+    bool operator==(const Vertices_iterator& rhs) const {
       if (&this->b != &rhs.b) return false;
       if (this->counter.size() != rhs.counter.size()) return false;
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
@@ -528,7 +528,7 @@ class Bitmap_cubical_complex_base {
       return true;
     }
 
-    bool operator!=(const Vertices_cells_iterator& rhs) const { return !(*this == rhs); }
+    bool operator!=(const Vertices_iterator& rhs) const { return !(*this == rhs); }
 
     /*
      * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
@@ -560,18 +560,18 @@ class Bitmap_cubical_complex_base {
   };
 
   /**
-   * Function returning a Vertices_cells_iterator to the first vertex of the bitmap.
+   * Function returning a Vertices_iterator to the first vertex of the bitmap.
    **/
-  Vertices_cells_iterator vertices_cells_iterator_begin() {
-    Vertices_cells_iterator a(*this);
+  Vertices_iterator vertices_iterator_begin() {
+    Vertices_iterator a(*this);
     return a;
   }
 
   /**
-   * Function returning a Vertices_cells_iterator to the last vertex of the bitmap.
+   * Function returning a Vertices_iterator to the last vertex of the bitmap.
    **/
-  Vertices_cells_iterator vertices_cells_iterator_end() {
-    Vertices_cells_iterator a(*this);
+  Vertices_iterator vertices_iterator_end() {
+    Vertices_iterator a(*this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
       a.counter[i] = this->sizes[i];
     }
@@ -580,21 +580,21 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @brief Vertices_cells_iterator_range class provides ranges for Vertices_cells_iterator_range
+   * @brief Vertices_iterator_range class provides ranges for Vertices_iterator_range
    **/
-  class Vertices_cells_range {
+  class Vertices_range {
    public:
-    Vertices_cells_range(Bitmap_cubical_complex_base* b) : b(b) {}
+    Vertices_range(Bitmap_cubical_complex_base* b) : b(b) {}
 
-    Vertices_cells_iterator begin() { return b->vertices_cells_iterator_begin(); }
+    Vertices_iterator begin() { return b->vertices_iterator_begin(); }
 
-    Vertices_cells_iterator end() { return b->vertices_cells_iterator_end(); }
+    Vertices_iterator end() { return b->vertices_iterator_end(); }
 
    private:
     Bitmap_cubical_complex_base<T>* b;
   };
 
-  Vertices_cells_range vertices_cells_range() { return Vertices_cells_range(this); }
+  Vertices_range vertices_range() { return Vertices_range(this); }
 
   //****************************************************************************************************************//
   //****************************************************************************************************************//
@@ -771,9 +771,9 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
         "sizes_in_following_directions vector is different from the size of vertices vector.");
   }
 
-  Bitmap_cubical_complex_base<T>::Vertices_cells_iterator it(*this);
+  Bitmap_cubical_complex_base<T>::Vertices_iterator it(*this);
   std::size_t index = 0;
-  for (it = this->vertices_cells_iterator_begin(); it != this->vertices_cells_iterator_end(); ++it) {
+  for (it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
     this->get_cell_data(*it) = vertices[index];
     ++index;
   }
@@ -1052,8 +1052,8 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices(
   std::vector<std::size_t> indices_to_consider;
   // we assume here that we already have a filtration on the vertices and
   // we have to extend it to higher ones.
-  typename Bitmap_cubical_complex_base<T>::Vertices_cells_iterator it(*this);
-  for (it = this->vertices_cells_iterator_begin(); it != this->vertices_cells_iterator_end(); ++it) {
+  typename Bitmap_cubical_complex_base<T>::Vertices_iterator it(*this);
+  for (it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
 

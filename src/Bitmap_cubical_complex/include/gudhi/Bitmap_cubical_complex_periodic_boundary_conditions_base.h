@@ -214,7 +214,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   this->set_up_containers(top_cells_sizes, false);
 
   std::size_t i = 0;
-  for (auto it = this->vertices_cells_iterator_begin(); it != this->vertices_cells_iterator_end(); ++it) {
+  for (auto it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
     this->get_cell_data(*it) = vertices[i];
     ++i;
   }
