@@ -280,7 +280,7 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
 
     std::size_t id = 0;
 
-    // xxx do a parralel for
+    // xxx do a parallel for
     for (auto edge : complex_.edge_range()) {
       complex_[edge].index() = id++;
       Profile const& profile = create_profile(edge);
@@ -474,7 +474,7 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
   }
 
   void update_changed_edges() {
-    // xxx do a parralel for
+    // xxx do a parallel for
     DBG("update edges");
 
     // sequential loop
@@ -530,7 +530,7 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
     // by definition of a blocker
 
     // todo uniqument utile pour la link condition
-    // laisser a l'utilisateur ? booleen update_heap_on_removed_blocker?
+    // laisser a l'utilisateur ? boolean update_heap_on_removed_blocker?
     Simplex blocker_copy(*blocker);
     for (auto x = blocker_copy.begin(); x != blocker_copy.end(); ++x) {
       for (auto y = x; ++y != blocker_copy.end();) {

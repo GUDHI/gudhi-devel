@@ -131,8 +131,7 @@ namespace persistent_cohomology {
 
 We provide several example files: run these examples with -h for details on their use, and read the README file.
 
-\li <a href="rips_persistence_8cpp-example.html">
-Rips_complex/rips_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its persistence
+\li \gudhi_example_link{Rips_complex,rips_persistence.cpp} computes the Rips complex of a point cloud and outputs its persistence
 diagram.
 \code $> ./rips_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3 \endcode
 \code The complex contains 177838 simplices 
@@ -144,12 +143,10 @@ diagram.
 
 More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
 
-\li <a href="rips_multifield_persistence_8cpp-example.html">
-Persistent_cohomology/rips_multifield_persistence.cpp</a> computes the Rips complex of a point cloud and outputs its
+\li \gudhi_example_link{Persistent_cohomology,rips_multifield_persistence.cpp} computes the Rips complex of a point cloud and outputs its
 persistence diagram with a family of field coefficients.
 
-\li <a href="rips_distance_matrix_persistence_8cpp-example.html">
-Rips_complex/rips_distance_matrix_persistence.cpp</a> computes the Rips complex of a distance matrix and
+\li \gudhi_example_link{Rips_complex,rips_distance_matrix_persistence.cpp} computes the Rips complex of a distance matrix and
 outputs its persistence diagram.
 
 The file should contain square or lower triangular distance matrix with semicolons as separators.
@@ -158,8 +155,7 @@ Please refer to data/distance_matrix/lower_triangular_distance_matrix.csv for an
 
 More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
 
-\li <a href="rips_correlation_matrix_persistence_8cpp-example.html">
-Rips_complex/rips_correlation_matrix_persistence.cpp</a>
+\li \gudhi_example_link{Rips_complex,rips_correlation_matrix_persistence.cpp}
 computes the Rips complex of a correlation matrix and outputs its persistence diagram.
 
 Note that no check is performed if the matrix given as the input is a correlation matrix.
@@ -169,8 +165,7 @@ Please refer to data/correlation_matrix/lower_triangular_correlation_matrix.csv 
 
 More details on the <a href="../../ripscomplex/">Rips complex utilities</a> dedicated page.
 
-\li <a href="alpha_complex_3d_persistence_8cpp-example.html">
-Alpha_complex/alpha_complex_3d_persistence.cpp</a> computes the persistent homology with
+\li \gudhi_example_link{Alpha_complex,alpha_complex_3d_persistence.cpp} computes the persistent homology with
 \f$\mathbb{Z}/2\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 \code $> ./alpha_complex_3d_persistence ../../data/points/tore3D_300.off -p 2 -m 0.45 \endcode
 \code Simplex_tree dim: 3
@@ -235,8 +230,7 @@ Note that the lengths of the sides of the periodic cuboid have to be the same.<b
 3  2 36.8838 inf
 3  3 58.6783 inf  \endcode
 
-\li <a href="alpha_complex_persistence_8cpp-example.html">
-Alpha_complex/alpha_complex_persistence.cpp</a> computes the persistent homology with
+\li \gudhi_example_link{Alpha_complex,alpha_complex_persistence.cpp} computes the persistent homology with
 \f$\mathbb{Z}/p\mathbb{Z}\f$ coefficients of the alpha complex on points sampling from an OFF file.
 \code $> ./alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off \endcode
 \code Alpha complex is of dimension 3 - 9273 simplices - 300 vertices.
@@ -248,8 +242,7 @@ Simplex_tree dim: 3
 
 More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> dedicated page.
 
-\li <a href="plain_homology_8cpp-example.html">
-Persistent_cohomology/plain_homology.cpp</a> computes the plain homology of a simple simplicial complex without
+\li \gudhi_example_link{Persistent_cohomology,plain_homology.cpp} computes the plain homology of a simple simplicial complex without
 filtration values.
 
  */

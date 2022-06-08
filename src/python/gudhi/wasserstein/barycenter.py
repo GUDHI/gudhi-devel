@@ -37,7 +37,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     :param init: The initial value for barycenter estimate.
         If ``None``, init is made on a random diagram from the dataset.
         Otherwise, it can be an ``int`` (then initialization is made on ``pdiagset[init]``)
-        or a `(n x 2)` ``numpy.array`` enconding a persistence diagram with `n` points.
+        or a `(n x 2)` ``numpy.array`` encoding a persistence diagram with `n` points.
     :type init: ``int``, or (n x 2) ``np.array``
     :param verbose: if ``True``, returns additional information about the barycenter.
     :type verbose: boolean
@@ -45,7 +45,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         (local minimum of the energy function).
         If ``pdiagset`` is empty, returns ``None``.
         If verbose, returns a couple ``(Y, log)`` where ``Y`` is the barycenter estimate,
-        and ``log`` is a ``dict`` that contains additional informations:
+        and ``log`` is a ``dict`` that contains additional information:
 
         - `"groupings"`, a list of list of pairs ``(i,j)``. Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates that `pdiagset[k][i]`` is matched to ``Y[j]`` if ``i = -1`` or ``j = -1``, it means they represent the diagonal.
 
@@ -73,7 +73,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
 
     nb_iter = 0
 
-    converged = False  # stoping criterion
+    converged = False  # stopping criterion
     while not converged:
         nb_iter += 1
         K = len(Y)  # current nb of points in Y (some might be on diagonal)

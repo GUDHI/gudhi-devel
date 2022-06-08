@@ -95,7 +95,7 @@ int main(int argc, char * const argv[]) {
   SimplexVector = {9, 10, 11};
   st.insert_simplex_and_subfaces(SimplexVector, 0.3);
 
-  // ++ NINETH
+  // ++ NINTH
   std::clog << "   - INSERT (2,10,12)" << std::endl;
   SimplexVector = {2, 10, 12};
   st.insert_simplex_and_subfaces(SimplexVector, 0.3);

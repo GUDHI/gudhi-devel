@@ -58,8 +58,7 @@ make \endverbatim
  * 
  * The following example requires the <a target="_blank" href="https://gmplib.org/">GNU Multiple Precision Arithmetic
  * Library</a> (GMP) and will not be built if GMP is not installed:
- * \li <a href="rips_multifield_persistence_8cpp-example.html">
- * Persistent_cohomology/rips_multifield_persistence.cpp</a>
+ * \li \gudhi_example_link{Persistent_cohomology,rips_multifield_persistence.cpp}
  *
  * Having GMP version 4.2 or higher installed is recommended.
  * 
@@ -76,58 +75,32 @@ make \endverbatim
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
  * Library</a> (CGAL \cite cgal:eb-19b) and will not be built if CGAL version 4.11.0 or higher is not installed:
- * \li <a href="example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
- * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
- * \li <a href="strong_witness_persistence_8cpp-example.html">
- * Witness_complex/strong_witness_persistence.cpp</a>
- * \li <a href="weak_witness_persistence_8cpp-example.html">
- * Witness_complex/weak_witness_persistence.cpp</a>
- * \li <a href="example_strong_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_strong_witness_complex_off.cpp</a>
- * \li <a href="example_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_witness_complex_off.cpp</a>
- * \li <a href="example_witness_complex_sphere_8cpp-example.html">
- * Witness_complex/example_witness_complex_sphere.cpp</a>
- * \li <a href="_alpha_complex_from_off_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="_alpha_complex_from_points_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="alpha_complex_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="custom_persistence_sort_8cpp-example.html">
- * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * \li <a href="alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
- * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
- * \li <a href="bottleneck_basic_example_8cpp-example.html">
- * Bottleneck_distance/bottleneck_basic_example.cpp</a>
- * \li <a href="bottleneck_distance_8cpp-example.html">
- * Bottleneck_distance/bottleneck_distance.cpp</a>
- * \li <a href="_coord_g_i_c_8cpp-example.html">
- * Nerve_GIC/CoordGIC.cpp</a>
- * \li <a href="_func_g_i_c_8cpp-example.html">
- * Nerve_GIC/FuncGIC.cpp</a>
- * \li <a href="_nerve_8cpp-example.html">
- * Nerve_GIC/Nerve.cpp</a>
- * \li <a href="_voronoi_g_i_c_8cpp-example.html">
- * Nerve_GIC/VoronoiGIC.cpp</a>
- * \li <a href="example_spatial_searching_8cpp-example.html">
- * Spatial_searching/example_spatial_searching.cpp</a>
- * \li <a href="example_choose_n_farthest_points_8cpp-example.html">
- * Subsampling/example_choose_n_farthest_points.cpp</a>
- * \li <a href="example_pick_n_random_points_8cpp-example.html">
- * Subsampling/example_pick_n_random_points.cpp</a>
- * \li <a href="example_sparsify_point_set_8cpp-example.html">
- * Subsampling/example_sparsify_point_set.cpp</a>
- * \li <a href="example_basic_8cpp-example.html">
- * Tangential_complex/example_basic.cpp</a>
- * \li <a href="example_with_perturb_8cpp-example.html">
- * Tangential_complex/example_with_perturb.cpp</a>
- * \li <a href="_weighted_alpha_complex_3d_from_points_8cpp-example.html">
- * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
- * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_coxeter_triangulation_2manifold_tracing_flat_torus_with_boundary_8cpp-example.html">
- * Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp</a>
+ * \li \gudhi_example_link{Simplex_tree,example_alpha_shapes_3_simplex_tree_from_off_file.cpp}
+ * \li \gudhi_example_link{Witness_complex,strong_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,weak_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_strong_witness_complex_off.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_witness_complex_off.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_witness_complex_sphere.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_persistence.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,custom_persistence_sort.cpp}
+ * \li \gudhi_example_link{Bottleneck_distance,alpha_rips_persistence_bottleneck_distance.cpp}
+ * \li \gudhi_example_link{Bottleneck_distance,bottleneck_basic_example.cpp}
+ * \li \gudhi_example_link{Bottleneck_distance,bottleneck_distance.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,CoordGIC.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,FuncGIC.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,Nerve.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,VoronoiGIC.cpp}
+ * \li \gudhi_example_link{Spatial_searching,example_spatial_searching.cpp}
+ * \li \gudhi_example_link{Subsampling,example_choose_n_farthest_points.cpp}
+ * \li \gudhi_example_link{Subsampling,example_pick_n_random_points.cpp}
+ * \li \gudhi_example_link{Subsampling,example_sparsify_point_set.cpp}
+ * \li \gudhi_example_link{Tangential_complex,example_basic.cpp}
+ * \li \gudhi_example_link{Tangential_complex,example_with_perturb.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Weighted_alpha_complex_3d_from_points.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_3d_persistence.cpp}
+ * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_flat_torus_with_boundary.cpp}
  *
  * \subsection eigen Eigen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
@@ -136,48 +109,27 @@ make \endverbatim
  * 
  * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> and will not be
  * built if Eigen is not installed:
- * \li <a href="_alpha_complex_from_off_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="_alpha_complex_from_points_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="alpha_complex_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="_weighted_alpha_complex_3d_from_points_8cpp-example.html">
- * Alpha_complex/Weighted_alpha_complex_3d_from_points.cpp</a>
- * \li <a href="alpha_rips_persistence_bottleneck_distance_8cpp-example.html">
- * Bottleneck_distance/alpha_rips_persistence_bottleneck_distance.cpp.cpp</a>
- * \li <a href="custom_persistence_sort_8cpp-example.html">
- * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * \li <a href="example_spatial_searching_8cpp-example.html">
- * Spatial_searching/example_spatial_searching.cpp</a>
- * \li <a href="example_choose_n_farthest_points_8cpp-example.html">
- * Subsampling/example_choose_n_farthest_points.cpp</a>
- * \li <a href="example_pick_n_random_points_8cpp-example.html">
- * Subsampling/example_pick_n_random_points.cpp</a>
- * \li <a href="example_sparsify_point_set_8cpp-example.html">
- * Subsampling/example_sparsify_point_set.cpp</a>
- * \li <a href="example_basic_8cpp-example.html">
- * Tangential_complex/example_basic.cpp</a>
- * \li <a href="example_with_perturb_8cpp-example.html">
- * Tangential_complex/example_with_perturb.cpp</a>
- * \li <a href="strong_witness_persistence_8cpp-example.html">
- * Witness_complex/strong_witness_persistence.cpp</a>
- * \li <a href="weak_witness_persistence_8cpp-example.html">
- * Witness_complex/weak_witness_persistence.cpp</a>
- * \li <a href="example_strong_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_strong_witness_complex_off.cpp</a>
- * \li <a href="example_witness_complex_off_8cpp-example.html">
- * Witness_complex/example_witness_complex_off.cpp</a>
- * \li <a href="example_witness_complex_sphere_8cpp-example.html">
- * Witness_complex/example_witness_complex_sphere.cpp</a>
- * \li <a href="_coxeter_triangulation_2cell_complex_from_basic_circle_manifold_8cpp-example.html">
- * Coxeter_triangulation/cell_complex_from_basic_circle_manifold.cpp</a>
- * \li <a href="_coxeter_triangulation_2manifold_tracing_custom_function_8cpp-example.html">
- * Coxeter_triangulation/manifold_tracing_custom_function.cpp</a>
- * \li <a href="_coxeter_triangulation_2manifold_tracing_flat_torus_with_boundary_8cpp-example.html">
- * Coxeter_triangulation/manifold_tracing_flat_torus_with_boundary.cpp</a>
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_persistence.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_3d_persistence.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Weighted_alpha_complex_3d_from_points.cpp}
+ * \li \gudhi_example_link{Bottleneck_distance,alpha_rips_persistence_bottleneck_distance.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,custom_persistence_sort.cpp}
+ * \li \gudhi_example_link{Spatial_searching,example_spatial_searching.cpp}
+ * \li \gudhi_example_link{Subsampling,example_choose_n_farthest_points.cpp}
+ * \li \gudhi_example_link{Subsampling,example_pick_n_random_points.cpp}
+ * \li \gudhi_example_link{Subsampling,example_sparsify_point_set.cpp}
+ * \li \gudhi_example_link{Tangential_complex,example_basic.cpp}
+ * \li \gudhi_example_link{Tangential_complex,example_with_perturb.cpp}
+ * \li \gudhi_example_link{Witness_complex,strong_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,weak_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_strong_witness_complex_off.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_witness_complex_off.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_witness_complex_sphere.cpp}
+ * \li \gudhi_example_link{Coxeter_triangulation,cell_complex_from_basic_circle_manifold.cpp}
+ * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_custom_function.cpp}
+ * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_flat_torus_with_boundary.cpp}
  *
  * \subsection tbb Threading Building Blocks
  * <a target="_blank" href="https://github.com/oneapi-src/oneTBB">Intel&reg; TBB</a> lets you easily write parallel
@@ -187,68 +139,37 @@ make \endverbatim
  * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
  * 
  * The following examples/utilities are using Intel&reg; TBB if installed:
- * \li <a href="_alpha_complex_from_off_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_off.cpp</a>
- * \li <a href="_alpha_complex_from_points_8cpp-example.html">
- * Alpha_complex/Alpha_complex_from_points.cpp</a>
- * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="alpha_complex_persistence_8cpp-example.html">
- * Alpha_complex/alpha_complex_persistence.cpp</a>
- * \li <a href="cubical_complex_persistence_8cpp-example.html">
- * Bitmap_cubical_complex/cubical_complex_persistence.cpp</a>
- * \li <a href="periodic_cubical_complex_persistence_8cpp-example.html">
- * Bitmap_cubical_complex/periodic_cubical_complex_persistence.cpp</a>
- * \li <a href="_random_bitmap_cubical_complex_8cpp-example.html">
- * Bitmap_cubical_complex/Random_bitmap_cubical_complex.cpp</a>
- * \li <a href="_coord_g_i_c_8cpp-example.html">
- * Nerve_GIC/CoordGIC.cpp</a>
- * \li <a href="_func_g_i_c_8cpp-example.html">
- * Nerve_GIC/FuncGIC.cpp</a>
- * \li <a href="_nerve_8cpp-example.html">
- * Nerve_GIC/Nerve.cpp</a>
- * \li <a href="_voronoi_g_i_c_8cpp-example.html">
- * Nerve_GIC/VoronoiGIC.cpp</a>
- * \li <a href="simple_simplex_tree_8cpp-example.html">
- * Simplex_tree/simple_simplex_tree.cpp</a>
- * \li <a href="example_alpha_shapes_3_simplex_tree_from_off_file_8cpp-example.html">
- * Simplex_tree/example_alpha_shapes_3_simplex_tree_from_off_file.cpp</a>
- * \li <a href="simplex_tree_from_cliques_of_graph_8cpp-example.html">
- * Simplex_tree/simplex_tree_from_cliques_of_graph.cpp</a>
- * \li <a href="graph_expansion_with_blocker_8cpp-example.html">
- * Simplex_tree/graph_expansion_with_blocker.cpp</a>
- * \li <a href="alpha_complex_3d_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_3d_persistence.cpp</a>
- * \li <a href="alpha_complex_persistence_8cpp-example.html">
- * Persistent_cohomology/alpha_complex_persistence.cpp</a>
- * \li <a href="rips_persistence_via_boundary_matrix_8cpp-example.html">
- * Persistent_cohomology/rips_persistence_via_boundary_matrix.cpp</a>
- * \li <a href="persistence_from_file_8cpp-example.html">
- * Persistent_cohomology/persistence_from_file.cpp</a>
- * \li <a href="persistence_from_simple_simplex_tree_8cpp-example.html">
- * Persistent_cohomology/persistence_from_simple_simplex_tree.cpp</a>
- * \li <a href="plain_homology_8cpp-example.html">
- * Persistent_cohomology/plain_homology.cpp</a>
- * \li <a href="rips_multifield_persistence_8cpp-example.html">
- * Persistent_cohomology/rips_multifield_persistence.cpp</a>
- * \li <a href="rips_persistence_step_by_step_8cpp-example.html">
- * Persistent_cohomology/rips_persistence_step_by_step.cpp</a>
- * \li <a href="custom_persistence_sort_8cpp-example.html">
- * Persistent_cohomology/custom_persistence_sort.cpp</a>
- * \li <a href="example_one_skeleton_rips_from_points_8cpp-example.html">
- * Rips_complex/example_one_skeleton_rips_from_points.cpp</a>
- * \li <a href="example_rips_complex_from_off_file_8cpp-example.html">
- * Rips_complex/example_rips_complex_from_off_file.cpp</a>
- * \li <a href="rips_distance_matrix_persistence_8cpp-example.html">
- * Rips_complex/rips_distance_matrix_persistence.cpp</a>
- * \li <a href="rips_persistence_8cpp-example.html">
- * Rips_complex/rips_persistence.cpp</a>
- * \li <a href="strong_witness_persistence_8cpp-example.html">
- * Witness_complex/strong_witness_persistence.cpp</a>
- * \li <a href="weak_witness_persistence_8cpp-example.html">
- * Witness_complex/weak_witness_persistence.cpp</a>
- * \li <a href="example_nearest_landmark_table_8cpp-example.html">
- * Witness_complex/example_nearest_landmark_table.cpp</a>
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
+ * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_3d_persistence.cpp}
+ * \li \gudhi_example_link{Alpha_complex,alpha_complex_persistence.cpp}
+ * \li \gudhi_example_link{Bitmap_cubical_complex,cubical_complex_persistence.cpp}
+ * \li \gudhi_example_link{Bitmap_cubical_complex,periodic_cubical_complex_persistence.cpp}
+ * \li \gudhi_example_link{Bitmap_cubical_complex,Random_bitmap_cubical_complex.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,CoordGIC.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,FuncGIC.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,Nerve.cpp}
+ * \li \gudhi_example_link{Nerve_GIC,VoronoiGIC.cpp}
+ * \li \gudhi_example_link{Simplex_tree,simple_simplex_tree.cpp}
+ * \li \gudhi_example_link{Simplex_tree,example_alpha_shapes_3_simplex_tree_from_off_file.cpp}
+ * \li \gudhi_example_link{Simplex_tree,simplex_tree_from_cliques_of_graph.cpp}
+ * \li \gudhi_example_link{Simplex_tree,graph_expansion_with_blocker.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,alpha_complex_3d_persistence.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,alpha_complex_persistence.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,rips_persistence_via_boundary_matrix.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,persistence_from_file.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,persistence_from_simple_simplex_tree.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,plain_homology.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,rips_multifield_persistence.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,rips_persistence_step_by_step.cpp}
+ * \li \gudhi_example_link{Persistent_cohomology,custom_persistence_sort.cpp}
+ * \li \gudhi_example_link{Rips_complex,example_one_skeleton_rips_from_points.cpp}
+ * \li \gudhi_example_link{Rips_complex,example_rips_complex_from_off_file.cpp}
+ * \li \gudhi_example_link{Rips_complex,rips_distance_matrix_persistence.cpp}
+ * \li \gudhi_example_link{Rips_complex,rips_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,strong_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,weak_witness_persistence.cpp}
+ * \li \gudhi_example_link{Witness_complex,example_nearest_landmark_table.cpp}
  *
  * \section Contributions Bug reports and contributions
  * Please help us improving the quality of the GUDHI library.
