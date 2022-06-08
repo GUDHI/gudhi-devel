@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cmath>
 
-int main(int argc, char* argv[]) {
+int main() {
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
@@ -28,8 +28,8 @@ int main(int argc, char* argv[]) {
 
   std::vector<unsigned> sizes_5d_top_cells(5, 10);
   std::vector<unsigned> sizes_5d_vertices(5, 11);
-  unsigned multiplier_top_cells = std::pow(10, 5);
-  unsigned multiplier_vertices = std::pow(11, 5);
+  const unsigned multiplier_top_cells = round(pow(10., 5.));
+  const unsigned multiplier_vertices = round(pow(11., 5.));
   std::vector<double> data_5d_top_cells, data_5d_vertices;
   for (size_t i = 0; i != multiplier_top_cells; ++i) {
     data_5d_top_cells.push_back(rand() / static_cast<double>(RAND_MAX));
