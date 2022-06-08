@@ -16,3 +16,13 @@
     height: auto;
     padding-left: 16px;
 }
+// With the doxygen versions <= 1.9.2 the default setting 'overflow: hidden;' causes problems.
+// With the commit:
+//   Commit: 590198b416cd53313d150428d2f912586065ea0d [590198b]
+//   Date: Wednesday, December 1, 2021 1:37:26 PM
+//   issue #8924 Horizontal scroll bar missing in HTML for wide class="dotgraph" objects
+// for the doxygen 1.9.3 version this has already been corrected but to run properly with the <= 1.9.2 version
+// this setting is required
+ul {
+  overflow: visible;
+}
