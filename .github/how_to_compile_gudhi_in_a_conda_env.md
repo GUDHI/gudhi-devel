@@ -13,7 +13,7 @@ conda activate gudhi
 mamba install -c conda-forge python cmake doxygen eigen cgal-cpp
 ```
 
-Some of the requirements are in the gudhi repository (please refer to
+Some of the requirements are in the gudhi-devel repository (please refer to
 [how to use github to contribute to gudhi](how_to_use_github_to_contribute_to_gudhi.md)).
 Once the gudhi-devel repository is cloned on your machine (`git clone...`) - let's call it `/workdir/gudhi-devel` i.e. -
 and once the submodules are initialised (`git submodule update --init`):
