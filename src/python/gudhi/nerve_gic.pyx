@@ -183,8 +183,8 @@ cdef class CoverComplex:
 
     def read_point_cloud(self, off_file):
         """Reads and stores the input point cloud from .(n)OFF file.
-        :param off_file: Name of the input .OFF or .nOFF file.
 
+        :param off_file: Name of the input .OFF or .nOFF file.
         :type off_file: string
 
         :rtype: bool

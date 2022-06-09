@@ -50,7 +50,7 @@ if nerve_complex.read_point_cloud(args.off_file):
     nerve_complex.set_gain()
     nerve_complex.set_cover_from_function()
     nerve_complex.find_simplices()
-    nerve_complex.plot_dot(b'GIC')
+    nerve_complex.plot_dot()
     simplex_tree = nerve_complex.create_simplex_tree()
     nerve_complex.compute_PD()
     if args.verbose:

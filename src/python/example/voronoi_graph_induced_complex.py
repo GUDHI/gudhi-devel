@@ -46,7 +46,7 @@ if nerve_complex.read_point_cloud(args.file):
     nerve_complex.set_graph_from_OFF()
     nerve_complex.set_cover_from_Voronoi(args.subsample_nb_points)
     nerve_complex.find_simplices()
-    nerve_complex.plot_off(b'GIC')
+    nerve_complex.plot_off()
     simplex_tree = nerve_complex.create_simplex_tree()
     nerve_complex.compute_PD()
     if args.verbose:
