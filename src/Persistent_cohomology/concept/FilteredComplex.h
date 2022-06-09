@@ -103,7 +103,7 @@ Filtration_simplex_range filtration_simplex_range();
 /** @} */
  
 
-/* \brief Iterator over the simplices of the complex,
+/** \brief Iterator over the simplices of the complex,
   * in an arbitrary order.
   *
   * 'value_type' must be 'Simplex_handle'.*/
