@@ -7,7 +7,7 @@ import tensorflow          as tf
 
 # The parameters of the model are the vertex function values of the simplex tree.
 
-def _LowerStarSimplexTree(simplextree, filtration, dimensions, homology_coeff_field=11):
+def _LowerStarSimplexTree(simplextree, filtration, dimensions, homology_coeff_field):
     # Parameters: simplextree (simplex tree on which to compute persistence)
     #             filtration (function values on the vertices of st),
     #             dimensions (homology dimensions),

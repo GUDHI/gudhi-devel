@@ -8,7 +8,7 @@ from ..rips_complex     import RipsComplex
 
 # The parameters of the model are the point coordinates.
 
-def _Rips(DX, max_edge, dimensions, homology_coeff_field=11):
+def _Rips(DX, max_edge, dimensions, homology_coeff_field):
     # Parameters: DX (distance matrix), 
     #             max_edge (maximum edge length for Rips filtration), 
     #             dimensions (homology dimensions)

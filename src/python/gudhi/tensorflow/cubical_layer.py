@@ -8,7 +8,7 @@ from ..cubical_complex  import CubicalComplex
 
 # The parameters of the model are the pixel values.
 
-def _Cubical(Xflat, Xdim, dimensions, homology_coeff_field=11):
+def _Cubical(Xflat, Xdim, dimensions, homology_coeff_field):
     # Parameters: Xflat (flattened image),
     #             Xdim (shape of non-flattened image)
     #             dimensions (homology dimensions)
