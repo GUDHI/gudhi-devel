@@ -70,6 +70,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
 # CoverComplex python interface
 cdef class CoverComplex:
     """Cover complex data structure.
+
     The data structure is a simplicial complex, representing a Graph Induced
     simplicial Complex (GIC) or a Nerve, and whose simplices are computed with
     a cover C of a point cloud P, which often comes from the preimages of
