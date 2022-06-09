@@ -18,7 +18,7 @@ namespace Gudhi {
 
 namespace witness_complex {
 
-  /* \class Active_witness
+  /** \class Active_witness
    *  \brief Class representing a list of nearest neighbors to a given witness.
    *  \details Every element is a pair of a landmark identifier and the squared distance to it.
   */
