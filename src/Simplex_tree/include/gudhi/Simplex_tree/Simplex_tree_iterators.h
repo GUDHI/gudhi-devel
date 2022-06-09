@@ -22,12 +22,12 @@
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
+/** \addtogroup simplex_tree 
  * Iterators and range types for the Simplex_tree.
- * @{
+ *  @{
  */
 
-/* \brief Iterator over the vertices of a simplex
+/** \brief Iterator over the vertices of a simplex
  * in a SimplexTree.
  *
  * Forward iterator, 'value_type' is SimplexTree::Vertex_handle.*/
@@ -73,7 +73,7 @@ class Simplex_tree_simplex_vertex_iterator : public boost::iterator_facade<
 };
 
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the simplices of the boundary of a
+/** \brief Iterator over the simplices of the boundary of a
  *  simplex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
@@ -181,7 +181,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   SimplexTree * st_;  // simplex containing the simplicial complex
 };
 
-/* \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
+/** \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
  *
  * Forward iterator, value_type is std::pair<SimplexTree::Simplex_handle, SimplexTree::Vertex_handle>.*/
 template<class SimplexTree>
@@ -291,7 +291,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
 };
 
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the simplices of a simplicial complex.
+/** \brief Iterator over the simplices of a simplicial complex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
 template<class SimplexTree>
@@ -364,7 +364,7 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
   SimplexTree * st_;
 };
 
-/* \brief Iterator over the simplices of the skeleton of a given
+/** \brief Iterator over the simplices of the skeleton of a given
  * dimension of the simplicial complex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
@@ -447,7 +447,8 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
   int curr_dim_;
 };
 
-/* @} */  // end addtogroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_

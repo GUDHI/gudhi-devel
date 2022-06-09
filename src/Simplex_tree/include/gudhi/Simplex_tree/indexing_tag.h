@@ -20,7 +20,7 @@ namespace Gudhi {
 struct linear_indexing_tag {
 };
 
-/* \brief Tag for a zigzag ordering of simplices. */
+/** \brief Tag for a zigzag ordering of simplices. */
 //  struct zigzag_indexing_tag {};
 }  // namespace Gudhi
 

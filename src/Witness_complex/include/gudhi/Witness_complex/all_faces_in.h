@@ -11,7 +11,7 @@
 #ifndef WITNESS_COMPLEX_ALL_FACES_IN_H_
 #define WITNESS_COMPLEX_ALL_FACES_IN_H_
 
-/* \brief Check if the facets of the k-dimensional simplex witnessed 
+/** \brief Check if the facets of the k-dimensional simplex witnessed 
  *  by witness witness_id are already in the complex.
  *  inserted_vertex is the handle of the (k+1)-th vertex witnessed by witness_id
  */

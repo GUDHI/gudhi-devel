@@ -107,6 +107,7 @@ Table of Contents
  * \subsection filtrationcomputation Filtration value computation algorithm
  * <br>
  * \f$
+ * \begin{array}{l}
  * \textbf{for } \text{i : dimension } \rightarrow 0 \textbf{ do}\\
  * \quad \textbf{for all } \sigma \text{ of dimension i}\\
  * \quad\quad \textbf{if } \text{filtration(} \sigma ) \text{ is NaN} \textbf{ then}\\
@@ -127,6 +128,7 @@ Table of Contents
  * \textbf{end for}\\
  * \text{make_filtration_non_decreasing()}\\
  * \text{prune_above_filtration()}\\
+ * \end{array}
  * \f$
  *
  * \subsubsection dimension2 Dimension 2

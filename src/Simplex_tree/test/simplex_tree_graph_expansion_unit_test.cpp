@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_with_blockers_3, typeST, li
         std::clog << vertex << ", ";
       }
       std::clog << "] ( " << simplex_tree.filtration(sh);
-      // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
+      // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boundaries)
       simplex_tree.assign_filtration(sh, simplex_tree.filtration(sh) + 1.);
 
       std::clog << " + 1. ) = " << result << std::endl;
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_with_blockers_2, typeST, li
         std::clog << vertex << ", ";
       }
       std::clog << "] ( " << simplex_tree.filtration(sh);
-      // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
+      // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boundaries)
       simplex_tree.assign_filtration(sh, simplex_tree.filtration(sh) + 1.);
 
       std::clog << " + 1. ) = " << result << std::endl;

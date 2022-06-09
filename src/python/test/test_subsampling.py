@@ -91,7 +91,7 @@ def test_simple_choose_n_farthest_points_randomed():
     assert gudhi.choose_n_farthest_points(points=[], nb_points=1) == []
     assert gudhi.choose_n_farthest_points(points=point_set, nb_points=0) == []
 
-    # Go furter than point set on purpose
+    # Go further than point set on purpose
     for iter in range(1, 10):
         sub_set = gudhi.choose_n_farthest_points(points=point_set, nb_points=iter)
         for sub in sub_set:
@@ -117,7 +117,7 @@ def test_simple_pick_n_random_points():
     assert gudhi.pick_n_random_points(points=[], nb_points=1) == []
     assert gudhi.pick_n_random_points(points=point_set, nb_points=0) == []
 
-    # Go furter than point set on purpose
+    # Go further than point set on purpose
     for iter in range(1, 10):
         sub_set = gudhi.pick_n_random_points(points=point_set, nb_points=iter)
         for sub in sub_set:
