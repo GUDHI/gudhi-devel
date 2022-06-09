@@ -78,7 +78,7 @@ firefox html/index.html # [optional] To display the c++ documentation. Anything 
 cd /workdir/gudhi
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
-# python OFF to prevent python modules search makes cmake faster - it is the next one in user version that matters
+# python OFF to prevent python modules search makes cmake faster - it is the next cmake call in user version that matters
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_PYTHON=OFF -DUSER_VERSION_DIR=version ..
 make user_version;
 cd version
