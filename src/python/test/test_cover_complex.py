@@ -8,8 +8,8 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import NGIComplex
-from gudhi.sklearn import CoverComplex
+from gudhi import CoverComplex
+from gudhi.sklearn import MapperComplex, GraphInducedComplex, NerveComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -21,12 +21,12 @@ __license__ = "MIT"
 
 def test_empty_constructor():
     # Try to create an empty CoverComplex
-    cover = NGIComplex()
+    cover = CoverComplex()
     assert cover.__is_defined() == True
 
 def test_non_existing_file_read():
     # Try to open a non existing file
-    cover = NGIComplex()
+    cover = CoverComplex()
     with pytest.raises(FileNotFoundError):
         cover.read_point_cloud("pouetpouettralala.toubiloubabdou")
 
@@ -43,7 +43,7 @@ def test_files_creation():
     graph_file.close()
 
 def test_nerve():
-    nerve = NGIComplex()
+    nerve = CoverComplex()
     nerve.set_type("Nerve")
     assert nerve.read_point_cloud("cloud") == True
     nerve.set_color_from_coordinate()
@@ -57,7 +57,7 @@ def test_nerve():
     assert stree.dimension() == 0
 
 def test_graph_induced_complex():
-    gic = NGIComplex()
+    gic = CoverComplex()
     gic.set_type("GIC")
     assert gic.read_point_cloud("cloud") == True
     gic.set_color_from_coordinate()
@@ -71,7 +71,7 @@ def test_graph_induced_complex():
     assert stree.dimension() == 2
 
 def test_voronoi_graph_induced_complex():
-    gic = NGIComplex()
+    gic = CoverComplex()
     gic.set_type("GIC")
     assert gic.read_point_cloud("cloud") == True
     gic.set_color_from_coordinate()
@@ -103,25 +103,21 @@ def test_cover_complex():
     X = np.array([[1,1],[1,1.5],[1,2],[1,2.5],[1,3],[1.5,2],[1.5,3],[2,2],[2,2.5],[2,3],[2,3.5],[2,4]])
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
 
-    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F[:,1], filter_bnds=np.array([.5,4.5]), 
-         resolutions=np.array([4]), gains=np.array([.3]), graph='rips', rips_threshold=.6, distance_matrix_name="distance_test", verbose=True).fit(X)
+    M = GraphInducedComplex(input_type="point cloud", cover="functional", color=None, mask=0, filter=F[:,1], filter_bnds=np.array([.5,4.5]), 
+         resolution=4, gain=.3, graph='rips', rips_threshold=.6, verbose=True).fit(X)
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([2, 3], 0.0)]
 
-    M = CoverComplex(complex_type="gic", input_type="point cloud", cover="voronoi", voronoi_samples=2, colors=None, mask=0, graph='rips', rips_threshold=.6, distance_matrix_name="distance_test", verbose=True).fit(X)
+    M = GraphInducedComplex(input_type="point cloud", cover="voronoi", voronoi_samples=2, color=None, mask=0, graph='rips', rips_threshold=.6, verbose=True).fit(X)
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0)]
 
-    M = CoverComplex(complex_type="mapper", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
+    M = MapperComplex(input_type="point cloud", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
          resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6)).fit(X)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
-
-    M = CoverComplex(complex_type="nerve", input_type="point cloud", cover="precomputed", colors=None, mask=0, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]]).fit(X)
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
 
-    M = CoverComplex(complex_type="nerve", input_type="point cloud", cover="functional", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
-         resolutions=np.array([2,4]), gains=np.array([.3,.3])).fit(X)
+    M = NerveComplex(input_type="point cloud", color=None, mask=0, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]]).fit(X)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], -3.0), ([1], -3.0), ([0, 1], -3.0), ([2], -3.0), ([1, 2], -3.0), ([3], -3.0), ([1, 3], -3.0), ([4], -3.0), ([2, 4], -3.0), ([3, 4], -3.0), ([5], -3.0), ([4, 5], -3.0)]
+    assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
 

@@ -1,3 +1,3 @@
 from .cover_complex import *
 
-__all__ = ["CoverComplex"]
+__all__ = ["NerveComplex", "GraphInducedComplex", "MapperComplex"]

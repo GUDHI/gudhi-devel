@@ -9,16 +9,19 @@ Definition
 
 .. include:: nerve_gic_complex_sum.inc
 
-We provide two classes for computing cover complexes: one is :class:`~gudhi.sklearn.CoverComplex`, which can compute Mapper, Nerve and Graph Induced complexes in a scikit-learn format, 
-the other is :class:`~gudhi.NGIComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
-while CoverComplex needs the inputs to be stored in memory).
+We provide two types of classes for computing cover complexes: one is comprised of the :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` classes, which correspond to Mapper, Nerve and Graph Induced complexes respectively, and are written in a scikit-learn format, 
+while the other type is :class:`~gudhi.CoverComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
+while :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` need the inputs to be stored in memory).
+Moreover, :class:`~gudhi.CoverComplex` usually provides better automatic tuning of the resolution parameter.
+
+Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5. On the other hand, Mapper complexes accept resolutions and gains with any length. 
   
 Both classes can print output files, which can then be visualized with either
 neato (from `graphviz <http://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/scikit-tda/kepler-mapper>`_.
 Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
-In the following, we provide examples for NGIComplex, and we refer to `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of CoverComplex.
+In the following, we provide examples for CoverComplex, and we refer to `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex`.
 
 Covers
 ------
@@ -58,7 +61,7 @@ which are then refined into their connected components using the triangulation o
 .. code-block:: python
 
     import gudhi
-    nerve_complex = gudhi.NGIComplex()
+    nerve_complex = gudhi.CoverComplex()
     nerve_complex.set_verbose(True)
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
@@ -200,7 +203,7 @@ simplicial complex is in dimension 3 in this example.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.NGIComplex()
+    nerve_complex = gudhi.CoverComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/human.off')):
@@ -249,7 +252,7 @@ threshold, resolution and gain can be computed as well for the Nerve.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.NGIComplex()
+    nerve_complex = gudhi.CoverComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/KleinBottle5D.off')):
@@ -291,7 +294,7 @@ automatically selected as before.
 .. testcode::
 
     import gudhi
-    nerve_complex = gudhi.NGIComplex()
+    nerve_complex = gudhi.CoverComplex()
 
     if (nerve_complex.read_point_cloud(gudhi.__root_source_dir__ + \
     '/data/points/COIL_database/lucky_cat.off')):

@@ -120,17 +120,18 @@ class Cover_complex {
   std::map<int, std::pair<int, double> >
       cover_color;  // size and coloring (induced by func_color) of the vertices of the output simplicial complex.
 
-  std::string distance_matrix_name = ""; // name of distance matrix, so that it can be read if the file already exists.
-
   int resolution_int = -1;
   double resolution_double = -1;
   double gain = -1;
-  double delta = -1;
   double rate_constant = 10;  // Constant in the subsampling.
   double rate_power = 0.001;  // Power in the subsampling.
   int mask = 0;               // Ignore nodes containing less than mask points.
 
   std::map<int, int> name2id, name2idinv;
+
+  std::string cover_name;
+  std::string point_cloud_name;
+  std::string color_name;
 
   // Remove all edges of a graph.
   void remove_edges(Graph& G) {
@@ -166,21 +167,13 @@ class Cover_complex {
   // Utils.
   // *******************************************************************************************************************
 
- public:	
-  /** \brief Specifies whether the type of the output simplicial complex.	
-   *	
-   * @param[in] t std::string (either "GIC" or "Nerve").	
-   *	
-   */	
+ public:
+  /** \brief Specifies whether the type of the output simplicial complex.
+   *
+   * @param[in] t std::string (either "GIC" or "Nerve").
+   *
+   */
   void set_type(const std::string& t) { type = t; }
-
-public:	
-  /** \brief Specifies the name of the distance matrix file.	
-   *	
-   * @param[in] t std::string.
-   *	
-   */	
-  void set_distance_matrix_name(const std::string& t) { distance_matrix_name = t; }
 
  public:
   /** \brief Specifies whether the program should display information or not.
@@ -223,10 +216,10 @@ public:
    */
   void set_point_cloud_from_range(const std::vector<std::vector<double> > & point_cloud) {
     n = point_cloud.size(); data_dimension = point_cloud[0].size();
+    point_cloud_name = "cloud"; cover.resize(n);
     for(int i = 0; i < n; i++){
       boost::add_vertex(one_skeleton_OFF);
       vertices.push_back(boost::add_vertex(one_skeleton));
-      cover.emplace_back();
     }
     this->point_cloud = point_cloud;
   }
@@ -237,6 +230,7 @@ public:
    *
    */
   bool read_point_cloud(const std::string& off_file_name) {
+    point_cloud_name = off_file_name;
     std::ifstream input(off_file_name);
     std::string line;
 
@@ -302,6 +296,7 @@ public:
         i++;
       }
     }
+
     return input.is_open();
   }
 
@@ -351,7 +346,6 @@ public:
            */
   template <typename Distance>
   void set_graph_from_rips(double threshold, Distance distance) {
-    delta = threshold;
     remove_edges(one_skeleton);
     if (distances.size() == 0) compute_pairwise_distances(distance);
     for (int i = 0; i < n; i++) {
@@ -382,7 +376,7 @@ public:
    *
    */
   void set_distances_from_range(const std::vector<std::vector<double> > & distance_matrix) {
-    n = distance_matrix.size(); data_dimension = 0;
+    n = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
     cover.resize(n); point_cloud.resize(n);
     for(int i = 0; i < n; i++){
       boost::add_vertex(one_skeleton_OFF);
@@ -399,35 +393,17 @@ public:
     double d;
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
-    std::ifstream input(distance_matrix_name, std::ios::out | std::ios::binary);
-
-    if (input.good()) {
-      if (verbose) std::clog << "Reading distances..." << std::endl;
-      for (int i = 0; i < n; i++) {
-        for (int j = i; j < n; j++) {
-          input.read((char*)&d, 8);
-          distances[i][j] = d;
-          distances[j][i] = d;
-        }
+    if (verbose) std::clog << "Computing distances..." << std::endl;
+    for (int i = 0; i < n; i++) {
+      int state = 100 * (i + 1) / n % 10;
+      if (state == 0 && verbose) std::clog << "\r" << state << "%" << std::flush;
+      for (int j = i; j < n; j++) {
+        double dis = ref_distance(point_cloud[i], point_cloud[j]);
+        distances[i][j] = dis;
+        distances[j][i] = dis;
       }
-      input.close();
-    } else {
-      if (verbose) std::clog << "Computing distances..." << std::endl;
-      input.close();
-      std::ofstream output(distance_matrix_name, std::ios::out | std::ios::binary);
-      for (int i = 0; i < n; i++) {
-        int state = (int)floor(100 * (i * 1.0 + 1) / n) % 10;
-        if (state == 0 && verbose) std::clog << "\r" << state << "%" << std::flush;
-        for (int j = i; j < n; j++) {
-          double dis = ref_distance(point_cloud[i], point_cloud[j]);
-          distances[i][j] = dis;
-          distances[j][i] = dis;
-          if (output.is_open()){ output.write((char*)&dis, 8); }
-        }
-      }
-      if (output.is_open()){ output.close(); }
-      if (verbose) std::clog << std::endl;
     }
+    if (verbose) std::clog << std::endl;
   }
 
  public:  // Automatic tuning of Rips complex.
@@ -507,6 +483,7 @@ public:
       i++;
     }
     functional_cover = true;
+    cover_name = func_file_name;
   }
 
  public:  // Set function from kth coordinate
@@ -519,11 +496,13 @@ public:
     if(point_cloud[0].size() > 0){
       for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
       functional_cover = true;
+      cover_name = "coordinate " + std::to_string(k);
     }
     else{
       std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
+      cover_name = "null";
     }
   }
 
@@ -556,21 +535,32 @@ public:
       std::cerr << "Cover needs to come from the preimages of a function." << std::endl;
       return 0;
     }
-
-    if (type != "GIC") {	
-      std::cerr << "Type of complex needs to be GIC." << std::endl;	
-      return 0;	
+    if (type != "Nerve" && type != "GIC") {
+      std::cerr << "Type of complex needs to be specified." << std::endl;
+      return 0;
     }
 
     double reso = 0;
     Index_map index = boost::get(boost::vertex_index, one_skeleton);
 
+    if (type == "GIC") {
       boost::graph_traits<Graph>::edge_iterator ei, ei_end;
       for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
         reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
                                        func[index[boost::target(*ei, one_skeleton)]]));
       if (verbose) std::clog << "resolution = " << reso << std::endl;
       resolution_double = reso;
+    }
+
+    if (type == "Nerve") {
+      boost::graph_traits<Graph>::edge_iterator ei, ei_end;
+      for (boost::tie(ei, ei_end) = boost::edges(one_skeleton); ei != ei_end; ++ei)
+        reso = (std::max)(reso, std::abs(func[index[boost::source(*ei, one_skeleton)]] -
+                                       func[index[boost::target(*ei, one_skeleton)]]) /
+                                  gain);
+      if (verbose) std::clog << "resolution = " << reso << std::endl;
+      resolution_double = reso;
+    }
 
     return reso;
   }
@@ -747,7 +737,7 @@ public:
       std::mutex covermutex, idmutex;
       tbb::parallel_for(0, res, [&](int i){
         // Compute connected components
-        Graph G = one_skeleton.create_subgraph(); 
+        Graph G = one_skeleton.create_subgraph();
         int num = preimages[i].size();
         std::vector<int> component(num);
         for (int j = 0; j < num; j++) boost::add_vertex(index[vertices[preimages[i][j]]], G);
@@ -850,6 +840,7 @@ public:
 
     maximal_dim = cov_number.size() - 1;
     for (int i = 0; i <= maximal_dim; i++) cover_color[i].second /= cover_color[i].first;
+    cover_name = cover_file_name;
   }
 
  public:  // Set cover from range.
@@ -863,13 +854,13 @@ public:
     std::vector<int> cov_elts, cov_number;
     for(int i=0; i < n; i++){
       cov_elts.clear();
-      for (unsigned int covid=0; covid < assignments[i].size(); covid++){
-        int cov = assignments[i][covid];
+      for (int cov : assignments[i]){
         cov_elts.push_back(cov);
         cov_number.push_back(cov);
         cover_fct[cov] = cov;
-        cover_color[cov].second += func_color[i];
-        cover_color[cov].first++;
+        auto& cc = cover_color[cov];
+        cc.second += func_color[i];
+        cc.first++;
         cover_back[cov].push_back(i);
       }
       cover[i] = cov_elts;
@@ -882,7 +873,6 @@ public:
     maximal_dim = cov_number.size() - 1;
     for (int i = 0; i <= maximal_dim; i++) cover_color[i].second /= cover_color[i].first;
   }
-
 
  public:  // Set cover from Voronoi
           /** \brief Creates the cover C from the Voronoï cells of a subsampling of the point cloud.
@@ -951,6 +941,7 @@ public:
     }
     for (int i = 0; i < m; i++) cover_color[i].second /= cover_color[i].first;
     maximal_dim = m - 1;
+    cover_name = "Voronoi";
   }
 
  public:  // return subset of data corresponding to a node
@@ -962,14 +953,15 @@ public:
           */
   const std::vector<int>& subpopulation(int c) { return cover_back[c]; }
 
- public:  // return mean color corresponding to a node
+
+ public:
           /** \brief Returns the mean color corresponding to a specific node of the created complex.
           *
           * @param[in] c ID of the node.
           * @result cover_color(c) mean color value.
           *
           */
-  const double& subcolor(int c) { return cover_color[c].second; }
+  double subcolor(int c) { return cover_color[c].second; }
 
   // *******************************************************************************************************************
   // Visualization.
@@ -993,6 +985,7 @@ public:
       func_color.push_back(f);
       i++;
     }
+    color_name = color_file_name;
   }
 
  public:  // Set color from kth coordinate
@@ -1004,11 +997,14 @@ public:
   void set_color_from_coordinate(int k = 0) {
     if(point_cloud[0].size() > 0){
       for (int i = 0; i < n; i++) func_color.push_back(point_cloud[i][k]);
+      color_name = "coordinate ";
+      color_name.append(std::to_string(k));
     }
     else{
       std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
       for (int i = 0; i < n; i++) func.push_back(0.0);
       functional_cover = true;
+      cover_name = "null";
     }
   }
 
@@ -1027,8 +1023,8 @@ public:
    * computed to get a visualization
    * of its 1-skeleton in a .pdf file.
    */
-  void plot_DOT(std::string point_cloud_name="covercomplex") {
-    std::string mapp = point_cloud_name + ".dot";
+  void plot_DOT() {
+    std::string mapp = point_cloud_name + "_sc.dot";
     std::ofstream graphic(mapp);
 
     double maxv = std::numeric_limits<double>::lowest();
@@ -1075,10 +1071,10 @@ public:
           /** \brief Creates a .txt file called SC.txt describing the 1-skeleton, which can then be plotted with e.g.
            * KeplerMapper.
            */
-  void write_info(std::string point_cloud_name="covercomplex", std::string cover_name="cover", std::string color_name="color") {
+  void write_info() {
     int num_simplices = simplices.size();
     int num_edges = 0;
-    std::string mapp = point_cloud_name + ".txt";
+    std::string mapp = point_cloud_name + "_sc.txt";
     std::ofstream graphic(mapp);
 
     for (int i = 0; i < num_simplices; i++)
@@ -1114,7 +1110,7 @@ public:
            * This function assumes that the cover has been computed with Voronoi. If data points are in 1D or 2D,
            * the remaining coordinates of the points embedded in 3D are set to 0.
            */
-  void plot_OFF(std::string point_cloud_name="VoronoiGIC") {
+  void plot_OFF() {
     assert(cover_name == "Voronoi");
 
     int m = voronoi_subsamples.size();
@@ -1123,7 +1119,7 @@ public:
     std::vector<std::vector<int> > edges, faces;
     int numsimplices = simplices.size();
 
-    std::string mapp = point_cloud_name + ".off";
+    std::string mapp = point_cloud_name + "_sc.off";
     std::ofstream graphic(mapp);
 
     graphic << "OFF" << std::endl;
@@ -1168,9 +1164,9 @@ public:
     // Compute max and min
     double maxf = std::numeric_limits<double>::lowest();
     double minf = (std::numeric_limits<double>::max)();
-    for (std::map<int, std::pair<int, double>>::iterator it = cover_color.begin(); it != cover_color.end(); it++) {
-      maxf = (std::max)(maxf, it->second.second);
-      minf = (std::min)(minf, it->second.second);
+    for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
+      maxf = (std::max)(maxf, it->second);
+      minf = (std::min)(minf, it->second);
     }
 
     // Build filtration
@@ -1180,8 +1176,8 @@ public:
       st.insert_simplex_and_subfaces(splx, -3);
     }
 
-    for (std::map<int, std::pair<int, double>>::iterator it = cover_color.begin(); it != cover_color.end(); it++) {
-      int vertex = it->first; float val = it->second.second;
+    for (std::map<int, double>::iterator it = cover_std.begin(); it != cover_std.end(); it++) {
+      int vertex = it->first; float val = it->second;
       int vert[] = {vertex}; int edge[] = {vertex, -2};
       if(st.find(vert) != st.null_simplex()){
         st.assign_filtration(st.find(vert), -2 + (val - minf)/(maxf - minf));
@@ -1231,7 +1227,7 @@ public:
       for (unsigned int i = 0; i < N - sz; i++) {
         if (verbose)  std::clog << "Computing " << i << "th bootstrap, bottleneck distance = ";
 
-        Cover_complex Cboot; Cboot.n = this->n; Cboot.data_dimension = this->data_dimension; Cboot.functional_cover = true;
+        Cover_complex Cboot; Cboot.n = this->n; Cboot.data_dimension = this->data_dimension; Cboot.type = this->type; Cboot.functional_cover = true;
 
         std::vector<int> boot(this->n);
         for (int j = 0; j < this->n; j++) {
@@ -1241,10 +1237,16 @@ public:
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
         }
         Cboot.set_color_from_range(Cboot.func);
-        Cboot.set_graph_from_rips(delta, Gudhi::Euclidean_distance()); std::clog << delta << " ";
-        Cboot.set_gain(gain); std::clog << gain << " ";
-        if (resolution_int == -1){ Cboot.set_resolution_with_interval_length(resolution_double); } else { Cboot.set_resolution_with_interval_number(resolution_int); }
-        std::clog << resolution_int << " " << resolution_double << std::endl;
+
+        for (int j = 0; j < n; j++) {
+          std::vector<double> dist(n);
+          for (int k = 0; k < n; k++) dist[k] = distances[boot[j]][boot[k]];
+          Cboot.distances.push_back(dist);
+        }
+
+        Cboot.set_graph_from_automatic_rips(Gudhi::Euclidean_distance());
+        Cboot.set_gain();
+        Cboot.set_automatic_resolution();
         Cboot.set_cover_from_function();
         Cboot.find_simplices();
         Cboot.compute_PD();
@@ -1324,19 +1326,17 @@ public:
   /** \brief Computes the simplices of the simplicial complex.
    */
   void find_simplices() {
+    if (type != "Nerve" && type != "GIC") {
+      std::cerr << "Type of complex needs to be specified." << std::endl;
+      return;
+    }
 
-    if (type != "Nerve" && type != "GIC") {	
-      std::cerr << "Type of complex needs to be specified." << std::endl;	
-      return;	
-    }	
-
-    if (type == "Nerve") {	
-      for(int i = 0; i < n; i++)  simplices.push_back(cover[i]);	
-      std::sort(simplices.begin(), simplices.end());	
-      std::vector<std::vector<int> >::iterator it = std::unique(simplices.begin(), simplices.end());	
-      simplices.resize(std::distance(simplices.begin(), it));	
-    }	
-
+    if (type == "Nerve") {
+      simplices = cover;
+      std::sort(simplices.begin(), simplices.end());
+      std::vector<std::vector<int> >::iterator it = std::unique(simplices.begin(), simplices.end());
+      simplices.resize(std::distance(simplices.begin(), it));
+    }
 
     if (type == "GIC") {
       Index_map index = boost::get(boost::vertex_index, one_skeleton);
@@ -1414,7 +1414,6 @@ public:
       }
     }
   }
- 
 };
 
 }  // namespace cover_complex

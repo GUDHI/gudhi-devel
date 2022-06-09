@@ -6,9 +6,9 @@
 Cover complexes reference manual
 ================================
 
-.. autoclass:: gudhi.NGIComplex
+.. autoclass:: gudhi.CoverComplex
    :members:
    :undoc-members:
    :show-inheritance:
 
-   .. automethod:: gudhi.NGIComplex.__init__
+   .. automethod:: gudhi.CoverComplex.__init__

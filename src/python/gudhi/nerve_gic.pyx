@@ -42,8 +42,8 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_color_from_file(string color_file_name)
         void set_color_from_range(vector[double] color)
         void set_cover_from_file(string cover_file_name)
-        void set_cover_from_function()
         void set_cover_from_range(vector[vector[int]] assignments)
+        void set_cover_from_function()
         void set_cover_from_Euclidean_Voronoi(int m)
         void set_function_from_coordinate(int k)
         void set_function_from_file(string func_file_name)
@@ -58,23 +58,24 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_resolution_with_interval_number(int resolution)
         void set_subsampling(double constant, double power)
         void set_type(string type)
-        void set_distance_matrix_name(string type)
         void set_verbose(bool verbose)
         vector[int] subpopulation(int c)
         double subcolor(int c)
-        void write_info(string data_name, string cover_name, string color_name)
-        void plot_DOT(string data_name)
-        void plot_OFF(string data_name)
+        void write_info()
+        void plot_DOT()
+        void plot_OFF()
         void set_point_cloud_from_range(vector[vector[double]] cloud)
         void set_distances_from_range(vector[vector[double]] distance_matrix)
 
-# NGIComplex python interface
-cdef class NGIComplex:
-    """Cover complex data structure for Nerve and Graph Induced complexes.
-
+# CoverComplex python interface
+cdef class CoverComplex:
+    """Cover complex data structure.
     The data structure is a simplicial complex, representing a Graph Induced
     simplicial Complex (GIC) or a Nerve, and whose simplices are computed with
-    a cover C of a point cloud P. To compute a GIC, one also needs a
+    a cover C of a point cloud P, which often comes from the preimages of
+    intervals covering the image of a function f defined on P. These intervals
+    are parameterized by their resolution (either their length or their number)
+    and their gain (percentage of overlap). To compute a GIC, one also needs a
     graph G built on top of P, whose cliques with vertices belonging to
     different elements of C correspond to the simplices of the GIC.
     """
@@ -83,7 +84,7 @@ cdef class NGIComplex:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self):
-        """NGIComplex constructor.
+        """CoverComplex constructor.
         """
 
     # The real cython constructor
@@ -95,7 +96,7 @@ cdef class NGIComplex:
             del self.thisptr
 
     def __is_defined(self):
-        """Returns true if NGIComplex pointer is not NULL.
+        """Returns true if CoverComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
@@ -123,6 +124,7 @@ cdef class NGIComplex:
 
         :param distance: Bottleneck distance.
         :type distance: double
+
         :rtype: double
         :returns: Confidence level.
         """
@@ -134,6 +136,7 @@ cdef class NGIComplex:
 
         :param alpha: Confidence level.
         :type alpha: double
+
         :rtype: double
         :returns: Bottleneck distance.
         """
@@ -180,9 +183,10 @@ cdef class NGIComplex:
 
     def read_point_cloud(self, off_file):
         """Reads and stores the input point cloud from .(n)OFF file.
-
         :param off_file: Name of the input .OFF or .nOFF file.
+
         :type off_file: string
+
         :rtype: bool
         :returns: Read file status.
         """
@@ -246,15 +250,18 @@ cdef class NGIComplex:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                     cover_file_name)
 
+    def set_cover_from_range(self, assignments):
+        """Creates a cover C from a vector stored in memory.
+
+        :param assignments: Vector containing the assignments of the points to their corresponding cover elements. For instance, if the i-th point belongs to the 1st and 3rd cover elements, then assignments[i] = [1,3].
+        :type assignments: vector[vector[int]]
+        """
+        self.thisptr.set_cover_from_range(assignments)
+
     def set_cover_from_function(self):
         """Creates a cover C from the preimages of the function f.
         """
         self.thisptr.set_cover_from_function()
-
-    def set_cover_from_range(self, assignments):
-        """Creates a cover C from a vector stored in memory.
-        """
-        self.thisptr.set_cover_from_range(assignments)
 
     def set_cover_from_Voronoi(self, m=100):
         """Creates the cover C from the Voronoï cells of a subsampling of the
@@ -305,8 +312,7 @@ cdef class NGIComplex:
         """Creates a graph G from a Rips complex whose threshold value is
         automatically tuned with subsampling - see :cite:`Carriere17c`.
 
-        :param N: Number of subsampling iteration (the default reasonable value
-            is 100, but there is no guarantee on how to choose it).
+        :param N: Number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
         :type N: int
         :rtype: double
         :returns: Delta threshold used for computing the Rips complex.
@@ -373,23 +379,19 @@ cdef class NGIComplex:
 
         :param constant: Constant.
         :type constant: double
+
         :param power: Power.
         :type resolution: double
         """
         self.thisptr.set_subsampling(constant, power)
 
-    def set_type(self, type):	
-        """Specifies whether the type of the output simplicial complex.	
-        :param type: either "GIC" or "Nerve".	
-        :type type: string	
-        """	
-        self.thisptr.set_type(type.encode('utf-8'))
+    def set_type(self, type):
+        """Specifies whether the type of the output simplicial complex.
 
-    def set_distance_matrix_name(self, type):	
-        """Specifies the name of the distance matrix file.
-        :type type: string	
-        """	
-        self.thisptr.set_distance_matrix_name(type.encode('utf-8'))
+        :param type: either "GIC" or "Nerve".
+        :type type: string
+        """
+        self.thisptr.set_type(type.encode('utf-8'))
 
     def set_verbose(self, verbose):
         """Specifies whether the program should display information or not.
@@ -405,6 +407,7 @@ cdef class NGIComplex:
 
         :param c: ID of the node.
         :type c: int
+
         :rtype: vector[int]
         :returns: Vector of IDs of data points.
         """
@@ -416,29 +419,29 @@ cdef class NGIComplex:
 
         :param c: ID of the node.
         :type c: int
+
         :rtype: double
         :returns: Mean color value of data points.
         """
         return self.thisptr.subcolor(c)
 
-    def write_info(self, dataname=b"covercomplex", covername=b"cover", colorname=b"color"):
+    def write_info(self):
         """Creates a .txt file called SC.txt describing the 1-skeleton, which can
         then be plotted with e.g. KeplerMapper.
         """
-        return self.thisptr.write_info(dataname, covername, colorname)
+        return self.thisptr.write_info()
 
-    def plot_dot(self, name):
+    def plot_dot(self):
         """Creates a .dot file called SC.dot for neato (part of the graphviz
         package) once the simplicial complex is computed to get a visualization of
         its 1-skeleton in a .pdf file.
         """
-        return self.thisptr.plot_DOT(name)
+        return self.thisptr.plot_DOT()
 
-    def plot_off(self, name):
+    def plot_off(self):
         """Creates a .off file called SC.off for 3D visualization, which contains
         the 2-skeleton of the GIC. This function assumes that the cover has been
         computed with Voronoi. If data points are in 1D or 2D, the remaining
         coordinates of the points embedded in 3D are set to 0.
         """
-        return self.thisptr.plot_OFF(name)
-
+        return self.thisptr.plot_OFF()
