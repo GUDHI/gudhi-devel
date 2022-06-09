@@ -15,7 +15,8 @@ mamba install -c conda-forge python cmake doxygen eigen cgal-cpp
 
 Some of the requirements are in the gudhi repository (please refer to
 [how to use github to contribute to gudhi](how_to_use_github_to_contribute_to_gudhi.md)).
-In the gudhi repository - let's call it `/workdir/gudhi` i.e. - once submodules are initialised:
+Once the gudhi-devel repository is cloned on your machine (`git clone...`) - let's call it `/workdir/gudhi-devel` i.e. -
+and once the submodules are initialised (`git submodule update --init`):
 
 ```bash
 pip install -r ext/gudhi-deploy/build-requirements.txt 
@@ -26,7 +27,7 @@ pip install -r ext/gudhi-deploy/test-requirements.txt  # pytorch can be painful 
 
 In order to compile all c++ utilities, examples, benchmarks, unitary tests, and python module:
 ```bash
-cd /workdir/gudhi
+cd /workdir/gudhi-devel
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # To build all even examples and benchmarks
@@ -37,7 +38,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_
 
 In order to compile only python module
 ```bash
-cd /workdir/gudhi
+cd /workdir/gudhi-devel
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ..
@@ -50,13 +51,13 @@ python setup.py build_ext -j 16 --inplace  # 16 is the number of CPU that are us
 
 In order to use freshly compiled gudhi python module:
 ```bash
-PYTHONPATH=/workdir/gudhi/build/src/python python # or ipython, jupyter, ...
+PYTHONPATH=/workdir/gudhi-devel/build/src/python python # or ipython, jupyter, ...
 ```
 
 ### Specific C++ documentation generation
 
 ```bash
-cd /workdir/gudhi
+cd /workdir/gudhi-devel
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # python OFF to prevent python modules search makes cmake faster
@@ -75,7 +76,7 @@ firefox html/index.html # [optional] To display the c++ documentation. Anything 
 ### Specific python documentation generation
 
 ```bash
-cd /workdir/gudhi
+cd /workdir/gudhi-devel
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
 cd build
 # python OFF to prevent python modules search makes cmake faster - it is the next cmake call in user version that matters
