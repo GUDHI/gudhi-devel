@@ -1,6 +1,3 @@
-
-option(WITH_GUDHI_CPP_DOCUMENTATION_ONLY    "Build only the GUDHI C++ documentation (with doxygen)." OFF)
-
 cmake_minimum_required(VERSION 3.5)
 
 project(GUDHIdev)
