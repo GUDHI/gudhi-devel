@@ -41,11 +41,16 @@ make \endverbatim
  * program). If some of the tests are failing, please send us the result of the following command:
  * \verbatim ctest --output-on-failure \endverbatim
  * 
- * \subsection documentationgeneration Documentation
- * To generate the documentation, <a target="_blank" href="http://www.doxygen.org/">Doxygen</a> is required.
- * Run the following command in a terminal:
+ * \subsection documentationgeneration C++ documentation
+ * To generate the C++ documentation, for this the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
+ * is required, run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
+ *
+ * In case there is not a full setup present and only the documentation should be build the following command sequence
+ * can be used:
+\verbatim  cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON ..
+make doxygen\endverbatim
  *
  * \subsection helloworld Hello world !
  * The <a target="_blank" href="https://github.com/GUDHI/hello-gudhi-world">Hello world for GUDHI</a>

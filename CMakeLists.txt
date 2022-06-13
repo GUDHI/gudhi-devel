@@ -1,3 +1,6 @@
+
+option(WITH_GUDHI_CPP_DOCUMENTATION_ONLY    "Build only the GUDHI C++ documentation (with doxygen)." OFF)
+
 cmake_minimum_required(VERSION 3.5)
 
 project(GUDHIdev)
@@ -13,8 +16,10 @@ set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 # This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "src/python")
 
-# For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
+if (NOT WITH_GUDHI_CPP_DOCUMENTATION_ONLY)
+  # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
+  include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
+endif()
 
 include(GUDHI_compilation_flags)
 
@@ -52,7 +57,9 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-add_subdirectory(src/GudhUI)
+if (NOT WITH_GUDHI_CPP_DOCUMENTATION_ONLY)
+  add_subdirectory(src/GudhUI)
+endif()
 
 if (WITH_GUDHI_PYTHON)
   # specific for cython module
