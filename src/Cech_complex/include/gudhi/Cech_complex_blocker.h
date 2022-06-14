@@ -74,25 +74,15 @@ class Cech_blocker {
     bool is_min_enclos_ball = false;
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
-    for (auto face : sc_ptr_->boundary_simplex_range(sh)) {
-        // Find which vertex of sh is missing in face. We rely on the fact that simplex_vertex_range is sorted.
-        auto longlist = sc_ptr_->simplex_vertex_range(sh);
-        auto shortlist = sc_ptr_->simplex_vertex_range(face);
-
-        auto longiter = std::begin(longlist);
-        auto shortiter = std::begin(shortlist);
-        auto enditer = std::end(shortlist);
-        while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
-        auto extra = *longiter; // Vertex_handle
-
+    for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
         Sphere sph;
-        auto k = sc_ptr_->key(face);
+        auto k = sc_ptr_->key(face_opposite_vertex.first);
         if(k != sc_ptr_->null_key()) {
             sph = cc_ptr_->get_cache().at(k);
         }
         else {
             Point_cloud face_points;
-            for (auto vertex : sc_ptr_->simplex_vertex_range(face)) {
+            for (auto vertex : sc_ptr_->simplex_vertex_range(face_opposite_vertex.first)) {
                 face_points.push_back(cc_ptr_->get_point(vertex));
                 #ifdef DEBUG_TRACES
                     std::clog << "#(" << vertex << ")#";
@@ -100,13 +90,13 @@ class Cech_blocker {
             }
             sph = get_sphere(face_points.cbegin(), face_points.cend());
             // Put edge sphere in cache
-            sc_ptr_->assign_key(face, cc_ptr_->get_cache().size());
+            sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
             cc_ptr_->get_cache().push_back(sph);
             // Clear face_points
             face_points.clear();
         }
-        // Check if the minimal enclosing ball of current face contains the extra point
-        if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(extra)) <= sph.second) {
+        // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
+        if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
             #ifdef DEBUG_TRACES
                 std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
             #endif  // DEBUG_TRACES
