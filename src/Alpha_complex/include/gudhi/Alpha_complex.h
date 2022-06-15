@@ -461,7 +461,6 @@ class Alpha_complex {
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     using Filtration_value = typename SimplicialComplexForAlpha::Filtration_value;
-    using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
 
     // ### Foreach Tau face of Sigma
     for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(f_simplex)) {
@@ -489,7 +488,7 @@ class Alpha_complex {
         auto const& cache=get_cache(complex, f_boundary);
         bool is_gab = kernel_.is_gabriel(cache, get_point_(face_opposite_vertex.second));
 #ifdef DEBUG_TRACES
-        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
+        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << face_opposite_vertex.second << std::endl;
 #endif  // DEBUG_TRACES
         // ### If Tau is not Gabriel of Sigma
         if (false == is_gab) {
