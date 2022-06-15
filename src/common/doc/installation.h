@@ -42,8 +42,8 @@ make \endverbatim
  * \verbatim ctest --output-on-failure \endverbatim
  * 
  * \subsection documentationgeneration C++ documentation
- * To generate the C++ documentation, for this the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
- * is required, run the following command in a terminal:
+ * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
+ * is required. Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
  *
