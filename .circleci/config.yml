@@ -48,7 +48,7 @@ jobs:
 
   python:
     docker:
-      - image: gudhi/doxygen_for_gudhi:latest
+      - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
       - run:
@@ -79,7 +79,7 @@ jobs:
 
   doxygen:
     docker:
-      - image: gudhi/ci_for_gudhi:latest
+      - image: gudhi/doxygen_for_gudhi:latest
     steps:
       - checkout
       - run:
