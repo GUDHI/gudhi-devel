@@ -31,7 +31,7 @@ using Points_off_reader = Gudhi::Points_off_reader<Point>;
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 
 template<typename Kernel>
-Simplex_tree benchmark_cech(const std::string& off_file_points, const Filtration_value& radius, const int& dim_max) {
+Simplex_tree benchmark_cech(const std::string& off_file_points, const Filtration_value& radius, const int& dim_max, const bool exact) {
     using Point_cgal = typename Kernel::Point_d;
     using Points_off_reader_cgal = Gudhi::Points_off_reader<Point_cgal>;
     using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
@@ -42,7 +42,7 @@ Simplex_tree benchmark_cech(const std::string& off_file_points, const Filtration
     Gudhi::Clock cech_clock("Cech computation");
     Cech_complex cech_complex_from_points(off_reader_cgal.get_point_cloud(), radius);
     Simplex_tree cech_stree;
-    cech_complex_from_points.create_complex(cech_stree, dim_max);
+    cech_complex_from_points.create_complex(cech_stree, dim_max, exact);
 
     // ------------------------------------------
     // Display information about the Cech complex
@@ -56,8 +56,9 @@ int main(int argc, char* argv[]) {
     boost::filesystem::path full_path(boost::filesystem::current_path());
     std::clog << "Current path is : " << full_path << std::endl;
 
-    std::clog << "File name ; Radius ; Rips time ; Dim-3 Epick Cech time ; Dynamic_dim Epick Cech time ; "
-                 "Dim-3 Epeck Cech time ; Dynamic_dim Epeck Cech time ; Cech nb simplices ; Rips nb simplices;"
+    std::clog << "File name ; Radius ; Rips time ; Dim-3 Fast Cech time ; Dynamic_dim Fast Cech time ; "
+                 "Dim-3 Safe Cech time ; Dynamic_dim Safe Cech time ; Dim-3 Exact Cech time ; Dynamic_dim Exact Cech time ; "
+                 "Cech nb simplices ; Rips nb simplices;"
               << std::endl;
     boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
     for (boost::filesystem::directory_iterator itr(boost::filesystem::current_path()); itr != end_itr; ++itr) {
@@ -83,10 +84,15 @@ int main(int argc, char* argv[]) {
                     // --------------
                     // Cech complex
                     // --------------
-                    benchmark_cech<CGAL::Epick_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1);
-                    benchmark_cech<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1);
-                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1);
-                    auto cech_stree = benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1);
+                    // Fast
+                    benchmark_cech<CGAL::Epick_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, false);
+                    benchmark_cech<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, false);
+                    // Safe
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, false);
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, false);
+                    // Exact
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, true);
+                    auto cech_stree = benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, true);
 
                     std::clog << cech_stree.num_simplices() << "  ;  ";
                     std::clog << rips_stree.num_simplices() << ";" << std::endl;

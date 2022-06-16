@@ -78,17 +78,19 @@ class Cech_complex {
    *
    * @param[in] complex SimplicialComplexForCech to be created.
    * @param[in] dim_max graph expansion until this given maximal dimension.
+   * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
+   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
-  void create_complex(SimplicialComplexForCechComplex& complex, int dim_max) {
+  void create_complex(SimplicialComplexForCechComplex& complex, int dim_max, const bool exact = false) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Cech_complex::create_complex - simplicial complex is not empty"));
 
     // insert the proximity graph in the simplicial complex
     complex.insert_graph(cech_skeleton_graph_);
     // expand the graph until dimension dim_max
-    complex.expansion_with_blockers(dim_max, cech_blocker(&complex, this));
+    complex.expansion_with_blockers(dim_max, cech_blocker(&complex, this, exact));
   }
 
   /** @return max_radius value given at construction. */
