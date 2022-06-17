@@ -49,7 +49,7 @@ void timing_persistence(FilteredComplex & cpx
  * with a Hasse diagram. The Hasse diagram represents explicitly all 
  * codimension 1 incidence relations in the complex, and hence leads to 
  * a faster computation of persistence because boundaries are precomputed. 
- * Hovewer, the simplex tree may be constructed directly from a point cloud and
+ * However, the simplex tree may be constructed directly from a point cloud and
  * is more compact.
  * We compute persistent homology with coefficient fields Z/2Z and Z/1223Z.
  * We present also timings for the computation of multi-field persistent 

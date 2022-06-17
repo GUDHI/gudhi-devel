@@ -27,7 +27,7 @@ template<typename SkBlComplex> class Lloyd_builder {
 
   /**
    * @brief Modify complex to be the expansion of the k-nearest neighbor
-   * symetric graph.
+   * symmetric graph.
    */
   Lloyd_builder(SkBlComplex& complex, unsigned num_iterations) : complex_(complex), dim(-1) {
     if (!complex_.empty()) {

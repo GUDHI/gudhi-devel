@@ -76,8 +76,8 @@ class Skeleton_blocker_sub_complex : public ComplexType {
  public:
   /**
    * Add a vertex 'global' of K to L. When added to L, this vertex will receive
-   * another number, addresses(global), its local adress.
-   * return the adress where the vertex lay on L.
+   * another number, addresses(global), its local address.
+   * return the address where the vertex lay on L.
    * The vertex corresponding to 'global' must not be already present
    * in the complex.
    */
@@ -174,7 +174,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
 
   // /**
   //  * Allocates a simplex in L corresponding to the simplex s in K
-  //  * with its local adresses and returns an AddressSimplex.
+  //  * with its local addresses and returns an AddressSimplex.
   //  */
   // boost::optional<Simplex> get_address(const Root_simplex_handle & s) const;
 
@@ -226,7 +226,7 @@ bool proper_face_in_union(
 }
 
 // Remark: this function should be friend in order to leave get_adresses private
-// however doing so seemes currently not possible due to a visual studio bug c2668
+// however doing so seems currently not possible due to a visual studio bug c2668
 // "the compiler does not support partial ordering of template functions as specified in the C++ Standard"
 // http://www.serkey.com/error-c2668-ambiguous-call-to-overloaded-function-bb45ft.html
 

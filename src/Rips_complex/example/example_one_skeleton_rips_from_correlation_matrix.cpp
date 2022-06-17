@@ -40,7 +40,7 @@ int main() {
         throw "The input matrix is not a correlation matrix. The program will now terminate.\n";
       }
       correlations[i][j] = 1 - correlations[i][j];
-      // Here we make sure that we will get the treshold value equal to maximal
+      // Here we make sure that we will get the threshold value equal to maximal
       // distance in the matrix.
       if (correlations[i][j] > threshold) threshold = correlations[i][j];
     }
