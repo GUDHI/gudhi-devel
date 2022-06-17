@@ -3,12 +3,14 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-===========================
-Datasets generators manual
-===========================
+================
+Datasets manual
+================
+
+Datasets generators
+===================
 
 We provide the generation of different customizable datasets to use as inputs for Gudhi complexes and data structures.
-
 
 Points generators
 ------------------
@@ -103,3 +105,29 @@ Example
 
 
 .. autofunction:: gudhi.datasets.generators.points.torus
+
+
+Fetching datasets
+=================
+
+We provide some ready-to-use datasets that are not available by default when getting GUDHI, and need to be fetched explicitly.
+
+By **default**, the fetched datasets directory is set to a folder named **'gudhi_data'** in the **user home folder**.
+Alternatively, it can be set using the **'GUDHI_DATA'** environment variable.
+
+.. autofunction:: gudhi.datasets.remote.fetch_bunny
+
+.. figure:: ./img/bunny.png
+     :figclass: align-center
+
+     3D Stanford bunny with 35947 vertices.
+
+
+.. autofunction:: gudhi.datasets.remote.fetch_spiral_2d
+
+.. figure:: ./img/spiral_2d.png
+     :figclass: align-center
+
+     2D spiral with 114562 vertices.
+
+.. autofunction:: gudhi.datasets.remote.clear_data_home
