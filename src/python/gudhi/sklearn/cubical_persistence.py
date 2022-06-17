@@ -91,7 +91,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
               - If `persistence_dimension` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
               - If `persistence_dimension` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
-        :rtype: list of pairs or list of list of pairs
+        :rtype: list of tuple or list of list of tuple
         """
 
         # Depends on persistence_dimension is an integer or a list of integer (else case)

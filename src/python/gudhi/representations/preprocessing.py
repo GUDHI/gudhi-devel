@@ -402,12 +402,12 @@ class DimensionSelector(BaseEstimator, TransformerMixin):
         Select persistence diagrams from its dimension.
 
         Parameters:
-            X (list of list of pairs): List of list of persistence pairs, i.e.
+            X (list of list of tuple): List of list of persistence pairs, i.e.
                 `[[array( Hi(X0) ), array( Hj(X0) ), ...], [array( Hi(X1) ), array( Hj(X1) ), ...], ...]` 
 
         Returns:
-            list of pairs:
-            Persistence diagrams in a specific dimension. i.e. if `index` was set to `m` and `Hn` is at index `n` of
+            list of tuple:
+            Persistence diagrams in a specific dimension. i.e. if `index` was set to `m` and `Hn` is at index `m` of
             the input, it returns `[array( Hn(X0) ), array( Hn(X1), ...]`
         """
 
