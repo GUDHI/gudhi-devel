@@ -598,6 +598,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
+    # Fetch remote datasets
+    if(WITH_GUDHI_REMOTE_TEST)
+      add_gudhi_py_test(test_remote_datasets)
+    endif()
+
     # persistence graphical tools
     if(MATPLOTLIB_FOUND)
       add_gudhi_py_test(test_persistence_graphical_tools)

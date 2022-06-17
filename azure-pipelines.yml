@@ -30,7 +30,7 @@ jobs:
     - bash: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON ..
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
         make
         make doxygen
         ctest --output-on-failure
@@ -74,7 +74,7 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        cmake  -DWITH_GUDHI_PYTHON=ON .
+        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd src\python
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
