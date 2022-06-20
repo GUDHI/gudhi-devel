@@ -461,10 +461,10 @@ class Alpha_complex {
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     using Filtration_value = typename SimplicialComplexForAlpha::Filtration_value;
-    using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
 
     // ### Foreach Tau face of Sigma
-    for (auto f_boundary : complex.boundary_simplex_range(f_simplex)) {
+    for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(f_simplex)) {
+      auto f_boundary = face_opposite_vertex.first;
 #ifdef DEBUG_TRACES
       std::clog << " | --------------------------------------------------\n";
       std::clog << " | Tau ";
@@ -485,18 +485,10 @@ class Alpha_complex {
 #endif  // DEBUG_TRACES
         // ### Else
       } else {
-        // Find which vertex of f_simplex is missing in f_boundary. We could actually write a variant of boundary_simplex_range that gives pairs (f_boundary, vertex). We rely on the fact that simplex_vertex_range is sorted.
-        auto longlist = complex.simplex_vertex_range(f_simplex);
-        auto shortlist = complex.simplex_vertex_range(f_boundary);
-        auto longiter = std::begin(longlist);
-        auto shortiter = std::begin(shortlist);
-        auto enditer = std::end(shortlist);
-        while(shortiter != enditer && *longiter == *shortiter) { ++longiter; ++shortiter; }
-        Vertex_handle extra = *longiter;
         auto const& cache=get_cache(complex, f_boundary);
-        bool is_gab = kernel_.is_gabriel(cache, get_point_(extra));
+        bool is_gab = kernel_.is_gabriel(cache, get_point_(face_opposite_vertex.second));
 #ifdef DEBUG_TRACES
-        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << extra << std::endl;
+        std::clog << " | Tau is_gabriel(Sigma)=" << is_gab << " - vertexForGabriel=" << face_opposite_vertex.second << std::endl;
 #endif  // DEBUG_TRACES
         // ### If Tau is not Gabriel of Sigma
         if (false == is_gab) {
