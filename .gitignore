@@ -21,6 +21,7 @@ cmake-build-debug/
 # Poetry files
 *.lock
 *.toml
+./venv
 
 # Ripsnet files
 ripsnet_doc_test.py

@@ -33,6 +33,20 @@ class DenseRagged(tf.keras.layers.Layer):
         self.kernel_initializer = kernel_initializer
         self.bias_initializer = bias_initializer
 
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                'units': self.units,
+                'use_bias': self.use_bias,
+                'activation': self.activation,
+                '_supports_ragged_inputs': self._supports_ragged_inputs,
+                'kernel_initializer': self.kernel_initializer,
+                'bias_initializer': self.bias_initializer,
+            }
+        )
+        return config
+
     def build(self, input_shape):
         last_dim = input_shape[-1]
         self.kernel = self.add_weight('kernel', shape=[last_dim, self.units], trainable=True, initializer=self.kernel_initializer)
@@ -117,6 +131,16 @@ class TFBlock(tf.keras.layers.Layer):
         if isinstance(layers[0], DenseRagged):
             self._supports_ragged_inputs = True
 
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                'layers': self.layers,
+                '_supports_ragged_inputs': self._supports_ragged_inputs,
+            }
+        )
+        return config
+
     def build(self, input_shape):
         # super().build(input_shape)
         return self
@@ -152,6 +176,16 @@ class PermopRagged(tf.keras.layers.Layer):
         super().__init__(dynamic=True, **kwargs)
         self._supports_ragged_inputs = True
         self.perm_op = perm_op
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                'perm_op': self.perm_op,
+                '_supports_ragged_inputs': self._supports_ragged_inputs,
+            }
+        )
+        return config
 
     def build(self, input_shape):
         super().build(input_shape)
@@ -189,6 +223,17 @@ class RipsNet(tf.keras.Model):
 
         # if perm_op not in ['mean', 'sum']:
         #     raise ValueError(f'Permutation invariant operation: {self.perm_op} is not allowed, must be "mean" or "sum".')
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update(
+            {
+                'phi_1': self.phi_1,
+                'phi_2': self.phi_2,
+                'perm_op': self.perm_op,
+                'input_dim': self.input_dim,
+            }
+        )
+        return config
 
     def build(self, input_shape):
         return self
