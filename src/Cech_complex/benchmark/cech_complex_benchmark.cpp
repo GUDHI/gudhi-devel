@@ -61,20 +61,22 @@ int main(int argc, char* argv[]) {
                  "Cech nb simplices ; Rips nb simplices;"
               << std::endl;
     boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
+    // For every ".off" file in the current directory, and for 3 predefined thresholds, compare Rips and various Cech constructions
     for (boost::filesystem::directory_iterator itr(boost::filesystem::current_path()); itr != end_itr; ++itr) {
         if (!boost::filesystem::is_directory(itr->status())) {
             if (itr->path().extension() == ".off") {
                 Points_off_reader off_reader(itr->path().string());
                 Point p0 = off_reader.get_point_cloud()[0];
-
-                for (Filtration_value radius = 0.1; radius < 0.4; radius += 0.1) {
+                // Loop over the different thresholds
+                for (Filtration_value radius = 0.1; radius < 0.35; radius += 0.1) {
                     std::clog << itr->path().stem() << "  ;  ";
                     std::clog << radius << "  ;  ";
 
                     Gudhi::Clock rips_clock("Rips computation");
                     Rips_complex rips_complex_from_points(off_reader.get_point_cloud(), radius, Gudhi::Euclidean_distance());
                     Simplex_tree rips_stree;
-                    rips_complex_from_points.create_complex(rips_stree, p0.size() - 1);
+                    int dim_max = p0.size() - 1;
+                    rips_complex_from_points.create_complex(rips_stree, dim_max);
                     // ------------------------------------------
                     // Display information about the Rips complex
                     // ------------------------------------------
@@ -85,14 +87,14 @@ int main(int argc, char* argv[]) {
                     // Cech complex
                     // --------------
                     // Fast
-                    benchmark_cech<CGAL::Epick_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, false);
-                    benchmark_cech<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, false);
+                    benchmark_cech<CGAL::Epick_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, dim_max, false);
+                    benchmark_cech<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, dim_max, false);
                     // Safe
-                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, false);
-                    benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, false);
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, dim_max, false);
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, dim_max, false);
                     // Exact
-                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, p0.size() - 1, true);
-                    auto cech_stree = benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, p0.size() - 1, true);
+                    benchmark_cech<CGAL::Epeck_d<CGAL::Dimension_tag<3>>>(itr->path().string(), radius, dim_max, true);
+                    auto cech_stree = benchmark_cech<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>>(itr->path().string(), radius, dim_max, true);
 
                     std::clog << cech_stree.num_simplices() << "  ;  ";
                     std::clog << rips_stree.num_simplices() << ";" << std::endl;

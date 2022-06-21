@@ -133,7 +133,7 @@ class Cech_blocker {
         radius = std::sqrt(cast_to_fv(sph.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
-        cc_ptr_->get_cache().push_back(sph);
+        cc_ptr_->get_cache().push_back(std::move(sph));
     }
 
 #ifdef DEBUG_TRACES

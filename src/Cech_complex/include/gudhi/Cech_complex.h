@@ -30,7 +30,7 @@ namespace cech_complex {
  * \ingroup cech_complex
  *
  * \details
- * Cech complex is a simplicial complex constructed from a proximity graph, where the set of all simplices is filtered
+ * Cech complex is a simplicial complex where the set of all simplices is filtered
  * by the radius of their minimal enclosing ball and bounded by the given max_radius.
  *
  * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.

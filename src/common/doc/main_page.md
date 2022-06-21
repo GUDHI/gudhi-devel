@@ -180,7 +180,7 @@
     <td width="15%">
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal
     </td>
  </tr>
