@@ -31,6 +31,8 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
         Bitmap_cubical_complex_base_interface(string perseus_file) nogil
         int num_simplices() nogil
         int dimension() nogil
+        double get_cell_data(size_t cell) nogil
+        size_t size() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
@@ -138,6 +140,24 @@ cdef class CubicalComplex:
         :returns:  int -- the complex dimension.
         """
         return self.thisptr.dimension()
+
+    def get_cell_data(self, cell):
+        """This function returns data contained in the given cell.
+
+        :param cell: The cell.
+        :type cell: int.
+        :returns:  The filtration value of the cell.
+        :rtype: float
+        """
+        return self.thisptr.get_cell_data(cell)
+
+    def get_total_cells_size(self):
+        """This function returns the size of total cells.
+
+        :returns: The size of total cells.
+        :rtype: int
+        """
+        return self.thisptr.size()
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be
