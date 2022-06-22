@@ -16,7 +16,10 @@
 #ifndef OPTIONS_INCLUDED
 #define OPTIONS_INCLUDED
 
-#include "Field_Z2.h"
+#include "Z2_field.h"
+
+namespace Gudhi {
+namespace persistence_matrix {
 
 enum Column_type {
 	LIST,
@@ -27,12 +30,6 @@ enum Column_type {
 	BOOST_LIST,
 	BOOST_SET
 };
-
-// using Vineyard_matrix_type = RU_matrix<Heap_column>;
-// using Vineyard_matrix_type = RU_matrix<List_column>;
-// using Vineyard_matrix_type = RU_matrix<Vector_column>;
-// using Vineyard_matrix_type = RU_matrix<Set_column>;
-// using Vineyard_matrix_type = RU_matrix<Unordered_set_column>;
 
 template<class Field_type = Z2_field_element, Column_type col_type = Column_type::SET, bool separated_by_dimension = false, bool parallelizable = false>
 struct Default_options{
@@ -83,6 +80,9 @@ struct Cohomology_persistence_options : Default_options<Field_type, Column_type:
 	static const bool is_of_chain_type = true;
 	static const bool has_removable_columns = true;
 };
+
+} //namespace persistence_matrix
+} //namespace Gudhi
 
 #endif // OPTIONS_INCLUDED
 
