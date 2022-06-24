@@ -43,18 +43,18 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
     """
-    def __init__(self, simplextree, dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
+    def __init__(self, simplextree, homology_dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
         """
         Constructor for the LowerStarSimplexTreeLayer class
   
         Parameters:
             simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n-1, where n is its number of vertices. Note that its filtration values are modified in each call of the class.
-            dimensions (List[int]): homology dimensions
+            homology_dimensions (List[int]): list of homology dimensions
             min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
             homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
         """
         super().__init__(dynamic=True, **kwargs)
-        self.dimensions  = dimensions
+        self.dimensions  = homology_dimensions
         self.simplextree = simplextree
         self.min_persistence = min_persistence if min_persistence != None else [0. for _ in range(len(self.dimensions))]
         self.hcf = homology_coeff_field

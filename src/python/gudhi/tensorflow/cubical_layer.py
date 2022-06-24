@@ -37,17 +37,17 @@ class CubicalLayer(tf.keras.layers.Layer):
     """
     TensorFlow layer for computing the persistent homology of a cubical complex
     """
-    def __init__(self, dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
+    def __init__(self, homology_dimensions, min_persistence=None, homology_coeff_field=11, **kwargs):
         """
         Constructor for the CubicalLayer class
 
         Parameters:
-            dimensions (List[int]): homology dimensions
+            homology_dimensions (List[int]): list of homology dimensions
             min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
             homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
         """
         super().__init__(dynamic=True, **kwargs)
-        self.dimensions = dimensions
+        self.dimensions = homology_dimensions
         self.min_persistence = min_persistence if min_persistence != None else [0.] * len(self.dimensions)
         self.hcf = homology_coeff_field
         assert len(self.min_persistence) == len(self.dimensions)
