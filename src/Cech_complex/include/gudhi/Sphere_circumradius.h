@@ -11,7 +11,7 @@
 #ifndef SPHERE_CIRCUMRADIUS_H_
 #define SPHERE_CIRCUMRADIUS_H_
 
-#include <CGAL/Epeck_d.h> // for #include <CGAL/NewKernel_d/KernelD_converter.h>
+#include <CGAL/Epick_d.h> // for #include <CGAL/NT_converter.h> which is not working/compiling alone
 
 #include <cmath>  // for std::sqrt
 #include <vector>
@@ -22,13 +22,16 @@ namespace cech_complex {
 
 /** \private @brief Compute the circumradius of the sphere passing through points given by a range of coordinates.
  * The points are assumed to have the same dimension. */
-template<typename Kernel>
+template<typename Kernel, typename Filtration_value>
 class Sphere_circumradius {
  private:
     Kernel kernel_;
  public:
+    using FT = typename Kernel::FT;
     using Point = typename Kernel::Point_d;
     using Point_cloud = typename std::vector<Point>;
+
+    CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
 
    /** \brief Circumradius of sphere passing through two points using CGAL.
    *
@@ -38,8 +41,8 @@ class Sphere_circumradius {
    * \tparam Point must be a Kernel::Point_d from CGAL.
    *
    */
-  double operator()(const Point& point_1, const Point& point_2) const {
-    return std::sqrt(CGAL::to_double(kernel_.squared_distance_d_object()(point_1, point_2))) / 2.;
+  Filtration_value operator()(const Point& point_1, const Point& point_2) const {
+    return std::sqrt(cast_to_fv(kernel_.squared_distance_d_object()(point_1, point_2))) / 2.;
   }
 
   /** \brief Circumradius of sphere passing through point cloud using CGAL.
@@ -49,8 +52,8 @@ class Sphere_circumradius {
    * \tparam Point_cloud must be a range of Kernel::Point_d points from CGAL.
    *
    */
-  double operator()(const Point_cloud& point_cloud) const {
-    return std::sqrt(CGAL::to_double(kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end())));
+  Filtration_value operator()(const Point_cloud& point_cloud) const {
+    return std::sqrt(cast_to_fv(kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end())));
   }
 
 };

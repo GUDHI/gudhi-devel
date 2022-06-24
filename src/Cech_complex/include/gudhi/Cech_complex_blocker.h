@@ -12,6 +12,7 @@
 #define CECH_COMPLEX_BLOCKER_H_
 
 #include <CGAL/NT_converter.h> // for casting from FT to Filtration_value
+#include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 
 #include <iostream>
 #include <vector>
@@ -84,9 +85,9 @@ class Cech_blocker {
             Point_cloud face_points;
             for (auto vertex : sc_ptr_->simplex_vertex_range(face_opposite_vertex.first)) {
                 face_points.push_back(cc_ptr_->get_point(vertex));
-                #ifdef DEBUG_TRACES
-                    std::clog << "#(" << vertex << ")#";
-                #endif  // DEBUG_TRACES
+#ifdef DEBUG_TRACES
+                std::clog << "#(" << vertex << ")#";
+#endif  // DEBUG_TRACES
             }
             sph = get_sphere(face_points.cbegin(), face_points.cend());
             // Put edge sphere in cache
@@ -97,10 +98,13 @@ class Cech_blocker {
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
-            #ifdef DEBUG_TRACES
-                std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
-            #endif  // DEBUG_TRACES
+#ifdef DEBUG_TRACES
+            std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
+#endif  // DEBUG_TRACES
             is_min_enclos_ball = true;
+#if CGAL_VERSION_NR >= 1050000000
+            if(exact_) CGAL::exact(sph.second);
+#endif
             radius = std::sqrt(cast_to_fv(sph.second));
             sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
             cc_ptr_->get_cache().push_back(sph);
@@ -114,10 +118,13 @@ class Cech_blocker {
             points.push_back(cc_ptr_->get_point(vertex));
         }
         Sphere sph = get_sphere(points.cbegin(), points.cend());
+#if CGAL_VERSION_NR >= 1050000000
+        if(exact_) CGAL::exact(sph.second);
+#endif
         radius = std::sqrt(cast_to_fv(sph.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
-        cc_ptr_->get_cache().push_back(sph);
+        cc_ptr_->get_cache().push_back(std::move(sph));
     }
 
 #ifdef DEBUG_TRACES
@@ -128,12 +135,13 @@ class Cech_blocker {
   }
 
   /** \internal \brief Čech complex blocker constructor. */
-  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr) : sc_ptr_(sc_ptr), cc_ptr_(cc_ptr) {}
+  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr, const bool exact) : sc_ptr_(sc_ptr), cc_ptr_(cc_ptr), exact_(exact) {}
 
  private:
   SimplicialComplexForCech* sc_ptr_;
   Cech_complex* cc_ptr_;
   Kernel kernel_;
+  const bool exact_;
 };
 
 }  // namespace cech_complex
