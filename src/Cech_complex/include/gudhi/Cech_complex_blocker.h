@@ -12,6 +12,7 @@
 #define CECH_COMPLEX_BLOCKER_H_
 
 #include <CGAL/NT_converter.h> // for casting from FT to Filtration_value
+#include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 
 #include <iostream>
 #include <vector>

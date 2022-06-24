@@ -70,7 +70,7 @@ class Cech_complex {
     point_cloud_.assign(std::begin(points), std::end(points));
 
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForCechComplex>(
-        point_cloud_, max_radius_, Sphere_circumradius<Kernel>());
+        point_cloud_, max_radius_, Sphere_circumradius<Kernel, Filtration_value>());
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
