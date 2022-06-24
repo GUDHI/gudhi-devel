@@ -47,8 +47,8 @@ struct SimplicialComplexForCech {
 
 };
 
-}  // namespace alpha_complex
+}  // namespace cech_complex
 
 }  // namespace Gudhi
 
-#endif  // CONCEPT_ALPHA_COMPLEX_SIMPLICIAL_COMPLEX_FOR_ALPHA_H_
+#endif  // CONCEPT_CECH_COMPLEX_SIMPLICIAL_COMPLEX_FOR_CECH_H_
