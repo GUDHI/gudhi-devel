@@ -40,7 +40,6 @@
  * @example edge_collapse_basic_example.cpp
  * \section Cech_complex_example_section Cech_complex
  * @example cech_persistence.cpp
- * @example cech_complex_step_by_step.cpp
  * @example cech_complex_example_from_points.cpp
  * \section Bitmap_cubical_complex_example_section Bitmap_cubical_complex
  * @example periodic_cubical_complex_persistence.cpp
