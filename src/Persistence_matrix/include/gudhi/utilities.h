@@ -28,21 +28,21 @@ using persistence_pair = std::pair<filtration_value_type, filtration_value_type>
 using boundary_type = std::vector<index>;
 using boundary_matrix = std::vector<boundary_type>;
 
-struct Bar{
-    Bar() : dim(-1), birth(-1), death(-1)
-    {}
+//struct Bar{
+//    Bar() : dim(-1), birth(-1), death(-1)
+//    {}
 
-    Bar(dimension_type dim, int birth, int death)
-        : dim(dim), birth(birth), death(death)
-    {}
+//    Bar(dimension_type dim, int birth, int death)
+//        : dim(dim), birth(birth), death(death)
+//    {}
 
-    dimension_type dim;
-    int birth;
-    int death;
-};
+//    dimension_type dim;
+//    int birth;
+//    int death;
+//};
 
-using barcode_type = std::vector<Bar>;
-using erasable_barcode_type = std::list<Bar>;
+//using barcode_type = std::vector<Bar>;
+//using erasable_barcode_type = std::list<Bar>;
 
 } //namespace persistence_matrix
 } //namespace Gudhi

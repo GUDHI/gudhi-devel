@@ -16,7 +16,7 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-
+class RU_matrix;
 
 } //namespace persistence_matrix
 } //namespace Gudhi

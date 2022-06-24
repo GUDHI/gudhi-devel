@@ -16,7 +16,7 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-
+class Chain_matrix_with_row_acces;
 
 } //namespace persistence_matrix
 } //namespace Gudhi
