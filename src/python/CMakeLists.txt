@@ -71,6 +71,7 @@ if(PYTHONINTERP_FOUND)
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'sklearn', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
@@ -290,8 +291,13 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
+<<<<<<< HEAD
     file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
     file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+=======
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")    
+    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+>>>>>>> 3e0e47b81ba488f6893933d8685fc1e7eec0e501
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
@@ -561,6 +567,11 @@ if(PYTHONINTERP_FOUND)
     # Representations
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
       add_gudhi_py_test(test_representations)
+    endif()
+
+    # Differentiation
+    if(TENSORFLOW_FOUND)
+      add_gudhi_py_test(test_diff)
     endif()
 
     # Betti curves
