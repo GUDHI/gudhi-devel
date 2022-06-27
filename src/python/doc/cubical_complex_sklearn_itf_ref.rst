@@ -21,8 +21,8 @@ a TDA scikit-learn pipeline is constructed and is composed of:
 
 #. :class:`~gudhi.sklearn.cubical_persistence.CubicalPersistence` that builds a cubical complex from the inputs and
    returns its persistence diagrams
-#. :class:`~gudhi.representations.DiagramSelector` that removes non-finite persistence diagrams values
-#. :class:`~gudhi.representations.PersistenceImage` that builds the persistence images from persistence diagrams
+#. :class:`~gudhi.representations.preprocessing.DiagramSelector` that removes non-finite persistence diagrams values
+#. :class:`~gudhi.representations.vector_methods.PersistenceImage` that builds the persistence images from persistence diagrams
 #. `SVC <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html>`_ which is a scikit-learn support
    vector classifier.
 
