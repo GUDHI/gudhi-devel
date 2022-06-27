@@ -401,6 +401,17 @@ mathematics, science, and engineering.
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `SciPy <http://scipy.org>`_ as a backend if explicitly requested.
 
+<<<<<<< HEAD
+=======
+TensorFlow
+----------
+
+The :doc:`cubical complex </cubical_complex_tflow_itf_ref>`, :doc:`simplex tree </ls_simplex_tree_tflow_itf_ref>`
+and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow <https://www.tensorflow.org>`_
+for incorporating them in neural nets. 
+
+`TensorFlow <https://www.tensorflow.org>`_ is also used in some automatic differentiation tests.
+>>>>>>> 3e0e47b81ba488f6893933d8685fc1e7eec0e501
 
 Bug reports and contributions
 *****************************
