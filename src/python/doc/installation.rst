@@ -396,7 +396,11 @@ mathematics, science, and engineering.
 TensorFlow
 ----------
 
-`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+The :doc:`cubical complex </cubical_complex_tflow_itf_ref>`, :doc:`simplex tree </ls_simplex_tree_tflow_itf_ref>`
+and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow <https://www.tensorflow.org>`_
+for incorporating them in neural nets. 
+
+`TensorFlow <https://www.tensorflow.org>`_ is also used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************
