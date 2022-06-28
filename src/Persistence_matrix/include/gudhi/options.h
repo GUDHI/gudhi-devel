@@ -17,31 +17,32 @@
 #define OPTIONS_INCLUDED
 
 #include "Z2_field.h"
-#include "column_types/heap_column.h"
-#include "column_types/list_column.h"
-#include "column_types/vector_column.h"
-#include "column_types/set_column.h"
-#include "column_types/unordered_set_column.h"
-#include "column_types/reduced_cell_list_column_with_row.h"
-#include "column_types/reduced_cell_set_column_with_row.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
-struct Column_types {
-	using list = List_column;
-	using set = Set_column;
-	using heap = Heap_column;
-	using vector = Vector_column;
-	using unordered_set = Unordered_set_column;
-	using boost_list = Reduced_cell_list_column_with_row;
-	using boost_set = Reduced_cell_set_column_with_row;
+//struct Column_types {
+//	using list = List_column;
+//	using set = Set_column;
+//	using heap = Heap_column;
+//	using vector = Vector_column;
+//	using unordered_set = Unordered_set_column;
+//	using boost_list = Reduced_cell_list_column_with_row;
+//	using boost_set = Reduced_cell_set_column_with_row;
+//};
+
+enum Column_types {
+	LIST,
+	SET,
+	HEAP,
+	VECTOR,
+	UNORDERED_SET
 };
 
-template<class Field_type = Z2_field_element, class Column_type = Column_types::set, bool separated_by_dimension = false, bool parallelizable = false>
+template<class Field_type = Z2_field_element, Column_types col_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
 struct Default_options{
 	using field_coeff_type = Field_type;
-	using column_type = Column_type;
+	static const Column_types column_type = col_type;
 
 	static const bool is_separated_by_dimension = separated_by_dimension;	//not implemented yet
 	static const bool is_parallelizable = parallelizable;					//not implemented yet
@@ -53,40 +54,37 @@ struct Default_options{
 	static const bool has_column_compression = false;						//not implemented yet
 	static const bool is_double_linked = true;								//single link not implemented yet. usefull?
 	static const bool is_of_boundary_type = true;
-	static const bool is_of_chain_type = false;
 	static const bool has_removable_columns = false;
 	static const bool is_indexed_by_column_index = false;
 };
 
-template<class Column_type = Column_types::boost_set, bool separated_by_dimension = false, bool parallelizable = false>
-struct Zigzag_options : Default_options<Z2_field_element, Column_type, separated_by_dimension, parallelizable>{
+template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
+struct Zigzag_options : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_row_access = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool is_of_boundary_type = false;
-	static const bool is_of_chain_type = true;
 	static const bool has_removable_columns = true;
 };
 
-template<class Field_type = Z2_field_element, class Column_type = Column_types::set, bool separated_by_dimension = false, bool parallelizable = false>
-struct Representative_cycles_options : Default_options<Field_type, Column_type, separated_by_dimension, parallelizable>{
+template<class Field_type = Z2_field_element, Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
+struct Representative_cycles_options : Default_options<Field_type, column_type, separated_by_dimension, parallelizable>{
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool is_indexed_by_column_index = true;
 };
 
-template<class Column_type = Column_types::set, bool separated_by_dimension = false, bool parallelizable = false>
-struct Multi_persistence_options : Default_options<Z2_field_element, Column_type, separated_by_dimension, parallelizable>{
+template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
+struct Multi_persistence_options : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool is_indexed_by_column_index = true;
 };
 
 template<class Field_type = Z2_field_element>
-struct Cohomology_persistence_options : Default_options<Field_type, Column_types::boost_list>{
+struct Cohomology_persistence_options : Default_options<Field_type, Column_types::LIST>{
 	static const bool has_row_access = true;
 	static const bool has_column_compression = true;
 	static const bool is_of_boundary_type = false;
-	static const bool is_of_chain_type = true;
 	static const bool has_removable_columns = true;
 };
 

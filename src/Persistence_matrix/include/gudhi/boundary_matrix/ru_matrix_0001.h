@@ -16,6 +16,7 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+template<class Master_matrix>
 class RU_matrix_with_removals;
 
 } //namespace persistence_matrix

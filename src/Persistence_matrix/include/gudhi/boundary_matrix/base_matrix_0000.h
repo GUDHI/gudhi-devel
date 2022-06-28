@@ -17,7 +17,13 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix;
+class Base_matrix : Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
+public:
+	Base_matrix() : Master_matrix::Base_swap_option(matrix_), Master_matrix::Base_pairing_option(){};
+
+private:
+	typename Master_matrix::column_container_type matrix_;
+};
 
 } //namespace persistence_matrix
 } //namespace Gudhi

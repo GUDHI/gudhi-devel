@@ -14,13 +14,13 @@
 #include <utility>
 
 #include "../utilities.h"
-#include "base_pairing.h"
+#include "ru_pairing.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class RU_vine_swap : public Base_pairing<Master_matrix>
+class RU_vine_swap : public RU_pairing<Master_matrix>
 {
 public:
 	void vine_swap_with_z_eq_1_case(index index);
@@ -39,8 +39,8 @@ protected:
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
 private:
-	using Base_pairing<Master_matrix>::barcode_;
-	using Base_pairing<Master_matrix>::indexToBar_;
+	using RU_pairing<Master_matrix>::barcode_;
+	using RU_pairing<Master_matrix>::indexToBar_;
 
 	Base_matrix &reducedMatrixR_;
 	Base_matrix &mirrorMatrixU_;
@@ -59,7 +59,7 @@ private:
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU)
-	: reducedMatrixR_(matrixR), mirrorMatrixU_(matrixU), Base_pairing<Master_matrix>()
+	: reducedMatrixR_(matrixR), mirrorMatrixU_(matrixU), RU_pairing<Master_matrix>()
 {}
 
 template<class Master_matrix>
@@ -67,14 +67,14 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(
 		RU_vine_swap &matrixToCopy)
 	: reducedMatrixR_(matrixToCopy.reducedMatrixR_),
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
-	  Base_pairing<Master_matrix>(matrixToCopy)
+	  RU_pairing<Master_matrix>(matrixToCopy)
 {}
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&other) noexcept
 	: reducedMatrixR_(std::move(other.reducedMatrixR_)),
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
-	  Base_pairing<Master_matrix>(std::move(other))
+	  RU_pairing<Master_matrix>(std::move(other))
 {}
 
 template<class Master_matrix>
@@ -144,7 +144,7 @@ inline RU_vine_swap<Master_matrix> &RU_vine_swap<Master_matrix>::operator=(
 {
 	std::swap(reducedMatrixR_, other.reducedMatrixR_);
 	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
-	Base_pairing<Master_matrix>::operator=(other);
+	RU_pairing<Master_matrix>::operator=(other);
 	return *this;
 }
 
@@ -258,8 +258,8 @@ inline void swap(RU_vine_swap<Friend_master_matrix>& swap1,
 {
 	std::swap(swap1.reducedMatrixR_, swap2.reducedMatrixR_);
 	std::swap(swap1.mirrorMatrixU_, swap2.mirrorMatrixU_);
-	std::swap(static_cast<Base_pairing<Friend_master_matrix> >(swap1),
-			  static_cast<Base_pairing<Friend_master_matrix> >(swap2));
+	std::swap(static_cast<RU_pairing<Friend_master_matrix> >(swap1),
+			  static_cast<RU_pairing<Friend_master_matrix> >(swap2));
 }
 
 } //namespace persistence_matrix

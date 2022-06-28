@@ -16,116 +16,145 @@
 #include <set>
 
 #include "../utilities.h"
+#include "../Zp_field.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
+template<class Field_element_type = Zp_field_element<11> >
 class Set_column
 {
 public:
+	using Cell = Base_cell<Field_element_type>;
+
 	Set_column();
-	Set_column(boundary_type& boundary);
+	Set_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
 	Set_column(Set_column& column);
 	Set_column(Set_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool isNonZero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Set_column& column);
 
 	Set_column& operator=(Set_column other);
 
-	friend void swap(Set_column& col1, Set_column& col2);
+	template<class Friend_field_element_type>
+	friend void swap(Set_column<Friend_field_element_type>& col1,
+					 Set_column<Friend_field_element_type>& col2);
 
 private:
 	int dim_;
-	std::set<unsigned int> column_;
+	std::set<Cell> column_;
 };
 
-inline Set_column::Set_column() : dim_(0)
+template<class Field_element_type>
+inline Set_column<Field_element_type>::Set_column() : dim_(0)
 {}
 
-inline Set_column::Set_column(boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary.begin(), boundary.end())
-{}
+template<class Field_element_type>
+inline Set_column<Field_element_type>::Set_column(
+		std::vector<index> &rowIndices, std::vector<unsigned int> &values)
+	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1),
+	  column_(rowIndices.size())
+{
+	for (unsigned int i = 0; i < rowIndices.size(); ++i){
+		column_.insert(Cell(values.at(i), rowIndices[i]));
+	}
+}
 
-inline Set_column::Set_column(Set_column &column)
+template<class Field_element_type>
+inline Set_column<Field_element_type>::Set_column(Set_column &column)
 	: dim_(column.dim_),
 	  column_(column.column_)
 {}
 
-inline Set_column::Set_column(Set_column &&column) noexcept
+template<class Field_element_type>
+inline Set_column<Field_element_type>::Set_column(Set_column &&column) noexcept
 	: dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_))
 {}
 
-inline void Set_column::get_content(boundary_type &container)
+//template<class Field_element_type>
+//inline void Set_column<Field_element_type>::get_content(boundary_type &container)
+//{
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//}
+
+template<class Field_element_type>
+inline bool Set_column<Field_element_type>::isNonZero(index rowIndex) const
 {
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+	return column_.find(Cell(0, rowIndex)) != column_.end();
 }
 
-inline bool Set_column::contains(unsigned int value) const
-{
-	return column_.find(value) != column_.end();
-}
-
-inline bool Set_column::is_empty()
+template<class Field_element_type>
+inline bool Set_column<Field_element_type>::is_empty()
 {
 	return column_.empty();
 }
 
-inline dimension_type Set_column::get_dimension() const
+template<class Field_element_type>
+inline dimension_type Set_column<Field_element_type>::get_dimension() const
 {
 	return dim_;
 }
 
-inline int Set_column::get_pivot()
+template<class Field_element_type>
+inline int Set_column<Field_element_type>::get_pivot()
 {
 	if (column_.empty()) return -1;
-	return *(column_.rbegin());
+	return column_.rbegin()->get_row_index();
 }
 
-inline void Set_column::clear()
+template<class Field_element_type>
+inline void Set_column<Field_element_type>::clear()
 {
 	column_.clear();
 }
 
-inline void Set_column::clear(unsigned int value)
+template<class Field_element_type>
+inline void Set_column<Field_element_type>::clear(index rowIndex)
 {
-	column_.erase(value);
+	column_.erase(Cell(0, rowIndex));
 }
 
-inline void Set_column::reorder(std::vector<index> &valueMap)
+template<class Field_element_type>
+inline void Set_column<Field_element_type>::reorder(std::vector<index> &valueMap)
 {
-	std::set<unsigned int> newSet;
-	for (const unsigned int& v : column_) newSet.insert(valueMap.at(v));
+	std::set<Cell> newSet;
+	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap.at(v.get_row_index())));
 	column_.swap(newSet);
 }
 
-inline void Set_column::add(Set_column &column)
+template<class Field_element_type>
+inline void Set_column<Field_element_type>::add(Set_column &column)
 {
-	for (const unsigned int& v : column.column_){
-		if (column_.find(v) != column_.end())
-			column_.erase(v);
-		else
+	for (const Cell& v : column.column_){
+		auto c = column_.find(v);
+		if (c != column_.end()){
+			c->get_element() += v.get_element();
+			if (c->get_element() == 0) column_.erase(c);
+		} else
 			column_.insert(v);
 	}
 }
 
-inline Set_column &Set_column::operator=(Set_column other)
+template<class Field_element_type>
+inline Set_column<Field_element_type> &Set_column<Field_element_type>::operator=(Set_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
 }
 
-inline void swap(Set_column& col1, Set_column& col2)
+template<class Friend_field_element_type>
+inline void swap(Set_column<Friend_field_element_type>& col1, Set_column<Friend_field_element_type>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

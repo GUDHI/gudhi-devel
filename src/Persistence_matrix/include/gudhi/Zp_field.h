@@ -77,70 +77,80 @@ private:
 	unsigned int element_;
 	static std::array<unsigned int,characteristic> inverse_;
 
-	void add_(unsigned int v);
-	void substract_(unsigned int v);
-	void multiply_(unsigned int v);
+	void _add(unsigned int v);
+	void _substract(unsigned int v);
+	void _multiply(unsigned int v);
+
+	static constexpr bool _is_prime(const int& p);
 };
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element()
 	: element_(0)
-{}
+{
+	static_assert(_is_prime(characteristic), "Characteristic has to be a prime number.");
+}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(unsigned int element)
 	: element_(element % characteristic)
-{}
+{
+	static_assert(_is_prime(characteristic), "Characteristic has to be a prime number.");
+}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(Zp_field_element<characteristic> &toCopy)
 	: element_(toCopy.element_)
-{}
+{
+	static_assert(_is_prime(characteristic), "Characteristic has to be a prime number.");
+}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(Zp_field_element<characteristic> &&toMove) noexcept
 	: element_(std::exchange(toMove.element_, 0))
-{}
+{
+	static_assert(_is_prime(characteristic), "Characteristic has to be a prime number.");
+}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(Zp_field_element<characteristic> const &f)
 {
-	add_(f.element_);
+	_add(f.element_);
 	return *this;
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(unsigned int const &v)
 {
-	add_(v % characteristic);
+	_add(v % characteristic);
 	return *this;
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(Zp_field_element<characteristic> const &f)
 {
-	substract_(f.element_);
+	_substract(f.element_);
 	return *this;
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(unsigned int const &v)
 {
-	substract_(v % characteristic);
+	_substract(v % characteristic);
 	return *this;
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(Zp_field_element<characteristic> const &f)
 {
-	multiply_(f.element_);
+	_multiply(f.element_);
 	return *this;
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(unsigned int const &v)
 {
-	multiply_(v % characteristic);
+	_multiply(v % characteristic);
 	return *this;
 }
 
@@ -200,7 +210,7 @@ inline unsigned int Zp_field_element<characteristic>::get_value() const
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::add_(unsigned int v)
+inline void Zp_field_element<characteristic>::_add(unsigned int v)
 {
 	if (UINT_MAX - element_ < v) {
 		unsigned long int sum = static_cast<unsigned long int>(element_) + v;
@@ -213,7 +223,7 @@ inline void Zp_field_element<characteristic>::add_(unsigned int v)
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::substract_(unsigned int v)
+inline void Zp_field_element<characteristic>::_substract(unsigned int v)
 {
 	if (element_ < v){
 		if (UINT_MAX - element_ < characteristic) {
@@ -227,7 +237,7 @@ inline void Zp_field_element<characteristic>::substract_(unsigned int v)
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::multiply_(unsigned int v)
+inline void Zp_field_element<characteristic>::_multiply(unsigned int v)
 {
 	unsigned int a = element_;
 	element_ = 0;
@@ -246,6 +256,20 @@ inline void Zp_field_element<characteristic>::multiply_(unsigned int v)
 			temp_b -= characteristic;
 		v += temp_b;
 	}
+}
+
+template<unsigned int characteristic>
+inline constexpr bool Zp_field_element<characteristic>::_is_prime(const int& p)
+{
+	if (p <= 1) return false;
+	if (p <= 3) return true;
+	if (p % 2 == 0 || p % 3 == 0) return false;
+
+	for (long i = 5; i * i <= p; i = i + 6)
+		if (p % i == 0 || p % (i + 2) == 0)
+			return false;
+
+	return true;
 }
 
 template<unsigned int friendCharacteristic>

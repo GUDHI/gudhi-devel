@@ -49,8 +49,6 @@ private:
 	dictionnary_type& pivotToPosition_;
 
 	void _add_to(const typename Column_type::Column& column, std::set<index>& set);
-	bool _is_essential(index simplexIndex);
-	bool _is_positive_in_pair(index simplexIndex);
 	bool _is_negative_in_pair(index simplexIndex);
 
 	void _positive_transpose(index simplexIndex1, index simplexIndex2);
@@ -61,6 +59,8 @@ private:
 	index _positive_negative_vine_swap(index columnIndex1, index columnIndex2);
 	index _negative_positive_vine_swap(index columnIndex1, index columnIndex2);
 	index _negative_vine_swap(index columnIndex1, index columnIndex2);
+
+	//TODO: update use of matrix and indexToBar
 };
 
 template<class Master_matrix>
@@ -163,19 +163,6 @@ inline void Chain_vine_swap<Master_matrix>::_add_to(
 			set.erase(res_insert.first);
 		}
 	}
-}
-
-template<class Master_matrix>
-inline bool Chain_vine_swap<Master_matrix>::_is_essential(index simplexIndex)
-{
-	return indexToBar_.at(simplexIndex)->death == -1;
-}
-
-template<class Master_matrix>
-inline bool Chain_vine_swap<Master_matrix>::_is_positive_in_pair(index simplexIndex)
-{
-	return indexToBar_.at(simplexIndex)->birth == static_cast<int>(simplexIndex)
-			&& indexToBar_.at(simplexIndex)->death != -1;
 }
 
 template<class Master_matrix>

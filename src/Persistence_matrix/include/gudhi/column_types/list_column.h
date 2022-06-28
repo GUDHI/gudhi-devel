@@ -13,111 +13,134 @@
 
 #include <iostream>
 #include <list>
-#include <unordered_set>
+#include <vector>
 
 #include "../utilities.h"
+#include "../Zp_field.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
+template<class Field_element_type = Zp_field_element<11> >
 class List_column
 {
 public:
+	using Cell = Base_cell<Field_element_type>;
+
 	List_column();
-	List_column(boundary_type& boundary);
+	List_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
 	List_column(List_column& column);
 	List_column(List_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool isNonZero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(List_column& column);
 
 	List_column& operator=(List_column other);
 
-	friend void swap(List_column& col1, List_column& col2);
+	template<class Friend_field_element_type>
+	friend void swap(List_column<Friend_field_element_type>& col1,
+					 List_column<Friend_field_element_type>& col2);
 
 private:
 	int dim_;
-	std::list<unsigned int> column_;
+	std::list<Cell> column_;
 };
 
-inline List_column::List_column() : dim_(0)
+template<class Field_element_type>
+inline List_column<Field_element_type>::List_column() : dim_(0)
 {}
 
-inline List_column::List_column(boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary.begin(), boundary.end())
-{}
+template<class Field_element_type>
+inline List_column<Field_element_type>::List_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values)
+	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1)
+{
+	for (unsigned int i = 0; i < rowIndices.size(); i++){
+		column_.push_back(Cell(values.at(i), rowIndices[i]));
+	}
+}
 
-inline List_column::List_column(List_column &column)
+template<class Field_element_type>
+inline List_column<Field_element_type>::List_column(List_column &column)
 	: dim_(column.dim_),
 	  column_(column.column_)
 {}
 
-inline List_column::List_column(List_column &&column) noexcept
+template<class Field_element_type>
+inline List_column<Field_element_type>::List_column(List_column &&column) noexcept
 	: dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_))
 {}
 
-inline void List_column::get_content(boundary_type &container)
-{
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-}
+//template<class Field_element_type>
+//inline void List_column<Field_element_type>::get_content(boundary_type &container)
+//{
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//}
 
-inline bool List_column::contains(unsigned int value) const
+template<class Field_element_type>
+inline bool List_column<Field_element_type>::isNonZero(index rowIndex) const
 {
-	for (unsigned int v : column_){
-		if (v == value) return true;
+	for (Cell v : column_){
+		if (v.get_row_index() == rowIndex) return true;
 	}
 	return false;
 }
 
-inline bool List_column::is_empty()
+template<class Field_element_type>
+inline bool List_column<Field_element_type>::is_empty()
 {
 	return column_.empty();
 }
 
-inline dimension_type List_column::get_dimension() const
+template<class Field_element_type>
+inline dimension_type List_column<Field_element_type>::get_dimension() const
 {
 	return dim_;
 }
 
-inline int List_column::get_pivot()
+template<class Field_element_type>
+inline int List_column<Field_element_type>::get_pivot()
 {
 	if (column_.empty()) return -1;
 
 	return column_.back();
 }
 
-inline void List_column::clear()
+template<class Field_element_type>
+inline void List_column<Field_element_type>::clear()
 {
 	column_.clear();
 }
 
-inline void List_column::clear(unsigned int value)
+template<class Field_element_type>
+inline void List_column<Field_element_type>::clear(index rowIndex)
 {
 	auto it = column_.begin();
-	while (it != column_.end() && *it != value) it++;
+	while (it != column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != column_.end()) column_.erase(it);
 }
 
-inline void List_column::reorder(std::vector<index> &valueMap)
+template<class Field_element_type>
+inline void List_column<Field_element_type>::reorder(std::vector<index> &valueMap)
 {
-	std::list<unsigned int>::iterator it = column_.begin();
+	typename std::list<Cell>::iterator it = column_.begin();
 	while (it != column_.end()) {
-		*it = valueMap.at(*it);
+		it->setRowIndex(valueMap.at(it->get_row_index()));
 		it++;
 	}
 	column_.sort();
 }
 
-inline void List_column::add(List_column &column)
+template<class Field_element_type>
+inline void List_column<Field_element_type>::add(List_column &column)
 {
 	if (column.is_empty()) return;
 	if (column_.empty()){
@@ -125,46 +148,51 @@ inline void List_column::add(List_column &column)
 		return;
 	}
 
-	std::list<unsigned int>::iterator itToAdd = column.column_.begin();
-	std::list<unsigned int>::iterator itTarget = column_.begin();
-	unsigned int valToAdd = *itToAdd;
-	unsigned int valTarget = *itTarget;
+	typename std::list<Cell>::iterator itToAdd = column.column_.begin();
+	typename std::list<Cell>::iterator itTarget = column_.begin();
+	index curRowToAdd = itToAdd->get_row_index();
+	index curRowTarget = itTarget->get_row_index();
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
 		if (itToAdd != column.column_.end() && itTarget != column_.end()){
-			if (valToAdd == valTarget){
-				column_.erase(itTarget++);
+			if (curRowToAdd == curRowTarget){
+				itTarget->get_element() =+ itToAdd->get_element();
+				if (itTarget->get_element() == 0) column_.erase(itTarget++);
+				else itTarget++;
 				itToAdd++;
-			} else if (valToAdd < valTarget){
-				column_.insert(itTarget, valToAdd);
+			} else if (curRowToAdd < curRowTarget){
+				column_.insert(itTarget, Cell(itToAdd->get_element(), curRowToAdd));
 				itToAdd++;
 			} else {
 				itTarget++;
 			}
 		}
 
-		valToAdd = *itToAdd;
-		valTarget = *itTarget;
+		curRowToAdd = itToAdd->get_row_index();
+		curRowTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
-		valToAdd = *itToAdd;
+		curRowToAdd = itToAdd->get_row_index();
 		if (itToAdd != column.column_.end()){
-			column_.push_back(valToAdd);
+			column_.push_back(Cell(itToAdd->get_element(), curRowToAdd));
 			itToAdd++;
 		}
 	}
 }
 
-inline List_column &List_column::operator=(List_column other)
+template<class Field_element_type>
+inline List_column<Field_element_type> &List_column<Field_element_type>::operator=(List_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
 }
 
-inline void swap(List_column& col1, List_column& col2)
+template<class Friend_field_element_type>
+inline void swap(List_column<Friend_field_element_type>& col1,
+				 List_column<Friend_field_element_type>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

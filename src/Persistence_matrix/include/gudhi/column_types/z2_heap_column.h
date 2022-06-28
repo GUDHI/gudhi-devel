@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef HEAPCOLUMN_H
-#define HEAPCOLUMN_H
+#ifndef Z2_HEAPCOLUMN_H
+#define Z2_HEAPCOLUMN_H
 
 #include <iostream>
 #include <algorithm>
@@ -23,13 +23,15 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-class Heap_column
+class Z2_heap_column
 {
 public:
-	Heap_column();
-	Heap_column(boundary_type& boundary);
-	Heap_column(Heap_column& column);
-	Heap_column(Heap_column&& column) noexcept;
+	using Cell = unsigned int;
+
+	Z2_heap_column();
+	Z2_heap_column(boundary_type& boundary);
+	Z2_heap_column(Z2_heap_column& column);
+	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
 	void get_content(boundary_type& container);
 	bool contains(unsigned int value) const;
@@ -39,15 +41,15 @@ public:
 	void clear();
 	void clear(unsigned int value);
 	void reorder(std::vector<index>& valueMap);
-	void add(Heap_column& column);
+	void add(Z2_heap_column& column);
 
-	Heap_column& operator=(Heap_column other);
+	Z2_heap_column& operator=(Z2_heap_column other);
 
-	friend void swap(Heap_column& col1, Heap_column& col2);
+	friend void swap(Z2_heap_column& col1, Z2_heap_column& col2);
 
 private:
 	int dim_;
-	std::vector<unsigned int> column_;
+	std::vector<Cell> column_;
 	unsigned int insertsSinceLastPrune_;
 	std::unordered_set<unsigned int> erasedValues_;
 
@@ -55,10 +57,10 @@ private:
 	int _pop_pivot();
 };
 
-inline Heap_column::Heap_column() : dim_(0), insertsSinceLastPrune_(0)
+inline Z2_heap_column::Z2_heap_column() : dim_(0), insertsSinceLastPrune_(0)
 {}
 
-inline Heap_column::Heap_column(boundary_type& boundary)
+inline Z2_heap_column::Z2_heap_column(boundary_type& boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary),
 	  insertsSinceLastPrune_(0)
@@ -66,28 +68,28 @@ inline Heap_column::Heap_column(boundary_type& boundary)
 	std::make_heap(column_.begin(), column_.end());
 }
 
-inline Heap_column::Heap_column(Heap_column& column)
+inline Z2_heap_column::Z2_heap_column(Z2_heap_column& column)
 	: dim_(column.dim_),
 	  column_(column.column_),
 	  insertsSinceLastPrune_(column.insertsSinceLastPrune_),
 	  erasedValues_(column.erasedValues_)
 {}
 
-inline Heap_column::Heap_column(Heap_column&& column) noexcept
+inline Z2_heap_column::Z2_heap_column(Z2_heap_column&& column) noexcept
 	: dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_)),
 	  insertsSinceLastPrune_(std::exchange(column.insertsSinceLastPrune_, 0)),
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-inline void Heap_column::get_content(boundary_type &container)
+inline void Z2_heap_column::get_content(boundary_type &container)
 {
 	_prune();
 	container = column_;
 	std::sort_heap(container.begin(), container.end());
 }
 
-inline bool Heap_column::contains(unsigned int value) const
+inline bool Z2_heap_column::contains(unsigned int value) const
 {
 	if (erasedValues_.find(value) != erasedValues_.end()) return false;
 
@@ -100,7 +102,7 @@ inline bool Heap_column::contains(unsigned int value) const
 	return c % 2 != 0;
 }
 
-inline bool Heap_column::is_empty()
+inline bool Z2_heap_column::is_empty()
 {
 	int pivot = _pop_pivot();
 	if (pivot != -1){
@@ -111,12 +113,12 @@ inline bool Heap_column::is_empty()
 	return true;
 }
 
-inline dimension_type Heap_column::get_dimension() const
+inline dimension_type Z2_heap_column::get_dimension() const
 {
 	return dim_;
 }
 
-inline int Heap_column::get_pivot()
+inline int Z2_heap_column::get_pivot()
 {
 	int pivot = _pop_pivot();
 	if (pivot != -1){
@@ -126,19 +128,19 @@ inline int Heap_column::get_pivot()
 	return pivot;
 }
 
-inline void Heap_column::clear()
+inline void Z2_heap_column::clear()
 {
 	column_.clear();
 	insertsSinceLastPrune_ = 0;
 	erasedValues_.clear();
 }
 
-inline void Heap_column::clear(unsigned int value)
+inline void Z2_heap_column::clear(unsigned int value)
 {
 	erasedValues_.insert(value);
 }
 
-inline void Heap_column::reorder(std::vector<index> &valueMap)
+inline void Z2_heap_column::reorder(std::vector<index> &valueMap)
 {
 	std::vector<unsigned int> tempCol;
 	int pivot = _pop_pivot();
@@ -153,7 +155,7 @@ inline void Heap_column::reorder(std::vector<index> &valueMap)
 	erasedValues_.clear();
 }
 
-inline void Heap_column::add(Heap_column &column)
+inline void Z2_heap_column::add(Z2_heap_column &column)
 {
 	std::vector<unsigned int>& colToAdd = column.column_;
 	const unsigned int size = colToAdd.size();
@@ -172,7 +174,7 @@ inline void Heap_column::add(Heap_column &column)
 	if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
 }
 
-inline Heap_column& Heap_column::operator=(Heap_column other)
+inline Z2_heap_column& Z2_heap_column::operator=(Z2_heap_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
@@ -181,7 +183,7 @@ inline Heap_column& Heap_column::operator=(Heap_column other)
 	return *this;
 }
 
-inline void Heap_column::_prune()
+inline void Z2_heap_column::_prune()
 {
 	if (insertsSinceLastPrune_ == 0 && erasedValues_.empty()) return;
 
@@ -198,7 +200,7 @@ inline void Heap_column::_prune()
 	erasedValues_.clear();
 }
 
-inline int Heap_column::_pop_pivot()
+inline int Z2_heap_column::_pop_pivot()
 {
 	if (column_.empty()) {
 		return -1;
@@ -226,7 +228,7 @@ inline int Heap_column::_pop_pivot()
 	return pivot;
 }
 
-inline void swap(Heap_column& col1, Heap_column& col2)
+inline void swap(Z2_heap_column& col1, Z2_heap_column& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);
@@ -237,4 +239,4 @@ inline void swap(Heap_column& col1, Heap_column& col2)
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // HEAPCOLUMN_H
+#endif // Z2_HEAPCOLUMN_H

@@ -1,0 +1,112 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Hannah Schreiber
+ *
+ *    Copyright (C) 2022 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
+#ifndef CELL_H
+#define CELL_H
+
+#include "../options.h"
+#include "../utilities.h"
+#include "../Zp_field.h"
+
+namespace Gudhi {
+namespace persistence_matrix {
+
+class Z2_base_cell
+{
+public:
+	Z2_base_cell(index rowIndex) : rowIndex_(rowIndex){};
+	Z2_base_cell(Z2_base_cell& cell) : rowIndex_(cell.rowIndex_){};
+	Z2_base_cell(Z2_base_cell&& cell) : rowIndex_(std::exchange(cell.rowIndex_, 0)){};
+
+	index get_row_index() const{
+		return rowIndex_;
+	};
+
+	void setRowIndex(const index &rowIndex){
+		rowIndex_ = rowIndex;
+	};
+
+	friend bool operator<(const Z2_base_cell& c1, const Z2_base_cell& c2){
+		return c1.get_row_index() < c2.get_row_index();
+	}
+	friend bool operator==(const Z2_base_cell& c1, const Z2_base_cell& c2){
+		return c1.get_row_index() == c2.get_row_index();
+	}
+
+private:
+	index rowIndex_;
+};
+
+class Z2_row_cell : public Z2_base_cell
+{
+public:
+	Z2_row_cell(index columnIndex, index rowIndex)
+		: Z2_base_cell(rowIndex), columnIndex_(columnIndex){};
+	Z2_row_cell(Z2_row_cell& cell)
+		: Z2_base_cell(cell), columnIndex_(cell.columnIndex_){};
+	Z2_row_cell(Z2_row_cell&& cell)
+		: Z2_base_cell(std::move(cell)), columnIndex_(std::exchange(cell.columnIndex_, 0)){};
+
+	index get_column_index() const{
+		return columnIndex_;
+	};
+
+	friend bool operator==(const Z2_row_cell& c1, const Z2_row_cell& c2)
+	{
+		return c1.get_row_index() == c2.get_row_index() &&
+				c1.get_column_index() == c2.get_column_index();
+	}
+
+private:
+	index columnIndex_;
+};
+
+template<class Field_element_type = Zp_field_element<11> >
+class Base_cell : public Z2_base_cell
+{
+public:
+	Base_cell(unsigned int element, index rowIndex)
+		: Z2_base_cell(rowIndex), element_(element){};
+	Base_cell(Base_cell& cell)
+		: Z2_base_cell(cell), element_(cell.element_){};
+	Base_cell(Base_cell&& cell)
+		: Z2_base_cell(std::move(cell)), element_(std::move(cell.element_)){};
+
+	Field_element_type& get_element() const{
+		return element_;
+	};
+
+private:
+	Field_element_type element_;
+};
+
+template<class Field_element_type = Zp_field_element<11> >
+class Row_cell : public Z2_row_cell
+{
+public:
+	Row_cell(unsigned int element, index columnIndex, index rowIndex)
+		: Z2_row_cell(columnIndex, rowIndex), element_(element){};
+	Row_cell(Row_cell& cell)
+		: Z2_row_cell(cell), element_(cell.element_){};
+	Row_cell(Row_cell&& cell)
+		: Z2_row_cell(std::move(cell)), element_(std::move(cell.element_)){};
+
+	Field_element_type& get_element() const{
+		return element_;
+	};
+
+private:
+	Field_element_type element_;
+};
+
+} //namespace persistence_matrix
+} //namespace Gudhi
+
+#endif // CELL_H

@@ -16,7 +16,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-class Chain_matrix_with_column_compression_with_row_acces;
+template<class Master_matrix>
+class Chain_matrix_with_column_compression_with_row_access;
 
 } //namespace persistence_matrix
 } //namespace Gudhi
