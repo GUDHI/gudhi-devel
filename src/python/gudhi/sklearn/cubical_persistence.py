@@ -45,7 +45,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         Parameters:
             newshape (tuple of ints): If cells filtration values require to be reshaped
                 (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`), set `newshape`
-                to perform `numpy.reshape(X, newshape, order='C'` in
+                to perform `numpy.reshape(X, newshape, order='C')` in
                 :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform` method.
             homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
