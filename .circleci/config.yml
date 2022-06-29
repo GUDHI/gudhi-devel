@@ -95,9 +95,9 @@ jobs:
             mkdir build
             cd build
             cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON ..
-            make doxygen 2>&1 | tee dox.log
-            grep warning dox.log
-            cp dox.log html/
+            make doxygen 2>&1
+            grep warning doxygen.log
+            cp doxygen.log html/
             cp -R html /tmp/doxygen
 
       - store_artifacts:
