@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "../utilities.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -24,18 +25,20 @@ namespace persistence_matrix {
 class Z2_unordered_set_column
 {
 public:
+	using Cell = Z2_base_cell;
+
 	Z2_unordered_set_column();
 	Z2_unordered_set_column(boundary_type& boundary);
 	Z2_unordered_set_column(Z2_unordered_set_column& column);
 	Z2_unordered_set_column(Z2_unordered_set_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Z2_unordered_set_column& column);
 
@@ -45,7 +48,7 @@ public:
 
 private:
 	int dim_;
-	std::unordered_set<unsigned int> column_;
+	std::unordered_set<Cell> column_;
 	bool pivotChanged_;
 	int pivot_;
 };
@@ -58,7 +61,7 @@ inline Z2_unordered_set_column::Z2_unordered_set_column(boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end()),
 	  pivotChanged_(false),
-	  pivot_(boundary.size() == 0 ? -1 : *std::max_element(boundary.begin(), boundary.end()))
+	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
 {}
 
 inline Z2_unordered_set_column::Z2_unordered_set_column(Z2_unordered_set_column &column)
@@ -75,15 +78,15 @@ inline Z2_unordered_set_column::Z2_unordered_set_column(Z2_unordered_set_column 
 	  pivot_(std::exchange(column.pivot_, 0))
 {}
 
-inline void Z2_unordered_set_column::get_content(boundary_type &container)
-{
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-	std::sort(container.begin(), container.end());
-}
+//inline void Z2_unordered_set_column::get_content(boundary_type &container)
+//{
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//	std::sort(container.begin(), container.end());
+//}
 
-inline bool Z2_unordered_set_column::contains(unsigned int value) const
+inline bool Z2_unordered_set_column::is_non_zero(index rowIndex) const
 {
-	return column_.find(value) != column_.end();
+	return column_.find(rowIndex) != column_.end();
 }
 
 inline bool Z2_unordered_set_column::is_empty()
@@ -98,10 +101,15 @@ inline dimension_type Z2_unordered_set_column::get_dimension() const
 
 inline int Z2_unordered_set_column::get_pivot()
 {
-	if (pivotChanged_){
-		pivot_ = column_.size() == 0 ?
-					-1
-				  : *std::max_element(column_.begin(), column_.end());
+	if (pivotChanged_ && column_.size() == 0){
+		pivot_ = -1;
+		pivotChanged_ = false;
+	} else if (pivotChanged_) {
+		pivot_ = 0;
+		for (const Cell& c : column_){
+			if (static_cast<int>(c.get_row_index()) > pivot_)
+				pivot_ = c.get_row_index();
+		}
 		pivotChanged_ = false;
 	}
 
@@ -115,30 +123,30 @@ inline void Z2_unordered_set_column::clear()
 	pivotChanged_ = false;
 }
 
-inline void Z2_unordered_set_column::clear(unsigned int value)
+inline void Z2_unordered_set_column::clear(index rowIndex)
 {
-	column_.erase(value);
-	if (static_cast<int>(value) == pivot_) pivotChanged_ = true;
+	column_.erase(rowIndex);
+	if (static_cast<int>(rowIndex) == pivot_) pivotChanged_ = true;
 }
 
 inline void Z2_unordered_set_column::reorder(std::vector<index> &valueMap)
 {
-	std::unordered_set<unsigned int> newSet;
-	for (const unsigned int& v : column_) newSet.insert(valueMap.at(v));
+	std::unordered_set<Cell> newSet;
+	for (const Cell& v : column_) newSet.insert(valueMap.at(v.get_row_index()));
 	column_.swap(newSet);
 	pivotChanged_ = true;
 }
 
 inline void Z2_unordered_set_column::add(Z2_unordered_set_column &column)
 {
-	for (const unsigned int& v : column.column_){
+	for (const Cell& v : column.column_){
 		if (column_.find(v) != column_.end()){
 			column_.erase(v);
-			if (static_cast<int>(v) == pivot_) pivotChanged_ = true;
+			if (static_cast<int>(v.get_row_index()) == pivot_) pivotChanged_ = true;
 		} else {
 			column_.insert(v);
-			if (static_cast<int>(v) > pivot_){
-				pivot_ = v;
+			if (static_cast<int>(v.get_row_index()) > pivot_){
+				pivot_ = v.get_row_index();
 				pivotChanged_ = false;
 			}
 		}

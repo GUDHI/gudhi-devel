@@ -34,7 +34,7 @@ public:
 	Set_column(Set_column&& column) noexcept;
 
 //	void get_content(boundary_type& container);
-	bool isNonZero(index rowIndex) const;
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
@@ -88,7 +88,7 @@ inline Set_column<Field_element_type>::Set_column(Set_column &&column) noexcept
 //}
 
 template<class Field_element_type>
-inline bool Set_column<Field_element_type>::isNonZero(index rowIndex) const
+inline bool Set_column<Field_element_type>::is_non_zero(index rowIndex) const
 {
 	return column_.find(Cell(0, rowIndex)) != column_.end();
 }

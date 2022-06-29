@@ -81,19 +81,19 @@ public:
 //	using Options::can_retrieve_representative_cycles;
 //	using Options::has_column_pairings;
 
-	using Cell_type = typename std::conditional<
-							Field_type::get_characteristic() == 2,
-							typename std::conditional<
-								Options::has_row_access,
-								Z2_row_cell,
-								Z2_base_cell
-							>::type,
-							typename std::conditional<
-								Options::has_row_access,
-								Row_cell<Field_type>,
-								Base_cell<Field_type>
-							>::type
-						>::type;
+//	using Cell_type = typename std::conditional<
+//							Field_type::get_characteristic() == 2,
+//							typename std::conditional<
+//								Options::has_row_access,
+//								Z2_row_cell,
+//								Z2_base_cell
+//							>::type,
+//							typename std::conditional<
+//								Options::has_row_access,
+//								Row_cell<Field_type>,
+//								Base_cell<Field_type>
+//							>::type
+//						>::type;
 
 	using Heap_column_type = Z2_heap_column;
 
@@ -106,15 +106,15 @@ public:
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_list_column_with_row,
-									List_column
+									Reduced_cell_list_column_with_row<Field_type>,
+									List_column<Field_type>
 								>::type
 							>::type;
 
 	using Vector_column_type = typename std::conditional<
 								Field_type::get_characteristic() == 2,
 								Z2_vector_column,
-								Vector_column
+								Vector_column<Field_type>
 							>::type;
 
 	using Set_column_type = typename std::conditional<
@@ -126,15 +126,15 @@ public:
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_set_column_with_row,
-									Set_column
+									Reduced_cell_set_column_with_row<Field_type>,
+									Set_column<Field_type>
 								>::type
 							>::type;
 
 	using Unordered_set_column_type = typename std::conditional<
 										Field_type::get_characteristic() == 2,
 										Z2_unordered_set_column,
-										Unordered_set_column
+										Unordered_set_column<Field_type>
 									>::type;
 
 	using Column_type = typename std::conditional<

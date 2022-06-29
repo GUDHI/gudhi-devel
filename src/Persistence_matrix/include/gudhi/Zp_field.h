@@ -311,8 +311,8 @@ Zp_field_element<friendCharacteristic> operator-(Zp_field_element<friendCharacte
 template<unsigned int friendCharacteristic>
 unsigned int operator-(unsigned int v, Zp_field_element<friendCharacteristic> const& f)
 {
+	if (v >= friendCharacteristic) v %= friendCharacteristic;
 	if (f.element_ > v) v += friendCharacteristic;
-	else if (v >= friendCharacteristic) v %= friendCharacteristic;
 	v -= f.element_;
 	return v;
 }

@@ -19,6 +19,19 @@ namespace persistence_matrix {
 template<class Master_matrix>
 class RU_matrix;
 
+template<class Master_matrix>
+class RU_matrix : Master_matrix::RU_pairing_option, Master_matrix::RU_vine_swap_option, Master_matrix::RU_representative_cycles_option{
+public:
+	RU_matrix()
+		: Master_matrix::RU_pairing_option(),
+		  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_),
+		  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_){};
+
+private:
+	typename Master_matrix::Base_matrix reducedMatrixR_;
+	typename Master_matrix::Base_matrix mirrorMatrixU_;
+};
+
 } //namespace persistence_matrix
 } //namespace Gudhi
 

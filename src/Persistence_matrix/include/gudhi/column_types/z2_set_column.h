@@ -16,6 +16,7 @@
 #include <set>
 
 #include "../utilities.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -23,18 +24,20 @@ namespace persistence_matrix {
 class Z2_set_column
 {
 public:
+	using Cell = Z2_base_cell;
+
 	Z2_set_column();
 	Z2_set_column(boundary_type& boundary);
 	Z2_set_column(Z2_set_column& column);
 	Z2_set_column(Z2_set_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Z2_set_column& column);
 
@@ -44,7 +47,7 @@ public:
 
 private:
 	int dim_;
-	std::set<unsigned int> column_;
+	std::set<Cell> column_;
 };
 
 inline Z2_set_column::Z2_set_column() : dim_(0)
@@ -65,14 +68,14 @@ inline Z2_set_column::Z2_set_column(Z2_set_column &&column) noexcept
 	  column_(std::move(column.column_))
 {}
 
-inline void Z2_set_column::get_content(boundary_type &container)
-{
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-}
+//inline void Z2_set_column::get_content(boundary_type &container)
+//{
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//}
 
-inline bool Z2_set_column::contains(unsigned int value) const
+inline bool Z2_set_column::is_non_zero(index rowIndex) const
 {
-	return column_.find(value) != column_.end();
+	return column_.find(rowIndex) != column_.end();
 }
 
 inline bool Z2_set_column::is_empty()
@@ -88,7 +91,7 @@ inline dimension_type Z2_set_column::get_dimension() const
 inline int Z2_set_column::get_pivot()
 {
 	if (column_.empty()) return -1;
-	return *(column_.rbegin());
+	return column_.rbegin()->get_row_index();
 }
 
 inline void Z2_set_column::clear()
@@ -96,21 +99,21 @@ inline void Z2_set_column::clear()
 	column_.clear();
 }
 
-inline void Z2_set_column::clear(unsigned int value)
+inline void Z2_set_column::clear(index rowIndex)
 {
-	column_.erase(value);
+	column_.erase(rowIndex);
 }
 
 inline void Z2_set_column::reorder(std::vector<index> &valueMap)
 {
-	std::set<unsigned int> newSet;
-	for (const unsigned int& v : column_) newSet.insert(valueMap.at(v));
+	std::set<Cell> newSet;
+	for (const Cell& v : column_) newSet.insert(valueMap.at(v.get_row_index()));
 	column_.swap(newSet);
 }
 
 inline void Z2_set_column::add(Z2_set_column &column)
 {
-	for (const unsigned int& v : column.column_){
+	for (const Cell& v : column.column_){
 		if (column_.find(v) != column_.end())
 			column_.erase(v);
 		else

@@ -19,6 +19,7 @@
 
 #include "../options.h"
 #include "../utilities.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -62,24 +63,10 @@ private:
 				base_hook_list >::type;
 
 public:
-	struct Cell : public base_hook_matrix_row, public base_hook_matrix_column
+	struct Cell : public Z2_row_cell, public base_hook_matrix_row, public base_hook_matrix_column
 	{
-		Cell(index columnIndex, index rowIndex);
-
-		index get_column_index() const;
-		index get_row_index() const;
-
-		friend bool operator<(const Cell& c1, const Cell& c2){
-			return c1.get_row_index() < c2.get_row_index();
-		}
-		friend bool operator==(const Cell& c1, const Cell& c2){
-			return c1.get_row_index() == c2.get_row_index() &&
-					c1.get_column_index() == c2.get_column_index();
-		}
-
-	private:
-		index columnIndex_;
-		index rowIndex_;
+		Cell(index columnIndex, index rowIndex)
+			: Z2_row_cell(columnIndex, rowIndex){};
 	};
 
 	using Column_type = typename std::conditional<
@@ -119,24 +106,6 @@ private:
 	int lowestSimplexIndex_;
 	int pairedColumn_;
 };
-
-template<Column_types boost_column_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::Cell::Cell(
-		index columnIndex, index rowIndex)
-	: columnIndex_(columnIndex), rowIndex_(rowIndex)
-{}
-
-template<Column_types boost_column_type>
-inline index Z2_reduced_cell_column_with_row<boost_column_type>::Cell::get_column_index() const
-{
-	return columnIndex_;
-}
-
-template<Column_types boost_column_type>
-inline index Z2_reduced_cell_column_with_row<boost_column_type>::Cell::get_row_index() const
-{
-	return rowIndex_;
-}
 
 template<Column_types boost_column_type>
 inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_column_with_row()

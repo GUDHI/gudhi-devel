@@ -69,6 +69,7 @@ struct Zigzag_options : Default_options<Z2_field_element, column_type, separated
 
 template<class Field_type = Z2_field_element, Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
 struct Representative_cycles_options : Default_options<Field_type, column_type, separated_by_dimension, parallelizable>{
+	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool is_indexed_by_column_index = true;
 };

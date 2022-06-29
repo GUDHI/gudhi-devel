@@ -16,6 +16,7 @@
 #include <unordered_set>
 
 #include "../utilities.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -23,20 +24,20 @@ namespace persistence_matrix {
 class Z2_list_column
 {
 public:
-	using Cell = unsigned int;
+	using Cell = Z2_base_cell;
 
 	Z2_list_column();
 	Z2_list_column(boundary_type& boundary);
 	Z2_list_column(Z2_list_column& column);
 	Z2_list_column(Z2_list_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Z2_list_column& column);
 
@@ -67,15 +68,15 @@ inline Z2_list_column::Z2_list_column(Z2_list_column &&column) noexcept
 	  column_(std::move(column.column_))
 {}
 
-inline void Z2_list_column::get_content(boundary_type &container)
-{
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-}
+//inline void Z2_list_column::get_content(boundary_type &container)
+//{
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//}
 
-inline bool Z2_list_column::contains(unsigned int value) const
+inline bool Z2_list_column::is_non_zero(index rowIndex) const
 {
-	for (unsigned int v : column_){
-		if (v == value) return true;
+	for (const Cell& v : column_){
+		if (v.get_row_index() == rowIndex) return true;
 	}
 	return false;
 }
@@ -94,7 +95,7 @@ inline int Z2_list_column::get_pivot()
 {
 	if (column_.empty()) return -1;
 
-	return column_.back();
+	return column_.back().get_row_index();
 }
 
 inline void Z2_list_column::clear()
@@ -102,18 +103,18 @@ inline void Z2_list_column::clear()
 	column_.clear();
 }
 
-inline void Z2_list_column::clear(unsigned int value)
+inline void Z2_list_column::clear(index rowIndex)
 {
 	auto it = column_.begin();
-	while (it != column_.end() && *it != value) it++;
+	while (it != column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != column_.end()) column_.erase(it);
 }
 
 inline void Z2_list_column::reorder(std::vector<index> &valueMap)
 {
-	std::list<unsigned int>::iterator it = column_.begin();
+	std::list<Cell>::iterator it = column_.begin();
 	while (it != column_.end()) {
-		*it = valueMap.at(*it);
+		it->setRowIndex(valueMap.at(it->get_row_index()));
 		it++;
 	}
 	column_.sort();
@@ -127,10 +128,10 @@ inline void Z2_list_column::add(Z2_list_column &column)
 		return;
 	}
 
-	std::list<unsigned int>::iterator itToAdd = column.column_.begin();
-	std::list<unsigned int>::iterator itTarget = column_.begin();
-	unsigned int valToAdd = *itToAdd;
-	unsigned int valTarget = *itTarget;
+	std::list<Cell>::iterator itToAdd = column.column_.begin();
+	std::list<Cell>::iterator itTarget = column_.begin();
+	unsigned int valToAdd = itToAdd->get_row_index();
+	unsigned int valTarget = itTarget->get_row_index();
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
@@ -146,12 +147,12 @@ inline void Z2_list_column::add(Z2_list_column &column)
 			}
 		}
 
-		valToAdd = *itToAdd;
-		valTarget = *itTarget;
+		valToAdd = itToAdd->get_row_index();
+		valTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
-		valToAdd = *itToAdd;
+		valToAdd = itToAdd->get_row_index();
 		if (itToAdd != column.column_.end()){
 			column_.push_back(valToAdd);
 			itToAdd++;

@@ -12,188 +12,234 @@
 #define VECTORCOLUMN_H
 
 #include <iostream>
-#include <list>
+#include <vector>
 #include <unordered_set>
 
 #include "../utilities.h"
+#include "../Zp_field.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
+template<class Field_element_type = Zp_field_element<11> >
 class Vector_column
 {
 public:
+	using Cell = Base_cell<Field_element_type>;
+
 	Vector_column();
-	Vector_column(boundary_type& boundary);
+	Vector_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
 	Vector_column(Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Vector_column& column);
 
 	Vector_column& operator=(Vector_column other);
 
-	friend void swap(Vector_column& col1, Vector_column& col2);
+	template<class Friend_field_element_type>
+	friend void swap(Vector_column<Friend_field_element_type>& col1,
+					 Vector_column<Friend_field_element_type>& col2);
 
 private:
 	int dim_;
-	std::vector<unsigned int> column_;
+	std::vector<Cell> column_;
 	std::unordered_set<unsigned int> erasedValues_;
 
 	void _cleanValues();
 };
 
-inline Vector_column::Vector_column() : dim_(0)
+template<class Field_element_type>
+inline Vector_column<Field_element_type>::Vector_column() : dim_(0)
 {}
 
-inline Vector_column::Vector_column(boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary)
-{}
+template<class Field_element_type>
+inline Vector_column<Field_element_type>::Vector_column(
+		std::vector<index> &rowIndices, std::vector<unsigned int> &values)
+	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1),
+	  column_(rowIndices.size())
+{
+	for (unsigned int i = 0; i < rowIndices.size(); i++){
+		column_[i] = Cell(values.at(i), rowIndices[i]);
+	}
+}
 
-inline Vector_column::Vector_column(Vector_column &column)
+template<class Field_element_type>
+inline Vector_column<Field_element_type>::Vector_column(Vector_column &column)
 	: dim_(column.dim_),
 	  column_(column.column_),
 	  erasedValues_(column.erasedValues_)
 {}
 
-inline Vector_column::Vector_column(Vector_column &&column) noexcept
+template<class Field_element_type>
+inline Vector_column<Field_element_type>::Vector_column(Vector_column &&column) noexcept
 	: dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_)),
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-inline void Vector_column::get_content(boundary_type &container)
-{
-	_cleanValues();
-	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-}
+//template<class Field_element_type>
+//inline void Vector_column<Field_element_type>::get_content(boundary_type &container)
+//{
+//	_cleanValues();
+//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
+//}
 
-inline bool Vector_column::contains(unsigned int value) const
+template<class Field_element_type>
+inline bool Vector_column<Field_element_type>::is_non_zero(index rowIndex) const
 {
-	if (erasedValues_.find(value) != erasedValues_.end()) return false;
+	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
-	for (unsigned int v : column_){
-		if (v == value) return true;
+	for (Cell v : column_){
+		if (v.get_row_index() == rowIndex) return true;
 	}
 	return false;
 }
 
-inline bool Vector_column::is_empty()
+template<class Field_element_type>
+inline bool Vector_column<Field_element_type>::is_empty()
 {
 	_cleanValues();
 	return column_.empty();
 }
 
-inline dimension_type Vector_column::get_dimension() const
+template<class Field_element_type>
+inline dimension_type Vector_column<Field_element_type>::get_dimension() const
 {
 	return dim_;
 }
 
-inline int Vector_column::get_pivot()
+template<class Field_element_type>
+inline int Vector_column<Field_element_type>::get_pivot()
 {
 	while (!column_.empty() &&
-		   erasedValues_.find(column_.back()) != erasedValues_.end()) {
-		erasedValues_.erase(column_.back());
+		   erasedValues_.find(column_.back().get_row_index()) != erasedValues_.end()) {
+		erasedValues_.erase(column_.back().get_row_index());
 		column_.pop_back();
 	}
 
 	if (column_.empty()) return -1;
 
-	return column_.back();
+	return column_.back().get_row_index();
 }
 
-inline void Vector_column::clear()
+template<class Field_element_type>
+inline void Vector_column<Field_element_type>::clear()
 {
 	column_.clear();
 	erasedValues_.clear();
 }
 
-inline void Vector_column::clear(unsigned int value)
+template<class Field_element_type>
+inline void Vector_column<Field_element_type>::clear(index rowIndex)
 {
-	erasedValues_.insert(value);
+	erasedValues_.insert(rowIndex);
 }
 
-inline void Vector_column::reorder(std::vector<index> &valueMap)
+template<class Field_element_type>
+inline void Vector_column<Field_element_type>::reorder(std::vector<index> &valueMap)
 {
-	std::vector<unsigned int> newColumn;
-	for (unsigned int& v : column_) {
-		if (erasedValues_.find(v) == erasedValues_.end())
-			newColumn.push_back(valueMap.at(v));
+	std::vector<Cell> newColumn;
+	for (Cell& v : column_) {
+		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
+			newColumn.push_back(Cell(v.get_element(), valueMap.at(v.get_row_index())));
 	}
 	std::sort(newColumn.begin(), newColumn.end());
 	erasedValues_.clear();
 	column_.swap(newColumn);
 }
 
-inline void Vector_column::add(Vector_column &column)
+template<class Field_element_type>
+inline void Vector_column<Field_element_type>::add(Vector_column &column)
 {
 	if (column.is_empty()) return;
 	if (column_.empty()){
+		column._cleanValues();
 		std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
+		erasedValues_.clear();
 		return;
 	}
 
-	std::vector<unsigned int> newColumn;
+	std::vector<Cell> newColumn;
 
-	std::vector<unsigned int>::iterator itToAdd = column.column_.begin();
-	std::vector<unsigned int>::iterator itTarget = column_.begin();
-	unsigned int valToAdd = *itToAdd;
-	unsigned int valTarget = *itTarget;
+	typename std::vector<Cell>::iterator itToAdd = column.column_.begin();
+	typename std::vector<Cell>::iterator itTarget = column_.begin();
+	unsigned int curRowToAdd = itToAdd->get_row_index();
+	unsigned int curRowTarget = itTarget->get_row_index();
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
 		while (itToAdd != column.column_.end() &&
-			   column.erasedValues_.find(valToAdd) != column.erasedValues_.end()) {
+			   column.erasedValues_.find(curRowToAdd) != column.erasedValues_.end()) {
 			itToAdd++;
-			valToAdd = *itToAdd;
+			curRowToAdd = itToAdd->get_row_index();
 		}
 
 		while (itTarget != column_.end() &&
-			   erasedValues_.find(valTarget) != erasedValues_.end()) {
+			   erasedValues_.find(curRowTarget) != erasedValues_.end()) {
 			itTarget++;
-			valTarget = *itTarget;
+			curRowTarget = itTarget->get_row_index();
 		}
 
 		if (itToAdd != column.column_.end() && itTarget != column_.end()){
-			if (valToAdd == valTarget){
+			if (curRowToAdd == curRowTarget){
+				Field_element_type sum = itTarget->get_element() + itToAdd->get_element();
+				if (sum != 0) newColumn.push_back(Cell(sum, curRowToAdd));
 				itTarget++;
 				itToAdd++;
-			} else if (valToAdd < valTarget){
-				newColumn.push_back(valToAdd);
+			} else if (curRowToAdd < curRowTarget){
+				newColumn.push_back(Cell(itToAdd->get_element(), curRowToAdd));
 				itToAdd++;
 			} else {
-				newColumn.push_back(valTarget);
+				newColumn.push_back(Cell(itTarget->get_element(), curRowTarget));
 				itTarget++;
 			}
 		}
 
-		valToAdd = *itToAdd;
-		valTarget = *itTarget;
+		curRowToAdd = itToAdd->get_row_index();
+		curRowTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
-		newColumn.push_back(*itToAdd);
-		itToAdd++;
+		while (itToAdd != column.column_.end() &&
+			   column.erasedValues_.find(curRowToAdd) != column.erasedValues_.end()) {
+			itToAdd++;
+			curRowToAdd = itToAdd->get_row_index();
+		}
+
+		if (itToAdd != column.column_.end()){
+			newColumn.push_back(Cell(itToAdd->get_element(), curRowToAdd));
+			itToAdd++;
+		}
 	}
 
 	while (itTarget != column_.end()){
-		newColumn.push_back(*itTarget);
-		itTarget++;
+		while (itTarget != column_.end() &&
+			   erasedValues_.find(curRowTarget) != erasedValues_.end()) {
+			itTarget++;
+			curRowTarget = itTarget->get_row_index();
+		}
+
+		if (itTarget != column_.end()){
+			newColumn.push_back(Cell(itTarget->get_element(), curRowTarget));
+			itTarget++;
+		}
 	}
 
 	column_.swap(newColumn);
 	erasedValues_.clear();
 }
 
-inline Vector_column &Vector_column::operator=(Vector_column other)
+template<class Field_element_type>
+inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator=(Vector_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
@@ -201,18 +247,21 @@ inline Vector_column &Vector_column::operator=(Vector_column other)
 	return *this;
 }
 
-inline void Vector_column::_cleanValues()
+template<class Field_element_type>
+inline void Vector_column<Field_element_type>::_cleanValues()
 {
-	std::vector<unsigned int> newColumn;
-	for (unsigned int v : column_){
-		if (erasedValues_.find(v) == erasedValues_.end())
+	std::vector<Cell> newColumn;
+	for (Cell& v : column_){
+		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
 			newColumn.push_back(v);
 	}
 	erasedValues_.clear();
 	column_.swap(newColumn);
 }
 
-inline void swap(Vector_column& col1, Vector_column& col2)
+template<class Friend_field_element_type>
+inline void swap(Vector_column<Friend_field_element_type>& col1,
+				 Vector_column<Friend_field_element_type>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

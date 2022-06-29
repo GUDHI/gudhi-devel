@@ -19,6 +19,7 @@
 #include <unordered_set>
 
 #include "../utilities.h"
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -26,20 +27,20 @@ namespace persistence_matrix {
 class Z2_heap_column
 {
 public:
-	using Cell = unsigned int;
+	using Cell = Z2_base_cell;
 
 	Z2_heap_column();
 	Z2_heap_column(boundary_type& boundary);
 	Z2_heap_column(Z2_heap_column& column);
 	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
-	void get_content(boundary_type& container);
-	bool contains(unsigned int value) const;
+//	void get_content(boundary_type& container);
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
-	void clear(unsigned int value);
+	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
 	void add(Z2_heap_column& column);
 
@@ -62,9 +63,12 @@ inline Z2_heap_column::Z2_heap_column() : dim_(0), insertsSinceLastPrune_(0)
 
 inline Z2_heap_column::Z2_heap_column(boundary_type& boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary),
+	  column_(boundary.begin(), boundary.end()),
 	  insertsSinceLastPrune_(0)
 {
+//	for (index i : boundary){
+//		column_[i] = Cell(i);
+//	}
 	std::make_heap(column_.begin(), column_.end());
 }
 
@@ -82,21 +86,21 @@ inline Z2_heap_column::Z2_heap_column(Z2_heap_column&& column) noexcept
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-inline void Z2_heap_column::get_content(boundary_type &container)
-{
-	_prune();
-	container = column_;
-	std::sort_heap(container.begin(), container.end());
-}
+//inline void Z2_heap_column::get_content(boundary_type &container)
+//{
+//	_prune();
+//	container = column_;
+//	std::sort_heap(container.begin(), container.end());
+//}
 
-inline bool Z2_heap_column::contains(unsigned int value) const
+inline bool Z2_heap_column::is_non_zero(index rowIndex) const
 {
-	if (erasedValues_.find(value) != erasedValues_.end()) return false;
+	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
 	unsigned int c = 0;
 
-	for (unsigned int v : column_){
-		if (v == value) c++;
+	for (const Cell& v : column_){
+		if (v.get_row_index() == rowIndex) c++;
 	}
 
 	return c % 2 != 0;
@@ -135,14 +139,14 @@ inline void Z2_heap_column::clear()
 	erasedValues_.clear();
 }
 
-inline void Z2_heap_column::clear(unsigned int value)
+inline void Z2_heap_column::clear(index rowIndex)
 {
-	erasedValues_.insert(value);
+	erasedValues_.insert(rowIndex);
 }
 
 inline void Z2_heap_column::reorder(std::vector<index> &valueMap)
 {
-	std::vector<unsigned int> tempCol;
+	std::vector<Cell> tempCol;
 	int pivot = _pop_pivot();
 	while (pivot != -1) {
 		tempCol.push_back(valueMap.at(pivot));
@@ -157,16 +161,16 @@ inline void Z2_heap_column::reorder(std::vector<index> &valueMap)
 
 inline void Z2_heap_column::add(Z2_heap_column &column)
 {
-	std::vector<unsigned int>& colToAdd = column.column_;
+	std::vector<Cell>& colToAdd = column.column_;
 	const unsigned int size = colToAdd.size();
 
 	if (size == 0) return;
 
-	for (unsigned int v : colToAdd) {
-		if (column.erasedValues_.find(v) == column.erasedValues_.end()){
+	for (Cell& v : colToAdd) {
+		if (column.erasedValues_.find(v.get_row_index()) == column.erasedValues_.end()){
 			column_.push_back(v);
 			std::push_heap(column_.begin(), column_.end());
-			erasedValues_.erase(v);
+			erasedValues_.erase(v.get_row_index());
 		}
 	}
 	insertsSinceLastPrune_ += size;
@@ -187,7 +191,7 @@ inline void Z2_heap_column::_prune()
 {
 	if (insertsSinceLastPrune_ == 0 && erasedValues_.empty()) return;
 
-	std::vector<unsigned int> tempCol;
+	std::vector<Cell> tempCol;
 	int pivot = _pop_pivot();
 	while (pivot != -1) {
 		tempCol.push_back(pivot);
@@ -206,10 +210,10 @@ inline int Z2_heap_column::_pop_pivot()
 		return -1;
 	}
 
-	unsigned int pivot = column_.front();
+	unsigned int pivot = column_.front().get_row_index();
 	std::pop_heap(column_.begin(), column_.end());
 	column_.pop_back();
-	while (!column_.empty() && column_.front() == pivot)
+	while (!column_.empty() && column_.front().get_row_index() == pivot)
 	{
 		std::pop_heap(column_.begin(), column_.end());
 		column_.pop_back();
@@ -217,7 +221,7 @@ inline int Z2_heap_column::_pop_pivot()
 		if (column_.empty()) {
 			return -1;
 		}
-		pivot = column_.front();
+		pivot = column_.front().get_row_index();
 		std::pop_heap(column_.begin(), column_.end());
 		column_.pop_back();
 	}

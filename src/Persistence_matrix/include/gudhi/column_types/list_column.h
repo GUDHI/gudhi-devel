@@ -34,7 +34,7 @@ public:
 	List_column(List_column&& column) noexcept;
 
 //	void get_content(boundary_type& container);
-	bool isNonZero(index rowIndex) const;
+	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
@@ -86,7 +86,7 @@ inline List_column<Field_element_type>::List_column(List_column &&column) noexce
 //}
 
 template<class Field_element_type>
-inline bool List_column<Field_element_type>::isNonZero(index rowIndex) const
+inline bool List_column<Field_element_type>::is_non_zero(index rowIndex) const
 {
 	for (Cell v : column_){
 		if (v.get_row_index() == rowIndex) return true;
