@@ -13,6 +13,8 @@ set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 # This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "src/python")
 
+include(GUDHI_submodules)
+
 if (NOT WITH_GUDHI_CPP_DOCUMENTATION_ONLY)
   # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
   include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
