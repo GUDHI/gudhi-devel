@@ -43,13 +43,13 @@ make \endverbatim
  * 
  * \subsection documentationgeneration C++ documentation
  * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
- * is required. Run the following command in a terminal:
+ * is required (version &ge; 1.9.3 is advised). Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
  *
  * In case there is not a full setup present and only the documentation should be build the following command sequence
  * can be used:
-\verbatim  cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON ..
+\verbatim  cmake -DWITH_GUDHI_THIRD_PARTY=OFF ..
 make doxygen\endverbatim
  *
  * \subsection helloworld Hello world !

@@ -4,6 +4,11 @@ This document tries to sum up the tests strategy that has been put in place for 
 
 The aim is to help maintainers to anticipate third parties modifications, updates.
 
+## CMake options
+
+[CMake GUDHI options](../../src/cmake/modules/GUDHI_options.cmake) allows to activate/deactivate what should be built and tested.
+Note the special option `WITH_GUDHI_THIRD_PARTY` that, when set to `OFF`, accelerates doxygen documentation generation or `user_version` for instance.
+
 ## Builds
 
 ### Linux

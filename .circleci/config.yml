@@ -58,7 +58,7 @@ jobs:
             git submodule update
             mkdir build
             cd build
-            cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON -DUSER_VERSION_DIR=version ..
+            cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
             make user_version
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 .
@@ -89,13 +89,13 @@ jobs:
             git submodule update
             mkdir build
             cd build
-            cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON -DUSER_VERSION_DIR=version ..
+            cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
             make user_version
             cd version
             mkdir build
             cd build
-            cmake -DWITH_GUDHI_CPP_DOCUMENTATION_ONLY=ON ..
-            make doxygen 2>&1
+            cmake -DWITH_GUDHI_THIRD_PARTY=OFF ..
+            make doxygen
             grep warning doxygen.log
             cp doxygen.log html/
             cp -R html /tmp/doxygen
