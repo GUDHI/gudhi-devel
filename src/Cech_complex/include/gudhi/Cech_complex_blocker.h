@@ -14,6 +14,8 @@
 #include <CGAL/NT_converter.h> // for casting from FT to Filtration_value
 #include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 
+#include <boost/range/size.hpp>
+
 #include <iostream>
 #include <vector>
 #include <set>
@@ -73,6 +75,8 @@ class Cech_blocker {
     CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
+    Point_cloud points;
+    points.reserve(boost::size(sc_ptr_->simplex_vertex_range(sh)));
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
@@ -82,19 +86,18 @@ class Cech_blocker {
             sph = cc_ptr_->get_cache().at(k);
         }
         else {
-            Point_cloud face_points;
             for (auto vertex : sc_ptr_->simplex_vertex_range(face_opposite_vertex.first)) {
-                face_points.push_back(cc_ptr_->get_point(vertex));
+                points.push_back(cc_ptr_->get_point(vertex));
 #ifdef DEBUG_TRACES
                 std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
             }
-            sph = get_sphere(face_points.cbegin(), face_points.cend());
+            sph = get_sphere(points.cbegin(), points.cend());
             // Put edge sphere in cache
             sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
             cc_ptr_->get_cache().push_back(sph);
-            // Clear face_points
-            face_points.clear();
+            // Clear face points
+            points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
@@ -113,7 +116,6 @@ class Cech_blocker {
     }
     // Spheres of each face don't contain the whole simplex
     if(!is_min_enclos_ball) {
-        Point_cloud points;
         for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
             points.push_back(cc_ptr_->get_point(vertex));
         }
