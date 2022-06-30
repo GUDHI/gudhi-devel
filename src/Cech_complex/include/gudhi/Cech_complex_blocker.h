@@ -54,6 +54,7 @@ class Cech_blocker {
 
   using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
+  using Simplex_key = typename SimplicialComplexForCech::Simplex_key;
 
   template<class PointIterator>
   Sphere get_sphere(PointIterator begin, PointIterator end) const {
@@ -78,8 +79,10 @@ class Cech_blocker {
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
         Sphere sph;
         auto k = sc_ptr_->key(face_opposite_vertex.first);
+        Simplex_key sph_key;
         if(k != sc_ptr_->null_key()) {
             sph = cc_ptr_->get_cache().at(k);
+            sph_key = k;
         }
         else {
             Point_cloud face_points;
@@ -92,6 +95,7 @@ class Cech_blocker {
             sph = get_sphere(face_points.cbegin(), face_points.cend());
             // Put edge sphere in cache
             sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
+            sph_key = cc_ptr_->get_cache().size();
             cc_ptr_->get_cache().push_back(sph);
             // Clear face_points
             face_points.clear();
@@ -106,8 +110,7 @@ class Cech_blocker {
             if(exact_) CGAL::exact(sph.second);
 #endif
             radius = std::sqrt(cast_to_fv(sph.second));
-            sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
-            cc_ptr_->get_cache().push_back(sph);
+            sc_ptr_->assign_key(sh, sph_key);
             break;
         }
     }
