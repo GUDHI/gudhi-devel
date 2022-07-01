@@ -44,6 +44,8 @@ protected:
 	Chain_representative_cycles(Chain_representative_cycles& matrixToCopy);
 	Chain_representative_cycles(Chain_representative_cycles&& other) noexcept;
 
+	static constexpr bool isActive_ = true;
+
 private:
 	matrix_type& matrix_;
 	dictionnary_type& pivotToPosition_;

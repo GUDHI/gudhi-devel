@@ -42,6 +42,8 @@ protected:
 	RU_representative_cycles(RU_representative_cycles& matrixToCopy);
 	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
+	static constexpr bool isActive_ = true;
+
 private:
 	Base_matrix &reducedMatrixR_;
 	Base_matrix &mirrorMatrixU_;
@@ -85,11 +87,10 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 	representativeCycles_.clear();
 	representativeCycles_.resize(counter);
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		boundary_type column;
-		mirrorMatrixU_.get_column(i).get_content(column);
-		for (unsigned int b : column){
-			if (birthToCycle_.at(b) != -1){
-				representativeCycles_.at(birthToCycle_.at(b)).push_back(i);
+		auto column = mirrorMatrixU_.get_column(i);
+		for (auto cell : column){
+			if (birthToCycle_.at(cell.get_row_index()) != -1){
+				representativeCycles_.at(birthToCycle_.at(cell.get_row_index())).push_back(i);
 			}
 		}
 	}

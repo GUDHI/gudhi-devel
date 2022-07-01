@@ -31,15 +31,17 @@ public:
 	Z2_list_column(Z2_list_column& column);
 	Z2_list_column(Z2_list_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<bool> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
-	bool is_empty();
+	bool is_empty() const;
 	dimension_type get_dimension() const;
 	int get_pivot();
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(Z2_list_column& column);
+
+	Z2_list_column& operator+=(Z2_list_column const &column);
+	friend Z2_list_column operator+(Z2_list_column column1, Z2_list_column const& column2);
 
 	Z2_list_column& operator=(Z2_list_column other);
 
@@ -68,10 +70,14 @@ inline Z2_list_column::Z2_list_column(Z2_list_column &&column) noexcept
 	  column_(std::move(column.column_))
 {}
 
-//inline void Z2_list_column::get_content(boundary_type &container)
-//{
-//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-//}
+inline std::vector<bool> Z2_list_column::get_content(unsigned int columnLength)
+{
+	std::vector<bool> container(columnLength, 0);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = 1;
+	}
+	return container;
+}
 
 inline bool Z2_list_column::is_non_zero(index rowIndex) const
 {
@@ -81,7 +87,7 @@ inline bool Z2_list_column::is_non_zero(index rowIndex) const
 	return false;
 }
 
-inline bool Z2_list_column::is_empty()
+inline bool Z2_list_column::is_empty() const
 {
 	return column_.empty();
 }
@@ -120,15 +126,15 @@ inline void Z2_list_column::reorder(std::vector<index> &valueMap)
 	column_.sort();
 }
 
-inline void Z2_list_column::add(Z2_list_column &column)
+inline Z2_list_column &Z2_list_column::operator+=(Z2_list_column const &column)
 {
-	if (column.is_empty()) return;
+	if (column.is_empty()) return *this;
 	if (column_.empty()){
 		std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
-		return;
+		return *this;
 	}
 
-	std::list<Cell>::iterator itToAdd = column.column_.begin();
+	std::list<Cell>::const_iterator itToAdd = column.column_.begin();
 	std::list<Cell>::iterator itTarget = column_.begin();
 	unsigned int valToAdd = itToAdd->get_row_index();
 	unsigned int valTarget = itTarget->get_row_index();
@@ -158,6 +164,8 @@ inline void Z2_list_column::add(Z2_list_column &column)
 			itToAdd++;
 		}
 	}
+
+	return *this;
 }
 
 inline Z2_list_column &Z2_list_column::operator=(Z2_list_column other)
@@ -165,6 +173,12 @@ inline Z2_list_column &Z2_list_column::operator=(Z2_list_column other)
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
+}
+
+Z2_list_column operator+(Z2_list_column column1, Z2_list_column const& column2)
+{
+	column1 += column2;
+	return column1;
 }
 
 inline void swap(Z2_list_column& col1, Z2_list_column& col2)

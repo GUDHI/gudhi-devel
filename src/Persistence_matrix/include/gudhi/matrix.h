@@ -173,7 +173,7 @@ public:
 										>::type;
 	using column_container_type = typename std::conditional<
 											Options::has_removable_columns,
-											std::unordered_map<index,typename barcode_type::iterator>,
+											std::unordered_map<index,Column_type>,
 											std::vector<Column_type>
 										>::type;
 
@@ -234,6 +234,8 @@ public:
 		Dummy_base_swap(column_container_type &matrix, unsigned int numberOfColumns){}
 		Dummy_base_swap(Dummy_base_swap& matrixToCopy){}
 		Dummy_base_swap(Dummy_base_swap&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using Base_swap_option = typename std::conditional<
@@ -247,6 +249,8 @@ public:
 		Dummy_base_pairing(){}
 		Dummy_base_pairing(Dummy_base_pairing& matrixToCopy){}
 		Dummy_base_pairing(Dummy_base_pairing&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using Base_pairing_option = typename std::conditional<
@@ -260,6 +264,8 @@ public:
 		Dummy_ru_pairing(){}
 		Dummy_ru_pairing(Dummy_base_pairing& matrixToCopy){}
 		Dummy_ru_pairing(Dummy_base_pairing&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using RU_pairing_option = typename std::conditional<
@@ -273,6 +279,8 @@ public:
 		Dummy_ru_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU){}
 		Dummy_ru_vine_swap(Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap(Dummy_ru_vine_swap&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using RU_vine_swap_option = typename std::conditional<
@@ -286,6 +294,8 @@ public:
 		Dummy_chain_pairing(){}
 		Dummy_chain_pairing(Dummy_chain_pairing& matrixToCopy){}
 		Dummy_chain_pairing(Dummy_chain_pairing&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_pairing_option = typename std::conditional<
@@ -299,6 +309,8 @@ public:
 		Dummy_chain_vine_swap(column_container_type& matrix, dictionnary_type<index>& pivotToPosition){}
 		Dummy_chain_vine_swap(Dummy_chain_vine_swap& matrixToCopy){}
 		Dummy_chain_vine_swap(Dummy_chain_vine_swap&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_vine_swap_option = typename std::conditional<
@@ -312,6 +324,8 @@ public:
 		Dummy_ru_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU){}
 		Dummy_ru_representative_cycles(Dummy_ru_representative_cycles& matrixToCopy){}
 		Dummy_ru_representative_cycles(Dummy_ru_representative_cycles&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using RU_representative_cycles_option = typename std::conditional<
@@ -325,6 +339,8 @@ public:
 		Dummy_chain_representative_cycles(column_container_type& matrix, dictionnary_type<index>& pivotToPosition){}
 		Dummy_chain_representative_cycles(Dummy_chain_representative_cycles& matrixToCopy){}
 		Dummy_chain_representative_cycles(Dummy_chain_representative_cycles&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_representative_cycles_option = typename std::conditional<

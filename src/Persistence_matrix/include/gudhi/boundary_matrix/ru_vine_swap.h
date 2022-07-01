@@ -38,6 +38,8 @@ protected:
 	RU_vine_swap(RU_vine_swap &matrixToCopy);
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
+	static constexpr bool isActive_ = true;
+
 private:
 	using RU_pairing<Master_matrix>::barcode_;
 	using RU_pairing<Master_matrix>::indexToBar_;

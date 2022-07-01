@@ -33,15 +33,24 @@ public:
 	Vector_column(Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<Field_element_type> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
+	Field_element_type get_pivot_value();
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(Vector_column& column);
+
+	Vector_column& operator+=(Vector_column &column);
+	template<class Friend_field_element_type>
+	friend Vector_column<Friend_field_element_type> operator+(Vector_column<Friend_field_element_type> column1, Vector_column<Friend_field_element_type>& column2);
+	Vector_column& operator*=(unsigned int const &v);
+	template<class Friend_field_element_type>
+	friend Vector_column<Friend_field_element_type> operator*(Vector_column<Friend_field_element_type> column, unsigned int const& v);
+	template<class Friend_field_element_type>
+	friend Vector_column<Friend_field_element_type> operator*(unsigned int const& v, Vector_column<Friend_field_element_type> const column);
 
 	Vector_column& operator=(Vector_column other);
 
@@ -86,12 +95,16 @@ inline Vector_column<Field_element_type>::Vector_column(Vector_column &&column) 
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-//template<class Field_element_type>
-//inline void Vector_column<Field_element_type>::get_content(boundary_type &container)
-//{
-//	_cleanValues();
-//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-//}
+template<class Field_element_type>
+inline std::vector<Field_element_type> Vector_column<Field_element_type>::get_content(unsigned int columnLength)
+{
+	_cleanValues();
+	std::vector<Field_element_type> container(columnLength);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = it->element();
+	}
+	return container;
+}
 
 template<class Field_element_type>
 inline bool Vector_column<Field_element_type>::is_non_zero(index rowIndex) const
@@ -132,6 +145,20 @@ inline int Vector_column<Field_element_type>::get_pivot()
 }
 
 template<class Field_element_type>
+inline Field_element_type Vector_column<Field_element_type>::get_pivot_value()
+{
+	while (!column_.empty() &&
+		   erasedValues_.find(column_.back().get_row_index()) != erasedValues_.end()) {
+		erasedValues_.erase(column_.back().get_row_index());
+		column_.pop_back();
+	}
+
+	if (column_.empty()) return 0;
+
+	return column_.back().get_element();
+}
+
+template<class Field_element_type>
 inline void Vector_column<Field_element_type>::clear()
 {
 	column_.clear();
@@ -158,7 +185,7 @@ inline void Vector_column<Field_element_type>::reorder(std::vector<index> &value
 }
 
 template<class Field_element_type>
-inline void Vector_column<Field_element_type>::add(Vector_column &column)
+inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator+=(Vector_column &column)
 {
 	if (column.is_empty()) return;
 	if (column_.empty()){
@@ -236,6 +263,26 @@ inline void Vector_column<Field_element_type>::add(Vector_column &column)
 
 	column_.swap(newColumn);
 	erasedValues_.clear();
+
+	return *this;
+}
+
+template<class Field_element_type>
+inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator*=(unsigned int const &v)
+{
+	v %= Field_element_type::get_characteristic();
+
+	if (v == 0) {
+		column_.clear();
+		erasedValues_.clear();
+		return *this;
+	}
+
+	for (Cell& cell : column_){
+		cell.get_element() *= v;
+	}
+
+	return *this;
 }
 
 template<class Field_element_type>
@@ -250,6 +297,8 @@ inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::ope
 template<class Field_element_type>
 inline void Vector_column<Field_element_type>::_cleanValues()
 {
+	if (erasedValues_.empty()) return;
+
 	std::vector<Cell> newColumn;
 	for (Cell& v : column_){
 		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
@@ -257,6 +306,31 @@ inline void Vector_column<Field_element_type>::_cleanValues()
 	}
 	erasedValues_.clear();
 	column_.swap(newColumn);
+}
+
+template<class Friend_field_element_type>
+Vector_column<Friend_field_element_type> operator+(
+		Vector_column<Friend_field_element_type> column1,
+		Vector_column<Friend_field_element_type>& column2)
+{
+	column1 += column2;
+	return column1;
+}
+
+template<class Friend_field_element_type>
+Vector_column<Friend_field_element_type> operator*(
+		Vector_column<Friend_field_element_type> column, unsigned int const& v)
+{
+	column *= v;
+	return column;
+}
+
+template<class Friend_field_element_type>
+Vector_column<Friend_field_element_type> operator*(
+		unsigned int const& v, Vector_column<Friend_field_element_type> column)
+{
+	column *= v;
+	return column;
 }
 
 template<class Friend_field_element_type>

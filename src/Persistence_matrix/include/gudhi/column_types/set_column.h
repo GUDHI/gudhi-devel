@@ -33,15 +33,24 @@ public:
 	Set_column(Set_column& column);
 	Set_column(Set_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<Field_element_type> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
 	int get_pivot();
+	Field_element_type get_pivot_value();
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(Set_column& column);
+
+	Set_column& operator+=(Set_column const &column);
+	template<class Friend_field_element_type>
+	friend Set_column<Friend_field_element_type> operator+(Set_column<Friend_field_element_type> column1, Set_column<Friend_field_element_type> const& column2);
+	Set_column& operator*=(unsigned int const &v);
+	template<class Friend_field_element_type>
+	friend Set_column<Friend_field_element_type> operator*(Set_column<Friend_field_element_type> column, unsigned int const& v);
+	template<class Friend_field_element_type>
+	friend Set_column<Friend_field_element_type> operator*(unsigned int const& v, Set_column<Friend_field_element_type> const column);
 
 	Set_column& operator=(Set_column other);
 
@@ -81,11 +90,15 @@ inline Set_column<Field_element_type>::Set_column(Set_column &&column) noexcept
 	  column_(std::move(column.column_))
 {}
 
-//template<class Field_element_type>
-//inline void Set_column<Field_element_type>::get_content(boundary_type &container)
-//{
-//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-//}
+template<class Field_element_type>
+inline std::vector<Field_element_type> Set_column<Field_element_type>::get_content(unsigned int columnLength)
+{
+	std::vector<Field_element_type> container(columnLength);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = it->element();
+	}
+	return container;
+}
 
 template<class Field_element_type>
 inline bool Set_column<Field_element_type>::is_non_zero(index rowIndex) const
@@ -113,6 +126,13 @@ inline int Set_column<Field_element_type>::get_pivot()
 }
 
 template<class Field_element_type>
+inline Field_element_type Set_column<Field_element_type>::get_pivot_value()
+{
+	if (column_.empty()) return 0;
+	return column_.rbegin()->get_element();
+}
+
+template<class Field_element_type>
 inline void Set_column<Field_element_type>::clear()
 {
 	column_.clear();
@@ -133,7 +153,7 @@ inline void Set_column<Field_element_type>::reorder(std::vector<index> &valueMap
 }
 
 template<class Field_element_type>
-inline void Set_column<Field_element_type>::add(Set_column &column)
+inline Set_column<Field_element_type> &Set_column<Field_element_type>::operator+=(Set_column const &column)
 {
 	for (const Cell& v : column.column_){
 		auto c = column_.find(v);
@@ -143,6 +163,25 @@ inline void Set_column<Field_element_type>::add(Set_column &column)
 		} else
 			column_.insert(v);
 	}
+
+	return *this;
+}
+
+template<class Field_element_type>
+inline Set_column<Field_element_type> &Set_column<Field_element_type>::operator*=(unsigned int const &v)
+{
+	v %= Field_element_type::get_characteristic();
+
+	if (v == 0) {
+		column_.clear();
+		return *this;
+	}
+
+	for (Cell& cell : column_){
+		cell.get_element() *= v;
+	}
+
+	return *this;
 }
 
 template<class Field_element_type>
@@ -151,6 +190,31 @@ inline Set_column<Field_element_type> &Set_column<Field_element_type>::operator=
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
+}
+
+template<class Friend_field_element_type>
+Set_column<Friend_field_element_type> operator+(
+		Set_column<Friend_field_element_type> column1,
+		Set_column<Friend_field_element_type> const& column2)
+{
+	column1 += column2;
+	return column1;
+}
+
+template<class Friend_field_element_type>
+Set_column<Friend_field_element_type> operator*(
+		Set_column<Friend_field_element_type> column, unsigned int const& v)
+{
+	column *= v;
+	return column;
+}
+
+template<class Friend_field_element_type>
+Set_column<Friend_field_element_type> operator*(
+		unsigned int const& v, Set_column<Friend_field_element_type> column)
+{
+	column *= v;
+	return column;
 }
 
 template<class Friend_field_element_type>

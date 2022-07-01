@@ -13,6 +13,8 @@
 
 #include <utility>
 
+#include "../utilities.h"
+
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -38,6 +40,7 @@ protected:
 
 	barcode_type barcode_;
 	dictionnary_type indexToBar_;
+	static constexpr bool isActive_ = true;
 };
 
 template<class Master_matrix>

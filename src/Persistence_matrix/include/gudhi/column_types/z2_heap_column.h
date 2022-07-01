@@ -34,7 +34,7 @@ public:
 	Z2_heap_column(Z2_heap_column& column);
 	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<bool> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
@@ -42,7 +42,9 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(Z2_heap_column& column);
+
+	Z2_heap_column& operator+=(Z2_heap_column const &column);
+	friend Z2_heap_column operator+(Z2_heap_column column1, Z2_heap_column const& column2);
 
 	Z2_heap_column& operator=(Z2_heap_column other);
 
@@ -86,12 +88,15 @@ inline Z2_heap_column::Z2_heap_column(Z2_heap_column&& column) noexcept
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-//inline void Z2_heap_column::get_content(boundary_type &container)
-//{
-//	_prune();
-//	container = column_;
-//	std::sort_heap(container.begin(), container.end());
-//}
+inline std::vector<bool> Z2_heap_column::get_content(unsigned int columnLength)
+{
+	_prune();
+	std::vector<bool> container(columnLength, 0);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = 1;
+	}
+	return container;
+}
 
 inline bool Z2_heap_column::is_non_zero(index rowIndex) const
 {
@@ -159,14 +164,14 @@ inline void Z2_heap_column::reorder(std::vector<index> &valueMap)
 	erasedValues_.clear();
 }
 
-inline void Z2_heap_column::add(Z2_heap_column &column)
+inline Z2_heap_column &Z2_heap_column::operator+=(Z2_heap_column const &column)
 {
-	std::vector<Cell>& colToAdd = column.column_;
+	const std::vector<Cell>& colToAdd = column.column_;
 	const unsigned int size = colToAdd.size();
 
-	if (size == 0) return;
+	if (size == 0) return *this;
 
-	for (Cell& v : colToAdd) {
+	for (const Cell& v : colToAdd) {
 		if (column.erasedValues_.find(v.get_row_index()) == column.erasedValues_.end()){
 			column_.push_back(v);
 			std::push_heap(column_.begin(), column_.end());
@@ -176,6 +181,8 @@ inline void Z2_heap_column::add(Z2_heap_column &column)
 	insertsSinceLastPrune_ += size;
 
 	if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
+
+	return *this;
 }
 
 inline Z2_heap_column& Z2_heap_column::operator=(Z2_heap_column other)
@@ -230,6 +237,12 @@ inline int Z2_heap_column::_pop_pivot()
 		pivot = _pop_pivot();
 
 	return pivot;
+}
+
+Z2_heap_column operator+(Z2_heap_column column1, Z2_heap_column const& column2)
+{
+	column1 += column2;
+	return column1;
 }
 
 inline void swap(Z2_heap_column& col1, Z2_heap_column& col2)

@@ -40,6 +40,7 @@ protected:
 
 	barcode_type barcode_;
 	dictionnary_type indexToBar_;
+	static constexpr bool isActive_ = true;
 
 	dimension_type _get_dimension(index simplexIndex) const;		//to move
 };

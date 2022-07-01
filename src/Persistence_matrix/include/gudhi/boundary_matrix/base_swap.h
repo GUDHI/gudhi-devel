@@ -46,6 +46,7 @@ protected:
 	index_dictionnary_type indexToRow_;
 	row_dictionnary_type rowToIndex_;
 	bool rowSwapped_;
+	static constexpr bool isActive_ = true;
 
 	void _orderRows();
 

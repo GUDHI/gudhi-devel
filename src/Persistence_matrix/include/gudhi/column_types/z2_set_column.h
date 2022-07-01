@@ -31,7 +31,7 @@ public:
 	Z2_set_column(Z2_set_column& column);
 	Z2_set_column(Z2_set_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<bool> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
@@ -39,7 +39,9 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(Z2_set_column& column);
+
+	Z2_set_column& operator+=(Z2_set_column const &column);
+	friend Z2_set_column operator+(Z2_set_column column1, Z2_set_column const& column2);
 
 	Z2_set_column& operator=(Z2_set_column other);
 
@@ -68,10 +70,14 @@ inline Z2_set_column::Z2_set_column(Z2_set_column &&column) noexcept
 	  column_(std::move(column.column_))
 {}
 
-//inline void Z2_set_column::get_content(boundary_type &container)
-//{
-//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-//}
+inline std::vector<bool> Z2_set_column::get_content(unsigned int columnLength)
+{
+	std::vector<bool> container(columnLength, 0);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = 1;
+	}
+	return container;
+}
 
 inline bool Z2_set_column::is_non_zero(index rowIndex) const
 {
@@ -111,7 +117,7 @@ inline void Z2_set_column::reorder(std::vector<index> &valueMap)
 	column_.swap(newSet);
 }
 
-inline void Z2_set_column::add(Z2_set_column &column)
+inline Z2_set_column &Z2_set_column::operator+=(Z2_set_column const &column)
 {
 	for (const Cell& v : column.column_){
 		if (column_.find(v) != column_.end())
@@ -119,6 +125,8 @@ inline void Z2_set_column::add(Z2_set_column &column)
 		else
 			column_.insert(v);
 	}
+
+	return *this;
 }
 
 inline Z2_set_column &Z2_set_column::operator=(Z2_set_column other)
@@ -126,6 +134,12 @@ inline Z2_set_column &Z2_set_column::operator=(Z2_set_column other)
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
+}
+
+Z2_set_column operator+(Z2_set_column column1, Z2_set_column const& column2)
+{
+	column1 += column2;
+	return column1;
 }
 
 inline void swap(Z2_set_column& col1, Z2_set_column& col2)

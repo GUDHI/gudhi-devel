@@ -33,15 +33,24 @@ public:
 	List_column(List_column& column);
 	List_column(List_column&& column) noexcept;
 
-//	void get_content(boundary_type& container);
+	std::vector<Field_element_type> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
-	bool is_empty();
+	bool is_empty() const;
 	dimension_type get_dimension() const;
 	int get_pivot();
+	Field_element_type get_pivot_value();
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
-	void add(List_column& column);
+
+	List_column& operator+=(List_column const &column);
+	template<class Friend_field_element_type>
+	friend List_column<Friend_field_element_type> operator+(List_column<Friend_field_element_type> column1, List_column<Friend_field_element_type> const& column2);
+	List_column& operator*=(unsigned int const &v);
+	template<class Friend_field_element_type>
+	friend List_column<Friend_field_element_type> operator*(List_column<Friend_field_element_type> column, unsigned int const& v);
+	template<class Friend_field_element_type>
+	friend List_column<Friend_field_element_type> operator*(unsigned int const& v, List_column<Friend_field_element_type> const column);
 
 	List_column& operator=(List_column other);
 
@@ -79,11 +88,15 @@ inline List_column<Field_element_type>::List_column(List_column &&column) noexce
 	  column_(std::move(column.column_))
 {}
 
-//template<class Field_element_type>
-//inline void List_column<Field_element_type>::get_content(boundary_type &container)
-//{
-//	std::copy(column_.begin(), column_.end(), std::back_inserter(container));
-//}
+template<class Field_element_type>
+inline std::vector<Field_element_type> List_column<Field_element_type>::get_content(unsigned int columnLength)
+{
+	std::vector<Field_element_type> container(columnLength);
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+		container[it->get_row_index()] = it->element();
+	}
+	return container;
+}
 
 template<class Field_element_type>
 inline bool List_column<Field_element_type>::is_non_zero(index rowIndex) const
@@ -95,7 +108,7 @@ inline bool List_column<Field_element_type>::is_non_zero(index rowIndex) const
 }
 
 template<class Field_element_type>
-inline bool List_column<Field_element_type>::is_empty()
+inline bool List_column<Field_element_type>::is_empty() const
 {
 	return column_.empty();
 }
@@ -111,7 +124,15 @@ inline int List_column<Field_element_type>::get_pivot()
 {
 	if (column_.empty()) return -1;
 
-	return column_.back();
+	return column_.back().get_row_index();
+}
+
+template<class Field_element_type>
+inline Field_element_type List_column<Field_element_type>::get_pivot_value()
+{
+	if (column_.empty()) return 0;
+
+	return column_.back().get_element();
 }
 
 template<class Field_element_type>
@@ -140,15 +161,15 @@ inline void List_column<Field_element_type>::reorder(std::vector<index> &valueMa
 }
 
 template<class Field_element_type>
-inline void List_column<Field_element_type>::add(List_column &column)
+inline List_column<Field_element_type> &List_column<Field_element_type>::operator+=(List_column const &column)
 {
-	if (column.is_empty()) return;
+	if (column.is_empty()) return *this;
 	if (column_.empty()){
 		std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
-		return;
+		return *this;
 	}
 
-	typename std::list<Cell>::iterator itToAdd = column.column_.begin();
+	typename std::list<Cell>::const_iterator itToAdd = column.column_.begin();
 	typename std::list<Cell>::iterator itTarget = column_.begin();
 	index curRowToAdd = itToAdd->get_row_index();
 	index curRowTarget = itTarget->get_row_index();
@@ -180,6 +201,25 @@ inline void List_column<Field_element_type>::add(List_column &column)
 			itToAdd++;
 		}
 	}
+
+	return *this;
+}
+
+template<class Field_element_type>
+inline List_column<Field_element_type> &List_column<Field_element_type>::operator*=(unsigned int const &v)
+{
+	v %= Field_element_type::get_characteristic();
+
+	if (v == 0) {
+		column_.clear();
+		return *this;
+	}
+
+	for (Cell& cell : column_){
+		cell.get_element() *= v;
+	}
+
+	return *this;
 }
 
 template<class Field_element_type>
@@ -188,6 +228,31 @@ inline List_column<Field_element_type> &List_column<Field_element_type>::operato
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
+}
+
+template<class Friend_field_element_type>
+List_column<Friend_field_element_type> operator+(
+		List_column<Friend_field_element_type> column1,
+		List_column<Friend_field_element_type> const& column2)
+{
+	column1 += column2;
+	return column1;
+}
+
+template<class Friend_field_element_type>
+List_column<Friend_field_element_type> operator*(
+		List_column<Friend_field_element_type> column, unsigned int const& v)
+{
+	column *= v;
+	return column;
+}
+
+template<class Friend_field_element_type>
+List_column<Friend_field_element_type> operator*(
+		unsigned int const& v, List_column<Friend_field_element_type> column)
+{
+	column *= v;
+	return column;
 }
 
 template<class Friend_field_element_type>

@@ -40,6 +40,8 @@ protected:
 	Chain_vine_swap(Chain_vine_swap &matrixToCopy);
 	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
+	static constexpr bool isActive_ = true;
+
 private:
 	using Chain_pairing<Master_matrix>::barcode_;
 	using Chain_pairing<Master_matrix>::indexToBar_;

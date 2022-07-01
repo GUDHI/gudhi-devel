@@ -36,20 +36,22 @@ protected:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using column_type = typename Master_matrix::Column_type;
 
-	Base_pairing(matrix_type& matrix);
+	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
 	Base_pairing(Base_pairing& matrixToCopy);
 	Base_pairing(Base_pairing&& other) noexcept;
 
 	matrix_type& matrix_;
+	dimension_type& maxDim_;
 	barcode_type barcode_;
-	int maxDim_;
 	bool isReduced_;
+	static constexpr bool isActive_ = true;
 
 	void _reduce();
 };
 
 template<class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing(matrix_type &matrix) : matrix_(matrix), maxDim_(0), isReduced_(false)
+inline Base_pairing<Master_matrix>::Base_pairing(matrix_type &matrix, dimension_type &maxDim)
+	: matrix_(matrix), maxDim_(maxDim), isReduced_(false)
 {}
 
 template<class Master_matrix>
@@ -82,7 +84,17 @@ inline void Base_pairing<Master_matrix>::_reduce()
 				int pivot = curr.get_pivot();
 
 				while (pivot != -1 && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
-					curr.add(matrix_.at(pivotsToColumn.at(pivot)));
+					if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+						curr += matrix_.at(pivotsToColumn.at(pivot));
+					} else {
+						column_type &toadd = matrix_.at(pivotsToColumn.at(pivot));
+						typename Master_matrix::Field_type coef = curr.get_pivot_value();
+						coef = coef.get_inverse();
+						coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+						curr *= coef;
+						curr += toadd;
+					}
+
 					pivot = curr.get_pivot();
 				}
 
