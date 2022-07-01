@@ -832,7 +832,7 @@ EXCLUDE                = @CMAKE_SOURCE_DIR@/data/ \
                          @CMAKE_SOURCE_DIR@/ext/ \
                          @CMAKE_SOURCE_DIR@/README.md \
                          @CMAKE_SOURCE_DIR@/.github \
-                         @CMAKE_CURRENT_BINARY_DIR@/new_gudhi_version_creation.md \
+                         @CMAKE_CURRENT_BINARY_DIR@ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/GudhUI/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/cmake/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/python/
