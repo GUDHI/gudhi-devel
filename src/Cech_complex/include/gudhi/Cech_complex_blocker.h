@@ -14,8 +14,6 @@
 #include <CGAL/NT_converter.h> // for casting from FT to Filtration_value
 #include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 
-#include <boost/range/size.hpp>
-
 #include <iostream>
 #include <vector>
 #include <set>
@@ -76,7 +74,7 @@ class Cech_blocker {
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
     Point_cloud points;
-    points.reserve(boost::size(sc_ptr_->simplex_vertex_range(sh)));
+    points.reserve(sc_ptr_->dimension(sh)+1);
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
