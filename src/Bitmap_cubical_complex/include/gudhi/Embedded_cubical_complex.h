@@ -1,11 +1,23 @@
+/* This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
+*  which is released under MIT.
+*  See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
+*  license details.
+*  Author(s):       Hugo Passe
+*
+*  Copyright (C) Year Inria
+*
+*  Modification(s):
+*    - YYYY/MM Author: Description of the modification
+*/
+
 #include <gudhi/Bitmap_cubical_complex.h>
 
 #include <future>
 #include <thread>
 #include <chrono>
 
-#ifndef EMBEDDED_CPLX
-#define EMBEDDED_CPLX
+#ifndef EMBEDDED_CUBICAL_COMPLEX_H_
+#define EMBEDDED_CUBICAL_COMPLEX_H_
 
 template <typename T>
 void print_vector(std::vector<T> vect){
@@ -13,7 +25,7 @@ void print_vector(std::vector<T> vect){
         std::cout << "[]\n";
     }else{
         std::cout << "[" << vect[0];
-        for(long unsigned int i=1; i<vect.size(); i++){
+        for(std::size_t i = 1; i < vect.size(); i++){
             std::cout << ", " << vect[i];
         }
         std::cout << "]\n";
@@ -50,25 +62,20 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             const std::vector<Filtration_value>& top_dimensional_cells, unsigned int num_jobs = 0):Gudhi::cubical_complex::Bitmap_cubical_complex<T>(dimensions, top_dimensional_cells)
             {
                 sizes_pdt.push_back(2*this->sizes[0]+1);
-                for(Simplex_handle i=1; i<this->dimension()-1; i++){           //In this loop we compute the product of the number of cubes in each direction, it optimizes the complexity of the get_coordinates_in_complex function
+                //In this loop we compute the product of the number of cubes in each direction, it optimizes the complexity of the get_coordinates_in_complex function
+                for(Simplex_handle i = 1; i < this->dimension()-1; i++){
                     sizes_pdt.push_back(sizes_pdt[i-1]*(2*this->sizes[i]+1));
                 }
 
                 std::cout << "Init embedding ...\n";
                 initalize_embedding();
                 initalize_embedding_index();
-                //print_embedding();
-                //print_filtration();
-                
+
                 std::cout << "Computing critical vertices\n";
                 if(num_jobs > std::thread::hardware_concurrency() || num_jobs <= 0){
                     num_jobs = std::thread::hardware_concurrency();
                 }
                 compute_critical_vertices(num_jobs);
-                //print_critical_vertices_old();
-                //print_critical_vertices();
-                //print_critical_multiplicity();
-
                 std::cout << "Cubical complex successfully created\n\n";
             }   
 
@@ -77,12 +84,12 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
         //*********************************************//
 
         void initalize_embedding(){
-            for(Simplex_handle i = 0; i<this->num_simplices();i++){
+            for(Simplex_handle i = 0; i < this->num_simplices();i++){
                 if(this->dimension(i) == 0){
                     std::vector<int> coords = get_coordinates_in_complex(i);
                     std::vector<double> embedded_coords(coords.size());
-                    for(Simplex_handle j=0; j<coords.size(); j++){
-                        embedded_coords[j] = (double)(coords[j] / 2) / this->sizes[j] - 0.5;
+                    for(Simplex_handle j = 0; j < coords.size(); j++){
+                        embedded_coords[j] = coords[j] / 2./ this->sizes[j] - 0.5;
                     }
                     embedding.push_back(embedded_coords);
                 }
@@ -110,14 +117,14 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             std::chrono::seconds zero_sec{0};
 
             int num_vertex = 1;
-            for(std::size_t  i=0; i<this->sizes.size(); i++){
+            for(std::size_t  i = 0; i < this->sizes.size(); i++){
                 num_vertex *= this->sizes[i] + 1;
             }
 
             std::vector<int> direction(dim,-1);
             long unsigned int index = 0;
 
-            for(int i=0; i<(1 << dim); i++){    //Loop on every possible critical direction 
+            for(int i = 0; i < (1 << dim); i++){    //Loop on every possible critical direction 
 
                 std::vector<int> tmp;
                 critical_vertices.push_back(tmp);
@@ -128,7 +135,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
                 std::vector<std::future<std::vector<std::vector<int>>>> future_vect;
                 std::vector<std::thread> thread_vector;
 
-                for(int i=0; i<num_jobs; i++){
+                for(int i = 0; i < num_jobs; i++){
                     std::promise<int> promiseObj;
             
                     promise_vect.push_back(std::promise<std::vector<std::vector<int>>>());
@@ -151,7 +158,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
                 //Finding next direction vector
                 int k=0;
-                while(direction[k] == 1 && k<dim){
+                while(direction[k] == 1 && k < dim){
                     direction[k] = -1;
                     index -= (1u << k);
                     k++;
@@ -180,7 +187,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
                 //Finding next vertex
                 coords[0] = coords[0] + 2*num_jobs;
-                for(int j=0;j<dim-1; j++){  
+                for(int j = 0; j < dim-1; j++){  
                     if((unsigned)coords[j] > 2*this->sizes[j]+1){
                         if(j == 0){
                             coords[0] = 2*job_index;
@@ -218,7 +225,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             std::vector<int> tmp(dim);  //This vector will help us to find all the adjacent cells involved in calculations
             int simplex_dim_sign = 1;
             
-            for(int i=0; i<(1 << dim)-1; i++){  //Looping on all of the adjacent cell in direction
+            for(int i = 0; i < (1 << dim)-1; i++){  //Looping on all of the adjacent cell in direction
                 int k = 0;
                 while(tmp[k] == 1){             //Finding the next adjacent cell 
                     tmp[k] = 0;
@@ -249,7 +256,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
         void print_embedding(){
             std::cout << "[";
-            for(Simplex_handle i=0; i<embedding_index.size(); i++){
+            for(Simplex_handle i = 0; i < embedding_index.size(); i++){
                 if(embedding_index[i] != -1){
                     print_vector(embedding[embedding_index[i]]);
                 }
@@ -259,7 +266,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
         void print_critical_vertices(){
             std::cout << "Critical vertices test : \n";
-            for(std::size_t i=0; i<critical_vertices.size(); i++){
+            for(std::size_t i = 0; i < critical_vertices.size(); i++){
                 print_vector(critical_vertices[(int)i]);
             }
             std::cout << "\n";
@@ -267,7 +274,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
         void print_critical_multiplicity(){
             std::cout << "Critical multiplicity : \n";
-            for(std::size_t i=0; i<critical_multiplicity.size(); i++){
+            for(std::size_t i = 0; i < critical_multiplicity.size(); i++){
                 print_vector(critical_multiplicity[(int)i]);
             }
             std::cout << "\n";
@@ -276,8 +283,8 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
         void print_filtration(){
             std::cout << "Filtration : \n[";
             int n = this->num_simplices()-1;
-            for(int i=0; i<2*this->sizes[1]+1; i++){
-                for(int j=0; j<2*this->sizes[0]+1; j++){
+            for(int i = 0; i < 2*this->sizes[1]+1; i++){
+                for(int j = 0; j < 2*this->sizes[0]+1; j++){
                     std::cout << this->filtration(j*(2*this->sizes[0]+1)+2*this->sizes[1]-i) << ", ";
                 }
                 std::cout << "\n";
@@ -296,8 +303,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             int n = (int)this->dimension();
             std::vector<int> coordinates;      //Coordinates of the face indexed by key to return
             
-            for(int i=n-1; i>0; i--){
-                //std::cout << "i = " << i << " key = " << key << " sizes_pdt[i] = " << sizes_pdt[i-1] << "\n";
+            for(int i = n-1; i > 0; i--){
                 coordinates.insert(coordinates.begin(),key / sizes_pdt[i-1]);
                 key = key - coordinates[0]*sizes_pdt[i-1];
             }
@@ -311,7 +317,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
         //The opposite operation than the previous function
         Simplex_key get_key_from_coordinates(std::vector<int> coordinates){
             Simplex_key key = 0;
-            for(int i=this->dimension()-1; i>=0; i--){
+            for(int i = this->dimension()-1; i >= 0; i--){
                 key = key*(2*this->sizes[i] + 1) + coordinates[i];
             }
             return key;
@@ -326,7 +332,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             std::vector<int> cell_vertex(n);                //The first identified vertex 
             int n_odd_coords = 0;                           //Gives us the dimension of the cell, as well as the number of vertices in it
             
-            for(int i=0; i<n; i++){                         //Computing the number and indexes of odd coordinates in vector cell_coordinates and finding the first vertex
+            for(int i = 0; i < n; i++){                         //Computing the number and indexes of odd coordinates in vector cell_coordinates and finding the first vertex
                 if(cell_coordinates[i]%2 == 1){
                     odd_coordinates.push_back(i);
                     cell_vertex[i] = cell_coordinates[i]-1;
@@ -347,8 +353,8 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
 
             cell_vertices.push_back(get_key_from_coordinates(cell_vertex));
 
-            for(int i=0; i<(1 << n_odd_coords)-1;i++){
-                for(int j=0; j<n_odd_coords;j++){                   //We use a binary counter on the odd cordinates of the simplex to compute all of the vertices coordinates
+            for(int i = 0; i < (1 << n_odd_coords)-1;i++){
+                for(int j = 0; j < n_odd_coords;j++){                   //We use a binary counter on the odd cordinates of the simplex to compute all of the vertices coordinates
                     if(tmp_vect[j] == 1){                           //Cell is vertex if and only if it all of its coordinates are even
                         tmp_vect[j] = 0;
                         cell_vertex[odd_coordinates[j]] = cell_vertex[odd_coordinates[j]] - 2;
@@ -370,7 +376,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             int index = 0;
             int muliplier = 1;
 
-            for(int i=0; i<(int)e.size(); i++){
+            for(int i = 0; i < (int)e.size(); i++){
                 if(e[i] >= 0){
                     index += muliplier;
                 }
@@ -387,7 +393,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
                 return 0;
             }
 
-            for(std::size_t i=0; i<coord_dim; i++){
+            for(std::size_t i = 0; i < coord_dim; i++){
                 if(coordinates[i] < 0 || coordinates[i] > 2*((int)this->sizes[i])){
                     return 0;
                 }
@@ -411,7 +417,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             
             double sum = 0.0;
 
-            for(std::size_t i=0; i<critical_vertices[index].size(); i++){   //Looping on critical vertices
+            for(std::size_t i = 0; i < critical_vertices[index].size(); i++){   //Looping on critical vertices
                 sum +=  critical_multiplicity[index][i] * kernel(std::inner_product(e.begin(),e.end(),embedding[embedding_index[critical_vertices[index][i]]].begin(),0.0));
             }
             return reverse_vector * sum;
@@ -434,8 +440,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             std::vector<std::future<std::vector<double>>> future_vect;
             std::vector<std::thread> thread_vector;
             
-            for(std::size_t i=0; i<num_threads; i++){   //We create threads
-                //std::promise<double> promiseObj;
+            for(std::size_t i = 0; i < num_threads; i++){   //We create threads
             
                 promise_vect.push_back(std::promise<std::vector<double>>());
                 future_vect.push_back(promise_vect[i].get_future());
@@ -455,7 +460,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
             int b = 1;
             while(b){
                 b = 0;
-                for(std::size_t i=0; i<num_threads; i++){       //Waiting for all the threads to finish their job
+                for(std::size_t i = 0; i < num_threads; i++){       //Waiting for all the threads to finish their job
                     if(future_vect[i].wait_for(zero_sec) != std::future_status::ready){
                         b = 1;
                         break;
@@ -463,7 +468,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
                 }
             }
             
-            for(std::size_t i=0; i<num_threads; i++){   //Merging answers in one vector
+            for(std::size_t i = 0; i < num_threads; i++){   //Merging answers in one vector
                 std::vector<double> thread_res = future_vect[i].get();
                 results.insert(results.end(),thread_res.begin(),thread_res.end());
             }
@@ -474,7 +479,7 @@ class Embedded_cubical_complex : public Gudhi::cubical_complex::Bitmap_cubical_c
         //Computing multiple transforms on one kernel, used by previous function
         void compute_hybrid_transform_subvector(std::promise<std::vector<double>> promiseObj, double (*kernel)(double), std::vector<std::vector<double>> vect_list, std::size_t begin_index, std::size_t end_index){
             std::vector<double> results;
-            for(std::size_t i=begin_index; i<end_index; i++){
+            for(std::size_t i = begin_index; i < end_index; i++){
                 results.push_back(compute_hybrid_transform(kernel,vect_list[i]));
             }
             promiseObj.set_value(results);
