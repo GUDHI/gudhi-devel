@@ -62,15 +62,16 @@ jobs:
         # No PyKeOps on windows, let's workaround this one.
         for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
         vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
+        choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
     - script: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
-        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        cmake -G "Ninja" -A x64 -DCMAKE_BUILD_TYPE=Release -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+        ninja
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
