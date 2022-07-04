@@ -25,14 +25,14 @@ jobs:
         python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
         python -m pip uninstall -y pykeops
         brew update || true
-        brew install graphviz doxygen boost eigen gmp mpfr tbb cgal || true
+        brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal || true
       displayName: 'Install build dependencies'
     - bash: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
-        make
-        make doxygen
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
+        ninja
+        ninja doxygen
         ctest --output-on-failure
       displayName: 'Build, test and documentation generation'
 
