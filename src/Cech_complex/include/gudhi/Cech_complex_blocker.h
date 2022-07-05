@@ -74,6 +74,8 @@ class Cech_blocker {
     CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
+    Point_cloud points;
+    points.reserve(sc_ptr_->dimension(sh)+1);
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
@@ -83,9 +85,8 @@ class Cech_blocker {
             sph_key = k;
         }
         else {
-            Point_cloud face_points;
             for (auto vertex : sc_ptr_->simplex_vertex_range(face_opposite_vertex.first)) {
-                face_points.push_back(cc_ptr_->get_point(vertex));
+                points.push_back(cc_ptr_->get_point(vertex));
 #ifdef DEBUG_TRACES
                 std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
@@ -93,9 +94,9 @@ class Cech_blocker {
             // Put edge sphere in cache
             sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
             sph_key = cc_ptr_->get_cache().size();
-            cc_ptr_->get_cache().push_back(get_sphere(face_points.cbegin(), face_points.cend()));
-            // Clear face_points
-            face_points.clear();
+            cc_ptr_->get_cache().push_back(get_sphere(points.cbegin(), points.cend()));
+            // Clear face points
+            points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
         if (kernel_.squared_distance_d_object()(cc_ptr_->get_cache()[sph_key].first, cc_ptr_->get_point(face_opposite_vertex.second)) <= cc_ptr_->get_cache()[sph_key].second) {
@@ -113,7 +114,6 @@ class Cech_blocker {
     }
     // Spheres of each face don't contain the whole simplex
     if(!is_min_enclos_ball) {
-        Point_cloud points;
         for (auto vertex : sc_ptr_->simplex_vertex_range(sh)) {
             points.push_back(cc_ptr_->get_point(vertex));
         }
