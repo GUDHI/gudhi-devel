@@ -77,11 +77,9 @@ class Cech_blocker {
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
-        Sphere sph;
         auto k = sc_ptr_->key(face_opposite_vertex.first);
         Simplex_key sph_key;
         if(k != sc_ptr_->null_key()) {
-            sph = cc_ptr_->get_cache().at(k);
             sph_key = k;
         }
         else {
@@ -92,24 +90,23 @@ class Cech_blocker {
                 std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
             }
-            sph = get_sphere(face_points.cbegin(), face_points.cend());
             // Put edge sphere in cache
             sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
             sph_key = cc_ptr_->get_cache().size();
-            cc_ptr_->get_cache().push_back(sph);
+            cc_ptr_->get_cache().push_back(get_sphere(face_points.cbegin(), face_points.cend()));
             // Clear face_points
             face_points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
-        if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
+        if (kernel_.squared_distance_d_object()(cc_ptr_->get_cache()[sph_key].first, cc_ptr_->get_point(face_opposite_vertex.second)) <= cc_ptr_->get_cache()[sph_key].second) {
 #ifdef DEBUG_TRACES
-            std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
+            std::clog << "center: " << cc_ptr_->get_cache()[sph_key].first << ", radius: " <<  radius << std::endl;
 #endif  // DEBUG_TRACES
             is_min_enclos_ball = true;
 #if CGAL_VERSION_NR >= 1050000000
-            if(exact_) CGAL::exact(sph.second);
+            if(exact_) CGAL::exact(cc_ptr_->get_cache()[sph_key].second);
 #endif
-            radius = std::sqrt(cast_to_fv(sph.second));
+            radius = std::sqrt(cast_to_fv(cc_ptr_->get_cache()[sph_key].second));
             sc_ptr_->assign_key(sh, sph_key);
             break;
         }
