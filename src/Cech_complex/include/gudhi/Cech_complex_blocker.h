@@ -92,8 +92,8 @@ class Cech_blocker {
 #endif  // DEBUG_TRACES
             }
             // Put edge sphere in cache
-            sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
             sph_key = cc_ptr_->get_cache().size();
+            sc_ptr_->assign_key(face_opposite_vertex.first, sph_key);
             cc_ptr_->get_cache().push_back(get_sphere(points.cbegin(), points.cend()));
             // Clear face points
             points.clear();
