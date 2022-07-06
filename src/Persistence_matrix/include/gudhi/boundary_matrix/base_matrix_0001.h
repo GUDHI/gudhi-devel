@@ -23,15 +23,18 @@ template<class Master_matrix>
 class Base_matrix_with_removals : Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
 public:
 	using Column_type = typename Master_matrix::Column_type;
+	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = void;
 
 	Base_matrix_with_removals();
-	Base_matrix_with_removals(std::vector<boundary_type>& orderedBoundaries);
+	template<class Boundary_type = boundary_type>
+	Base_matrix_with_removals(std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix_with_removals(unsigned int numberOfColumns);
 	Base_matrix_with_removals(Base_matrix_with_removals& matrixToCopy);
 	Base_matrix_with_removals(Base_matrix_with_removals&& other) noexcept;
 
-	void insert_boundary(boundary_type& boundary);
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	Row_type get_row(index rowIndex);
 	void erase_last();		//does not update barcode
@@ -74,7 +77,9 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals()
 {}
 
 template<class Master_matrix>
-inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(std::vector<boundary_type> &orderedBoundaries)
+template<class Boundary_type>
+inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(
+		std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, maxDim_),
 	  Master_matrix::Base_pairing_option(),
 	  matrix_(orderedBoundaries.size()),
@@ -86,7 +91,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(std::
 	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		boundary_type& b = orderedBoundaries.at(i);
+		Boundary_type& b = orderedBoundaries.at(i);
 		matrix_.at(i) = Column_type(b);
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
@@ -142,7 +147,8 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(Base_
 {}
 
 template<class Master_matrix>
-inline void Base_matrix_with_removals<Master_matrix>::insert_boundary(boundary_type &boundary)
+template<class Boundary_type>
+inline void Base_matrix_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();

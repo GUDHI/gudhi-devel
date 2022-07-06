@@ -88,7 +88,7 @@ inline void RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
 	bool iiIsPositive = (barcode_.at(indexToBar_.at(index + 1)).birth == static_cast<int>(index) + 1);
 
 	if (iIsPositive && iiIsPositive) {
-		mirrorMatrixU_.zero_cell(index, index + 1);
+		mirrorMatrixU_.zero_cell(index + 1, index);
 		_positive_vine_swap(index);
 	} else if (!iIsPositive && !iiIsPositive)
 		_negative_vine_swap(index);
@@ -112,26 +112,26 @@ inline void RU_vine_swap<Master_matrix>::vine_swap(index index)
 			_positive_transpose(index);
 			return;
 		}
-		if (!mirrorMatrixU_.is_zero_cell(index, index + 1)){
-			mirrorMatrixU_.zero_cell(index, index + 1);
+		if (!mirrorMatrixU_.is_zero_cell(index + 1, index)){
+			mirrorMatrixU_.zero_cell(index + 1, index);
 		}
 		_positive_vine_swap(index);
 	} else if (!iIsPositive && !iiIsPositive) {
-		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index + 1, index)){
 			_swap_at_index(index);
 			_negative_transpose(index);
 			return;
 		}
 		_negative_vine_swap(index);
 	} else if (iIsPositive && !iiIsPositive) {
-		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index + 1, index)){
 			_swap_at_index(index);
 			_positive_negative_transpose(index);
 			return;
 		}
 		_positive_negative_vine_swap(index);
 	} else {
-		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1) || mirrorMatrixU_.is_zero_cell(index + 1, index)){
 			_swap_at_index(index);
 			_negative_positive_transpose(index);
 			return;
@@ -153,14 +153,14 @@ inline RU_vine_swap<Master_matrix> &RU_vine_swap<Master_matrix>::operator=(
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_swap_at_index(index index){
 	reducedMatrixR_.swap_at_indices(index, index + 1);
-	mirrorMatrixU_.swap_at_indices(index, index + 1);
+	mirrorMatrixU_.swap_at_indices(index + 1, index);
 }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_add_to(index sourceIndex, index targetIndex)
 {
 	reducedMatrixR_.add_to(sourceIndex, targetIndex);
-	mirrorMatrixU_.add_to(targetIndex, sourceIndex);
+	mirrorMatrixU_.add_to(sourceIndex, targetIndex);
 }
 
 template<class Master_matrix>
@@ -240,7 +240,7 @@ inline void RU_vine_swap<Master_matrix>::_negative_vine_swap(index index)
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(index index)
 {
-	mirrorMatrixU_.zero_cell(index, index + 1);
+	mirrorMatrixU_.zero_cell(index + 1, index);
 
 	_swap_at_index(index);
 	_positive_negative_transpose(index);

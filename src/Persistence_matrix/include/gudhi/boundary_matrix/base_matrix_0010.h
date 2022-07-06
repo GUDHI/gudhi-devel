@@ -13,6 +13,8 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
+#include <algorithm>
 
 #include "../utilities.h"
 
@@ -26,12 +28,14 @@ public:
 	using Row_type = typename Master_matrix::Column_type::Row_type;
 
 	Base_matrix_with_row_access();
-	Base_matrix_with_row_access(std::vector<boundary_type>& orderedBoundaries);
+	template<class Boundary_type>
+	Base_matrix_with_row_access(std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix_with_row_access(unsigned int numberOfColumns);
 	Base_matrix_with_row_access(Base_matrix_with_row_access& matrixToCopy);
 	Base_matrix_with_row_access(Base_matrix_with_row_access&& other) noexcept;
 
-	void insert_boundary(boundary_type& boundary);
+	template<class Boundary_type>
+	void insert_boundary(Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	Row_type& get_row(index rowIndex);
 	void erase_last();
@@ -65,7 +69,12 @@ private:
 	dimension_type maxDim_;
 	index nextInsertIndex_;
 
-	void _reduce_boundary(boundary_type& boundary);
+	template<class Boundary_type>
+	void _reduce_boundary(Boundary_type& boundary);
+	void _add_to(const Column_type &column,
+				 std::set<index>& set);
+	void _add_to(const Column_type &column,
+				 std::set<std::pair<index,typename Master_matrix::Field_type> >& set);
 };
 
 template<class Master_matrix>
@@ -74,10 +83,16 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access()
 	  Master_matrix::Base_pairing_option(),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
-{}
+{
+	if constexpr (pair_opt::isActive_){
+		pair_opt::isReduced_ = true;
+	}
+}
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(std::vector<boundary_type> &orderedBoundaries)
+template<class Boundary_type>
+inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(
+		std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, maxDim_),
 	  Master_matrix::Base_pairing_option(),
 	  matrix_(orderedBoundaries.size()),
@@ -88,11 +103,15 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(s
 		swap_opt::indexToRow_.resize(orderedBoundaries.size());
 		swap_opt::rowToIndex_.resize(orderedBoundaries.size());
 	}
+	if constexpr (pair_opt::isActive_){
+		pair_opt::isReduced_ = true;
+		pair_opt::indexToBar_.resize(orderedBoundaries.size(), -1);
+	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		boundary_type& b = orderedBoundaries.at(i);
-		matrix_.at(i) = Column_type(b);
+		Boundary_type& b = orderedBoundaries.at(i);
 		if (maxDim_ < static_cast<int>(b.size()) - 1) maxDim_ = b.size() - 1;
+		_reduce_boundary(b);
 
 		if constexpr (swap_opt::isActive_){
 			swap_opt::indexToRow_.at(i) = i;
@@ -110,6 +129,11 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(u
 	  maxDim_(0),
 	  nextInsertIndex_(0)
 {
+	if constexpr (pair_opt::isActive_){
+		pair_opt::isReduced_ = true;
+		pair_opt::indexToBar_.resize(numberOfColumns, -1);
+	}
+
 	if constexpr (swap_opt::isActive_){
 		swap_opt::indexToRow_.resize(numberOfColumns);
 		swap_opt::rowToIndex_.resize(numberOfColumns);
@@ -140,10 +164,14 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(B
 {}
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::insert_boundary(boundary_type &boundary)
+template<class Boundary_type>
+inline void Base_matrix_with_row_access<Master_matrix>::insert_boundary(Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+	}
+	if constexpr (pair_opt::isActive_){
+		pair_opt::indexToBar_.resize(boundary.size(), -1);
 	}
 
 	unsigned int size = matrix_.size();
@@ -179,7 +207,7 @@ inline typename Base_matrix_with_row_access<Master_matrix>::Row_type &Base_matri
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::erase_last(index simplexIndex)
+inline void Base_matrix_with_row_access<Master_matrix>::erase_last()
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'erase_last' is not implemented for the chosen options.");
@@ -265,6 +293,95 @@ inline void Base_matrix_with_row_access<Master_matrix>::print()
 		std::cout << "\n";
 	}
 	std::cout << "\n";
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Base_matrix_with_row_access<Master_matrix>::_reduce_boundary(Boundary_type &boundary)
+{
+//	int dim = boundary.size() - 1;
+//	int pivot = -1;
+
+//	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+//		std::set<index> col(boundary.begin(), boundary.end);
+//		pivot = *(boundary.rbegin());
+
+//		while (pivot != -1 && pivotToColumnIndex_.find(pivot) != pivotToColumnIndex_.end()){
+//			_add_to(matrix_.at(pivotToColumnIndex_.at(pivot)), col);
+//			pivot = col.size() == 0 ? -1 : *(col.rbegin());
+//		}
+
+//		if (pivot != -1) matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, col);
+//	} else {
+//		std::set<std::pair<index,typename Master_matrix::Field_type> > col(
+//					boundary.begin(),
+//					boundary.end,
+//					[](const std::pair<index,typename Master_matrix::Field_type>& p1,
+//					   const std::pair<index,typename Master_matrix::Field_type>& p2){
+//						return p1.first < p2.first;
+//					}
+//		);
+//		pivot = boundary.rbegin()->first;
+
+//		while (pivot != -1 && pivotToColumnIndex_.find(pivot) != pivotToColumnIndex_.end()){
+//			Column_type &toadd = matrix_.at(pivotToColumnIndex_.at(pivot));
+//			typename Master_matrix::Field_type coef = col.rbegin()->second;
+//			coef = coef.get_inverse();
+//			coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+//			for (std::pair<index,typename Master_matrix::Field_type>& p : col){
+//				p.second *= coef;
+//			}
+//			_add_to(toadd, col);
+
+//			pivot = col.size() == 0 ? -1 : col.rbegin()->first;
+//		}
+
+//		if (pivot != -1) matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, col);
+//	}
+
+//	if (pivot != -1){
+//		pivotToColumnIndex_.emplace(pivot, nextInsertIndex_);
+//		if constexpr (pair_opt::isActive_){
+//			pair_opt::barcode_.at(pair_opt::indexToBar_.at(pivot)).death = nextInsertIndex_;
+//			pair_opt::indexToBar_.at(nextInsertIndex_) = pair_opt::indexToBar_.at(pivot);
+//		}
+//	} else {
+//		if constexpr (pair_opt::isActive_){
+//			pair_opt::barcode_.push_back(Bar(dim, nextInsertIndex_, -1));
+//			pair_opt::indexToBar_.at(nextInsertIndex_) = pair_opt::barcode_.size() - 1;
+//		}
+//	}
+
+//	for (typename Column_type::Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
+//		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
+//	}
+//	++nextInsertIndex_;
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_row_access<Master_matrix>::_add_to(
+		const Column_type &column, std::set<index>& set)
+{
+	std::pair<std::set<index>::iterator,bool> res_insert;
+	for (const typename Column_type::Cell &cell : column) {
+		res_insert = set.insert(cell.get_row_index());
+		if (!res_insert.second) {
+			set.erase(res_insert.first);
+		}
+	}
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_row_access<Master_matrix>::_add_to(
+		const Column_type &column, std::set<std::pair<index,typename Master_matrix::Field_type> >& set)
+{
+	std::pair<std::set<index>::iterator,bool> res_insert;
+	for (const typename Column_type::Cell &cell : column) {
+		res_insert = set.insert(cell.get_row_index());
+		if (!res_insert.second) {
+			set.erase(res_insert.first);
+		}
+	}
 }
 
 template<class Friend_master_matrix>

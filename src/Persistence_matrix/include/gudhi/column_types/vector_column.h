@@ -29,7 +29,8 @@ public:
 	using Cell = Base_cell<Field_element_type>;
 
 	Vector_column();
-	Vector_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
+	template<class Boundary_type>
+	Vector_column(Boundary_type& boundary);
 	Vector_column(Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
@@ -71,13 +72,13 @@ inline Vector_column<Field_element_type>::Vector_column() : dim_(0)
 {}
 
 template<class Field_element_type>
-inline Vector_column<Field_element_type>::Vector_column(
-		std::vector<index> &rowIndices, std::vector<unsigned int> &values)
-	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1),
-	  column_(rowIndices.size())
+template<class Boundary_type>
+inline Vector_column<Field_element_type>::Vector_column(Boundary_type &boundary)
+	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
+	  column_(boundary.size())
 {
-	for (unsigned int i = 0; i < rowIndices.size(); i++){
-		column_[i] = Cell(values.at(i), rowIndices[i]);
+	for (unsigned int i = 0; i < boundary.size(); i++){
+		column_[i] = Cell(boundary[i]->second, boundary[i]->first);
 	}
 }
 

@@ -177,6 +177,13 @@ public:
 											std::vector<Column_type>
 										>::type;
 
+	using boundary_type = typename std::conditional<
+									Field_type::get_characteristic() == 2,
+									std::vector<index>,
+									std::vector<std::pair<index,Field_type> >
+								>::type;
+	using boundary_matrix = std::vector<boundary_type>;
+
 	using Base_matrix = typename std::conditional<
 											Options::has_removable_columns,
 											typename std::conditional<

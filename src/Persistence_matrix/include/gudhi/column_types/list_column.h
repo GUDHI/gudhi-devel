@@ -29,7 +29,8 @@ public:
 	using Cell = Base_cell<Field_element_type>;
 
 	List_column();
-	List_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
+	template<class Boundary_type>
+	List_column(Boundary_type& boundary);
 	List_column(List_column& column);
 	List_column(List_column&& column) noexcept;
 
@@ -68,11 +69,12 @@ inline List_column<Field_element_type>::List_column() : dim_(0)
 {}
 
 template<class Field_element_type>
-inline List_column<Field_element_type>::List_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values)
-	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1)
+template<class Boundary_type>
+inline List_column<Field_element_type>::List_column(Boundary_type &boundary)
+	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1)
 {
-	for (unsigned int i = 0; i < rowIndices.size(); i++){
-		column_.push_back(Cell(values.at(i), rowIndices[i]));
+	for (std::pair<index,Field_element_type>& p : boundary){
+		column_.push_back(Cell(p.second, p.first));
 	}
 }
 

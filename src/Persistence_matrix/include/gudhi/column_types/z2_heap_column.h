@@ -30,7 +30,8 @@ public:
 	using Cell = Z2_base_cell;
 
 	Z2_heap_column();
-	Z2_heap_column(boundary_type& boundary);
+	template<class Boundary_type>
+	Z2_heap_column(Boundary_type& boundary);
 	Z2_heap_column(Z2_heap_column& column);
 	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
@@ -63,14 +64,12 @@ private:
 inline Z2_heap_column::Z2_heap_column() : dim_(0), insertsSinceLastPrune_(0)
 {}
 
-inline Z2_heap_column::Z2_heap_column(boundary_type& boundary)
+template<class Boundary_type>
+inline Z2_heap_column::Z2_heap_column(Boundary_type& boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end()),
 	  insertsSinceLastPrune_(0)
 {
-//	for (index i : boundary){
-//		column_[i] = Cell(i);
-//	}
 	std::make_heap(column_.begin(), column_.end());
 }
 

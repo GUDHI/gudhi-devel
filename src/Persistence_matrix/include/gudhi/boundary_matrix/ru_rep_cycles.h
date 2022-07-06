@@ -77,21 +77,14 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 {
 	birthToCycle_.clear();
 	birthToCycle_.resize(reducedMatrixR_.get_number_of_columns(), -1);
-	unsigned int counter = 0;
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
 		if (reducedMatrixR_.is_zero_column(i)){
-			birthToCycle_.at(i) = counter++;
-		}
-	}
-
-	representativeCycles_.clear();
-	representativeCycles_.resize(counter);
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		auto column = mirrorMatrixU_.get_column(i);
-		for (auto cell : column){
-			if (birthToCycle_.at(cell.get_row_index()) != -1){
-				representativeCycles_.at(birthToCycle_.at(cell.get_row_index())).push_back(i);
+			representativeCycles_.push_back(cycle_type());
+			auto column = mirrorMatrixU_.get_column(i);
+			for (auto cell : column){
+				representativeCycles_.back().push_back(cell.get_row_index());
 			}
+			birthToCycle_.at(i) = representativeCycles_.size() - 1;
 		}
 	}
 }

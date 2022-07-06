@@ -25,8 +25,6 @@ using index = unsigned int;
 using filtration_value_type = double;
 using dimension_type = int;
 using persistence_pair = std::pair<filtration_value_type, filtration_value_type>;
-using boundary_type = std::vector<index>;
-using boundary_matrix = std::vector<boundary_type>;
 
 struct Bar{
 	Bar() : dim(-1), birth(-1), death(-1)

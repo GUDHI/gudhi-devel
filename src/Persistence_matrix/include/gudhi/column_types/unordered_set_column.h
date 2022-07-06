@@ -30,7 +30,8 @@ public:
 	using Cell = Base_cell<Field_element_type>;
 
 	Unordered_set_column();
-	Unordered_set_column(std::vector<index>& rowIndices, std::vector<unsigned int>& values);
+	template<class Boundary_type>
+	Unordered_set_column(Boundary_type& boundary);
 	Unordered_set_column(Unordered_set_column& column);
 	Unordered_set_column(Unordered_set_column&& column) noexcept;
 
@@ -72,15 +73,15 @@ inline Unordered_set_column<Field_element_type>::Unordered_set_column()
 {}
 
 template<class Field_element_type>
-inline Unordered_set_column<Field_element_type>::Unordered_set_column(
-		std::vector<index> &rowIndices, std::vector<unsigned int> &values)
-	: dim_(rowIndices.size() == 0 ? 0 : rowIndices.size() - 1),
-	  column_(rowIndices.size()),
+template<class Boundary_type>
+inline Unordered_set_column<Field_element_type>::Unordered_set_column(Boundary_type &boundary)
+	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
+	  column_(boundary.size()),
 	  pivotChanged_(false),
-	  pivot_(rowIndices.empty() ? 0 : Cell(*(values.rbegin()), *(rowIndices.rbegin())))
+	  pivot_(boundary.empty() ? 0 : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
 {
-	for (unsigned int i = 0; i < rowIndices.size(); ++i){
-		column_.insert(Cell(values.at(i), rowIndices[i]));
+	for (std::pair<index,Field_element_type>& p : boundary){
+		column_.insert(Cell(p.second, p.first));
 	}
 }
 

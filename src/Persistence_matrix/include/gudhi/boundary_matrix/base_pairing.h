@@ -35,6 +35,7 @@ public:
 protected:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using column_type = typename Master_matrix::Column_type;
+	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
 	Base_pairing(Base_pairing& matrixToCopy);
@@ -43,6 +44,7 @@ protected:
 	matrix_type& matrix_;
 	dimension_type& maxDim_;
 	barcode_type barcode_;
+	dictionnary_type indexToBar_;
 	bool isReduced_;
 	static constexpr bool isActive_ = true;
 
@@ -104,6 +106,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
 					barcode_.push_back(Bar(d - 1, pivot, i));
 				} else {
 					matrix_.at(i).clear();
+					barcode_.push_back(Bar(d, i, -1));
 				}
 			}
 		}

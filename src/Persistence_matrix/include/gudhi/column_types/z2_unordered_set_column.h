@@ -28,7 +28,8 @@ public:
 	using Cell = Z2_base_cell;
 
 	Z2_unordered_set_column();
-	Z2_unordered_set_column(boundary_type& boundary);
+	template<class Boundary_type>
+	Z2_unordered_set_column(Boundary_type& boundary);
 	Z2_unordered_set_column(Z2_unordered_set_column& column);
 	Z2_unordered_set_column(Z2_unordered_set_column&& column) noexcept;
 
@@ -59,7 +60,8 @@ inline Z2_unordered_set_column::Z2_unordered_set_column()
 	: dim_(0), pivotChanged_(false), pivot_(-1)
 {}
 
-inline Z2_unordered_set_column::Z2_unordered_set_column(boundary_type &boundary)
+template<class Boundary_type>
+inline Z2_unordered_set_column::Z2_unordered_set_column(Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end()),
 	  pivotChanged_(false),

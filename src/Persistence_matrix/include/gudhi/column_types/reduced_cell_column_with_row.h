@@ -83,9 +83,9 @@ public:
 
 	Reduced_cell_column_with_row();
 	template<class Chain_type>
-	Reduced_cell_column_with_row(index chainIndex, Chain_type& rowIndices, Chain_type& values);
+	Reduced_cell_column_with_row(index chainIndex, Chain_type& chain);
 	template<class Chain_type>
-	Reduced_cell_column_with_row(index chainIndex, Chain_type& rowIndices, Chain_type& values, index pairedColumnIndex);
+	Reduced_cell_column_with_row(index chainIndex, Chain_type& chain, index pairedColumnIndex);
 	Reduced_cell_column_with_row(const Reduced_cell_column_with_row& other);
 	~Reduced_cell_column_with_row();
 
@@ -116,28 +116,24 @@ inline Reduced_cell_column_with_row<boost_column_type,Field_element_type>::Reduc
 template<Column_types boost_column_type, class Field_element_type>
 template<class Chain_type>
 inline Reduced_cell_column_with_row<boost_column_type,Field_element_type>::Reduced_cell_column_with_row(
-		index chainIndex, Chain_type& rowIndices, Chain_type &values)
-	: pivot_(*(rowIndices.rbegin())), lowestSimplexIndex_(pivot_), pairedColumn_(-1)
+		index chainIndex, Chain_type& chain)
+	: pivot_(chain.rbegin()->first), lowestSimplexIndex_(pivot_), pairedColumn_(-1)
 {
-	typename Chain_type::iterator valIt = values.begin();
-	for (index id : rowIndices){
-		Cell *new_cell = new Cell(*valIt, chainIndex, id);
+	for (std::pair<index,Field_element_type>& p : chain){
+		Cell *new_cell = new Cell(p.second, chainIndex, p.first);
 		column_.insert(column_.end(), *new_cell);
-		++valIt;
 	}
 }
 
 template<Column_types boost_column_type, class Field_element_type>
 template<class Chain_type>
 inline Reduced_cell_column_with_row<boost_column_type,Field_element_type>::Reduced_cell_column_with_row(
-		index chainIndex, Chain_type& rowIndices, Chain_type &values, index pairedColumnIndex)
-	: pivot_(*(rowIndices.rbegin())), lowestSimplexIndex_(pivot_), pairedColumn_(pairedColumnIndex)
+		index chainIndex, Chain_type& chain, index pairedColumnIndex)
+	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), pairedColumn_(pairedColumnIndex)
 {
-	typename Chain_type::iterator valIt = values.begin();
-	for (index id : rowIndices){
-		Cell *new_cell = new Cell(*valIt, chainIndex, id);
+	for (std::pair<index,Field_element_type>& p : chain){
+		Cell *new_cell = new Cell(p.second, chainIndex, p.first);
 		column_.insert(column_.end(), *new_cell);
-		++valIt;
 	}
 }
 
