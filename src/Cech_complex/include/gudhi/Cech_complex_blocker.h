@@ -99,15 +99,16 @@ class Cech_blocker {
             points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
-        if (kernel_.squared_distance_d_object()(cc_ptr_->get_cache()[sph_key].first, cc_ptr_->get_point(face_opposite_vertex.second)) <= cc_ptr_->get_cache()[sph_key].second) {
+        Sphere const& sph = cc_ptr_->get_cache()[sph_key];
+        if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
 #ifdef DEBUG_TRACES
-            std::clog << "center: " << cc_ptr_->get_cache()[sph_key].first << ", radius: " <<  radius << std::endl;
+            std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
 #endif  // DEBUG_TRACES
             is_min_enclos_ball = true;
 #if CGAL_VERSION_NR >= 1050000000
-            if(exact_) CGAL::exact(cc_ptr_->get_cache()[sph_key].second);
+            if(exact_) CGAL::exact(sph.second);
 #endif
-            radius = std::sqrt(cast_to_fv(cc_ptr_->get_cache()[sph_key].second));
+            radius = std::sqrt(cast_to_fv(sph.second));
             sc_ptr_->assign_key(sh, sph_key);
             break;
         }
