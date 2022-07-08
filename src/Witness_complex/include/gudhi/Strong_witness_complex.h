@@ -125,7 +125,7 @@ class Strong_witness_complex {
   //@}
 
  private:
-    /* \brief Adds recursively all the faces of a certain dimension dim-1 witnessed by the same witness.
+    /** \brief Adds recursively all the faces of a certain dimension dim-1 witnessed by the same witness.
      * Iterator is needed to know until how far we can take landmarks to form simplexes.
      * simplex is the prefix of the simplexes to insert.
      * The landmark pointed by aw_it is added to all formed simplices.

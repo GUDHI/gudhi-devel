@@ -26,12 +26,12 @@ namespace Gudhi {
 
 namespace coxeter_triangulation {
 
-/* \addtogroup coxeter_triangulation
+/** \addtogroup coxeter_triangulation
  * Iterator types for Permutahedral_representation
  * @{
  */
 
-/* \brief Iterator over the vertices of a simplex
+/** \brief Iterator over the vertices of a simplex
  * represented by its permutahedral representation.
  *
  * Forward iterator, 'value_type' is Permutahedral_representation::Vertex.*/
@@ -83,7 +83,7 @@ class Vertex_iterator
 };  // Vertex_iterator
 
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the k-faces of a simplex
+/** \brief Iterator over the k-faces of a simplex
  *  given by its permutahedral representation.
  *
  * Forward iterator, value_type is Permutahedral_representation. */
@@ -141,7 +141,7 @@ class Face_iterator : public boost::iterator_facade<Face_iterator<Permutahedral_
 };  // Face_iterator
 
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the k-cofaces of a simplex
+/** \brief Iterator over the k-cofaces of a simplex
  *  given by its permutahedral representation.
  *
  * Forward iterator, value_type is Permutahedral_representation. */
@@ -246,6 +246,8 @@ class Coface_iterator
   value_t value_;  // the dereference value
 
 };  // Coface_iterator
+
+/** @} */
 
 }  // namespace coxeter_triangulation
 

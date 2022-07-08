@@ -44,6 +44,20 @@ if(DOXYGEN_FOUND)
     set(GUDHI_DOXYGEN_UTILS_PATH "utilities/*")
   endif()
 
+  message("++ Doxygen version ${DOXYGEN_VERSION}")
+  if (DOXYGEN_VERSION VERSION_LESS 1.9.3)
+    set(GUDHI_DOXYGEN_CLASS_DIAGRAMS "CLASS_DIAGRAMS = NO")
+  else()
+    set(GUDHI_DOXYGEN_CLASS_DIAGRAMS "")
+  endif()
+  if (DOXYGEN_VERSION VERSION_LESS 1.9.2)
+    set(GUDHI_DOXYGEN_MATHJAX_VERSION "MATHJAX_VERSION = MathJax_2")
+    set(GUDHI_DOXYGEN_MATHJAX_EXTENSIONS "TeX/AMSmath TeX/AMSsymbols")
+  else()
+    set(GUDHI_DOXYGEN_MATHJAX_VERSION "MATHJAX_VERSION = MathJax_3")
+    set(GUDHI_DOXYGEN_MATHJAX_EXTENSIONS "ams")
+  endif()
+
   configure_file(${GUDHI_DOXYGEN_SOURCE_PREFIX}/Doxyfile.in "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile" @ONLY)
 
   add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile

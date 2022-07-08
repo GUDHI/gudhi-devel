@@ -14,11 +14,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
-#if BOOST_VERSION < 106600
-# include <boost/function_output_iterator.hpp>
-#else
 # include <boost/iterator/function_output_iterator.hpp>
-#endif
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
@@ -235,7 +231,7 @@ std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv
 
   std::string line;
 
-  // the first line is emtpy, so we ignore it:
+  // the first line is empty, so we ignore it:
   std::getline(in, line);
   std::vector<Filtration_value> values_in_this_line;
   result.push_back(values_in_this_line);

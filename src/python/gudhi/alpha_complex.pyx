@@ -16,7 +16,7 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
-import os
+import warnings
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
@@ -28,66 +28,76 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, bool fast_version, bool exact_version) nogil except +
+        Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
+        @staticmethod
+        void set_float_relative_precision(double precision) nogil
+        @staticmethod
+        double get_float_relative_precision() nogil
 
 # AlphaComplex python interface
 cdef class AlphaComplex:
-    """AlphaComplex is a simplicial complex constructed from the finite cells
-    of a Delaunay Triangulation.
+    """AlphaComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    The filtration value of each simplex is computed as the square of the
-    circumradius of the simplex if the circumsphere is empty (the simplex is
-    then said to be Gabriel), and as the minimum of the filtration values of
-    the codimension 1 cofaces that make it not Gabriel otherwise.
+    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
+    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration values of the
+    codimension 1 cofaces that make it not Gabriel otherwise.
 
-    All simplices that have a filtration value strictly greater than a given
-    alpha squared value are not inserted into the complex.
+    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
+    the complex.
 
     .. note::
 
-        When Alpha_complex is constructed with an infinite value of alpha, the
-        complex is a Delaunay complex.
-
+        When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
 
     cdef Alpha_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, off_file='', precision='safe'):
+    def __init__(self, points=[], off_file='', weights=None, precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
-        :type points: list of list of double
+        :type points: Iterable[Iterable[float]]
 
-        Or
-
-        :param off_file: An OFF file style name.
+        :param off_file: **[deprecated]** An `OFF file style <fileformats.html#off-file-format>`_ name.
+            If an `off_file` is given with `points` as arguments, only points from the file are taken into account.
         :type off_file: string
+
+        :param weights: A list of weights. If set, the number of weights must correspond to the number of points.
+        :type weights: Iterable[float]
 
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
+
+        :raises FileNotFoundError: **[deprecated]** If `off_file` is set but not found.
+        :raises ValueError: In case of inconsistency between the number of points and weights.
         """
 
     # The real cython constructor
-    def __cinit__(self, points = None, off_file = '', precision = 'safe'):
+    def __cinit__(self, points = [], off_file = '', weights=None, precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 
-        cdef vector[vector[double]] pts
         if off_file:
-            if os.path.isfile(off_file):
-                points = read_points_from_off_file(off_file = off_file)
-            else:
-                print("file " + off_file + " not found.")
-        if points is None:
-            # Empty Alpha construction
-            points=[]
+            warnings.warn("off_file is a deprecated parameter, please consider using gudhi.read_points_from_off_file",
+                          DeprecationWarning)
+            points = read_points_from_off_file(off_file = off_file)
+
+        # weights are set but is inconsistent with the number of points
+        if weights != None and len(weights) != len(points):
+            raise ValueError("Inconsistency between the number of points and weights")
+
+        # need to copy the points to use them without the gil
+        cdef vector[vector[double]] pts
+        cdef vector[double] wgts
         pts = points
+        if weights != None:
+            wgts = weights
         with nogil:
-            self.this_ptr = new Alpha_complex_interface(pts, fast, exact)
+            self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
@@ -127,3 +137,28 @@ cdef class AlphaComplex:
             self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
                                               mas, compute_filtration)
         return stree
+
+    @staticmethod
+    def set_float_relative_precision(precision):
+        """
+        :param precision: When the AlphaComplex is constructed with :code:`precision = 'safe'` (the default),
+            one can set the float relative precision of filtration values computed in
+            :func:`~gudhi.AlphaComplex.create_simplex_tree`.
+            Default is :code:`1e-5` (cf. :func:`~gudhi.AlphaComplex.get_float_relative_precision`).
+            For more details, please refer to
+            `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
+        :type precision: float
+        """
+        if precision <=0. or precision >= 1.:
+            raise ValueError("Relative precision value must be strictly greater than 0 and strictly lower than 1")
+        Alpha_complex_interface.set_float_relative_precision(precision)
+    
+    @staticmethod
+    def get_float_relative_precision():
+        """
+        :returns: The float relative precision of filtration values computation in
+            :func:`~gudhi.AlphaComplex.create_simplex_tree` when the AlphaComplex is constructed with
+            :code:`precision = 'safe'` (the default).
+        :rtype: float
+        """
+        return Alpha_complex_interface.get_float_relative_precision()

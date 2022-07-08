@@ -107,7 +107,7 @@ struct Trie {
   }
 
   /**
-   * Goes to the root in the trie to consitute simplex
+   * Goes to the root in the trie to constitute simplex
    */
   void add_vertices_up_to_the_root(Simplex& res) const {
     res.add_vertex(v);

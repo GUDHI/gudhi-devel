@@ -31,15 +31,34 @@ namespace Gudhi {
 
 namespace alpha_complex {
 
-template <typename CgalPointType>
-std::vector<double> pt_cgal_to_cython(CgalPointType const& point) {
-  std::vector<double> vd;
-  vd.reserve(point.dimension());
-  for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
-    vd.push_back(CGAL::to_double(*coord));
-  return vd;
-}
+// template Functor that transforms a CGAL point to a vector of double as expected by cython
+template<typename CgalPointType, bool Weighted>
+struct Point_cgal_to_cython;
 
+// Specialized Unweighted Functor
+template<typename CgalPointType>
+struct Point_cgal_to_cython<CgalPointType, false> {
+  std::vector<double> operator()(CgalPointType const& point) const 
+  {
+    std::vector<double> vd;
+    vd.reserve(point.dimension());
+    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
+      vd.push_back(CGAL::to_double(*coord));
+    return vd;
+  }
+};
+
+// Specialized Weighted Functor
+template<typename CgalPointType>
+struct Point_cgal_to_cython<CgalPointType, true> {
+  std::vector<double> operator()(CgalPointType const& weighted_point) const 
+  {
+    const auto& point = weighted_point.point();
+    return Point_cgal_to_cython<decltype(point), false>()(point);
+  }
+};
+
+// Function that transforms a cython point (aka. a vector of double) to a CGAL point
 template <typename CgalPointType>
 static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
   return CgalPointType(vec.size(), vec.begin(), vec.end());
@@ -51,24 +70,35 @@ class Abstract_alpha_complex {
 
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) = 0;
+  
+  virtual std::size_t num_vertices() const = 0;
 
   virtual ~Abstract_alpha_complex() = default;
 };
 
-class Exact_Alphacomplex_dD final : public Abstract_alpha_complex {
+template <bool Weighted = false>
+class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-  using Point = typename Kernel::Point_d;
+  using Bare_point = typename Kernel::Point_d;
+  using Point = std::conditional_t<Weighted, typename Kernel::Weighted_point_d,
+                                             typename Kernel::Point_d>;
 
  public:
-  Exact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
+  Exact_alpha_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
     : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+  }
+
+  Exact_alpha_complex_dD(const std::vector<std::vector<double>>& points,
+                           const std::vector<double>& weights, bool exact_version)
+    : exact_version_(exact_version),
+      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
-    Point const& point = alpha_complex_.get_point(vh);
-    return pt_cgal_to_cython(point);
+    // Can be a Weighted or a Bare point in function of Weighted
+    return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
@@ -76,64 +106,48 @@ class Exact_Alphacomplex_dD final : public Abstract_alpha_complex {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
+  virtual std::size_t num_vertices() const {
+    return alpha_complex_.num_vertices();
+  }
+
  private:
   bool exact_version_;
-  Alpha_complex<Kernel> alpha_complex_;
+  Alpha_complex<Kernel, Weighted> alpha_complex_;
 };
 
-class Inexact_Alphacomplex_dD final : public Abstract_alpha_complex {
+template <bool Weighted = false>
+class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
  private:
   using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-  using Point = typename Kernel::Point_d;
+  using Bare_point = typename Kernel::Point_d;
+  using Point = std::conditional_t<Weighted, typename Kernel::Weighted_point_d,
+                                             typename Kernel::Point_d>;
 
  public:
-  Inexact_Alphacomplex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
-    : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Point>)) {
+  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+  }
+
+  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
+    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
-    Point const& point = alpha_complex_.get_point(vh);
-    return pt_cgal_to_cython(point);
+    // Can be a Weighted or a Bare point in function of Weighted
+    return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
   }
   virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
+  }
+
+  virtual std::size_t num_vertices() const {
+    return alpha_complex_.num_vertices();
   }
 
  private:
-  bool exact_version_;
-  Alpha_complex<Kernel> alpha_complex_;
+  Alpha_complex<Kernel, Weighted> alpha_complex_;
 };
-
-template <complexity Complexity>
-class Alphacomplex_3D final : public Abstract_alpha_complex {
- private:
-  using Point = typename Alpha_complex_3d<Complexity, false, false>::Bare_point_3;
-
-  static Point pt_cython_to_cgal_3(std::vector<double> const& vec) {
-    return Point(vec[0], vec[1], vec[2]);
-  }
-
- public:
-  Alphacomplex_3D(const std::vector<std::vector<double>>& points)
-    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal_3)) {
-  }
-
-  virtual std::vector<double> get_point(int vh) override {
-    Point const& point = alpha_complex_.get_point(vh);
-    return pt_cgal_to_cython(point);
-  }
-
-  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square);
-  }
-
- private:
-  Alpha_complex_3d<Complexity, false, false> alpha_complex_;
-};
-
 
 }  // namespace alpha_complex
 

@@ -70,6 +70,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
@@ -148,10 +149,6 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_EIGEN3', ")
-      set(GUDHI_USE_EIGEN3 "True")
-    else (EIGEN3_FOUND)
-      set(GUDHI_USE_EIGEN3 "False")
     endif (EIGEN3_FOUND)
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_reader', ")
@@ -171,13 +168,25 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     endif ()
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
     endif ()
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
+    endif ()
 
+    # from windows vcpkg eigen 3.4.0#2 : build fails with
+    # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+    # cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+    # Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+    if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int', ")
+    endif()
+
+
+    add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
       if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
         # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.
@@ -212,13 +221,14 @@ if(PYTHONINTERP_FOUND)
         endif(NOT GMP_LIBRARIES_DIR)
         add_GUDHI_PYTHON_lib_dir(${GMP_LIBRARIES_DIR})
         message("** Add gmp ${GMP_LIBRARIES_DIR}")
+        # When FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX is set, not defining CGAL_USE_GMPXX is sufficient enough
         if(GMPXX_FOUND)
           add_gudhi_debug_info("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
           set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
           add_GUDHI_PYTHON_lib("${GMPXX_LIBRARIES}")
           add_GUDHI_PYTHON_lib_dir(${GMPXX_LIBRARIES_DIR})
           message("** Add gmpxx ${GMPXX_LIBRARIES_DIR}")
-        endif(GMPXX_FOUND)
+        endif()
       endif(GMP_FOUND)
       if(MPFR_FOUND)
         add_gudhi_debug_info("MPFR_LIBRARIES = ${MPFR_LIBRARIES}")
@@ -262,6 +272,10 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
     endif()
 
+    if(DEBUG_TRACES)
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
+    endif(DEBUG_TRACES)
+
     if(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
       set( GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}")
     endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
@@ -276,7 +290,8 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")    
+    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
@@ -313,12 +328,12 @@ if(PYTHONINTERP_FOUND)
             if(SCIPY_FOUND)
               if(SKLEARN_FOUND)
                 if(OT_FOUND)
-                  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                  if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                     set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                     # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                    # Images and biblio warnings because not found on developper version
+                    # Images and biblio warnings because not found on developer version
                     if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
                     endif()
                     # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
                     add_custom_target(sphinx
@@ -333,10 +348,10 @@ if(PYTHONINTERP_FOUND)
                              ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
                     # Set missing or not modules
                     set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                  else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-                    message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 4.11.0")
+                  else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                    message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
                     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+                  endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                 else(OT_FOUND)
                   message("++ Python documentation module will not be compiled because POT was not found")
                   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -372,13 +387,15 @@ if(PYTHONINTERP_FOUND)
 
 
     # Test examples
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Bottleneck and Alpha
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
                -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Tangential
       add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -446,7 +463,7 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_cover_complex)
     endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -462,14 +479,14 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
       add_gudhi_py_test(test_alpha_complex)
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       # Euclidean witness
       add_gudhi_py_test(test_euclidean_witness_complex)
 
       # Datasets generators
-      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independant from CGAL ?
+      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independent from CGAL ?
 
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
@@ -547,6 +564,16 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 
+    # Differentiation
+    if(TENSORFLOW_FOUND)
+      add_gudhi_py_test(test_diff)
+    endif()
+
+    # Betti curves
+    if(SKLEARN_FOUND AND SCIPY_FOUND)
+      add_gudhi_py_test(test_betti_curve_representations)
+    endif()
+
     # Time Delay
     add_gudhi_py_test(test_time_delay)
 
@@ -571,6 +598,15 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
+    # Fetch remote datasets
+    if(WITH_GUDHI_REMOTE_TEST)
+      add_gudhi_py_test(test_remote_datasets)
+    endif()
+
+    # persistence graphical tools
+    if(MATPLOTLIB_FOUND)
+      add_gudhi_py_test(test_persistence_graphical_tools)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")

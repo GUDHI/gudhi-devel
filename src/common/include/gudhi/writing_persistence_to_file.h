@@ -48,7 +48,7 @@ class Persistence_interval_common {
       : birth_(birth), death_(death), dimension_(dim), arith_element_(field) {}
 
   /**
-   * Operator to compare two persistence pairs. During the comparision all the
+   * Operator to compare two persistence pairs. During the comparison all the
    * fields: birth, death, dimensiona and arith_element_ are taken into account
    * and they all have to be equal for two pairs to be equal.
   **/
@@ -65,7 +65,7 @@ class Persistence_interval_common {
   /**
    * Operator to compare objects of a type Persistence_interval_common.
    * One intervals is smaller than the other if it has lower persistence.
-   * Note that this operator do not take Arith_element into account when doing comparisions.
+   * Note that this operator do not take Arith_element into account when doing comparisons.
   **/
   bool operator<(const Persistence_interval_common& i2) const {
     return fabs(this->death_ - this->birth_) < fabs(i2.death_ - i2.birth_);

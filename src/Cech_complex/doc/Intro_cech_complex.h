@@ -28,7 +28,7 @@ namespace cech_complex {
  * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a> constructed
  *  from a proximity graph. The set of all simplices is filtered by the radius of their minimal enclosing ball.
  *
- * The input shall be a point cloud in an Euclidean space.
+ * The input shall be a range of points where a point is defined as <a target="_blank" href="https://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Point__d.html">CGAL kernel Point_d.</a>
  * 
  * \remark For people only interested in the topology of the \ref cech_complex (for instance persistence),
  * \ref alpha_complex is equivalent to the \ref cech_complex and much smaller if you do not bound the radii.
@@ -37,8 +37,7 @@ namespace cech_complex {
  * \subsection cechalgorithm Algorithm
  *
  * Cech_complex first builds a proximity graph from a point cloud.
- * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed from
- * `Gudhi::Minimal_enclosing_ball_radius` function.
+ * The filtration value of each edge of the `Gudhi::Proximity_graph` is computed using CGAL kernel functions.
  * 
  * All edges that have a filtration value strictly greater than a user given maximal radius value, \f$max\_radius\f$,
  * are not inserted into the complex.
@@ -60,19 +59,8 @@ namespace cech_complex {
  *
  * \image html "cech_complex_representation.png" "Čech complex expansion"
  *
- * The minimal ball radius computation is insured by
- * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html">
- * the miniball software (V3.0)</a> - Smallest Enclosing Balls of Points - and distributed with GUDHI.
- * Please refer to
- * <a target="_blank" href="https://people.inf.ethz.ch/gaertner/subdir/texts/own_work/esa99_final.pdf">
- * the miniball software design description</a> for more information about this computation.
- *
  * This radius computation is the reason why the Cech_complex is taking much more time to be computed than the
  * \ref rips_complex but it offers more topological guarantees.
- *
- * If the Cech_complex interfaces are not detailed enough for your need, please refer to
- * <a href="cech_complex_step_by_step_8cpp-example.html">
- * cech_complex_step_by_step.cpp</a> example, where the graph construction over the Simplex_tree is more detailed.
  *
  * \subsection cechpointscloudexample Example from a point cloud
  * 

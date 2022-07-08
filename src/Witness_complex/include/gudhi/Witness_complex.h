@@ -127,7 +127,7 @@ class Witness_complex {
   //@}
 
  private:
-  /* \brief Adds recursively all the faces of a certain dimension dim witnessed by the same witness.
+  /** \brief Adds recursively all the faces of a certain dimension dim witnessed by the same witness.
    * Iterator is needed to know until how far we can take landmarks to form simplexes.
    * simplex is the prefix of the simplexes to insert.
    * The output value indicates if the witness rests active or not.

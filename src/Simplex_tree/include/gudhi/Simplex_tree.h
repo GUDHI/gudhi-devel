@@ -42,6 +42,10 @@
 
 namespace Gudhi {
 
+/** \addtogroup simplex_tree 
+ *  @{
+ */
+
 /**
  * \class Extended_simplex_type Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Extended simplex type data structure for representing the type of simplices in an extended filtration.
@@ -97,8 +101,7 @@ class Simplex_tree {
   // Simplex_key next to each other).
   typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
 
-  /* \brief Set of nodes sharing a same parent in the simplex tree. */
-  /* \brief Set of nodes sharing a same parent in the simplex tree. */
+  /** \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
 
 
@@ -187,6 +190,12 @@ class Simplex_tree {
   typedef Simplex_tree_boundary_simplex_iterator<Simplex_tree> Boundary_simplex_iterator;
   /** \brief Range over the simplices of the boundary of a simplex. */
   typedef boost::iterator_range<Boundary_simplex_iterator> Boundary_simplex_range;
+  /** \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
+   *
+   * 'value_type' is std::pair<Simplex_handle, Vertex_handle>. */
+  typedef Simplex_tree_boundary_opposite_vertex_simplex_iterator<Simplex_tree> Boundary_opposite_vertex_simplex_iterator;
+  /** \brief Range over the simplices of the boundary of a simplex and their opposite vertices. */
+  typedef boost::iterator_range<Boundary_opposite_vertex_simplex_iterator> Boundary_opposite_vertex_simplex_range;
   /** \brief Iterator over the simplices of the simplicial complex.
    *
    * 'value_type' is Simplex_handle. */
@@ -294,6 +303,23 @@ class Simplex_tree {
   Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) {
     return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
                                   Boundary_simplex_iterator(this));
+  }
+
+  /** \brief Given a simplex, returns a range over the simplices of its boundary and their opposite vertices.
+   *
+   * The boundary of a simplex is the set of codimension \f$1\f$ subsimplices of the simplex.
+   * If the simplex is \f$[v_0, \cdots ,v_d]\f$, with canonical orientation induced by \f$ v_0 < \cdots < v_d \f$, the
+   * iterator enumerates the simplices of the boundary in the order:
+   * \f$[v_0,\cdots,\widehat{v_i},\cdots,v_d]\f$ for \f$i\f$ from \f$d\f$ to \f$0\f$, where \f$\widehat{v_i}\f$ means
+   * that the vertex \f$v_i\f$, known as the opposite vertex, is omitted from boundary, but returned as the second
+   * element of a pair.
+   *
+   * @param[in] sh Simplex for which the boundary is computed.
+   */
+  template<class SimplexHandle>
+  Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) {
+    return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
+                                                  Boundary_opposite_vertex_simplex_iterator(this));
   }
 
   /** @} */  // end range and iterator methods
@@ -942,7 +968,7 @@ class Simplex_tree {
         // If we reached the end of the vertices, and the simplex has more vertices than the given simplex
         // => we found a coface
 
-        // Add a coface if we wan't the star or if the number of vertices of the current simplex matches with nbVertices
+        // Add a coface if we want the star or if the number of vertices of the current simplex matches with nbVertices
         bool addCoface = (star || curr_nbVertices == nbVertices);
         if (addCoface)
           cofaces.push_back(simplex);
@@ -1060,8 +1086,8 @@ class Simplex_tree {
    *
    * Inserts all vertices and edges given by a OneSkeletonGraph.
    * OneSkeletonGraph must be a model of
-   * <a href="http://www.boost.org/doc/libs/1_76_0/libs/graph/doc/VertexAndEdgeListGraph.html">boost::VertexAndEdgeListGraph</a>
-   * and <a href="http://www.boost.org/doc/libs/1_76_0/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
+   * <a href="https://www.boost.org/doc/libs/release/libs/graph/doc/VertexAndEdgeListGraph.html">boost::VertexAndEdgeListGraph</a>
+   * and <a href="https://www.boost.org/doc/libs/release/libs/graph/doc/PropertyGraph.html">boost::PropertyGraph</a>.
    *
    * The vertex filtration value is accessible through the property tag
    * vertex_filtration_t.
@@ -1283,6 +1309,7 @@ class Simplex_tree {
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
                                           boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
+        simplex->second.assign_children(new_sib);
         std::vector<Vertex_handle> blocked_new_sib_vertex_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
         for (auto new_sib_member = new_sib->members().begin();
@@ -1305,7 +1332,6 @@ class Simplex_tree {
             new_sib->members().erase(blocked_new_sib_member);
           }
           // ensure recursive call
-          simplex->second.assign_children(new_sib);
           siblings_expansion_with_blockers(new_sib, max_dim, k - 1, block_simplex);
         }
       } else {
@@ -1315,7 +1341,7 @@ class Simplex_tree {
     }
   }
 
-  /* \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
+  /** \private Returns the Simplex_handle composed of the vertex list (from the Simplex_handle), plus the given
    * Vertex_handle if the Vertex_handle is found in the Simplex_handle children list.
    * Returns null_simplex() if it does not exist
   */
@@ -1468,7 +1494,7 @@ class Simplex_tree {
 
       int sh_dimension = dimension(sh);
       if (sh_dimension >= dimension_)
-        // Stop browsing as soon as the dimension is reached, no need to go furter
+        // Stop browsing as soon as the dimension is reached, no need to go further
         return false;
       new_dimension = (std::max)(new_dimension, sh_dimension);
     }
@@ -1778,7 +1804,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool contiguous_vertices = true;
 };
 
-/** @} */  // end defgroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
 
 }  // namespace Gudhi
 
