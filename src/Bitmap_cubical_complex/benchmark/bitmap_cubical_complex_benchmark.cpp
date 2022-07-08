@@ -14,6 +14,16 @@
 #include <vector>
 #include <cstdlib>
 #include <cmath>
+#include <random>
+
+std::random_device rd;
+std::mt19937 gen(rd());
+
+double get_random()
+{
+    std::uniform_real_distribution<double> dist(0., 1.);
+    return dist(gen);
+}
 
 int main() {
 
@@ -23,7 +33,7 @@ int main() {
   std::vector<unsigned> sizes_1d (1, 100000);
   std::vector<double> data_1d;
   for (size_t i = 0; i != sizes_1d[0]; ++i) {
-    data_1d.push_back(rand() / static_cast<double>(RAND_MAX));
+    data_1d.push_back(get_random());
   }
 
   std::vector<unsigned> sizes_5d_top_cells(5, 10);
@@ -32,10 +42,10 @@ int main() {
   const unsigned multiplier_vertices = round(pow(11., 5.));
   std::vector<double> data_5d_top_cells, data_5d_vertices;
   for (size_t i = 0; i != multiplier_top_cells; ++i) {
-    data_5d_top_cells.push_back(rand() / static_cast<double>(RAND_MAX));
+    data_5d_top_cells.push_back(get_random());
   }
   for (size_t i = 0; i != multiplier_vertices; ++i) {
-    data_5d_vertices.push_back(rand() / static_cast<double>(RAND_MAX));
+    data_5d_vertices.push_back(get_random());
   }
 
   Gudhi::Clock cub_1d_from_top_cells_creation_clock("Cubical complex creation from 100 000 top cells in 1D");

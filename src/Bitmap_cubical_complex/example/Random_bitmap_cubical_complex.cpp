@@ -17,9 +17,12 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <random>
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 int main(int argc, char** argv) {
-  srand(time(0));
 
   std::clog
       << "This program computes persistent homology, by using bitmap_cubical_complex class, of cubical "
@@ -45,8 +48,9 @@ int main(int argc, char** argv) {
   }
 
   std::vector<double> data;
+  std::uniform_real_distribution<double> dist(0., 1.);
   for (size_t i = 0; i != multipliers; ++i) {
-    data.push_back(rand() / static_cast<double>(RAND_MAX));
+    data.push_back(dist(gen));
   }
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
