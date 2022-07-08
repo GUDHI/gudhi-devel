@@ -614,7 +614,7 @@ class Bitmap_cubical_complex_base {
   std::vector<T> data;
   std::size_t total_number_of_cells;
 
-  void set_up_containers(const std::vector<unsigned>& sizes, const bool& is_pos_inf) {
+  void set_up_containers(const std::vector<unsigned>& sizes, bool is_pos_inf) {
     unsigned multiplier = 1;
     for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
@@ -731,15 +731,15 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
               << "elements that follow from sizes_in_following_directions vector is different from the size of "
               << "top_dimensional_cells vector."
               << std::endl;
-    throw(
+    throw std::invalid_argument(
         "Error in constructor Bitmap_cubical_complex_base( std::vector<unsigned> sizes_in_following_directions,"
         "std::vector<T> top_dimensional_cells ). Number of top dimensional elements that follow from "
         "sizes_in_following_directions vector is different from the size of top_dimensional_cells vector.");
   }
 
-  Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
   std::size_t index = 0;
-  for (it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin();
+       it != this->top_dimensional_cells_iterator_end(); ++it) {
     this->get_cell_data(*it) = top_dimensional_cells[index];
     ++index;
   }
@@ -765,15 +765,15 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
               << "elements that follow from sizes_in_following_directions vector is different from the size of "
               << "vertices vector."
               << std::endl;
-    throw(
+    throw std::invalid_argument(
         "Error in constructor Bitmap_cubical_complex_base( std::vector<unsigned> sizes_in_following_directions,"
         "std::vector<T> vertices ). Number of vertices elements that follow from "
         "sizes_in_following_directions vector is different from the size of vertices vector.");
   }
 
-  Bitmap_cubical_complex_base<T>::Vertices_iterator it(*this);
   std::size_t index = 0;
-  for (it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
+  for (Bitmap_cubical_complex_base<T>::Vertices_iterator it = this->vertices_iterator_begin();
+       it != this->vertices_iterator_end(); ++it) {
     this->get_cell_data(*it) = vertices[index];
     ++index;
   }
@@ -783,7 +783,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
 template <typename T>
 size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size_t splx) {
   if (this->get_dimension_of_a_cell(splx) == this->dimension()){return splx;}
-  else{
+  else {
     for (auto v : this->get_coboundary_of_a_cell(splx)){
       if(this->get_cell_data(v) == this->get_cell_data(splx)){
         return this->get_top_dimensional_coface_of_a_cell(v);
@@ -796,7 +796,7 @@ size_t Bitmap_cubical_complex_base<T>::get_top_dimensional_coface_of_a_cell(size
 template <typename T>
 size_t Bitmap_cubical_complex_base<T>::get_vertex_of_a_cell(size_t splx) {
   if (this->get_dimension_of_a_cell(splx) == 0){return splx;}
-  else{
+  else {
     for (auto v : this->get_boundary_of_a_cell(splx)){
       if(this->get_cell_data(v) == this->get_cell_data(splx)){
         return this->get_vertex_of_a_cell(v);
@@ -811,8 +811,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
                                                             const std::vector<T>& cells, bool input_top_cells) {
   if (input_top_cells) {
     this->setup_bitmap_based_on_top_dimensional_cells_list(sizes_in_following_directions, cells);
-  }
-  else {
+  } else {
     this->setup_bitmap_based_on_vertices(sizes_in_following_directions, cells);
   }
 }
@@ -843,8 +842,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   }
   this->set_up_containers(sizes, true);
 
-  Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
-  it = this->top_dimensional_cells_iterator_begin();
+  Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin();
 
   T filtrationLevel = 0.;
   std::size_t filtration_counter = 0;
@@ -907,8 +905,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
   // It ignores the last parameter of the function.
   if (input_top_cells) {
     this->setup_bitmap_based_on_top_dimensional_cells_list(dimensions, cells);
-  }
-  else {
+  } else {
     this->setup_bitmap_based_on_vertices(dimensions, cells);
   }
 }
@@ -1006,8 +1003,8 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   std::vector<std::size_t> indices_to_consider;
   // we assume here that we already have a filtration on the top dimensional cells and
   // we have to extend it to lower ones.
-  typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it(*this);
-  for (it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
+  for (typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin();
+       it != this->top_dimensional_cells_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
 
@@ -1052,8 +1049,8 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices(
   std::vector<std::size_t> indices_to_consider;
   // we assume here that we already have a filtration on the vertices and
   // we have to extend it to higher ones.
-  typename Bitmap_cubical_complex_base<T>::Vertices_iterator it(*this);
-  for (it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
+  for (typename Bitmap_cubical_complex_base<T>::Vertices_iterator it = this->vertices_iterator_begin();
+       it != this->vertices_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
 
