@@ -22,8 +22,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Field_element_type = Zp_field_element<11> >
-class Vector_column
+template<class Field_element_type, class Column_pairing_option>
+class Vector_column : Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
@@ -31,6 +31,8 @@ public:
 	Vector_column();
 	template<class Boundary_type>
 	Vector_column(Boundary_type& boundary);
+	template<class Boundary_type>
+	Vector_column(Boundary_type& boundary, dimension_type dimension);
 	Vector_column(Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
@@ -45,19 +47,25 @@ public:
 	void reorder(std::vector<index>& valueMap);
 
 	Vector_column& operator+=(Vector_column &column);
-	template<class Friend_field_element_type>
-	friend Vector_column<Friend_field_element_type> operator+(Vector_column<Friend_field_element_type> column1, Vector_column<Friend_field_element_type>& column2);
+	template<class Friend_field_element_type, class Friend_column_pairing_option>
+	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
+			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column1,
+			Vector_column<Friend_field_element_type,Friend_column_pairing_option>& column2);
 	Vector_column& operator*=(unsigned int const &v);
-	template<class Friend_field_element_type>
-	friend Vector_column<Friend_field_element_type> operator*(Vector_column<Friend_field_element_type> column, unsigned int const& v);
-	template<class Friend_field_element_type>
-	friend Vector_column<Friend_field_element_type> operator*(unsigned int const& v, Vector_column<Friend_field_element_type> const column);
+	template<class Friend_field_element_type, class Friend_column_pairing_option>
+	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
+			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column,
+			unsigned int const& v);
+	template<class Friend_field_element_type, class Friend_column_pairing_option>
+	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
+			unsigned int const& v,
+			Vector_column<Friend_field_element_type,Friend_column_pairing_option> const column);
 
 	Vector_column& operator=(Vector_column other);
 
-	template<class Friend_field_element_type>
-	friend void swap(Vector_column<Friend_field_element_type>& col1,
-					 Vector_column<Friend_field_element_type>& col2);
+	template<class Friend_field_element_type, class Friend_column_pairing_option>
+	friend void swap(Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
+					 Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col2);
 
 private:
 	int dim_;
@@ -67,13 +75,13 @@ private:
 	void _cleanValues();
 };
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type>::Vector_column() : dim_(0)
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column() : dim_(0)
 {}
 
-template<class Field_element_type>
+template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline Vector_column<Field_element_type>::Vector_column(Boundary_type &boundary)
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.size())
 {
@@ -82,33 +90,46 @@ inline Vector_column<Field_element_type>::Vector_column(Boundary_type &boundary)
 	}
 }
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type>::Vector_column(Vector_column &column)
-	: dim_(column.dim_),
+template<class Field_element_type, class Column_pairing_option>
+template<class Boundary_type>
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Boundary_type &boundary, dimension_type dimension)
+	: dim_(dimension),
+	  column_(boundary.size())
+{
+	for (unsigned int i = 0; i < boundary.size(); i++){
+		column_[i] = Cell(boundary[i]->second, boundary[i]->first);
+	}
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
 	  column_(column.column_),
 	  erasedValues_(column.erasedValues_)
 {}
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type>::Vector_column(Vector_column &&column) noexcept
-	: dim_(std::exchange(column.dim_, 0)),
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &&column) noexcept
+	: Column_pairing_option(std::move(column)),
+	  dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_)),
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-template<class Field_element_type>
-inline std::vector<Field_element_type> Vector_column<Field_element_type>::get_content(unsigned int columnLength)
+template<class Field_element_type, class Column_pairing_option>
+inline std::vector<Field_element_type> Vector_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
 {
 	_cleanValues();
-	std::vector<Field_element_type> container(columnLength);
+	std::vector<Field_element_type,Column_pairing_option> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
 		container[it->get_row_index()] = it->element();
 	}
 	return container;
 }
 
-template<class Field_element_type>
-inline bool Vector_column<Field_element_type>::is_non_zero(index rowIndex) const
+template<class Field_element_type, class Column_pairing_option>
+inline bool Vector_column<Field_element_type,Column_pairing_option>::is_non_zero(index rowIndex) const
 {
 	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
@@ -118,21 +139,21 @@ inline bool Vector_column<Field_element_type>::is_non_zero(index rowIndex) const
 	return false;
 }
 
-template<class Field_element_type>
-inline bool Vector_column<Field_element_type>::is_empty()
+template<class Field_element_type, class Column_pairing_option>
+inline bool Vector_column<Field_element_type,Column_pairing_option>::is_empty()
 {
 	_cleanValues();
 	return column_.empty();
 }
 
-template<class Field_element_type>
-inline dimension_type Vector_column<Field_element_type>::get_dimension() const
+template<class Field_element_type, class Column_pairing_option>
+inline dimension_type Vector_column<Field_element_type,Column_pairing_option>::get_dimension() const
 {
 	return dim_;
 }
 
-template<class Field_element_type>
-inline int Vector_column<Field_element_type>::get_pivot()
+template<class Field_element_type, class Column_pairing_option>
+inline int Vector_column<Field_element_type,Column_pairing_option>::get_pivot()
 {
 	while (!column_.empty() &&
 		   erasedValues_.find(column_.back().get_row_index()) != erasedValues_.end()) {
@@ -145,8 +166,8 @@ inline int Vector_column<Field_element_type>::get_pivot()
 	return column_.back().get_row_index();
 }
 
-template<class Field_element_type>
-inline Field_element_type Vector_column<Field_element_type>::get_pivot_value()
+template<class Field_element_type, class Column_pairing_option>
+inline Field_element_type Vector_column<Field_element_type,Column_pairing_option>::get_pivot_value()
 {
 	while (!column_.empty() &&
 		   erasedValues_.find(column_.back().get_row_index()) != erasedValues_.end()) {
@@ -159,21 +180,21 @@ inline Field_element_type Vector_column<Field_element_type>::get_pivot_value()
 	return column_.back().get_element();
 }
 
-template<class Field_element_type>
-inline void Vector_column<Field_element_type>::clear()
+template<class Field_element_type, class Column_pairing_option>
+inline void Vector_column<Field_element_type,Column_pairing_option>::clear()
 {
 	column_.clear();
 	erasedValues_.clear();
 }
 
-template<class Field_element_type>
-inline void Vector_column<Field_element_type>::clear(index rowIndex)
+template<class Field_element_type, class Column_pairing_option>
+inline void Vector_column<Field_element_type,Column_pairing_option>::clear(index rowIndex)
 {
 	erasedValues_.insert(rowIndex);
 }
 
-template<class Field_element_type>
-inline void Vector_column<Field_element_type>::reorder(std::vector<index> &valueMap)
+template<class Field_element_type, class Column_pairing_option>
+inline void Vector_column<Field_element_type,Column_pairing_option>::reorder(std::vector<index> &valueMap)
 {
 	std::vector<Cell> newColumn;
 	for (Cell& v : column_) {
@@ -185,8 +206,8 @@ inline void Vector_column<Field_element_type>::reorder(std::vector<index> &value
 	column_.swap(newColumn);
 }
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator+=(Vector_column &column)
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator+=(Vector_column &column)
 {
 	if (column.is_empty()) return;
 	if (column_.empty()){
@@ -268,8 +289,8 @@ inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::ope
 	return *this;
 }
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator*=(unsigned int const &v)
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int const &v)
 {
 	v %= Field_element_type::get_characteristic();
 
@@ -286,8 +307,8 @@ inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::ope
 	return *this;
 }
 
-template<class Field_element_type>
-inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::operator=(Vector_column other)
+template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator=(Vector_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
@@ -295,8 +316,8 @@ inline Vector_column<Field_element_type> &Vector_column<Field_element_type>::ope
 	return *this;
 }
 
-template<class Field_element_type>
-inline void Vector_column<Field_element_type>::_cleanValues()
+template<class Field_element_type, class Column_pairing_option>
+inline void Vector_column<Field_element_type,Column_pairing_option>::_cleanValues()
 {
 	if (erasedValues_.empty()) return;
 
@@ -309,34 +330,34 @@ inline void Vector_column<Field_element_type>::_cleanValues()
 	column_.swap(newColumn);
 }
 
-template<class Friend_field_element_type>
-Vector_column<Friend_field_element_type> operator+(
-		Vector_column<Friend_field_element_type> column1,
-		Vector_column<Friend_field_element_type>& column2)
+template<class Friend_field_element_type, class Friend_column_pairing_option>
+Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
+		Vector_column<Friend_field_element_type,Friend_column_pairing_option> column1,
+		Vector_column<Friend_field_element_type,Friend_column_pairing_option>& column2)
 {
 	column1 += column2;
 	return column1;
 }
 
-template<class Friend_field_element_type>
-Vector_column<Friend_field_element_type> operator*(
-		Vector_column<Friend_field_element_type> column, unsigned int const& v)
+template<class Friend_field_element_type, class Friend_column_pairing_option>
+Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
+		Vector_column<Friend_field_element_type,Friend_column_pairing_option> column, unsigned int const& v)
 {
 	column *= v;
 	return column;
 }
 
-template<class Friend_field_element_type>
-Vector_column<Friend_field_element_type> operator*(
-		unsigned int const& v, Vector_column<Friend_field_element_type> column)
+template<class Friend_field_element_type, class Friend_column_pairing_option>
+Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
+		unsigned int const& v, Vector_column<Friend_field_element_type,Friend_column_pairing_option> column)
 {
 	column *= v;
 	return column;
 }
 
-template<class Friend_field_element_type>
-inline void swap(Vector_column<Friend_field_element_type>& col1,
-				 Vector_column<Friend_field_element_type>& col2)
+template<class Friend_field_element_type, class Friend_column_pairing_option>
+inline void swap(Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
+				 Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

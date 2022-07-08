@@ -303,8 +303,20 @@ inline void RU_matrix<Master_matrix>::_reduce()
 			int pivot = curr.get_pivot();
 
 			while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
-				curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-				mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+				if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+					curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
+					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+				} else {
+					Column_type &toadd = reducedMatrixR_.at(pivotToColumnIndex_.at(pivot));
+					typename Master_matrix::Field_type coef = curr.get_pivot_value();
+					coef = coef.get_inverse();
+					coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+					curr *= coef;
+					curr += toadd;
+					mirrorMatrixU_.get_column(i) *= coef;
+					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+				}
+
 				pivot = curr.get_pivot();
 			}
 
@@ -340,8 +352,20 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 	int pivot = curr.get_pivot();
 
 	while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
-		curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-		mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+		if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+			curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
+			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+		} else {
+			Column_type &toadd = reducedMatrixR_.at(pivotToColumnIndex_.at(pivot));
+			typename Master_matrix::Field_type coef = curr.get_pivot_value();
+			coef = coef.get_inverse();
+			coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+			curr *= coef;
+			curr += toadd;
+			mirrorMatrixU_.get_column(nextInsertIndex_) *= coef;
+			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+		}
+
 		pivot = curr.get_pivot();
 	}
 

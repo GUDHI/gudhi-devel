@@ -16,36 +16,32 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-class Z2_reduced_cell_set_column_with_row : Z2_reduced_cell_column_with_row<Column_types::SET>
+template<class Column_pairing_option>
+class Z2_reduced_cell_set_column_with_row : Z2_reduced_cell_column_with_row<Column_types::SET,Column_pairing_option>
 {
 public:
 	Z2_reduced_cell_set_column_with_row();
 	template<class Chain_type>
-	Z2_reduced_cell_set_column_with_row(index chainIndex, Chain_type& chain);
-	template<class Chain_type>
-	Z2_reduced_cell_set_column_with_row(index chainIndex, Chain_type& chain, index pairedColumnIndex);
+	Z2_reduced_cell_set_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension);
 	Z2_reduced_cell_set_column_with_row(const Z2_reduced_cell_set_column_with_row& other);
 };
 
-inline Z2_reduced_cell_set_column_with_row::Z2_reduced_cell_set_column_with_row()
-	: Z2_reduced_cell_column_with_row<Column_types::SET>()
+template<class Column_pairing_option>
+inline Z2_reduced_cell_set_column_with_row<Column_pairing_option>::Z2_reduced_cell_set_column_with_row()
+	: Z2_reduced_cell_column_with_row<Column_types::SET,Column_pairing_option>()
 {}
 
+template<class Column_pairing_option>
 template<class Chain_type>
-inline Z2_reduced_cell_set_column_with_row::Z2_reduced_cell_set_column_with_row(
-		index chainIndex, Chain_type& chain)
-	: Z2_reduced_cell_column_with_row<Column_types::SET>(chainIndex, chain)
+inline Z2_reduced_cell_set_column_with_row<Column_pairing_option>::Z2_reduced_cell_set_column_with_row(
+		index chainIndex, Chain_type& chain, dimension_type dimension)
+	: Z2_reduced_cell_column_with_row<Column_types::SET,Column_pairing_option>(chainIndex, chain, dimension)
 {}
 
-template<class Chain_type>
-inline Z2_reduced_cell_set_column_with_row::Z2_reduced_cell_set_column_with_row(
-		index chainIndex, Chain_type& chain, index pairedColumnIndex)
-	: Z2_reduced_cell_column_with_row<Column_types::SET>(chainIndex, chain, pairedColumnIndex)
-{}
-
-inline Z2_reduced_cell_set_column_with_row::Z2_reduced_cell_set_column_with_row(
+template<class Column_pairing_option>
+inline Z2_reduced_cell_set_column_with_row<Column_pairing_option>::Z2_reduced_cell_set_column_with_row(
 		const Z2_reduced_cell_set_column_with_row& other)
-	: Z2_reduced_cell_column_with_row<Column_types::SET>(other)
+	: Z2_reduced_cell_column_with_row<Column_types::SET,Column_pairing_option>(other)
 {}
 
 } //namespace persistence_matrix

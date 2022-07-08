@@ -22,7 +22,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-class Z2_unordered_set_column
+template<class Column_pairing_option>
+class Z2_unordered_set_column : Column_pairing_option
 {
 public:
 	using Cell = Z2_base_cell;
@@ -30,6 +31,8 @@ public:
 	Z2_unordered_set_column();
 	template<class Boundary_type>
 	Z2_unordered_set_column(Boundary_type& boundary);
+	template<class Boundary_type>
+	Z2_unordered_set_column(Boundary_type& boundary, dimension_type dimension);
 	Z2_unordered_set_column(Z2_unordered_set_column& column);
 	Z2_unordered_set_column(Z2_unordered_set_column&& column) noexcept;
 
@@ -43,11 +46,16 @@ public:
 	void reorder(std::vector<index>& valueMap);
 
 	Z2_unordered_set_column& operator+=(Z2_unordered_set_column const &column);
-	friend Z2_unordered_set_column operator+(Z2_unordered_set_column column1, Z2_unordered_set_column const& column2);
+	template<class Friend_column_pairing_option>
+	friend Z2_unordered_set_column<Friend_column_pairing_option> operator+(
+			Z2_unordered_set_column<Friend_column_pairing_option> column1,
+			Z2_unordered_set_column<Friend_column_pairing_option> const& column2);
 
 	Z2_unordered_set_column& operator=(Z2_unordered_set_column other);
 
-	friend void swap(Z2_unordered_set_column& col1, Z2_unordered_set_column& col2);
+	template<class Friend_column_pairing_option>
+	friend void swap(Z2_unordered_set_column<Friend_column_pairing_option>& col1,
+					 Z2_unordered_set_column<Friend_column_pairing_option>& col2);
 
 private:
 	int dim_;
@@ -56,33 +64,49 @@ private:
 	int pivot_;
 };
 
-inline Z2_unordered_set_column::Z2_unordered_set_column()
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column()
 	: dim_(0), pivotChanged_(false), pivot_(-1)
 {}
 
+template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_unordered_set_column::Z2_unordered_set_column(Boundary_type &boundary)
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end()),
 	  pivotChanged_(false),
 	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
 {}
 
-inline Z2_unordered_set_column::Z2_unordered_set_column(Z2_unordered_set_column &column)
-	: dim_(column.dim_),
+template<class Column_pairing_option>
+template<class Boundary_type>
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(Boundary_type &boundary, dimension_type dimension)
+	: dim_(dimension),
+	  column_(boundary.begin(), boundary.end()),
+	  pivotChanged_(false),
+	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+{}
+
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(Z2_unordered_set_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
 	  column_(column.column_),
 	  pivotChanged_(column.pivotChanged_),
 	  pivot_(column.pivot_)
 {}
 
-inline Z2_unordered_set_column::Z2_unordered_set_column(Z2_unordered_set_column &&column) noexcept
-	: dim_(std::exchange(column.dim_, 0)),
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(Z2_unordered_set_column &&column) noexcept
+	: Column_pairing_option(std::move(column)),
+	  dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_)),
 	  pivotChanged_(std::exchange(column.pivotChanged_, 0)),
 	  pivot_(std::exchange(column.pivot_, 0))
 {}
 
-inline std::vector<bool> Z2_unordered_set_column::get_content(unsigned int columnLength)
+template<class Column_pairing_option>
+inline std::vector<bool> Z2_unordered_set_column<Column_pairing_option>::get_content(unsigned int columnLength)
 {
 	std::vector<bool> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
@@ -91,22 +115,26 @@ inline std::vector<bool> Z2_unordered_set_column::get_content(unsigned int colum
 	return container;
 }
 
-inline bool Z2_unordered_set_column::is_non_zero(index rowIndex) const
+template<class Column_pairing_option>
+inline bool Z2_unordered_set_column<Column_pairing_option>::is_non_zero(index rowIndex) const
 {
 	return column_.find(rowIndex) != column_.end();
 }
 
-inline bool Z2_unordered_set_column::is_empty()
+template<class Column_pairing_option>
+inline bool Z2_unordered_set_column<Column_pairing_option>::is_empty()
 {
 	return column_.empty();
 }
 
-inline dimension_type Z2_unordered_set_column::get_dimension() const
+template<class Column_pairing_option>
+inline dimension_type Z2_unordered_set_column<Column_pairing_option>::get_dimension() const
 {
 	return dim_;
 }
 
-inline int Z2_unordered_set_column::get_pivot()
+template<class Column_pairing_option>
+inline int Z2_unordered_set_column<Column_pairing_option>::get_pivot()
 {
 	if (pivotChanged_ && column_.size() == 0){
 		pivot_ = -1;
@@ -123,20 +151,23 @@ inline int Z2_unordered_set_column::get_pivot()
 	return pivot_;
 }
 
-inline void Z2_unordered_set_column::clear()
+template<class Column_pairing_option>
+inline void Z2_unordered_set_column<Column_pairing_option>::clear()
 {
 	column_.clear();
 	pivot_ = -1;
 	pivotChanged_ = false;
 }
 
-inline void Z2_unordered_set_column::clear(index rowIndex)
+template<class Column_pairing_option>
+inline void Z2_unordered_set_column<Column_pairing_option>::clear(index rowIndex)
 {
 	column_.erase(rowIndex);
 	if (static_cast<int>(rowIndex) == pivot_) pivotChanged_ = true;
 }
 
-inline void Z2_unordered_set_column::reorder(std::vector<index> &valueMap)
+template<class Column_pairing_option>
+inline void Z2_unordered_set_column<Column_pairing_option>::reorder(std::vector<index> &valueMap)
 {
 	std::unordered_set<Cell> newSet;
 	for (const Cell& v : column_) newSet.insert(valueMap.at(v.get_row_index()));
@@ -144,7 +175,8 @@ inline void Z2_unordered_set_column::reorder(std::vector<index> &valueMap)
 	pivotChanged_ = true;
 }
 
-inline Z2_unordered_set_column &Z2_unordered_set_column::operator+=(Z2_unordered_set_column const &column)
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option> &Z2_unordered_set_column<Column_pairing_option>::operator+=(Z2_unordered_set_column const &column)
 {
 	for (const Cell& v : column.column_){
 		if (column_.find(v) != column_.end()){
@@ -162,7 +194,8 @@ inline Z2_unordered_set_column &Z2_unordered_set_column::operator+=(Z2_unordered
 	return *this;
 }
 
-inline Z2_unordered_set_column &Z2_unordered_set_column::operator=(Z2_unordered_set_column other)
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option> &Z2_unordered_set_column<Column_pairing_option>::operator=(Z2_unordered_set_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
@@ -171,13 +204,18 @@ inline Z2_unordered_set_column &Z2_unordered_set_column::operator=(Z2_unordered_
 	return *this;
 }
 
-Z2_unordered_set_column operator+(Z2_unordered_set_column column1, Z2_unordered_set_column const& column2)
+template<class Friend_column_pairing_option>
+Z2_unordered_set_column<Friend_column_pairing_option> operator+(
+		Z2_unordered_set_column<Friend_column_pairing_option> column1,
+		Z2_unordered_set_column<Friend_column_pairing_option> const& column2)
 {
 	column1 += column2;
 	return column1;
 }
 
-inline void swap(Z2_unordered_set_column& col1, Z2_unordered_set_column& col2)
+template<class Friend_column_pairing_option>
+inline void swap(Z2_unordered_set_column<Friend_column_pairing_option>& col1,
+				 Z2_unordered_set_column<Friend_column_pairing_option>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

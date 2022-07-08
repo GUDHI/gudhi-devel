@@ -54,7 +54,8 @@
 #include "column_types/z2_unordered_set_column.h"
 #include "column_types/z2_reduced_cell_list_column_with_row.h"
 #include "column_types/z2_reduced_cell_set_column_with_row.h"
-#include "cell.h"
+#include "column_types/cell.h"
+#include "column_types/column_pairing.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -95,46 +96,61 @@ public:
 //							>::type
 //						>::type;
 
-	using Heap_column_type = Z2_heap_column;
+	struct Dummy_column_pairing{
+	protected:
+		Dummy_column_pairing(){}
+		Dummy_column_pairing(Dummy_column_pairing& toCopy){}
+		Dummy_column_pairing(Dummy_column_pairing&& other) noexcept{}
+
+		static constexpr bool isActive_ = false;
+	};
+
+	using Column_pairing_option = typename std::conditional<
+											Options::is_of_boundary_type,
+											Dummy_column_pairing,
+											Column_pairing
+										>::type;
+
+	using Heap_column_type = Z2_heap_column<Column_pairing_option>;
 
 	using List_column_type = typename std::conditional<
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_list_column_with_row,
-									Z2_list_column
+									Z2_reduced_cell_list_column_with_row<Column_pairing_option>,
+									Z2_list_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_list_column_with_row<Field_type>,
-									List_column<Field_type>
+									Reduced_cell_list_column_with_row<Field_type,Column_pairing_option>,
+									List_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
 
 	using Vector_column_type = typename std::conditional<
 								Field_type::get_characteristic() == 2,
-								Z2_vector_column,
-								Vector_column<Field_type>
+								Z2_vector_column<Column_pairing_option>,
+								Vector_column<Field_type,Column_pairing_option>
 							>::type;
 
 	using Set_column_type = typename std::conditional<
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_set_column_with_row,
-									Z2_set_column
+									Z2_reduced_cell_set_column_with_row<Column_pairing_option>,
+									Z2_set_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_set_column_with_row<Field_type>,
-									Set_column<Field_type>
+									Reduced_cell_set_column_with_row<Field_type,Column_pairing_option>,
+									Set_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
 
 	using Unordered_set_column_type = typename std::conditional<
 										Field_type::get_characteristic() == 2,
-										Z2_unordered_set_column,
-										Unordered_set_column<Field_type>
+										Z2_unordered_set_column<Column_pairing_option>,
+										Unordered_set_column<Field_type,Column_pairing_option>
 									>::type;
 
 	using Column_type = typename std::conditional<
@@ -171,6 +187,7 @@ public:
 											std::unordered_map<unsigned int,value_type>,
 											std::vector<value_type>
 										>::type;
+
 	using column_container_type = typename std::conditional<
 											Options::has_removable_columns,
 											std::unordered_map<index,Column_type>,

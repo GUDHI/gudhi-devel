@@ -21,7 +21,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-class Z2_list_column
+template<class Column_pairing_option>
+class Z2_list_column : Column_pairing_option
 {
 public:
 	using Cell = Z2_base_cell;
@@ -29,6 +30,8 @@ public:
 	Z2_list_column();
 	template<class Boundary_type>
 	Z2_list_column(Boundary_type& boundary);
+	template<class Boundary_type>
+	Z2_list_column(Boundary_type& boundary, dimension_type dimension);
 	Z2_list_column(Z2_list_column& column);
 	Z2_list_column(Z2_list_column&& column) noexcept;
 
@@ -42,37 +45,56 @@ public:
 	void reorder(std::vector<index>& valueMap);
 
 	Z2_list_column& operator+=(Z2_list_column const &column);
-	friend Z2_list_column operator+(Z2_list_column column1, Z2_list_column const& column2);
+	template<class Friend_column_pairing_option>
+	friend Z2_list_column<Friend_column_pairing_option> operator+(
+			Z2_list_column<Friend_column_pairing_option> column1,
+			Z2_list_column<Friend_column_pairing_option> const& column2);
 
 	Z2_list_column& operator=(Z2_list_column other);
 
-	friend void swap(Z2_list_column& col1, Z2_list_column& col2);
+	template<class Friend_column_pairing_option>
+	friend void swap(Z2_list_column<Friend_column_pairing_option>& col1,
+					 Z2_list_column<Friend_column_pairing_option>& col2);
 
 private:
 	int dim_;
 	std::list<Cell> column_;
 };
 
-inline Z2_list_column::Z2_list_column() : dim_(0)
+template<class Column_pairing_option>
+inline Z2_list_column<Column_pairing_option>::Z2_list_column() : dim_(0)
 {}
 
+template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_list_column::Z2_list_column(Boundary_type &boundary)
+inline Z2_list_column<Column_pairing_option>::Z2_list_column(Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end())
 {}
 
-inline Z2_list_column::Z2_list_column(Z2_list_column &column)
-	: dim_(column.dim_),
+template<class Column_pairing_option>
+template<class Boundary_type>
+inline Z2_list_column<Column_pairing_option>::Z2_list_column(Boundary_type &boundary, dimension_type dimension)
+	: dim_(dimension),
+	  column_(boundary.begin(), boundary.end())
+{}
+
+template<class Column_pairing_option>
+inline Z2_list_column<Column_pairing_option>::Z2_list_column(Z2_list_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
 	  column_(column.column_)
 {}
 
-inline Z2_list_column::Z2_list_column(Z2_list_column &&column) noexcept
-	: dim_(std::exchange(column.dim_, 0)),
+template<class Column_pairing_option>
+inline Z2_list_column<Column_pairing_option>::Z2_list_column(Z2_list_column &&column) noexcept
+	: Column_pairing_option(std::move(column)),
+	  dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_))
 {}
 
-inline std::vector<bool> Z2_list_column::get_content(unsigned int columnLength)
+template<class Column_pairing_option>
+inline std::vector<bool> Z2_list_column<Column_pairing_option>::get_content(unsigned int columnLength)
 {
 	std::vector<bool> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
@@ -81,7 +103,8 @@ inline std::vector<bool> Z2_list_column::get_content(unsigned int columnLength)
 	return container;
 }
 
-inline bool Z2_list_column::is_non_zero(index rowIndex) const
+template<class Column_pairing_option>
+inline bool Z2_list_column<Column_pairing_option>::is_non_zero(index rowIndex) const
 {
 	for (const Cell& v : column_){
 		if (v.get_row_index() == rowIndex) return true;
@@ -89,36 +112,42 @@ inline bool Z2_list_column::is_non_zero(index rowIndex) const
 	return false;
 }
 
-inline bool Z2_list_column::is_empty() const
+template<class Column_pairing_option>
+inline bool Z2_list_column<Column_pairing_option>::is_empty() const
 {
 	return column_.empty();
 }
 
-inline dimension_type Z2_list_column::get_dimension() const
+template<class Column_pairing_option>
+inline dimension_type Z2_list_column<Column_pairing_option>::get_dimension() const
 {
 	return dim_;
 }
 
-inline int Z2_list_column::get_pivot()
+template<class Column_pairing_option>
+inline int Z2_list_column<Column_pairing_option>::get_pivot()
 {
 	if (column_.empty()) return -1;
 
 	return column_.back().get_row_index();
 }
 
-inline void Z2_list_column::clear()
+template<class Column_pairing_option>
+inline void Z2_list_column<Column_pairing_option>::clear()
 {
 	column_.clear();
 }
 
-inline void Z2_list_column::clear(index rowIndex)
+template<class Column_pairing_option>
+inline void Z2_list_column<Column_pairing_option>::clear(index rowIndex)
 {
 	auto it = column_.begin();
 	while (it != column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != column_.end()) column_.erase(it);
 }
 
-inline void Z2_list_column::reorder(std::vector<index> &valueMap)
+template<class Column_pairing_option>
+inline void Z2_list_column<Column_pairing_option>::reorder(std::vector<index> &valueMap)
 {
 	std::list<Cell>::iterator it = column_.begin();
 	while (it != column_.end()) {
@@ -128,7 +157,8 @@ inline void Z2_list_column::reorder(std::vector<index> &valueMap)
 	column_.sort();
 }
 
-inline Z2_list_column &Z2_list_column::operator+=(Z2_list_column const &column)
+template<class Column_pairing_option>
+inline Z2_list_column<Column_pairing_option> &Z2_list_column<Column_pairing_option>::operator+=(Z2_list_column const &column)
 {
 	if (column.is_empty()) return *this;
 	if (column_.empty()){
@@ -170,20 +200,26 @@ inline Z2_list_column &Z2_list_column::operator+=(Z2_list_column const &column)
 	return *this;
 }
 
-inline Z2_list_column &Z2_list_column::operator=(Z2_list_column other)
+template<class Column_pairing_option>
+inline Z2_list_column<Column_pairing_option> &Z2_list_column<Column_pairing_option>::operator=(Z2_list_column other)
 {
 	std::swap(dim_, other.dim_);
 	std::swap(column_, other.column_);
 	return *this;
 }
 
-Z2_list_column operator+(Z2_list_column column1, Z2_list_column const& column2)
+template<class Friend_column_pairing_option>
+Z2_list_column<Friend_column_pairing_option> operator+(
+		Z2_list_column<Friend_column_pairing_option> column1,
+		Z2_list_column<Friend_column_pairing_option> const& column2)
 {
 	column1 += column2;
 	return column1;
 }
 
-inline void swap(Z2_list_column& col1, Z2_list_column& col2)
+template<class Friend_column_pairing_option>
+inline void swap(Z2_list_column<Friend_column_pairing_option>& col1,
+				 Z2_list_column<Friend_column_pairing_option>& col2)
 {
 	std::swap(col1.dim_, col2.dim_);
 	col1.column_.swap(col2.column_);

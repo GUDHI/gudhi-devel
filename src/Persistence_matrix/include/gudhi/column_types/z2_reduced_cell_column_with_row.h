@@ -24,8 +24,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<Column_types boost_column_type>
-class Z2_reduced_cell_column_with_row
+template<Column_types boost_column_type, class Column_pairing_option>
+class Z2_reduced_cell_column_with_row : Column_pairing_option
 {
 public:
 	struct Cell;
@@ -82,20 +82,16 @@ public:
 
 	Z2_reduced_cell_column_with_row();
 	template<class Chain_type>
-	Z2_reduced_cell_column_with_row(index chainIndex, Chain_type& chain);
-	template<class Chain_type>
-	Z2_reduced_cell_column_with_row(index chainIndex, Chain_type& chain, index pairedColumnIndex);
+	Z2_reduced_cell_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension);
 	Z2_reduced_cell_column_with_row(const Z2_reduced_cell_column_with_row& other);
 	~Z2_reduced_cell_column_with_row();
 
-	index get_paired_chain_index();
-	bool is_paired();
-	void assign_paired_chain(index other_col);
-	void unassign_paired_chain();
 	Column_type& get_column();
 	Row_type& get_row();
 	int get_pivot();
 	int get_lowest_simplex_index();
+	dimension_type get_dimension() const;
+
 	void swap_rows(Z2_reduced_cell_column_with_row& other);
 	void swap_lowest_simplex_index(Z2_reduced_cell_column_with_row& other);
 
@@ -104,19 +100,19 @@ private:
 	Row_type row_;
 	int pivot_;		//simplex index associated to the chain
 	int lowestSimplexIndex_;
-	int pairedColumn_;
+	dimension_type dim_;
 };
 
-template<Column_types boost_column_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_column_with_row()
-	: pivot_(-1), lowestSimplexIndex_(-1), pairedColumn_(-1)
+template<Column_types boost_column_type, class Column_pairing_option>
+inline Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::Z2_reduced_cell_column_with_row()
+	: pivot_(-1), lowestSimplexIndex_(-1), dim_(-1)
 {}
 
-template<Column_types boost_column_type>
+template<Column_types boost_column_type, class Column_pairing_option>
 template<class Chain_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_column_with_row(
-		index chainIndex, Chain_type& chain)
-	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), pairedColumn_(-1)
+inline Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::Z2_reduced_cell_column_with_row(
+		index chainIndex, Chain_type& chain, dimension_type dimension)
+	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), dim_(dimension)
 {
 	for (index id : chain){
 		Cell *new_cell = new Cell(chainIndex, id);
@@ -124,24 +120,12 @@ inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_colum
 	}
 }
 
-template<Column_types boost_column_type>
-template<class Chain_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_column_with_row(
-		index chainIndex, Chain_type& chain, index pairedColumnIndex)
-	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), pairedColumn_(pairedColumnIndex)
-{
-	for (index id : chain){
-		Cell *new_cell = new Cell(chainIndex, id);
-		column_.insert(column_.end(), *new_cell);
-	}
-}
-
-template<Column_types boost_column_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_column_with_row(
+template<Column_types boost_column_type, class Column_pairing_option>
+inline Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::Z2_reduced_cell_column_with_row(
 		const Z2_reduced_cell_column_with_row& other)
-	: pivot_(other.pivot_),
-	  lowestSimplexIndex_(other.lowestSimplexIndex_),
-	  pairedColumn_(other.pairedColumn_)
+	: Column_pairing_option(other),
+	  pivot_(other.pivot_),
+	  lowestSimplexIndex_(other.lowestSimplexIndex_)
 {
 	//Cloner object function
 	struct new_cloner
@@ -161,8 +145,8 @@ inline Z2_reduced_cell_column_with_row<boost_column_type>::Z2_reduced_cell_colum
 	row_.clone_from(other.row_, new_cloner(), delete_disposer());
 }
 
-template<Column_types boost_column_type>
-inline Z2_reduced_cell_column_with_row<boost_column_type>::~Z2_reduced_cell_column_with_row()
+template<Column_types boost_column_type, class Column_pairing_option>
+inline Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::~Z2_reduced_cell_column_with_row()
 { //empty the column, call delete on all cells
 	for (typename Column_type::iterator c_it = column_.begin(); c_it != column_.end(); )
 	{
@@ -175,67 +159,47 @@ inline Z2_reduced_cell_column_with_row<boost_column_type>::~Z2_reduced_cell_colu
 	}
 }
 
-template<Column_types boost_column_type>
-inline index Z2_reduced_cell_column_with_row<boost_column_type>::get_paired_chain_index()
-{
-	assert(pairedColumn_ != -1 && "Column not paired.");
-	return static_cast<index>(pairedColumn_);
-}
-
-template<Column_types boost_column_type>
-inline bool Z2_reduced_cell_column_with_row<boost_column_type>::is_paired()
-{
-	return pairedColumn_ != -1;
-}
-
-template<Column_types boost_column_type>
-inline void Z2_reduced_cell_column_with_row<boost_column_type>::assign_paired_chain(
-		index other_col)
-{
-	pairedColumn_ = other_col;
-}
-
-template<Column_types boost_column_type>
-inline void Z2_reduced_cell_column_with_row<boost_column_type>::unassign_paired_chain()
-{
-	pairedColumn_ = -1;
-}
-
-template<Column_types boost_column_type>
-inline typename Z2_reduced_cell_column_with_row<boost_column_type>::Column_type&
-Z2_reduced_cell_column_with_row<boost_column_type>::get_column()
+template<Column_types boost_column_type, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::Column_type&
+Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::get_column()
 {
 	return column_;
 }
 
-template<Column_types boost_column_type>
-inline typename Z2_reduced_cell_column_with_row<boost_column_type>::Row_type&
-Z2_reduced_cell_column_with_row<boost_column_type>::get_row()
+template<Column_types boost_column_type, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::Row_type&
+Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::get_row()
 {
 	return row_;
 }
 
-template<Column_types boost_column_type>
-inline int Z2_reduced_cell_column_with_row<boost_column_type>::get_pivot()
+template<Column_types boost_column_type, class Column_pairing_option>
+inline int Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::get_pivot()
 {
 	return pivot_;
 }
 
-template<Column_types boost_column_type>
-inline int Z2_reduced_cell_column_with_row<boost_column_type>::get_lowest_simplex_index()
+template<Column_types boost_column_type, class Column_pairing_option>
+inline int Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::get_lowest_simplex_index()
 {
 	return lowestSimplexIndex_;
 }
 
-template<Column_types boost_column_type>
-inline void Z2_reduced_cell_column_with_row<boost_column_type>::swap_rows(Z2_reduced_cell_column_with_row& other)
+template<Column_types boost_column_type, class Column_pairing_option>
+inline dimension_type Z2_reduced_cell_column_with_row<boost_column_type, Column_pairing_option>::get_dimension() const
+{
+	return dim_;
+}
+
+template<Column_types boost_column_type, class Column_pairing_option>
+inline void Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::swap_rows(Z2_reduced_cell_column_with_row& other)
 {
 	std::swap(row_, other.row_);
 	std::swap(pivot_, other.pivot_);
 }
 
-template<Column_types boost_column_type>
-inline void Z2_reduced_cell_column_with_row<boost_column_type>::swap_lowest_simplex_index(Z2_reduced_cell_column_with_row& other)
+template<Column_types boost_column_type, class Column_pairing_option>
+inline void Z2_reduced_cell_column_with_row<boost_column_type,Column_pairing_option>::swap_lowest_simplex_index(Z2_reduced_cell_column_with_row& other)
 {
 	std::swap(lowestSimplexIndex_, other.lowestSimplexIndex_);
 }
