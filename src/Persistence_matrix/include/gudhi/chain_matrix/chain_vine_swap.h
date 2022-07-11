@@ -36,10 +36,11 @@ protected:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
-	Chain_vine_swap(matrix_type& matrix, dictionnary_type& pivotToPosition);
+	Chain_vine_swap(matrix_type& matrix);
 	Chain_vine_swap(Chain_vine_swap &matrixToCopy);
 	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
+	dictionnary_type pivotToPosition_;
 	static constexpr bool isActive_ = true;
 
 private:
@@ -48,7 +49,6 @@ private:
 	using Column_type = typename Master_matrix::Column_type;
 
 	matrix_type& matrix_;
-	dictionnary_type& pivotToPosition_;
 
 	void _add_to(const typename Column_type::Column& column, std::set<index>& set);
 	bool _is_negative_in_pair(index simplexIndex);
@@ -66,8 +66,8 @@ private:
 };
 
 template<class Master_matrix>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix, dictionnary_type &pivotToPosition)
-	: matrix_(matrix), pivotToPosition_(pivotToPosition), Chain_pairing<Master_matrix>()
+inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix)
+	: matrix_(matrix), pivotToPosition_(matrix.size()), Chain_pairing<Master_matrix>()
 {}
 
 template<class Master_matrix>

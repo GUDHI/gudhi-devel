@@ -92,6 +92,7 @@ public:
 	int get_pivot();
 	int get_lowest_simplex_index();
 	dimension_type get_dimension() const;
+	bool is_empty() const;
 
 	void swap_rows(Reduced_cell_column_with_row& other);
 	void swap_lowest_simplex_index(Reduced_cell_column_with_row& other);
@@ -190,6 +191,12 @@ template<Column_types boost_column_type, class Field_element_type, class Column_
 inline dimension_type Reduced_cell_column_with_row<boost_column_type, Field_element_type, Column_pairing_option>::get_dimension() const
 {
 	return dim_;
+}
+
+template<Column_types boost_column_type, class Field_element_type, class Column_pairing_option>
+inline bool Reduced_cell_column_with_row<boost_column_type, Field_element_type, Column_pairing_option>::is_empty() const
+{
+	return column_.empty();
 }
 
 template<Column_types boost_column_type, class Field_element_type, class Column_pairing_option>

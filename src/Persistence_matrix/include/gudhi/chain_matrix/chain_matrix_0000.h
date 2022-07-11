@@ -82,7 +82,7 @@ private:
 template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix()
 	: Master_matrix::Chain_pairing_option(),
-	  Master_matrix::Chain_vine_swap_option(matrix_, pivotToColumnIndex_),
+	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
 	  nextInsertIndex_(0),
 	  maxDim_(-1)
@@ -92,7 +92,7 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline Chain_matrix<Master_matrix>::Chain_matrix(std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Chain_pairing_option(),
-	  Master_matrix::Chain_vine_swap_option(matrix_, pivotToColumnIndex_),
+	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
 	  matrix_(orderedBoundaries.size()),
 	  pivotToColumnIndex_(orderedBoundaries.size(), -1),
@@ -343,87 +343,6 @@ inline void Chain_matrix<Master_matrix>::print()
 		std::cout << "\n";
 	}
 	std::cout << "\n";
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_initialize_U()
-{
-	boundary_type id(1);
-	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id.at(0).second = 1;
-
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id.at(0) = i;
-		else id.at(0).first = i;
-		mirrorMatrixU_.insert_boundary(id);
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_reduce()
-{
-	if constexpr (_barcode_option_is_active()){
-		_indexToBar().resize(reducedMatrixR_.get_number_of_columns(), -1);
-	}
-
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if (!(reducedMatrixR_.is_zero_column(i)))
-		{
-			Column_type &curr = reducedMatrixR_.get_column(i);
-			int pivot = curr.get_pivot();
-
-			while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
-				curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-				mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
-				pivot = curr.get_pivot();
-			}
-
-			if (pivot != -1){
-				pivotToColumnIndex_.at(pivot) = i;
-				if constexpr (_barcode_option_is_active()){
-					_barcode().at(_indexToBar().at(pivot)).death = i;
-					_indexToBar().at(i) = _indexToBar().at(pivot);
-				}
-			} else if constexpr (_barcode_option_is_active()){
-				_barcode().emplace_back(get_column_dimension(i), i, -1);
-				_indexToBar().at(i) = _barcode().size() - 1;
-			}
-		} else if constexpr (_barcode_option_is_active()){
-			_barcode().emplace_back(0, i, -1);
-			_indexToBar().at(i) = _barcode().size() - 1;
-		}
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_reduce_last_column()
-{
-	Column_type &curr = reducedMatrixR_.get_column(nextInsertIndex_);
-	if (curr.is_empty()) {
-		if constexpr (_barcode_option_is_active()){
-			_barcode().emplace_back(0, nextInsertIndex_, -1);
-			_indexToBar().push_back(_barcode().size() - 1);
-		}
-		return;
-	}
-
-	int pivot = curr.get_pivot();
-
-	while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
-		curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-		mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
-		pivot = curr.get_pivot();
-	}
-
-	if (pivot != -1){
-		pivotToColumnIndex_.at(pivot) = nextInsertIndex_;
-		if constexpr (_barcode_option_is_active()){
-			_barcode().at(_indexToBar().at(pivot)).death = nextInsertIndex_;
-			_indexToBar().push_back(_indexToBar().at(pivot));
-		}
-	} else if constexpr (_barcode_option_is_active()){
-		_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);
-		_indexToBar().push_back(_barcode().size() - 1);
-	}
 }
 
 template<class Master_matrix>
