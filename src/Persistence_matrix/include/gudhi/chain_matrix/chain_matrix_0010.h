@@ -22,7 +22,7 @@ namespace persistence_matrix {
 template<class Master_matrix>
 class Chain_matrix_with_row_access : Master_matrix::Chain_pairing_option, Master_matrix::Chain_vine_swap_option, Master_matrix::Chain_representative_cycles_option{
 public:
-	using Column_type = typename Master_matrix::Column_type::Column_type;
+	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Column_type::Row_type;
 	using Cell = typename Master_matrix::Column_type::Cell;
 	using boundary_type = typename Master_matrix::boundary_type;
@@ -80,7 +80,7 @@ private:
 
 	void _insert_chain(std::set<index>& column, dimension_type dimension);
 	void _insert_chain(std::set<index>& column, dimension_type dimension, index pair);
-	void _add_to(const Column_type& column, std::set<index>& set);
+	void _add_to(const typename Column_type::Column_type& column, std::set<index>& set);
 
 	static constexpr bool _barcode_option_is_active();
 	constexpr barcode_type& _barcode();
@@ -102,7 +102,7 @@ inline Chain_matrix_with_row_access<Master_matrix>::Chain_matrix_with_row_access
 	: Master_matrix::Chain_pairing_option(),
 	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
-	  matrix_(orderedBoundaries.size(), Master_matrix::Column_type(matrix_, pivotToColumnIndex_)),
+	  matrix_(orderedBoundaries.size(), Column_type(matrix_, pivotToColumnIndex_)),
 	  pivotToColumnIndex_(orderedBoundaries.size(), -1),
 	  nextInsertIndex_(orderedBoundaries.size()),
 	  maxDim_(-1)
@@ -117,7 +117,7 @@ inline Chain_matrix_with_row_access<Master_matrix>::Chain_matrix_with_row_access
 	: Master_matrix::Chain_pairing_option(),
 	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
-	  matrix_(numberOfColumns, Master_matrix::Column_type(matrix_, pivotToColumnIndex_)),
+	  matrix_(numberOfColumns, Column_type(matrix_, pivotToColumnIndex_)),
 	  pivotToColumnIndex_(numberOfColumns, -1),
 	  nextInsertIndex_(0),
 	  maxDim_(-1)
@@ -158,9 +158,13 @@ template<class Boundary_type>
 inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	std::set<index> column(boundary.begin(), boundary.end());
-	if (matrix_.size() <= nextInsertIndex_) matrix_.resize(nextInsertIndex_ * 2, Master_matrix::Column_type(matrix_, pivotToColumnIndex_));
+	if (matrix_.size() <= nextInsertIndex_){
+		matrix_.resize(nextInsertIndex_ * 2, Column_type(matrix_, pivotToColumnIndex_));
+		pivotToColumnIndex_.resize(matrix_.size(), -1);
+	}
 	if constexpr (swap_opt::isActive_){
-		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
+		if (swap_opt::pivotToPosition_.size() <= nextInsertIndex_) swap_opt::pivotToPosition_.resize(matrix_.size());
+		swap_opt::pivotToPosition_.at(nextInsertIndex_) = nextInsertIndex_;
 	}
 	int dim = boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
@@ -173,6 +177,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(Boundar
 			_barcode().emplace_back(0, nextInsertIndex_, -1);
 			_indexToBar().push_back(_barcode().size() - 1);
 		}
+		++nextInsertIndex_;
 		return;
 	}
 
@@ -180,7 +185,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(Boundar
 	std::vector<index> chains_in_H; //for corresponding indices in H
 
 	std::pair<std::set<index>::iterator,bool> res_insert;
-	while (matrix_.is_paired(col_low))
+	while (matrix_.at(col_low).is_paired())
 	{
 		chains_in_H.push_back(matrix_.at(col_low).get_paired_column());//keep the col_h with which col_g is paired
 		_add_to(matrix_.at(col_low), column);	//Reduce with the column col_g
@@ -268,7 +273,7 @@ inline dimension_type Chain_matrix_with_row_access<Master_matrix>::get_max_dimen
 template<class Master_matrix>
 inline unsigned int Chain_matrix_with_row_access<Master_matrix>::get_number_of_columns() const
 {
-	return matrix_.size();
+	return nextInsertIndex_;
 }
 
 template<class Master_matrix>
@@ -327,7 +332,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print()
 {
 	std::cout << "Column Matrix:\n";
 	for (auto p : pivotToColumnIndex_){
-		Column_type& col = matrix_.at(p.second).get_column();
+		typename Column_type::Column_type& col = matrix_.at(p.second).get_column();
 		for (auto it = col.begin(); it != col.end(); it++){
 			auto &cell = *it;
 			std::cout << cell.get_row_index() << " ";
@@ -350,8 +355,8 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print()
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::_insert_chain(std::set<index> &column, dimension_type dimension)
 {
-	matrix_.at(nextInsertIndex_) = Master_matrix::Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
-	pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
+	matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	pivotToColumnIndex_.at(nextInsertIndex_) = *(column.rbegin());
 	for (Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
 		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
 	}
@@ -360,17 +365,17 @@ inline void Chain_matrix_with_row_access<Master_matrix>::_insert_chain(std::set<
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::_insert_chain(std::set<index> &column, dimension_type dimension, index pair)
 {
-	matrix_.at(nextInsertIndex_) = Master_matrix::Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
 	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
 	matrix_.at(pair).assign_paired_chain(nextInsertIndex_);
-	pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
+	pivotToColumnIndex_.at(nextInsertIndex_) = *(column.rbegin());
 	for (Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
 		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
 	}
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access<Master_matrix>::_add_to(const Chain_matrix_with_row_access::Column_type &column, std::set<index> &set)
+inline void Chain_matrix_with_row_access<Master_matrix>::_add_to(const typename Column_type::Column_type &column, std::set<index> &set)
 {
 	std::pair<std::set<index>::iterator,bool> res_insert;
 	for (const Cell &cell : column) {

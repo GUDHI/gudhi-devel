@@ -82,6 +82,8 @@ public:
 //	using Options::can_retrieve_representative_cycles;
 //	using Options::has_column_pairings;
 
+//	using Options::is_indexed_by_simplex_index;
+
 //	using Cell_type = typename std::conditional<
 //							Field_type::get_characteristic() == 2,
 //							typename std::conditional<
@@ -117,12 +119,12 @@ public:
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_list_column_with_row<Column_pairing_option>,
+									Z2_reduced_cell_list_column_with_row<Matrix<Options> >,
 									Z2_list_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_list_column_with_row<Field_type,Column_pairing_option>,
+									Reduced_cell_list_column_with_row<Matrix<Options> >,
 									List_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
@@ -137,12 +139,12 @@ public:
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_set_column_with_row<Column_pairing_option>,
+									Z2_reduced_cell_set_column_with_row<Matrix<Options> >,
 									Z2_set_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_set_column_with_row<Field_type,Column_pairing_option>,
+									Reduced_cell_set_column_with_row<Matrix<Options> >,
 									Set_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
@@ -168,6 +170,20 @@ public:
 											Vector_column_type
 										>::type
 									>::type
+								>::type
+							>::type;
+
+	using Row_type = typename std::conditional<
+								Field_type::get_characteristic() == 2,
+								typename std::conditional<
+									Options::column_type == Column_types::LIST,
+									typename Z2_reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
+									typename Z2_reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
+								>::type,
+								typename std::conditional<
+									Options::column_type == Column_types::LIST,
+									typename Reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
+									typename Reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
 								>::type
 							>::type;
 
@@ -379,32 +395,33 @@ public:
 	Matrix(Matrix &matrixToCopy);
 	Matrix(Matrix&& other) noexcept;
 
-	//	template<class Chain_type>
-	//	void insert_boundary(index simplexIndex, Chain_type& boundary);
-	//	template<class Chain_type>
-	//	void insert_boundary(index simplexIndex, Chain_type& boundary, std::vector<index>& chains_in_F);
-	//	dimension_type get_dimension(index simplexIndex) const;
-	//	unsigned int get_number_of_simplices() const;
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(Boundary_type& boundary);
+	Column_type& get_column(index columnIndex);
+	Row_type& get_row(index rowIndex);
+	void erase_last();
 
-	//	index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);	//returns index which was not modified, ie new i+1
-	//	index vine_swap(index columnIndex1, index columnIndex2);					//returns index which was not modified, ie new i+1
-	//	const barcode_type& get_current_barcode();
-	//	void erase_last(index simplexIndex);
+	dimension_type get_max_dimension() const;
+	unsigned int get_number_of_columns() const;
 
-	//	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	dimension_type get_column_dimension(index columnIndex) const;
 
-	//	index get_column_with_pivot(index simplexIndex);
-	//	void get_row(index rowIndex, std::vector<index>& row);
-	//	index get_pivot(index columnIndex);
+	void add_to(index sourceColumnIndex, index targetColumnIndex);
 
-	//	bool is_paired(index columnIndex);
-	//	index get_paired_column(index columnIndex);
+	void zero_cell(index columnIndex, index rowIndex);
+	void zero_column(index columnIndex);
+	bool is_zero_cell(index columnIndex, index rowIndex) const;
+	bool is_zero_column(index columnIndex);
 
-	//	void print_matrices();  //for debug
+	index get_column_with_pivot(index simplexIndex);
+	index get_pivot(index columnIndex);
 
-	//	Matrix& operator=(Matrix other);
-	//	template<class Friend_options>
-	//	friend void swap(Matrix& matrix1, Matrix& matrix2);
+	Matrix& operator=(Matrix other);
+	template<class Friend_options>
+	friend void swap(Matrix<Friend_options>& matrix1,
+					 Matrix<Friend_options>& matrix2);
+
+	void print();  //for debug
 
 private:
 	using matrix_type = typename std::conditional<
@@ -453,6 +470,102 @@ inline Matrix<Options>::Matrix(Matrix &&other) noexcept : matrix_(std::move(othe
 }
 
 template<class Options>
+inline typename Matrix<Options>::Column_type &Matrix<Options>::get_column(index columnIndex)
+{
+	return matrix_.get_column(columnIndex);
+}
+
+template<class Options>
+inline typename Matrix<Options>::Row_type &Matrix<Options>::get_row(index rowIndex)
+{
+	static_assert(Options::has_row_access, "'get_row' is not implemented for the chosen options.");
+
+	return matrix_.get_row(rowIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::erase_last()
+{
+	static_assert(Options::has_removable_columns, "'erase_last' is not implemented for the chosen options.");
+
+	matrix_.erase_last();
+}
+
+template<class Options>
+inline dimension_type Matrix<Options>::get_max_dimension() const
+{
+	return matrix_.get_max_dimension();
+}
+
+template<class Options>
+inline unsigned int Matrix<Options>::get_number_of_columns() const
+{
+	return matrix_.get_number_of_columns();
+}
+
+template<class Options>
+inline dimension_type Matrix<Options>::get_column_dimension(index columnIndex) const
+{
+	return matrix_.get_column_dimension(columnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(index sourceColumnIndex, index targetColumnIndex)
+{
+	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::zero_cell(index columnIndex, index rowIndex)
+{
+	return matrix_.zero_cell(columnIndex, rowIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::zero_column(index columnIndex)
+{
+	return matrix_.zero_column(columnIndex);
+}
+
+template<class Options>
+inline bool Matrix<Options>::is_zero_cell(index columnIndex, index rowIndex) const
+{
+	return matrix_.is_zero_cell(columnIndex, rowIndex);
+}
+
+template<class Options>
+inline bool Matrix<Options>::is_zero_column(index columnIndex)
+{
+	return matrix_.is_zero_column(columnIndex);
+}
+
+template<class Options>
+inline index Matrix<Options>::get_column_with_pivot(index simplexIndex)
+{
+	return matrix_.get_column_with_pivot(simplexIndex);
+}
+
+template<class Options>
+inline index Matrix<Options>::get_pivot(index columnIndex)
+{
+	return matrix_.get_pivot(columnIndex);
+}
+
+template<class Options>
+inline Matrix<Options>& Matrix<Options>::operator=(Matrix other)
+{
+	std::swap(matrix_, other.matrix_);
+
+	return *this;
+}
+
+template<class Options>
+inline void Matrix<Options>::print()
+{
+	return matrix_.print();
+}
+
+template<class Options>
 inline constexpr void Matrix<Options>::_assert_options()
 {
 
@@ -480,6 +593,12 @@ inline constexpr void Matrix<Options>::_assert_options()
 //	using Options::has_vine_update;
 //	using Options::can_retrieve_representative_cycles;
 	//	using Options::has_column_pairings;
+}
+
+template<class Friend_options>
+void swap(Matrix<Friend_options>& matrix1, Matrix<Friend_options>& matrix2)
+{
+	std::swap(matrix1.matrix_, matrix2.matrix_);
 }
 
 } //namespace persistence_matrix

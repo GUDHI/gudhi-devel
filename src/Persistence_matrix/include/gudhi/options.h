@@ -56,6 +56,8 @@ struct Default_options{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = false;
 	static const bool is_indexed_by_column_index = false;
+
+	static const bool is_indexed_by_simplex_index = true;					//not implemented yet
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>

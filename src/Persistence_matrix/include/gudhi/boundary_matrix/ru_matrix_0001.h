@@ -173,12 +173,16 @@ template<class Master_matrix>
 inline void RU_matrix_with_removals<Master_matrix>::erase_last()
 {
 	--nextInsertIndex_;
-	typename barcode_type::iterator bar = _indexToBar().at(nextInsertIndex_);
 
-	if (bar->death == -1) _barcode().erase(bar);
-	else bar->death = -1;
+	if constexpr (_barcode_option_is_active()){
+		typename barcode_type::iterator bar = _indexToBar().at(nextInsertIndex_);
 
-	_indexToBar().erase(nextInsertIndex_);
+		if (bar->death == -1) _barcode().erase(bar);
+		else bar->death = -1;
+
+		_indexToBar().erase(nextInsertIndex_);
+	}
+
 	pivotToColumnIndex_.erase(reducedMatrixR_.get_column(nextInsertIndex_).get_pivot());
 
 	reducedMatrixR_.erase_last();
