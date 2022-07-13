@@ -39,7 +39,7 @@ protected:
 	using Base_matrix = typename Master_matrix::Base_matrix;
 
 	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
-	RU_representative_cycles(RU_representative_cycles& matrixToCopy);
+	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
 	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
 	static constexpr bool isActive_ = true;
@@ -57,7 +57,7 @@ inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(Base_ma
 {}
 
 template<class Master_matrix>
-inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(RU_representative_cycles<Master_matrix>& matrixToCopy)
+inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(const RU_representative_cycles<Master_matrix>& matrixToCopy)
 	: reducedMatrixR_(matrixToCopy.reducedMatrixR_),
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
 	  representativeCycles_(matrixToCopy.representativeCycles_),

@@ -29,7 +29,7 @@ public:
 
 	Base_matrix_with_row_access();
 	template<class Boundary_type>
-	Base_matrix_with_row_access(std::vector<Boundary_type>& orderedBoundaries);
+	Base_matrix_with_row_access(const std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix_with_row_access(unsigned int numberOfColumns);
 	Base_matrix_with_row_access(Base_matrix_with_row_access& matrixToCopy);
 	Base_matrix_with_row_access(Base_matrix_with_row_access&& other) noexcept;
@@ -91,8 +91,7 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access()
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(
-		std::vector<Boundary_type> &orderedBoundaries)
+inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, maxDim_),
 	  Master_matrix::Base_pairing_option(),
 	  matrix_(orderedBoundaries.size()),

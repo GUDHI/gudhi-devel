@@ -16,42 +16,52 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct matrix_list_row_tag;
+struct matrix_list_column_tag;
+
+using base_hook_matrix_list_row = boost::intrusive::list_base_hook<
+			boost::intrusive::tag < matrix_list_row_tag >
+		  , boost::intrusive::link_mode < boost::intrusive::auto_unlink >
+	>;
+using base_hook_matrix_list_column = boost::intrusive::list_base_hook <
+			boost::intrusive::tag < matrix_list_column_tag >
+		  , boost::intrusive::link_mode < boost::intrusive::safe_link >
+		>;
+
+template<class Field_element_type>
+struct List_cell : public Row_cell<Field_element_type>, public base_hook_matrix_list_row, public base_hook_matrix_list_column
+{
+	List_cell(unsigned int element, index columnIndex, index rowIndex)
+		: Row_cell<Field_element_type>(element, columnIndex, rowIndex){};
+};
+
+template<class Field_element_type>
+using List_column_type = boost::intrusive::list <
+					List_cell<Field_element_type>
+				  , boost::intrusive::constant_time_size<false>
+				  , boost::intrusive::base_hook< base_hook_matrix_list_column >  >;
+
+template<class Field_element_type>
+using List_row_type = boost::intrusive::list <
+					List_cell<Field_element_type>
+				  , boost::intrusive::constant_time_size<false>
+				  , boost::intrusive::base_hook< base_hook_matrix_list_row >
+				>;
+
 template<class Master_matrix>
-class Reduced_cell_list_column_with_row : Reduced_cell_column_with_row<Column_types::LIST,typename Master_matrix::Field_type,typename Master_matrix::Column_pairing_option>
+class Reduced_cell_list_column_with_row
+		: public Reduced_cell_column_with_row<List_cell<typename Master_matrix::Field_type>,
+											  List_column_type<typename Master_matrix::Field_type>,
+											  List_row_type<typename Master_matrix::Field_type>,
+											  base_hook_matrix_list_row,
+											  typename Master_matrix::Field_type,
+											  typename Master_matrix::Column_pairing_option>
 {
 public:
-	struct Cell;
 	using Field_element_type = typename Master_matrix::Field_type;
-
-private:
-	struct matrix_row_tag;
-	struct matrix_column_tag;
-
-	using base_hook_matrix_row = boost::intrusive::list_base_hook<
-				boost::intrusive::tag < matrix_row_tag >
-			  , boost::intrusive::link_mode < boost::intrusive::auto_unlink >
-		>;
-	using base_hook_matrix_column = boost::intrusive::list_base_hook <
-				boost::intrusive::tag < matrix_column_tag >
-			  , boost::intrusive::link_mode < boost::intrusive::safe_link >
-			>;
-
-public:
-	struct Cell : public Row_cell<Field_element_type>, public base_hook_matrix_row, public base_hook_matrix_column
-	{
-		Cell(unsigned int element, index columnIndex, index rowIndex)
-			: Row_cell<Field_element_type>(element, columnIndex, rowIndex){};
-	};
-
-	using Column_type = boost::intrusive::list <
-						Cell
-					  , boost::intrusive::constant_time_size<false>
-					  , boost::intrusive::base_hook< base_hook_matrix_column >  >;
-	using Row_type = boost::intrusive::list <
-						Cell
-					  , boost::intrusive::constant_time_size<false>
-					  , boost::intrusive::base_hook< base_hook_matrix_row >
-					>;
+	using Cell = List_cell<Field_element_type>;
+	using Column_type = List_column_type<Field_element_type>;
+	using Row_type = List_row_type<Field_element_type>;
 
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
@@ -64,12 +74,12 @@ public:
 	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
-	Reduced_cell_list_column_with_row& operator+=(Reduced_cell_list_column_with_row const &column);
+	Reduced_cell_list_column_with_row& operator+=(Reduced_cell_list_column_with_row &column);
 	template<class Friend_master_matrix>
 	friend Reduced_cell_list_column_with_row<Friend_master_matrix> operator+(
 			Reduced_cell_list_column_with_row<Friend_master_matrix> column1,
 			Reduced_cell_list_column_with_row<Friend_master_matrix> const& column2);
-	Reduced_cell_list_column_with_row& operator*=(unsigned int const &v);
+	Reduced_cell_list_column_with_row& operator*=(unsigned int v);
 	template<class Friend_master_matrix>
 	friend Reduced_cell_list_column_with_row<Friend_master_matrix> operator*(
 			Reduced_cell_list_column_with_row<Friend_master_matrix> column,
@@ -80,7 +90,7 @@ public:
 			Reduced_cell_list_column_with_row<Friend_master_matrix> column);
 
 private:
-	using RCC = Reduced_cell_column_with_row<Column_types::LIST,Field_element_type,typename Master_matrix::Column_pairing_option>;
+	using RCC = Reduced_cell_column_with_row<Cell,Column_type,Row_type,base_hook_matrix_list_row,Field_element_type,typename Master_matrix::Column_pairing_option>;
 
 	matrix_type& matrix_;
 	dictionnary_type& pivotToColumnIndex_;
@@ -122,7 +132,7 @@ inline bool Reduced_cell_list_column_with_row<Master_matrix>::is_non_zero(index 
 }
 
 template<class Master_matrix>
-inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_column_with_row<Master_matrix>::operator+=(const Reduced_cell_list_column_with_row &column)
+inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_column_with_row<Master_matrix>::operator+=(Reduced_cell_list_column_with_row &column)
 {
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
@@ -141,12 +151,12 @@ inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_colum
 			++it2;
 		} else { //it1->key() == it2->key()
 			it1->get_element() += it2->get_element();
-			if (it1->get_element() == 0){
+			if (it1->get_element() == 0u){
 				typename Column_type::iterator tmp_it = it1;
 				++it1;
 				++it2;
 				Cell* tmp_ptr = &(*tmp_it);
-				tmp_it->base_hook_matrix_row::unlink(); //unlink from row
+				tmp_it->base_hook_matrix_list_row::unlink(); //unlink from row
 				tc.erase(tmp_it); //remove from col
 				delete tmp_ptr;
 			}
@@ -169,7 +179,7 @@ inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_colum
 }
 
 template<class Master_matrix>
-inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_column_with_row<Master_matrix>::operator*=(const unsigned int &v)
+inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_column_with_row<Master_matrix>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
@@ -179,7 +189,7 @@ inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_colum
 			typename Column_type::iterator tmp_it = it;
 			++it;
 			Cell* tmp_ptr = &(*tmp_it);
-			tmp_it->base_hook_matrix_row::unlink(); //unlink from row
+			tmp_it->base_hook_matrix_list_row::unlink(); //unlink from row
 			RCC::get_column().erase(tmp_it); //remove from col
 			delete tmp_ptr;
 		}

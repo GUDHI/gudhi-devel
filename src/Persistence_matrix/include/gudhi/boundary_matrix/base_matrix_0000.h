@@ -30,7 +30,7 @@ public:
 	template<class Boundary_type = boundary_type>
 	Base_matrix(std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix(unsigned int numberOfColumns);
-	Base_matrix(Base_matrix& matrixToCopy);
+	Base_matrix(const Base_matrix& matrixToCopy);
 	Base_matrix(Base_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -69,8 +69,8 @@ private:
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix()
-	: Master_matrix::Base_swap_option(matrix_, maxDim_),
-	  Master_matrix::Base_pairing_option(),
+	: Master_matrix::Base_swap_option(matrix_),
+	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
 {}
@@ -78,8 +78,8 @@ inline Base_matrix<Master_matrix>::Base_matrix()
 template<class Master_matrix>
 template<class Boundary_type>
 inline Base_matrix<Master_matrix>::Base_matrix(std::vector<Boundary_type> &orderedBoundaries)
-	: Master_matrix::Base_swap_option(matrix_, maxDim_),
-	  Master_matrix::Base_pairing_option(),
+	: Master_matrix::Base_swap_option(matrix_, orderedBoundaries.size()),
+	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  matrix_(orderedBoundaries.size()),
 	  maxDim_(0),
 	  nextInsertIndex_(orderedBoundaries.size())
@@ -104,8 +104,8 @@ inline Base_matrix<Master_matrix>::Base_matrix(std::vector<Boundary_type> &order
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
-	: Master_matrix::Base_swap_option(matrix_, maxDim_),
-	  Master_matrix::Base_pairing_option(),
+	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
+	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  matrix_(numberOfColumns),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
@@ -122,7 +122,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &matrixToCopy)
+inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  Master_matrix::Base_pairing_option(matrixToCopy),
 	  matrix_(matrixToCopy.matrix_),

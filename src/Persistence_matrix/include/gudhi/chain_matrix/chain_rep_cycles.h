@@ -41,7 +41,7 @@ protected:
 	using column_type = typename Master_matrix::Column_type;
 
 	Chain_representative_cycles(matrix_type& matrix, dictionnary_type& pivotToPosition);
-	Chain_representative_cycles(Chain_representative_cycles& matrixToCopy);
+	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
 	Chain_representative_cycles(Chain_representative_cycles&& other) noexcept;
 
 	static constexpr bool isActive_ = true;
@@ -59,7 +59,7 @@ inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(m
 {}
 
 template<class Master_matrix>
-inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(Chain_representative_cycles<Master_matrix>& matrixToCopy)
+inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(const Chain_representative_cycles<Master_matrix>& matrixToCopy)
 	: matrix_(matrixToCopy.matrix_),
 	  pivotToPosition_(matrixToCopy.pivotToPosition_),
 	  representativeCycles_(matrixToCopy.representativeCycles_),

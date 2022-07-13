@@ -30,7 +30,7 @@ public:
 	template<class Boundary_type = boundary_type>
 	Chain_matrix_with_row_access_with_removals(std::vector<Boundary_type>& orderedBoundaries);
 	Chain_matrix_with_row_access_with_removals(unsigned int numberOfColumns);
-	Chain_matrix_with_row_access_with_removals(Chain_matrix_with_row_access_with_removals& matrixToCopy);
+	Chain_matrix_with_row_access_with_removals(const Chain_matrix_with_row_access_with_removals& matrixToCopy);
 	Chain_matrix_with_row_access_with_removals(Chain_matrix_with_row_access_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -80,7 +80,7 @@ private:
 
 	void _insert_chain(std::set<index>& column, dimension_type dimension);
 	void _insert_chain(std::set<index>& column, dimension_type dimension, index pair);
-	void _add_to(const typename Column_type::Column_type& column, std::set<index>& set);
+	void _add_to(Column_type &column, std::set<index>& set);
 
 	static constexpr bool _barcode_option_is_active();
 	constexpr barcode_type& _barcode();
@@ -124,7 +124,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 {}
 
 template<class Master_matrix>
-inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_with_row_access_with_removals(Chain_matrix_with_row_access_with_removals &matrixToCopy)
+inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_with_row_access_with_removals(const Chain_matrix_with_row_access_with_removals &matrixToCopy)
 	: Master_matrix::Chain_pairing_option(matrixToCopy),
 	  Master_matrix::Chain_vine_swap_option(matrixToCopy),
 	  Master_matrix::Chain_representative_cycles_option(matrixToCopy),
@@ -169,7 +169,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	if (boundary.empty())
 	{
 		column.insert(nextInsertIndex_);
-		_insert_chain(column);
+		_insert_chain(column, dim);
 		if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, nextInsertIndex_, -1);
 			_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
@@ -184,7 +184,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	std::pair<std::set<index>::iterator,bool> res_insert;
 	while (matrix_.at(col_low).is_paired())
 	{
-		chains_in_H.push_back(matrix_.at(col_low).get_paired_column());//keep the col_h with which col_g is paired
+		chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());//keep the col_h with which col_g is paired
 		_add_to(matrix_.at(col_low), column);	//Reduce with the column col_g
 
 		if (column.empty()) {
@@ -194,7 +194,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 				_add_to(matrix_.at(idx_h), column);
 			}
 			//create a new cycle (in F) sigma - \sum col_h
-			_insert_chain(column);
+			_insert_chain(column, dim);
 			if constexpr (_barcode_option_is_active()){
 				_barcode().emplace_back(dim, nextInsertIndex_, -1);
 				_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
@@ -213,7 +213,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 		if (!matrix_.at(col_low).is_paired()) {
 			currentEssentialCycleIndices.push_back(col_low);
 		} else {
-			chains_in_H.push_back(matrix_.at(col_low).get_paired_column());
+			chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());
 		}
 
 		_add_to(matrix_.at(col_low), column);
@@ -234,7 +234,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	}
 
 	//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
-	_insert_chain(column, chain_fp);
+	_insert_chain(column, dim, chain_fp);
 	if constexpr (_barcode_option_is_active()){
 		_indexToBar().at(matrix_.at(chain_fp).get_pivot())->death = nextInsertIndex_;
 		_indexToBar().emplace(nextInsertIndex_, _indexToBar().at(matrix_.at(chain_fp).get_pivot()));
@@ -379,7 +379,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::print()
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(std::set<index> &column, dimension_type dimension)
 {
-	matrix_.emplace(nextInsertIndex_, nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_));
 	pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
 	for (Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
 		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
@@ -389,7 +389,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(std::set<index> &column, dimension_type dimension, index pair)
 {
-	matrix_.emplace(nextInsertIndex_, nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_));
 	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
 	matrix_.at(pair).assign_paired_chain(nextInsertIndex_);
 	pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
@@ -399,10 +399,10 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(const typename Column_type::Column_type &column, std::set<index> &set)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(Column_type &column, std::set<index> &set)
 {
 	std::pair<std::set<index>::iterator,bool> res_insert;
-	for (const Cell &cell : column) {
+	for (const Cell &cell : column.get_column()) {
 		res_insert = set.insert(cell.get_row_index());
 		if (!res_insert.second) {
 			set.erase(res_insert.first);
@@ -419,13 +419,19 @@ inline constexpr bool Chain_matrix_with_row_access_with_removals<Master_matrix>:
 template<class Master_matrix>
 inline constexpr typename Chain_matrix_with_row_access_with_removals<Master_matrix>::barcode_type &Chain_matrix_with_row_access_with_removals<Master_matrix>::_barcode()
 {
-	return swap_opt::isActive_ ? swap_opt::indexToBar_ : pair_opt::indexToBar_;
+	if constexpr (swap_opt::isActive_)
+		return swap_opt::barcode_;
+	else
+		return pair_opt::barcode_;
 }
 
 template<class Master_matrix>
 inline constexpr typename Chain_matrix_with_row_access_with_removals<Master_matrix>::bar_dictionnary_type &Chain_matrix_with_row_access_with_removals<Master_matrix>::_indexToBar()
 {
-	return swap_opt::isActive_ ? swap_opt::barcode_ : pair_opt::barcode_;
+	if constexpr (swap_opt::isActive_)
+		return swap_opt::indexToBar_;
+	else
+		return pair_opt::indexToBar_;
 }
 
 template<class Friend_master_matrix>

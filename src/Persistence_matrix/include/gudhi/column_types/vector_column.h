@@ -23,7 +23,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Field_element_type, class Column_pairing_option>
-class Vector_column : Column_pairing_option
+class Vector_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
@@ -33,7 +33,7 @@ public:
 	Vector_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Vector_column(Boundary_type& boundary, dimension_type dimension);
-	Vector_column(Vector_column& column);
+	Vector_column(const Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
 	std::vector<Field_element_type> get_content(unsigned int columnLength);
@@ -51,7 +51,7 @@ public:
 	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
 			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column1,
 			Vector_column<Friend_field_element_type,Friend_column_pairing_option>& column2);
-	Vector_column& operator*=(unsigned int const &v);
+	Vector_column& operator*=(unsigned int v);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
 	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
 			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column,
@@ -86,7 +86,7 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Bo
 	  column_(boundary.size())
 {
 	for (unsigned int i = 0; i < boundary.size(); i++){
-		column_[i] = Cell(boundary[i]->second, boundary[i]->first);
+		column_[i] = Cell(boundary[i].second, boundary[i].first);
 	}
 }
 
@@ -97,12 +97,12 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Bo
 	  column_(boundary.size())
 {
 	for (unsigned int i = 0; i < boundary.size(); i++){
-		column_[i] = Cell(boundary[i]->second, boundary[i]->first);
+		column_[i] = Cell(boundary[i].second, boundary[i].first);
 	}
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &column)
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(const Vector_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
 	  column_(column.column_),
@@ -209,12 +209,13 @@ inline void Vector_column<Field_element_type,Column_pairing_option>::reorder(std
 template<class Field_element_type, class Column_pairing_option>
 inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator+=(Vector_column &column)
 {
-	if (column.is_empty()) return;
+	if (column.is_empty()) return *this;
+
 	if (column_.empty()){
 		column._cleanValues();
 		std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
 		erasedValues_.clear();
-		return;
+		return *this;
 	}
 
 	std::vector<Cell> newColumn;
@@ -290,7 +291,7 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int const &v)
+inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 

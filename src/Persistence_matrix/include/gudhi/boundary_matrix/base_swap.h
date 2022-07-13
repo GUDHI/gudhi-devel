@@ -38,9 +38,8 @@ protected:
 	using matrix_type = typename Master_matrix::column_container_type;
 
 	Base_swap(matrix_type &matrix);
-	Base_swap(matrix_type &matrix, std::vector<boundary_type>& orderedBoundaries);
 	Base_swap(matrix_type &matrix, unsigned int numberOfColumns);
-	Base_swap(Base_swap& matrixToCopy);
+	Base_swap(const Base_swap& matrixToCopy);
 	Base_swap(Base_swap&& other) noexcept;
 
 	index_dictionnary_type indexToRow_;
@@ -60,16 +59,6 @@ inline Base_swap<Master_matrix>::Base_swap(matrix_type &matrix)
 {}
 
 template<class Master_matrix>
-inline Base_swap<Master_matrix>::Base_swap(
-		matrix_type &matrix,
-		std::vector<boundary_type>& orderedBoundaries)
-	: indexToRow_(orderedBoundaries.size()),
-	  rowToIndex_(orderedBoundaries.size()),
-	  rowSwapped_(false),
-	  matrix_(matrix)
-{}
-
-template<class Master_matrix>
 inline Base_swap<Master_matrix>::Base_swap(matrix_type &matrix, unsigned int numberOfColumns)
 	: indexToRow_(numberOfColumns),
 	  rowToIndex_(numberOfColumns),
@@ -78,7 +67,7 @@ inline Base_swap<Master_matrix>::Base_swap(matrix_type &matrix, unsigned int num
 {}
 
 template<class Master_matrix>
-inline Base_swap<Master_matrix>::Base_swap(Base_swap<Master_matrix>& matrixToCopy)
+inline Base_swap<Master_matrix>::Base_swap(const Base_swap<Master_matrix>& matrixToCopy)
 	: indexToRow_(matrixToCopy.indexToRow_),
 	  rowToIndex_(matrixToCopy.rowToIndex_),
 	  rowSwapped_(matrixToCopy.rowSwapped_),

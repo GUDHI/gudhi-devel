@@ -30,7 +30,7 @@ public:
 	template<class Boundary_type = boundary_type>
 	Base_matrix_with_removals(std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix_with_removals(unsigned int numberOfColumns);
-	Base_matrix_with_removals(Base_matrix_with_removals& matrixToCopy);
+	Base_matrix_with_removals(const Base_matrix_with_removals& matrixToCopy);
 	Base_matrix_with_removals(Base_matrix_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -127,7 +127,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(unsig
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(Base_matrix_with_removals &matrixToCopy)
+inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const Base_matrix_with_removals &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  Master_matrix::Base_pairing_option(matrixToCopy),
 	  matrix_(matrixToCopy.matrix_),

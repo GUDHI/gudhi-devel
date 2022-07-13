@@ -35,7 +35,7 @@ protected:
 	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	RU_pairing();
-	RU_pairing(RU_pairing &matrixToCopy);
+	RU_pairing(const RU_pairing &matrixToCopy);
 	RU_pairing(RU_pairing&& other) noexcept;
 
 	barcode_type barcode_;
@@ -48,8 +48,7 @@ inline RU_pairing<Master_matrix>::RU_pairing()
 {}
 
 template<class Master_matrix>
-inline RU_pairing<Master_matrix>::RU_pairing(
-		RU_pairing &matrixToCopy)
+inline RU_pairing<Master_matrix>::RU_pairing(const RU_pairing &matrixToCopy)
 	: barcode_(matrixToCopy.barcode_),
 	  indexToBar_(matrixToCopy.indexToBar_)
 {}

@@ -20,7 +20,7 @@ class Z2_field_element {
 public:
 	Z2_field_element();
 	Z2_field_element(unsigned int element);
-	Z2_field_element(Z2_field_element& toCopy);
+	Z2_field_element(const Z2_field_element& toCopy);
 	Z2_field_element(Z2_field_element&& toMove) noexcept;
 
 	Z2_field_element& operator+=(Z2_field_element const &f);
@@ -68,7 +68,7 @@ inline Z2_field_element::Z2_field_element(unsigned int element)
 	: element_(element % 2)
 {}
 
-inline Z2_field_element::Z2_field_element(Z2_field_element &toCopy)
+inline Z2_field_element::Z2_field_element(const Z2_field_element &toCopy)
 	: element_(toCopy.element_)
 {}
 

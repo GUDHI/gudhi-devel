@@ -173,20 +173,6 @@ public:
 								>::type
 							>::type;
 
-	using Row_type = typename std::conditional<
-								Field_type::get_characteristic() == 2,
-								typename std::conditional<
-									Options::column_type == Column_types::LIST,
-									typename Z2_reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
-									typename Z2_reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
-								>::type,
-								typename std::conditional<
-									Options::column_type == Column_types::LIST,
-									typename Reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
-									typename Reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
-								>::type
-							>::type;
-
 	using barcode_type = typename std::conditional<
 										Options::has_removable_columns,
 										std::list<Bar>,
@@ -216,6 +202,20 @@ public:
 									std::vector<std::pair<index,Field_type> >
 								>::type;
 	using boundary_matrix = std::vector<boundary_type>;
+
+	using Row_type = typename std::conditional<
+								Field_type::get_characteristic() == 2,
+								typename std::conditional<
+									Options::column_type == Column_types::LIST,
+									typename Z2_reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
+									typename Z2_reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
+								>::type,
+								typename std::conditional<
+									Options::column_type == Column_types::LIST,
+									typename Reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
+									typename Reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
+								>::type
+							>::type;
 
 	using Base_matrix = typename std::conditional<
 											Options::has_removable_columns,
@@ -270,7 +270,6 @@ public:
 	struct Dummy_base_swap{
 	protected:
 		Dummy_base_swap(column_container_type &matrix){}
-		Dummy_base_swap(column_container_type &matrix, std::vector<boundary_type>& orderedBoundaries){}
 		Dummy_base_swap(column_container_type &matrix, unsigned int numberOfColumns){}
 		Dummy_base_swap(Dummy_base_swap& matrixToCopy){}
 		Dummy_base_swap(Dummy_base_swap&& other) noexcept{}
@@ -286,7 +285,7 @@ public:
 
 	struct Dummy_base_pairing{
 	protected:
-		Dummy_base_pairing(){}
+		Dummy_base_pairing(column_container_type& matrix, dimension_type& maxDim){}
 		Dummy_base_pairing(Dummy_base_pairing& matrixToCopy){}
 		Dummy_base_pairing(Dummy_base_pairing&& other) noexcept{}
 
@@ -346,7 +345,7 @@ public:
 
 	struct Dummy_chain_vine_swap{
 	protected:
-		Dummy_chain_vine_swap(column_container_type& matrix, dictionnary_type<index>& pivotToPosition){}
+		Dummy_chain_vine_swap(column_container_type& matrix){}
 		Dummy_chain_vine_swap(Dummy_chain_vine_swap& matrixToCopy){}
 		Dummy_chain_vine_swap(Dummy_chain_vine_swap&& other) noexcept{}
 
@@ -392,7 +391,7 @@ public:
 	Matrix();
 	Matrix(boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
-	Matrix(Matrix &matrixToCopy);
+	Matrix(const Matrix &matrixToCopy);
 	Matrix(Matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -458,7 +457,7 @@ inline Matrix<Options>::Matrix(int numberOfColumns) : matrix_(numberOfColumns)
 }
 
 template<class Options>
-inline Matrix<Options>::Matrix(Matrix &matrixToCopy) : matrix_(matrixToCopy.matrix_)
+inline Matrix<Options>::Matrix(const Matrix &matrixToCopy) : matrix_(matrixToCopy.matrix_)
 {
 	_assert_options();
 }

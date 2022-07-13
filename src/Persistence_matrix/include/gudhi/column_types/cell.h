@@ -95,7 +95,11 @@ public:
 	Base_cell(Base_cell&& cell) noexcept
 		: Z2_base_cell(std::move(cell)), element_(std::move(cell.element_)){};
 
-	Field_element_type& get_element() const{
+	Field_element_type& get_element(){
+		return element_;
+	};
+
+	unsigned int get_element_value() const{
 		return element_;
 	};
 
@@ -122,7 +126,11 @@ public:
 	Row_cell(Row_cell&& cell) noexcept
 		: Z2_row_cell(std::move(cell)), element_(std::move(cell.element_)){};
 
-	Field_element_type& get_element() const{
+	Field_element_type& get_element(){
+		return element_;
+	};
+
+	Field_element_type get_element_value() const{
 		return element_;
 	};
 
@@ -143,6 +151,35 @@ template<>
 struct std::hash<Gudhi::persistence_matrix::Z2_base_cell>
 {
 	size_t operator()(const Gudhi::persistence_matrix::Z2_base_cell& cell) const
+	{
+		return std::hash<unsigned int>()(cell.get_row_index());
+	}
+};
+
+template<>
+struct std::hash<Gudhi::persistence_matrix::Z2_row_cell>
+{
+	size_t operator()(const Gudhi::persistence_matrix::Z2_row_cell& cell) const
+	{
+		return std::hash<unsigned int>()(cell.get_row_index());
+	}
+};
+
+//template<>
+template<class Field_element_type>
+struct std::hash<Gudhi::persistence_matrix::Base_cell<Field_element_type> >
+{
+	size_t operator()(const Gudhi::persistence_matrix::Base_cell<Field_element_type>& cell) const
+	{
+		return std::hash<unsigned int>()(cell.get_row_index());
+	}
+};
+
+//template<>
+template<class Field_element_type>
+struct std::hash<Gudhi::persistence_matrix::Row_cell<Field_element_type> >
+{
+	size_t operator()(const Gudhi::persistence_matrix::Row_cell<Field_element_type>& cell) const
 	{
 		return std::hash<unsigned int>()(cell.get_row_index());
 	}

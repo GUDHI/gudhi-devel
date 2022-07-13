@@ -35,7 +35,7 @@ protected:
 	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	Chain_pairing();
-	Chain_pairing(Chain_pairing &matrixToCopy);
+	Chain_pairing(const Chain_pairing &matrixToCopy);
 	Chain_pairing(Chain_pairing&& other) noexcept;
 
 	barcode_type barcode_;
@@ -50,8 +50,7 @@ inline Chain_pairing<Master_matrix>::Chain_pairing()
 {}
 
 template<class Master_matrix>
-inline Chain_pairing<Master_matrix>::Chain_pairing(
-		Chain_pairing &matrixToCopy)
+inline Chain_pairing<Master_matrix>::Chain_pairing(const Chain_pairing &matrixToCopy)
 	: barcode_(matrixToCopy.barcode_),
 	  indexToBar_(matrixToCopy.indexToBar_)
 {}

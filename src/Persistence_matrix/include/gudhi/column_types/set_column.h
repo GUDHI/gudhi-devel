@@ -23,7 +23,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Field_element_type, class Column_pairing_option>
-class Set_column : Column_pairing_option
+class Set_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
@@ -33,7 +33,7 @@ public:
 	Set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Set_column(Boundary_type& boundary, dimension_type dimension);
-	Set_column(Set_column& column);
+	Set_column(const Set_column& column);
 	Set_column(Set_column&& column) noexcept;
 
 	std::vector<Field_element_type> get_content(unsigned int columnLength);
@@ -51,7 +51,7 @@ public:
 	friend Set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
 			Set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
 			Set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2);
-	Set_column& operator*=(unsigned int const &v);
+	Set_column& operator*=(unsigned int v);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
 	friend Set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
 			Set_column<Friend_field_element_type,Friend_column_pairing_option> column,
@@ -79,8 +79,7 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column() : dim_
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
 inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary.size())
+	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1)
 {
 	for (std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
@@ -90,8 +89,7 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
 inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary_type &boundary, dimension_type dimension)
-	: dim_(dimension),
-	  column_(boundary.size())
+	: dim_(dimension)
 {
 	for (std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
@@ -99,7 +97,7 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_column &column)
+inline Set_column<Field_element_type,Column_pairing_option>::Set_column(const Set_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
 	  column_(column.column_)
@@ -151,7 +149,8 @@ template<class Field_element_type, class Column_pairing_option>
 inline Field_element_type Set_column<Field_element_type,Column_pairing_option>::get_pivot_value()
 {
 	if (column_.empty()) return 0;
-	return column_.rbegin()->get_element();
+	Cell c = *(column_.rbegin());
+	return c.get_element();
 }
 
 template<class Field_element_type, class Column_pairing_option>
@@ -180,8 +179,10 @@ inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_el
 	for (const Cell& v : column.column_){
 		auto c = column_.find(v);
 		if (c != column_.end()){
-			c->get_element() += v.get_element();
-			if (c->get_element() == 0) column_.erase(c);
+			Cell newCell(*c);
+			newCell.get_element() += v.get_element_value();
+			column_.erase(c);
+			if (newCell.get_element() != 0u) column_.insert(newCell);
 		} else
 			column_.insert(v);
 	}
@@ -190,7 +191,7 @@ inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_el
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int const &v)
+inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
@@ -199,9 +200,15 @@ inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_el
 		return *this;
 	}
 
-	for (Cell& cell : column_){
-		cell.get_element() *= v;
+	std::set<Cell> newColumn;
+
+	for (const Cell& cell : column_){
+		Cell newCell(cell);
+		newCell.get_element() *= v;
+		newColumn.insert(newCell);
 	}
+
+	column_.swap(newColumn);
 
 	return *this;
 }

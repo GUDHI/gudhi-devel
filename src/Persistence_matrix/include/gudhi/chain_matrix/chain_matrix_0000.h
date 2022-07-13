@@ -27,7 +27,7 @@ public:
 	template<class Boundary_type = boundary_type>
 	Chain_matrix(std::vector<Boundary_type>& orderedBoundaries);
 	Chain_matrix(unsigned int numberOfColumns);
-	Chain_matrix(Chain_matrix& matrixToCopy);
+	Chain_matrix(const Chain_matrix& matrixToCopy);
 	Chain_matrix(Chain_matrix&& other) noexcept;
 
 //	template<class Boundary_type = boundary_type>
@@ -116,7 +116,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns)
 {}
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(Chain_matrix &matrixToCopy)
+inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy)
 	: Master_matrix::Chain_pairing_option(matrixToCopy),
 	  Master_matrix::Chain_vine_swap_option(matrixToCopy),
 	  Master_matrix::Chain_representative_cycles_option(matrixToCopy),

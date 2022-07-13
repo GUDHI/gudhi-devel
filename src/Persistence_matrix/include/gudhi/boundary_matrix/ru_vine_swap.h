@@ -35,14 +35,13 @@ protected:
 	using Base_matrix = typename Master_matrix::Base_matrix;
 
 	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU);
-	RU_vine_swap(RU_vine_swap &matrixToCopy);
+	RU_vine_swap(const RU_vine_swap &matrixToCopy);
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
 	static constexpr bool isActive_ = true;
 
 private:
-	using RU_pairing<Master_matrix>::barcode_;
-	using RU_pairing<Master_matrix>::indexToBar_;
+	using RUP = RU_pairing<Master_matrix>;
 
 	Base_matrix &reducedMatrixR_;
 	Base_matrix &mirrorMatrixU_;
@@ -57,6 +56,9 @@ private:
 	void _negative_vine_swap(index index);
 	void _positive_negative_vine_swap(index index);
 	void _negative_positive_vine_swap(index index);
+
+	int& _death(index simplexIndex);
+	int& _birth(index simplexIndex);
 };
 
 template<class Master_matrix>
@@ -66,7 +68,7 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(Base_matrix &matrixR, Base_matr
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(
-		RU_vine_swap &matrixToCopy)
+		const RU_vine_swap &matrixToCopy)
 	: reducedMatrixR_(matrixToCopy.reducedMatrixR_),
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
 	  RU_pairing<Master_matrix>(matrixToCopy)
@@ -84,8 +86,8 @@ inline void RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
 {
 	if (index >= reducedMatrixR_.get_number_of_columns() - 1) return;
 
-	bool iIsPositive = (barcode_.at(indexToBar_.at(index)).birth == static_cast<int>(index));
-	bool iiIsPositive = (barcode_.at(indexToBar_.at(index + 1)).birth == static_cast<int>(index) + 1);
+	bool iIsPositive = (_birth(index) == static_cast<int>(index));
+	bool iiIsPositive = (_birth(index + 1) == static_cast<int>(index) + 1);
 
 	if (iIsPositive && iiIsPositive) {
 		mirrorMatrixU_.zero_cell(index + 1, index);
@@ -103,8 +105,8 @@ inline void RU_vine_swap<Master_matrix>::vine_swap(index index)
 {
 	if (index >= reducedMatrixR_.get_number_of_columns() - 1) return;
 
-	bool iIsPositive = (barcode_.at(indexToBar_.at(index)).birth == static_cast<int>(index));
-	bool iiIsPositive = (barcode_.at(indexToBar_.at(index + 1)).birth == static_cast<int>(index) + 1);
+	bool iIsPositive = (_birth(index) == static_cast<int>(index));
+	bool iiIsPositive = (_birth(index + 1) == static_cast<int>(index) + 1);
 
 	if (iIsPositive && iiIsPositive) {
 		if (reducedMatrixR_.get_column_dimension(index) != reducedMatrixR_.get_column_dimension(index + 1)){
@@ -166,40 +168,40 @@ inline void RU_vine_swap<Master_matrix>::_add_to(index sourceIndex, index target
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_transpose(index index)
 {
-	barcode_.at(indexToBar_.at(index)).birth = index + 1;
-	barcode_.at(indexToBar_.at(index + 1)).birth = index;
-	std::swap(indexToBar_.at(index), indexToBar_.at(index + 1));
+	_birth(index) = index + 1;
+	_birth(index + 1) = index;
+	std::swap(RUP::indexToBar_.at(index), RUP::indexToBar_.at(index + 1));
 }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_transpose(index index)
 {
-	barcode_.at(indexToBar_.at(index)).death = index + 1;
-	barcode_.at(indexToBar_.at(index + 1)).death = index;
-	std::swap(indexToBar_.at(index), indexToBar_.at(index + 1));
+	_death(index) = index + 1;
+	_death(index + 1) = index;
+	std::swap(RUP::indexToBar_.at(index), RUP::indexToBar_.at(index + 1));
 }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(index index)
 {
-	barcode_.at(indexToBar_.at(index)).birth = index + 1;
-	barcode_.at(indexToBar_.at(index + 1)).death = index;
-	std::swap(indexToBar_.at(index), indexToBar_.at(index + 1));
+	_birth(index) = index + 1;
+	_death(index + 1) = index;
+	std::swap(RUP::indexToBar_.at(index), RUP::indexToBar_.at(index + 1));
 }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(index index)
 {
-	barcode_.at(indexToBar_.at(index)).death = index + 1;
-	barcode_.at(indexToBar_.at(index + 1)).birth = index;
-	std::swap(indexToBar_.at(index), indexToBar_.at(index + 1));
+	_death(index) = index + 1;
+	_birth(index + 1) = index;
+	std::swap(RUP::indexToBar_.at(index), RUP::indexToBar_.at(index + 1));
 }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 {
-	int iDeath = barcode_.at(indexToBar_.at(index)).death;
-	int iiDeath = barcode_.at(indexToBar_.at(index + 1)).death;
+	int iDeath = _death(index);
+	int iiDeath = _death(index + 1);
 
 	if (iDeath != -1 && iiDeath != -1 && !(reducedMatrixR_.is_zero_cell(iiDeath, index)))
 	{
@@ -228,7 +230,7 @@ inline void RU_vine_swap<Master_matrix>::_negative_vine_swap(index index)
 	_add_to(index, index + 1);
 	_swap_at_index(index);
 
-	if (barcode_.at(indexToBar_.at(index)).birth < barcode_.at(indexToBar_.at(index + 1)).birth)
+	if (_birth(index) < _birth(index + 1))
 	{
 		_negative_transpose(index);
 		return;
@@ -252,6 +254,26 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_vine_swap(index inde
 	_add_to(index, index + 1);
 	_swap_at_index(index);
 	_add_to(index, index + 1);
+}
+
+template<class Master_matrix>
+inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
+{
+	if constexpr (Master_matrix::Options::has_removable_columns){
+		return RUP::indexToBar_.at(simplexIndex)->death;
+	} else {
+		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).death;
+	}
+}
+
+template<class Master_matrix>
+inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
+{
+	if constexpr (Master_matrix::Options::has_removable_columns){
+		return RUP::indexToBar_.at(simplexIndex)->birth;
+	} else {
+		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).birth;
+	}
 }
 
 template<class Friend_master_matrix>

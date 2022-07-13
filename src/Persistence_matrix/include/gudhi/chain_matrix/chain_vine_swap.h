@@ -37,7 +37,7 @@ protected:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
 	Chain_vine_swap(matrix_type& matrix);
-	Chain_vine_swap(Chain_vine_swap &matrixToCopy);
+	Chain_vine_swap(const Chain_vine_swap &matrixToCopy);
 	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
 	dictionnary_type pivotToPosition_;
@@ -49,7 +49,7 @@ private:
 
 	matrix_type& matrix_;
 
-	void _add_to(const typename Column_type::Column& column, std::set<index>& set);
+	void _add_to(const typename Column_type::Column_type& column, std::set<index>& set);
 	bool _is_negative_in_pair(index simplexIndex);
 
 	void _positive_transpose(index simplexIndex1, index simplexIndex2);
@@ -74,7 +74,7 @@ inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix)
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(
-		Chain_vine_swap &matrixToCopy)
+		const Chain_vine_swap &matrixToCopy)
 	: matrix_(matrixToCopy.matrix_), pivotToPosition_(matrixToCopy.pivotToPosition_), Chain_pairing<Master_matrix>(matrixToCopy)
 {}
 
@@ -158,7 +158,7 @@ inline Chain_vine_swap<Master_matrix> &Chain_vine_swap<Master_matrix>::operator=
 
 template<class Master_matrix>
 inline void Chain_vine_swap<Master_matrix>::_add_to(
-		const typename Column_type::Column& column, std::set<index>& set)
+		const typename Column_type::Column_type& column, std::set<index>& set)
 {
 	std::pair<std::set<index>::iterator,bool> res_insert;
 	for (const typename Column_type::Cell &cell : column) {

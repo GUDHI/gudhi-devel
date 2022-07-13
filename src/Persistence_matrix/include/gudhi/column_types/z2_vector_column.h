@@ -22,7 +22,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Column_pairing_option>
-class Z2_vector_column : Column_pairing_option
+class Z2_vector_column : public Column_pairing_option
 {
 public:
 	using Cell = Z2_base_cell;
@@ -32,7 +32,7 @@ public:
 	Z2_vector_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Z2_vector_column(Boundary_type& boundary, dimension_type dimension);
-	Z2_vector_column(Z2_vector_column& column);
+	Z2_vector_column(const Z2_vector_column& column);
 	Z2_vector_column(Z2_vector_column&& column) noexcept;
 
 	std::vector<bool> get_content(unsigned int columnLength);
@@ -83,7 +83,7 @@ inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Boundary_type &
 {}
 
 template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Z2_vector_column &column)
+inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Z2_vector_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
 	  column_(column.column_),

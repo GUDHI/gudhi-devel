@@ -16,41 +16,47 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct z2_matrix_set_row_tag;
+struct z2_matrix_set_column_tag;
+
+using z2_base_hook_matrix_set_row = boost::intrusive::set_base_hook<
+			boost::intrusive::tag < z2_matrix_set_row_tag >
+		  , boost::intrusive::link_mode < boost::intrusive::auto_unlink >
+	>;
+using z2_base_hook_matrix_set_column = boost::intrusive::set_base_hook <
+			boost::intrusive::tag < z2_matrix_set_column_tag >
+		  , boost::intrusive::link_mode < boost::intrusive::safe_link >
+		>;
+
+struct Z2_set_cell : public Z2_row_cell, public z2_base_hook_matrix_set_row, public z2_base_hook_matrix_set_column
+{
+	Z2_set_cell(index columnIndex, index rowIndex)
+		: Z2_row_cell(columnIndex, rowIndex){};
+};
+
+using Z2_set_column_type = boost::intrusive::set <
+					Z2_set_cell
+				  , boost::intrusive::constant_time_size<false>
+				  , boost::intrusive::base_hook< z2_base_hook_matrix_set_column >  >;
+
+using Z2_set_row_type = boost::intrusive::set <
+					Z2_set_cell
+				  , boost::intrusive::constant_time_size<false>
+				  , boost::intrusive::base_hook< z2_base_hook_matrix_set_row >
+				>;
+
 template<class Master_matrix>
-class Z2_reduced_cell_set_column_with_row : Z2_reduced_cell_column_with_row<Column_types::SET,typename Master_matrix::Column_pairing_option>
+class Z2_reduced_cell_set_column_with_row
+		: public Z2_reduced_cell_column_with_row<Z2_set_cell,
+												 Z2_set_column_type,
+												 Z2_set_row_type,
+												 z2_base_hook_matrix_set_row,
+												 typename Master_matrix::Column_pairing_option>
 {
 public:
-	struct Cell;
-
-private:
-	struct matrix_row_tag;
-	struct matrix_column_tag;
-
-	using base_hook_matrix_row = boost::intrusive::set_base_hook<
-				boost::intrusive::tag < matrix_row_tag >
-			  , boost::intrusive::link_mode < boost::intrusive::auto_unlink >
-		>;
-	using base_hook_matrix_column = boost::intrusive::set_base_hook <
-				boost::intrusive::tag < matrix_column_tag >
-			  , boost::intrusive::link_mode < boost::intrusive::safe_link >
-			>;
-
-public:
-	struct Cell : public Z2_row_cell, public base_hook_matrix_row, public base_hook_matrix_column
-	{
-		Cell(index columnIndex, index rowIndex)
-			: Z2_row_cell(columnIndex, rowIndex){};
-	};
-
-	using Column_type = boost::intrusive::set <
-						Cell
-					  , boost::intrusive::constant_time_size<false>
-					  , boost::intrusive::base_hook< base_hook_matrix_column >  >;
-	using Row_type = boost::intrusive::set <
-						Cell
-					  , boost::intrusive::constant_time_size<false>
-					  , boost::intrusive::base_hook< base_hook_matrix_row >
-					>;
+	using Cell = Z2_set_cell;
+	using Column_type = Z2_set_column_type;
+	using Row_type = Z2_set_row_type;
 
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
@@ -63,14 +69,14 @@ public:
 	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
-	Z2_reduced_cell_set_column_with_row& operator+=(Z2_reduced_cell_set_column_with_row const &column);
+	Z2_reduced_cell_set_column_with_row& operator+=(Z2_reduced_cell_set_column_with_row& column);
 	template<class Friend_master_matrix>
 	friend Z2_reduced_cell_set_column_with_row<Friend_master_matrix> operator+(
 			Z2_reduced_cell_set_column_with_row<Friend_master_matrix> column1,
 			Z2_reduced_cell_set_column_with_row<Friend_master_matrix> const& column2);
 
 private:
-	using RCC = Z2_reduced_cell_column_with_row<Column_types::SET,typename Master_matrix::Column_pairing_option>;
+	using RCC = Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,z2_base_hook_matrix_set_row,typename Master_matrix::Column_pairing_option>;
 
 	matrix_type& matrix_;
 	dictionnary_type& pivotToColumnIndex_;
@@ -78,20 +84,20 @@ private:
 
 template<class Master_matrix>
 inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
-	: Z2_reduced_cell_column_with_row<Column_types::SET,typename Master_matrix::Column_pairing_option>(), matrix_(matrix), pivotToColumnIndex_(pivotToColumnIndex)
+	: RCC(), matrix_(matrix), pivotToColumnIndex_(pivotToColumnIndex)
 {}
 
 template<class Master_matrix>
 template<class Chain_type>
 inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(
 		index chainIndex, Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
-	: Z2_reduced_cell_column_with_row<Column_types::SET,typename Master_matrix::Column_pairing_option>(chainIndex, chain, dimension), matrix_(matrix), pivotToColumnIndex_(pivotToColumnIndex)
+	: RCC(chainIndex, chain, dimension), matrix_(matrix), pivotToColumnIndex_(pivotToColumnIndex)
 {}
 
 template<class Master_matrix>
 inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(
 		const Z2_reduced_cell_set_column_with_row& other)
-	: Z2_reduced_cell_column_with_row<Column_types::SET,typename Master_matrix::Column_pairing_option>(other), matrix_(other.matrix_), pivotToColumnIndex_(other.pivotToColumnIndex_)
+	: RCC(other), matrix_(other.matrix_), pivotToColumnIndex_(other.pivotToColumnIndex_)
 {}
 
 template<class Master_matrix>
@@ -109,7 +115,7 @@ inline bool Z2_reduced_cell_set_column_with_row<Master_matrix>::is_non_zero(inde
 }
 
 template<class Master_matrix>
-inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_column_with_row<Master_matrix>::operator+=(const Z2_reduced_cell_set_column_with_row &column)
+inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_column_with_row<Master_matrix>::operator+=(Z2_reduced_cell_set_column_with_row &column)
 {
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
@@ -119,7 +125,7 @@ inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_c
 		auto it1 = tc.find(cell);
 		if (it1 != tc.end()) {//already there => remove as 1+1=0
 			Cell * tmp_ptr = &(*it1);
-			it1->base_hook_matrix_row::unlink(); //unlink from row
+			it1->z2_base_hook_matrix_set_row::unlink(); //unlink from row
 			tc.erase(it1); //remove from col
 			delete tmp_ptr;
 		} else {//not there, insert new cell

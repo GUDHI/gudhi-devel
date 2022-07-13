@@ -32,7 +32,7 @@ public:
 
 protected:
 	Column_pairing();
-	Column_pairing(Column_pairing &toCopy);
+	Column_pairing(const Column_pairing &toCopy);
 	Column_pairing(Column_pairing&& other) noexcept;
 
 	int pairedColumn_;
@@ -42,7 +42,7 @@ protected:
 inline Column_pairing::Column_pairing() : pairedColumn_(-1)
 {}
 
-inline Column_pairing::Column_pairing(Column_pairing &toCopy)
+inline Column_pairing::Column_pairing(const Column_pairing &toCopy)
 	: pairedColumn_(toCopy.pairedColumn_)
 {}
 

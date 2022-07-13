@@ -24,7 +24,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Field_element_type, class Column_pairing_option>
-class Unordered_set_column : Column_pairing_option
+class Unordered_set_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
@@ -34,7 +34,7 @@ public:
 	Unordered_set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Unordered_set_column(Boundary_type& boundary, dimension_type dimension);
-	Unordered_set_column(Unordered_set_column& column);
+	Unordered_set_column(const Unordered_set_column& column);
 	Unordered_set_column(Unordered_set_column&& column) noexcept;
 
 	std::vector<Field_element_type> get_content(unsigned int columnLength);
@@ -52,7 +52,7 @@ public:
 	friend Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
 			Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
 			Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2);
-	Unordered_set_column& operator*=(unsigned int const &v);
+	Unordered_set_column& operator*=(unsigned int v);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
 	friend Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator*
 	(Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column,
@@ -86,7 +86,7 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.size()),
 	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? 0 : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
 {
 	for (std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
@@ -99,7 +99,7 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered
 	: dim_(dimension),
 	  column_(boundary.size()),
 	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? 0 : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
 {
 	for (std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
@@ -107,7 +107,7 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(Unordered_set_column &column)
+inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(const Unordered_set_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
 	  column_(column.column_),
@@ -157,12 +157,12 @@ inline int Unordered_set_column<Field_element_type,Column_pairing_option>::get_p
 {
 	if (pivotChanged_){
 		pivot_ = column_.size() == 0 ?
-					0
+					Cell()
 				  : *std::max_element(column_.begin(), column_.end());
 		pivotChanged_ = false;
 	}
 
-	if (pivot_.get_element() == 0) return -1;
+	if (pivot_.get_element() == 0u) return -1;
 	return pivot_.get_row_index();
 }
 
@@ -171,7 +171,7 @@ inline Field_element_type Unordered_set_column<Field_element_type,Column_pairing
 {
 	if (pivotChanged_){
 		pivot_ = column_.size() == 0 ?
-					-1
+					Cell()
 				  : *std::max_element(column_.begin(), column_.end());
 		pivotChanged_ = false;
 	}
@@ -209,8 +209,10 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered
 	for (const Cell& v : column.column_){
 		auto c = column_.find(v);
 		if (c != column_.end()){
-			c->get_element() += v.get_element();
-			if (c->get_element() == 0) column_.erase(c);
+			Cell newCell(*c);
+			newCell.get_element() += v.get_element_value();
+			column_.erase(c);
+			if (newCell.get_element() != 0u) column_.insert(newCell);
 			if (v == pivot_) pivotChanged_ = true;
 		} else {
 			column_.insert(v);
@@ -225,20 +227,26 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int const &v)
+inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
 	if (v == 0) {
 		column_.clear();
-		pivot_ = 0;
+		pivot_ = Cell();
 		pivotChanged_ = false;
 		return *this;
 	}
 
-	for (Cell& cell : column_){
-		cell.get_element() *= v;
+	std::unordered_set<Cell> newColumn;
+
+	for (const Cell& cell : column_){
+		Cell newCell(cell);
+		newCell.get_element() *= v;
+		newColumn.insert(newCell);
 	}
+
+	column_.swap(newColumn);
 
 	pivot_.get_element() *= v;
 

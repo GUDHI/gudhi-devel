@@ -55,9 +55,7 @@ struct Default_options{
 	static const bool is_double_linked = true;								//single link not implemented yet. usefull?
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = false;
-	static const bool is_indexed_by_column_index = false;
-
-	static const bool is_indexed_by_simplex_index = true;					//not implemented yet
+	static const bool is_indexed_by_column_index = false;					//not implemented yet
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
@@ -86,7 +84,7 @@ struct Multi_persistence_options : Default_options<Z2_field_element, column_type
 template<class Field_type = Z2_field_element>
 struct Cohomology_persistence_options : Default_options<Field_type, Column_types::LIST>{
 	static const bool has_row_access = true;
-	static const bool has_column_compression = true;
+	//static const bool has_column_compression = true;
 	static const bool is_of_boundary_type = false;
 	static const bool has_removable_columns = true;
 };

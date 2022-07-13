@@ -31,7 +31,7 @@ public:
 	template<class Boundary_type = boundary_type>
 	RU_matrix(std::vector<Boundary_type>& orderedBoundaries);
 	RU_matrix(unsigned int numberOfColumns);
-	RU_matrix(RU_matrix& matrixToCopy);
+	RU_matrix(const RU_matrix& matrixToCopy);
 	RU_matrix(RU_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -119,7 +119,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
 {}
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix &matrixToCopy)
+inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy)
 	: Master_matrix::RU_pairing_option(matrixToCopy),
 	  Master_matrix::RU_vine_swap_option(matrixToCopy),
 	  Master_matrix::RU_representative_cycles_option(matrixToCopy),
@@ -307,10 +307,10 @@ inline void RU_matrix<Master_matrix>::_reduce()
 					curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
 					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
 				} else {
-					Column_type &toadd = reducedMatrixR_.at(pivotToColumnIndex_.at(pivot));
+					Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
 					coef = coef.get_inverse();
-					coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 					curr *= coef;
 					curr += toadd;
 					mirrorMatrixU_.get_column(i) *= coef;
@@ -390,13 +390,19 @@ inline constexpr bool RU_matrix<Master_matrix>::_barcode_option_is_active()
 template<class Master_matrix>
 inline constexpr typename RU_matrix<Master_matrix>::barcode_type &RU_matrix<Master_matrix>::_barcode()
 {
-	return swap_opt::isActive_ ? swap_opt::indexToBar_ : pair_opt::indexToBar_;
+	if constexpr (swap_opt::isActive_)
+		return swap_opt::template RU_pairing<Master_matrix>::barcode_;
+	else
+		return pair_opt::barcode_;
 }
 
 template<class Master_matrix>
 inline constexpr typename RU_matrix<Master_matrix>::bar_dictionnary_type &RU_matrix<Master_matrix>::_indexToBar()
 {
-	return swap_opt::isActive_ ? swap_opt::barcode_ : pair_opt::barcode_;
+	if constexpr (swap_opt::isActive_)
+		return swap_opt::template RU_pairing<Master_matrix>::indexToBar_;
+	else
+		return pair_opt::indexToBar_;
 }
 
 template<class Friend_master_matrix>

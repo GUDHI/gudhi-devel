@@ -24,7 +24,7 @@ class Zp_field_element {
 public:
 	Zp_field_element();
 	Zp_field_element(unsigned int element);
-	Zp_field_element(Zp_field_element& toCopy);
+	Zp_field_element(const Zp_field_element& toCopy);
 	Zp_field_element(Zp_field_element&& toMove) noexcept;
 
 	Zp_field_element& operator+=(Zp_field_element const &f);
@@ -75,7 +75,7 @@ public:
 
 private:
 	unsigned int element_;
-	static std::array<unsigned int,characteristic> inverse_;
+	static inline std::array<unsigned int,characteristic> inverse_;
 
 	void _add(unsigned int v);
 	void _substract(unsigned int v);
@@ -99,7 +99,7 @@ inline Zp_field_element<characteristic>::Zp_field_element(unsigned int element)
 }
 
 template<unsigned int characteristic>
-inline Zp_field_element<characteristic>::Zp_field_element(Zp_field_element<characteristic> &toCopy)
+inline Zp_field_element<characteristic>::Zp_field_element(const Zp_field_element<characteristic> &toCopy)
 	: element_(toCopy.element_)
 {
 	static_assert(_is_prime(characteristic), "Characteristic has to be a prime number.");

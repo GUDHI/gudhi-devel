@@ -38,7 +38,7 @@ protected:
 	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
-	Base_pairing(Base_pairing& matrixToCopy);
+	Base_pairing(const Base_pairing& matrixToCopy);
 	Base_pairing(Base_pairing&& other) noexcept;
 
 	matrix_type& matrix_;
@@ -57,8 +57,7 @@ inline Base_pairing<Master_matrix>::Base_pairing(matrix_type &matrix, dimension_
 {}
 
 template<class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing(
-		Base_pairing &matrixToCopy)
+inline Base_pairing<Master_matrix>::Base_pairing(const Base_pairing &matrixToCopy)
 	: matrix_(matrixToCopy.matrix_),
 	  barcode_(matrixToCopy.barcode_),
 	  maxDim_(matrixToCopy.maxDim_),
@@ -92,7 +91,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
 						column_type &toadd = matrix_.at(pivotsToColumn.at(pivot));
 						typename Master_matrix::Field_type coef = curr.get_pivot_value();
 						coef = coef.get_inverse();
-						coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+						coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 						curr *= coef;
 						curr += toadd;
 					}

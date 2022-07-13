@@ -23,7 +23,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Field_element_type, class Column_pairing_option>
-class List_column : Column_pairing_option
+class List_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
@@ -33,7 +33,7 @@ public:
 	List_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	List_column(Boundary_type& boundary, dimension_type dimension);
-	List_column(List_column& column);
+	List_column(const List_column& column);
 	List_column(List_column&& column) noexcept;
 
 	std::vector<Field_element_type> get_content(unsigned int columnLength);
@@ -51,7 +51,7 @@ public:
 	friend List_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
 			List_column<Friend_field_element_type,Friend_column_pairing_option> column1,
 			List_column<Friend_field_element_type,Friend_column_pairing_option> const& column2);
-	List_column& operator*=(unsigned int const &v);
+	List_column& operator*=(unsigned int v);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
 	friend List_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
 			List_column<Friend_field_element_type,Friend_column_pairing_option> column,
@@ -97,7 +97,7 @@ inline List_column<Field_element_type,Column_pairing_option>::List_column(Bounda
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline List_column<Field_element_type,Column_pairing_option>::List_column(List_column &column)
+inline List_column<Field_element_type,Column_pairing_option>::List_column(const List_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
 	  column_(column.column_)
@@ -200,12 +200,12 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 	{
 		if (itToAdd != column.column_.end() && itTarget != column_.end()){
 			if (curRowToAdd == curRowTarget){
-				itTarget->get_element() =+ itToAdd->get_element();
-				if (itTarget->get_element() == 0) column_.erase(itTarget++);
+				itTarget->get_element() =+ itToAdd->get_element_value();
+				if (itTarget->get_element() == 0u) column_.erase(itTarget++);
 				else itTarget++;
 				itToAdd++;
 			} else if (curRowToAdd < curRowTarget){
-				column_.insert(itTarget, Cell(itToAdd->get_element(), curRowToAdd));
+				column_.insert(itTarget, Cell(itToAdd->get_element_value(), curRowToAdd));
 				itToAdd++;
 			} else {
 				itTarget++;
@@ -219,7 +219,7 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 	while (itToAdd != column.column_.end()){
 		curRowToAdd = itToAdd->get_row_index();
 		if (itToAdd != column.column_.end()){
-			column_.push_back(Cell(itToAdd->get_element(), curRowToAdd));
+			column_.push_back(Cell(itToAdd->get_element_value(), curRowToAdd));
 			itToAdd++;
 		}
 	}
@@ -228,7 +228,7 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int const &v)
+inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
