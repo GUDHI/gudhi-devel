@@ -34,6 +34,7 @@ public:
 	Unordered_set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Unordered_set_column(Boundary_type& boundary, dimension_type dimension);
+	Unordered_set_column(Unordered_set_column& column);
 	Unordered_set_column(const Unordered_set_column& column);
 	Unordered_set_column(Unordered_set_column&& column) noexcept;
 
@@ -107,6 +108,15 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered
 }
 
 template<class Field_element_type, class Column_pairing_option>
+inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(Unordered_set_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_),
+	  pivotChanged_(column.pivotChanged_),
+	  pivot_(column.pivot_)
+{}
+
+template<class Field_element_type, class Column_pairing_option>
 inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(const Unordered_set_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
@@ -127,9 +137,9 @@ inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered
 template<class Field_element_type, class Column_pairing_option>
 inline std::vector<Field_element_type> Unordered_set_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
 {
-	std::vector<Field_element_type,Column_pairing_option> container(columnLength);
+	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = it->element();
+		container[it->get_row_index()] = it->get_element_value();
 	}
 	return container;
 }
@@ -183,7 +193,7 @@ template<class Field_element_type, class Column_pairing_option>
 inline void Unordered_set_column<Field_element_type,Column_pairing_option>::clear()
 {
 	column_.clear();
-	pivot_ = 0;
+	pivot_ = Cell();
 	pivotChanged_ = false;
 }
 

@@ -23,6 +23,8 @@ template<class Master_matrix>
 class RU_vine_swap : public RU_pairing<Master_matrix>
 {
 public:
+	using Base_matrix = typename Master_matrix::Base_matrix;
+
 	void vine_swap_with_z_eq_1_case(index index);
 	void vine_swap(index index);
 
@@ -31,13 +33,11 @@ public:
 	friend void swap(RU_vine_swap<Friend_master_matrix>& swap1,
 					 RU_vine_swap<Friend_master_matrix>& swap2);
 
-protected:
-	using Base_matrix = typename Master_matrix::Base_matrix;
-
 	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU);
 	RU_vine_swap(const RU_vine_swap &matrixToCopy);
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
+protected:
 	static constexpr bool isActive_ = true;
 
 private:
@@ -76,8 +76,8 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&other) noexcept
-	: reducedMatrixR_(std::move(other.reducedMatrixR_)),
-	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
+	: reducedMatrixR_(other.reducedMatrixR_),
+	  mirrorMatrixU_(other.mirrorMatrixU_),
 	  RU_pairing<Master_matrix>(std::move(other))
 {}
 

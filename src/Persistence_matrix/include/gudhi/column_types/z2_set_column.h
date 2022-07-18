@@ -32,6 +32,7 @@ public:
 	Z2_set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Z2_set_column(Boundary_type& boundary, dimension_type dimension);
+	Z2_set_column(Z2_set_column& column);
 	Z2_set_column(const Z2_set_column& column);
 	Z2_set_column(Z2_set_column&& column) noexcept;
 
@@ -77,6 +78,13 @@ template<class Boundary_type>
 inline Z2_set_column<Column_pairing_option>::Z2_set_column(Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension),
 	  column_(boundary.begin(), boundary.end())
+{}
+
+template<class Column_pairing_option>
+inline Z2_set_column<Column_pairing_option>::Z2_set_column(Z2_set_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_)
 {}
 
 template<class Column_pairing_option>

@@ -24,6 +24,7 @@ class RU_representative_cycles
 {
 public:
 	using cycle_type = std::vector<index>;
+	using Base_matrix = typename Master_matrix::Base_matrix;
 
 	void update_representative_cycles();
 
@@ -35,13 +36,11 @@ public:
 	friend void swap(RU_representative_cycles<Friend_master_matrix>& base1,
 					 RU_representative_cycles<Friend_master_matrix>& base2);
 
-protected:
-	using Base_matrix = typename Master_matrix::Base_matrix;
-
 	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
 	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
 	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
+protected:
 	static constexpr bool isActive_ = true;
 
 private:
@@ -66,8 +65,8 @@ inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(const R
 
 template<class Master_matrix>
 inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(RU_representative_cycles<Master_matrix> &&other) noexcept
-	: reducedMatrixR_(std::move(other.reducedMatrixR_)),
-	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
+	: reducedMatrixR_(other.reducedMatrixR_),
+	  mirrorMatrixU_(other.mirrorMatrixU_),
 	  representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}

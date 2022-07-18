@@ -99,9 +99,11 @@ public:
 //						>::type;
 
 	struct Dummy_column_pairing{
-	protected:
+		Dummy_column_pairing& operator=(Dummy_column_pairing other){return *this;}
+		friend void swap(Dummy_column_pairing& d1, Dummy_column_pairing& d2){}
+
 		Dummy_column_pairing(){}
-		Dummy_column_pairing(Dummy_column_pairing& toCopy){}
+		Dummy_column_pairing(const Dummy_column_pairing& toCopy){}
 		Dummy_column_pairing(Dummy_column_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -268,10 +270,12 @@ public:
 										>::type;
 
 	struct Dummy_base_swap{
-	protected:
+		Dummy_base_swap& operator=(Dummy_base_swap other){return *this;}
+		friend void swap(Dummy_base_swap& d1, Dummy_base_swap& d2){}
+
 		Dummy_base_swap(column_container_type &matrix){}
 		Dummy_base_swap(column_container_type &matrix, unsigned int numberOfColumns){}
-		Dummy_base_swap(Dummy_base_swap& matrixToCopy){}
+		Dummy_base_swap(const Dummy_base_swap& matrixToCopy){}
 		Dummy_base_swap(Dummy_base_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -284,9 +288,11 @@ public:
 										>::type;
 
 	struct Dummy_base_pairing{
-	protected:
+		Dummy_base_pairing& operator=(Dummy_base_pairing other){return *this;}
+		friend void swap(Dummy_base_pairing& d1, Dummy_base_pairing& d2){}
+
 		Dummy_base_pairing(column_container_type& matrix, dimension_type& maxDim){}
-		Dummy_base_pairing(Dummy_base_pairing& matrixToCopy){}
+		Dummy_base_pairing(const Dummy_base_pairing& matrixToCopy){}
 		Dummy_base_pairing(Dummy_base_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -299,9 +305,11 @@ public:
 										>::type;
 
 	struct Dummy_ru_pairing{
-	protected:
+		Dummy_ru_pairing& operator=(Dummy_ru_pairing other){return *this;}
+		friend void swap(Dummy_ru_pairing& d1, Dummy_ru_pairing& d2){}
+
 		Dummy_ru_pairing(){}
-		Dummy_ru_pairing(Dummy_base_pairing& matrixToCopy){}
+		Dummy_ru_pairing(const Dummy_base_pairing& matrixToCopy){}
 		Dummy_ru_pairing(Dummy_base_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -314,9 +322,11 @@ public:
 										>::type;
 
 	struct Dummy_ru_vine_swap{
-	protected:
+		Dummy_ru_vine_swap& operator=(Dummy_ru_vine_swap other){return *this;}
+		friend void swap(Dummy_ru_vine_swap& d1, Dummy_ru_vine_swap& d2){}
+
 		Dummy_ru_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU){}
-		Dummy_ru_vine_swap(Dummy_ru_vine_swap& matrixToCopy){}
+		Dummy_ru_vine_swap(const Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap(Dummy_ru_vine_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -329,9 +339,11 @@ public:
 										>::type;
 
 	struct Dummy_chain_pairing{
-	protected:
+		Dummy_chain_pairing& operator=(Dummy_chain_pairing other){return *this;}
+		friend void swap(Dummy_chain_pairing& d1, Dummy_chain_pairing& d2){}
+
 		Dummy_chain_pairing(){}
-		Dummy_chain_pairing(Dummy_chain_pairing& matrixToCopy){}
+		Dummy_chain_pairing(const Dummy_chain_pairing& matrixToCopy){}
 		Dummy_chain_pairing(Dummy_chain_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -344,9 +356,11 @@ public:
 										>::type;
 
 	struct Dummy_chain_vine_swap{
-	protected:
+		Dummy_chain_vine_swap& operator=(Dummy_chain_vine_swap other){return *this;}
+		friend void swap(Dummy_chain_vine_swap& d1, Dummy_chain_vine_swap& d2){}
+
 		Dummy_chain_vine_swap(column_container_type& matrix){}
-		Dummy_chain_vine_swap(Dummy_chain_vine_swap& matrixToCopy){}
+		Dummy_chain_vine_swap(const Dummy_chain_vine_swap& matrixToCopy){}
 		Dummy_chain_vine_swap(Dummy_chain_vine_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -359,9 +373,11 @@ public:
 										>::type;
 
 	struct Dummy_ru_representative_cycles{
-	protected:
+		Dummy_ru_representative_cycles& operator=(Dummy_ru_representative_cycles other){return *this;}
+		friend void swap(Dummy_ru_representative_cycles& d1, Dummy_ru_representative_cycles& d2){}
+
 		Dummy_ru_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU){}
-		Dummy_ru_representative_cycles(Dummy_ru_representative_cycles& matrixToCopy){}
+		Dummy_ru_representative_cycles(const Dummy_ru_representative_cycles& matrixToCopy){}
 		Dummy_ru_representative_cycles(Dummy_ru_representative_cycles&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -374,9 +390,11 @@ public:
 											>::type;
 
 	struct Dummy_chain_representative_cycles{
-	protected:
+		Dummy_chain_representative_cycles& operator=(Dummy_chain_representative_cycles other){return *this;}
+		friend void swap(Dummy_chain_representative_cycles& d1, Dummy_chain_representative_cycles& d2){}
+
 		Dummy_chain_representative_cycles(column_container_type& matrix, dictionnary_type<index>& pivotToPosition){}
-		Dummy_chain_representative_cycles(Dummy_chain_representative_cycles& matrixToCopy){}
+		Dummy_chain_representative_cycles(const Dummy_chain_representative_cycles& matrixToCopy){}
 		Dummy_chain_representative_cycles(Dummy_chain_representative_cycles&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -409,7 +427,7 @@ public:
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
-	bool is_zero_cell(index columnIndex, index rowIndex) const;
+	bool is_zero_cell(index columnIndex, index rowIndex);
 	bool is_zero_column(index columnIndex);
 
 	index get_column_with_pivot(index simplexIndex);
@@ -466,6 +484,13 @@ template<class Options>
 inline Matrix<Options>::Matrix(Matrix &&other) noexcept : matrix_(std::move(other.matrix_))
 {
 	_assert_options();
+}
+
+template<class Options>
+template<class Boundary_type>
+inline void Matrix<Options>::insert_boundary(Boundary_type &boundary)
+{
+	matrix_.insert_boundary(boundary);
 }
 
 template<class Options>
@@ -527,7 +552,7 @@ inline void Matrix<Options>::zero_column(index columnIndex)
 }
 
 template<class Options>
-inline bool Matrix<Options>::is_zero_cell(index columnIndex, index rowIndex) const
+inline bool Matrix<Options>::is_zero_cell(index columnIndex, index rowIndex)
 {
 	return matrix_.is_zero_cell(columnIndex, rowIndex);
 }

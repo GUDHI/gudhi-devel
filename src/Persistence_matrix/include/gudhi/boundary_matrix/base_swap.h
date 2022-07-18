@@ -32,15 +32,16 @@ public:
 	friend void swap(Base_swap<Friend_master_matrix>& base1,
 					 Base_swap<Friend_master_matrix>& base2);
 
-protected:
-	using index_dictionnary_type = typename Master_matrix::template dictionnary_type<unsigned int>;
-	using row_dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using matrix_type = typename Master_matrix::column_container_type;
 
 	Base_swap(matrix_type &matrix);
 	Base_swap(matrix_type &matrix, unsigned int numberOfColumns);
 	Base_swap(const Base_swap& matrixToCopy);
 	Base_swap(Base_swap&& other) noexcept;
+
+protected:
+	using index_dictionnary_type = typename Master_matrix::template dictionnary_type<unsigned int>;
+	using row_dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
 	index_dictionnary_type indexToRow_;
 	row_dictionnary_type rowToIndex_;
@@ -79,7 +80,7 @@ inline Base_swap<Master_matrix>::Base_swap(Base_swap<Master_matrix> &&other) noe
 	: indexToRow_(std::move(other.indexToRow_)),
 	  rowToIndex_(std::move(other.rowToIndex_)),
 	  rowSwapped_(std::exchange(other.rowSwapped_, 0)),
-	  matrix_(std::move(other.matrix_))
+	  matrix_(other.matrix_)
 {}
 
 template<class Master_matrix>

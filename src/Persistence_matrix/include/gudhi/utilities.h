@@ -15,6 +15,8 @@
 #include <list>
 #include <limits>
 
+#include "Zp_field.h"
+
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -44,5 +46,21 @@ struct Bar{
 
 } //namespace persistence_matrix
 } //namespace Gudhi
+
+template<unsigned int characteristic>
+struct std::hash<std::pair<unsigned int, Gudhi::persistence_matrix::Zp_field_element<characteristic> > >
+{
+	size_t operator()(const std::pair<unsigned int, Gudhi::persistence_matrix::Zp_field_element<characteristic> >& p) const
+	{
+		return std::hash<unsigned int>()(p.first);
+	}
+};
+
+template<unsigned int characteristic>
+bool operator<(
+		const std::pair<unsigned int, Gudhi::persistence_matrix::Zp_field_element<characteristic> >& p1,
+		const std::pair<unsigned int, Gudhi::persistence_matrix::Zp_field_element<characteristic> >& p2){
+	return p1.first < p2.first;
+}
 
 #endif // UTILITIES_H

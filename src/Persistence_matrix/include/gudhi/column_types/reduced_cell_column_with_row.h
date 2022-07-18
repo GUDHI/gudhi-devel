@@ -38,6 +38,7 @@ public:
 	Column_type& get_column();
 	Row_type& get_row();
 	int get_pivot() const;
+	Field_element_type get_pivot_value();
 	int get_lowest_simplex_index() const;
 	dimension_type get_dimension() const;
 	bool is_empty() const;
@@ -64,7 +65,7 @@ inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Fiel
 		index chainIndex, Chain_type& chain, dimension_type dimension)
 	: pivot_(chain.rbegin()->first), lowestSimplexIndex_(pivot_), dim_(dimension)
 {
-	for (std::pair<index,Field_element_type>& p : chain){
+	for (const std::pair<index,Field_element_type>& p : chain){
 		Cell *new_cell = new Cell(p.second, chainIndex, p.first);
 		column_.insert(column_.end(), *new_cell);
 	}
@@ -125,6 +126,15 @@ template<class Cell, class Column_type, class Row_type, class Row_base_hook, cla
 inline int Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::get_pivot() const
 {
 	return pivot_;
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
+inline Field_element_type Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::get_pivot_value()
+{
+	for (Cell& cell : column_){
+		if (cell.get_row_index() == pivot_) return cell.get_element();
+	}
+	return Field_element_type();
 }
 
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>

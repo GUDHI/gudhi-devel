@@ -20,7 +20,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Chain_matrix_with_row_access : Master_matrix::Chain_pairing_option, Master_matrix::Chain_vine_swap_option, Master_matrix::Chain_representative_cycles_option{
+class Chain_matrix_with_row_access : public Master_matrix::Chain_pairing_option, Master_matrix::Chain_vine_swap_option, Master_matrix::Chain_representative_cycles_option{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Column_type::Row_type;
@@ -51,7 +51,7 @@ public:
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
-	bool is_zero_cell(index columnIndex, index rowIndex) const;
+	bool is_zero_cell(index columnIndex, index rowIndex);
 	bool is_zero_column(index columnIndex);
 
 	index get_column_with_pivot(index simplexIndex);
@@ -72,6 +72,7 @@ private:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+	using Field_element_type = typename Master_matrix::Field_type;
 
 	matrix_type matrix_;
 	dictionnary_type pivotToColumnIndex_;
@@ -81,6 +82,7 @@ private:
 	void _insert_chain(std::set<index>& column, dimension_type dimension);
 	void _insert_chain(std::set<index>& column, dimension_type dimension, index pair);
 	void _add_to(Column_type& column, std::set<index>& set);
+	void _add_to(Column_type &column, std::set<std::pair<index,Field_element_type> >& set, Field_element_type& coef);
 
 	static constexpr bool _barcode_option_is_active();
 	constexpr barcode_type& _barcode();
@@ -157,7 +159,6 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
-	std::set<index> column(boundary.begin(), boundary.end());
 	if (matrix_.size() <= nextInsertIndex_){
 		matrix_.resize(nextInsertIndex_ * 2, Column_type(matrix_, pivotToColumnIndex_));
 		pivotToColumnIndex_.resize(matrix_.size(), -1);
@@ -169,80 +170,170 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(Boundar
 	int dim = boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
 
-	if (boundary.empty())
-	{
-		column.insert(nextInsertIndex_);
-		_insert_chain(column, dim);
-		if constexpr (_barcode_option_is_active()){
-			_barcode().emplace_back(0, nextInsertIndex_, -1);
-			_indexToBar().push_back(_barcode().size() - 1);
-		}
-		++nextInsertIndex_;
-		return;
-	}
+	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+		std::set<index> column(boundary.begin(), boundary.end());
 
-	index col_low = pivotToColumnIndex_.at(*(column.rbegin()));
-	std::vector<index> chains_in_H; //for corresponding indices in H
-
-	std::pair<std::set<index>::iterator,bool> res_insert;
-	while (matrix_.at(col_low).is_paired())
-	{
-		chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());//keep the col_h with which col_g is paired
-		_add_to(matrix_.at(col_low), column);	//Reduce with the column col_g
-
-		if (column.empty()) {
-			//produce the sum of all col_h in chains_in_H
+		if (boundary.empty())
+		{
 			column.insert(nextInsertIndex_);
-			for (index idx_h : chains_in_H) {
-				_add_to(matrix_.at(idx_h), column);
-			}
-			//create a new cycle (in F) sigma - \sum col_h
 			_insert_chain(column, dim);
 			if constexpr (_barcode_option_is_active()){
-				_barcode().emplace_back(dim, nextInsertIndex_, -1);
+				_barcode().emplace_back(0, nextInsertIndex_, -1);
 				_indexToBar().push_back(_barcode().size() - 1);
 			}
 			++nextInsertIndex_;
 			return;
 		}
 
-		col_low = pivotToColumnIndex_.at(*(column.rbegin()));
-	}
+		index col_low = pivotToColumnIndex_.at(*(column.rbegin()));
+		std::vector<index> chains_in_H; //for corresponding indices in H
 
-	while (!column.empty())
-	{
-		col_low = pivotToColumnIndex_.at(*(column.rbegin()));
+		while (matrix_.at(col_low).is_paired())
+		{
+			chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());//keep the col_h with which col_g is paired
+			_add_to(matrix_.at(col_low), column);	//Reduce with the column col_g
 
-		if (!matrix_.at(col_low).is_paired()) {
-			currentEssentialCycleIndices.push_back(col_low);
-		} else {
-			chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());
+			if (column.empty()) {
+				//produce the sum of all col_h in chains_in_H
+				column.insert(nextInsertIndex_);
+				for (index idx_h : chains_in_H) {
+					_add_to(matrix_.at(idx_h), column);
+				}
+				//create a new cycle (in F) sigma - \sum col_h
+				_insert_chain(column, dim);
+				if constexpr (_barcode_option_is_active()){
+					_barcode().emplace_back(dim, nextInsertIndex_, -1);
+					_indexToBar().push_back(_barcode().size() - 1);
+				}
+				++nextInsertIndex_;
+				return;
+			}
+
+			col_low = pivotToColumnIndex_.at(*(column.rbegin()));
 		}
 
-		_add_to(matrix_.at(col_low), column);
-	}
+		while (!column.empty())
+		{
+			col_low = pivotToColumnIndex_.at(*(column.rbegin()));
 
-	index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
+			if (!matrix_.at(col_low).is_paired()) {
+				currentEssentialCycleIndices.push_back(col_low);
+			} else {
+				chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());
+			}
 
-	for (std::vector<index>::iterator other_col_it = currentEssentialCycleIndices.begin() + 1;
-		other_col_it != currentEssentialCycleIndices.end(); ++other_col_it)
-	{
-		add_to(*other_col_it, chain_fp);
-	}
+			_add_to(matrix_.at(col_low), column);
+		}
 
-	//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
-	column.insert(nextInsertIndex_);
-	for(index idx_h : chains_in_H){
-		_add_to(matrix_.at(idx_h), column);
-	}
+		index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
 
-	//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
-	_insert_chain(column, dim, chain_fp);
-	if constexpr (_barcode_option_is_active()){
-		_barcode().at(_indexToBar().at(matrix_.at(chain_fp).get_pivot())).death = nextInsertIndex_;
-		_indexToBar().push_back(_indexToBar().at(matrix_.at(chain_fp).get_pivot()));
+		for (std::vector<index>::iterator other_col_it = currentEssentialCycleIndices.begin() + 1;
+			other_col_it != currentEssentialCycleIndices.end(); ++other_col_it)
+		{
+			add_to(*other_col_it, chain_fp);
+		}
+
+		//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
+		column.insert(nextInsertIndex_);
+		for(index idx_h : chains_in_H){
+			_add_to(matrix_.at(idx_h), column);
+		}
+
+		//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
+		_insert_chain(column, dim, chain_fp);
+		if constexpr (_barcode_option_is_active()){
+			_barcode().at(_indexToBar().at(matrix_.at(chain_fp).get_pivot())).death = nextInsertIndex_;
+			_indexToBar().push_back(_indexToBar().at(matrix_.at(chain_fp).get_pivot()));
+		}
+		++nextInsertIndex_;
+	} else {
+		std::set<std::pair<index,Field_element_type> > column(boundary.begin(), boundary.end());
+
+		if (boundary.empty())
+		{
+			column.emplace(nextInsertIndex_, 1);
+			_insert_chain(column, dim);
+			if constexpr (_barcode_option_is_active()){
+				_barcode().emplace_back(0, nextInsertIndex_, -1);
+				_indexToBar().push_back(_barcode().size() - 1);
+			}
+			++nextInsertIndex_;
+			return;
+		}
+
+		index col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+		std::vector<std::pair<index,Field_element_type> > chains_in_H; //for corresponding indices in H
+		std::vector<std::pair<index,Field_element_type> > chains_in_F; //for corresponding indices in F
+
+		while (matrix_.at(col_low).is_paired())
+		{
+			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
+			coef = coef.get_inverse();
+			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
+
+			_add_to(matrix_.at(col_low), column, coef);	//Reduce with the column col_g
+			chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);//keep the col_h with which col_g is paired
+
+			if (column.empty()) {
+				//produce the sum of all col_h in chains_in_H
+				column.emplace(nextInsertIndex_, 1);
+				for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
+					_add_to(matrix_.at(idx_h.first), column, idx_h.second);
+				}
+				//create a new cycle (in F) sigma - \sum col_h
+				_insert_chain(column, dim);
+				if constexpr (_barcode_option_is_active()){
+					_barcode().emplace_back(dim, nextInsertIndex_, -1);
+					_indexToBar().push_back(_barcode().size() - 1);
+				}
+				++nextInsertIndex_;
+				return;
+			}
+
+			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+		}
+
+		while (!column.empty())
+		{
+			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
+			coef = coef.get_inverse();
+			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
+
+			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+
+			if (!matrix_.at(col_low).is_paired()) {
+				currentEssentialCycleIndices.push_back(col_low);
+				chains_in_F.emplace_back(col_low, coef);
+			} else {
+				chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);
+			}
+
+			_add_to(matrix_.at(col_low), column);
+		}
+
+		index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
+
+		for (auto other_col_it = chains_in_F.begin() + 1;
+			other_col_it != chains_in_F.end(); ++other_col_it)
+		{
+			matrix_.at(chain_fp) *= other_col_it->second.get_inverse();
+			add_to(other_col_it->first, chain_fp);
+		}
+
+		//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
+		column.emplace(nextInsertIndex_, 1);
+		for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
+			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
+		}
+
+		//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
+		_insert_chain(column, dim, chain_fp);
+		if constexpr (_barcode_option_is_active()){
+			_barcode().at(_indexToBar().at(matrix_.at(chain_fp).get_pivot())).death = nextInsertIndex_;
+			_indexToBar().push_back(_indexToBar().at(matrix_.at(chain_fp).get_pivot()));
+		}
+		++nextInsertIndex_;
 	}
-	++nextInsertIndex_;
 }
 
 template<class Master_matrix>
@@ -303,7 +394,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::zero_column(index colum
 }
 
 template<class Master_matrix>
-inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
+inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex)
 {
 	return matrix_.at(columnIndex).is_non_zero(rowIndex);
 }
@@ -312,6 +403,18 @@ template<class Master_matrix>
 inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_column(index columnIndex)
 {
 	return matrix_.at(columnIndex).is_empty();
+}
+
+template<class Master_matrix>
+inline index Chain_matrix_with_row_access<Master_matrix>::get_column_with_pivot(index simplexIndex)
+{
+	return pivotToColumnIndex_.at(simplexIndex);
+}
+
+template<class Master_matrix>
+inline index Chain_matrix_with_row_access<Master_matrix>::get_pivot(index columnIndex)
+{
+	return matrix_.at(columnIndex).get_pivot();
 }
 
 template<class Master_matrix>
@@ -384,6 +487,30 @@ inline void Chain_matrix_with_row_access<Master_matrix>::_add_to(Column_type &co
 			set.erase(res_insert.first);
 		}
 	}
+}
+
+template<class Master_matrix>
+inline void Chain_matrix_with_row_access<Master_matrix>::_add_to(
+		Column_type &column, std::set<std::pair<index, Field_element_type> > &set, Field_element_type &coef)
+{
+	std::set<std::pair<index,Field_element_type> > newSet;
+
+	for (const Cell &cell : column.get_column()) {
+		std::pair<index,Field_element_type> p(cell.get_row_index(), cell.get_element());
+		auto res_it = set.find(p);
+
+		if (res_it != set.end()){
+			p.second *= coef;
+			p.second += res_it->second;
+			if (p.second != 0){
+				newSet.insert(p);
+			}
+		} else {
+			newSet.insert(p);
+		}
+	}
+
+	set.swap(newSet);
 }
 
 template<class Master_matrix>

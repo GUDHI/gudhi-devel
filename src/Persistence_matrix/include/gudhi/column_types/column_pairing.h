@@ -30,11 +30,11 @@ public:
 	friend void swap(Column_pairing& pairing1,
 					 Column_pairing& pairing2);
 
-protected:
 	Column_pairing();
 	Column_pairing(const Column_pairing &toCopy);
 	Column_pairing(Column_pairing&& other) noexcept;
 
+protected:
 	int pairedColumn_;
 	static constexpr bool isActive_ = true;
 };

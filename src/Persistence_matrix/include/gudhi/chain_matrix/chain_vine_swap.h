@@ -32,7 +32,6 @@ public:
 	friend void swap(Chain_vine_swap<Friend_master_matrix>& swap1,
 					 Chain_vine_swap<Friend_master_matrix>& swap2);
 
-protected:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
@@ -40,6 +39,7 @@ protected:
 	Chain_vine_swap(const Chain_vine_swap &matrixToCopy);
 	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
+protected:
 	dictionnary_type pivotToPosition_;
 	static constexpr bool isActive_ = true;
 
@@ -75,13 +75,13 @@ inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix)
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(
 		const Chain_vine_swap &matrixToCopy)
-	: matrix_(matrixToCopy.matrix_), pivotToPosition_(matrixToCopy.pivotToPosition_), Chain_pairing<Master_matrix>(matrixToCopy)
+	: pivotToPosition_(matrixToCopy.pivotToPosition_), matrix_(matrixToCopy.matrix_), Chain_pairing<Master_matrix>(matrixToCopy)
 {}
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(Chain_vine_swap<Master_matrix> &&other) noexcept
-	: matrix_(std::move(other.reducedMatrixR_)),
-	  pivotToPosition_(std::move(other.mirrorMatrixU_)),
+	: pivotToPosition_(std::move(other.pivotToPosition_)),
+	  matrix_(other.matrix_),
 	  Chain_pairing<Master_matrix>(std::move(other))
 {}
 
@@ -112,7 +112,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	index rowIndex2 = pivotToPosition_.at(pivot2);
 
 	if (_is_negative_in_pair(rowIndex1) && _is_negative_in_pair(rowIndex2)){
-		if (!matrix_.at(columnIndex2).contains(matrix_.at(columnIndex1).get_lowest_simplex_index())){
+		if (!matrix_.at(columnIndex2).is_non_zero(matrix_.at(columnIndex1).get_lowest_simplex_index())){
 			_negative_transpose(rowIndex1, rowIndex2);
 			matrix_.at(pivot1).swap_independent_rows(pivot2);
 			return columnIndex1;
@@ -121,7 +121,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	}
 
 	if (_is_negative_in_pair(rowIndex1)){
-		if (!matrix_.at(columnIndex2).contains(matrix_.at(columnIndex1).get_lowest_simplex_index())){
+		if (!matrix_.at(columnIndex2).is_non_zero(matrix_.at(columnIndex1).get_lowest_simplex_index())){
 			_negative_positive_transpose(rowIndex1, rowIndex2);
 			matrix_.at(pivot1).swap_independent_rows(pivot2);
 			return columnIndex1;
@@ -130,7 +130,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	}
 
 	if (_is_negative_in_pair(rowIndex2)){
-		if (!matrix_.at(columnIndex2).contains(matrix_.at(columnIndex1).get_lowest_simplex_index())){
+		if (!matrix_.at(columnIndex2).is_non_zero(matrix_.at(columnIndex1).get_lowest_simplex_index())){
 			_positive_negative_transpose(rowIndex1, rowIndex2);
 			matrix_.at(pivot1).swap_independent_rows(pivot2);
 			return columnIndex1;
@@ -138,7 +138,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 		return _positive_negative_vine_swap(columnIndex1, columnIndex2);
 	}
 
-	if (!matrix_.at(columnIndex2).contains(matrix_.at(columnIndex1).get_lowest_simplex_index())){
+	if (!matrix_.at(columnIndex2).is_non_zero(matrix_.at(columnIndex1).get_lowest_simplex_index())){
 		_positive_transpose(rowIndex1, rowIndex2);
 		matrix_.at(pivot1).swap_independent_rows(pivot2);
 		return columnIndex1;

@@ -22,7 +22,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix_with_row_access : Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
+class Base_matrix_with_row_access : public Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Column_type::Row_type;
@@ -256,9 +256,9 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(B
 //inline bool Base_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 //{
 //	if constexpr (swap_opt::isActive_){
-//		return !(matrix_.at(columnIndex).contains(swap_opt::indexToRow_.at(rowIndex)));
+//		return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
 //	} else {
-//		return !(matrix_.at(columnIndex).contains(rowIndex));
+//		return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
 //	}
 //}
 

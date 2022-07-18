@@ -20,7 +20,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix_with_removals : Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
+class Base_matrix_with_removals : public Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;
@@ -50,6 +50,9 @@ public:
 	void zero_column(index columnIndex);
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
+
+	index get_column_with_pivot(index simplexIndex);
+	index get_pivot(index columnIndex);
 
 	Base_matrix_with_removals& operator=(Base_matrix_with_removals other);
 	template<class Friend_master_matrix>
@@ -242,9 +245,9 @@ template<class Master_matrix>
 inline bool Base_matrix_with_removals<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
-		return !(matrix_.at(columnIndex).contains(swap_opt::indexToRow_.at(rowIndex)));
+		return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
 	} else {
-		return !(matrix_.at(columnIndex).contains(rowIndex));
+		return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
 	}
 }
 
@@ -252,6 +255,19 @@ template<class Master_matrix>
 inline bool Base_matrix_with_removals<Master_matrix>::is_zero_column(index columnIndex)
 {
 	return matrix_.at(columnIndex).is_empty();
+}
+
+template<class Master_matrix>
+inline index Base_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex)
+{
+	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+			"'get_column_with_pivot' is not implemented for the chosen options.");
+}
+
+template<class Master_matrix>
+inline index Base_matrix_with_removals<Master_matrix>::get_pivot(index columnIndex)
+{
+	return matrix_.at(columnIndex).get_pivot();
 }
 
 template<class Master_matrix>
@@ -271,9 +287,9 @@ inline void Base_matrix_with_removals<Master_matrix>::print()
 {
 	std::cout << "Base_matrix_with_removals:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		const Column_type& col = matrix_.at(i);
+		Column_type& col = matrix_.at(i);
 		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0) std::cout << "-\n";
+			if (e == 0u) std::cout << "-\n";
 			else std::cout << e << " ";
 		}
 		std::cout << "\n";

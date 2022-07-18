@@ -33,6 +33,7 @@ public:
 	Vector_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Vector_column(Boundary_type& boundary, dimension_type dimension);
+	Vector_column(Vector_column& column);
 	Vector_column(const Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
@@ -102,6 +103,14 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Bo
 }
 
 template<class Field_element_type, class Column_pairing_option>
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_),
+	  erasedValues_(column.erasedValues_)
+{}
+
+template<class Field_element_type, class Column_pairing_option>
 inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(const Vector_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
@@ -121,9 +130,9 @@ template<class Field_element_type, class Column_pairing_option>
 inline std::vector<Field_element_type> Vector_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
 {
 	_cleanValues();
-	std::vector<Field_element_type,Column_pairing_option> container(columnLength);
+	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = it->element();
+		container[it->get_row_index()] = it->get_element();
 	}
 	return container;
 }

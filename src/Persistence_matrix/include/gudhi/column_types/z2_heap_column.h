@@ -35,6 +35,7 @@ public:
 	Z2_heap_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Z2_heap_column(Boundary_type& boundary, dimension_type dimension);
+	Z2_heap_column(Z2_heap_column& column);
 	Z2_heap_column(const Z2_heap_column& column);
 	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
@@ -93,6 +94,15 @@ inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(Boundary_type& boun
 {
 	std::make_heap(column_.begin(), column_.end());
 }
+
+template<class Column_pairing_option>
+inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(Z2_heap_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_),
+	  insertsSinceLastPrune_(column.insertsSinceLastPrune_),
+	  erasedValues_(column.erasedValues_)
+{}
 
 template<class Column_pairing_option>
 inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Z2_heap_column &column)

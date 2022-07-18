@@ -24,6 +24,8 @@ class Chain_representative_cycles
 {
 public:
 	using cycle_type = std::vector<index>;
+	using matrix_type = typename Master_matrix::column_container_type;
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
 	void update_representative_cycles();
 
@@ -35,14 +37,12 @@ public:
 	friend void swap(Chain_representative_cycles<Friend_master_matrix>& base1,
 					 Chain_representative_cycles<Friend_master_matrix>& base2);
 
-protected:
-	using matrix_type = typename Master_matrix::column_container_type;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
-	using column_type = typename Master_matrix::Column_type;
-
 	Chain_representative_cycles(matrix_type& matrix, dictionnary_type& pivotToPosition);
 	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
 	Chain_representative_cycles(Chain_representative_cycles&& other) noexcept;
+
+protected:
+	using column_type = typename Master_matrix::Column_type;
 
 	static constexpr bool isActive_ = true;
 
@@ -68,8 +68,8 @@ inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(c
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(Chain_representative_cycles<Master_matrix>&& other) noexcept
-	: matrix_(std::move(other.matrix_)),
-	  pivotToPosition_(std::move(other.pivotToPosition_)),
+	: matrix_(other.matrix_),
+	  pivotToPosition_(other.pivotToPosition_),
 	  representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}

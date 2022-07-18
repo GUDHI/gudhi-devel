@@ -18,7 +18,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class RU_matrix_with_removals : Master_matrix::RU_pairing_option, Master_matrix::RU_vine_swap_option, Master_matrix::RU_representative_cycles_option{
+class RU_matrix_with_removals : public Master_matrix::RU_pairing_option, Master_matrix::RU_vine_swap_option, Master_matrix::RU_representative_cycles_option{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = void;
@@ -247,6 +247,18 @@ inline bool RU_matrix_with_removals<Master_matrix>::is_zero_column(index columnI
 }
 
 template<class Master_matrix>
+inline index RU_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex)
+{
+	return pivotToColumnIndex_.at(simplexIndex);
+}
+
+template<class Master_matrix>
+inline index RU_matrix_with_removals<Master_matrix>::get_pivot(index columnIndex)
+{
+	return reducedMatrixR_.get_column(columnIndex).get_pivot();
+}
+
+template<class Master_matrix>
 inline RU_matrix_with_removals<Master_matrix> &RU_matrix_with_removals<Master_matrix>::operator=(RU_matrix_with_removals other)
 {
 	swap_opt::operator=(other);
@@ -264,9 +276,9 @@ inline void RU_matrix_with_removals<Master_matrix>::print()
 {
 	std::cout << "R_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		const Column_type& col = reducedMatrixR_.get_column(i);
+		Column_type& col = reducedMatrixR_.get_column(i);
 		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0) std::cout << "-\n";
+			if (e == 0u) std::cout << "-\n";
 			else std::cout << e << " ";
 		}
 		std::cout << "\n";
@@ -274,9 +286,9 @@ inline void RU_matrix_with_removals<Master_matrix>::print()
 	std::cout << "\n";
 	std::cout << "U_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		const Column_type& col = mirrorMatrixU_.get_column(i);
+		Column_type& col = mirrorMatrixU_.get_column(i);
 		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0) std::cout << "-\n";
+			if (e == 0u) std::cout << "-\n";
 			else std::cout << e << " ";
 		}
 		std::cout << "\n";
@@ -315,10 +327,10 @@ inline void RU_matrix_with_removals<Master_matrix>::_reduce()
 					curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
 					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
 				} else {
-					Column_type &toadd = reducedMatrixR_.at(pivotToColumnIndex_.at(pivot));
+					Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
 					coef = coef.get_inverse();
-					coef *= (Master_matrix::Field_type::get_characteristic() - toadd.get_pivot_value());
+					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 					curr *= coef;
 					curr += toadd;
 					mirrorMatrixU_.get_column(i) *= coef;

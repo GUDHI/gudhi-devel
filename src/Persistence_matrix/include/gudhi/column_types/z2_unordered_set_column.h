@@ -33,6 +33,7 @@ public:
 	Z2_unordered_set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Z2_unordered_set_column(Boundary_type& boundary, dimension_type dimension);
+	Z2_unordered_set_column(Z2_unordered_set_column& column);
 	Z2_unordered_set_column(const Z2_unordered_set_column& column);
 	Z2_unordered_set_column(Z2_unordered_set_column&& column) noexcept;
 
@@ -85,6 +86,15 @@ inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(B
 	  column_(boundary.begin(), boundary.end()),
 	  pivotChanged_(false),
 	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+{}
+
+template<class Column_pairing_option>
+inline Z2_unordered_set_column<Column_pairing_option>::Z2_unordered_set_column(Z2_unordered_set_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_),
+	  pivotChanged_(column.pivotChanged_),
+	  pivot_(column.pivot_)
 {}
 
 template<class Column_pairing_option>

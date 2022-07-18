@@ -31,12 +31,12 @@ public:
 	friend void swap(RU_pairing<Friend_matrix>& pairing1,
 					 RU_pairing<Friend_matrix>& pairing2);
 
-protected:
-	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-
 	RU_pairing();
 	RU_pairing(const RU_pairing &matrixToCopy);
 	RU_pairing(RU_pairing&& other) noexcept;
+
+protected:
+	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	barcode_type barcode_;
 	dictionnary_type indexToBar_;

@@ -24,6 +24,7 @@ class Base_pairing
 {
 public:
 	using barcode_type = typename Master_matrix::barcode_type;
+	using matrix_type = typename Master_matrix::column_container_type;
 
 	const barcode_type& get_current_barcode();
 
@@ -32,14 +33,13 @@ public:
 	friend void swap(Base_pairing<Friend_matrix>& pairing1,
 					 Base_pairing<Friend_matrix>& pairing2);
 
-protected:
-	using matrix_type = typename Master_matrix::column_container_type;
-	using column_type = typename Master_matrix::Column_type;
-	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-
 	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
 	Base_pairing(const Base_pairing& matrixToCopy);
 	Base_pairing(Base_pairing&& other) noexcept;
+
+protected:
+	using column_type = typename Master_matrix::Column_type;
+	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	matrix_type& matrix_;
 	dimension_type& maxDim_;
@@ -59,16 +59,18 @@ inline Base_pairing<Master_matrix>::Base_pairing(matrix_type &matrix, dimension_
 template<class Master_matrix>
 inline Base_pairing<Master_matrix>::Base_pairing(const Base_pairing &matrixToCopy)
 	: matrix_(matrixToCopy.matrix_),
-	  barcode_(matrixToCopy.barcode_),
 	  maxDim_(matrixToCopy.maxDim_),
+	  barcode_(matrixToCopy.barcode_),
+	  indexToBar_(matrixToCopy.indexToBar_),
 	  isReduced_(matrixToCopy.isReduced_)
 {}
 
 template<class Master_matrix>
 inline Base_pairing<Master_matrix>::Base_pairing(Base_pairing<Master_matrix> &&other) noexcept
-	: matrix_(std::move(other.matrix_)),
+	: matrix_(other.matrix_),
+	  maxDim_(other.maxDim_),
 	  barcode_(std::move(other.barcode_)),
-	  maxDim_(std::move(other.maxDim_)),
+	  indexToBar_(std::move(other.indexToBar_)),
 	  isReduced_(std::move(other.isReduced_))
 {}
 

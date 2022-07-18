@@ -33,6 +33,7 @@ public:
 	Set_column(Boundary_type& boundary);
 	template<class Boundary_type>
 	Set_column(Boundary_type& boundary, dimension_type dimension);
+	Set_column(Set_column& column);
 	Set_column(const Set_column& column);
 	Set_column(Set_column&& column) noexcept;
 
@@ -97,6 +98,13 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary
 }
 
 template<class Field_element_type, class Column_pairing_option>
+inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_column &column)
+	: Column_pairing_option(column),
+	  dim_(column.dim_),
+	  column_(column.column_)
+{}
+
+template<class Field_element_type, class Column_pairing_option>
 inline Set_column<Field_element_type,Column_pairing_option>::Set_column(const Set_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
@@ -113,9 +121,9 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_colu
 template<class Field_element_type, class Column_pairing_option>
 inline std::vector<Field_element_type> Set_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
 {
-	std::vector<Field_element_type,Column_pairing_option> container(columnLength);
+	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = it->element();
+		container[it->get_row_index()] = it->get_element_value();
 	}
 	return container;
 }
