@@ -123,12 +123,12 @@ inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_c
 
 	for (Cell &cell : sc) {
 		auto it1 = tc.find(cell);
-		if (it1 != tc.end()) {//already there => remove as 1+1=0
+		if (it1 != tc.end()) {
 			Cell * tmp_ptr = &(*it1);
-			it1->z2_base_hook_matrix_set_row::unlink(); //unlink from row
-			tc.erase(it1); //remove from col
+			it1->z2_base_hook_matrix_set_row::unlink();
+			tc.erase(it1);
 			delete tmp_ptr;
-		} else {//not there, insert new cell
+		} else {
 			Cell *new_cell = new Cell(pos, cell.get_row_index());
 			tc.insert(tc.end(), *new_cell);
 			matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(*new_cell);//row link,no order

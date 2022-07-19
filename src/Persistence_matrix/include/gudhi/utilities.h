@@ -20,13 +20,13 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-const double inf = std::numeric_limits<double>::infinity();
-const double negInf = -1 * inf;
+//const double inf = std::numeric_limits<double>::infinity();
+//const double negInf = -1 * inf;
 
 using index = unsigned int;
-using filtration_value_type = double;
 using dimension_type = int;
-using persistence_pair = std::pair<filtration_value_type, filtration_value_type>;
+//using filtration_value_type = double;
+//using persistence_pair = std::pair<filtration_value_type, filtration_value_type>;
 
 struct Bar{
 	Bar() : dim(-1), birth(-1), death(-1)
@@ -40,9 +40,6 @@ struct Bar{
 	int birth;
 	int death;
 };
-
-//using barcode_type = std::vector<Bar>;
-//using erasable_barcode_type = std::list<Bar>;
 
 } //namespace persistence_matrix
 } //namespace Gudhi

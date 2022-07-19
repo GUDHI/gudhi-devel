@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "../utilities.h"
-//#include "../Zp_field.h"
 #include "cell.h"
 
 namespace Gudhi {

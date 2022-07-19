@@ -141,14 +141,14 @@ inline Reduced_cell_set_column_with_row<Master_matrix> &Reduced_cell_set_column_
 			it1->get_element() += cell.get_element();
 			if (it1->get_element() == 0u){
 				Cell *tmp_ptr = &(*it1);
-				it1->base_hook_matrix_set_row::unlink(); //unlink from row
-				tc.erase(it1); //remove from col
+				it1->base_hook_matrix_set_row::unlink();
+				tc.erase(it1);
 				delete tmp_ptr;
 			}
 		} else {
 			Cell *new_cell = new Cell(cell.get_element(), pos, cell.get_row_index());
 			tc.insert(tc.end(), *new_cell);
-			matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(*new_cell);//row link,no order
+			matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(*new_cell);
 		}
 	}
 
@@ -171,8 +171,8 @@ inline Reduced_cell_set_column_with_row<Master_matrix> &Reduced_cell_set_column_
 			typename Column_type::iterator tmp_it = it;
 			++it;
 			Cell* tmp_ptr = &(*tmp_it);
-			tmp_it->base_hook_matrix_set_row::unlink(); //unlink from row
-			RCC::get_column().erase(tmp_it); //remove from col
+			tmp_it->base_hook_matrix_set_row::unlink();
+			RCC::get_column().erase(tmp_it);
 			delete tmp_ptr;
 		}
 		return *this;

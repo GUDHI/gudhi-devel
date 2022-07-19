@@ -133,24 +133,24 @@ inline Z2_reduced_cell_list_column_with_row<Master_matrix> &Z2_reduced_cell_list
 		} else {
 			if (it1->get_row_index() > it2->get_row_index()) {
 				Cell * new_cell = new Cell(pos, it2->get_row_index());
-				tc.insert(it1, *new_cell); //col link, in order
-				matrix_.at(pivotToColumnIndex_.at(it2->get_row_index())).get_row().push_back(*new_cell);//row link,no order
+				tc.insert(it1, *new_cell);
+				matrix_.at(pivotToColumnIndex_.at(it2->get_row_index())).get_row().push_back(*new_cell);
 				++it2;
-			} else { //it1->key() == it2->key()
+			} else {
 				typename Column_type::iterator tmp_it = it1;
 				++it1;
 				++it2;
 				Cell* tmp_ptr = &(*tmp_it);
-				tmp_it->z2_base_hook_matrix_list_row::unlink(); //unlink from row
-				tc.erase(tmp_it); //remove from col
+				tmp_it->z2_base_hook_matrix_list_row::unlink();
+				tc.erase(tmp_it);
 				delete tmp_ptr;
 			}
 		}
 	}
 
-	while (it2 != sc.end()) {//if it1 reached the end of its column, but not it2
+	while (it2 != sc.end()) {
 		Cell * new_cell = new Cell(pos, it2->get_row_index());
-		matrix_.at(pivotToColumnIndex_.at(it2->get_row_index())).get_row().push_back(*new_cell); //row links
+		matrix_.at(pivotToColumnIndex_.at(it2->get_row_index())).get_row().push_back(*new_cell);
 		tc.insert(tc.end(), *new_cell);
 		++it2;
 	}

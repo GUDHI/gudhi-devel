@@ -165,7 +165,6 @@ struct std::hash<Gudhi::persistence_matrix::Z2_row_cell>
 	}
 };
 
-//template<>
 template<class Field_element_type>
 struct std::hash<Gudhi::persistence_matrix::Base_cell<Field_element_type> >
 {
@@ -175,7 +174,6 @@ struct std::hash<Gudhi::persistence_matrix::Base_cell<Field_element_type> >
 	}
 };
 
-//template<>
 template<class Field_element_type>
 struct std::hash<Gudhi::persistence_matrix::Row_cell<Field_element_type> >
 {

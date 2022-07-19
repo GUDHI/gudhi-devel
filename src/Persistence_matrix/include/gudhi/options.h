@@ -21,16 +21,6 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-//struct Column_types {
-//	using list = List_column;
-//	using set = Set_column;
-//	using heap = Heap_column;
-//	using vector = Vector_column;
-//	using unordered_set = Unordered_set_column;
-//	using boost_list = Reduced_cell_list_column_with_row;
-//	using boost_set = Reduced_cell_set_column_with_row;
-//};
-
 enum Column_types {
 	LIST,
 	SET,
@@ -47,7 +37,7 @@ struct Default_options{
 	static const bool is_separated_by_dimension = separated_by_dimension;	//not implemented yet
 	static const bool is_parallelizable = parallelizable;					//not implemented yet
 
-	static const bool has_row_access = false;
+	static const bool has_row_access = false;								//access not implemented for boundary type matrices, option without access not implemented for chain type matrices
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;

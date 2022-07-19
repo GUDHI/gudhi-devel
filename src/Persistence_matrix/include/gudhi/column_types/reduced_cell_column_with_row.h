@@ -98,13 +98,13 @@ inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Fiel
 
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
 inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::~Reduced_cell_column_with_row()
-{ //empty the column, call delete on all cells
+{
 	for (typename Column_type::iterator c_it = column_.begin(); c_it != column_.end(); )
 	{
 		auto tmp_it = c_it;
 		++c_it;
 		Cell *tmp_cell = &(*tmp_it);
-		tmp_it->Row_base_hook::unlink(); //rm from row
+		tmp_it->Row_base_hook::unlink();
 		column_.erase(tmp_it);
 		delete tmp_cell;
 	}

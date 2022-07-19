@@ -73,12 +73,6 @@ private:
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 	using Field_element_type = typename Master_matrix::Field_type;
 
-//	using boundary_element_type = typename std::conditional<
-//										Master_matrix::Field_type::get_characteristic() == 2,
-//										index,
-//										std::pair<index,Field_element_type>
-//									>::type;
-
 	matrix_type matrix_;
 	dictionnary_type pivotToColumnIndex_;
 	index nextInsertIndex_;
@@ -378,9 +372,6 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::erase_las
 
 	index toErase = pivotToColumnIndex_.at(nextInsertIndex_);
 	Column_type& c = matrix_.at(toErase);
-
-//	assert(c.get_row().size() == 1);
-//	assert(c.get_pivot() == nextInsertIndex_);
 
 	if (c.is_paired()) matrix_.at(c.get_paired_chain_index()).unassign_paired_chain();
 	pivotToColumnIndex_.erase(nextInsertIndex_);

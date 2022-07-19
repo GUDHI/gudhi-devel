@@ -65,46 +65,14 @@ class Matrix
 {
 public:
 	using Field_type = typename Options::field_coeff_type;
-//	using Options::is_double_linked;			//later
-
-//	using Options::is_of_boundary_type;
-//	using Options::is_of_chain_type;
-
-//	static const bool is_indexed_by_column_index = false;
-
-//	using Options::is_separated_by_dimension;	//later
-//	using Options::is_parallelizable;			//later
-//	using Options::has_column_compression;		//later
-//	using Options::has_row_access;
-//	using Options::has_removable_columns;
-
-//	using Options::has_vine_update;
-//	using Options::can_retrieve_representative_cycles;
-//	using Options::has_column_pairings;
-
-//	using Options::is_indexed_by_simplex_index;
-
-//	using Cell_type = typename std::conditional<
-//							Field_type::get_characteristic() == 2,
-//							typename std::conditional<
-//								Options::has_row_access,
-//								Z2_row_cell,
-//								Z2_base_cell
-//							>::type,
-//							typename std::conditional<
-//								Options::has_row_access,
-//								Row_cell<Field_type>,
-//								Base_cell<Field_type>
-//							>::type
-//						>::type;
 
 	struct Dummy_column_pairing{
-		Dummy_column_pairing& operator=(Dummy_column_pairing other){return *this;}
-		friend void swap(Dummy_column_pairing& d1, Dummy_column_pairing& d2){}
+		Dummy_column_pairing& operator=([[maybe_unused]] Dummy_column_pairing other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_column_pairing& d1, [[maybe_unused]] Dummy_column_pairing& d2){}
 
 		Dummy_column_pairing(){}
-		Dummy_column_pairing(const Dummy_column_pairing& toCopy){}
-		Dummy_column_pairing(Dummy_column_pairing&& other) noexcept{}
+		Dummy_column_pairing([[maybe_unused]] const Dummy_column_pairing& toCopy){}
+		Dummy_column_pairing([[maybe_unused]] Dummy_column_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -270,13 +238,13 @@ public:
 										>::type;
 
 	struct Dummy_base_swap{
-		Dummy_base_swap& operator=(Dummy_base_swap other){return *this;}
-		friend void swap(Dummy_base_swap& d1, Dummy_base_swap& d2){}
+		Dummy_base_swap& operator=([[maybe_unused]] Dummy_base_swap other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2){}
 
-		Dummy_base_swap(column_container_type &matrix){}
-		Dummy_base_swap(column_container_type &matrix, unsigned int numberOfColumns){}
-		Dummy_base_swap(const Dummy_base_swap& matrixToCopy){}
-		Dummy_base_swap(Dummy_base_swap&& other) noexcept{}
+		Dummy_base_swap([[maybe_unused]] column_container_type &matrix){}
+		Dummy_base_swap([[maybe_unused]] column_container_type &matrix, [[maybe_unused]] unsigned int numberOfColumns){}
+		Dummy_base_swap([[maybe_unused]] const Dummy_base_swap& matrixToCopy){}
+		Dummy_base_swap([[maybe_unused]] Dummy_base_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -288,12 +256,12 @@ public:
 										>::type;
 
 	struct Dummy_base_pairing{
-		Dummy_base_pairing& operator=(Dummy_base_pairing other){return *this;}
-		friend void swap(Dummy_base_pairing& d1, Dummy_base_pairing& d2){}
+		Dummy_base_pairing& operator=([[maybe_unused]] Dummy_base_pairing other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_base_pairing& d1, [[maybe_unused]] Dummy_base_pairing& d2){}
 
-		Dummy_base_pairing(column_container_type& matrix, dimension_type& maxDim){}
-		Dummy_base_pairing(const Dummy_base_pairing& matrixToCopy){}
-		Dummy_base_pairing(Dummy_base_pairing&& other) noexcept{}
+		Dummy_base_pairing([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dimension_type& maxDim){}
+		Dummy_base_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
+		Dummy_base_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -305,12 +273,12 @@ public:
 										>::type;
 
 	struct Dummy_ru_pairing{
-		Dummy_ru_pairing& operator=(Dummy_ru_pairing other){return *this;}
-		friend void swap(Dummy_ru_pairing& d1, Dummy_ru_pairing& d2){}
+		Dummy_ru_pairing& operator=([[maybe_unused]] Dummy_ru_pairing other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_ru_pairing& d1, [[maybe_unused]] Dummy_ru_pairing& d2){}
 
 		Dummy_ru_pairing(){}
-		Dummy_ru_pairing(const Dummy_base_pairing& matrixToCopy){}
-		Dummy_ru_pairing(Dummy_base_pairing&& other) noexcept{}
+		Dummy_ru_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
+		Dummy_ru_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -322,12 +290,12 @@ public:
 										>::type;
 
 	struct Dummy_ru_vine_swap{
-		Dummy_ru_vine_swap& operator=(Dummy_ru_vine_swap other){return *this;}
-		friend void swap(Dummy_ru_vine_swap& d1, Dummy_ru_vine_swap& d2){}
+		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
 
-		Dummy_ru_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU){}
-		Dummy_ru_vine_swap(const Dummy_ru_vine_swap& matrixToCopy){}
-		Dummy_ru_vine_swap(Dummy_ru_vine_swap&& other) noexcept{}
+		Dummy_ru_vine_swap([[maybe_unused]] Base_matrix &matrixR, [[maybe_unused]] Base_matrix &matrixU){}
+		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
+		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -339,12 +307,12 @@ public:
 										>::type;
 
 	struct Dummy_chain_pairing{
-		Dummy_chain_pairing& operator=(Dummy_chain_pairing other){return *this;}
-		friend void swap(Dummy_chain_pairing& d1, Dummy_chain_pairing& d2){}
+		Dummy_chain_pairing& operator=([[maybe_unused]] Dummy_chain_pairing other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2){}
 
 		Dummy_chain_pairing(){}
-		Dummy_chain_pairing(const Dummy_chain_pairing& matrixToCopy){}
-		Dummy_chain_pairing(Dummy_chain_pairing&& other) noexcept{}
+		Dummy_chain_pairing([[maybe_unused]] const Dummy_chain_pairing& matrixToCopy){}
+		Dummy_chain_pairing([[maybe_unused]] Dummy_chain_pairing&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -356,12 +324,12 @@ public:
 										>::type;
 
 	struct Dummy_chain_vine_swap{
-		Dummy_chain_vine_swap& operator=(Dummy_chain_vine_swap other){return *this;}
-		friend void swap(Dummy_chain_vine_swap& d1, Dummy_chain_vine_swap& d2){}
+		Dummy_chain_vine_swap& operator=([[maybe_unused]] Dummy_chain_vine_swap other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2){}
 
-		Dummy_chain_vine_swap(column_container_type& matrix){}
-		Dummy_chain_vine_swap(const Dummy_chain_vine_swap& matrixToCopy){}
-		Dummy_chain_vine_swap(Dummy_chain_vine_swap&& other) noexcept{}
+		Dummy_chain_vine_swap([[maybe_unused]] column_container_type& matrix){}
+		Dummy_chain_vine_swap([[maybe_unused]] const Dummy_chain_vine_swap& matrixToCopy){}
+		Dummy_chain_vine_swap([[maybe_unused]] Dummy_chain_vine_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -373,12 +341,12 @@ public:
 										>::type;
 
 	struct Dummy_ru_representative_cycles{
-		Dummy_ru_representative_cycles& operator=(Dummy_ru_representative_cycles other){return *this;}
-		friend void swap(Dummy_ru_representative_cycles& d1, Dummy_ru_representative_cycles& d2){}
+		Dummy_ru_representative_cycles& operator=([[maybe_unused]] Dummy_ru_representative_cycles other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_ru_representative_cycles& d1, [[maybe_unused]] Dummy_ru_representative_cycles& d2){}
 
-		Dummy_ru_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU){}
-		Dummy_ru_representative_cycles(const Dummy_ru_representative_cycles& matrixToCopy){}
-		Dummy_ru_representative_cycles(Dummy_ru_representative_cycles&& other) noexcept{}
+		Dummy_ru_representative_cycles([[maybe_unused]] Base_matrix &matrixR, [[maybe_unused]] Base_matrix &matrixU){}
+		Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
+		Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -390,12 +358,12 @@ public:
 											>::type;
 
 	struct Dummy_chain_representative_cycles{
-		Dummy_chain_representative_cycles& operator=(Dummy_chain_representative_cycles other){return *this;}
-		friend void swap(Dummy_chain_representative_cycles& d1, Dummy_chain_representative_cycles& d2){}
+		Dummy_chain_representative_cycles& operator=([[maybe_unused]] Dummy_chain_representative_cycles other){return *this;}
+		friend void swap([[maybe_unused]] Dummy_chain_representative_cycles& d1, [[maybe_unused]] Dummy_chain_representative_cycles& d2){}
 
-		Dummy_chain_representative_cycles(column_container_type& matrix, dictionnary_type<index>& pivotToPosition){}
-		Dummy_chain_representative_cycles(const Dummy_chain_representative_cycles& matrixToCopy){}
-		Dummy_chain_representative_cycles(Dummy_chain_representative_cycles&& other) noexcept{}
+		Dummy_chain_representative_cycles([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dictionnary_type<index>& pivotToPosition){}
+		Dummy_chain_representative_cycles([[maybe_unused]] const Dummy_chain_representative_cycles& matrixToCopy){}
+		Dummy_chain_representative_cycles([[maybe_unused]] Dummy_chain_representative_cycles&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
 	};
@@ -599,24 +567,6 @@ inline constexpr void Matrix<Options>::_assert_options()
 	static_assert(!Options::has_vine_update || Field_type::get_characteristic() == 2, "Vine update currently works only for Z_2 coefficients.");
 	static_assert(!Options::has_row_access || Options::column_type == Column_types::LIST || Options::column_type == Column_types::SET, "Row access is currently implemented only for set and list type of columns.");
 	static_assert(Options::column_type != Column_types::HEAP || Field_type::get_characteristic() == 2, "Heap column currently works only for Z_2 coefficients.");
-
-//	using Field_type = typename Options::field_coeff_type;
-//	using Column_type = typename Options::column_type;
-//	using Options::is_double_linked;			//later
-
-//	using Options::is_of_boundary_type;
-
-//	static const bool is_indexed_by_column_index = false;
-
-//	using Options::is_separated_by_dimension;	//later
-//	using Options::is_parallelizable;			//later
-//	using Options::has_column_compression;		//later
-//	using Options::has_row;
-//	using Options::has_removable_columns;
-
-//	using Options::has_vine_update;
-//	using Options::can_retrieve_representative_cycles;
-	//	using Options::has_column_pairings;
 }
 
 template<class Friend_options>
