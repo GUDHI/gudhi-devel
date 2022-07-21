@@ -152,7 +152,7 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        =
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -162,7 +162,8 @@ STRIP_FROM_PATH        =
 # using the -I flag.
 
 STRIP_FROM_INC_PATH    = include \
-                         concept
+                         concept \
+                         @CMAKE_SOURCE_DIR@
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter (but
 # less readable) file names. This can be useful is your file systems doesn't
@@ -832,7 +833,7 @@ EXCLUDE                = @CMAKE_SOURCE_DIR@/data/ \
                          @CMAKE_SOURCE_DIR@/ext/ \
                          @CMAKE_SOURCE_DIR@/README.md \
                          @CMAKE_SOURCE_DIR@/.github \
-                         @CMAKE_CURRENT_BINARY_DIR@/new_gudhi_version_creation.md \
+                         @CMAKE_CURRENT_BINARY_DIR@ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/GudhUI/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/cmake/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/python/
