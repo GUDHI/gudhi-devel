@@ -71,7 +71,6 @@ class Cech_blocker {
    *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
   bool operator()(Simplex_handle sh) {
     using Point_cloud =  std::vector<Point_d>;
-    CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
     Point_cloud points;
@@ -106,10 +105,7 @@ class Cech_blocker {
 #if CGAL_VERSION_NR >= 1050000000
             if(exact_) CGAL::exact(sph.second);
 #endif
-            if(k != sc_ptr_->null_key())
-                radius = sc_ptr_->filtration(face_opposite_vertex.first);
-            else
-                radius = std::sqrt(cast_to_fv(sph.second));
+            radius = sc_ptr_->filtration(face_opposite_vertex.first);
 #ifdef DEBUG_TRACES
             std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
 #endif  // DEBUG_TRACES
@@ -125,6 +121,7 @@ class Cech_blocker {
 #if CGAL_VERSION_NR >= 1050000000
         if(exact_) CGAL::exact(sph.second);
 #endif
+        CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
         radius = std::sqrt(cast_to_fv(sph.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
