@@ -92,11 +92,10 @@ def test_density():
 def test_dtm_overflow_warnings():
     pts = numpy.array([[10., 100000000000000000000000000000.], [1000., 100000000000000000000000000.]])
     impl_warn = ["keops", "hnsw"]
-    with warnings.catch_warnings(record=True) as w:
-        for impl in impl_warn:
+    for impl in impl_warn:
+        with warnings.catch_warnings(record=True) as w:
             dtm = DistanceToMeasure(2, implementation=impl)
             r = dtm.fit_transform(pts)
-        assert len(w) == 2
-        for i in range(len(w)):
-            assert issubclass(w[i].category, RuntimeWarning)
-            assert "Overflow" in str(w[i].message)
+            assert len(w) == 1
+            assert issubclass(w[0].category, RuntimeWarning)
+            assert "Overflow" in str(w[0].message)
