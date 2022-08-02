@@ -106,7 +106,10 @@ class Cech_blocker {
 #if CGAL_VERSION_NR >= 1050000000
             if(exact_) CGAL::exact(sph.second);
 #endif
-            radius = std::sqrt(cast_to_fv(sph.second));
+            if(k != sc_ptr_->null_key())
+                radius = sc_ptr_->filtration(face_opposite_vertex.first);
+            else
+                radius = std::sqrt(cast_to_fv(sph.second));
 #ifdef DEBUG_TRACES
             std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
 #endif  // DEBUG_TRACES
