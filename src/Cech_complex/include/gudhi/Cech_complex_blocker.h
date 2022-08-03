@@ -102,9 +102,6 @@ class Cech_blocker {
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
             is_min_enclos_ball = true;
             sc_ptr_->assign_key(sh, sph_key);
-#if CGAL_VERSION_NR >= 1050000000
-            if(exact_) CGAL::exact(sph.second);
-#endif
             radius = sc_ptr_->filtration(face_opposite_vertex.first);
 #ifdef DEBUG_TRACES
             std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
