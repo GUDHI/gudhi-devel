@@ -33,8 +33,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
+        homology_dimensions,
         newshape=None,
-        homology_dimensions=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
         n_jobs=None,
@@ -43,20 +43,20 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         Constructor for the CubicalPersistence class.
 
         Parameters:
+            homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
+                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
+                dimension matters (in other words, when `homology_dimensions` is an int).
             newshape (tuple of ints): If cells filtration values require to be reshaped
                 (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`), set `newshape`
                 to perform `numpy.reshape(X, newshape, order='C')` in
                 :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform` method.
-            homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
-                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
-                dimension matters (in other words, when `homology_dimensions` is an int).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
-        self.newshape = newshape
         self.homology_dimensions = homology_dimensions
+        self.newshape = newshape
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
         self.n_jobs = n_jobs
