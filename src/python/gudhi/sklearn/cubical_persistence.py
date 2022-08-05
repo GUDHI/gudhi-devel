@@ -93,7 +93,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
               - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
               - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
-        :rtype: list of tuple or list of list of tuple
+        :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
         if self.newshape is not None:
             X = np.reshape(X, self.newshape, order='C')
