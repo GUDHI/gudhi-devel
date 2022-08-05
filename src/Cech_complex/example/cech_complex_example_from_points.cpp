@@ -1,30 +1,33 @@
 #include <gudhi/Cech_complex.h>
 #include <gudhi/Simplex_tree.h>
 
+#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
 
 int main() {
   // Type definitions
-  using Point_cloud = std::vector<std::array<double, 2>>;
   using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
   using Filtration_value = Simplex_tree::Filtration_value;
-  using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
+  using Kernel = CGAL::Epeck_d<CGAL::Dimension_tag<2>>;
+  using Point = typename Kernel::Point_d;
+  using Point_cloud = std::vector<Point>;
+  using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 
   Point_cloud points;
-  points.push_back({1., 0.});                  // 0
-  points.push_back({0., 1.});                  // 1
-  points.push_back({2., 1.});                  // 2
-  points.push_back({3., 2.});                  // 3
-  points.push_back({0., 3.});                  // 4
-  points.push_back({3. + std::sqrt(3.), 3.});  // 5
-  points.push_back({1., 4.});                  // 6
-  points.push_back({3., 4.});                  // 7
-  points.push_back({2., 4. + std::sqrt(3.)});  // 8
-  points.push_back({0., 4.});                  // 9
-  points.push_back({-0.5, 2.});                // 10
+  points.emplace_back(1., 0.);                    // 0
+  points.emplace_back(0., 1.);                    // 1
+  points.emplace_back(2., 1.);                    // 2
+  points.emplace_back(3., 2.);                    // 3
+  points.emplace_back(0., 3.);                    // 4
+  points.emplace_back(3. + std::sqrt(3.), 3.);    // 5
+  points.emplace_back(1., 4.);                    // 6
+  points.emplace_back(3., 4.);                    // 7
+  points.emplace_back(2., 4. + std::sqrt(3.));    // 8
+  points.emplace_back(0., 4.);                    // 9
+  points.emplace_back(-0.5, 2.);                  // 10
 
   // ----------------------------------------------------------------------------
   // Init of a Cech complex from points
