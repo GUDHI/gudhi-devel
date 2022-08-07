@@ -175,7 +175,7 @@ A complete configuration would be :
     Scikit-learn version 1.0.1 
     POT version 0.8.0 
     HNSWlib found
-    PyKeOps version [pyKeOps]: 1.5 
+    PyKeOps version [pyKeOps]: 2.1
     EagerPy version 0.30.0 
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
