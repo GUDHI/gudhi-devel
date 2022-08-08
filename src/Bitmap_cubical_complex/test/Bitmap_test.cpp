@@ -40,10 +40,6 @@ BOOST_AUTO_TEST_CASE(check_dimension) {
 }
 
 BOOST_AUTO_TEST_CASE(cellsIterator_test) {
-  std::vector<double> expectedFiltrationValues1({0, 0, 0, 0, 100, 0, 0, 0, 0});
-
-  std::vector<double> expectedFiltrationValues2({1, 2, 3, 4, 5, 6, 7, 8, 9});
-
   std::vector<double> increasingFiltration({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   std::vector<double> oneDimensionalCycle({0, 0, 0, 0, 100, 0, 0, 0, 0});
@@ -57,13 +53,13 @@ BOOST_AUTO_TEST_CASE(cellsIterator_test) {
   int i = 0;
   for (auto it = increasing_top_cells.top_dimensional_cells_iterator_begin();
        it != increasing_top_cells.top_dimensional_cells_iterator_end(); ++it) {
-    BOOST_CHECK(increasing_top_cells.get_cell_data(*it) == expectedFiltrationValues2[i]);
+    BOOST_CHECK(increasing_top_cells.get_cell_data(*it) == increasingFiltration[i]);
     ++i;
   }
   i = 0;
   for (auto it = hole_top_cells.top_dimensional_cells_iterator_begin();
        it != hole_top_cells.top_dimensional_cells_iterator_end(); ++it) {
-    BOOST_CHECK(hole_top_cells.get_cell_data(*it) == expectedFiltrationValues1[i]);
+    BOOST_CHECK(hole_top_cells.get_cell_data(*it) == oneDimensionalCycle[i]);
     ++i;
   }
 
@@ -74,13 +70,13 @@ BOOST_AUTO_TEST_CASE(cellsIterator_test) {
   i = 0;
   for (auto it = increasing_vertices.vertices_iterator_begin();
        it != increasing_vertices.vertices_iterator_end(); ++it) {
-    BOOST_CHECK(increasing_vertices.get_cell_data(*it) == expectedFiltrationValues2[i]);
+    BOOST_CHECK(increasing_vertices.get_cell_data(*it) == increasingFiltration[i]);
     ++i;
   }
   i = 0;
   for (auto it = hole_vertices.vertices_iterator_begin();
        it != hole_vertices.vertices_iterator_end(); ++it) {
-    BOOST_CHECK(hole_vertices.get_cell_data(*it) == expectedFiltrationValues1[i]);
+    BOOST_CHECK(hole_vertices.get_cell_data(*it) == oneDimensionalCycle[i]);
     ++i;
   }
 }
