@@ -244,6 +244,12 @@ class Bitmap_cubical_complex : public T {
   class Filtration_simplex_iterator {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
    public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = Simplex_handle;     // 'value_type' must be 'Simplex_handle'.
+    using difference_type = Simplex_handle;
+    using pointer = Simplex_handle*;
+    using reference = Simplex_handle&;
+
     Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) {}
 
     Filtration_simplex_iterator() : b(NULL), position(0) {}
@@ -295,12 +301,6 @@ class Bitmap_cubical_complex : public T {
     friend class Filtration_simplex_range;
 
    private:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = Simplex_handle;     // 'value_type' must be 'Simplex_handle'.
-    using difference_type = Simplex_handle;
-    using pointer = Simplex_handle*;
-    using reference = Simplex_handle&;
-
     Bitmap_cubical_complex<T>* b;
     std::size_t position;
   };
@@ -394,6 +394,12 @@ class Bitmap_cubical_complex : public T {
   class Skeleton_simplex_iterator {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
    public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = Simplex_handle;     // 'value_type' must be 'Simplex_handle'.
+    using difference_type = Simplex_handle;
+    using pointer = Simplex_handle*;
+    using reference = Simplex_handle&;
+
     Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
 #ifdef DEBUG_TRACES
       std::clog << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
@@ -461,12 +467,6 @@ class Bitmap_cubical_complex : public T {
     friend class Skeleton_simplex_range;
 
    private:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = Simplex_handle;     // 'value_type' must be 'Simplex_handle'.
-    using difference_type = Simplex_handle;
-    using pointer = Simplex_handle*;
-    using reference = Simplex_handle&;
-
     Bitmap_cubical_complex<T>* b;
     std::size_t position;
     unsigned dimension;

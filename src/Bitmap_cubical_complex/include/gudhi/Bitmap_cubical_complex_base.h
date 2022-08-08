@@ -267,6 +267,12 @@ class Bitmap_cubical_complex_base {
    **/
   class All_cells_iterator {
    public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = T;
+    using difference_type = T;
+    using pointer = T*;
+    using reference = T&;
+
     All_cells_iterator() { this->counter = 0; }
 
     All_cells_iterator operator++() {
@@ -305,13 +311,6 @@ class Bitmap_cubical_complex_base {
 
    protected:
     std::size_t counter;
-
-   private:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&;
   };
 
   /**
@@ -378,6 +377,12 @@ class Bitmap_cubical_complex_base {
    **/
   class Top_dimensional_cells_iterator {
    public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = T;
+    using difference_type = T;
+    using pointer = T*;
+    using reference = T&;
+
     Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<std::size_t>(b.dimension());
       // std::fill( this->counter.begin() , this->counter.end() , 0 );
@@ -449,13 +454,6 @@ class Bitmap_cubical_complex_base {
    protected:
     std::vector<std::size_t> counter;
     Bitmap_cubical_complex_base& b;
-
-   private:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&;
   };
 
   /**
@@ -500,7 +498,13 @@ class Bitmap_cubical_complex_base {
   //****************************************************************************************************************//
   //****************************************************************************************************************//
   class Vertices_iterator {
-    public:
+   public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = T;
+    using difference_type = T;
+    using pointer = T*;
+    using reference = T&;
+
     Vertices_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<std::size_t>(b.dimension());
     }
@@ -571,13 +575,6 @@ class Bitmap_cubical_complex_base {
    protected:
     std::vector<std::size_t> counter;
     Bitmap_cubical_complex_base& b;
-
-   private:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&;
   };
 
   /**
