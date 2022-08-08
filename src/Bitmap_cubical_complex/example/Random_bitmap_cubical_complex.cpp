@@ -18,9 +18,16 @@
 #include <sstream>
 #include <vector>
 #include <random>
+#include <algorithm>
 
 std::random_device rd;
 std::mt19937 gen(rd());
+
+double get_random()
+{
+  std::uniform_real_distribution<double> dist(0., 1.);
+  return dist(gen);
+}
 
 int main(int argc, char** argv) {
 
@@ -47,11 +54,8 @@ int main(int argc, char** argv) {
     multipliers *= sizeInThisDimension;
   }
 
-  std::vector<double> data;
-  std::uniform_real_distribution<double> dist(0., 1.);
-  for (size_t i = 0; i != multipliers; ++i) {
-    data.push_back(dist(gen));
-  }
+  std::vector<double> data(multipliers);
+  std::generate(data.begin(), data.end(), get_random);
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
