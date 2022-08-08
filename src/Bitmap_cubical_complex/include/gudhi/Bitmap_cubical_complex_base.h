@@ -723,7 +723,7 @@ std::pair<T, T> Bitmap_cubical_complex_base<T>::min_max_filtration() {
 
 template <typename K>
 std::ostream& operator<<(std::ostream& out, const Bitmap_cubical_complex_base<K>& b) {
-  for (typename Bitmap_cubical_complex_base<K>::all_cells_const_iterator it = b.all_cells_const_begin();
+  for (auto it = b.all_cells_const_begin();
        it != b.all_cells_const_end(); ++it) {
     out << *it << " ";
   }
@@ -755,7 +755,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
   }
 
   std::size_t index = 0;
-  for (Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin();
+  for (auto it = this->top_dimensional_cells_iterator_begin();
        it != this->top_dimensional_cells_iterator_end(); ++it) {
     this->get_cell_data(*it) = top_dimensional_cells[index];
     ++index;
@@ -786,7 +786,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
   }
 
   std::size_t index = 0;
-  for (Bitmap_cubical_complex_base<T>::Vertices_iterator it = this->vertices_iterator_begin();
+  for (auto it = this->vertices_iterator_begin();
        it != this->vertices_iterator_end(); ++it) {
     this->get_cell_data(*it) = vertices[index];
     ++index;
@@ -1017,7 +1017,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   std::vector<std::size_t> indices_to_consider;
   // we assume here that we already have a filtration on the top dimensional cells and
   // we have to extend it to lower ones.
-  for (typename Bitmap_cubical_complex_base<T>::Top_dimensional_cells_iterator it = this->top_dimensional_cells_iterator_begin();
+  for (auto it = this->top_dimensional_cells_iterator_begin();
        it != this->top_dimensional_cells_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
@@ -1025,29 +1025,29 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
   while (indices_to_consider.size()) {
 #ifdef DEBUG_TRACES
     std::clog << "indices_to_consider in this iteration \n";
-    for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-      std::clog << indices_to_consider[i] << "  ";
+    for (auto index : indices_to_consider) {
+      std::clog << index << "  ";
     }
 #endif
     std::vector<std::size_t> new_indices_to_consider;
-    for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-      std::vector<std::size_t> bd = this->get_boundary_of_a_cell(indices_to_consider[i]);
-      for (std::size_t boundaryIt = 0; boundaryIt != bd.size(); ++boundaryIt) {
+    for (auto index : indices_to_consider) {
+      std::vector<std::size_t> bd = this->get_boundary_of_a_cell(index);
+      for (auto boundary : bd) {
 #ifdef DEBUG_TRACES
-        std::clog << "filtration of a cell : " << bd[boundaryIt] << " is : " << this->data[bd[boundaryIt]]
-                  << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
+        std::clog << "filtration of a cell : " << boundary << " is : " << this->data[boundary]
+                  << " while of a cell: " << index << " is: " << this->data[index]
                   << std::endl;
 #endif
-        if (this->data[bd[boundaryIt]] > this->data[indices_to_consider[i]]) {
-          this->data[bd[boundaryIt]] = this->data[indices_to_consider[i]];
+        if (this->data[boundary] > this->data[index]) {
+          this->data[boundary] = this->data[index];
 #ifdef DEBUG_TRACES
-          std::clog << "Setting the value of a cell : " << bd[boundaryIt]
-                    << " to : " << this->data[indices_to_consider[i]] << std::endl;
+          std::clog << "Setting the value of a cell : " << boundary
+                    << " to : " << this->data[index] << std::endl;
 #endif
         }
-        if (is_this_cell_considered[bd[boundaryIt]] == false) {
-          new_indices_to_consider.push_back(bd[boundaryIt]);
-          is_this_cell_considered[bd[boundaryIt]] = true;
+        if (is_this_cell_considered[boundary] == false) {
+          new_indices_to_consider.push_back(boundary);
+          is_this_cell_considered[boundary] = true;
         }
       }
     }
@@ -1063,7 +1063,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices(
   std::vector<std::size_t> indices_to_consider;
   // we assume here that we already have a filtration on the vertices and
   // we have to extend it to higher ones.
-  for (typename Bitmap_cubical_complex_base<T>::Vertices_iterator it = this->vertices_iterator_begin();
+  for (auto it = this->vertices_iterator_begin();
        it != this->vertices_iterator_end(); ++it) {
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
@@ -1071,29 +1071,29 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices(
   while (indices_to_consider.size()) {
 #ifdef DEBUG_TRACES
     std::clog << "indices_to_consider in this iteration \n";
-    for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-      std::clog << indices_to_consider[i] << "  ";
+    for (auto index : indices_to_consider) {
+      std::clog << index << "  ";
     }
 #endif
     std::vector<std::size_t> new_indices_to_consider;
-    for (std::size_t i = 0; i != indices_to_consider.size(); ++i) {
-      std::vector<std::size_t> cbd = this->get_coboundary_of_a_cell(indices_to_consider[i]);
-      for (std::size_t coboundaryIt = 0; coboundaryIt != cbd.size(); ++coboundaryIt) {
+    for (auto index : indices_to_consider) {
+      std::vector<std::size_t> cbd = this->get_coboundary_of_a_cell(index);
+      for (auto coboundary : cbd) {
 #ifdef DEBUG_TRACES
-        std::clog << "filtration of a cell : " << cbd[coboundaryIt] << " is : " << this->data[cbd[coboundaryIt]]
-                  << " while of a cell: " << indices_to_consider[i] << " is: " << this->data[indices_to_consider[i]]
+        std::clog << "filtration of a cell : " << coboundary << " is : " << this->data[coboundary]
+                  << " while of a cell: " << index << " is: " << this->data[index]
                   << std::endl;
 #endif
-        if (this->data[cbd[coboundaryIt]] < this->data[indices_to_consider[i]]) {
-          this->data[cbd[coboundaryIt]] = this->data[indices_to_consider[i]];
+        if (this->data[coboundary] < this->data[index]) {
+          this->data[coboundary] = this->data[index];
 #ifdef DEBUG_TRACES
-          std::clog << "Setting the value of a cell : " << cbd[coboundaryIt]
-                    << " to : " << this->data[indices_to_consider[i]] << std::endl;
+          std::clog << "Setting the value of a cell : " << coboundary
+                    << " to : " << this->data[index] << std::endl;
 #endif
         }
-        if (is_this_cell_considered[cbd[coboundaryIt]] == false) {
-          new_indices_to_consider.push_back(cbd[coboundaryIt]);
-          is_this_cell_considered[cbd[coboundaryIt]] = true;
+        if (is_this_cell_considered[coboundary] == false) {
+          new_indices_to_consider.push_back(coboundary);
+          is_this_cell_considered[coboundary] = true;
         }
       }
     }
