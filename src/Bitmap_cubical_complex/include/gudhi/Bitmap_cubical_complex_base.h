@@ -23,6 +23,7 @@
 #include <utility>
 #include <stdexcept>
 #include <cstddef>
+#include <numeric>
 
 namespace Gudhi {
 
@@ -738,11 +739,9 @@ template <typename T>
 void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells_list(
     const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
   this->set_up_containers(sizes_in_following_directions, true);
-
-  std::size_t number_of_top_dimensional_elements = 1;
-  for (std::size_t i = 0; i != sizes_in_following_directions.size(); ++i) {
-    number_of_top_dimensional_elements *= sizes_in_following_directions[i];
-  }
+  std::size_t number_of_top_dimensional_elements = std::accumulate(std::begin(sizes_in_following_directions),
+                                                   std::end(sizes_in_following_directions), 1,
+                                                   std::multiplies<unsigned>());
   if (number_of_top_dimensional_elements != top_dimensional_cells.size()) {
     std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<unsigned> "
               << "sizes_in_following_directions, std::vector<T> top_dimensional_cells ). Number of top dimensional "
@@ -770,13 +769,10 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
   std::vector<unsigned> top_cells_sizes;
   std::transform (sizes_in_following_directions.begin(), sizes_in_following_directions.end(), std::back_inserter(top_cells_sizes),
                [](int i){ return --i;});
-
   this->set_up_containers(top_cells_sizes, false);
-
-  std::size_t number_of_vertices = 1;
-  for (std::size_t i = 0; i != sizes_in_following_directions.size(); ++i) {
-    number_of_vertices *= sizes_in_following_directions[i];
-  }
+  std::size_t number_of_vertices = std::accumulate(std::begin(sizes_in_following_directions),
+                                                   std::end(sizes_in_following_directions), 1,
+                                                   std::multiplies<unsigned>());
   if (number_of_vertices != vertices.size()) {
     std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<unsigned> "
               << "sizes_in_following_directions, std::vector<T> vertices ). Number of vertices "
