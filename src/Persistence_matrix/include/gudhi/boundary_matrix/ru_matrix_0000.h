@@ -267,25 +267,9 @@ template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::print()
 {
 	std::cout << "R_matrix:\n";
-	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		Column_type& col = reducedMatrixR_.get_column(i);
-		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0u) std::cout << "-\n";
-			else std::cout << e << " ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << "\n";
+	reducedMatrixR_.print();
 	std::cout << "U_matrix:\n";
-	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		Column_type& col = mirrorMatrixU_.get_column(i);
-		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0u) std::cout << "-\n";
-			else std::cout << e << " ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << "\n";
+	mirrorMatrixU_.print();
 }
 
 template<class Master_matrix>

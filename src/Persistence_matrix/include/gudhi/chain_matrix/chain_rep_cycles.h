@@ -56,7 +56,7 @@ private:
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(matrix_type &matrix, dictionnary_type &pivotToPosition)
 	: matrix_(matrix), pivotToPosition_(pivotToPosition)
-{}
+{std::cout << "here22\n";}
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(const Chain_representative_cycles<Master_matrix>& matrixToCopy)

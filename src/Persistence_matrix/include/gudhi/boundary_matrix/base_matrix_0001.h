@@ -289,7 +289,7 @@ inline void Base_matrix_with_removals<Master_matrix>::print()
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
 		Column_type& col = matrix_.at(i);
 		for (auto e : col.get_content(nextInsertIndex_)){
-			if (e == 0u) std::cout << "-\n";
+			if (e == 0u) std::cout << "- ";
 			else std::cout << e << " ";
 		}
 		std::cout << "\n";

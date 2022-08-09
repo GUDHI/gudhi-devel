@@ -63,22 +63,22 @@ private:
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU)
-	: reducedMatrixR_(matrixR), mirrorMatrixU_(matrixU), RU_pairing<Master_matrix>()
+	: RU_pairing<Master_matrix>(), reducedMatrixR_(matrixR), mirrorMatrixU_(matrixU)
 {}
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(
 		const RU_vine_swap &matrixToCopy)
-	: reducedMatrixR_(matrixToCopy.reducedMatrixR_),
-	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
-	  RU_pairing<Master_matrix>(matrixToCopy)
+	: RU_pairing<Master_matrix>(matrixToCopy),
+	  reducedMatrixR_(matrixToCopy.reducedMatrixR_),
+	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_)
 {}
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&other) noexcept
-	: reducedMatrixR_(other.reducedMatrixR_),
-	  mirrorMatrixU_(other.mirrorMatrixU_),
-	  RU_pairing<Master_matrix>(std::move(other))
+	: RU_pairing<Master_matrix>(std::move(other)),
+	  reducedMatrixR_(other.reducedMatrixR_),
+	  mirrorMatrixU_(other.mirrorMatrixU_)
 {}
 
 template<class Master_matrix>

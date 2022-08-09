@@ -106,7 +106,7 @@ inline Chain_matrix_with_row_access<Master_matrix>::Chain_matrix_with_row_access
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
 	  matrix_(orderedBoundaries.size(), Column_type(matrix_, pivotToColumnIndex_)),
 	  pivotToColumnIndex_(orderedBoundaries.size(), -1),
-	  nextInsertIndex_(orderedBoundaries.size()),
+	  nextInsertIndex_(0),
 	  maxDim_(-1)
 {
 	for (Boundary_type &b : orderedBoundaries){

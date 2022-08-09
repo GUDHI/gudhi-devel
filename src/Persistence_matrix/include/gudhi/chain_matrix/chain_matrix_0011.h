@@ -108,7 +108,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
 	  matrix_(orderedBoundaries.size()),
 	  pivotToColumnIndex_(orderedBoundaries.size()),
-	  nextInsertIndex_(orderedBoundaries.size()),
+	  nextInsertIndex_(0),
 	  maxDim_(-1)
 {
 	for (Boundary_type &b : orderedBoundaries){
@@ -164,7 +164,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	if constexpr (swap_opt::isActive_){
 		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
 	}
-	int dim = boundary.size() - 1;
+	int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 	++(dimensions_[dim]);

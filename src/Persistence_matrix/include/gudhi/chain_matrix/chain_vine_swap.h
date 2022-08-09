@@ -69,20 +69,20 @@ private:
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix)
-	: matrix_(matrix), pivotToPosition_(matrix.size()), Chain_pairing<Master_matrix>()
+	: Chain_pairing<Master_matrix>(), matrix_(matrix)
 {}
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(
 		const Chain_vine_swap &matrixToCopy)
-	: pivotToPosition_(matrixToCopy.pivotToPosition_), matrix_(matrixToCopy.matrix_), Chain_pairing<Master_matrix>(matrixToCopy)
+	: Chain_pairing<Master_matrix>(matrixToCopy), pivotToPosition_(matrixToCopy.pivotToPosition_), matrix_(matrixToCopy.matrix_)
 {}
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(Chain_vine_swap<Master_matrix> &&other) noexcept
-	: pivotToPosition_(std::move(other.pivotToPosition_)),
-	  matrix_(other.matrix_),
-	  Chain_pairing<Master_matrix>(std::move(other))
+	: Chain_pairing<Master_matrix>(std::move(other)),
+	  pivotToPosition_(std::move(other.pivotToPosition_)),
+	  matrix_(other.matrix_)
 {}
 
 template<class Master_matrix>

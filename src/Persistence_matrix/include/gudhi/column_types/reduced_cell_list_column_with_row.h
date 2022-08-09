@@ -154,12 +154,14 @@ inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_colum
 			if (it1->get_element() == 0u){
 				typename Column_type::iterator tmp_it = it1;
 				++it1;
-				++it2;
 				Cell* tmp_ptr = &(*tmp_it);
 				tmp_it->base_hook_matrix_list_row::unlink();
 				tc.erase(tmp_it);
 				delete tmp_ptr;
+			} else {
+				++it1;
 			}
+			++it2;
 		}
 	}
 
