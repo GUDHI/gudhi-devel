@@ -171,7 +171,12 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
     Self const* algorithm_;
   };
 
+#if CGAL_VERSION_NR < 1050500000
   typedef CGAL::Modifiable_priority_queue<Edge_handle, Compare_cost, Undirected_edge_id> PQ;
+#else
+  typedef CGAL::Modifiable_priority_queue<Edge_handle, Compare_cost, Undirected_edge_id, CGAL::CGAL_BOOST_PENDING_RELAXED_HEAP> PQ;
+#endif
+  
   typedef bool pq_handle;
 
 
