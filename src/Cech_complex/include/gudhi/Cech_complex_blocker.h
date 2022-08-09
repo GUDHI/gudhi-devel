@@ -128,7 +128,8 @@ class Cech_blocker {
 #ifdef DEBUG_TRACES
     if (radius > cc_ptr_->max_radius()) std::clog << "radius > max_radius => expansion is blocked\n";
 #endif  // DEBUG_TRACES
-    sc_ptr_->assign_filtration(sh, radius);
+    // Check that the filtration to be assigned (radius) would be valid
+    if (radius > sc_ptr_->filtration(sh)) sc_ptr_->assign_filtration(sh, radius);
     return (radius > cc_ptr_->max_radius());
   }
 
