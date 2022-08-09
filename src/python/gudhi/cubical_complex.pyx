@@ -223,7 +223,7 @@ cdef class CubicalComplex:
 
         Since the cubical complex construction from vertices is different from the top dimensional one,
         the former may not have an equivalent with the second construction, and vice versa.
-        Therefore, using cofaces_of_persistence_pairs with a cubical complex constructed from vertices
+        Therefore, using :func:`cofaces_of_persistence_pairs` with a cubical complex constructed from vertices
         can lead to an undefined behavior.
 
         This function returns a list of pairs of top-dimensional cells corresponding to
@@ -280,8 +280,8 @@ cdef class CubicalComplex:
 
         Since the cubical complex construction from vertices is different from the top dimensional one,
         the former may not have an equivalent with the second construction, and vice versa.
-        Therefore, using vertices_of_persistence_pairs with a cubical complex constructed from top_dimensional_cells
-        can lead to an undefined behavior.
+        Therefore, using :func:`vertices_of_persistence_pairs` with a cubical complex constructed from
+        top_dimensional_cells can lead to an undefined behavior.
 
         :returns: The vertices of the positive and negative cells,
             together with the corresponding homological dimension, in two lists of numpy arrays of integers.
