@@ -171,8 +171,13 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
     Self const* algorithm_;
   };
 
+#if CGAL_VERSION_NR < 1050500000
   typedef CGAL::Modifiable_priority_queue<Edge_handle, Compare_cost, Undirected_edge_id> PQ;
-  typedef typename PQ::handle pq_handle;
+#else
+  typedef CGAL::Modifiable_priority_queue<Edge_handle, Compare_cost, Undirected_edge_id, CGAL::CGAL_BOOST_PENDING_RELAXED_HEAP> PQ;
+#endif
+  
+  typedef bool pq_handle;
 
 
   // An Edge_data is associated with EVERY edge in the complex (collapsible or not).
@@ -196,7 +201,7 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
     }
 
     bool is_in_PQ() const {
-      return PQHandle_ != PQ::null_handle();
+      return PQHandle_ != false;
     }
 
     void set_PQ_handle(pq_handle h) {
@@ -204,7 +209,7 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
     }
 
     void reset_PQ_handle() {
-      PQHandle_ = PQ::null_handle();
+      PQHandle_ = false;
     }
 
    private:
@@ -238,16 +243,22 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
   }
 
   void insert_in_PQ(Edge_handle edge, Edge_data& data) {
-    data.set_PQ_handle(heap_PQ_->push(edge));
+    heap_PQ_->push(edge);
+    data.set_PQ_handle(true);
     ++current_num_edges_heap_;
   }
 
   void update_in_PQ(Edge_handle edge, Edge_data& data) {
+#if CGAL_VERSION_NR < 1050500000
     data.set_PQ_handle(heap_PQ_->update(edge, data.PQ_handle()));
+#else
+    heap_PQ_->update(edge);
+#endif
   }
 
   void remove_from_PQ(Edge_handle edge, Edge_data& data) {
-    data.set_PQ_handle(heap_PQ_->erase(edge, data.PQ_handle()));
+    heap_PQ_->erase(edge);
+    data.set_PQ_handle(false);
     --current_num_edges_heap_;
   }
 
