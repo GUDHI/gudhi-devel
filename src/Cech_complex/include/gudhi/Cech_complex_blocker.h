@@ -54,6 +54,7 @@ class Cech_blocker {
 
   using Simplex_handle = typename SimplicialComplexForCech::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForCech::Filtration_value;
+  using Simplex_key = typename SimplicialComplexForCech::Simplex_key;
 
   template<class PointIterator>
   Sphere get_sphere(PointIterator begin, PointIterator end) const {
@@ -70,7 +71,6 @@ class Cech_blocker {
    *  \return true if the simplex radius is greater than the Cech_complex max_radius*/
   bool operator()(Simplex_handle sh) {
     using Point_cloud =  std::vector<Point_d>;
-    CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
     Point_cloud points;
@@ -78,10 +78,10 @@ class Cech_blocker {
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
-        Sphere sph;
         auto k = sc_ptr_->key(face_opposite_vertex.first);
+        Simplex_key sph_key;
         if(k != sc_ptr_->null_key()) {
-            sph = cc_ptr_->get_cache().at(k);
+            sph_key = k;
         }
         else {
             for (auto vertex : sc_ptr_->simplex_vertex_range(face_opposite_vertex.first)) {
@@ -90,25 +90,22 @@ class Cech_blocker {
                 std::clog << "#(" << vertex << ")#";
 #endif  // DEBUG_TRACES
             }
-            sph = get_sphere(points.cbegin(), points.cend());
             // Put edge sphere in cache
-            sc_ptr_->assign_key(face_opposite_vertex.first, cc_ptr_->get_cache().size());
-            cc_ptr_->get_cache().push_back(sph);
+            sph_key = cc_ptr_->get_cache().size();
+            sc_ptr_->assign_key(face_opposite_vertex.first, sph_key);
+            cc_ptr_->get_cache().push_back(get_sphere(points.cbegin(), points.cend()));
             // Clear face points
             points.clear();
         }
         // Check if the minimal enclosing ball of current face contains the extra point/opposite vertex
+        Sphere const& sph = cc_ptr_->get_cache()[sph_key];
         if (kernel_.squared_distance_d_object()(sph.first, cc_ptr_->get_point(face_opposite_vertex.second)) <= sph.second) {
+            is_min_enclos_ball = true;
+            sc_ptr_->assign_key(sh, sph_key);
+            radius = sc_ptr_->filtration(face_opposite_vertex.first);
 #ifdef DEBUG_TRACES
             std::clog << "center: " << sph.first << ", radius: " <<  radius << std::endl;
 #endif  // DEBUG_TRACES
-            is_min_enclos_ball = true;
-#if CGAL_VERSION_NR >= 1050000000
-            if(exact_) CGAL::exact(sph.second);
-#endif
-            radius = std::sqrt(cast_to_fv(sph.second));
-            sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
-            cc_ptr_->get_cache().push_back(sph);
             break;
         }
     }
@@ -119,8 +116,9 @@ class Cech_blocker {
         }
         Sphere sph = get_sphere(points.cbegin(), points.cend());
 #if CGAL_VERSION_NR >= 1050000000
-        if(exact_) CGAL::exact(sph.second);
+        if(cc_ptr_->is_exact()) CGAL::exact(sph.second);
 #endif
+        CGAL::NT_converter<FT, Filtration_value> cast_to_fv;
         radius = std::sqrt(cast_to_fv(sph.second));
 
         sc_ptr_->assign_key(sh, cc_ptr_->get_cache().size());
@@ -130,18 +128,18 @@ class Cech_blocker {
 #ifdef DEBUG_TRACES
     if (radius > cc_ptr_->max_radius()) std::clog << "radius > max_radius => expansion is blocked\n";
 #endif  // DEBUG_TRACES
-    sc_ptr_->assign_filtration(sh, radius);
+    // Check that the filtration to be assigned (radius) would be valid
+    if (radius > sc_ptr_->filtration(sh)) sc_ptr_->assign_filtration(sh, radius);
     return (radius > cc_ptr_->max_radius());
   }
 
   /** \internal \brief Čech complex blocker constructor. */
-  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr, const bool exact) : sc_ptr_(sc_ptr), cc_ptr_(cc_ptr), exact_(exact) {}
+  Cech_blocker(SimplicialComplexForCech* sc_ptr, Cech_complex* cc_ptr) : sc_ptr_(sc_ptr), cc_ptr_(cc_ptr) {}
 
  private:
   SimplicialComplexForCech* sc_ptr_;
   Cech_complex* cc_ptr_;
   Kernel kernel_;
-  const bool exact_;
 };
 
 }  // namespace cech_complex

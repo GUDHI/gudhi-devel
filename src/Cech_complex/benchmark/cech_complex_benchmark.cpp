@@ -40,9 +40,9 @@ Simplex_tree benchmark_cech(const std::string& off_file_points, const Filtration
     Points_off_reader_cgal off_reader_cgal(off_file_points);
 
     Gudhi::Clock cech_clock("Cech computation");
-    Cech_complex cech_complex_from_points(off_reader_cgal.get_point_cloud(), radius);
+    Cech_complex cech_complex_from_points(off_reader_cgal.get_point_cloud(), radius, exact);
     Simplex_tree cech_stree;
-    cech_complex_from_points.create_complex(cech_stree, dim_max, exact);
+    cech_complex_from_points.create_complex(cech_stree, dim_max);
 
     // ------------------------------------------
     // Display information about the Cech complex

@@ -508,26 +508,20 @@ class Entropy(BaseEstimator, TransformerMixin):
         new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
-            orig_diagram, diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-            try:
-                new_diagram = DiagramScaler(use=True, scalers=[([1], MaxAbsScaler())]).fit_transform([diagram])[0]
-            except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                assert len(diagram) == 0
-                new_diagram = np.empty(shape = [0, 2])
-
+            orig_diagram, new_diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
+                
+            p = new_diagram[:,1]
+            p = p/np.sum(p)
             if self.mode == "scalar":
-                ent = - np.sum( np.multiply(new_diagram[:,1], np.log(new_diagram[:,1])) )
+                ent = -np.dot(p, np.log(p))
                 Xfit.append(np.array([[ent]]))
-
             else:
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
                     [px,py] = orig_diagram[j,:2]
                     min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
                     max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                    for k in range(min_idx, max_idx):
-                        ent[k] += (-1) * new_diagram[j,1] * np.log(new_diagram[j,1])
+                    ent[min_idx:max_idx]-=p[j]*np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
                 Xfit.append(np.reshape(ent,[1,-1]))
