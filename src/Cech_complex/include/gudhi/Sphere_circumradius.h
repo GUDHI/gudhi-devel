@@ -12,6 +12,7 @@
 #define SPHERE_CIRCUMRADIUS_H_
 
 #include <CGAL/Epick_d.h> // for #include <CGAL/NT_converter.h> which is not working/compiling alone
+#include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 
 #include <cmath>  // for std::sqrt
 #include <vector>
@@ -26,6 +27,7 @@ template<typename Kernel, typename Filtration_value>
 class Sphere_circumradius {
  private:
     Kernel kernel_;
+    const bool exact_;
  public:
     using FT = typename Kernel::FT;
     using Point = typename Kernel::Point_d;
@@ -42,7 +44,9 @@ class Sphere_circumradius {
    *
    */
   Filtration_value operator()(const Point& point_1, const Point& point_2) const {
-    return std::sqrt(cast_to_fv(kernel_.squared_distance_d_object()(point_1, point_2))) / 2.;
+    auto squared_dist_obj = kernel_.squared_distance_d_object()(point_1, point_2);
+    if(exact_) CGAL::exact(squared_dist_obj);
+    return std::sqrt(cast_to_fv(squared_dist_obj)) / 2.;
   }
 
   /** \brief Circumradius of sphere passing through point cloud using CGAL.
@@ -53,8 +57,17 @@ class Sphere_circumradius {
    *
    */
   Filtration_value operator()(const Point_cloud& point_cloud) const {
-    return std::sqrt(cast_to_fv(kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end())));
+    auto squared_radius_obj = kernel_.compute_squared_radius_d_object()(point_cloud.begin(), point_cloud.end());
+    if(exact_) CGAL::exact(squared_radius_obj);
+    return std::sqrt(cast_to_fv(squared_radius_obj));
   }
+
+  /** \brief Constructor
+   * @param[in] exact Option for exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
+   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
+   * Default is false.
+   */
+  Sphere_circumradius(const bool exact = false) : exact_(exact) {}
 
 };
 
