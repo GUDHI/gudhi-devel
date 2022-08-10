@@ -298,6 +298,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
+    file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 
     # Some files for pip package
@@ -574,6 +575,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_betti_curve_representations)
     endif()
 
+    # Representations preprocessing
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_representations_preprocessing)
+    endif()
+
     # Time Delay
     add_gudhi_py_test(test_time_delay)
 
@@ -601,6 +607,11 @@ if(PYTHONINTERP_FOUND)
     # Fetch remote datasets
     if(WITH_GUDHI_REMOTE_TEST)
       add_gudhi_py_test(test_remote_datasets)
+    endif()
+
+    # sklearn
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_cubical_persistence)
     endif()
 
     # persistence graphical tools
