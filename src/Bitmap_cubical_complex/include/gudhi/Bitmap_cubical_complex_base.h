@@ -384,10 +384,7 @@ class Bitmap_cubical_complex_base {
     using pointer = T*;
     using reference = T&;
 
-    Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
-      this->counter = std::vector<std::size_t>(b.dimension());
-      // std::fill( this->counter.begin() , this->counter.end() , 0 );
-    }
+    Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : counter(b.dimension()), b(b) {}
 
     Top_dimensional_cells_iterator operator++() {
       // first find first element of the counter that can be increased:
@@ -506,9 +503,7 @@ class Bitmap_cubical_complex_base {
     using pointer = T*;
     using reference = T&;
 
-    Vertices_iterator(Bitmap_cubical_complex_base& b) : b(b) {
-      this->counter = std::vector<std::size_t>(b.dimension());
-    }
+    Vertices_iterator(Bitmap_cubical_complex_base& b) : counter(b.dimension()), b(b) {}
 
     Vertices_iterator operator++() {
       // first find first element of the counter that can be increased:
