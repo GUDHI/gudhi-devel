@@ -48,12 +48,6 @@ if(CGAL_FOUND)
   include( ${CGAL_USE_FILE} )
 endif()
 
-# For those who dislike bundled dependencies, this indicates where to find a preinstalled Hera.
-set(HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include)
-set(HERA_WASSERSTEIN_INCLUDE_DIR ${HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's wasserstein.h")
-set(HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/bottleneck/include)
-set(HERA_BOTTLENECK_INCLUDE_DIR ${HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's bottleneck.h")
-
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
 # Find TBB package for parallel sort - not mandatory, just optional.
@@ -174,7 +168,7 @@ if (WITH_GUDHI_PYTHON)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
   endif(NOT GUDHI_PYTHON_PATH)
   
-  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
   
   if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(SPHINX_FOUND)

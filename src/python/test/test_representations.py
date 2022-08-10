@@ -152,7 +152,26 @@ def test_vectorization_empty_diagrams():
     scv = Entropy(mode="vector", normalized=False, resolution=random_resolution)(empty_diag)
     assert not np.any(scv)
     assert scv.shape[0] == random_resolution
-
+    
+def test_entropy_miscalculation():
+    diag_ex = np.array([[0.0,1.0], [0.0,1.0], [0.0,2.0]])
+    def pe(pd):
+        l = pd[:,1] - pd[:,0]
+        l = l/sum(l)
+        return -np.dot(l, np.log(l))
+    sce = Entropy(mode="scalar")
+    assert [[pe(diag_ex)]] == sce.fit_transform([diag_ex])
+    sce = Entropy(mode="vector", resolution=4, normalized=False)
+    pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
+           -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
+           -1/2*np.log(1/2), 
+           0.0]
+    assert all(([pef] == sce.fit_transform([diag_ex]))[0])
+    sce = Entropy(mode="vector", resolution=4, normalized=True)
+    pefN = (sce.fit_transform([diag_ex]))[0]
+    area = np.linalg.norm(pefN, ord=1)
+    assert area==1
+        
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
     assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.

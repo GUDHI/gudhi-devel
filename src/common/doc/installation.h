@@ -40,12 +40,19 @@ make \endverbatim
  * `make test` is using <a href="https://cmake.org/cmake/help/latest/manual/ctest.1.html">Ctest</a> (CMake test driver
  * program). If some of the tests are failing, please send us the result of the following command:
  * \verbatim ctest --output-on-failure \endverbatim
+ * Testing fetching datasets feature requires the use of the internet and is disabled by default. If you want to include this test, set WITH_GUDHI_REMOTE_TEST to ON when building in the previous step (note that this test is included in the python module):
+ * \verbatim cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_REMOTE_TEST=ON --DWITH_GUDHI_PYTHON=ON .. \endverbatim
  * 
- * \subsection documentationgeneration Documentation
- * To generate the documentation, <a target="_blank" href="http://www.doxygen.org/">Doxygen</a> is required.
- * Run the following command in a terminal:
+ * \subsection documentationgeneration C++ documentation
+ * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
+ * is required (version &ge; 1.9.3 is advised). Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
+ *
+ * In case there is not a full setup present and only the documentation should be build the following command sequence
+ * can be used:
+\verbatim  cmake -DWITH_GUDHI_THIRD_PARTY=OFF ..
+make doxygen\endverbatim
  *
  * \subsection helloworld Hello world !
  * The <a target="_blank" href="https://github.com/GUDHI/hello-gudhi-world">Hello world for GUDHI</a>

@@ -332,7 +332,7 @@ def plot_persistence_diagram(
             axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
             # Infinity label
             yt = axes.get_yticks()
-            yt = yt[np.where(yt < axis_end)]  # to avoid ploting ticklabel higher than infinity
+            yt = yt[np.where(yt < axis_end)]  # to avoid plotting ticklabel higher than infinity
             yt = np.append(yt, infinity)
             ytl = ["%.3f" % e for e in yt]  # to avoid float precision error
             ytl[-1] = r"$+\infty$"

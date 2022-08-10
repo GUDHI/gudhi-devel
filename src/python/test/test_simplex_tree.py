@@ -320,6 +320,10 @@ def test_extend_filtration():
     ]
 
     dgms = st.extended_persistence(min_persistence=-1.)
+    assert len(dgms) == 4
+    # Sort by (death-birth) descending - we are only interested in those with the longest life span
+    for idx in range(4):
+        dgms[idx] = sorted(dgms[idx], key=lambda x:(-abs(x[1][0]-x[1][1])))
 
     assert dgms[0][0][1][0] == pytest.approx(2.)
     assert dgms[0][0][1][1] == pytest.approx(3.)
@@ -528,7 +532,7 @@ def test_expansion_with_blocker():
 
     def blocker(simplex):
         try:
-            # Block all simplices that countains vertex 6
+            # Block all simplices that contain vertex 6
             simplex.index(6)
             print(simplex, ' is blocked')
             return True

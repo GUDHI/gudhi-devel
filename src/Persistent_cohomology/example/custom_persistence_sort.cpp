@@ -33,7 +33,7 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
       Gudhi::persistent_cohomology::Field_Zp >;
 
 std::vector<Point> random_points() {
-  // Instanciate a random point generator
+  // Instantiate a random point generator
   CGAL::Random rng(0);
 
   // Generate "points_number" random points in a vector
