@@ -9,12 +9,13 @@
  */
 
 #include <gudhi/Cech_complex.h>
-#include <gudhi/distance_functions.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Points_off_io.h>
 
 #include <boost/program_options.hpp>
+
+#include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
 
 #include <string>
 #include <vector>
@@ -23,10 +24,11 @@
 // Types definition
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = Simplex_tree::Filtration_value;
-using Point = std::vector<double>;
-using Point_cloud = std::vector<Point>;
+
+using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+using Point = typename Kernel::Point_d;
 using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Simplex_tree, Point_cloud>;
+using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 

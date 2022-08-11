@@ -152,7 +152,7 @@ FULL_PATH_NAMES        = YES
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        =
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -162,7 +162,8 @@ STRIP_FROM_PATH        =
 # using the -I flag.
 
 STRIP_FROM_INC_PATH    = include \
-                         concept
+                         concept \
+                         @CMAKE_SOURCE_DIR@
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter (but
 # less readable) file names. This can be useful is your file systems doesn't
@@ -711,7 +712,7 @@ CITE_BIB_FILES         = @CMAKE_SOURCE_DIR@/biblio/bibliography.bib \
 # messages are off.
 # The default value is: NO.
 
-QUIET                  = NO
+QUIET                  = YES
 
 # The WARNINGS tag can be used to turn on/off the warning messages that are
 # generated to standard error (stderr) by doxygen. If WARNINGS is set to YES
@@ -765,7 +766,7 @@ WARN_FORMAT            = "$file:$line: $text"
 # messages should be written. If left blank the output is written to standard
 # error (stderr).
 
-WARN_LOGFILE           =
+WARN_LOGFILE           = doxygen.log
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -832,7 +833,7 @@ EXCLUDE                = @CMAKE_SOURCE_DIR@/data/ \
                          @CMAKE_SOURCE_DIR@/ext/ \
                          @CMAKE_SOURCE_DIR@/README.md \
                          @CMAKE_SOURCE_DIR@/.github \
-                         @CMAKE_CURRENT_BINARY_DIR@/new_gudhi_version_creation.md \
+                         @CMAKE_CURRENT_BINARY_DIR@ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/GudhUI/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/cmake/ \
                          @GUDHI_DOXYGEN_SOURCE_PREFIX@/python/
@@ -1117,7 +1118,7 @@ HTML_FOOTER            = @GUDHI_DOXYGEN_COMMON_DOC_PATH@/footer.html
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_STYLESHEET        = @GUDHI_DOXYGEN_COMMON_DOC_PATH@/stylesheet.css
+HTML_STYLESHEET        =
 
 # The HTML_EXTRA_STYLESHEET tag can be used to specify additional user-defined
 # cascading style sheets that are included after the standard style sheets
@@ -1130,7 +1131,7 @@ HTML_STYLESHEET        = @GUDHI_DOXYGEN_COMMON_DOC_PATH@/stylesheet.css
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_STYLESHEET  = @GUDHI_DOXYGEN_COMMON_DOC_PATH@/stylesheet.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note

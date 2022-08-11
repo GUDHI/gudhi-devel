@@ -70,6 +70,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
@@ -289,13 +290,15 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")    
+    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
+    file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 
     # Some files for pip package
@@ -562,9 +565,19 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 
+    # Differentiation
+    if(TENSORFLOW_FOUND)
+      add_gudhi_py_test(test_diff)
+    endif()
+
     # Betti curves
     if(SKLEARN_FOUND AND SCIPY_FOUND)
       add_gudhi_py_test(test_betti_curve_representations)
+    endif()
+
+    # Representations preprocessing
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_representations_preprocessing)
     endif()
 
     # Time Delay
@@ -594,6 +607,11 @@ if(PYTHONINTERP_FOUND)
     # Fetch remote datasets
     if(WITH_GUDHI_REMOTE_TEST)
       add_gudhi_py_test(test_remote_datasets)
+    endif()
+
+    # sklearn
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_cubical_persistence)
     endif()
 
     # persistence graphical tools
