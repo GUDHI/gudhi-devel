@@ -1,8 +1,8 @@
 .. list-table::
-   :widths: 40 30 30
+   :width: 100%
    :header-rows: 0
 
-   * - :Since: GUDHI 3.5.0
+   * - :Since: GUDHI 3.6.0
      - :License: MIT
      - :Requires: `TensorFlow <installation.html#tensorflow>`_
 
