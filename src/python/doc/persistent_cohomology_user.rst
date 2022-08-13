@@ -6,19 +6,24 @@ Persistent cohomology user manual
 =================================
 Definition
 ----------
-=====================================  =====================================  =====================================
-:Author: Clément Maria                 :Since: GUDHI PYTHON 2.0.0             :License: GPL v3
-=====================================  =====================================  =====================================
 
-+-----------------------------------------------------------------+-----------------------------------------------------------------------+
-|  :doc:`persistent_cohomology_user`                              | Please refer to each data structure that contains persistence         |
-|                                                                 | feature for reference:                                                |
-|                                                                 |                                                                       |
-|                                                                 | * :doc:`simplex_tree_ref`                                             |
-|                                                                 | * :doc:`cubical_complex_ref`                                          |
-|                                                                 | * :doc:`periodic_cubical_complex_ref`                                 |
-+-----------------------------------------------------------------+-----------------------------------------------------------------------+
+.. list-table::
+   :width: 100%
+   :header-rows: 0
 
+   * - :Author: Clément Maria
+     - :Since: GUDHI 2.0.0
+     - :License: MIT
+
+.. list-table::
+   :width: 100%
+   :header-rows: 0
+
+   * - :doc:`persistent_cohomology_user`
+     - Please refer to each data structure that contains persistence feature for reference:
+           * :doc:`simplex_tree_ref`
+           * :doc:`cubical_complex_ref`
+           * :doc:`periodic_cubical_complex_ref`
 
 Computation of persistent cohomology using the algorithm of :cite:`DBLP:journals/dcg/SilvaMV11` and
 :cite:`DBLP:conf/compgeom/DeyFW14` and the Compressed Annotation Matrix implementation of
