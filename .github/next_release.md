@@ -1,4 +1,4 @@
-We are pleased to announce the release 3.6.0.rc1 of the GUDHI library.
+We are pleased to announce the release 3.6.0 of the GUDHI library.
 
 As a major new feature, the GUDHI library now offers automatic differentiation for the computation of
 persistence diagrams, Cubical complex persistence scikit-learn like interface, datasets fetch methods,
@@ -7,7 +7,7 @@ and weighted version for alpha complex in any dimension D.
 Do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 For further information, please visit the [GUDHI web site](https://gudhi.inria.fr/).
 
-# GUDHI 3.6.0rc1 Release Notes
+# GUDHI 3.6.0 Release Notes
 Below is a list of changes made since GUDHI 3.5.0:
 
 - TensorFlow 2 models that can handle automatic differentiation for the computation of persistence diagrams:
@@ -28,7 +28,7 @@ Below is a list of changes made since GUDHI 3.5.0:
 - [Edge collapse](https://gudhi.inria.fr/doc/latest/group__edge__collapse.html)
      - rewriting of the module to improve performance
 
-- [Čech complex](https://gudhi.inria.fr/doc/latest/group__edge__collapse.html)
+- [Čech complex](https://gudhi.inria.fr/doc/latest/group__cech__complex.html)
      - rewriting of the module to improve performance
 
 - [Representations](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.vector_methods.BettiCurve)
