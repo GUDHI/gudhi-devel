@@ -7,14 +7,7 @@ Cubical complex user manual
 Definition
 ----------
 
-=====================================  =====================================  =====================================
-:Author: Pawel Dlotko                  :Since: GUDHI PYTHON 2.0.0             :License: GPL v3
-=====================================  =====================================  =====================================
-
-+---------------------------------------------+----------------------------------------------------------------------+
-| :doc:`cubical_complex_user`                 | * :doc:`cubical_complex_ref`                                         |
-|                                             | * :doc:`periodic_cubical_complex_ref`                                |
-+---------------------------------------------+----------------------------------------------------------------------+
+.. include:: cubical_complex_sum.inc
 
 The cubical complex is an example of a structured complex useful in computational mathematics (specially rigorous
 numerics) and image analysis.
