@@ -10,8 +10,10 @@
    | * :doc:`cubical_complex_user`                                            | * :doc:`cubical_complex_ref`                                                                                               |
    |                                                                          | * :doc:`periodic_cubical_complex_ref`                                                                                      |
    +--------------------------------------------------------------------------+--------------------------------------------------------------+-------------------------------------------------------------+
-   |                                                                          | * :doc:`cubical_complex_tflow_itf_ref`                       | :requires: `TensorFlow <installation.html#tensorflow>`_     |
-   |                                                                          |                                                              |                                                             |
+   | .. image::                                                               | * :doc:`cubical_complex_tflow_itf_ref`                       | :requires: `TensorFlow <installation.html#tensorflow>`_     |
+   |      img/tensorflow.png                                                  |                                                              |                                                             |
+   |      :target: https://www.tensorflow.org                                 |                                                              |                                                             |
+   |      :height: 30                                                         |                                                              |                                                             |
    +--------------------------------------------------------------------------+--------------------------------------------------------------+-------------------------------------------------------------+
    | .. image::                                                               | * :doc:`cubical_complex_sklearn_itf_ref`                     | :Requires: `Scikit-learn <installation.html#scikit-learn>`_ |
    |      img/sklearn.png                                                     |                                                              |                                                             |
