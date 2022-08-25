@@ -723,7 +723,7 @@ class Persistent_cohomology {
   boost::disjoint_sets<int *, Simplex_key *> dsets_;
   /* The compressed annotation matrix fields.*/
   Cam cam_;
-  /*  Dictionary establishing the correspondance between the Simplex_key of
+  /*  Dictionary establishing the correspondence between the Simplex_key of
    * the root vertex in the union-find ds and the Simplex_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
   std::map<Simplex_key, Simplex_key> zero_cocycles_;

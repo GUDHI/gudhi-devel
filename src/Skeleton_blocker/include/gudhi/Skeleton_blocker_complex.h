@@ -1291,7 +1291,7 @@ class Skeleton_blocker_complex {
   typedef boost::iterator_range<Complex_neighbors_vertices_iterator> Complex_neighbors_vertices_range;
 
   /**
-   * @brief Returns a Complex_edge_range over all edges of the simplicial complex that passes trough v
+   * @brief Returns a Complex_edge_range over all edges of the simplicial complex that passes through v
    */
   Complex_neighbors_vertices_range vertex_range(Vertex_handle v) const {
     auto begin = Complex_neighbors_vertices_iterator(this, v);
