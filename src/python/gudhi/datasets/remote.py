@@ -221,3 +221,55 @@ def fetch_bunny(file_path = None, accept_license = False):
                     print(f.read())
 
     return np.load(archive_path, mmap_mode='r')
+
+def fetch_daily_activities(file_path = None, accept_license = False):
+    """
+    Load the Daily and Sports Activities dataset. This dataset comes from
+    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license)
+    and has been concatenated in a Pandas DataFrame pickle file compressed in a `xz` format.
+
+    This dataset contains 1.140.000 vertices in dimension 48.
+
+    Note that if the dataset already exists in the target location, it is not downloaded again,
+    and the corresponding DataFrame is read (compressed) from cache.
+
+    Parameters
+    ----------
+    file_path : string
+        Full path of the downloaded file including filename.
+
+        Default is None, meaning that it's set to "data_home/points/activities/activities.xz".
+        In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
+
+        The "data_home" directory is set by default to "~/gudhi_data",
+        unless the 'GUDHI_DATA' environment variable is set.
+
+    accept_license : boolean
+        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
+
+        Default is False.
+
+    Returns
+    -------
+    points: Pandas DataFrame
+        Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set'.
+    """
+
+    file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz"
+    file_checksum = '77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd'
+    license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
+    license_checksum = '30da7b8250d90e9a333188320ba7cfa4786f77fc70164191c3afb934fe47cf26'
+
+    archive_path = _get_archive_path(file_path, "points/activities/activities.xz")
+
+    if not exists(archive_path):
+        _fetch_remote(file_url, archive_path, file_checksum)
+        license_path = join(split(archive_path)[0], "activities.LICENSE")
+        _fetch_remote(license_url, license_path, license_checksum)
+        # Print license terms unless accept_license is set to True
+        if not accept_license:
+            if exists(license_path):
+                with open(license_path, 'r') as f:
+                    print(f.read())
+
+    return np.load(archive_path, mmap_mode='r')
