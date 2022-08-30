@@ -254,11 +254,14 @@ def fetch_daily_activities(file_path = None, accept_license = False):
     points: Pandas DataFrame
         Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set'.
     """
+    import pandas as pd
 
-    file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz"
-    file_checksum = '77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd'
-    license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
-    license_checksum = '30da7b8250d90e9a333188320ba7cfa4786f77fc70164191c3afb934fe47cf26'
+    #file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz"
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.xz"
+    file_checksum = None # '77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd'
+    #license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
+    license_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE"
+    license_checksum = None # '30da7b8250d90e9a333188320ba7cfa4786f77fc70164191c3afb934fe47cf26'
 
     archive_path = _get_archive_path(file_path, "points/activities/activities.xz")
 
@@ -272,4 +275,5 @@ def fetch_daily_activities(file_path = None, accept_license = False):
                 with open(license_path, 'r') as f:
                     print(f.read())
 
-    return np.load(archive_path, mmap_mode='r')
+    print(archive_path)
+    return pd.read_pickle(archive_path)
