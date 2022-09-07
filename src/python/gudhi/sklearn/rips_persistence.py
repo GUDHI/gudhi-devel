@@ -110,6 +110,9 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             stree = (self.__get_stree_from_points)(points, (self.homology_dimensions + 1))
             return stree.persistence_intervals_in_dimension(self.homology_dimensions)
 
+    def is_riper_available(self):
+        return _RIPSER_IS_AVAILABLE
+
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
 
