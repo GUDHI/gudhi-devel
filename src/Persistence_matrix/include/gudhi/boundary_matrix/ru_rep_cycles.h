@@ -24,7 +24,7 @@ class RU_representative_cycles
 {
 public:
 	using cycle_type = std::vector<index>;
-	using Base_matrix = typename Master_matrix::Base_matrix;
+	using Base_matrix = typename Master_matrix::Base_matrix_type;
 
 	void update_representative_cycles();
 

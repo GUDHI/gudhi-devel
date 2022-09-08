@@ -187,7 +187,7 @@ public:
 								>::type
 							>::type;
 
-	using Base_matrix = typename std::conditional<
+	using Base_matrix_type = typename std::conditional<
 											Options::has_removable_columns,
 											typename std::conditional<
 												Options::has_row_access,
@@ -201,7 +201,7 @@ public:
 											>::type
 										>::type;
 
-	using RU_matrix = typename std::conditional<
+	using RU_matrix_type = typename std::conditional<
 											Options::has_removable_columns,
 											typename std::conditional<
 												Options::has_row_access,
@@ -215,7 +215,7 @@ public:
 											>::type
 										>::type;
 
-	using Chain_matrix = typename std::conditional<
+	using Chain_matrix_type = typename std::conditional<
 											Options::has_removable_columns,
 											typename std::conditional<
 												Options::has_row_access,
@@ -293,7 +293,7 @@ public:
 		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
 
-		Dummy_ru_vine_swap([[maybe_unused]] Base_matrix &matrixR, [[maybe_unused]] Base_matrix &matrixU){}
+		Dummy_ru_vine_swap([[maybe_unused]] Base_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU){}
 		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
 
@@ -344,7 +344,7 @@ public:
 		Dummy_ru_representative_cycles& operator=([[maybe_unused]] Dummy_ru_representative_cycles other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_representative_cycles& d1, [[maybe_unused]] Dummy_ru_representative_cycles& d2){}
 
-		Dummy_ru_representative_cycles([[maybe_unused]] Base_matrix &matrixR, [[maybe_unused]] Base_matrix &matrixU){}
+		Dummy_ru_representative_cycles([[maybe_unused]] Base_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU){}
 		Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
 		Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
 
@@ -413,10 +413,10 @@ private:
 							Options::is_of_boundary_type,
 							typename std::conditional<
 								Options::has_vine_update || Options::can_retrieve_representative_cycles,
-								RU_matrix,
-								Base_matrix
+								RU_matrix_type,
+								Base_matrix_type
 							>::type,
-							Chain_matrix
+							Chain_matrix_type
 						>::type;
 
 	matrix_type matrix_;

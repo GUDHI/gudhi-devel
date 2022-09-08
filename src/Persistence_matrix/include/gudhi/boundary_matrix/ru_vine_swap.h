@@ -23,7 +23,7 @@ template<class Master_matrix>
 class RU_vine_swap : public RU_pairing<Master_matrix>
 {
 public:
-	using Base_matrix = typename Master_matrix::Base_matrix;
+	using Base_matrix = typename Master_matrix::Base_matrix_type;
 
 	void vine_swap_with_z_eq_1_case(index index);
 	void vine_swap(index index);
