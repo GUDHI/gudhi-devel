@@ -6,6 +6,8 @@ option(WITH_GUDHI_TEST "Activate/deactivate examples compilation and installatio
 option(WITH_GUDHI_UTILITIES "Activate/deactivate utilities compilation and installation" ON)
 option(WITH_GUDHI_THIRD_PARTY "Activate/deactivate third party libraries cmake detection. When set to OFF, it is usefull for doxygen or user_version i.e." ON)
 
+set(WITH_GUDHI_SANITIZER "" CACHE STRING "To compile with '-fsanitizer=WITH_GUDHI_SANITIZER'. Can be 'address' or 'leak'/'memory'. Check with your g++/clang++ version")
+
 if (NOT WITH_GUDHI_THIRD_PARTY)
   set (WITH_GUDHI_BENCHMARK OFF)
   set (WITH_GUDHI_EXAMPLE OFF)
