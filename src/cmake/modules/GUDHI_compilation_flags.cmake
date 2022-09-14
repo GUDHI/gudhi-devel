@@ -11,7 +11,7 @@ macro(add_cxx_compiler_flag _flag)
   endif()
 endmacro()
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 enable_testing()
 
