@@ -15,7 +15,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "utilities.h"
+#include "utilities/utilities.h"
 #include "options.h"
 
 #include "boundary_matrix/base_swap.h"
@@ -64,6 +64,7 @@ template<class Options = Default_options<> >
 class Matrix
 {
 public:
+	using Option_list = Options;
 	using Field_type = typename Options::field_coeff_type;
 
 	struct Dummy_column_pairing{
@@ -374,6 +375,8 @@ public:
 													Dummy_chain_representative_cycles
 												>::type;
 
+	using cycle_type = std::vector<index>;
+
 	Matrix();
 	Matrix(boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
@@ -407,6 +410,16 @@ public:
 					 Matrix<Friend_options>& matrix2);
 
 	void print();  //for debug
+
+	//access to optionnal methods
+	const barcode_type& get_current_barcode();
+	void update_representative_cycles();
+	const std::vector<cycle_type>& get_representative_cycles();
+	const cycle_type& get_representative_cycle(const Bar& bar);
+	void vine_swap_with_z_eq_1_case(index index);								//by column position with ordered columns
+	index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);	//by column id with potentielly unordered columns
+	void vine_swap(index index);												//by column position with ordered columns
+	index vine_swap(index columnIndex1, index columnIndex2);					//by column id with potentielly unordered columns
 
 private:
 	using matrix_type = typename std::conditional<
@@ -555,6 +568,62 @@ template<class Options>
 inline void Matrix<Options>::print()
 {
 	return matrix_.print();
+}
+
+template<class Options>
+inline const typename Matrix<Options>::barcode_type& Matrix<Options>::get_current_barcode()
+{
+	static_assert(Options::has_column_pairings || Options::has_vine_update, "This method was not enabled.");
+	return matrix_.get_current_barcode();
+}
+
+template<class Options>
+inline void Matrix<Options>::update_representative_cycles()
+{
+	static_assert(Options::can_retrieve_representative_cycles, "This method was not enabled.");
+	matrix_.update_representative_cycles();
+}
+
+template<class Options>
+inline const std::vector<typename Matrix<Options>::cycle_type>& Matrix<Options>::get_representative_cycles()
+{
+	static_assert(Options::can_retrieve_representative_cycles, "This method was not enabled.");
+	return matrix_.get_representative_cycles();
+}
+
+template<class Options>
+inline const typename Matrix<Options>::cycle_type& Matrix<Options>::get_representative_cycle(const Bar& bar)
+{
+	static_assert(Options::can_retrieve_representative_cycles, "This method was not enabled.");
+	return matrix_.get_representative_cycle(bar);
+}
+
+template<class Options>
+inline void Matrix<Options>::vine_swap_with_z_eq_1_case(index index)
+{
+	static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
+	matrix_.vine_swap_with_z_eq_1_case(index);
+}
+
+template<class Options>
+inline index Matrix<Options>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
+{
+	static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
+	return matrix_.vine_swap_with_z_eq_1_case(columnIndex1, columnIndex2);
+}
+
+template<class Options>
+inline void Matrix<Options>::vine_swap(index index)
+{
+	static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
+	matrix_.vine_swap(index);
+}
+
+template<class Options>
+inline index Matrix<Options>::vine_swap(index columnIndex1, index columnIndex2)
+{
+	static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
+	return matrix_.vine_swap(columnIndex1, columnIndex2);
 }
 
 template<class Options>

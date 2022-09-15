@@ -13,7 +13,7 @@
 
 #include <utility>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "ru_pairing.h"
 
 namespace Gudhi {
@@ -259,7 +259,7 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_vine_swap(index inde
 template<class Master_matrix>
 inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
 {
-	if constexpr (Master_matrix::Options::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return RUP::indexToBar_.at(simplexIndex)->death;
 	} else {
 		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).death;
@@ -269,7 +269,7 @@ inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
 template<class Master_matrix>
 inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
 {
-	if constexpr (Master_matrix::Options::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return RUP::indexToBar_.at(simplexIndex)->birth;
 	} else {
 		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).birth;

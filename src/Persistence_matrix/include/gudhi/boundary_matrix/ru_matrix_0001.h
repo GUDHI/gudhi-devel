@@ -11,14 +11,18 @@
 #ifndef RU_MATRIX_0001_H
 #define RU_MATRIX_0001_H
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "base_matrix_0001.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class RU_matrix_with_removals : public Master_matrix::RU_pairing_option, Master_matrix::RU_vine_swap_option, Master_matrix::RU_representative_cycles_option{
+class RU_matrix_with_removals
+		: public Master_matrix::RU_pairing_option,
+		  public Master_matrix::RU_vine_swap_option,
+		  public Master_matrix::RU_representative_cycles_option
+{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = void;

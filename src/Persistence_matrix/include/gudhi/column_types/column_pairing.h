@@ -13,7 +13,7 @@
 
 #include <utility>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

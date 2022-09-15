@@ -14,13 +14,17 @@
 #include <iostream>
 #include <set>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Chain_matrix_with_row_access : public Master_matrix::Chain_pairing_option, Master_matrix::Chain_vine_swap_option, Master_matrix::Chain_representative_cycles_option{
+class Chain_matrix_with_row_access
+		: public Master_matrix::Chain_pairing_option,
+		  public Master_matrix::Chain_vine_swap_option,
+		  public Master_matrix::Chain_representative_cycles_option
+{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Column_type::Row_type;

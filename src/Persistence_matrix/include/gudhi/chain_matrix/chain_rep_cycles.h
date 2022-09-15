@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "../utilities.h"  //type definitions
+#include "../utilities/utilities.h"  //type definitions
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -30,7 +30,7 @@ public:
 	void update_representative_cycles();
 
 	const std::vector<cycle_type>& get_representative_cycles();
-	const cycle_type& get_representative_cycle(Bar& bar);
+	const cycle_type& get_representative_cycle(const Bar& bar);
 
 	Chain_representative_cycles& operator=(Chain_representative_cycles other);
 	template<class Friend_master_matrix>
@@ -104,7 +104,7 @@ Chain_representative_cycles<Master_matrix>::get_representative_cycles()
 
 template<class Master_matrix>
 inline const typename Chain_representative_cycles<Master_matrix>::cycle_type &
-Chain_representative_cycles<Master_matrix>::get_representative_cycle(Bar &bar)
+Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar &bar)
 {
 	if (representativeCycles_.empty()) update_representative_cycles();
 	return representativeCycles_.at(birthToCycle_.at(bar.birth));

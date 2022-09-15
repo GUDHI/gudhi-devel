@@ -15,7 +15,7 @@
 #include <list>
 #include <vector>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -26,6 +26,8 @@ class List_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
+	using iterator = typename std::list<Cell>::iterator;
+	using const_iterator = typename std::list<Cell>::const_iterator;
 
 	List_column();
 	template<class Boundary_type>
@@ -45,6 +47,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	List_column& operator+=(List_column const &column);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
@@ -187,6 +194,34 @@ inline void List_column<Field_element_type,Column_pairing_option>::reorder(std::
 		it++;
 	}
 	column_.sort();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename List_column<Field_element_type,Column_pairing_option>::iterator
+List_column<Field_element_type,Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename List_column<Field_element_type,Column_pairing_option>::const_iterator
+List_column<Field_element_type,Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename List_column<Field_element_type,Column_pairing_option>::iterator
+List_column<Field_element_type,Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename List_column<Field_element_type,Column_pairing_option>::const_iterator
+List_column<Field_element_type,Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Field_element_type, class Column_pairing_option>

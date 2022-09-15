@@ -11,7 +11,7 @@
 #ifndef RU_MATRIX_0010_H
 #define RU_MATRIX_0010_H
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

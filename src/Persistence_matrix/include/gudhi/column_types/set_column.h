@@ -15,8 +15,8 @@
 #include <list>
 #include <set>
 
-#include "../utilities.h"
-#include "../Zp_field.h"
+#include "../utilities/utilities.h"
+#include "../utilities/Zp_field.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -27,6 +27,8 @@ class Set_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
+	using iterator = typename std::set<Cell>::iterator;
+	using const_iterator = typename std::set<Cell>::const_iterator;
 
 	Set_column();
 	template<class Boundary_type>
@@ -46,6 +48,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	Set_column& operator+=(Set_column const &column);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
@@ -179,6 +186,34 @@ inline void Set_column<Field_element_type,Column_pairing_option>::reorder(std::v
 	std::set<Cell> newSet;
 	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap.at(v.get_row_index())));
 	column_.swap(newSet);
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Set_column<Field_element_type,Column_pairing_option>::iterator
+Set_column<Field_element_type,Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Set_column<Field_element_type,Column_pairing_option>::const_iterator
+Set_column<Field_element_type,Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Set_column<Field_element_type,Column_pairing_option>::iterator
+Set_column<Field_element_type,Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Set_column<Field_element_type,Column_pairing_option>::const_iterator
+Set_column<Field_element_type,Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Field_element_type, class Column_pairing_option>

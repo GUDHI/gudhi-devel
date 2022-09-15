@@ -15,8 +15,8 @@
 #include <vector>
 #include <unordered_set>
 
-#include "../utilities.h"
-#include "../Zp_field.h"
+#include "../utilities/utilities.h"
+#include "../utilities/Zp_field.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -27,6 +27,8 @@ class Vector_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
+	using iterator = typename std::vector<Cell>::iterator;
+	using const_iterator = typename std::vector<Cell>::const_iterator;
 
 	Vector_column();
 	template<class Boundary_type>
@@ -46,6 +48,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	Vector_column& operator+=(Vector_column &column);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
@@ -213,6 +220,34 @@ inline void Vector_column<Field_element_type,Column_pairing_option>::reorder(std
 	std::sort(newColumn.begin(), newColumn.end());
 	erasedValues_.clear();
 	column_.swap(newColumn);
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Vector_column<Field_element_type,Column_pairing_option>::iterator
+Vector_column<Field_element_type,Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Vector_column<Field_element_type,Column_pairing_option>::const_iterator
+Vector_column<Field_element_type,Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Vector_column<Field_element_type,Column_pairing_option>::iterator
+Vector_column<Field_element_type,Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Vector_column<Field_element_type,Column_pairing_option>::const_iterator
+Vector_column<Field_element_type,Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Field_element_type, class Column_pairing_option>

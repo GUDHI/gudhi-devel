@@ -16,8 +16,8 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include "../utilities.h"
-#include "../Zp_field.h"
+#include "../utilities/utilities.h"
+#include "../utilities/Zp_field.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -28,6 +28,8 @@ class Unordered_set_column : public Column_pairing_option
 {
 public:
 	using Cell = Base_cell<Field_element_type>;
+	using iterator = typename std::unordered_set<Cell>::iterator;
+	using const_iterator = typename std::unordered_set<Cell>::const_iterator;
 
 	Unordered_set_column();
 	template<class Boundary_type>
@@ -47,6 +49,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	Unordered_set_column& operator+=(Unordered_set_column const &column);
 	template<class Friend_field_element_type, class Friend_column_pairing_option>
@@ -211,6 +218,34 @@ inline void Unordered_set_column<Field_element_type,Column_pairing_option>::reor
 	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap.at(v.get_row_index())));
 	column_.swap(newSet);
 	pivotChanged_ = true;
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::iterator
+Unordered_set_column<Field_element_type,Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::const_iterator
+Unordered_set_column<Field_element_type,Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::iterator
+Unordered_set_column<Field_element_type,Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Field_element_type, class Column_pairing_option>
+inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::const_iterator
+Unordered_set_column<Field_element_type,Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Field_element_type, class Column_pairing_option>

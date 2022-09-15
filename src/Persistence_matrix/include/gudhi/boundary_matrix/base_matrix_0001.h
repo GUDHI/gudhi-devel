@@ -14,13 +14,16 @@
 #include <iostream>
 #include <vector>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix_with_removals : public Master_matrix::Base_swap_option, Master_matrix::Base_pairing_option{
+class Base_matrix_with_removals
+		: public Master_matrix::Base_swap_option,
+		  public Master_matrix::Base_pairing_option
+{
 public:
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;

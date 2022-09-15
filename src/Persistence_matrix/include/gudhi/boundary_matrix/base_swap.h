@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-#include "../utilities.h"  //type definitions
+#include "../utilities/utilities.h"  //type definitions
 
 namespace Gudhi {
 namespace persistence_matrix {

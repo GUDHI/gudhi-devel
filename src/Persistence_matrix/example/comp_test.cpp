@@ -15,8 +15,9 @@
 
 #include "gudhi/matrix.h"
 #include "gudhi/options.h"
-#include "gudhi/Z2_field.h"
-#include "gudhi/Zp_field.h"
+#include "gudhi/utilities/Z2_field.h"
+#include "gudhi/utilities/Zp_field.h"
+#include "gudhi/utilities/utilities.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;
@@ -27,6 +28,7 @@ using Gudhi::persistence_matrix::Zigzag_options;
 using Gudhi::persistence_matrix::Multi_persistence_options;
 using Gudhi::persistence_matrix::Cohomology_persistence_options;
 using Gudhi::persistence_matrix::Column_types;
+using Gudhi::persistence_matrix::Bar;
 
 using boundary_type = std::vector<unsigned int>;
 template<class Field_type = Zp_field_element<5> >
@@ -106,7 +108,7 @@ int main(int argc, char* const argv[]) {
 	orderedBoundaries2.emplace_back();
 	orderedBoundaries2.emplace_back();
 	orderedBoundaries2.emplace_back();
-	orderedBoundaries2.emplace_back(field_boundary_type<>{{0,3},{1,2}});
+	orderedBoundaries2.push_back(field_boundary_type<>{{0,3},{1,2}});
 	orderedBoundaries2.push_back(field_boundary_type<>{{1,3},{2,2}});
 
 	Matrix<Representative_cycles_options<Zp_field_element<5> > > m1(orderedBoundaries2);
@@ -151,6 +153,43 @@ int main(int argc, char* const argv[]) {
 	test_comp_z2(m8);
 	test_comp_z2(m10);
 
+	auto& dgm1 = m1.get_current_barcode();
+	m1.update_representative_cycles();
+	m1.get_representative_cycles();
+	m1.get_representative_cycle(dgm1.front());
+	auto& dgm2 = m2.get_current_barcode();
+	m2.update_representative_cycles();
+	m2.get_representative_cycles();
+	m2.get_representative_cycle(dgm2.front());
+	auto& dgm3 = m3.get_current_barcode();
+	m3.update_representative_cycles();
+	m3.get_representative_cycles();
+	m3.get_representative_cycle(dgm3.front());
+	auto& dgm4 = m4.get_current_barcode();
+	m4.update_representative_cycles();
+	m4.get_representative_cycles();
+	m4.get_representative_cycle(dgm4.front());
+	auto& dgm5 = m5.get_current_barcode();
+	m5.update_representative_cycles();
+	m5.get_representative_cycles();
+	m5.get_representative_cycle(dgm5.front());
+	auto& dgm6 = m6.get_current_barcode();
+	m6.update_representative_cycles();
+	m6.get_representative_cycles();
+	m6.get_representative_cycle(dgm6.front());
+	auto& dgm7 = m7.get_current_barcode();
+	m7.update_representative_cycles();
+	m7.get_representative_cycles();
+	m7.get_representative_cycle(dgm7.front());
+	auto& dgm8 = m8.get_current_barcode();
+	m8.update_representative_cycles();
+	m8.get_representative_cycles();
+	m8.get_representative_cycle(dgm8.front());
+	auto& dgm10 = m10.get_current_barcode();
+	m10.update_representative_cycles();
+	m10.get_representative_cycles();
+	m10.get_representative_cycle(dgm10.front());
+
 	test_comp_zp(m11);
 	test_comp_z2(m12);
 	test_comp_zp(m13);
@@ -191,16 +230,37 @@ int main(int argc, char* const argv[]) {
 	m23.get_column_with_pivot(0);
 	m24.get_column_with_pivot(0);
 	m25.get_column_with_pivot(0);
+	m21.get_current_barcode();
+	m21.vine_swap_with_z_eq_1_case(3);
+	m21.vine_swap(3);
+	m22.get_current_barcode();
+	m22.vine_swap_with_z_eq_1_case(3);
+	m22.vine_swap(3);
+	m23.get_current_barcode();
+	m23.vine_swap_with_z_eq_1_case(3);
+	m23.vine_swap(3);
+	m24.get_current_barcode();
+	m24.vine_swap_with_z_eq_1_case(3);
+	m24.vine_swap(3);
+	m25.get_current_barcode();
+	m25.vine_swap_with_z_eq_1_case(3);
+	m25.vine_swap(3);
 
 	test_comp_z2(m31);
 	test_comp_z2(m32);
 
+	m31.get_column_with_pivot(0);
+	m32.get_column_with_pivot(0);
+	m31.get_current_barcode();
+	m31.vine_swap_with_z_eq_1_case(3,4);
+	m31.vine_swap(3,4);
+	m32.get_current_barcode();
+	m32.vine_swap_with_z_eq_1_case(3,4);
+	m32.vine_swap(3,4);
 	m31.get_row(0);
 	m31.erase_last();
 	m32.get_row(0);
 	m32.erase_last();
-	m31.get_column_with_pivot(0);
-	m32.get_column_with_pivot(0);
 
 	test_comp_zp(m41);
 	test_comp_z2(m42);

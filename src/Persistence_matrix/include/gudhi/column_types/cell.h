@@ -12,8 +12,8 @@
 #define CELL_H
 
 #include "../options.h"
-#include "../utilities.h"
-#include "../Zp_field.h"
+#include "../utilities/utilities.h"
+#include "../utilities/Zp_field.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

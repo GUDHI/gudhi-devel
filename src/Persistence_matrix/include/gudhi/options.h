@@ -16,7 +16,7 @@
 #ifndef OPTIONS_INCLUDED
 #define OPTIONS_INCLUDED
 
-#include "Z2_field.h"
+#include "utilities/Z2_field.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -45,7 +45,7 @@ struct Default_options{
 	static const bool is_double_linked = true;								//single link not implemented yet. usefull?
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = false;
-	static const bool is_indexed_by_column_index = false;					//not implemented yet
+	static const bool is_indexed_by_position = false;					//not implemented yet
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
@@ -61,14 +61,14 @@ template<class Field_type = Z2_field_element, Column_types column_type = Column_
 struct Representative_cycles_options : Default_options<Field_type, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
-	static const bool is_indexed_by_column_index = true;
+	static const bool is_indexed_by_position = true;
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
 struct Multi_persistence_options : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
-	static const bool is_indexed_by_column_index = true;
+	static const bool is_indexed_by_position = true;
 };
 
 template<class Field_type = Z2_field_element>

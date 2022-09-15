@@ -14,7 +14,8 @@
 #include <utility>
 #include <vector>
 
-#include "../utilities.h"  //type definitions
+#include "../utilities/utilities.h"  //type definitions
+#include "../options.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -29,7 +30,7 @@ public:
 	void update_representative_cycles();
 
 	const std::vector<cycle_type>& get_representative_cycles();
-	const cycle_type& get_representative_cycle(Bar& bar);
+	const cycle_type& get_representative_cycle(const Bar& bar);
 
 	RU_representative_cycles& operator=(RU_representative_cycles other);
 	template<class Friend_master_matrix>
@@ -82,6 +83,8 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 			auto column = mirrorMatrixU_.get_column(i);
 			for (auto cell : column){
 				representativeCycles_.back().push_back(cell.get_row_index());
+				if constexpr (Master_matrix::Option_list::column_type == Column_types::HEAP || Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)
+						std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());
 			}
 			birthToCycle_.at(i) = representativeCycles_.size() - 1;
 		}
@@ -98,7 +101,7 @@ RU_representative_cycles<Master_matrix>::get_representative_cycles()
 
 template<class Master_matrix>
 inline const typename RU_representative_cycles<Master_matrix>::cycle_type &
-RU_representative_cycles<Master_matrix>::get_representative_cycle(Bar &bar)
+RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar &bar)
 {
 	if (representativeCycles_.empty()) update_representative_cycles();
 	return representativeCycles_.at(birthToCycle_.at(bar.birth));

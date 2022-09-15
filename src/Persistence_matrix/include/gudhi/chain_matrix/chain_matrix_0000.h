@@ -11,13 +11,17 @@
 #ifndef CHAIN_MATRIX_0000_H
 #define CHAIN_MATRIX_0000_H
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Chain_matrix : Master_matrix::Chain_pairing_option, Master_matrix::Chain_vine_swap_option, Master_matrix::Chain_representative_cycles_option{
+class Chain_matrix
+		: public Master_matrix::Chain_pairing_option,
+		  public Master_matrix::Chain_vine_swap_option,
+		  public Master_matrix::Chain_representative_cycles_option
+{
 
 };
 

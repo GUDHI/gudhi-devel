@@ -11,7 +11,7 @@
 #ifndef CHAIN_MATRIX_0001_H
 #define CHAIN_MATRIX_0001_H
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

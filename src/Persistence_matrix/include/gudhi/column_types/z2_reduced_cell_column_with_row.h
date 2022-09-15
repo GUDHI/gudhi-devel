@@ -18,7 +18,7 @@
 #include <boost/intrusive/set.hpp>
 
 #include "../options.h"
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -28,6 +28,9 @@ template<class Cell, class Column_type, class Row_type, class Row_base_hook, cla
 class Z2_reduced_cell_column_with_row : public Column_pairing_option
 {
 public:
+	using iterator = typename Column_type::iterator;
+	using const_iterator = typename Column_type::const_iterator;
+
 	Z2_reduced_cell_column_with_row();
 	template<class Chain_type>
 	Z2_reduced_cell_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension);
@@ -43,6 +46,11 @@ public:
 
 	void swap_rows(Z2_reduced_cell_column_with_row& other);
 	void swap_lowest_simplex_index(Z2_reduced_cell_column_with_row& other);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 private:
 	Column_type column_;
@@ -155,6 +163,34 @@ template<class Cell, class Column_type, class Row_type, class Row_base_hook, cla
 inline void Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::swap_lowest_simplex_index(Z2_reduced_cell_column_with_row& other)
 {
 	std::swap(lowestSimplexIndex_, other.lowestSimplexIndex_);
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::iterator
+Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::const_iterator
+Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::iterator
+Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline typename Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::const_iterator
+Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 } //namespace persistence_matrix

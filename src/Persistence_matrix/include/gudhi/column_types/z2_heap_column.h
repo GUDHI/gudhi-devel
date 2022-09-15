@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -29,6 +29,8 @@ class Z2_heap_column : public Column_pairing_option
 {
 public:
 	using Cell = Z2_base_cell;
+	using iterator = typename std::vector<Cell>::iterator;
+	using const_iterator = typename std::vector<Cell>::const_iterator;
 
 	Z2_heap_column();
 	template<class Boundary_type>
@@ -47,6 +49,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	Z2_heap_column& operator+=(Z2_heap_column const &column);
 	template<class Friend_column_pairing_option>
@@ -204,6 +211,34 @@ inline void Z2_heap_column<Column_pairing_option>::reorder(std::vector<index> &v
 
 	insertsSinceLastPrune_ = 0;
 	erasedValues_.clear();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::iterator
+Z2_heap_column<Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_iterator
+Z2_heap_column<Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::iterator
+Z2_heap_column<Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_iterator
+Z2_heap_column<Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Column_pairing_option>

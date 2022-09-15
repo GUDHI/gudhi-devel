@@ -15,7 +15,7 @@
 #include <list>
 #include <unordered_set>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "cell.h"
 
 namespace Gudhi {
@@ -26,6 +26,8 @@ class Z2_vector_column : public Column_pairing_option
 {
 public:
 	using Cell = Z2_base_cell;
+	using iterator = typename std::vector<Cell>::iterator;
+	using const_iterator = typename std::vector<Cell>::const_iterator;
 
 	Z2_vector_column();
 	template<class Boundary_type>
@@ -44,6 +46,11 @@ public:
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
+
+	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
+	iterator end() noexcept;
+	const_iterator end() const noexcept;
 
 	Z2_vector_column& operator+=(Z2_vector_column &column);
 	template<class Friend_column_pairing_option>
@@ -145,6 +152,8 @@ inline dimension_type Z2_vector_column<Column_pairing_option>::get_dimension() c
 template<class Column_pairing_option>
 inline int Z2_vector_column<Column_pairing_option>::get_pivot()
 {
+	if (column_.empty()) return -1;
+
 	auto it = erasedValues_.find(column_.back().get_row_index());
 	while (!column_.empty() && it != erasedValues_.end()) {
 		erasedValues_.erase(it);
@@ -181,6 +190,34 @@ inline void Z2_vector_column<Column_pairing_option>::reorder(std::vector<index> 
 	std::sort(newColumn.begin(), newColumn.end());
 	erasedValues_.clear();
 	column_.swap(newColumn);
+}
+
+template<class Column_pairing_option>
+inline typename Z2_vector_column<Column_pairing_option>::iterator
+Z2_vector_column<Column_pairing_option>::begin() noexcept
+{
+	return column_.begin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_vector_column<Column_pairing_option>::const_iterator
+Z2_vector_column<Column_pairing_option>::begin() const noexcept
+{
+	return column_.begin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_vector_column<Column_pairing_option>::iterator
+Z2_vector_column<Column_pairing_option>::end() noexcept
+{
+	return column_.end();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_vector_column<Column_pairing_option>::const_iterator
+Z2_vector_column<Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
 }
 
 template<class Column_pairing_option>

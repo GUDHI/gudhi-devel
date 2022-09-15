@@ -14,7 +14,7 @@
 #include <utility>
 #include <set>
 
-#include "../utilities.h"
+#include "../utilities/utilities.h"
 #include "chain_pairing.h"
 
 namespace Gudhi {
@@ -220,7 +220,7 @@ inline index Chain_vine_swap<Master_matrix>::_positive_vine_swap(index columnInd
 			|| (_birth(pivot1) < _birth(pivot2) && _death(pivot1) == -1 && _death(pivot2) == -1))
 	{
 		if (_death(pivot2) != -1)
-			matrix_.at(matrix_.at(columnIndex2).get_paired_column()) += matrix_.at(matrix_.at(columnIndex1).get_paired_column());
+			matrix_.at(matrix_.at(columnIndex2).get_paired_chain_index()) += matrix_.at(matrix_.at(columnIndex1).get_paired_chain_index());
 		matrix_.at(columnIndex2) += matrix_.at(columnIndex1);
 
 		_positive_transpose(pivot1, pivot2);
@@ -229,7 +229,7 @@ inline index Chain_vine_swap<Master_matrix>::_positive_vine_swap(index columnInd
 	}
 
 	if (_death(pivot1) != -1 && _death(pivot2) != -1)
-		matrix_.at(matrix_.at(columnIndex1).get_paired_column()) += matrix_.at(matrix_.at(columnIndex2).get_paired_column());
+		matrix_.at(matrix_.at(columnIndex1).get_paired_chain_index()) += matrix_.at(matrix_.at(columnIndex2).get_paired_chain_index());
 	matrix_.at(columnIndex1) += matrix_.at(columnIndex2);
 
 	return columnIndex2;
@@ -260,8 +260,8 @@ inline index Chain_vine_swap<Master_matrix>::_negative_vine_swap(index columnInd
 	index pivot1 = pivotToPosition_.at(matrix_.at(columnIndex1).get_pivot());
 	index pivot2 = pivotToPosition_.at(matrix_.at(columnIndex2).get_pivot());
 
-	index pairedIndex1 = matrix_.at(columnIndex1).get_paired_column();
-	index pairedIndex2 = matrix_.at(columnIndex2).get_paired_column();
+	index pairedIndex1 = matrix_.at(columnIndex1).get_paired_chain_index();
+	index pairedIndex2 = matrix_.at(columnIndex2).get_paired_chain_index();
 
 	std::swap(pivotToPosition_.at(matrix_.at(columnIndex1).get_pivot()), pivotToPosition_.at(matrix_.at(columnIndex2).get_pivot()));
 
@@ -283,7 +283,7 @@ inline index Chain_vine_swap<Master_matrix>::_negative_vine_swap(index columnInd
 template<class Master_matrix>
 inline int& Chain_vine_swap<Master_matrix>::_death(index simplexIndex)
 {
-	if constexpr (Master_matrix::Options::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return CP::indexToBar_.at(simplexIndex)->death;
 	} else {
 		return CP::barcode_.at(CP::indexToBar_.at(simplexIndex)).death;
@@ -293,7 +293,7 @@ inline int& Chain_vine_swap<Master_matrix>::_death(index simplexIndex)
 template<class Master_matrix>
 inline int& Chain_vine_swap<Master_matrix>::_birth(index simplexIndex)
 {
-	if constexpr (Master_matrix::Options::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return CP::indexToBar_.at(simplexIndex)->birth;
 	} else {
 		return CP::barcode_.at(CP::indexToBar_.at(simplexIndex)).birth;
