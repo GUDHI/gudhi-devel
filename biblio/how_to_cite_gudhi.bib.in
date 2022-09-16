@@ -68,7 +68,7 @@
 }
 
 @incollection{gudhi:CechComplex
-, author =  "Vincent Rouvreau"
+, author =  "Vincent Rouvreau, Hind Montassif"
 , title =   "\v{C}ech complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
