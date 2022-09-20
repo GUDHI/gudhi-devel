@@ -63,6 +63,18 @@ def test_fetch_remote_datasets_wrapped():
         bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
 
+        cross_training_arr = remote.fetch_daily_cross_training_activities("./another_fetch_folder_for_test/cross_training.npy")
+        assert cross_training_arr.shape == (7500, 3)
+
+        jumping_arr = remote.fetch_daily_jumping_activities("./another_fetch_folder_for_test/jumping.npy")
+        assert jumping_arr.shape == (7500, 3)
+
+        stepper_arr = remote.fetch_daily_stepper_activities("./another_fetch_folder_for_test/stepper.npy")
+        assert stepper_arr.shape == (7500, 3)
+
+        walking_arr = remote.fetch_daily_walking_activities("./another_fetch_folder_for_test/walking.npy")
+        assert walking_arr.shape == (7500, 3)
+
     # Check that the directory was created
     assert isdir("./another_fetch_folder_for_test")
     # Check downloaded files
@@ -70,9 +82,19 @@ def test_fetch_remote_datasets_wrapped():
     assert exists("./another_fetch_folder_for_test/bunny.npy")
     assert exists("./another_fetch_folder_for_test/bunny.LICENSE")
 
+    assert exists("./another_fetch_folder_for_test/cross_training.npy")
+    assert exists("./another_fetch_folder_for_test/jumping.npy")
+    assert exists("./another_fetch_folder_for_test/stepper.npy")
+    assert exists("./another_fetch_folder_for_test/walking.npy")
+    assert exists("./another_fetch_folder_for_test/activities.LICENSE")
+
     # Remove test folders
     del spiral_2d_arr
     del bunny_arr
+    del cross_training_arr
+    del jumping_arr
+    del stepper_arr
+    del walking_arr
     shutil.rmtree("./another_fetch_folder_for_test")
 
 def test_gudhi_data_env():
