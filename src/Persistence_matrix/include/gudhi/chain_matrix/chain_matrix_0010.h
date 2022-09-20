@@ -39,7 +39,7 @@ public:
 	Chain_matrix_with_row_access(Chain_matrix_with_row_access&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(Boundary_type& boundary);	//new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
 	Column_type& get_column(index columnIndex);

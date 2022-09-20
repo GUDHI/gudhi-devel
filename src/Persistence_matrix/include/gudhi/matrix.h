@@ -16,6 +16,8 @@
 #include <unordered_map>
 
 #include "utilities/utilities.h"
+#include "utilities/overlay_id_to_position_index.h"
+#include "utilities/overlay_position_to_id_index.h"
 #include "options.h"
 
 #include "boundary_matrix/base_swap.h"
@@ -426,10 +428,22 @@ private:
 							Options::is_of_boundary_type,
 							typename std::conditional<
 								Options::has_vine_update || Options::can_retrieve_representative_cycles,
-								RU_matrix_type,
-								Base_matrix_type
+								typename std::conditional<
+									Options::is_indexed_by_position,
+									RU_matrix_type,
+									Id_to_position_indexation_overlay<RU_matrix_type,Matrix<Options>>
+								>::type,
+								typename std::conditional<
+									Options::is_indexed_by_position,
+									Base_matrix_type,
+									Id_to_position_indexation_overlay<Base_matrix_type,Matrix<Options>>
+								>::type
 							>::type,
-							Chain_matrix_type
+							typename std::conditional<
+								Options::is_indexed_by_position,
+								Position_to_id_indexation_overlay<Chain_matrix_type,Matrix<Options>>,
+								Chain_matrix_type
+							>::type
 						>::type;
 
 	matrix_type matrix_;

@@ -45,15 +45,15 @@ protected:
 	static constexpr bool isActive_ = true;
 
 private:
-	Base_matrix &reducedMatrixR_;
-	Base_matrix &mirrorMatrixU_;
+	Base_matrix *reducedMatrixR_;
+	Base_matrix *mirrorMatrixU_;
 	std::vector<cycle_type> representativeCycles_;
 	std::vector<int> birthToCycle_;
 };
 
 template<class Master_matrix>
 inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU)
-	: reducedMatrixR_(matrixR), mirrorMatrixU_(matrixU)
+	: reducedMatrixR_(&matrixR), mirrorMatrixU_(&matrixU)
 {}
 
 template<class Master_matrix>
@@ -66,8 +66,8 @@ inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(const R
 
 template<class Master_matrix>
 inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(RU_representative_cycles<Master_matrix> &&other) noexcept
-	: reducedMatrixR_(other.reducedMatrixR_),
-	  mirrorMatrixU_(other.mirrorMatrixU_),
+	: reducedMatrixR_(std::exchange(other.reducedMatrixR_, nullptr)),
+	  mirrorMatrixU_(std::exchange(other.mirrorMatrixU_, nullptr)),
 	  representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}
@@ -76,11 +76,11 @@ template<class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::update_representative_cycles()
 {
 	birthToCycle_.clear();
-	birthToCycle_.resize(reducedMatrixR_.get_number_of_columns(), -1);
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if (reducedMatrixR_.is_zero_column(i)){
+	birthToCycle_.resize(reducedMatrixR_->get_number_of_columns(), -1);
+	for (unsigned int i = 0; i < reducedMatrixR_->get_number_of_columns(); i++){
+		if (reducedMatrixR_->is_zero_column(i)){
 			representativeCycles_.push_back(cycle_type());
-			auto column = mirrorMatrixU_.get_column(i);
+			auto column = mirrorMatrixU_->get_column(i);
 			for (auto cell : column){
 				representativeCycles_.back().push_back(cell.get_row_index());
 				if constexpr (Master_matrix::Option_list::column_type == Column_types::HEAP || Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)

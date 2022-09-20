@@ -47,16 +47,16 @@ protected:
 	static constexpr bool isActive_ = true;
 
 private:
-	matrix_type& matrix_;
-	dictionnary_type& pivotToPosition_;
+	matrix_type* matrix_;
+	dictionnary_type* pivotToPosition_;
 	std::vector<cycle_type> representativeCycles_;
 	std::vector<int> birthToCycle_;
 };
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(matrix_type &matrix, dictionnary_type &pivotToPosition)
-	: matrix_(matrix), pivotToPosition_(pivotToPosition)
-{std::cout << "here22\n";}
+	: matrix_(&matrix), pivotToPosition_(&pivotToPosition)
+{}
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(const Chain_representative_cycles<Master_matrix>& matrixToCopy)
@@ -68,8 +68,8 @@ inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(c
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(Chain_representative_cycles<Master_matrix>&& other) noexcept
-	: matrix_(other.matrix_),
-	  pivotToPosition_(other.pivotToPosition_),
+	: matrix_(std::exchange(other.matrix_, nullptr)),
+	  pivotToPosition_(std::exchange(other.pivotToPosition_, nullptr)),
 	  representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}
@@ -78,11 +78,11 @@ template<class Master_matrix>
 inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles()
 {
 	birthToCycle_.clear();
-	birthToCycle_.resize(matrix_.size(), -1);
+	birthToCycle_.resize(matrix_->size(), -1);
 	representativeCycles_.clear();
 
-	for (index i = 0; i < matrix_.size(); i++){
-		column_type &col = matrix_.at(pivotToPosition_.at(i));
+	for (index i = 0; i < matrix_->size(); i++){
+		column_type &col = matrix_->at(pivotToPosition_->at(i));
 		if (!col.is_paired() || i < col.get_paired_chain_index()){
 			cycle_type cycle;
 			for (typename column_type::Cell c : col){

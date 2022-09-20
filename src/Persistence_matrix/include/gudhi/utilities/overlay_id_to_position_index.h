@@ -144,7 +144,15 @@ template<class Matrix_type, class Master_matrix_type>
 inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::erase_last()
 {
 	matrix_.erase_last();
-
+	columnIDToPosition_.erase(lastID_);
+	if constexpr (Master_matrix_type::Option_list::has_removable_columns){
+		auto it = columnIDToPosition_.begin();
+		while (it != columnIDToPosition_.end() && it->second != columnIDToPosition_.size() - 1)
+			++it;
+		lastID_ = it->first;
+	} else {
+		for (lastID_ = 0; columnIDToPosition_[lastID_] != columnIDToPosition_.size() - 1; ++lastID_);
+	}
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -162,37 +170,37 @@ inline unsigned int Id_to_position_indexation_overlay<Matrix_type,Master_matrix_
 template<class Matrix_type, class Master_matrix_type>
 inline dimension_type Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_dimension(index columnIndex) const
 {
-	return matrix_.get_column_dimension(matrix_.get_pivot(columnIDToPosition_.at(columnIndex)));
+	return matrix_.get_column_dimension(columnIDToPosition_.at(columnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
-	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
+	return matrix_.add_to(columnIDToPosition_.at(sourceColumnIndex), columnIDToPosition_.at(targetColumnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::zero_cell(index columnIndex, index rowIndex)
 {
-	return matrix_.zero_cell(columnIndex, rowIndex);
+	return matrix_.zero_cell(columnIDToPosition_.at(columnIndex), columnIDToPosition_.at(rowIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::zero_column(index columnIndex)
 {
-	return matrix_.zero_column(columnIndex);
+	return matrix_.zero_column(columnIDToPosition_.at(columnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline bool Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::is_zero_cell(index columnIndex, index rowIndex)
 {
-	return matrix_.is_zero_cell(columnIndex, rowIndex);
+	return matrix_.is_zero_cell(columnIDToPosition_.at(columnIndex), columnIDToPosition_.at(rowIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline bool Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::is_zero_column(index columnIndex)
 {
-	return matrix_.is_zero_column(columnIndex);
+	return matrix_.is_zero_column(columnIDToPosition_.at(columnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -204,7 +212,7 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_pivot(index columnIndex)
 {
-	return matrix_.get_pivot(columnIndex);
+	return matrix_.get_pivot(columnIDToPosition_.at(columnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -214,6 +222,7 @@ Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::operator=(Id_
 	std::swap(matrix_, other.matrix_);
 	std::swap(columnIDToPosition_, other.columnIDToPosition_);
 	std::swap(nextIndex_, other.nextIndex_);
+	std::swap(lastID_, other.lastID_);
 
 	return *this;
 }
@@ -251,18 +260,33 @@ inline const typename Id_to_position_indexation_overlay<Matrix_type,Master_matri
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
 {
-	return matrix_.vine_swap_with_z_eq_1_case(columnIndex1, columnIndex2);
+	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
+	index first = columnIDToPosition_.at(columnIndex1);
+	index second = columnIDToPosition_.at(columnIndex2);
+	index res = columnIndex1;
+	if (first > second) {
+		std::swap(first, second);
+		res = columnIndex2;
+	}
+	matrix_.vine_swap_with_z_eq_1_case(first);
+	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+	return res;
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap(index columnIndex1, index columnIndex2)
 {
-	return matrix_.vine_swap(columnIndex1, columnIndex2);
-//	index next = matrix_.vine_swap(columnIDToPosition_.at(position), columnIDToPosition_.at(position + 1));
-//	if (next == columnIDToPosition_.at(position)){
-//		std::swap(columnIDToPosition_.at(position),
-//				  columnIDToPosition_.at(position + 1));
-//	}
+	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
+	index first = columnIDToPosition_.at(columnIndex1);
+	index second = columnIDToPosition_.at(columnIndex2);
+	index res = columnIndex1;
+	if (first > second) {
+		std::swap(first, second);
+		res = columnIndex2;
+	}
+	matrix_.vine_swap(first);
+	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+	return res;
 }
 
 template<class Friend_matrix_type, class Friend_master_matrix_type>
@@ -272,6 +296,7 @@ void swap(Id_to_position_indexation_overlay<Friend_matrix_type,Friend_master_mat
 	std::swap(matrix1.matrix_, matrix2.matrix_);
 	std::swap(matrix1.columnIDToPosition_, matrix2.columnIDToPosition_);
 	std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
+	std::swap(matrix1.lastID_, matrix2.lastID_);
 }
 
 } //namespace persistence_matrix

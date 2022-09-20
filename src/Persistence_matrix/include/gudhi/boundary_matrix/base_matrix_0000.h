@@ -201,7 +201,7 @@ inline dimension_type Base_matrix<Master_matrix>::get_max_dimension() const
 template<class Master_matrix>
 inline unsigned int Base_matrix<Master_matrix>::get_number_of_columns() const
 {
-	return matrix_.size();
+	return nextInsertIndex_;
 }
 
 template<class Master_matrix>

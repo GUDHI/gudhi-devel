@@ -34,6 +34,22 @@ using boundary_type = std::vector<unsigned int>;
 template<class Field_type = Zp_field_element<5> >
 using field_boundary_type = std::vector<std::pair<unsigned int,Field_type> >;
 
+template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
+struct test_options1 : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+};
+
+template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
+struct test_options2 : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
+	static const bool has_row_access = true;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+	static const bool is_of_boundary_type = false;
+	static const bool has_removable_columns = true;
+	static const bool is_indexed_by_position = true;
+};
+
 template<class Matrix_type>
 void test_comp_zp(Matrix_type m)
 {
@@ -143,6 +159,15 @@ int main(int argc, char* const argv[]) {
 	Matrix<Cohomology_persistence_options<Zp_field_element<5> > > m41(orderedBoundaries2);
 	Matrix<Cohomology_persistence_options<Zp_field_element<2> > > m42(orderedBoundaries1);
 
+	Matrix<test_options1<> > m51(orderedBoundaries1);
+	Matrix<test_options1<Column_types::LIST> > m52(orderedBoundaries1);
+	Matrix<test_options1<Column_types::UNORDERED_SET> > m53(orderedBoundaries1);
+	Matrix<test_options1<Column_types::VECTOR> > m54(orderedBoundaries1);
+	Matrix<test_options1<Column_types::HEAP> > m55(orderedBoundaries1);
+
+	Matrix<test_options2<> > m61(orderedBoundaries1);
+	Matrix<test_options2<Column_types::LIST> > m62(orderedBoundaries1);
+
 	test_comp_zp(m1);
 	test_comp_z2(m2);
 	test_comp_zp(m3);
@@ -219,13 +244,17 @@ int main(int argc, char* const argv[]) {
 	m20.zero_cell(0, 0);
 	m20.zero_column(0);
 
+//	std::cout << "number of columns2: " << m21.get_number_of_columns() << "\n";
 	test_comp_z2(m21);
+//	std::cout << "number of columns3: " << m21.get_number_of_columns() << "\n";
 	test_comp_z2(m22);
 	test_comp_z2(m23);
 	test_comp_z2(m24);
 	test_comp_z2(m25);
 
+//	std::cout << "number of columns4: " << m21.get_number_of_columns() << "\n";
 	m21.get_column_with_pivot(0);
+//	std::cout << "number of columns5: " << m21.get_number_of_columns() << "\n";
 	m22.get_column_with_pivot(0);
 	m23.get_column_with_pivot(0);
 	m24.get_column_with_pivot(0);
@@ -264,6 +293,53 @@ int main(int argc, char* const argv[]) {
 
 	test_comp_zp(m41);
 	test_comp_z2(m42);
+
+//	std::cout << "number of columns2: " << m51.get_number_of_columns() << "\n";
+	test_comp_z2(m51);
+//	std::cout << "number of columns3: " << m51.get_number_of_columns() << "\n";
+	test_comp_z2(m52);
+	test_comp_z2(m53);
+	test_comp_z2(m54);
+	test_comp_z2(m55);
+//std::cout << "number of columns2: " << m51.get_number_of_columns() << "\n";
+	m51.get_column_with_pivot(0);
+	m52.get_column_with_pivot(0);
+	m53.get_column_with_pivot(0);
+	m54.get_column_with_pivot(0);
+	m55.get_column_with_pivot(0);
+//	std::cout << "number of columns3: " << m51.get_number_of_columns() << "\n";
+	m51.get_current_barcode();
+//	std::cout << "number of columns4: " << m51.get_number_of_columns() << "\n";
+	m51.vine_swap_with_z_eq_1_case(3,4);
+	m51.vine_swap(3,4);
+	m52.get_current_barcode();
+	m52.vine_swap_with_z_eq_1_case(3,4);
+	m52.vine_swap(3,4);
+	m53.get_current_barcode();
+	m53.vine_swap_with_z_eq_1_case(3,4);
+	m53.vine_swap(3,4);
+	m54.get_current_barcode();
+	m54.vine_swap_with_z_eq_1_case(3,4);
+	m54.vine_swap(3,4);
+	m55.get_current_barcode();
+	m55.vine_swap_with_z_eq_1_case(3,4);
+	m55.vine_swap(3,4);
+
+	test_comp_z2(m61);
+	test_comp_z2(m62);
+
+	m61.get_column_with_pivot(0);
+	m62.get_column_with_pivot(0);
+	m61.get_current_barcode();
+	m61.vine_swap_with_z_eq_1_case(3);
+	m61.vine_swap(3);
+	m62.get_current_barcode();
+	m62.vine_swap_with_z_eq_1_case(3);
+	m62.vine_swap(3);
+	m61.get_row(0);
+	m61.erase_last();
+	m62.get_row(0);
+	m62.erase_last();
 
 	return 0;
 }

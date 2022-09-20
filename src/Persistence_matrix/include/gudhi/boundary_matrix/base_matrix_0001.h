@@ -213,7 +213,7 @@ inline dimension_type Base_matrix_with_removals<Master_matrix>::get_max_dimensio
 template<class Master_matrix>
 inline unsigned int Base_matrix_with_removals<Master_matrix>::get_number_of_columns() const
 {
-	return matrix_.size();
+	return nextInsertIndex_;
 }
 
 template<class Master_matrix>
