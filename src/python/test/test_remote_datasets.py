@@ -6,6 +6,8 @@
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+#   - 2022/09 Vincent Rouvreau: Factorize _capture_license_output to be useable by activities
+#                               Test fetch activities (except pandas file) and its license file
 
 from gudhi.datasets import remote
 
@@ -31,27 +33,36 @@ def test_fetch_remote():
         remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy", "tmp_spiral_2d.npy", file_checksum = 'XXXXXXXXXX')
     assert not exists("tmp_spiral_2d.npy")
 
-def _get_bunny_license_print(accept_license = False):
+def _capture_license_output(fetch_method, accept_license = False):
     capturedOutput = io.StringIO()
     # Redirect stdout
     sys.stdout = capturedOutput
 
-    bunny_arr = remote.fetch_bunny("./tmp_for_test/bunny.npy", accept_license)
-    assert bunny_arr.shape == (35947, 3)
-    del bunny_arr
-    remove("./tmp_for_test/bunny.npy")
+    bunny_arr = fetch_method("./tmp_for_test/data.npy", accept_license)
+    # No need to keep numpy file
+    remove("./tmp_for_test/data.npy")
 
     # Reset redirect
     sys.stdout = sys.__stdout__
     return capturedOutput
 
-def test_print_bunny_license():
+def test_bunny_license_capture():
     # Test not printing bunny.npy LICENSE when accept_license = True
-    assert "" == _get_bunny_license_print(accept_license = True).getvalue()
+    assert "" == _capture_license_output(remote.fetch_bunny, accept_license = True).getvalue()
     # Test printing bunny.LICENSE file when fetching bunny.npy with accept_license = False (default)
     with open("./tmp_for_test/bunny.LICENSE") as f:
-        assert f.read().rstrip("\n") == _get_bunny_license_print().getvalue().rstrip("\n")
+        assert f.read().rstrip("\n") == _capture_license_output(remote.fetch_bunny).getvalue().rstrip("\n")
     shutil.rmtree("./tmp_for_test")
+
+def test_activities_license_capture():
+    for activity_fetch_method in [remote.fetch_daily_cross_training_activities, remote.fetch_daily_jumping_activities,
+                                  remote.fetch_daily_stepper_activities, remote.fetch_daily_walking_activities]:
+        # Test not printing activities.LICENSE when accept_license = True
+        assert "" == _capture_license_output(activity_fetch_method, accept_license = True).getvalue()
+        # Test printing activities.LICENSE file when fetching "activities".npy with accept_license = False (default)
+        with open("./tmp_for_test/activities.LICENSE") as f:
+            assert f.read().rstrip("\n") == _capture_license_output(activity_fetch_method).getvalue().rstrip("\n")
+        shutil.rmtree("./tmp_for_test")
 
 def test_fetch_remote_datasets_wrapped():
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default (twice, to test case of already fetched files)
@@ -89,19 +100,12 @@ def test_fetch_remote_datasets_wrapped():
     assert exists("./another_fetch_folder_for_test/activities.LICENSE")
 
     # Remove test folders
-    del spiral_2d_arr
-    del bunny_arr
-    del cross_training_arr
-    del jumping_arr
-    del stepper_arr
-    del walking_arr
     shutil.rmtree("./another_fetch_folder_for_test")
 
 def test_gudhi_data_env():
     # Set environment variable "GUDHI_DATA"
     environ["GUDHI_DATA"] = "./test_folder_from_env_var"
     bunny_arr = remote.fetch_bunny()
-    assert bunny_arr.shape == (35947, 3)
     assert exists("./test_folder_from_env_var/points/bunny/bunny.npy")
     assert exists("./test_folder_from_env_var/points/bunny/bunny.LICENSE")
     # Remove test folder
