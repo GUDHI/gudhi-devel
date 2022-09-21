@@ -132,4 +132,12 @@ Alternatively, it can be set using the **'GUDHI_DATA'** environment variable.
 
 .. autofunction:: gudhi.datasets.remote.fetch_daily_activities
 
+.. autofunction:: gudhi.datasets.remote.fetch_daily_cross_training_activities
+
+.. autofunction:: gudhi.datasets.remote.fetch_daily_jumping_activities
+
+.. autofunction:: gudhi.datasets.remote.fetch_daily_stepper_activities
+   
+.. autofunction:: gudhi.datasets.remote.fetch_daily_walking_activities
+
 .. autofunction:: gudhi.datasets.remote.clear_data_home

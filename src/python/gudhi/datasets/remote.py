@@ -266,6 +266,11 @@ def fetch_daily_activities(file_path=None, accept_license=False):
     https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
 
     This dataset contains 1.140.000 vertices in dimension 48. Its size is about 111 Mo.
+    If you are only interested in a subset and smaller dataset, please refer to
+    :func:`~gudhi.datasets.remote.fetch_daily_cross_training_activities`,
+    :func:`~gudhi.datasets.remote.fetch_daily_jumping_activities`,
+    :func:`~gudhi.datasets.remote.fetch_daily_stepper_activities`, or
+    :func:`~gudhi.datasets.remote.fetch_daily_walking_activities`
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding DataFrame is read (compressed) from cache.
