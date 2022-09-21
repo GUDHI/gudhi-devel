@@ -19,6 +19,7 @@ import pytest
 from os.path import isdir, expanduser, exists
 from os import remove, environ
 
+
 def test_data_home():
     # Test _get_data_home and clear_data_home on new empty folder
     empty_data_home = remote._get_data_home(data_home="empty_folder_for_test")
@@ -27,13 +28,19 @@ def test_data_home():
     remote.clear_data_home(data_home=empty_data_home)
     assert not isdir(empty_data_home)
 
+
 def test_fetch_remote():
     # Test fetch with a wrong checksum
     with pytest.raises(OSError):
-        remote._fetch_remote("https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy", "tmp_spiral_2d.npy", file_checksum = 'XXXXXXXXXX')
+        remote._fetch_remote(
+            "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy",
+            "tmp_spiral_2d.npy",
+            file_checksum="XXXXXXXXXX",
+        )
     assert not exists("tmp_spiral_2d.npy")
 
-def _capture_license_output(fetch_method, accept_license = False):
+
+def _capture_license_output(fetch_method, accept_license=False):
     capturedOutput = io.StringIO()
     # Redirect stdout
     sys.stdout = capturedOutput
@@ -46,23 +53,30 @@ def _capture_license_output(fetch_method, accept_license = False):
     sys.stdout = sys.__stdout__
     return capturedOutput
 
+
 def test_bunny_license_capture():
     # Test not printing bunny.npy LICENSE when accept_license = True
-    assert "" == _capture_license_output(remote.fetch_bunny, accept_license = True).getvalue()
+    assert "" == _capture_license_output(remote.fetch_bunny, accept_license=True).getvalue()
     # Test printing bunny.LICENSE file when fetching bunny.npy with accept_license = False (default)
     with open("./tmp_for_test/bunny.LICENSE") as f:
         assert f.read().rstrip("\n") == _capture_license_output(remote.fetch_bunny).getvalue().rstrip("\n")
     shutil.rmtree("./tmp_for_test")
 
+
 def test_activities_license_capture():
-    for activity_fetch_method in [remote.fetch_daily_cross_training_activities, remote.fetch_daily_jumping_activities,
-                                  remote.fetch_daily_stepper_activities, remote.fetch_daily_walking_activities]:
+    for activity_fetch_method in [
+        remote.fetch_daily_cross_training_activities,
+        remote.fetch_daily_jumping_activities,
+        remote.fetch_daily_stepper_activities,
+        remote.fetch_daily_walking_activities,
+    ]:
         # Test not printing activities.LICENSE when accept_license = True
-        assert "" == _capture_license_output(activity_fetch_method, accept_license = True).getvalue()
+        assert "" == _capture_license_output(activity_fetch_method, accept_license=True).getvalue()
         # Test printing activities.LICENSE file when fetching "activities".npy with accept_license = False (default)
         with open("./tmp_for_test/activities.LICENSE") as f:
             assert f.read().rstrip("\n") == _capture_license_output(activity_fetch_method).getvalue().rstrip("\n")
         shutil.rmtree("./tmp_for_test")
+
 
 def test_fetch_remote_datasets_wrapped():
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default (twice, to test case of already fetched files)
@@ -74,7 +88,9 @@ def test_fetch_remote_datasets_wrapped():
         bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
 
-        cross_training_arr = remote.fetch_daily_cross_training_activities("./another_fetch_folder_for_test/cross_training.npy")
+        cross_training_arr = remote.fetch_daily_cross_training_activities(
+            "./another_fetch_folder_for_test/cross_training.npy"
+        )
         assert cross_training_arr.shape == (7500, 3)
 
         jumping_arr = remote.fetch_daily_jumping_activities("./another_fetch_folder_for_test/jumping.npy")
@@ -102,6 +118,7 @@ def test_fetch_remote_datasets_wrapped():
     # Remove test folders
     shutil.rmtree("./another_fetch_folder_for_test")
 
+
 def test_gudhi_data_env():
     # Set environment variable "GUDHI_DATA"
     environ["GUDHI_DATA"] = "./test_folder_from_env_var"
@@ -109,5 +126,4 @@ def test_gudhi_data_env():
     assert exists("./test_folder_from_env_var/points/bunny/bunny.npy")
     assert exists("./test_folder_from_env_var/points/bunny/bunny.LICENSE")
     # Remove test folder
-    del bunny_arr
     shutil.rmtree("./test_folder_from_env_var")

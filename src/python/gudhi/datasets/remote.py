@@ -18,7 +18,8 @@ import shutil
 
 import numpy as np
 
-def _get_data_home(data_home = None):
+
+def _get_data_home(data_home=None):
     """
     Return the path of the remote datasets directory.
     This folder is used to store remotely fetched datasets.
@@ -46,7 +47,7 @@ def _get_data_home(data_home = None):
     return data_home
 
 
-def clear_data_home(data_home = None):
+def clear_data_home(data_home=None):
     """
     Delete the data home cache directory and all its content.
 
@@ -59,6 +60,7 @@ def clear_data_home(data_home = None):
     """
     data_home = _get_data_home(data_home)
     shutil.rmtree(data_home)
+
 
 def _checksum_sha256(file_path):
     """
@@ -75,7 +77,7 @@ def _checksum_sha256(file_path):
     """
     sha256_hash = hashlib.sha256()
     chunk_size = 4096
-    with open(file_path,"rb") as f:
+    with open(file_path, "rb") as f:
         # Read and update hash string value in blocks of 4K
         while True:
             buffer = f.read(chunk_size)
@@ -84,7 +86,8 @@ def _checksum_sha256(file_path):
             sha256_hash.update(buffer)
     return sha256_hash.hexdigest()
 
-def _fetch_remote(url, file_path, file_checksum = None):
+
+def _fetch_remote(url, file_path, file_checksum=None):
     """
     Fetch the wanted dataset from the given url and save it in file_path.
 
@@ -112,11 +115,14 @@ def _fetch_remote(url, file_path, file_checksum = None):
         if file_checksum != checksum:
             # Remove file and raise error
             remove(file_path)
-            raise IOError("{} has a SHA256 checksum : {}, "
-                        "different from expected : {}."
-                        "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum))
+            raise IOError(
+                "{} has a SHA256 checksum : {}, "
+                "different from expected : {}."
+                "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum)
+            )
 
-def _fetch_remote_license(license_url, license_path, license_checksum = None, accept_license = False):
+
+def _fetch_remote_license(license_url, license_path, license_checksum=None, accept_license=False):
     """
     Fetch the wanted license from the given url and save it in file_path.
 
@@ -139,8 +145,9 @@ def _fetch_remote_license(license_url, license_path, license_checksum = None, ac
     # Print license terms unless accept_license is set to True
     if not accept_license:
         if exists(license_path):
-            with open(license_path, 'r') as f:
+            with open(license_path, "r") as f:
                 print(f.read())
+
 
 def _get_archive_path(file_path, label):
     """
@@ -168,7 +175,8 @@ def _get_archive_path(file_path, label):
 
     return archive_path
 
-def fetch_spiral_2d(file_path = None):
+
+def fetch_spiral_2d(file_path=None):
     """
     Load the spiral_2d dataset.
 
@@ -191,16 +199,17 @@ def fetch_spiral_2d(file_path = None):
         Array of shape (114562, 2).
     """
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/spiral_2d/spiral_2d.npy"
-    file_checksum = '2226024da76c073dd2f24b884baefbfd14928b52296df41ad2d9b9dc170f2401'
+    file_checksum = "2226024da76c073dd2f24b884baefbfd14928b52296df41ad2d9b9dc170f2401"
 
     archive_path = _get_archive_path(file_path, "points/spiral_2d/spiral_2d.npy")
 
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
 
-    return np.load(archive_path, mmap_mode='r')
+    return np.load(archive_path, mmap_mode="r")
 
-def fetch_bunny(file_path = None, accept_license = False):
+
+def fetch_bunny(file_path=None, accept_license=False):
     """
     Load the Stanford bunny dataset.
 
@@ -232,9 +241,9 @@ def fetch_bunny(file_path = None, accept_license = False):
     """
 
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy"
-    file_checksum = 'f382482fd89df8d6444152dc8fd454444fe597581b193fd139725a85af4a6c6e'
+    file_checksum = "f382482fd89df8d6444152dc8fd454444fe597581b193fd139725a85af4a6c6e"
     license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.LICENSE"
-    license_checksum = 'b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a'
+    license_checksum = "b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a"
 
     archive_path = _get_archive_path(file_path, "points/bunny/bunny.npy")
 
@@ -243,13 +252,15 @@ def fetch_bunny(file_path = None, accept_license = False):
         license_path = join(split(archive_path)[0], "bunny.LICENSE")
         _fetch_remote_license(license_url, license_path, license_checksum, accept_license)
 
-    return np.load(archive_path, mmap_mode='r')
+    return np.load(archive_path, mmap_mode="r")
 
-#_activities_license_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE'
-_activities_license_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE'
-_activities_license_checksum = '00c8daaab2cd1d877b0a0deb4bce098e3aa93bef346e0df879a55b673577cbd7'
 
-def fetch_daily_activities(file_path = None, accept_license = False):
+# _activities_license_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE'
+_activities_license_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE"
+_activities_license_checksum = "00c8daaab2cd1d877b0a0deb4bce098e3aa93bef346e0df879a55b673577cbd7"
+
+
+def fetch_daily_activities(file_path=None, accept_license=False):
     """
     Load the Daily and Sports Activities dataset. This dataset comes from
     https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
@@ -284,20 +295,21 @@ def fetch_daily_activities(file_path = None, accept_license = False):
     # ImportError if not available
     import pandas as pd
 
-    #file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
-    file_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.xz'
-    file_checksum = '77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd'
+    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.xz"
+    file_checksum = "77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd"
 
-    archive_path = _get_archive_path(file_path, 'points/activities/activities.xz')
+    archive_path = _get_archive_path(file_path, "points/activities/activities.xz")
 
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], 'activities.LICENSE')
+        license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
     return pd.read_pickle(archive_path)
 
-def fetch_daily_cross_training_activities(file_path = None, accept_license = False):
+
+def fetch_daily_cross_training_activities(file_path=None, accept_license=False):
     """
     Load a subset (only left leg magnetometer of cross training activity performed by the person 1)
     of the Daily and Sports Activities dataset. This dataset comes from
@@ -329,20 +341,21 @@ def fetch_daily_cross_training_activities(file_path = None, accept_license = Fal
     points: numpy array
         Array of shape (7500, 3).
     """
-    #file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
-    file_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy'
-    file_checksum = '2b7636a56734d4422abcf5c9c1eb523b85b22b1086ca19ea9a33d4157e6a48c8'
+    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy"
+    file_checksum = "2b7636a56734d4422abcf5c9c1eb523b85b22b1086ca19ea9a33d4157e6a48c8"
 
-    archive_path = _get_archive_path(file_path, 'points/activities/cross_training_p1_left_leg.npy')
+    archive_path = _get_archive_path(file_path, "points/activities/cross_training_p1_left_leg.npy")
 
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], 'activities.LICENSE')
+        license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
     return np.load(archive_path)
 
-def fetch_daily_jumping_activities(file_path = None, accept_license = False):
+
+def fetch_daily_jumping_activities(file_path=None, accept_license=False):
     """
     Load a subset (only left leg magnetometer of jumping activity performed by the person 1)
     of the Daily and Sports Activities dataset. This dataset comes from
@@ -374,20 +387,21 @@ def fetch_daily_jumping_activities(file_path = None, accept_license = False):
     points: numpy array
         Array of shape (7500, 3).
     """
-    #file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
-    file_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy'
-    file_checksum = 'd1d150d32772b16365a0a4cbb786e90c32f29aaa469c633e215f783e7d1d4795'
+    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy"
+    file_checksum = "d1d150d32772b16365a0a4cbb786e90c32f29aaa469c633e215f783e7d1d4795"
 
-    archive_path = _get_archive_path(file_path, 'points/activities/jumping_p1_left_leg.npy')
+    archive_path = _get_archive_path(file_path, "points/activities/jumping_p1_left_leg.npy")
 
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], 'activities.LICENSE')
+        license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
     return np.load(archive_path)
 
-def fetch_daily_stepper_activities(file_path = None, accept_license = False):
+
+def fetch_daily_stepper_activities(file_path=None, accept_license=False):
     """
     Load a subset (only left leg magnetometer of stepper activity performed by the person 1)
     of the Daily and Sports Activities dataset. This dataset comes from
@@ -419,20 +433,21 @@ def fetch_daily_stepper_activities(file_path = None, accept_license = False):
     points: numpy array
         Array of shape (7500, 3).
     """
-    #file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
-    file_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy'
-    file_checksum = 'fef1e61572456bfdf0035448c3393751e13ce8e9dc8d7656182b89078582ed64'
+    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy"
+    file_checksum = "fef1e61572456bfdf0035448c3393751e13ce8e9dc8d7656182b89078582ed64"
 
-    archive_path = _get_archive_path(file_path, 'points/activities/stepper_p1_left_leg.npy')
+    archive_path = _get_archive_path(file_path, "points/activities/stepper_p1_left_leg.npy")
 
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], 'activities.LICENSE')
+        license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
     return np.load(archive_path)
 
-def fetch_daily_walking_activities(file_path = None, accept_license = False):
+
+def fetch_daily_walking_activities(file_path=None, accept_license=False):
     """
     Load a subset (only left leg magnetometer of walking activity performed by the person 1)
     of the Daily and Sports Activities dataset. This dataset comes from
@@ -464,9 +479,9 @@ def fetch_daily_walking_activities(file_path = None, accept_license = False):
     points: numpy array
         Array of shape (7500, 3).
     """
-    #file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
-    file_url = 'https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy'
-    file_checksum = '3ca1926ed824d02ce938a462011f9b1ba49bdc04024996ef2ce345a313a47032'
+    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
+    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy"
+    file_checksum = "3ca1926ed824d02ce938a462011f9b1ba49bdc04024996ef2ce345a313a47032"
 
     archive_path = _get_archive_path(file_path, "points/activities/walking_p1_left_leg.npy")
 
