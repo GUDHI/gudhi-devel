@@ -84,7 +84,8 @@ inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Fiel
 		const Reduced_cell_column_with_row& other)
 	: Column_pairing_option(other),
 	  pivot_(other.pivot_),
-	  lowestSimplexIndex_(other.lowestSimplexIndex_)
+	  lowestSimplexIndex_(other.lowestSimplexIndex_),
+	  dim_(other.dim_)
 {
 	//Cloner object function
 	struct new_cloner

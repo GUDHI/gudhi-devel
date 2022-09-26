@@ -88,7 +88,7 @@ private:
 	template<class Chain_type>
 	void _insert_chain(Chain_type& column, dimension_type dimension, index pair);
 	void _add_to(Column_type &column, std::set<index>& set);
-	void _add_to(Column_type &column, std::set<std::pair<index,Field_element_type> >& set, Field_element_type& coef);
+	void _add_to(Column_type &column, std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> >& set, Field_element_type& coef);
 
 	static constexpr bool _barcode_option_is_active();
 	constexpr barcode_type& _barcode();
@@ -149,8 +149,8 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	  Master_matrix::Chain_representative_cycles_option(std::move(other)),
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextInsertIndex_(std::move(other.nextInsertIndex_)),
-	  maxDim_(std::exchange(other.maxDim_, 0))
+	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
+	  maxDim_(std::exchange(other.maxDim_, -1))
 {}
 
 template<class Master_matrix>
@@ -165,19 +165,23 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
+//	std::cout << "here0\n";
+//	std::cout << "nextInsertIndex_: " << nextInsertIndex_ << "\n";
 	if constexpr (swap_opt::isActive_){
+//		std::cout << "here1\n";
 		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
 	}
 	int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 	++(dimensions_[dim]);
-
+//std::cout << "here2\n";
 	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
 		std::set<index> column(boundary.begin(), boundary.end());
-
+//std::cout << "here3\n";
 		if (boundary.empty())
 		{
+//			std::cout << nextInsertIndex_ << "\n";
 			column.insert(nextInsertIndex_);
 			_insert_chain(column, dim);
 			if constexpr (_barcode_option_is_active()){
@@ -251,8 +255,13 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 		}
 		++nextInsertIndex_;
 	} else {
-		std::set<std::pair<index,Field_element_type> > column(boundary.begin(), boundary.end());
-
+		std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> > column(boundary.begin(), boundary.end());
+//		std::cout << "boundary: ";
+//		for (const std::pair<index,Field_element_type>& p : column){
+//			std::cout << p.first << " " << p.second << ", ";
+//		}
+//		std::cout << "\n";
+//std::cout << "here4\n";
 		if (boundary.empty())
 		{
 			column.emplace(nextInsertIndex_, 1);
@@ -262,18 +271,21 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 				_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
 			}
 			++nextInsertIndex_;
+//			std::cout << "nextInsertIndex_: " << nextInsertIndex_ << "\n";
 			return;
 		}
-
+//std::cout << "here5\n";
+//std::cout << "pivot: " << column.rbegin()->first << "\n";
+//std::cout << "col_low: " << pivotToColumnIndex_.at(column.rbegin()->first) << "\n";
 		index col_low = pivotToColumnIndex_.at(column.rbegin()->first);
 		std::vector<std::pair<index,Field_element_type> > chains_in_H; //for corresponding indices in H
 		std::vector<std::pair<index,Field_element_type> > chains_in_F; //for corresponding indices in F
-
+//std::cout << "here6\n";
 		while (matrix_.at(col_low).is_paired())
 		{
-			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
+			Field_element_type coef = column.rbegin()->second;
 			coef = coef.get_inverse();
-			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
+			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(matrix_.at(col_low).get_pivot_value()));
 
 			_add_to(matrix_.at(col_low), column, coef);	//Reduce with the column col_g
 			chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);//keep the col_h with which col_g is paired
@@ -281,6 +293,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 			if (column.empty()) {
 				//produce the sum of all col_h in chains_in_H
 				column.emplace(nextInsertIndex_, 1);
+//				std::cout << "column nextInsertIndex_: " << nextInsertIndex_ << "\n";
 				for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
 					_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 				}
@@ -291,19 +304,19 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 					_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
 				}
 				++nextInsertIndex_;
+//				std::cout << "nextInsertIndex_: " << nextInsertIndex_ << "\n";
 				return;
 			}
 
 			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
 		}
-
+//std::cout << "here7\n";
 		while (!column.empty())
 		{
-			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
-			coef = coef.get_inverse();
-			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
-
 			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+			Field_element_type coef = column.rbegin()->second;
+			coef = coef.get_inverse();
+			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(matrix_.at(col_low).get_pivot_value()));
 
 			if (!matrix_.at(col_low).is_paired()) {
 				currentEssentialCycleIndices.push_back(col_low);
@@ -312,24 +325,29 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 				chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);
 			}
 
+//			std::cout << "column add: ";
+//			for (const std::pair<index,Field_element_type>& p : column){
+//				std::cout << p.first << " " << p.second << ", ";
+//			}
 			_add_to(matrix_.at(col_low), column, coef);
 		}
-
+//std::cout << "here8\n";
 		index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
-
+//std::cout << "here9\n";
 		for (auto other_col_it = chains_in_F.begin() + 1;
 			other_col_it != chains_in_F.end(); ++other_col_it)
 		{
 			matrix_.at(chain_fp) *= other_col_it->second.get_inverse();
 			add_to(other_col_it->first, chain_fp);
 		}
-
+//std::cout << "here10\n";
 		//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
 		column.emplace(nextInsertIndex_, 1);
+//		std::cout << "column nextInsertIndex_: " << nextInsertIndex_ << "\n";
 		for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
 			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 		}
-
+//std::cout << "here11\n";
 		//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
 		_insert_chain(column, dim, chain_fp);
 		if constexpr (_barcode_option_is_active()){
@@ -337,7 +355,9 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 			_indexToBar().emplace(nextInsertIndex_, _indexToBar().at(matrix_.at(chain_fp).get_pivot()));
 		}
 		++nextInsertIndex_;
+//		std::cout << "nextInsertIndex_: " << nextInsertIndex_ << "\n";
 	}
+//	std::cout << "here12\n";
 }
 
 template<class Master_matrix>
@@ -423,7 +443,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::zero_colu
 template<class Master_matrix>
 inline bool Chain_matrix_with_row_access_with_removals<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex)
 {
-	return matrix_.at(columnIndex).is_non_zero(rowIndex);
+	return !matrix_.at(columnIndex).is_non_zero(rowIndex);
 }
 
 template<class Master_matrix>
@@ -492,6 +512,12 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
 		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
+//		std::cout << "column: ";
+//		for (const std::pair<index,Field_element_type>& p : column){
+//			std::cout << p.first << " " << p.second << ", ";
+//		}
+//		std::cout << "\n";
+//		std::cout << "pivot: " << column.rbegin()->first << "\n";
 		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
 	}
 
@@ -511,6 +537,12 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
 		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
+//		std::cout << "column: ";
+//		for (const std::pair<index,Field_element_type>& p : column){
+//			std::cout << p.first << " " << p.second << ", ";
+//		}
+//		std::cout << "\n";
+//		std::cout << "pivot: " << column.rbegin()->first << "\n";
 		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
 	}
 
@@ -533,26 +565,26 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(C
 
 template<class Master_matrix>
 void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(
-		Column_type &column, std::set<std::pair<index,Field_element_type> >& set, Field_element_type& coef)
+		Column_type &column,
+		std::set<std::pair<index, Field_element_type>, CellPairComparator<Field_element_type> > &set,
+		Field_element_type& coef)
 {
-	std::set<std::pair<index,Field_element_type> > newSet;
-
 	for (Cell &cell : column.get_column()) {
 		std::pair<index,Field_element_type> p(cell.get_row_index(), cell.get_element());
 		auto res_it = set.find(p);
 
 		if (res_it != set.end()){
-			p.second *= coef;
-			p.second += res_it->second;
-			if (p.second != 0){
-				newSet.insert(p);
+			std::pair<index,Field_element_type> res = *res_it;
+			res.second *= coef;
+			res.second += p.second;
+			set.erase(res_it);
+			if (res.second != 0){
+				set.insert(res);
 			}
 		} else {
-			newSet.insert(p);
+			set.insert(p);
 		}
 	}
-
-	set.swap(newSet);
 }
 
 template<class Master_matrix>

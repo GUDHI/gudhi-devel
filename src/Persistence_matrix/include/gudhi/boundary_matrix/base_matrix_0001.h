@@ -148,8 +148,8 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(Base_
 	  Master_matrix::Base_pairing_option(std::move(other)),
 	  matrix_(std::move(other.matrix_)),
 	  dimensions_(std::move(other.dimensions_)),
-	  maxDim_(std::exchange(other.maxDim_,0)),
-	  nextInsertIndex_(std::move(other.nextInsertIndex_))
+	  maxDim_(std::exchange(other.maxDim_,-1)),
+	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
 {}
 
 template<class Master_matrix>

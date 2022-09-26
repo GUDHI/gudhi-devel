@@ -44,7 +44,9 @@ public:
 	friend bool operator==(const Z2_field_element& f1, const Z2_field_element& f2);
 	friend bool operator==(const unsigned int& v, const Z2_field_element& f);
 	friend bool operator==(const Z2_field_element& f, const unsigned int& v);
+
 	Z2_field_element& operator=(Z2_field_element other);
+	Z2_field_element& operator=(const unsigned int& value);
 	operator unsigned int() const;
 	friend void swap(Z2_field_element& f1, Z2_field_element& f2);
 
@@ -118,6 +120,12 @@ inline Z2_field_element &Z2_field_element::operator=(Z2_field_element other)
 	return *this;
 }
 
+inline Z2_field_element &Z2_field_element::operator=(unsigned int const &value)
+{
+	element_ = value % 2;
+	return *this;
+}
+
 inline Z2_field_element::operator unsigned int() const
 {
 	return element_;
@@ -125,7 +133,7 @@ inline Z2_field_element::operator unsigned int() const
 
 inline Z2_field_element Z2_field_element::get_inverse() const
 {
-	return element_ ? Z2_field_element() : Z2_field_element(1);
+	return element_ ? Z2_field_element(1) : Z2_field_element();
 }
 
 inline Z2_field_element Z2_field_element::get_additive_identity()

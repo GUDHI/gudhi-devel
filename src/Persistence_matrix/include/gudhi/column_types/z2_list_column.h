@@ -216,16 +216,14 @@ inline Z2_list_column<Column_pairing_option> &Z2_list_column<Column_pairing_opti
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
-		if (itToAdd != column.column_.end() && itTarget != column_.end()){
-			if (valToAdd == valTarget){
-				column_.erase(itTarget++);
-				itToAdd++;
-			} else if (valToAdd < valTarget){
-				column_.insert(itTarget, valToAdd);
-				itToAdd++;
-			} else {
-				itTarget++;
-			}
+		if (valToAdd == valTarget){
+			column_.erase(itTarget++);
+			itToAdd++;
+		} else if (valToAdd < valTarget){
+			column_.insert(itTarget, valToAdd);
+			itToAdd++;
+		} else {
+			itTarget++;
 		}
 
 		valToAdd = itToAdd->get_row_index();

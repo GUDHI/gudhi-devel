@@ -138,7 +138,7 @@ inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(RU_matrix
 	  reducedMatrixR_(std::move(other.reducedMatrixR_)),
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextInsertIndex_(std::move(other.nextInsertIndex_))
+	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
 {}
 
 template<class Master_matrix>

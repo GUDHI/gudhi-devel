@@ -60,7 +60,9 @@ public:
 	friend bool operator==(const unsigned int& v, const Zp_field_element<friendCharacteristic>& f);
 	template<unsigned int friendCharacteristic>
 	friend bool operator==(const Zp_field_element<friendCharacteristic>& f, const unsigned int& v);
+
 	Zp_field_element& operator=(Zp_field_element other);
+	Zp_field_element& operator=(const unsigned int& value);
 	operator unsigned int() const;
 	template<unsigned int friendCharacteristic>
 	friend void swap(Zp_field_element<friendCharacteristic>& f1, Zp_field_element<friendCharacteristic>& f2);
@@ -158,6 +160,13 @@ template<unsigned  characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator=(Zp_field_element other)
 {
 	std::swap(element_, other.element_);
+	return *this;
+}
+
+template<unsigned  characteristic>
+inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator=(unsigned int const &value)
+{
+	element_ = value % characteristic;
 	return *this;
 }
 

@@ -240,18 +240,16 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
-		if (itToAdd != column.column_.end() && itTarget != column_.end()){
-			if (curRowToAdd == curRowTarget){
-				itTarget->get_element() =+ itToAdd->get_element_value();
-				if (itTarget->get_element() == 0u) column_.erase(itTarget++);
-				else itTarget++;
-				itToAdd++;
-			} else if (curRowToAdd < curRowTarget){
-				column_.insert(itTarget, Cell(itToAdd->get_element_value(), curRowToAdd));
-				itToAdd++;
-			} else {
-				itTarget++;
-			}
+		if (curRowToAdd == curRowTarget){
+			itTarget->get_element() += itToAdd->get_element_value();
+			if (itTarget->get_element() == 0u) column_.erase(itTarget++);
+			else itTarget++;
+			itToAdd++;
+		} else if (curRowToAdd < curRowTarget){
+			column_.insert(itTarget, Cell(itToAdd->get_element_value(), curRowToAdd));
+			itToAdd++;
+		} else {
+			itTarget++;
 		}
 
 		curRowToAdd = itToAdd->get_row_index();

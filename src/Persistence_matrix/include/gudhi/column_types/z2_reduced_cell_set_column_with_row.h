@@ -111,12 +111,20 @@ inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::swap_independent
 template<class Master_matrix>
 inline bool Z2_reduced_cell_set_column_with_row<Master_matrix>::is_non_zero(index rowIndex)
 {
+//	Cell cell(pivotToColumnIndex_.at(RCC::get_pivot()), rowIndex);
+//	std::cout << "is_non_zero: " << rowIndex << " " << RCC::get_pivot() << " " << pivotToColumnIndex_.at(RCC::get_pivot()) << "\n";
+//	std::cout << "cell: " << cell.get_row_index() << " " << cell.get_column_index() << "\n";
+//	for (Cell& c : RCC::get_column()){
+//		std::cout << "(" << c.get_row_index() << ", " << c.get_column_index() << ") ";
+//	}
+//	std::cout << "\n";
 	return RCC::get_column().find(Cell(pivotToColumnIndex_.at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
 }
 
 template<class Master_matrix>
 inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_column_with_row<Master_matrix>::operator+=(Z2_reduced_cell_set_column_with_row &column)
 {
+//	std::cout << "add: " << RCC::get_dimension() << ", " << column.get_dimension() << "\n";
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
 	index pos = pivotToColumnIndex_.at(RCC::get_pivot());

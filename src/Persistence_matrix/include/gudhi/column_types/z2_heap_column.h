@@ -217,6 +217,7 @@ template<class Column_pairing_option>
 inline typename Z2_heap_column<Column_pairing_option>::iterator
 Z2_heap_column<Column_pairing_option>::begin() noexcept
 {
+	_prune();
 	return column_.begin();
 }
 
@@ -224,6 +225,7 @@ template<class Column_pairing_option>
 inline typename Z2_heap_column<Column_pairing_option>::const_iterator
 Z2_heap_column<Column_pairing_option>::begin() const noexcept
 {
+	_prune();
 	return column_.begin();
 }
 

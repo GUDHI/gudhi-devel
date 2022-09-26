@@ -41,6 +41,14 @@ struct Bar{
 	int death;
 };
 
+template<class Field_element_type>
+struct CellPairComparator {
+	bool operator()(const std::pair<index,Field_element_type>& p1, const std::pair<index,Field_element_type>& p2) const
+	{
+		return p1.first < p2.first;
+	};
+};
+
 } //namespace persistence_matrix
 } //namespace Gudhi
 

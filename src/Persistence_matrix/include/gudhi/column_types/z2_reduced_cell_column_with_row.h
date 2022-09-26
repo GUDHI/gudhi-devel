@@ -72,6 +72,7 @@ inline Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,C
 	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), dim_(dimension)
 {
 	for (index id : chain){
+//		std::cout << chainIndex << ", " << id << ", " << pivot_ << "\n";
 		Cell *new_cell = new Cell(chainIndex, id);
 		column_.insert(column_.end(), *new_cell);
 	}
@@ -82,7 +83,8 @@ inline Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,C
 		const Z2_reduced_cell_column_with_row& other)
 	: Column_pairing_option(other),
 	  pivot_(other.pivot_),
-	  lowestSimplexIndex_(other.lowestSimplexIndex_)
+	  lowestSimplexIndex_(other.lowestSimplexIndex_),
+	  dim_(other.dim_)
 {
 	//Cloner object function
 	struct new_cloner
@@ -119,6 +121,7 @@ inline Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,C
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
 inline Column_type& Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::get_column()
 {
+//	std::cout << "pivot: " << pivot_ << " " << dim_ << "\n";
 	return column_;
 }
 

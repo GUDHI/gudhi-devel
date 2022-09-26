@@ -147,8 +147,8 @@ inline Chain_matrix_with_row_access<Master_matrix>::Chain_matrix_with_row_access
 	  Master_matrix::Chain_representative_cycles_option(std::move(other)),
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextInsertIndex_(std::move(other.nextInsertIndex_)),
-	  maxDim_(std::exchange(other.maxDim_, 0))
+	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
+	  maxDim_(std::exchange(other.maxDim_, -1))
 {}
 
 template<class Master_matrix>
@@ -400,7 +400,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::zero_column(index colum
 template<class Master_matrix>
 inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex)
 {
-	return matrix_.at(columnIndex).is_non_zero(rowIndex);
+	return !matrix_.at(columnIndex).is_non_zero(rowIndex);
 }
 
 template<class Master_matrix>
