@@ -11,7 +11,7 @@
 #ifndef VIEW_VIEWER_INSTRUCTOR_H_
 #define VIEW_VIEWER_INSTRUCTOR_H_
 
-// todo do a viewer instructor that have directely a pointer to a QGLviewer and buffer ot not triangles
+// todo do a viewer instructor that has directly a pointer to a QGLviewer and buffer ot not triangles
 
 #include <QFileDialog>
 #include <QKeyEvent>
