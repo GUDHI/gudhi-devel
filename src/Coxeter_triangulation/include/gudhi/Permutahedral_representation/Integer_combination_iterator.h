@@ -68,7 +68,7 @@ class Integer_combination_iterator
  public:
   template <class Bound_range>
   Integer_combination_iterator(const uint& n, const uint& k, const Bound_range& bounds)
-      : value_(k + 2), is_end_(n == 0 || k == 0), n_(n), k_(k) {
+	  : value_(k + 2), is_end_(n == 0 || k == 0), k_(k) {
     bounds_.reserve(k + 2);
     uint sum_radices = 0;
     for (auto b : bounds) {
@@ -96,13 +96,12 @@ class Integer_combination_iterator
   }
 
   // Used for the creating an end iterator
-  Integer_combination_iterator() : is_end_(true), n_(0), k_(0) {}
+  Integer_combination_iterator() : is_end_(true), k_(0) {}
 
  private:
   value_t value_;  // the dereference value
   bool is_end_;    // is true when the current integer combination is the final one
 
-  uint n_;
   uint k_;
   std::vector<uint> bounds_;
 };

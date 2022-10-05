@@ -98,8 +98,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st4);
   BOOST_CHECK(st3 == st);
 
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
   st = st;
-  print_simplex_filtration(st4, "Third self copy assignment from the default Simplex_tree");
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
+
+  print_simplex_filtration(st, "Third self copy assignment from the default Simplex_tree");
 
   BOOST_CHECK(st3 == st);
 

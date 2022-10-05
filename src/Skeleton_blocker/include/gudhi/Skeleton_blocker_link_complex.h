@@ -164,7 +164,7 @@ ComplexType> {
         Vertex_handle y_parent = *parent_complex.get_address(
                                                              this->get_id(*y_link));
         if (parent_complex.contains_edge(x_parent, y_parent)) {
-          // we check that there is no blocker subset of alpha passing trough x and y
+          // we check that there is no blocker subset of alpha passing through x and y
           bool new_edge = true;
           for (auto blocker_parent : parent_complex.const_blocker_range(
                                                                         x_parent)) {
