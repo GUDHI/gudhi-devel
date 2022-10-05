@@ -57,7 +57,7 @@ struct Function_affine_plane_in_Rd {
    * The dimension of the vector should be the ambient dimension of the manifold.
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix, const Eigen::VectorXd& offset)
-      : normal_matrix_(normal_matrix), d_(normal_matrix.rows()), k_(normal_matrix.cols()), m_(d_ - k_), off_(offset) {
+	  : normal_matrix_(normal_matrix), d_(normal_matrix.rows()), k_(normal_matrix.cols()), off_(offset) {
     normal_matrix_.colwise().normalize();
   }
 
@@ -73,14 +73,13 @@ struct Function_affine_plane_in_Rd {
       : normal_matrix_(normal_matrix),
         d_(normal_matrix.rows()),
         k_(normal_matrix.cols()),
-        m_(d_ - k_),
         off_(Eigen::VectorXd::Zero(d_)) {
     normal_matrix_.colwise().normalize();
   }
 
  private:
   Eigen::MatrixXd normal_matrix_;
-  std::size_t d_, k_, m_;
+  std::size_t d_, k_;
   Eigen::VectorXd off_;
 };
 

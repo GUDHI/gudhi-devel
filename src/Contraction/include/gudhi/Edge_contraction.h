@@ -48,7 +48,7 @@ Therefore, the simplification can be done without enumerating the set of simplic
 
 A typical application of this package is homology group computation. It is illustrated in the next figure where a Rips complex is built upon a set of high-dimensional points and
 simplified with edge contractions.
-It has initially a big number of simplices (around 20 millions) but simplifying it to a much reduced form with only 15 vertices (and 714 simplices) takes only few seconds on a desktop machine (see the example bellow).
+It has initially a big number of simplices (around 20 millions) but simplifying it to a much reduced form with only 15 vertices (and 714 simplices) takes only few seconds on a desktop machine (see the example below).
 One can then compute homology group with a simplicial complex having very few simplices instead of running the homology algorithm on the much bigger initial set of 
 simplices which would take much more time and memory.
 
