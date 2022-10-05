@@ -238,7 +238,7 @@ if ( argc != 2 )
         double integral = p.compute_integral_of_landscape();
         cout << "integral : " << integral <<endl;
 
-        //compute integral for each level separatelly
+        //compute integral for each level separately
         for ( size_t level = 0 ; level != p.size() ; ++level )
         {
                 cout << p.compute_integral_of_landscape( level ) << endl;
