@@ -313,6 +313,8 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 			newColumn.push_back(Cell(itToAdd->get_element(), curRowToAdd));
 			itToAdd++;
 		}
+
+		curRowToAdd = itToAdd->get_row_index();
 	}
 
 	while (itTarget != column_.end()){
@@ -326,6 +328,8 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 			newColumn.push_back(Cell(itTarget->get_element(), curRowTarget));
 			itTarget++;
 		}
+
+		curRowTarget = itTarget->get_row_index();
 	}
 
 	column_.swap(newColumn);

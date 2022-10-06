@@ -63,8 +63,6 @@ private:
 
 	int& _death(index simplexIndex);
 	int& _birth(index simplexIndex);
-
-	//TODO: update use of matrix and indexToBar
 };
 
 template<class Master_matrix>
@@ -114,7 +112,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	if (_is_negative_in_pair(rowIndex1) && _is_negative_in_pair(rowIndex2)){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_lowest_simplex_index())){
 			_negative_transpose(rowIndex1, rowIndex2);
-			matrix_->at(pivot1).swap_independent_rows(pivot2);
+			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
 		return _negative_vine_swap(columnIndex1, columnIndex2);
@@ -123,7 +121,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	if (_is_negative_in_pair(rowIndex1)){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_lowest_simplex_index())){
 			_negative_positive_transpose(rowIndex1, rowIndex2);
-			matrix_->at(pivot1).swap_independent_rows(pivot2);
+			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
 		return _negative_positive_vine_swap(columnIndex1, columnIndex2);
@@ -132,7 +130,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	if (_is_negative_in_pair(rowIndex2)){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_lowest_simplex_index())){
 			_positive_negative_transpose(rowIndex1, rowIndex2);
-			matrix_->at(pivot1).swap_independent_rows(pivot2);
+			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
 		return _positive_negative_vine_swap(columnIndex1, columnIndex2);
@@ -140,7 +138,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 
 	if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_lowest_simplex_index())){
 		_positive_transpose(rowIndex1, rowIndex2);
-		matrix_->at(pivot1).swap_independent_rows(pivot2);
+		std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 		return columnIndex1;
 	}
 	return _positive_vine_swap(columnIndex1, columnIndex2);

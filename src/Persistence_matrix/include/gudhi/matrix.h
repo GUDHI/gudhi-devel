@@ -296,7 +296,7 @@ public:
 		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
 
-		Dummy_ru_vine_swap([[maybe_unused]] Base_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU){}
+		Dummy_ru_vine_swap([[maybe_unused]] Base_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
 		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
 
@@ -418,9 +418,9 @@ public:
 	void update_representative_cycles();
 	const std::vector<cycle_type>& get_representative_cycles();
 	const cycle_type& get_representative_cycle(const Bar& bar);
-	void vine_swap_with_z_eq_1_case(index index);								//by column position with ordered columns
+	bool vine_swap_with_z_eq_1_case(index index);								//by column position with ordered columns
 	index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);	//by column id with potentielly unordered columns
-	void vine_swap(index index);												//by column position with ordered columns
+	bool vine_swap(index index);												//by column position with ordered columns
 	index vine_swap(index columnIndex1, index columnIndex2);					//by column id with potentielly unordered columns
 
 private:
@@ -613,10 +613,10 @@ inline const typename Matrix<Options>::cycle_type& Matrix<Options>::get_represen
 }
 
 template<class Options>
-inline void Matrix<Options>::vine_swap_with_z_eq_1_case(index index)
+inline bool Matrix<Options>::vine_swap_with_z_eq_1_case(index index)
 {
 	static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
-	matrix_.vine_swap_with_z_eq_1_case(index);
+	return matrix_.vine_swap_with_z_eq_1_case(index);
 }
 
 template<class Options>
@@ -627,10 +627,10 @@ inline index Matrix<Options>::vine_swap_with_z_eq_1_case(index columnIndex1, ind
 }
 
 template<class Options>
-inline void Matrix<Options>::vine_swap(index index)
+inline bool Matrix<Options>::vine_swap(index index)
 {
 	static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
-	matrix_.vine_swap(index);
+	return matrix_.vine_swap(index);
 }
 
 template<class Options>

@@ -58,8 +58,8 @@ public:
 	void update_representative_cycles();
 	const std::vector<cycle_type>& get_representative_cycles();
 	const cycle_type& get_representative_cycle(const Bar& bar);
-	void vine_swap_with_z_eq_1_case(index position);							//by column position with ordered columns
-	void vine_swap(index position);												//by column position with ordered columns
+	bool vine_swap_with_z_eq_1_case(index position);							//by column position with ordered columns
+	bool vine_swap(index position);												//by column position with ordered columns
 
 private:
 	Matrix_type matrix_;
@@ -190,7 +190,10 @@ inline bool Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::i
 template<class Matrix_type, class Master_matrix_type>
 inline index Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_with_pivot(index simplexIndex)
 {
-	return matrix_.get_column_with_pivot(simplexIndex);
+	index id = matrix_.get_column_with_pivot(simplexIndex);
+	unsigned int i = 0;
+	while (columnPositionToID_[i] != id) ++i;
+	return i;
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -245,23 +248,30 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_represent
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap_with_z_eq_1_case(index position)
+inline bool Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap_with_z_eq_1_case(index position)
 {
 	index next = matrix_.vine_swap_with_z_eq_1_case(columnPositionToID_.at(position), columnPositionToID_.at(position + 1));
 	if (next == columnPositionToID_.at(position)){
 		std::swap(columnPositionToID_.at(position),
 				  columnPositionToID_.at(position + 1));
+		return true;
 	}
+
+	return false;
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap(index position)
+inline bool Position_to_id_indexation_overlay<Matrix_type, Master_matrix_type>::vine_swap(index position)
 {
+//	std::cout << "pos: " << position << ", " << columnPositionToID_.at(position) << ", " << columnPositionToID_.at(position + 1) << "\n";
 	index next = matrix_.vine_swap(columnPositionToID_.at(position), columnPositionToID_.at(position + 1));
 	if (next == columnPositionToID_.at(position)){
 		std::swap(columnPositionToID_.at(position),
 				  columnPositionToID_.at(position + 1));
+		return true;
 	}
+
+	return false;
 }
 
 template<class Friend_matrix_type, class Friend_master_matrix_type>

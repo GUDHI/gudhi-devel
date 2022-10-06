@@ -444,7 +444,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print()
 			auto &cell = *it;
 			std::cout << cell.get_row_index() << " ";
 		}
-		std::cout << "(" << p.first << ")\n";
+		std::cout << "(" << p.first << ", " << p.second << ")\n";
 	}
 	std::cout << "\n";
 	std::cout << "Row Matrix:\n";
@@ -454,7 +454,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print()
 			auto &cell = *it;
 			std::cout << cell.get_column_index() << " ";
 		}
-		std::cout << "(" << p.second << ")\n";
+		std::cout << "(" << p.first << ", " << p.second << ")\n";
 	}
 	std::cout << "\n";
 }

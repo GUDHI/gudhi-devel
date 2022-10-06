@@ -66,7 +66,7 @@ public:
 	Z2_reduced_cell_list_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex);
 	Z2_reduced_cell_list_column_with_row(const Z2_reduced_cell_list_column_with_row& other);
 
-	void swap_independent_rows(index rowIndex);
+//	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
 	Z2_reduced_cell_list_column_with_row& operator+=(Z2_reduced_cell_list_column_with_row &column);
@@ -80,6 +80,8 @@ private:
 
 	matrix_type& matrix_;
 	dictionnary_type& pivotToColumnIndex_;
+
+	void _swap_independent_rows(index rowIndex);
 };
 
 template<class Master_matrix>
@@ -101,7 +103,7 @@ inline Z2_reduced_cell_list_column_with_row<Master_matrix>::Z2_reduced_cell_list
 {}
 
 template<class Master_matrix>
-inline void Z2_reduced_cell_list_column_with_row<Master_matrix>::swap_independent_rows(index rowIndex)
+inline void Z2_reduced_cell_list_column_with_row<Master_matrix>::_swap_independent_rows(index rowIndex)
 {
 	std::swap(pivotToColumnIndex_.at(RCC::get_pivot()),
 			  pivotToColumnIndex_.at(rowIndex));
@@ -156,8 +158,8 @@ inline Z2_reduced_cell_list_column_with_row<Master_matrix> &Z2_reduced_cell_list
 	}
 
 	if (!is_non_zero(RCC::get_lowest_simplex_index())){
-		swap_independent_rows(column.get_pivot());
 		RCC::swap_lowest_simplex_index(column);
+		_swap_independent_rows(column.get_pivot());
 	}
 
 	return *this;

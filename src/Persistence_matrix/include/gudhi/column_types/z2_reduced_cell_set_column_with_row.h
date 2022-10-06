@@ -19,7 +19,7 @@ namespace persistence_matrix {
 struct z2_matrix_set_row_tag;
 struct z2_matrix_set_column_tag;
 
-using z2_base_hook_matrix_set_row = boost::intrusive::set_base_hook<
+using z2_base_hook_matrix_set_row = boost::intrusive::list_base_hook<
 			boost::intrusive::tag < z2_matrix_set_row_tag >
 		  , boost::intrusive::link_mode < boost::intrusive::auto_unlink >
 	>;
@@ -39,7 +39,7 @@ using Z2_set_column_type = boost::intrusive::set <
 				  , boost::intrusive::constant_time_size<false>
 				  , boost::intrusive::base_hook< z2_base_hook_matrix_set_column >  >;
 
-using Z2_set_row_type = boost::intrusive::set <
+using Z2_set_row_type = boost::intrusive::list <
 					Z2_set_cell
 				  , boost::intrusive::constant_time_size<false>
 				  , boost::intrusive::base_hook< z2_base_hook_matrix_set_row >
@@ -66,7 +66,7 @@ public:
 	Z2_reduced_cell_set_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex);
 	Z2_reduced_cell_set_column_with_row(const Z2_reduced_cell_set_column_with_row& other);
 
-	void swap_independent_rows(index rowIndex);
+//	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
 	Z2_reduced_cell_set_column_with_row& operator+=(Z2_reduced_cell_set_column_with_row& column);
@@ -80,6 +80,9 @@ private:
 
 	matrix_type& matrix_;
 	dictionnary_type& pivotToColumnIndex_;
+
+//	void _switch_row_index(index pivot, index newRowIndex);
+	void _swap_independent_rows(index rowIndex);
 };
 
 template<class Master_matrix>
@@ -100,31 +103,35 @@ inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_c
 	: RCC(other), matrix_(other.matrix_), pivotToColumnIndex_(other.pivotToColumnIndex_)
 {}
 
-template<class Master_matrix>
-inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::swap_independent_rows(index rowIndex)
-{
-	std::swap(pivotToColumnIndex_.at(RCC::get_pivot()),
-			  pivotToColumnIndex_.at(rowIndex));
-	matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).swap_rows(matrix_.at(pivotToColumnIndex_.at(rowIndex)));
-}
+//template<class Master_matrix>
+//inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::swap_independent_rows(index rowIndex)
+//{
+////	std::cout << "lowest: " << RCC::get_lowest_simplex_index() << ", row: " << RCC::get_row().begin()->get_row_index() << "\n";
+//	std::cout << "pivot: " << RCC::get_pivot() << ", rowIndex: " << rowIndex << "\n";
+//	std::cout << "pivot: " << pivotToColumnIndex_.at(RCC::get_pivot()) << ", rowIndex: " << pivotToColumnIndex_.at(rowIndex) << "\n";
+//	std::cout << "lowest: " << matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).get_lowest_simplex_index() << ", row: " << matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).get_row().begin()->get_row_index() << "\n";
+//	std::cout << "lowest: " << matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_lowest_simplex_index() << ", row: " << matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row().begin()->get_row_index() << "\n";
+
+//	index curIndex = matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).get_row().begin()->get_row_index();
+//	index newIndex = matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row().begin()->get_row_index();
+//	_switch_row_index(RCC::get_pivot(), newIndex);
+//	_switch_row_index(rowIndex, curIndex);
+
+//	std::cout << "pivot: " << RCC::get_pivot() << ", rowIndex: " << rowIndex << "\n";
+//	std::cout << "pivot: " << pivotToColumnIndex_.at(RCC::get_pivot()) << ", rowIndex: " << pivotToColumnIndex_.at(rowIndex) << "\n";
+//	std::cout << "lowest: " << matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).get_lowest_simplex_index() << ", row: " << matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).get_row().begin()->get_row_index() << "\n";
+//	std::cout << "lowest: " << matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_lowest_simplex_index() << ", row: " << matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row().begin()->get_row_index() << "\n";
+//}
 
 template<class Master_matrix>
 inline bool Z2_reduced_cell_set_column_with_row<Master_matrix>::is_non_zero(index rowIndex)
 {
-//	Cell cell(pivotToColumnIndex_.at(RCC::get_pivot()), rowIndex);
-//	std::cout << "is_non_zero: " << rowIndex << " " << RCC::get_pivot() << " " << pivotToColumnIndex_.at(RCC::get_pivot()) << "\n";
-//	std::cout << "cell: " << cell.get_row_index() << " " << cell.get_column_index() << "\n";
-//	for (Cell& c : RCC::get_column()){
-//		std::cout << "(" << c.get_row_index() << ", " << c.get_column_index() << ") ";
-//	}
-//	std::cout << "\n";
 	return RCC::get_column().find(Cell(pivotToColumnIndex_.at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
 }
 
 template<class Master_matrix>
 inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_column_with_row<Master_matrix>::operator+=(Z2_reduced_cell_set_column_with_row &column)
 {
-//	std::cout << "add: " << RCC::get_dimension() << ", " << column.get_dimension() << "\n";
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
 	index pos = pivotToColumnIndex_.at(RCC::get_pivot());
@@ -144,11 +151,50 @@ inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_c
 	}
 
 	if (!is_non_zero(RCC::get_lowest_simplex_index())){
-		swap_independent_rows(column.get_pivot());
 		RCC::swap_lowest_simplex_index(column);
+		_swap_independent_rows(column.get_pivot());
 	}
 
 	return *this;
+}
+
+//template<class Master_matrix>
+//inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::_switch_row_index(index pivot, index newRowIndex)
+//{
+//	Row_type& row = matrix_.at(pivotToColumnIndex_.at(pivot)).get_row();
+//	index currentRowIndex = row.begin()->get_row_index();
+//	std::vector<index> columns;
+//	std::cout << "cur: " << pivot << ", " << currentRowIndex << ", " << pivotToColumnIndex_.at(pivot) << "\n";
+//	std::cout << "new: " << newRowIndex << "\n";
+
+//	std::cout << "cell.get_column_index(): ";
+//	for (Cell& cell : row){
+//		columns.push_back(cell.get_column_index());
+//		std::cout << "(" << cell.get_column_index() << ", " << cell.get_row_index() << ") ";
+//	}
+//	std::cout << "end\n";
+
+//	for (index pos : columns){
+//		Cell currentPivot(pos, currentRowIndex);
+//		Cell *newPivot = new Cell(pos, newRowIndex);
+//		Column_type& col = matrix_.at(pos).get_column();
+
+//		auto it = col.find(currentPivot);
+//		Cell* tmp_ptr = &(*it);
+//		it->z2_base_hook_matrix_set_row::unlink();
+//		col.erase(it);
+//		delete tmp_ptr;
+//		col.insert(col.end(), *newPivot);
+//		row.push_back(*newPivot);
+//	}
+//}
+
+template<class Master_matrix>
+inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::_swap_independent_rows(index rowIndex)
+{
+	std::swap(pivotToColumnIndex_.at(RCC::get_pivot()),
+			  pivotToColumnIndex_.at(rowIndex));
+	matrix_.at(pivotToColumnIndex_.at(RCC::get_pivot())).swap_rows(matrix_.at(pivotToColumnIndex_.at(rowIndex)));
 }
 
 template<class Friend_master_matrix>

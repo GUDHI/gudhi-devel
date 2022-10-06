@@ -91,7 +91,7 @@ private:
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix()
 	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_),
+	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
 	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
 	  nextInsertIndex_(0)
 {}
@@ -100,7 +100,7 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline RU_matrix<Master_matrix>::RU_matrix(std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_),
+	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
 	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
 	  reducedMatrixR_(orderedBoundaries),
 	  mirrorMatrixU_(orderedBoundaries.size()),
@@ -114,7 +114,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(std::vector<Boundary_type> &orderedBo
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
 	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_),
+	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
 	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
 	  reducedMatrixR_(numberOfColumns),
 	  mirrorMatrixU_(numberOfColumns),

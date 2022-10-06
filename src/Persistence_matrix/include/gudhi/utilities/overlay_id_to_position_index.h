@@ -206,7 +206,10 @@ inline bool Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::i
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_with_pivot(index simplexIndex)
 {
-	return matrix_.get_column_with_pivot(simplexIndex);
+	index pos = matrix_.get_column_with_pivot(simplexIndex);
+	unsigned int i = 0;
+	while (columnIDToPosition_[i] != pos) ++i;
+	return i;
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -261,32 +264,32 @@ template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
 {
 	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
-	index first = columnIDToPosition_.at(columnIndex1);
-	index second = columnIDToPosition_.at(columnIndex2);
-	index res = columnIndex1;
-	if (first > second) {
-		std::swap(first, second);
-		res = columnIndex2;
+	index first = columnIDToPosition_.at(columnIndex1) < columnIDToPosition_.at(columnIndex2) ? columnIDToPosition_.at(columnIndex1) : columnIDToPosition_.at(columnIndex2);
+
+	bool change = matrix_.vine_swap_with_z_eq_1_case(first);
+
+	if (change){
+		std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+		return columnIndex1;
 	}
-	matrix_.vine_swap_with_z_eq_1_case(first);
-	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
-	return res;
+
+	return columnIndex2;
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap(index columnIndex1, index columnIndex2)
 {
 	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
-	index first = columnIDToPosition_.at(columnIndex1);
-	index second = columnIDToPosition_.at(columnIndex2);
-	index res = columnIndex1;
-	if (first > second) {
-		std::swap(first, second);
-		res = columnIndex2;
+	index first = columnIDToPosition_.at(columnIndex1) < columnIDToPosition_.at(columnIndex2) ? columnIDToPosition_.at(columnIndex1) : columnIDToPosition_.at(columnIndex2);
+
+	bool change = matrix_.vine_swap(first);
+
+	if (change){
+		std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+		return columnIndex1;
 	}
-	matrix_.vine_swap(first);
-	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
-	return res;
+
+	return columnIndex2;
 }
 
 template<class Friend_matrix_type, class Friend_master_matrix_type>
