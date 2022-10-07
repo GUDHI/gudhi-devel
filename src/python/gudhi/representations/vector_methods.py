@@ -175,7 +175,7 @@ class Landscape(BaseEstimator, TransformerMixin):
 
         Xfit = []
         x_values = self.im_range
-        for i, diag in enumerate(X):
+        for diag in X:
             midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
             tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
             tent_functions.partition(diag.shape[0] - self.num_landscapes, axis=1)
