@@ -46,6 +46,11 @@ struct Function_moment_curve_in_Rd {
     return result;
   }
 
+  /** @brief Returns the radius of the moment curve. */
+  double get_radius() const{
+	return r_;
+  }
+
   /**
    * \brief Constructor of the function that defines an implicit moment curve
    * in the d-dimensional Euclidean space.
@@ -53,7 +58,7 @@ struct Function_moment_curve_in_Rd {
    * @param[in] r Numerical parameter.
    * @param[in] d The ambient dimension.
    */
-  Function_moment_curve_in_Rd(double r, std::size_t d) : m_(1), k_(d - 1), d_(d), r_(r) {}
+  Function_moment_curve_in_Rd(double r, std::size_t d) : k_(d - 1), d_(d), r_(r) {}
 
   /**
    * \brief Constructor of the function that defines an implicit moment curve
@@ -64,10 +69,10 @@ struct Function_moment_curve_in_Rd {
    * @param[in] offset The offset of the moment curve.
    */
   Function_moment_curve_in_Rd(double r, std::size_t d, Eigen::VectorXd& offset)
-      : m_(1), k_(d - 1), d_(d), r_(r), off_(offset) {}
+	: k_(d - 1), d_(d), r_(r), off_(offset) {}
 
  private:
-  std::size_t m_, k_, d_;
+  std::size_t k_, d_;
   double r_;
   Eigen::VectorXd off_;
 };

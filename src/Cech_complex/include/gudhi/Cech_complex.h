@@ -62,15 +62,18 @@ class Cech_complex {
    *
    * @param[in] points Range of points where each point is defined as `kernel::Point_d`.
    * @param[in] max_radius Maximal radius value.
+   * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
+   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
+   * Default is false.
    *
    */
   template<typename InputPointRange >
-  Cech_complex(const InputPointRange & points, Filtration_value max_radius) : max_radius_(max_radius) {
+  Cech_complex(const InputPointRange & points, Filtration_value max_radius, const bool exact = false) : max_radius_(max_radius), exact_(exact) {
 
     point_cloud_.assign(std::begin(points), std::end(points));
 
     cech_skeleton_graph_ = Gudhi::compute_proximity_graph<SimplicialComplexForCechComplex>(
-        point_cloud_, max_radius_, Sphere_circumradius<Kernel, Filtration_value>());
+        point_cloud_, max_radius_, Sphere_circumradius<Kernel, Filtration_value>(exact));
   }
 
   /** \brief Initializes the simplicial complex from the proximity graph and expands it until a given maximal
@@ -78,19 +81,17 @@ class Cech_complex {
    *
    * @param[in] complex SimplicialComplexForCech to be created.
    * @param[in] dim_max graph expansion until this given maximal dimension.
-   * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
-   * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>.
    * @exception std::invalid_argument In debug mode, if `complex.num_vertices()` does not return 0.
    *
    */
-  void create_complex(SimplicialComplexForCechComplex& complex, int dim_max, const bool exact = false) {
+  void create_complex(SimplicialComplexForCechComplex& complex, int dim_max) {
     GUDHI_CHECK(complex.num_vertices() == 0,
                 std::invalid_argument("Cech_complex::create_complex - simplicial complex is not empty"));
 
     // insert the proximity graph in the simplicial complex
     complex.insert_graph(cech_skeleton_graph_);
     // expand the graph until dimension dim_max
-    complex.expansion_with_blockers(dim_max, cech_blocker(&complex, this, exact));
+    complex.expansion_with_blockers(dim_max, cech_blocker(&complex, this));
   }
 
   /** @return max_radius value given at construction. */
@@ -106,11 +107,17 @@ class Cech_complex {
    */
   std::vector<Sphere> & get_cache() { return cache_; }
 
+  /** \brief Check exact option
+   * @return Exact option.
+   */
+  const bool is_exact() { return exact_; }
+
  private:
   Proximity_graph cech_skeleton_graph_;
   Filtration_value max_radius_;
   Point_cloud point_cloud_;
   std::vector<Sphere> cache_;
+  const bool exact_;
 };
 
 }  // namespace cech_complex

@@ -267,7 +267,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_blocker_include_in_simp
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::tip_blockers(Vertex_handle a, Vertex_handle b,
                                                                std::vector<Simplex> & buffer) const {
-  for (auto const & blocker : this->const_blocker_range(a)) {
+  for (auto const blocker : this->const_blocker_range(a)) {
     Simplex beta = (*blocker);
     beta.remove_vertex(a);
     buffer.push_back(beta);

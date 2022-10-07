@@ -7,13 +7,7 @@ Rips complex user manual
 Definition
 ----------
 
-================================================================================  ================================  ======================
-:Authors: Clément Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse, Yuichi Ike  :Since: GUDHI 2.0.0               :License: GPL v3
-================================================================================  ================================  ======================
-
-+-------------------------------------------+----------------------------------------------------------------------+
-| :doc:`rips_complex_user`                  | :doc:`rips_complex_ref`                                              |
-+-------------------------------------------+----------------------------------------------------------------------+
+.. include:: rips_complex_sum.inc
 
 The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that
 generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices correspond to the input
