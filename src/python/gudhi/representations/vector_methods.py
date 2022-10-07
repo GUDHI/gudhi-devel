@@ -123,6 +123,15 @@ def _automatic_sample_range(sample_range, X, y):
                 pass
         return sample_range
 
+
+def trim_on_edges(x, are_endpoints_nan):
+    if are_endpoints_nan[0]:
+        x = x[1:]
+    if are_endpoints_nan[1]:
+        x = x[:-1]
+    return x
+
+
 class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
@@ -149,6 +158,8 @@ class Landscape(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+        self.im_range = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+        self.im_range = trim_on_edges(self.im_range, self.nan_in_range)
         return self
 
     def transform(self, X):
@@ -163,17 +174,13 @@ class Landscape(BaseEstimator, TransformerMixin):
         """
 
         Xfit = []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+        x_values = self.im_range
         for i, diag in enumerate(X):
             midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
             tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
             tent_functions.partition(diag.shape[0] - self.num_landscapes, axis=1)
-            landscapes = np.sort(tent_functions, axis=1)[:, -self.num_landscapes:][:, ::-1].T
+            landscapes = tent_functions[:, -self.num_landscapes:][:, ::-1].T
 
-            if self.nan_in_range[0]:
-                landscapes = landscapes[:, 1:]
-            if self.nan_in_range[1]:
-                landscapes = landscapes[:, :-1]
             landscapes = np.sqrt(2) * np.ravel(landscapes)
             Xfit.append(landscapes)
 
@@ -189,7 +196,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of samples = **num_landscapes** x **resolution**): output persistence landscape.
         """
-        return self.fit_transform([diag])[0,:]
+        return self.fit_transform([diag])[0, :]
 
 class Silhouette(BaseEstimator, TransformerMixin):
     """
@@ -205,7 +212,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
-        self.im_range = None
+        self.nan_in_range = np.isnan(np.array(self.sample_range))
+        self.new_resolution = self.resolution + self.nan_in_range.sum()
 
     def fit(self, X, y=None):
         """
@@ -216,7 +224,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
-        self.im_range = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
+        self.im_range = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+        self.im_range = trim_on_edges(self.im_range, self.nan_in_range)
         return self
 
     def transform(self, X):
@@ -232,9 +241,9 @@ class Silhouette(BaseEstimator, TransformerMixin):
         Xfit = []
         x_values = self.im_range
 
-        for i, diag in enumerate(X):
+        for diag in X:
             midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
-            weights = np.array([self.weight(point) for point in diag])
+            weights = np.array([self.weight(pt) for pt in diag])
             total_weight = np.sum(weights)
 
             tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)

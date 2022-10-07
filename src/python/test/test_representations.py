@@ -209,7 +209,7 @@ def test_silhouette_multiplication_invariance():
 
 def test_silhouette_numeric():
     dgm = np.array([[2., 3.], [5., 6.]])
-    slt = Silhouette(resolution=9, weight=pow(1))
+    slt = Silhouette(resolution=9, weight=pow(1), sample_range=[2., 6.])
     #slt.fit([dgm])
     # x_values = array([2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.])
 
