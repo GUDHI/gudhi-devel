@@ -241,3 +241,11 @@ def test_landscape_numeric():
     lds = Landscape(num_landscapes=2, resolution=9, sample_range=[2., 6.])
     lds_dgm = lds(dgm)
     assert np.all(np.isclose(lds_dgm, lds_ref))
+
+
+def test_landscape_nan_range():
+    dgm = np.array([[2., 6.], [3., 5.]])
+    lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
+    lds_dgm = lds(dgm)
+    assert (lds.sample_range[0] == 2) & (lds.sample_range[1] == 6)
+    assert lds.new_resolution == 10
