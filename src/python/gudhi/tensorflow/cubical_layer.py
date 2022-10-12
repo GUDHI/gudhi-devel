@@ -18,7 +18,7 @@ def _Cubical(Xflat, Xdim, dimensions, homology_coeff_field):
     cc = CubicalComplex(dimensions=Xdim[::-1], top_dimensional_cells=Xflat)
     cc.compute_persistence(homology_coeff_field=homology_coeff_field)
 
-    # Retrieve and ouput image indices/pixels corresponding to positive and negative simplices    
+    # Retrieve and output image indices/pixels corresponding to positive and negative simplices
     cof_pp = cc.cofaces_of_persistence_pairs()
     
     L_cofs = []
