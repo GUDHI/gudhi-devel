@@ -179,14 +179,15 @@ class Landscape(BaseEstimator, TransformerMixin):
             midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
             tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
             n_points = diag.shape[0]
-            tent_functions.partition(n_points-self.num_landscapes, axis=1)
-            landscapes = np.sort(tent_functions[:, -self.num_landscapes:], axis=1)[:, ::-1].T
-
             # Complete the array with zeros to get the right number of landscapes
             if self.num_landscapes > n_points:
-                landscapes = np.concatenate([
-                    landscapes, np.zeros((self.num_landscapes-n_points, *landscapes.shape[1:]))
-                ], axis=0)
+                tent_functions = np.concatenate(
+                    [tent_functions, np.zeros((tent_functions.shape[0], self.num_landscapes-n_points))],
+                    axis=1
+                )
+            tent_functions.partition(tent_functions.shape[1]-self.num_landscapes, axis=1)
+            landscapes = np.sort(tent_functions[:, -self.num_landscapes:], axis=1)[:, ::-1].T
+
             landscapes = np.sqrt(2) * np.ravel(landscapes)
             Xfit.append(landscapes)
 
