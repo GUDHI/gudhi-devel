@@ -235,10 +235,12 @@ def test_landscape_numeric():
     dgm = np.array([[2., 6.], [3., 5.]])
     lds_ref = np.array([
         0., 0.5, 1., 1.5, 2., 1.5, 1., 0.5, 0.,  # tent of [2, 6]
-        0., 0., 0., 0.5, 1., 0.5, 0., 0., 0.
+        0., 0., 0., 0.5, 1., 0.5, 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 0., 0., 0.,
     ])
     lds_ref *= np.sqrt(2)
-    lds = Landscape(num_landscapes=2, resolution=9, sample_range=[2., 6.])
+    lds = Landscape(num_landscapes=4, resolution=9, sample_range=[2., 6.])
     lds_dgm = lds(dgm)
     assert np.all(np.isclose(lds_dgm, lds_ref))
 
