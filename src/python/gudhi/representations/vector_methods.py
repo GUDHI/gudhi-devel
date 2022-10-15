@@ -179,10 +179,8 @@ class Landscape(BaseEstimator, TransformerMixin):
             midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
             tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
             n_points = diag.shape[0]
-            # Get indices of largest elements: can't take more than n_points - 1 (the last ones are in the right position)
-            argpartition = np.argpartition(-tent_functions, min(self.num_landscapes, n_points-1), axis=1)
-            landscapes = np.take_along_axis(tent_functions, argpartition, axis=1)
-            landscapes = landscapes[:, :min(self.num_landscapes, n_points)].T
+            tent_functions.partition(n_points-self.num_landscapes, axis=1)
+            landscapes = np.sort(tent_functions[:, -self.num_landscapes:], axis=1)[:, ::-1].T
 
             # Complete the array with zeros to get the right number of landscapes
             if self.num_landscapes > n_points:
