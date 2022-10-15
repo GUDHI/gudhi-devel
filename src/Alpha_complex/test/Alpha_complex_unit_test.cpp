@@ -13,18 +13,14 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Epick_d.h>
 #include <CGAL/Epeck_d.h>
 
-#include <cmath>  // float comparison
-#include <limits>
+#include <stdexcept> // std::out_of_range
 #include <string>
 #include <vector>
 
 #include <gudhi/Alpha_complex.h>
-// to construct a simplex_tree from Delaunay_triangulation
-#include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
 
