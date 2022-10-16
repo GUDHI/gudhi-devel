@@ -272,12 +272,14 @@ cdef class SimplexTree:
         """Inserts edges given by a sparse matrix in `COOrdinate format
         <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
         If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
-        Diagonal entries are interpreted as vertices, although this is only useful if you want to insert
-        vertices with a smaller filtration value than the smallest edge containing it, since vertices are
-        implicitly inserted together with the edges.
+        Diagonal entries are currently interpreted as vertices, although we do not guarantee this behavior
+        in the future, and this is only useful if you want to insert vertices with a smaller filtration value
+        than the smallest edge containing it, since vertices are implicitly inserted together with the edges.
 
         :param edges: the edges to insert and their filtration values.
         :type edges: scipy.sparse.coo_matrix of shape (n,n)
+
+        .. seealso:: :func:`insert_batch`
         """
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
@@ -299,6 +301,8 @@ cdef class SimplexTree:
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
+        # This may be slow if we end up inserting vertices in a bad order (flat_map).
+        # We could first insert the vertices from np.unique(vertex_array), or leave it to the caller.
         cdef Py_ssize_t k = vertex_array.shape[0]
         cdef Py_ssize_t n = vertex_array.shape[1]
         assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
