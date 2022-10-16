@@ -286,3 +286,30 @@ def _weighted_doc_example(precision):
 def test_weighted_doc_example():
     for precision in ['fast', 'safe', 'exact']:
         _weighted_doc_example(precision)
+
+def test_float_relative_precision():
+    assert AlphaComplex.get_float_relative_precision() == 1e-5
+    # Must be > 0.
+    with pytest.raises(ValueError):
+        AlphaComplex.set_float_relative_precision(0.)
+    # Must be < 1.
+    with pytest.raises(ValueError):
+        AlphaComplex.set_float_relative_precision(1.)
+
+    points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+    st = AlphaComplex(points=points).create_simplex_tree()
+    filtrations = list(st.get_filtration())
+
+    # Get a better precision
+    AlphaComplex.set_float_relative_precision(1e-15)
+    assert AlphaComplex.get_float_relative_precision() == 1e-15
+
+    st = AlphaComplex(points=points).create_simplex_tree()
+    filtrations_better_resolution = list(st.get_filtration())
+
+    assert len(filtrations) == len(filtrations_better_resolution)
+    for idx in range(len(filtrations)):
+        # check simplex is the same
+        assert filtrations[idx][0] == filtrations_better_resolution[idx][0]
+        # check filtration is about the same with a relative precision of the worst case
+        assert filtrations[idx][1] == pytest.approx(filtrations_better_resolution[idx][1], rel=1e-5)

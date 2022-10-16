@@ -15,16 +15,15 @@
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
+/** \addtogroup simplex_tree
  * Represents a node of a Simplex_tree.
  * @{
  */
 
-/*
- * \brief Node of a simplex tree with filtration value
+/** \brief Node of a simplex tree with filtration value
  * and simplex key.
  *
- * It stores explicitely its own filtration value and its own Simplex_key.
+ * It stores explicitly its own filtration value and its own Simplex_key.
  */
 template<class SimplexTree>
 struct Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base, SimplexTree::Key_simplex_base {
@@ -54,7 +53,8 @@ struct Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base
   Siblings * children_;
 };
 
-/* @} */  // end addtogroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_

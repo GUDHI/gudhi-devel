@@ -70,6 +70,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
@@ -148,10 +149,6 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_EIGEN3', ")
-      set(GUDHI_USE_EIGEN3 "True")
-    else (EIGEN3_FOUND)
-      set(GUDHI_USE_EIGEN3 "False")
     endif (EIGEN3_FOUND)
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_reader', ")
@@ -179,6 +176,15 @@ if(PYTHONINTERP_FOUND)
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
+
+    # from windows vcpkg eigen 3.4.0#2 : build fails with
+    # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+    # cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+    # Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+    if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int', ")
+    endif()
+
 
     add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
@@ -215,13 +221,14 @@ if(PYTHONINTERP_FOUND)
         endif(NOT GMP_LIBRARIES_DIR)
         add_GUDHI_PYTHON_lib_dir(${GMP_LIBRARIES_DIR})
         message("** Add gmp ${GMP_LIBRARIES_DIR}")
+        # When FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX is set, not defining CGAL_USE_GMPXX is sufficient enough
         if(GMPXX_FOUND)
           add_gudhi_debug_info("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
           set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
           add_GUDHI_PYTHON_lib("${GMPXX_LIBRARIES}")
           add_GUDHI_PYTHON_lib_dir(${GMPXX_LIBRARIES_DIR})
           message("** Add gmpxx ${GMPXX_LIBRARIES_DIR}")
-        endif(GMPXX_FOUND)
+        endif()
       endif(GMP_FOUND)
       if(MPFR_FOUND)
         add_gudhi_debug_info("MPFR_LIBRARIES = ${MPFR_LIBRARIES}")
@@ -283,13 +290,15 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")    
+    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
+    file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 
     # Some files for pip package
@@ -323,9 +332,9 @@ if(PYTHONINTERP_FOUND)
                   if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
                     set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                     # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                    # Images and biblio warnings because not found on developper version
+                    # Images and biblio warnings because not found on developer version
                     if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developper version. Images and biblio will miss")
+                      set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
                     endif()
                     # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
                     add_custom_target(sphinx
@@ -478,7 +487,7 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_euclidean_witness_complex)
 
       # Datasets generators
-      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independant from CGAL ?
+      add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independent from CGAL ?
 
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
 
@@ -556,9 +565,19 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 
+    # Differentiation
+    if(TENSORFLOW_FOUND)
+      add_gudhi_py_test(test_diff)
+    endif()
+
     # Betti curves
     if(SKLEARN_FOUND AND SCIPY_FOUND)
       add_gudhi_py_test(test_betti_curve_representations)
+    endif()
+
+    # Representations preprocessing
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_representations_preprocessing)
     endif()
 
     # Time Delay
@@ -585,6 +604,20 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
     endif()
 
+    # Fetch remote datasets
+    if(WITH_GUDHI_REMOTE_TEST)
+      add_gudhi_py_test(test_remote_datasets)
+    endif()
+
+    # sklearn
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_cubical_persistence)
+    endif()
+
+    # persistence graphical tools
+    if(MATPLOTLIB_FOUND)
+      add_gudhi_py_test(test_persistence_graphical_tools)
+    endif()
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")

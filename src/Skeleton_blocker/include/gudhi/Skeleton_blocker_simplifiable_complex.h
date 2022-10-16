@@ -39,7 +39,6 @@ bool Skeleton_blocker_complex<SkeletonBlockerDS>::is_popable_blocker(Blocker_han
 
 /**
  * Removes all the popable blockers of the complex and delete them.
- * @returns the number of popable blockers deleted
  */
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_popable_blockers() {
@@ -160,7 +159,6 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::update_blockers_after_remove_s
 
 /**
  * Remove the star of the edge connecting vertices a and b.
- * @returns the number of blocker that have been removed
  */
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_star(Vertex_handle a, Vertex_handle b) {
@@ -269,7 +267,7 @@ void Skeleton_blocker_complex<SkeletonBlockerDS>::remove_blocker_include_in_simp
 template<typename SkeletonBlockerDS>
 void Skeleton_blocker_complex<SkeletonBlockerDS>::tip_blockers(Vertex_handle a, Vertex_handle b,
                                                                std::vector<Simplex> & buffer) const {
-  for (auto const & blocker : this->const_blocker_range(a)) {
+  for (auto const blocker : this->const_blocker_range(a)) {
     Simplex beta = (*blocker);
     beta.remove_vertex(a);
     buffer.push_back(beta);

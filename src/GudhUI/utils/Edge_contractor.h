@@ -65,7 +65,7 @@ template<typename SkBlComplex> class Edge_contractor {
 
   /**
    * @brief Modify complex to be the expansion of the k-nearest neighbor
-   * symetric graph.
+   * symmetric graph.
    */
   Edge_contractor(SkBlComplex& complex, unsigned num_contractions) :
       complex_(complex), num_contractions_(num_contractions) {

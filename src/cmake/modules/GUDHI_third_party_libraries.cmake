@@ -19,6 +19,15 @@ if(GMP_FOUND)
   endif()
 endif()
 
+# from windows vcpkg eigen 3.4.0#2 : build fails with
+# error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+# cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+# Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
+if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
+  message("++ User explicit demand to force EIGEN_DEFAULT_DENSE_INDEX_TYPE to int")
+  add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
+endif()
+
 # In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
 # cf. http://doc.cgal.org/latest/Manual/installation.html#title40
 # A workaround is to include(${CGAL_USE_FILE}) before adding "-std=c++11".
@@ -38,12 +47,6 @@ if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
   include( ${CGAL_USE_FILE} )
 endif()
-
-# For those who dislike bundled dependencies, this indicates where to find a preinstalled Hera.
-set(HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/wasserstein/include)
-set(HERA_WASSERSTEIN_INCLUDE_DIR ${HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's wasserstein.h")
-set(HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ext/hera/bottleneck/include)
-set(HERA_BOTTLENECK_INCLUDE_DIR ${HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR} CACHE PATH "Directory where one can find Hera's bottleneck.h")
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
@@ -165,7 +168,7 @@ if (WITH_GUDHI_PYTHON)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
   endif(NOT GUDHI_PYTHON_PATH)
   
-  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Usefull when setting rpath is not allowed" ON)
+  option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
   
   if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(SPHINX_FOUND)

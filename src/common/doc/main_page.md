@@ -180,8 +180,8 @@
     <td width="15%">
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Includes:</b> [Miniball](https://people.inf.ethz.ch/gaertner/subdir/software/miniball.html)<br>
+      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal
     </td>
  </tr>
  <tr>
@@ -231,13 +231,12 @@
     homology of the input sequence. The resulting method is simple and extremely efficient.
 
     Computation of edge collapse and persistent homology of a filtered flag complex via edge collapse as described in
-    \cite edgecollapsesocg2020.
+    \cite edgecollapsearxiv.
     </td>
     <td width="15%">
-      <b>Author:</b> Siddharth Pritam<br>
+      <b>Author:</b> Siddharth Pritam, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 3.3.0<br>
-      <b>Copyright:</b> MIT<br>
-      <b>Requires:</b> \ref eigen
+      <b>Copyright:</b> MIT
     </td>
  </tr>
  <tr>

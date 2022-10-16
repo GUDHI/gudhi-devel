@@ -20,12 +20,12 @@
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
+/** \addtogroup simplex_tree
  * Represents a set of node of a Simplex_tree that share the same parent.
  * @{
  */
 
-/* \brief Data structure to store a set of nodes in a SimplexTree sharing
+/** \brief Data structure to store a set of nodes in a SimplexTree sharing
  * the same parent node.*/
 template<class SimplexTree, class MapContainer>
 class Simplex_tree_siblings {
@@ -36,6 +36,7 @@ class Simplex_tree_siblings {
   template<class T> friend class Simplex_tree_boundary_simplex_iterator;
   template<class T> friend class Simplex_tree_complex_simplex_iterator;
   template<class T> friend class Simplex_tree_skeleton_simplex_iterator;
+  template<class T> friend class Simplex_tree_boundary_opposite_vertex_simplex_iterator;
 
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
   typedef typename SimplexTree::Filtration_value Filtration_value;
@@ -57,7 +58,7 @@ class Simplex_tree_siblings {
         members_() {
   }
 
-  /* \brief Constructor with initialized set of members.
+  /** \brief Constructor with initialized set of members.
    *
    * 'members' must be sorted and unique.*/
   template<typename RandomAccessVertexRange>
@@ -71,8 +72,7 @@ class Simplex_tree_siblings {
     }
   }
 
-  /*
-   * \brief Inserts a Node in the set of siblings nodes.
+  /** \brief Inserts a Node in the set of siblings nodes.
    *
    * If already present, assigns the minimal filtration value 
    * between input filtration_value and the value already 
@@ -113,7 +113,8 @@ class Simplex_tree_siblings {
   Dictionary members_;
 };
 
-/* @} */  // end addtogroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_

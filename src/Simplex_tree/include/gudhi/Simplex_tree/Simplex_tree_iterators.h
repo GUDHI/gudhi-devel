@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2022/04 Vincent Rouvreau: Add Simplex_tree_boundary_opposite_vertex_simplex_iterator for alpha and cech purpose
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -17,15 +18,16 @@
 #include <boost/container/static_vector.hpp>
 
 #include <vector>
+#include <utility>  // for std::pair
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
+/** \addtogroup simplex_tree 
  * Iterators and range types for the Simplex_tree.
- * @{
+ *  @{
  */
 
-/* \brief Iterator over the vertices of a simplex
+/** \brief Iterator over the vertices of a simplex
  * in a SimplexTree.
  *
  * Forward iterator, 'value_type' is SimplexTree::Vertex_handle.*/
@@ -71,7 +73,7 @@ class Simplex_tree_simplex_vertex_iterator : public boost::iterator_facade<
 };
 
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the simplices of the boundary of a
+/** \brief Iterator over the simplices of the boundary of a
  *  simplex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
@@ -123,7 +125,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
 
  private:
   friend class boost::iterator_core_access;
-// valid when iterating along the SAME boundary.
+  // valid when iterating along the SAME boundary.
   bool equal(Simplex_tree_boundary_simplex_iterator const& other) const {
     return sh_ == other.sh_;
   }
@@ -178,8 +180,118 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   Simplex_handle sh_;  // current Simplex_handle in the boundary
   SimplexTree * st_;  // simplex containing the simplicial complex
 };
+
+/** \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
+ *
+ * Forward iterator, value_type is std::pair<SimplexTree::Simplex_handle, SimplexTree::Vertex_handle>.*/
+template<class SimplexTree>
+class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::iterator_facade<
+    Simplex_tree_boundary_opposite_vertex_simplex_iterator<SimplexTree>,
+    std::pair<typename SimplexTree::Simplex_handle, typename SimplexTree::Vertex_handle> const, boost::forward_traversal_tag> {
+ public:
+  using Simplex_handle = typename SimplexTree::Simplex_handle;
+  using Vertex_handle = typename SimplexTree::Vertex_handle;
+  using Siblings = typename SimplexTree::Siblings;
+
+  // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is
+  // overwritten.
+  Simplex_tree_boundary_opposite_vertex_simplex_iterator()
+      : sib_(nullptr),
+        st_(nullptr)  {
+  }
+
+  // any end() iterator
+  explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st)
+      : last_(st->null_vertex()),
+        next_(st->null_vertex()),
+        sib_(nullptr),
+        baov_(st->null_simplex(), st->null_vertex()),
+        st_(st)  {
+  }
+
+  template<class SimplexHandle>
+  Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st, SimplexHandle sh)
+      : last_(sh->first),
+        next_(st->null_vertex()),
+        sib_(nullptr),
+        baov_(st->null_simplex(), sh->first),
+        st_(st) {
+    // Only check once at the beginning instead of for every increment, as this is expensive.
+    if (SimplexTree::Options::contiguous_vertices)
+      GUDHI_CHECK(st_->contiguous_vertices(), "The set of vertices is not { 0, ..., n } without holes");
+    Siblings * sib = st->self_siblings(sh);
+    next_ = sib->parent();
+    sib_ = sib->oncles();
+    if (sib_ != nullptr) {
+      if (SimplexTree::Options::contiguous_vertices && sib_->oncles() == nullptr)
+        // Only relevant for edges
+        baov_.first = sib_->members_.begin()+next_;
+      else
+        baov_.first = sib_->find(next_);
+    }
+  }
+
+ private:
+  friend class boost::iterator_core_access;
+
+  // valid when iterating along the SAME boundary.
+  bool equal(Simplex_tree_boundary_opposite_vertex_simplex_iterator const& other) const {
+    return (baov_.first == other.baov_.first);
+  }
+
+  std::pair<Simplex_handle, Vertex_handle> const& dereference() const {
+   return baov_;
+  }
+
+  void increment() {
+    if (sib_ == nullptr) {
+      baov_.first = st_->null_simplex();
+      return;  // ------>>
+    }
+    Siblings * for_sib = sib_;
+    Siblings * new_sib = sib_->oncles();
+    auto rit = suffix_.rbegin();
+    if (SimplexTree::Options::contiguous_vertices && new_sib == nullptr) {
+      // We reached the root, use a short-cut to find a vertex.
+      if (rit == suffix_.rend()) {
+        baov_.second = baov_.first->first;
+        // Segment, this vertex is the last boundary simplex
+        baov_.first = for_sib->members_.begin()+last_;
+        sib_ = nullptr;
+        return;
+      } else {
+        // Dim >= 2, initial step of the descent
+        baov_.first = for_sib->members_.begin()+*rit;
+        for_sib = baov_.first->second.children();
+        ++rit;
+      }
+    }
+    for (; rit != suffix_.rend(); ++rit) {
+      baov_.first = for_sib->find(*rit);
+      for_sib = baov_.first->second.children();
+    }
+    baov_.first = for_sib->find(last_);  // baov_.first points to the right simplex now
+    suffix_.push_back(next_);
+    next_ = sib_->parent();
+    sib_ = new_sib;
+    baov_.second = suffix_.back();
+  }
+
+  // Most of the storage should be moved to the range, iterators should be light.
+  Vertex_handle last_;  // last vertex of the simplex
+  Vertex_handle next_;  // next vertex to push in suffix_
+  // 40 seems a conservative bound on the dimension of a Simplex_tree for now,
+  // as it would not fit on the biggest hard-drive.
+  boost::container::static_vector<Vertex_handle, 40> suffix_;
+  // static_vector still has some overhead compared to a trivial hand-made
+  // version using std::aligned_storage, or compared to making suffix_ static.
+  Siblings * sib_;  // where the next search will start from
+  std::pair<Simplex_handle, Vertex_handle> baov_;  // a pair containing the current Simplex_handle in the boundary and its opposite vertex
+  SimplexTree * st_;  // simplex containing the simplicial complex
+};
+
 /*---------------------------------------------------------------------------*/
-/* \brief Iterator over the simplices of a simplicial complex.
+/** \brief Iterator over the simplices of a simplicial complex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
 template<class SimplexTree>
@@ -252,7 +364,7 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
   SimplexTree * st_;
 };
 
-/* \brief Iterator over the simplices of the skeleton of a given
+/** \brief Iterator over the simplices of the skeleton of a given
  * dimension of the simplicial complex.
  *
  * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
@@ -335,7 +447,8 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
   int curr_dim_;
 };
 
-/* @} */  // end addtogroup simplex_tree
+/** @}*/  // end addtogroup simplex_tree
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_ITERATORS_H_

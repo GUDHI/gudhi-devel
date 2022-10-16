@@ -1,6 +1,6 @@
 // List of GUDHI examples and utils - Doxygen needs at least a file tag to analyse comments
 // Generated from scripts/cpp_examples_for_doxygen.py
-/*! @file Examples
+/*! @file
  * \section Witness_complex_example_section Witness_complex
  * @example strong_witness_persistence.cpp
  * @example weak_witness_persistence.cpp
@@ -40,7 +40,6 @@
  * @example edge_collapse_basic_example.cpp
  * \section Cech_complex_example_section Cech_complex
  * @example cech_persistence.cpp
- * @example cech_complex_step_by_step.cpp
  * @example cech_complex_example_from_points.cpp
  * \section Bitmap_cubical_complex_example_section Bitmap_cubical_complex
  * @example periodic_cubical_complex_persistence.cpp

@@ -175,7 +175,7 @@ A complete configuration would be :
     Scikit-learn version 1.0.1 
     POT version 0.8.0 
     HNSWlib found
-    PyKeOps version [pyKeOps]: 1.5 
+    PyKeOps version [pyKeOps]: 2.1
     EagerPy version 0.30.0 
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
@@ -396,7 +396,11 @@ mathematics, science, and engineering.
 TensorFlow
 ----------
 
-`TensorFlow <https://www.tensorflow.org>`_ is currently only used in some automatic differentiation tests.
+The :doc:`cubical complex </cubical_complex_tflow_itf_ref>`, :doc:`simplex tree </ls_simplex_tree_tflow_itf_ref>`
+and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow <https://www.tensorflow.org>`_
+for incorporating them in neural nets. 
+
+`TensorFlow <https://www.tensorflow.org>`_ is also used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************

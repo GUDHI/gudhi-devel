@@ -107,7 +107,7 @@ struct Trie {
   }
 
   /**
-   * Goes to the root in the trie to consitute simplex
+   * Goes to the root in the trie to constitute simplex
    */
   void add_vertices_up_to_the_root(Simplex& res) const {
     res.add_vertex(v);
@@ -150,7 +150,7 @@ struct Trie {
     ++s_pos;
     while (s_pos != s.end() && current != 0) {
       bool found = false;
-      for (const auto child : current->childs) {
+	  for (const auto& child : current->childs) {
         if (child->v == *s_pos) {
           ++s_pos;
           current = child.get();

@@ -51,13 +51,13 @@ struct Function_affine_plane_in_Rd {
    * plane in the d-dimensional Euclidean space.
    *
    * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
-   * correspond to the ambient dimension, the number of columns should corespond to
+   * correspond to the ambient dimension, the number of columns should correspond to
    * the size of the normal basis (codimension).
    * @param[in] offset The offset vector of the affine plane.
    * The dimension of the vector should be the ambient dimension of the manifold.
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix, const Eigen::VectorXd& offset)
-      : normal_matrix_(normal_matrix), d_(normal_matrix.rows()), k_(normal_matrix.cols()), m_(d_ - k_), off_(offset) {
+	  : normal_matrix_(normal_matrix), d_(normal_matrix.rows()), k_(normal_matrix.cols()), off_(offset) {
     normal_matrix_.colwise().normalize();
   }
 
@@ -66,21 +66,20 @@ struct Function_affine_plane_in_Rd {
    * plane in the d-dimensional Euclidean space that passes through origin.
    *
    * @param[in] normal_matrix A normal matrix of the affine plane. The number of rows should
-   * correspond to the ambient dimension, the number of columns should corespond to
+   * correspond to the ambient dimension, the number of columns should correspond to
    * the size of the normal basis (codimension).
    */
   Function_affine_plane_in_Rd(const Eigen::MatrixXd& normal_matrix)
       : normal_matrix_(normal_matrix),
         d_(normal_matrix.rows()),
         k_(normal_matrix.cols()),
-        m_(d_ - k_),
         off_(Eigen::VectorXd::Zero(d_)) {
     normal_matrix_.colwise().normalize();
   }
 
  private:
   Eigen::MatrixXd normal_matrix_;
-  std::size_t d_, k_, m_;
+  std::size_t d_, k_;
   Eigen::VectorXd off_;
 };
 

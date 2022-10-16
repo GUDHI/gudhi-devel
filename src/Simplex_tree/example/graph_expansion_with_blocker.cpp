@@ -42,7 +42,7 @@ int main(int argc, char* const argv[]) {
       std::clog << vertex << ", ";
     }
     std::clog << "] ( " << stree.filtration(sh);
-    // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boudaries)
+    // User can re-assign a new filtration value directly in the blocker (default is the maximal value of boundaries)
     stree.assign_filtration(sh, stree.filtration(sh) + 1.);
 
     std::clog << " + 1. ) = " << result << std::endl;

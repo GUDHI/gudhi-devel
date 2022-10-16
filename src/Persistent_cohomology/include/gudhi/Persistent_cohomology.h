@@ -211,7 +211,7 @@ class Persistent_cohomology {
   /** \brief Update the cohomology groups under the insertion of an edge.
    *
    * The 0-homology is maintained with a simple Union-Find data structure, which
-   * explains the existance of a specific function of edge insertions. */
+   * explains the existence of a specific function of edge insertions. */
   void update_cohomology_groups_edge(Simplex_handle sigma) {
     Simplex_handle u, v;
     boost::tie(u, v) = cpx_->endpoints(sigma);
@@ -723,7 +723,7 @@ class Persistent_cohomology {
   boost::disjoint_sets<int *, Simplex_key *> dsets_;
   /* The compressed annotation matrix fields.*/
   Cam cam_;
-  /*  Dictionary establishing the correspondance between the Simplex_key of
+  /*  Dictionary establishing the correspondence between the Simplex_key of
    * the root vertex in the union-find ds and the Simplex_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
   std::map<Simplex_key, Simplex_key> zero_cocycles_;

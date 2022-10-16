@@ -29,7 +29,7 @@ struct SkeletonBlockerDS {
 
   /**
    * @brief Root_vertex_handle and Vertex_handle are similar to global and local vertex descriptor
-   * used in <a href="http://www.boost.org/doc/libs/1_38_0/libs/graph/doc/subgraph.html">boost subgraphs</a>
+   * used in <a href="https://www.boost.org/doc/libs/release/libs/graph/doc/subgraph.html">boost subgraphs</a>
    * and allow to localize a vertex of a subcomplex on its parent root complex.
    *
    * In gross, vertices are stored in a vector
