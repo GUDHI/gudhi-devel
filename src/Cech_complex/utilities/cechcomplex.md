@@ -26,7 +26,11 @@ a prime number).
 
 **Usage**
 
-`cech_persistence [options] <OFF input file>`
+`cech_persistence [options] <input OFF file>`
+
+where
+`<input OFF file>` is the path to the input point cloud in
+[nOFF ASCII format]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsOFF).
 
 **Allowed options**
 
@@ -36,6 +40,8 @@ a prime number).
 * `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Čech complex we want to compute.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
+* `-e [ --exact ]` for the exact computation version.
+* `-f [ --fast ]` for the fast computation version.
 
 Beware: this program may use a lot of RAM and take a lot of time if `max-edge-length` is set to a large value.
 
