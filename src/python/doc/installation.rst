@@ -39,7 +39,7 @@ If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
 
-The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
+The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
 Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
