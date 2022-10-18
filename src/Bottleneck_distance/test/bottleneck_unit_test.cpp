@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(neg_global) {
 BOOST_AUTO_TEST_CASE(bottleneck_simple_test) {
   std::vector< std::pair<double, double> > v1, v2;
   double inf = std::numeric_limits<double>::infinity();
-  double neginf = -1 * inf;
+  double neginf = -inf;
   double b;
 
   v1.emplace_back(9.6, 14.);

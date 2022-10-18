@@ -76,7 +76,7 @@ Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
   int u_inf = 0;
   int v_inf = 0;
   double inf = std::numeric_limits<double>::infinity();
-  double neginf = -1 * inf;
+  double neginf = -inf;
 
   for (auto it = std::begin(diag1); it != std::end(diag1); ++it) {
 	if (std::get<0>(*it) != inf && std::get<1>(*it) != neginf){
