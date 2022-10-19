@@ -12,7 +12,6 @@ Definition
 We provide two types of classes for computing cover complexes: one is comprised of the :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` classes, which correspond to Mapper, Nerve and Graph Induced complexes respectively, and are written in a scikit-learn format, 
 while the other type is :class:`~gudhi.CoverComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
 while :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` need the inputs to be stored in memory).
-Moreover, :class:`~gudhi.CoverComplex` usually provides better automatic tuning of the resolution parameter.
 
 Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5. On the other hand, Mapper complexes accept resolutions and gains with any length. 
   
