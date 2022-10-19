@@ -33,9 +33,13 @@ public:
 	const cycle_type& get_representative_cycle(const Bar& bar);
 
 	Chain_representative_cycles& operator=(Chain_representative_cycles other);
-	template<class Friend_master_matrix>
-	friend void swap(Chain_representative_cycles<Friend_master_matrix>& base1,
-					 Chain_representative_cycles<Friend_master_matrix>& base2);
+	friend void swap(Chain_representative_cycles& base1,
+					 Chain_representative_cycles& base2){
+		std::swap(base1.matrix_, base2.matrix_);
+		std::swap(base1.pivotToPosition_, base2.pivotToPosition_);
+		base1.representativeCycles_.swap(base2.representativeCycles_);
+		base1.birthToCycle_.swap(base2.birthToCycle_);
+	}
 
 	Chain_representative_cycles(matrix_type& matrix, dictionnary_type& pivotToPosition);
 	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
@@ -115,18 +119,9 @@ inline Chain_representative_cycles<Master_matrix> &Chain_representative_cycles<M
 {
 	std::swap(matrix_, other.matrix_);
 	std::swap(pivotToPosition_, other.pivotToPosition_);
-	std::swap(representativeCycles_, other.representativeCycles_);
-	std::swap(birthToCycle_, other.birthToCycle_);
+	representativeCycles_.swap(other.representativeCycles_);
+	birthToCycle_.swap(other.birthToCycle_);
 	return *this;
-}
-
-template<class Friend_master_matrix>
-inline void swap(Chain_representative_cycles<Friend_master_matrix>& base1, Chain_representative_cycles<Friend_master_matrix>& base2)
-{
-	std::swap(base1.matrix_, base2.matrix_);
-	std::swap(base1.pivotToPosition_, base2.pivotToPosition_);
-	std::swap(base1.representativeCycles_, base2.representativeCycles_);
-	std::swap(base1.birthToCycle_, base2.birthToCycle_);
 }
 
 } //namespace persistence_matrix

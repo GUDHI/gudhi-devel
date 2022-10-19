@@ -33,9 +33,12 @@ public:
 	const cycle_type& get_representative_cycle(const Bar& bar);
 
 	RU_representative_cycles& operator=(RU_representative_cycles other);
-	template<class Friend_master_matrix>
-	friend void swap(RU_representative_cycles<Friend_master_matrix>& base1,
-					 RU_representative_cycles<Friend_master_matrix>& base2);
+	friend void swap(RU_representative_cycles& base1, RU_representative_cycles& base2){
+		std::swap(base1.reducedMatrixR_, base2.reducedMatrixR_);
+		std::swap(base1.mirrorMatrixU_, base2.mirrorMatrixU_);
+		base1.representativeCycles_.swap(base2.representativeCycles_);
+		base1.birthToCycle_.swap(base2.birthToCycle_);
+	}
 
 	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
 	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
@@ -112,18 +115,9 @@ inline RU_representative_cycles<Master_matrix> &RU_representative_cycles<Master_
 {
 	std::swap(reducedMatrixR_, other.reducedMatrixR_);
 	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
-	std::swap(representativeCycles_, other.representativeCycles_);
-	std::swap(birthToCycle_, other.birthToCycle_);
+	representativeCycles_.swap(other.representativeCycles_);
+	birthToCycle_.swap(other.birthToCycle_);
 	return *this;
-}
-
-template<class Friend_master_matrix>
-inline void swap(RU_representative_cycles<Friend_master_matrix>& base1, RU_representative_cycles<Friend_master_matrix>& base2)
-{
-	std::swap(base1.reducedMatrixR_, base2.reducedMatrixR_);
-	std::swap(base1.mirrorMatrixU_, base2.mirrorMatrixU_);
-	std::swap(base1.representativeCycles_, base2.representativeCycles_);
-	std::swap(base1.birthToCycle_, base2.birthToCycle_);
 }
 
 } //namespace persistence_matrix

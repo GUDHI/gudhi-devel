@@ -407,9 +407,9 @@ public:
 	index get_pivot(index columnIndex);
 
 	Matrix& operator=(Matrix other);
-	template<class Friend_options>
-	friend void swap(Matrix<Friend_options>& matrix1,
-					 Matrix<Friend_options>& matrix2);
+	friend void swap(Matrix& matrix1, Matrix& matrix2){
+		swap(matrix1.matrix_, matrix2.matrix_);
+	}
 
 	void print();  //for debug
 
@@ -573,7 +573,7 @@ inline index Matrix<Options>::get_pivot(index columnIndex)
 template<class Options>
 inline Matrix<Options>& Matrix<Options>::operator=(Matrix other)
 {
-	std::swap(matrix_, other.matrix_);
+	swap(matrix_, other.matrix_);
 
 	return *this;
 }
@@ -650,12 +650,6 @@ inline constexpr void Matrix<Options>::_assert_options()
 	static_assert(!Options::has_vine_update || Field_type::get_characteristic() == 2, "Vine update currently works only for Z_2 coefficients.");
 	static_assert(!Options::has_row_access || Options::column_type == Column_types::LIST || Options::column_type == Column_types::SET, "Row access is currently implemented only for set and list type of columns.");
 	static_assert(Options::column_type != Column_types::HEAP || Field_type::get_characteristic() == 2, "Heap column currently works only for Z_2 coefficients.");
-}
-
-template<class Friend_options>
-void swap(Matrix<Friend_options>& matrix1, Matrix<Friend_options>& matrix2)
-{
-	std::swap(matrix1.matrix_, matrix2.matrix_);
 }
 
 } //namespace persistence_matrix

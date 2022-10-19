@@ -70,17 +70,17 @@ BOOST_AUTO_TEST_CASE(Field_constructors)
 	//swap
 	Z2_field_element z2_s1(5);
 	Z2_field_element z2_s2(8);
-	std::swap(z2_s1, z2_s2);
+	swap(z2_s1, z2_s2);
 	BOOST_CHECK_EQUAL(z2_s2, 1u);
 	BOOST_CHECK_EQUAL(z2_s1, 0u);
 	Zp_field_element<5> z5_s1(4);
 	Zp_field_element<5> z5_s2(8);
-	std::swap(z5_s1, z5_s2);
+	swap(z5_s1, z5_s2);
 	BOOST_CHECK_EQUAL(z5_s2, 4u);
 	BOOST_CHECK_EQUAL(z5_s1, 3u);
 	Zp_field_element<13> z13_s1(4);
 	Zp_field_element<13> z13_s2(22);
-	std::swap(z13_s1, z13_s2);
+	swap(z13_s1, z13_s2);
 	BOOST_CHECK_EQUAL(z13_s2, 4u);
 	BOOST_CHECK_EQUAL(z13_s1, 9u);
 }

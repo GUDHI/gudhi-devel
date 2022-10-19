@@ -56,25 +56,29 @@ public:
 	const_iterator end() const noexcept;
 
 	Unordered_set_column& operator+=(Unordered_set_column const &column);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-			Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-			Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2);
+	friend Unordered_set_column operator+(Unordered_set_column column1, Unordered_set_column const& column2){
+		column1 += column2;
+		return column1;
+	}
 	Unordered_set_column& operator*=(unsigned int v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator*
-	(Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column,
-	 unsigned int const& v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-			unsigned int const& v,
-			Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> const column);
+	friend Unordered_set_column operator*(Unordered_set_column column, unsigned int const& v){
+		column *= v;
+		return column;
+	}
+	friend Unordered_set_column operator*(unsigned int const& v, Unordered_set_column const column){
+		column *= v;
+		return column;
+	}
 
 	Unordered_set_column& operator=(Unordered_set_column other);
 
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend void swap(Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-					 Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option>& col2);
+	friend void swap(Unordered_set_column& col1,
+					 Unordered_set_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+		std::swap(col1.pivotChanged_, col2.pivotChanged_);
+		std::swap(col1.pivot_, col2.pivot_);
+	}
 
 private:
 	int dim_;
@@ -302,45 +306,10 @@ template<class Field_element_type, class Column_pairing_option>
 inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator=(Unordered_set_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
+	column_.swap(other.column_);
 	std::swap(pivotChanged_, other.pivotChanged_);
 	std::swap(pivot_, other.pivot_);
 	return *this;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-		Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-		Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column, unsigned int const& v)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		unsigned int const& v, Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option> column)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-inline void swap(Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-				 Unordered_set_column<Friend_field_element_type,Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
-	std::swap(col1.pivotChanged_, col2.pivotChanged_);
-	std::swap(col1.pivot_, col2.pivot_);
 }
 
 } //namespace persistence_matrix

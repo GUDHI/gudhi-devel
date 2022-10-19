@@ -58,9 +58,17 @@ public:
 	index get_pivot(index columnIndex);
 
 	Base_matrix_with_removals& operator=(Base_matrix_with_removals other);
-	template<class Friend_master_matrix>
-	friend void swap(Base_matrix_with_removals<Friend_master_matrix>& matrix1,
-					 Base_matrix_with_removals<Friend_master_matrix>& matrix2);
+	friend void swap(Base_matrix_with_removals& matrix1,
+					 Base_matrix_with_removals& matrix2){
+		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
+			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::Base_pairing_option&>(matrix1),
+			 static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
+		matrix1.matrix_.swap(matrix2.matrix_);
+		matrix1.dimensions_.swap(matrix2.dimensions_);
+		std::swap(matrix1.maxDim_, matrix2.maxDim_);
+		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+	}
 
 	void print();  //for debug
 
@@ -278,8 +286,8 @@ inline Base_matrix_with_removals<Master_matrix> &Base_matrix_with_removals<Maste
 {
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
-	std::swap(matrix_, other.matrix_);
-	std::swap(dimensions_, other.dimensions_);
+	matrix_.swap(other.matrix_);
+	dimensions_.swap(other.dimensions_);
 	std::swap(maxDim_, other.maxDim_);
 	std::swap(nextInsertIndex_, other.nextInsertIndex_);
 	return *this;
@@ -298,20 +306,6 @@ inline void Base_matrix_with_removals<Master_matrix>::print()
 		std::cout << "\n";
 	}
 	std::cout << "\n";
-}
-
-template<class Friend_master_matrix>
-void swap(Base_matrix_with_removals<Friend_master_matrix>& matrix1,
-		  Base_matrix_with_removals<Friend_master_matrix>& matrix2)
-{
-	std::swap(static_cast<typename Friend_master_matrix::Base_swap_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Base_swap_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::Base_pairing_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Base_pairing_option>(matrix2));
-	std::swap(matrix1.matrix_, matrix2.matrix_);
-	std::swap(matrix1.dimensions_, matrix2.dimensions_);
-	std::swap(matrix1.maxDim_, matrix2.maxDim_);
-	std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 }
 
 } //namespace persistence_matrix

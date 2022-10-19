@@ -66,14 +66,15 @@ public:
 	Z2_reduced_cell_list_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex);
 	Z2_reduced_cell_list_column_with_row(const Z2_reduced_cell_list_column_with_row& other);
 
-//	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
 	Z2_reduced_cell_list_column_with_row& operator+=(Z2_reduced_cell_list_column_with_row &column);
-	template<class Friend_master_matrix>
-	friend Z2_reduced_cell_list_column_with_row<Friend_master_matrix> operator+(
-			Z2_reduced_cell_list_column_with_row<Friend_master_matrix> column1,
-			Z2_reduced_cell_list_column_with_row<Friend_master_matrix> const& column2);
+	friend Z2_reduced_cell_list_column_with_row operator+(
+			Z2_reduced_cell_list_column_with_row column1,
+			Z2_reduced_cell_list_column_with_row const& column2){
+		column1 += column2;
+		return column1;
+	}
 
 private:
 	using RCC = Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,z2_base_hook_matrix_list_row,typename Master_matrix::Column_pairing_option>;
@@ -163,15 +164,6 @@ inline Z2_reduced_cell_list_column_with_row<Master_matrix> &Z2_reduced_cell_list
 	}
 
 	return *this;
-}
-
-template<class Friend_master_matrix>
-Z2_reduced_cell_list_column_with_row<Friend_master_matrix> operator+(
-		Z2_reduced_cell_list_column_with_row<Friend_master_matrix> column1,
-		Z2_reduced_cell_list_column_with_row<Friend_master_matrix> const& column2)
-{
-	column1 += column2;
-	return column1;
 }
 
 } //namespace persistence_matrix

@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Matrix_constructors, Matrix, list_of_matrix_types)
 	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 0);
 
 	//swap
-	std::swap(mm, mb);
+	swap(mm, mb);
 	BOOST_CHECK_EQUAL(mm.get_max_dimension(), -1);
 	BOOST_CHECK_EQUAL(mm.get_number_of_columns(), 0);
 	BOOST_CHECK_EQUAL(mb.get_max_dimension(), 2);

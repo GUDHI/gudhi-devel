@@ -53,16 +53,18 @@ public:
 	const_iterator end() const noexcept;
 
 	Z2_vector_column& operator+=(Z2_vector_column &column);
-	template<class Friend_column_pairing_option>
-	friend Z2_vector_column<Friend_column_pairing_option> operator+(
-			Z2_vector_column<Friend_column_pairing_option> column1,
-			Z2_vector_column<Friend_column_pairing_option>& column2);
+	friend Z2_vector_column operator+(Z2_vector_column column1, Z2_vector_column& column2){
+		column1 += column2;
+		return column1;
+	}
 
 	Z2_vector_column& operator=(Z2_vector_column other);
 
-	template<class Friend_column_pairing_option>
-	friend void swap(Z2_vector_column<Friend_column_pairing_option>& col1,
-					 Z2_vector_column<Friend_column_pairing_option>& col2);
+	friend void swap(Z2_vector_column& col1, Z2_vector_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+		col1.erasedValues_.swap(col2.erasedValues_);
+	}
 
 private:
 	int dim_;
@@ -305,8 +307,8 @@ template<class Column_pairing_option>
 inline Z2_vector_column<Column_pairing_option> &Z2_vector_column<Column_pairing_option>::operator=(Z2_vector_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
-	std::swap(erasedValues_, other.erasedValues_);
+	column_.swap(other.column_);
+	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
@@ -322,24 +324,6 @@ inline void Z2_vector_column<Column_pairing_option>::_cleanValues()
 	}
 	erasedValues_.clear();
 	column_.swap(newColumn);
-}
-
-template<class Friend_column_pairing_option>
-Z2_vector_column<Friend_column_pairing_option> operator+(
-		Z2_vector_column<Friend_column_pairing_option> column1,
-		Z2_vector_column<Friend_column_pairing_option>& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_column_pairing_option>
-inline void swap(Z2_vector_column<Friend_column_pairing_option>& col1,
-				 Z2_vector_column<Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
-	std::swap(col1.erasedValues_, col2.erasedValues_);
 }
 
 } //namespace persistence_matrix

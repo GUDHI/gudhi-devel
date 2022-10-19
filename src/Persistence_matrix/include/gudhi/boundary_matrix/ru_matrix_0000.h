@@ -60,9 +60,18 @@ public:
 	index get_pivot(index columnIndex);
 
 	RU_matrix& operator=(RU_matrix other);
-	template<class Friend_master_matrix>
-	friend void swap(RU_matrix<Friend_master_matrix>& matrix1,
-					 RU_matrix<Friend_master_matrix>& matrix2);
+	friend void swap(RU_matrix& matrix1, RU_matrix& matrix2){
+		swap(static_cast<typename Master_matrix::RU_pairing_option&>(matrix1),
+			 static_cast<typename Master_matrix::RU_pairing_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::RU_vine_swap_option&>(matrix1),
+			 static_cast<typename Master_matrix::RU_vine_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::RU_representative_cycles_option&>(matrix1),
+			 static_cast<typename Master_matrix::RU_representative_cycles_option&>(matrix2));
+		swap(matrix1.reducedMatrixR_, matrix2.reducedMatrixR_);
+		swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
+		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
+		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+	}
 
 	void print();  //for debug
 
@@ -260,9 +269,9 @@ inline RU_matrix<Master_matrix> &RU_matrix<Master_matrix>::operator=(RU_matrix o
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
-	std::swap(reducedMatrixR_, other.reducedMatrixR_);
-	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
-	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
+	swap(reducedMatrixR_, other.reducedMatrixR_);
+	swap(mirrorMatrixU_, other.mirrorMatrixU_);
+	pivotToColumnIndex_.swap(other.pivotToColumnIndex_);
 	std::swap(nextInsertIndex_, other.nextInsertIndex_);
 	return *this;
 }
@@ -403,22 +412,6 @@ inline constexpr typename RU_matrix<Master_matrix>::bar_dictionnary_type &RU_mat
 		return swap_opt::template RU_pairing<Master_matrix>::indexToBar_;
 	else
 		return pair_opt::indexToBar_;
-}
-
-template<class Friend_master_matrix>
-void swap(RU_matrix<Friend_master_matrix>& matrix1,
-		  RU_matrix<Friend_master_matrix>& matrix2)
-{
-	std::swap(static_cast<typename Friend_master_matrix::RU_pairing_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::RU_pairing_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::RU_vine_swap_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::RU_vine_swap_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::RU_representative_cycles_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::RU_representative_cycles_option>(matrix2));
-	std::swap(matrix1.reducedMatrixR_, matrix2.reducedMatrixR_);
-	std::swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
-	std::swap(matrix1.pivotToColumnIndex_, matrix2.pivotToColumnIndex_);
-	std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 }
 
 } //namespace persistence_matrix

@@ -104,7 +104,7 @@ public:
 	};
 
 	Base_cell& operator=(Base_cell other){
-		std::swap(element_, other.element_);
+		swap(element_, other.element_);
 		Z2_base_cell::operator=(other);
 		return *this;
 	};
@@ -135,7 +135,7 @@ public:
 	};
 
 	Row_cell& operator=(Row_cell other){
-		std::swap(element_, other.element_);
+		swap(element_, other.element_);
 		Z2_row_cell::operator=(other);
 		return *this;
 	};

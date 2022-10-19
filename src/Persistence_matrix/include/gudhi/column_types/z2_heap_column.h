@@ -56,17 +56,19 @@ public:
 	const_iterator end() const noexcept;
 
 	Z2_heap_column& operator+=(Z2_heap_column const &column);
-	template<class Friend_column_pairing_option>
-	friend Z2_heap_column<Friend_column_pairing_option> operator+(
-			Z2_heap_column<Friend_column_pairing_option> column1,
-			Z2_heap_column<Friend_column_pairing_option> const& column2);
+	friend Z2_heap_column operator+(Z2_heap_column column1, Z2_heap_column const& column2){
+		column1 += column2;
+		return column1;
+	}
 
 	Z2_heap_column& operator=(Z2_heap_column other);
 
-	template<class Friend_column_pairing_option>
-	friend void swap(
-			Z2_heap_column<Friend_column_pairing_option>& col1,
-			Z2_heap_column<Friend_column_pairing_option>& col2);
+	friend void swap(Z2_heap_column& col1, Z2_heap_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+		std::swap(col1.insertsSinceLastPrune_, col2.insertsSinceLastPrune_);
+		col1.erasedValues_.swap(col2.erasedValues_);
+	}
 
 private:
 	int dim_;
@@ -269,9 +271,9 @@ template<class Column_pairing_option>
 inline Z2_heap_column<Column_pairing_option>& Z2_heap_column<Column_pairing_option>::operator=(Z2_heap_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
+	column_.swap(other.column_);
 	std::swap(insertsSinceLastPrune_, other.insertsSinceLastPrune_);
-	std::swap(erasedValues_, other.erasedValues_);
+	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
@@ -320,25 +322,6 @@ inline int Z2_heap_column<Column_pairing_option>::_pop_pivot()
 		pivot = _pop_pivot();
 
 	return pivot;
-}
-
-template <class Friend_column_pairing_option>
-Z2_heap_column<Friend_column_pairing_option> operator+(
-		Z2_heap_column<Friend_column_pairing_option> column1,
-		Z2_heap_column<Friend_column_pairing_option> const& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_column_pairing_option>
-inline void swap(Z2_heap_column<Friend_column_pairing_option>& col1,
-				 Z2_heap_column<Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
-	std::swap(col1.insertsSinceLastPrune_, col2.insertsSinceLastPrune_);
-	std::swap(col1.erasedValues_, col2.erasedValues_);
 }
 
 } //namespace persistence_matrix

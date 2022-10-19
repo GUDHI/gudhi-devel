@@ -71,23 +71,28 @@ public:
 	Reduced_cell_list_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex);
 	Reduced_cell_list_column_with_row(const Reduced_cell_list_column_with_row& other);
 
-//	void swap_independent_rows(index rowIndex);
 	bool is_non_zero(index rowIndex);
 
 	Reduced_cell_list_column_with_row& operator+=(Reduced_cell_list_column_with_row &column);
-	template<class Friend_master_matrix>
-	friend Reduced_cell_list_column_with_row<Friend_master_matrix> operator+(
-			Reduced_cell_list_column_with_row<Friend_master_matrix> column1,
-			Reduced_cell_list_column_with_row<Friend_master_matrix> const& column2);
+	friend Reduced_cell_list_column_with_row operator+(
+			Reduced_cell_list_column_with_row column1,
+			Reduced_cell_list_column_with_row const& column2){
+		column1 += column2;
+		return column1;
+	}
 	Reduced_cell_list_column_with_row& operator*=(unsigned int v);
-	template<class Friend_master_matrix>
-	friend Reduced_cell_list_column_with_row<Friend_master_matrix> operator*(
-			Reduced_cell_list_column_with_row<Friend_master_matrix> column,
-			unsigned int const& v);
-	template<class Friend_master_matrix>
-	friend Reduced_cell_list_column_with_row<Friend_master_matrix> operator*(
+	friend Reduced_cell_list_column_with_row operator*(
+			Reduced_cell_list_column_with_row column,
+			unsigned int const& v){
+		column *= v;
+		return column;
+	}
+	friend Reduced_cell_list_column_with_row operator*(
 			unsigned int const& v,
-			Reduced_cell_list_column_with_row<Friend_master_matrix> column);
+			Reduced_cell_list_column_with_row column){
+		column *= v;
+		return column;
+	}
 
 private:
 	using RCC = Reduced_cell_column_with_row<Cell,Column_type,Row_type,base_hook_matrix_list_row,Field_element_type,typename Master_matrix::Column_pairing_option>;
@@ -205,33 +210,6 @@ inline Reduced_cell_list_column_with_row<Master_matrix> &Reduced_cell_list_colum
 	}
 
 	return *this;
-}
-
-template<class Friend_master_matrix>
-Reduced_cell_list_column_with_row<Friend_master_matrix> operator+(
-		Reduced_cell_list_column_with_row<Friend_master_matrix> column1,
-		Reduced_cell_list_column_with_row<Friend_master_matrix> const& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_master_matrix>
-Reduced_cell_list_column_with_row<Friend_master_matrix> operator*(
-		Reduced_cell_list_column_with_row<Friend_master_matrix> column,
-		unsigned int const& v)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_master_matrix>
-Reduced_cell_list_column_with_row<Friend_master_matrix> operator*(
-		unsigned int const& v,
-		Reduced_cell_list_column_with_row<Friend_master_matrix> column)
-{
-	column *= v;
-	return column;
 }
 
 } //namespace persistence_matrix

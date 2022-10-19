@@ -27,9 +27,11 @@ public:
 	const barcode_type& get_current_barcode();
 
 	Chain_pairing& operator=(Chain_pairing other);
-	template<class Friend_matrix>
-	friend void swap(Chain_pairing<Friend_matrix>& pairing1,
-					 Chain_pairing<Friend_matrix>& pairing2);
+	friend void swap(Chain_pairing& pairing1,
+					 Chain_pairing& pairing2){
+		pairing1.barcode_.swap(pairing2.barcode_);
+		pairing1.indexToBar_.swap(pairing2.indexToBar_);
+	}
 
 	Chain_pairing();
 	Chain_pairing(const Chain_pairing &matrixToCopy);
@@ -71,8 +73,8 @@ Chain_pairing<Master_matrix>::get_current_barcode()
 template<class Master_matrix>
 inline Chain_pairing<Master_matrix> &Chain_pairing<Master_matrix>::operator=(Chain_pairing<Master_matrix> other)
 {
-	std::swap(barcode_, other.barcode_);
-	std::swap(indexToBar_, other.indexToBar_);
+	barcode_.swap(other.barcode_);
+	indexToBar_.swap(other.indexToBar_);
 	return *this;
 }
 
@@ -83,14 +85,6 @@ inline dimension_type Chain_pairing<Master_matrix>::_get_dimension(index pivot) 
 		return indexToBar_.at(pivot)->dim;
 	else
 		return indexToBar_.at(pivot)->dim + 1;
-}
-
-template<class Friend_matrix>
-inline void swap(Chain_pairing<Friend_matrix>& pairing1,
-				 Chain_pairing<Friend_matrix>& pairing2)
-{
-	pairing1.barcode_.swap(pairing2.barcode_);
-	pairing1.indexToBar_.swap(pairing2.indexToBar_);
 }
 
 } //namespace persistence_matrix

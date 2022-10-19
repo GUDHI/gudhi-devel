@@ -47,9 +47,13 @@ public:
 	index get_pivot(index columnIndex);
 
 	Id_to_position_indexation_overlay& operator=(Id_to_position_indexation_overlay other);
-	template<class Friend_matrix_type, class Friend_master_matrix_type>
-	friend void swap(Id_to_position_indexation_overlay<Friend_matrix_type,Friend_master_matrix_type>& matrix1,
-					 Id_to_position_indexation_overlay<Friend_matrix_type,Friend_master_matrix_type>& matrix2);
+	friend void swap(Id_to_position_indexation_overlay& matrix1,
+					 Id_to_position_indexation_overlay& matrix2){
+		swap(matrix1.matrix_, matrix2.matrix_);
+		matrix1.columnIDToPosition_.swap(matrix2.columnIDToPosition_);
+		std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
+		std::swap(matrix1.lastID_, matrix2.lastID_);
+	}
 
 	void print();  //for debug
 
@@ -222,8 +226,8 @@ template<class Matrix_type, class Master_matrix_type>
 inline Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>&
 Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::operator=(Id_to_position_indexation_overlay other)
 {
-	std::swap(matrix_, other.matrix_);
-	std::swap(columnIDToPosition_, other.columnIDToPosition_);
+	swap(matrix_, other.matrix_);
+	columnIDToPosition_.swap(other.columnIDToPosition_);
 	std::swap(nextIndex_, other.nextIndex_);
 	std::swap(lastID_, other.lastID_);
 
@@ -290,16 +294,6 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 	}
 
 	return columnIndex2;
-}
-
-template<class Friend_matrix_type, class Friend_master_matrix_type>
-void swap(Id_to_position_indexation_overlay<Friend_matrix_type,Friend_master_matrix_type>& matrix1,
-		  Id_to_position_indexation_overlay<Friend_matrix_type,Friend_master_matrix_type>& matrix2)
-{
-	std::swap(matrix1.matrix_, matrix2.matrix_);
-	std::swap(matrix1.columnIDToPosition_, matrix2.columnIDToPosition_);
-	std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
-	std::swap(matrix1.lastID_, matrix2.lastID_);
 }
 
 } //namespace persistence_matrix

@@ -29,9 +29,13 @@ public:
 	const barcode_type& get_current_barcode();
 
 	Base_pairing& operator=(Base_pairing other);
-	template<class Friend_matrix>
-	friend void swap(Base_pairing<Friend_matrix>& pairing1,
-					 Base_pairing<Friend_matrix>& pairing2);
+	friend void swap(Base_pairing& pairing1, Base_pairing& pairing2){
+		std::swap(pairing1.matrix_, pairing2.matrix_);
+		pairing1.barcode_.swap(pairing2.barcode_);
+		std::swap(pairing1.maxDim_, pairing2.maxDim_);
+		pairing1.indexToBar_.swap(pairing2.indexToBar_);
+		std::swap(pairing1.isReduced_, pairing2.isReduced_);
+	}
 
 	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
 	Base_pairing(const Base_pairing& matrixToCopy);
@@ -127,23 +131,12 @@ Base_pairing<Master_matrix>::get_current_barcode()
 template<class Master_matrix>
 inline Base_pairing<Master_matrix> &Base_pairing<Master_matrix>::operator=(Base_pairing<Master_matrix> other)
 {
-	std::swap(barcode_, other.barcode_);
 	std::swap(matrix_, other.matrix_);
+	barcode_.swap(other.barcode_);
 	std::swap(maxDim_, other.maxDim_);
-	std::swap(indexToBar_, other.indexToBar_);
+	indexToBar_.swap(other.indexToBar_);
 	std::swap(isReduced_, other.isReduced_);
 	return *this;
-}
-
-template<class Friend_matrix>
-inline void swap(Base_pairing<Friend_matrix>& pairing1,
-				 Base_pairing<Friend_matrix>& pairing2)
-{
-	std::swap(pairing1.matrix_, pairing2.matrix_);
-	pairing1.barcode_.swap(pairing2.barcode_);
-	std::swap(pairing1.maxDim_, pairing2.maxDim_);
-	std::swap(pairing1.indexToBar_, pairing2.indexToBar_);
-	std::swap(pairing1.isReduced_, pairing2.isReduced_);
 }
 
 } //namespace persistence_matrix

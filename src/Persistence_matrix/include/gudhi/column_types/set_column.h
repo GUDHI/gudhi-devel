@@ -55,25 +55,26 @@ public:
 	const_iterator end() const noexcept;
 
 	Set_column& operator+=(Set_column const &column);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-			Set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-			Set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2);
+	friend Set_column operator+(Set_column column1, Set_column const& column2){
+		column1 += column2;
+		return column1;
+	}
 	Set_column& operator*=(unsigned int v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-			Set_column<Friend_field_element_type,Friend_column_pairing_option> column,
-			unsigned int const& v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-			unsigned int const& v,
-			Set_column<Friend_field_element_type,Friend_column_pairing_option> const column);
+	friend Set_column operator*(Set_column column, unsigned int const& v){
+		column *= v;
+		return column;
+	}
+	friend Set_column operator*(unsigned int const& v, Set_column const column){
+		column *= v;
+		return column;
+	}
 
 	Set_column& operator=(Set_column other);
 
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend void swap(Set_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-					 Set_column<Friend_field_element_type,Friend_column_pairing_option>& col2);
+	friend void swap(Set_column& col1, Set_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+	}
 
 private:
 	int dim_;
@@ -260,41 +261,8 @@ template<class Field_element_type, class Column_pairing_option>
 inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_element_type,Column_pairing_option>::operator=(Set_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
+	column_.swap(other.column_);
 	return *this;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Set_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-		Set_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-		Set_column<Friend_field_element_type,Friend_column_pairing_option> const& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		Set_column<Friend_field_element_type,Friend_column_pairing_option> column, unsigned int const& v)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Set_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		unsigned int const& v, Set_column<Friend_field_element_type,Friend_column_pairing_option> column)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-inline void swap(Set_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-				 Set_column<Friend_field_element_type,Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
 }
 
 } //namespace persistence_matrix

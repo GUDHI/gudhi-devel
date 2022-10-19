@@ -28,9 +28,12 @@ public:
 	index vine_swap(index columnIndex1, index columnIndex2);					//returns index which was not modified, ie new i+1
 
 	Chain_vine_swap& operator=(Chain_vine_swap other);
-	template<class Friend_master_matrix>
-	friend void swap(Chain_vine_swap<Friend_master_matrix>& swap1,
-					 Chain_vine_swap<Friend_master_matrix>& swap2);
+	friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2){
+		std::swap(swap1.matrix_, swap2.matrix_);
+		swap1.pivotToPosition_.swap(swap2.pivotToPosition_);
+		swap(static_cast<Chain_pairing<Master_matrix>&>(swap1),
+			 static_cast<Chain_pairing<Master_matrix>&>(swap2));
+	}
 
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
@@ -149,7 +152,7 @@ inline Chain_vine_swap<Master_matrix> &Chain_vine_swap<Master_matrix>::operator=
 		Chain_vine_swap<Master_matrix> other)
 {
 	std::swap(matrix_, other.matrix_);
-	std::swap(pivotToPosition_, other.pivotToPosition_);
+	pivotToPosition_.swap(other.pivotToPosition_);
 	Chain_pairing<Master_matrix>::operator=(other);
 	return *this;
 }
@@ -296,16 +299,6 @@ inline int& Chain_vine_swap<Master_matrix>::_birth(index simplexIndex)
 	} else {
 		return CP::barcode_.at(CP::indexToBar_.at(simplexIndex)).birth;
 	}
-}
-
-template<class Friend_master_matrix>
-inline void swap(Chain_vine_swap<Friend_master_matrix>& swap1,
-				 Chain_vine_swap<Friend_master_matrix>& swap2)
-{
-	std::swap(swap1.matrix_, swap2.matrix_);
-	std::swap(swap1.pivotToPosition_, swap2.pivotToPosition_);
-	std::swap(static_cast<Chain_pairing<Friend_master_matrix> >(swap1),
-			  static_cast<Chain_pairing<Friend_master_matrix> >(swap2));
 }
 
 } //namespace persistence_matrix

@@ -55,25 +55,27 @@ public:
 	const_iterator end() const noexcept;
 
 	Vector_column& operator+=(Vector_column &column);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-			Vector_column<Friend_field_element_type,Friend_column_pairing_option>& column2);
+	friend Vector_column operator+(Vector_column column1, Vector_column& column2){
+		column1 += column2;
+		return column1;
+	}
 	Vector_column& operator*=(unsigned int v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-			Vector_column<Friend_field_element_type,Friend_column_pairing_option> column,
-			unsigned int const& v);
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-			unsigned int const& v,
-			Vector_column<Friend_field_element_type,Friend_column_pairing_option> const column);
+	friend Vector_column operator*(Vector_column column, unsigned int const& v){
+		column *= v;
+		return column;
+	}
+	friend Vector_column operator*(unsigned int const& v, Vector_column const column){
+		column *= v;
+		return column;
+	}
 
 	Vector_column& operator=(Vector_column other);
 
-	template<class Friend_field_element_type, class Friend_column_pairing_option>
-	friend void swap(Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-					 Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col2);
+	friend void swap(Vector_column& col1, Vector_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+		col1.erasedValues_.swap(col2.erasedValues_);
+	}
 
 private:
 	int dim_;
@@ -360,8 +362,8 @@ template<class Field_element_type, class Column_pairing_option>
 inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Field_element_type,Column_pairing_option>::operator=(Vector_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
-	std::swap(erasedValues_, other.erasedValues_);
+	column_.swap(other.column_);
+	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
@@ -377,40 +379,6 @@ inline void Vector_column<Field_element_type,Column_pairing_option>::_cleanValue
 	}
 	erasedValues_.clear();
 	column_.swap(newColumn);
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator+(
-		Vector_column<Friend_field_element_type,Friend_column_pairing_option> column1,
-		Vector_column<Friend_field_element_type,Friend_column_pairing_option>& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		Vector_column<Friend_field_element_type,Friend_column_pairing_option> column, unsigned int const& v)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-Vector_column<Friend_field_element_type,Friend_column_pairing_option> operator*(
-		unsigned int const& v, Vector_column<Friend_field_element_type,Friend_column_pairing_option> column)
-{
-	column *= v;
-	return column;
-}
-
-template<class Friend_field_element_type, class Friend_column_pairing_option>
-inline void swap(Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col1,
-				 Vector_column<Friend_field_element_type,Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
-	std::swap(col1.erasedValues_, col2.erasedValues_);
 }
 
 } //namespace persistence_matrix

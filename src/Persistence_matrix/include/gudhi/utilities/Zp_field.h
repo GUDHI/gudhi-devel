@@ -28,44 +28,89 @@ public:
 	Zp_field_element(Zp_field_element&& toMove) noexcept;
 
 	Zp_field_element& operator+=(Zp_field_element const &f);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator+(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2);
+	friend Zp_field_element operator+(Zp_field_element f1, Zp_field_element const& f2){
+		f1 += f2;
+		return f1;
+	}
 	Zp_field_element& operator+=(unsigned int const &v);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator+(Zp_field_element<friendCharacteristic> f, unsigned int const& v);
-	template<unsigned int friendCharacteristic>
-	friend unsigned int operator+(unsigned int v, Zp_field_element<friendCharacteristic> const& f);
+	friend Zp_field_element operator+(Zp_field_element f, unsigned int const& v){
+		f += v;
+		return f;
+	}
+	friend unsigned int operator+(unsigned int v, Zp_field_element const& f){
+		v += f.element_;
+		v %= characteristic;
+		return v;
+	}
 
 	Zp_field_element& operator-=(Zp_field_element const &f);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator-(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2);
+	friend Zp_field_element operator-(Zp_field_element f1, Zp_field_element const& f2){
+		f1 -= f2;
+		return f1;
+	}
 	Zp_field_element& operator-=(unsigned int const &v);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator-(Zp_field_element<friendCharacteristic> f, unsigned int const& v);
-	template<unsigned int friendCharacteristic>
-	friend unsigned int operator-(unsigned int v, Zp_field_element<friendCharacteristic> const& f);
+	friend Zp_field_element operator-(Zp_field_element f, unsigned int const& v){
+		f -= v;
+		return f;
+	}
+	friend unsigned int operator-(unsigned int v, Zp_field_element const& f){
+		if (v >= characteristic) v %= characteristic;
+		if (f.element_ > v) v += characteristic;
+		v -= f.element_;
+		return v;
+	}
 
 	Zp_field_element& operator*=(Zp_field_element const &f);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator*(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2);
+	friend Zp_field_element operator*(Zp_field_element f1, Zp_field_element const& f2){
+		f1 *= f2;
+		return f1;
+	}
 	Zp_field_element& operator*=(unsigned int const &v);
-	template<unsigned int friendCharacteristic>
-	friend Zp_field_element<friendCharacteristic> operator*(Zp_field_element<friendCharacteristic> f, unsigned int const& v);
-	template<unsigned int friendCharacteristic>
-	friend unsigned int operator*(unsigned int const& v, Zp_field_element<friendCharacteristic> const& f);
+	friend Zp_field_element operator*(Zp_field_element f, unsigned int const& v){
+		f *= v;
+		return f;
+	}
+	friend unsigned int operator*(unsigned int const& v, Zp_field_element const& f){
+		unsigned int a = v;
+		unsigned int b = f.element_;
+		unsigned int res = 0;
+		unsigned int temp_b;
 
-	template<unsigned int friendCharacteristic>
-	friend bool operator==(const Zp_field_element<friendCharacteristic>& f1, const Zp_field_element<friendCharacteristic>& f2);
-	template<unsigned int friendCharacteristic>
-	friend bool operator==(const unsigned int& v, const Zp_field_element<friendCharacteristic>& f);
-	template<unsigned int friendCharacteristic>
-	friend bool operator==(const Zp_field_element<friendCharacteristic>& f, const unsigned int& v);
+		while (a != 0) {
+			if (a & 1) {
+				if (b >= characteristic - res)
+					res -= characteristic;
+				res += b;
+			}
+			a >>= 1;
+
+			temp_b = b;
+			if (b >= characteristic - b)
+				temp_b -= characteristic;
+			b += temp_b;
+		}
+
+		return res;
+	}
+
+	friend bool operator==(const Zp_field_element& f1, const Zp_field_element& f2){
+		return f1.element_ == f2.element_;
+	}
+	friend bool operator==(const unsigned int& v, const Zp_field_element& f){
+		if (v < characteristic) return v == f.element_;
+		return (v % characteristic) == f.element_;
+	}
+	friend bool operator==(const Zp_field_element& f, const unsigned int& v){
+		if (v < characteristic) return v == f.element_;
+		return (v % characteristic) == f.element_;
+	}
 
 	Zp_field_element& operator=(Zp_field_element other);
 	Zp_field_element& operator=(const unsigned int& value);
 	operator unsigned int() const;
-	template<unsigned int friendCharacteristic>
-	friend void swap(Zp_field_element<friendCharacteristic>& f1, Zp_field_element<friendCharacteristic>& f2);
+	friend void swap(Zp_field_element& f1, Zp_field_element& f2){
+		std::swap(f1.element_, f2.element_);
+	}
 
 	Zp_field_element get_inverse() const;
 
@@ -279,116 +324,6 @@ inline constexpr bool Zp_field_element<characteristic>::_is_prime(const int& p)
 			return false;
 
 	return true;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator+(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2)
-{
-	f1 += f2;
-	return f1;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator+(Zp_field_element<friendCharacteristic> f, unsigned int const& v)
-{
-	f += v;
-	return f;
-}
-
-template<unsigned int friendCharacteristic>
-unsigned int operator+(unsigned int v, Zp_field_element<friendCharacteristic> const& f)
-{
-	v += f.element_;
-	v %= friendCharacteristic;
-	return v;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator-(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2)
-{
-	f1 -= f2;
-	return f1;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator-(Zp_field_element<friendCharacteristic> f, unsigned int const& v)
-{
-	f -= v;
-	return f;
-}
-
-template<unsigned int friendCharacteristic>
-unsigned int operator-(unsigned int v, Zp_field_element<friendCharacteristic> const& f)
-{
-	if (v >= friendCharacteristic) v %= friendCharacteristic;
-	if (f.element_ > v) v += friendCharacteristic;
-	v -= f.element_;
-	return v;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator*(Zp_field_element<friendCharacteristic> f1, Zp_field_element<friendCharacteristic> const& f2)
-{
-	f1 *= f2;
-	return f1;
-}
-
-template<unsigned int friendCharacteristic>
-Zp_field_element<friendCharacteristic> operator*(Zp_field_element<friendCharacteristic> f, unsigned int const& v)
-{
-	f *= v;
-	return f;
-}
-
-template<unsigned int friendCharacteristic>
-unsigned int operator*(unsigned int const& v, Zp_field_element<friendCharacteristic> const& f)
-{
-	unsigned int a = v;
-	unsigned int b = f.element_;
-	unsigned int res = 0;
-	unsigned int temp_b;
-
-	while (a != 0) {
-		if (a & 1) {
-			if (b >= friendCharacteristic - res)
-				res -= friendCharacteristic;
-			res += b;
-		}
-		a >>= 1;
-
-		temp_b = b;
-		if (b >= friendCharacteristic - b)
-			temp_b -= friendCharacteristic;
-		b += temp_b;
-	}
-
-	return res;
-}
-
-template<unsigned int friendCharacteristic>
-bool operator==(const Zp_field_element<friendCharacteristic>& f1, const Zp_field_element<friendCharacteristic>& f2)
-{
-	return f1.element_ == f2.element_;
-}
-
-template<unsigned int friendCharacteristic>
-bool operator==(const unsigned int& v, const Zp_field_element<friendCharacteristic>& f)
-{
-	if (v < friendCharacteristic) return v == f.element_;
-	return (v % friendCharacteristic) == f.element_;
-}
-
-template<unsigned int friendCharacteristic>
-bool operator==(const Zp_field_element<friendCharacteristic>& f, const unsigned int& v)
-{
-	if (v < friendCharacteristic) return v == f.element_;
-	return (v % friendCharacteristic) == f.element_;
-}
-
-template<unsigned int friendCharacteristic>
-void swap(Zp_field_element<friendCharacteristic>& f1, Zp_field_element<friendCharacteristic>& f2)
-{
-	std::swap(f1.element_, f2.element_);
 }
 
 } //namespace persistence_matrix

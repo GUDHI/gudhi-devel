@@ -21,6 +21,10 @@ namespace persistence_matrix {
 class Column_pairing
 {
 public:
+	Column_pairing();
+	Column_pairing(const Column_pairing &toCopy);
+	Column_pairing(Column_pairing&& other) noexcept;
+
 	index get_paired_chain_index();
 	bool is_paired();
 	void assign_paired_chain(index other_col);
@@ -28,11 +32,9 @@ public:
 
 	Column_pairing& operator=(Column_pairing other);
 	friend void swap(Column_pairing& pairing1,
-					 Column_pairing& pairing2);
-
-	Column_pairing();
-	Column_pairing(const Column_pairing &toCopy);
-	Column_pairing(Column_pairing&& other) noexcept;
+					 Column_pairing& pairing2){
+		std::swap(pairing1.pairedColumn_, pairing2.pairedColumn_);
+	}
 
 protected:
 	int pairedColumn_;
@@ -68,6 +70,12 @@ inline void Column_pairing::assign_paired_chain(index other_col)
 inline void Column_pairing::unassign_paired_chain()
 {
 	pairedColumn_ = -1;
+}
+
+inline Column_pairing& Column_pairing::operator=(Column_pairing other)
+{
+	std::swap(pairedColumn_, other.pairedColumn_);
+	return *this;
 }
 
 } //namespace persistence_matrix

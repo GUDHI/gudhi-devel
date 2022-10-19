@@ -30,9 +30,13 @@ public:
 	bool vine_swap(index index);					//returns true if barcode was changed
 
 	RU_vine_swap& operator=(RU_vine_swap other);
-	template<class Friend_master_matrix>
-	friend void swap(RU_vine_swap<Friend_master_matrix>& swap1,
-					 RU_vine_swap<Friend_master_matrix>& swap2);
+	friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2){
+		std::swap(swap1.reducedMatrixR_, swap2.reducedMatrixR_);
+		std::swap(swap1.mirrorMatrixU_, swap2.mirrorMatrixU_);
+		std::swap(swap1.pivotToColumnIndex_, swap2.pivotToColumnIndex_);
+		swap(static_cast<RU_pairing<Master_matrix>&>(swap1),
+			 static_cast<RU_pairing<Master_matrix>&>(swap2));
+	}
 
 	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
 	RU_vine_swap(const RU_vine_swap &matrixToCopy);
@@ -152,6 +156,7 @@ inline RU_vine_swap<Master_matrix> &RU_vine_swap<Master_matrix>::operator=(
 {
 	std::swap(reducedMatrixR_, other.reducedMatrixR_);
 	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
+	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
 	RU_pairing<Master_matrix>::operator=(other);
 	return *this;
 }
@@ -324,16 +329,6 @@ inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
 	} else {
 		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).birth;
 	}
-}
-
-template<class Friend_master_matrix>
-inline void swap(RU_vine_swap<Friend_master_matrix>& swap1,
-				 RU_vine_swap<Friend_master_matrix>& swap2)
-{
-	std::swap(swap1.reducedMatrixR_, swap2.reducedMatrixR_);
-	std::swap(swap1.mirrorMatrixU_, swap2.mirrorMatrixU_);
-	std::swap(static_cast<RU_pairing<Friend_master_matrix> >(swap1),
-			  static_cast<RU_pairing<Friend_master_matrix> >(swap2));
 }
 
 } //namespace persistence_matrix

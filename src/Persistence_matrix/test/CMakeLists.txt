@@ -1,7 +1,5 @@
 project(Persistence_matrix_tests)
 
-set(CMAKE_CXX_STANDARD 17)
-
 include(GUDHI_boost_test)
 
 add_executable ( Persistence_matrix_common_test_unit Persistence_matrix_common_unit_test.cpp )

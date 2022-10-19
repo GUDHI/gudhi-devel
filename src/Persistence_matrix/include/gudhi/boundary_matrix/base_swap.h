@@ -28,9 +28,12 @@ public:
 	void swap_at_indices(index index1, index index2);
 
 	Base_swap& operator=(Base_swap other);
-	template<class Friend_master_matrix>
-	friend void swap(Base_swap<Friend_master_matrix>& base1,
-					 Base_swap<Friend_master_matrix>& base2);
+	friend void swap(Base_swap& base1, Base_swap& base2){
+		base1.matrix_.swap(base2.matrix_);
+		base1.indexToRow_.swap(base2.indexToRow_);
+		base1.rowToIndex_.swap(base2.rowToIndex_);
+		std::swap(base1.rowSwapped_, base2.rowSwapped_);
+	}
 
 	using matrix_type = typename Master_matrix::column_container_type;
 
@@ -86,7 +89,7 @@ inline Base_swap<Master_matrix>::Base_swap(Base_swap<Master_matrix> &&other) noe
 template<class Master_matrix>
 inline void Base_swap<Master_matrix>::swap_columns(index columnIndex1, index columnIndex2)
 {
-	std::swap(matrix_.at(columnIndex1), matrix_.at(columnIndex2));
+	swap(matrix_.at(columnIndex1), matrix_.at(columnIndex2));
 }
 
 template<class Master_matrix>
@@ -107,9 +110,9 @@ inline void Base_swap<Master_matrix>::swap_at_indices(index index1, index index2
 template<class Master_matrix>
 inline Base_swap<Master_matrix> &Base_swap<Master_matrix>::operator=(Base_swap<Master_matrix> other)
 {
-	std::swap(matrix_, other.matrix_);
-	std::swap(indexToRow_, other.indexToRow_);
-	std::swap(rowToIndex_, other.rowToIndex_);
+	matrix_.swap(other.matrix_);
+	indexToRow_.swap(other.indexToRow_);
+	rowToIndex_.swap(other.rowToIndex_);
 	std::swap(rowSwapped_, other.rowSwapped_);
 	return *this;
 }
@@ -125,15 +128,6 @@ inline void Base_swap<Master_matrix>::_orderRows()
 		rowToIndex_.at(i) = i;
 	}
 	rowSwapped_ = false;
-}
-
-template<class Friend_master_matrix>
-inline void swap(Base_swap<Friend_master_matrix>& base1, Base_swap<Friend_master_matrix>& base2)
-{
-	std::swap(base1.matrix_, base2.matrix_);
-	std::swap(base1.indexToRow_, base2.indexToRow_);
-	std::swap(base1.rowToIndex_, base2.rowToIndex_);
-	std::swap(base1.rowSwapped_, base2.rowSwapped_);
 }
 
 } //namespace persistence_matrix

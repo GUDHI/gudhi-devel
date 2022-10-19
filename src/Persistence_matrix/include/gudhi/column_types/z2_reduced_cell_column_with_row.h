@@ -156,7 +156,7 @@ inline bool Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_h
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
 inline void Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::swap_rows(Z2_reduced_cell_column_with_row& other)
 {
-	std::swap(row_, other.row_);
+	row_.swap(other.row_);
 	std::swap(pivot_, other.pivot_);
 }
 

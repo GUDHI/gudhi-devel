@@ -62,9 +62,19 @@ public:
 	index get_pivot(index columnIndex);
 
 	Chain_matrix_with_row_access& operator=(Chain_matrix_with_row_access other);
-	template<class Friend_master_matrix>
-	friend void swap(Chain_matrix_with_row_access<Friend_master_matrix>& matrix1,
-					 Chain_matrix_with_row_access<Friend_master_matrix>& matrix2);
+	friend void swap(Chain_matrix_with_row_access& matrix1,
+					 Chain_matrix_with_row_access& matrix2){
+		swap(static_cast<typename Master_matrix::Chain_pairing_option&>(matrix1),
+			 static_cast<typename Master_matrix::Chain_pairing_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::Chain_vine_swap_option&>(matrix1),
+			 static_cast<typename Master_matrix::Chain_vine_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::Chain_representative_cycles_option&>(matrix1),
+			 static_cast<typename Master_matrix::Chain_representative_cycles_option&>(matrix2));
+		matrix1.matrix_.swap(matrix2.matrix_);
+		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
+		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+		std::swap(matrix1.maxDim_, matrix2.maxDim_);
+	}
 
 	void print();  //for debug
 
@@ -427,8 +437,8 @@ inline Chain_matrix_with_row_access<Master_matrix> &Chain_matrix_with_row_access
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
-	std::swap(matrix_, other.matrix_);
-	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
+	matrix_.swap(other.matrix_);
+	pivotToColumnIndex_.swap(other.pivotToColumnIndex_);
 	std::swap(nextInsertIndex_, other.nextInsertIndex_);
 	std::swap(maxDim_, other.maxDim_);
 	return *this;
@@ -539,22 +549,6 @@ inline constexpr typename Chain_matrix_with_row_access<Master_matrix>::bar_dicti
 		return swap_opt::template Chain_pairing<Master_matrix>::indexToBar_;
 	else
 		return pair_opt::indexToBar_;
-}
-
-template<class Friend_master_matrix>
-void swap(Chain_matrix_with_row_access<Friend_master_matrix>& matrix1,
-		  Chain_matrix_with_row_access<Friend_master_matrix>& matrix2)
-{
-	std::swap(static_cast<typename Friend_master_matrix::Chain_pairing_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Chain_pairing_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::Chain_vine_swap_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Chain_vine_swap_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::Chain_representative_cycles_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Chain_representative_cycles_option>(matrix2));
-	std::swap(matrix1.matrix_, matrix2.matrix_);
-	std::swap(matrix1.pivotToColumnIndex_, matrix2.pivotToColumnIndex_);
-	std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
-	std::swap(matrix1.maxDim_, matrix2.maxDim_);
 }
 
 } //namespace persistence_matrix

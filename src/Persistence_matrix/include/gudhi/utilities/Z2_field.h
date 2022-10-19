@@ -24,31 +24,63 @@ public:
 	Z2_field_element(Z2_field_element&& toMove) noexcept;
 
 	Z2_field_element& operator+=(Z2_field_element const &f);
-	friend Z2_field_element operator+(Z2_field_element f1, Z2_field_element const& f2);
+	friend Z2_field_element operator+(Z2_field_element f1, Z2_field_element const& f2){
+		f1 += f2;
+		return f1;
+	}
 	Z2_field_element& operator+=(unsigned int const &v);
-	friend Z2_field_element operator+(Z2_field_element f, unsigned int const& v);
-	friend unsigned int operator+(unsigned int const&v, Z2_field_element const& f);
+	friend Z2_field_element operator+(Z2_field_element f, unsigned int const& v){
+		f += v;
+		return f;
+	}
+	friend unsigned int operator+(unsigned int const&v, Z2_field_element const& f){
+		return f.element_ != (v % 2);
+	}
 
 	Z2_field_element& operator-=(Z2_field_element const &f);
-	friend Z2_field_element operator-(Z2_field_element f1, Z2_field_element const& f2);
+	friend Z2_field_element operator-(Z2_field_element f1, Z2_field_element const& f2){
+		f1 -= f2;
+		return f1;
+	}
 	Z2_field_element& operator-=(unsigned int const &v);
-	friend Z2_field_element operator-(Z2_field_element f, unsigned int const& v);
-	friend unsigned int operator-(unsigned int const&v, Z2_field_element const& f);
+	friend Z2_field_element operator-(Z2_field_element f, unsigned int const& v){
+		f -= v;
+		return f;
+	}
+	friend unsigned int operator-(unsigned int const&v, Z2_field_element const& f){
+		return f.element_ != (v % 2);
+	}
 
 	Z2_field_element& operator*=(Z2_field_element const &f);
-	friend Z2_field_element operator*(Z2_field_element f1, Z2_field_element const& f2);
+	friend Z2_field_element operator*(Z2_field_element f1, Z2_field_element const& f2){
+		f1 *= f2;
+		return f1;
+	}
 	Z2_field_element& operator*=(unsigned int const &v);
-	friend Z2_field_element operator*(Z2_field_element f, unsigned int const& v);
-	friend unsigned int operator*(unsigned int const&v, Z2_field_element const& f);
+	friend Z2_field_element operator*(Z2_field_element f, unsigned int const& v){
+		f *= v;
+		return f;
+	}
+	friend unsigned int operator*(unsigned int const&v, Z2_field_element const& f){
+		return f.element_ && (v % 2);
+	}
 
-	friend bool operator==(const Z2_field_element& f1, const Z2_field_element& f2);
-	friend bool operator==(const unsigned int& v, const Z2_field_element& f);
-	friend bool operator==(const Z2_field_element& f, const unsigned int& v);
+	friend bool operator==(const Z2_field_element& f1, const Z2_field_element& f2){
+		return f1.element_ == f2.element_;
+	}
+	friend bool operator==(const unsigned int& v, const Z2_field_element& f){
+		return (v % 2) == f.element_;
+	}
+	friend bool operator==(const Z2_field_element& f, const unsigned int& v){
+		return (v % 2) == f.element_;
+	}
 
 	Z2_field_element& operator=(Z2_field_element other);
 	Z2_field_element& operator=(const unsigned int& value);
 	operator unsigned int() const;
-	friend void swap(Z2_field_element& f1, Z2_field_element& f2);
+	friend void swap(Z2_field_element& f1, Z2_field_element& f2){
+		std::swap(f1.element_, f2.element_);
+	}
 
 	Z2_field_element get_inverse() const;
 
@@ -154,74 +186,6 @@ inline constexpr int Z2_field_element::get_characteristic()
 inline unsigned int Z2_field_element::get_value() const
 {
 	return element_;
-}
-
-Z2_field_element operator+(Z2_field_element f1, Z2_field_element const& f2){
-	f1 += f2;
-	return f1;
-}
-
-Z2_field_element operator+(Z2_field_element f, unsigned int const& v)
-{
-	f += v;
-	return f;
-}
-
-unsigned int operator+(unsigned int const& v, Z2_field_element const& f)
-{
-	return f.element_ != (v % 2);
-}
-
-Z2_field_element operator-(Z2_field_element f1, Z2_field_element const& f2){
-	f1 -= f2;
-	return f1;
-}
-
-Z2_field_element operator-(Z2_field_element f, unsigned int const& v)
-{
-	f -= v;
-	return f;
-}
-
-unsigned int operator-(unsigned int const& v, Z2_field_element const& f)
-{
-	return f.element_ != (v % 2);
-}
-
-Z2_field_element operator*(Z2_field_element f1, Z2_field_element const& f2){
-	f1 *= f2;
-	return f1;
-}
-
-Z2_field_element operator*(Z2_field_element f, unsigned int const& v)
-{
-	f *= v;
-	return f;
-}
-
-unsigned int operator*(unsigned int const& v, Z2_field_element const& f)
-{
-	return f.element_ && (v % 2);
-}
-
-bool operator==(const Z2_field_element& f1, const Z2_field_element& f2)
-{
-	return f1.element_ == f2.element_;
-}
-
-bool operator==(const unsigned int& v, const Z2_field_element& f)
-{
-	return (v % 2) == f.element_;
-}
-
-bool operator==(const Z2_field_element& f, const unsigned int& v)
-{
-	return (v % 2) == f.element_;
-}
-
-void swap(Z2_field_element& f1, Z2_field_element& f2)
-{
-	std::swap(f1.element_, f2.element_);
 }
 
 } //namespace persistence_matrix

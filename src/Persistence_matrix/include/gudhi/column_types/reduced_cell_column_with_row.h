@@ -167,7 +167,7 @@ inline bool Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
 inline void Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::swap_rows(Reduced_cell_column_with_row& other)
 {
-	std::swap(row_, other.row_);
+	row_.swap(other.row_);
 	std::swap(pivot_, other.pivot_);
 }
 

@@ -58,9 +58,15 @@ public:
 	index get_pivot(index columnIndex);
 
 	Base_matrix& operator=(Base_matrix other);
-	template<class Friend_master_matrix>
-	friend void swap(Base_matrix<Friend_master_matrix>& matrix1,
-					 Base_matrix<Friend_master_matrix>& matrix2);
+	friend void swap(Base_matrix& matrix1, Base_matrix& matrix2){
+		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
+			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::Base_pairing_option&>(matrix1),
+			 static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
+		matrix1.matrix_.swap(matrix2.matrix_);
+		std::swap(matrix1.maxDim_, matrix2.maxDim_);
+		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+	}
 
 	void print();  //for debug
 
@@ -266,7 +272,7 @@ inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(Base_ma
 {
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
-	std::swap(matrix_, other.matrix_);
+	matrix_.swap(other.matrix_);
 	std::swap(maxDim_, other.maxDim_);
 	std::swap(nextInsertIndex_, other.nextInsertIndex_);
 	return *this;
@@ -285,19 +291,6 @@ inline void Base_matrix<Master_matrix>::print()
 		std::cout << "\n";
 	}
 	std::cout << "\n";
-}
-
-template<class Friend_master_matrix>
-void swap(Base_matrix<Friend_master_matrix>& matrix1,
-		  Base_matrix<Friend_master_matrix>& matrix2)
-{
-	std::swap(static_cast<typename Friend_master_matrix::Base_swap_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Base_swap_option>(matrix2));
-	std::swap(static_cast<typename Friend_master_matrix::Base_pairing_option>(matrix1),
-			  static_cast<typename Friend_master_matrix::Base_pairing_option>(matrix2));
-	std::swap(matrix1.matrix_, matrix2.matrix_);
-	std::swap(matrix1.maxDim_, matrix2.maxDim_);
-	std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 }
 
 } //namespace persistence_matrix

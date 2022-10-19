@@ -27,9 +27,10 @@ public:
 	const barcode_type& get_current_barcode();
 
 	RU_pairing& operator=(RU_pairing other);
-	template<class Friend_matrix>
-	friend void swap(RU_pairing<Friend_matrix>& pairing1,
-					 RU_pairing<Friend_matrix>& pairing2);
+	friend void swap(RU_pairing& pairing1, RU_pairing& pairing2){
+		pairing1.barcode_.swap(pairing2.barcode_);
+		pairing1.indexToBar_.swap(pairing2.indexToBar_);
+	}
 
 	RU_pairing();
 	RU_pairing(const RU_pairing &matrixToCopy);
@@ -69,17 +70,9 @@ RU_pairing<Master_matrix>::get_current_barcode()
 template<class Master_matrix>
 inline RU_pairing<Master_matrix> &RU_pairing<Master_matrix>::operator=(RU_pairing<Master_matrix> other)
 {
-	std::swap(barcode_, other.barcode_);
-	std::swap(indexToBar_, other.indexToBar_);
+	barcode_.swap(other.barcode_);
+	indexToBar_.swap(other.indexToBar_);
 	return *this;
-}
-
-template<class Friend_matrix>
-inline void swap(RU_pairing<Friend_matrix>& pairing1,
-				 RU_pairing<Friend_matrix>& pairing2)
-{
-	pairing1.barcode_.swap(pairing2.barcode_);
-	pairing1.indexToBar_.swap(pairing2.indexToBar_);
 }
 
 } //namespace persistence_matrix

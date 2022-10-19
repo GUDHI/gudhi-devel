@@ -53,16 +53,17 @@ public:
 	const_iterator end() const noexcept;
 
 	Z2_set_column& operator+=(Z2_set_column const &column);
-	template<class Friend_column_pairing_option>
-	friend Z2_set_column<Friend_column_pairing_option> operator+(
-			Z2_set_column<Friend_column_pairing_option> column1,
-			Z2_set_column<Friend_column_pairing_option> const& column2);
+	friend Z2_set_column operator+(Z2_set_column column1, Z2_set_column const& column2){
+		column1 += column2;
+		return column1;
+	}
 
 	Z2_set_column& operator=(Z2_set_column other);
 
-	template<class Friend_column_pairing_option>
-	friend void swap(Z2_set_column<Friend_column_pairing_option>& col1,
-					 Z2_set_column<Friend_column_pairing_option>& col2);
+	friend void swap(Z2_set_column& col1, Z2_set_column& col2){
+		std::swap(col1.dim_, col2.dim_);
+		col1.column_.swap(col2.column_);
+	}
 
 private:
 	int dim_;
@@ -208,25 +209,8 @@ template<class Column_pairing_option>
 inline Z2_set_column<Column_pairing_option> &Z2_set_column<Column_pairing_option>::operator=(Z2_set_column other)
 {
 	std::swap(dim_, other.dim_);
-	std::swap(column_, other.column_);
+	column_.swap(other.column_);
 	return *this;
-}
-
-template<class Friend_column_pairing_option>
-Z2_set_column<Friend_column_pairing_option> operator+(
-		Z2_set_column<Friend_column_pairing_option> column1,
-		Z2_set_column<Friend_column_pairing_option> const& column2)
-{
-	column1 += column2;
-	return column1;
-}
-
-template<class Friend_column_pairing_option>
-inline void swap(Z2_set_column<Friend_column_pairing_option>& col1,
-				 Z2_set_column<Friend_column_pairing_option>& col2)
-{
-	std::swap(col1.dim_, col2.dim_);
-	col1.column_.swap(col2.column_);
 }
 
 } //namespace persistence_matrix
