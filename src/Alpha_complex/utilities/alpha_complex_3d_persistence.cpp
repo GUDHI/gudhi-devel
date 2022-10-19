@@ -263,7 +263,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
       "cuboid-file,c", po::value<std::string>(&cuboid_file),
       "Name of file describing the periodic domain. Format is:\n  min_hx min_hy min_hz\n  max_hx max_hy max_hz")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-alpha-square-value,r",
       po::value<Filtration_value>(&alpha_square_max_value)
           ->default_value(std::numeric_limits<Filtration_value>::infinity()),
