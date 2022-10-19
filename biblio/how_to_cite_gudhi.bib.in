@@ -222,7 +222,7 @@
 }
 
 @incollection{gudhi:WeightedRipsComplex
-, author =  "Yuichi Ike"
+, author =  "Rapha\"el Tinarrage, Yuichi Ike, Masatoshi Takenouchi"
 , title =   "Weighted Rips Complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
