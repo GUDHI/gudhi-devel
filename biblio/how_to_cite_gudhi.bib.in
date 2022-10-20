@@ -78,7 +78,7 @@
 }
 
 @incollection{gudhi:RipsComplex
-, author =  "Cl\'ement Maria and Pawel Dlotko and Vincent Rouvreau and Marc Glisse"
+, author =  "Cl\'ement Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse"
 , title =   "Rips complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -88,7 +88,7 @@
 }
 
 @incollection{gudhi:Collapse
-, author =  "Siddharth Pritam and Marc Glisse"
+, author =  "Siddharth Pritam, Marc Glisse"
 , title =   "Edge collapse"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -168,7 +168,7 @@
 }
 
 @incollection{gudhi:SubSampling
-, author =  "Cl\'ement Jamin and Siargey Kachanovich"
+, author =  "Cl\'ement Jamin, Siargey Kachanovich"
 , title =   "Subsampling"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -191,36 +191,6 @@
 % Python specific gudhi modules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-@incollection{gudhi:CubicalPersistenceTensorFlowLayer
-, author =  "Mathieu Carri\`ere"
-, title =   "TensorFlow layer for cubical persistence"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/cubical_complex_tflow_itf_ref.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:CubicalPersistenceScikitlearnInterface
-, author =  "Vincent Rouvreau"
-, title =   "Cubical complex persistence scikit-learn like interface"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/cubical_complex_sklearn_itf_ref.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:LowerStarPersistenceTensorFlowLayer
-, author =  "Mathieu Carri\`ere"
-, title =   "TensorFlow layer for lower-star persistence on simplex trees"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/ls_simplex_tree_tflow_itf_ref.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
 @incollection{gudhi:WeightedRipsComplex
 , author =  "Rapha\"el Tinarrage, Yuichi Ike, Masatoshi Takenouchi"
 , title =   "Weighted Rips Complex"
@@ -238,16 +208,6 @@
 , edition =     "{@GUDHI_VERSION@}"
 , booktitle =   "{GUDHI} User and Reference Manual"
 , url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/rips_complex_user.html#dtm-rips-complex"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:RipsPersistenceTensorFlowLayer
-, author =  "Mathieu Carri\`ere"
-, title =   "TensorFlow layer for Vietoris-Rips persistence"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/rips_complex_tflow_itf_ref.html"
 , year =        @GUDHI_VERSION_YEAR@
 }
 
