@@ -118,7 +118,7 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
       "fast,f", po::bool_switch(&fast),
       "To activate fast version of Cech complex (default is false, not available if exact is set)")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-radius,r",
       po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
       "Maximal length of an edge for the Cech complex construction.")(

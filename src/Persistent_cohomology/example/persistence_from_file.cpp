@@ -93,7 +93,7 @@ void program_options(int argc, char * argv[]
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&output_file)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::clog")
+       "Name of file in which the persistence diagram is written. Default print in standard output")
       ("field-charac,p", po::value<int>(&p)->default_value(11),
        "Characteristic p of the coefficient field Z/pZ for computing homology.")
       ("min-persistence,m", po::value<Filtration_value>(&min_persistence),
