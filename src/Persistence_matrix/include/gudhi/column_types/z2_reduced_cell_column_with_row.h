@@ -33,12 +33,14 @@ public:
 
 	Z2_reduced_cell_column_with_row();
 	template<class Chain_type>
-	Z2_reduced_cell_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension);
+	Z2_reduced_cell_column_with_row(index chainIndex, const Chain_type& chain, dimension_type dimension);
 	Z2_reduced_cell_column_with_row(const Z2_reduced_cell_column_with_row& other);
 	~Z2_reduced_cell_column_with_row();
 
 	Column_type& get_column();
+	const Column_type& get_column() const;
 	Row_type& get_row();
+	const Row_type& get_row() const;
 	int get_pivot() const;
 	int get_lowest_simplex_index() const;
 	dimension_type get_dimension() const;
@@ -68,7 +70,7 @@ inline Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,C
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
 template<class Chain_type>
 inline Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::Z2_reduced_cell_column_with_row(
-		index chainIndex, Chain_type& chain, dimension_type dimension)
+		index chainIndex, const Chain_type& chain, dimension_type dimension)
 	: pivot_(*(chain.rbegin())), lowestSimplexIndex_(pivot_), dim_(dimension)
 {
 	for (index id : chain){
@@ -124,7 +126,19 @@ inline Column_type& Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Ro
 }
 
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline const Column_type& Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::get_column() const
+{
+	return column_;
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
 inline Row_type& Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::get_row()
+{
+	return row_;
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Column_pairing_option>
+inline const Row_type& Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Column_pairing_option>::get_row() const
 {
 	return row_;
 }

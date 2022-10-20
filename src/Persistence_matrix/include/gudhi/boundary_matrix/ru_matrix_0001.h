@@ -30,15 +30,16 @@ public:
 
 	RU_matrix_with_removals();
 	template<class Boundary_type = boundary_type>
-	RU_matrix_with_removals(std::vector<Boundary_type>& orderedBoundaries);
+	RU_matrix_with_removals(const std::vector<Boundary_type>& orderedBoundaries);
 	RU_matrix_with_removals(unsigned int numberOfColumns);
 	RU_matrix_with_removals(const RU_matrix_with_removals& matrixToCopy);
 	RU_matrix_with_removals(RU_matrix_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
-	Row_type get_row(index rowIndex);
+	const Column_type& get_column(index columnIndex) const;
+	Row_type get_row(index rowIndex) const;
 	void erase_last();
 
 	dimension_type get_max_dimension() const;
@@ -53,7 +54,7 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex, bool inR = true) const;
 	bool is_zero_column(index columnIndex, bool inR = true);
 
-	index get_column_with_pivot(index simplexIndex);
+	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
 	RU_matrix_with_removals& operator=(RU_matrix_with_removals other);
@@ -104,7 +105,7 @@ inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals()
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(std::vector<Boundary_type> &orderedBoundaries)
+inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::RU_pairing_option(),
 	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
 	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
@@ -152,7 +153,7 @@ inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(RU_matrix
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void RU_matrix_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary)
+inline void RU_matrix_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	reducedMatrixR_.insert_boundary(boundary);
 
@@ -176,7 +177,13 @@ inline typename RU_matrix_with_removals<Master_matrix>::Column_type &RU_matrix_w
 }
 
 template<class Master_matrix>
-inline typename RU_matrix_with_removals<Master_matrix>::Row_type RU_matrix_with_removals<Master_matrix>::get_row(index rowIndex)
+inline const typename RU_matrix_with_removals<Master_matrix>::Column_type &RU_matrix_with_removals<Master_matrix>::get_column(index columnIndex) const
+{
+	return reducedMatrixR_.get_column(columnIndex);
+}
+
+template<class Master_matrix>
+inline typename RU_matrix_with_removals<Master_matrix>::Row_type RU_matrix_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_row' is not implemented for the chosen options.");
@@ -260,7 +267,7 @@ inline bool RU_matrix_with_removals<Master_matrix>::is_zero_column(index columnI
 }
 
 template<class Master_matrix>
-inline index RU_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex)
+inline index RU_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
 	return pivotToColumnIndex_.at(simplexIndex);
 }

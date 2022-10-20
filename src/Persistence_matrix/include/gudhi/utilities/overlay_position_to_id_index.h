@@ -20,15 +20,17 @@ public:
 
 	Position_to_id_indexation_overlay();
 	template<class Boundary_type = boundary_type>
-	Position_to_id_indexation_overlay(std::vector<Boundary_type>& boundaries);	//simplex indices have to start at 0 and be consecutifs
+	Position_to_id_indexation_overlay(const std::vector<Boundary_type>& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Position_to_id_indexation_overlay(int numberOfColumns);
 	Position_to_id_indexation_overlay(const Position_to_id_indexation_overlay &matrixToCopy);
 	Position_to_id_indexation_overlay(Position_to_id_indexation_overlay&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
+	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
+	const Row_type& get_row(index rowIndex) const;
 	void erase_last();
 
 	dimension_type get_max_dimension() const;
@@ -40,10 +42,10 @@ public:
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
-	bool is_zero_cell(index columnIndex, index rowIndex);
+	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	index get_column_with_pivot(index simplexIndex);
+	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
 	Position_to_id_indexation_overlay& operator=(Position_to_id_indexation_overlay other);
@@ -79,8 +81,11 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
 inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Position_to_id_indexation_overlay(
-		std::vector<Boundary_type> &boundaries)
-	: matrix_(boundaries), columnPositionToID_(boundaries.size()), nextIndex_(boundaries.size()), nextID_(boundaries.size())
+		const std::vector<Boundary_type> &boundaries)
+	: matrix_(boundaries),
+	  columnPositionToID_(boundaries.size()),
+	  nextIndex_(boundaries.size()),
+	  nextID_(boundaries.size())
 {
 	for (unsigned int i = 0; i < boundaries.size(); i++){
 		columnPositionToID_[i] = i;
@@ -111,7 +116,7 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(Boundary_type &boundary)
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type &boundary)
 {
 	matrix_.insert_boundary(boundary);
 	if (columnPositionToID_.size() <= nextIndex_) {
@@ -128,8 +133,22 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column(in
 }
 
 template<class Matrix_type, class Master_matrix_type>
+inline const typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Column_type &
+Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column(index columnIndex) const
+{
+	return matrix_.get_column(columnPositionToID_.at(columnIndex));
+}
+
+template<class Matrix_type, class Master_matrix_type>
 inline typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Row_type &
 Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index rowIndex)
+{
+	return matrix_.get_row(columnPositionToID_.at(rowIndex));
+}
+
+template<class Matrix_type, class Master_matrix_type>
+inline const typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Row_type &
+Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index rowIndex) const
 {
 	return matrix_.get_row(columnPositionToID_.at(rowIndex));
 }
@@ -180,7 +199,7 @@ inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::z
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline bool Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::is_zero_cell(index columnIndex, index rowIndex)
+inline bool Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	return matrix_.is_zero_cell(columnPositionToID_.at(columnIndex), columnPositionToID_.at(rowIndex));
 }
@@ -192,7 +211,7 @@ inline bool Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::i
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline index Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_with_pivot(index simplexIndex)
+inline index Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_with_pivot(index simplexIndex) const
 {
 	index id = matrix_.get_column_with_pivot(simplexIndex);
 	unsigned int i = 0;

@@ -24,6 +24,13 @@ template<class Master_matrix>
 class Chain_vine_swap : public Chain_pairing<Master_matrix>
 {
 public:
+	using matrix_type = typename Master_matrix::column_container_type;
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+
+	Chain_vine_swap(matrix_type& matrix);
+	Chain_vine_swap(const Chain_vine_swap &matrixToCopy);
+	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
+
 	index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);	//returns index which was not modified, ie new i+1
 	index vine_swap(index columnIndex1, index columnIndex2);					//returns index which was not modified, ie new i+1
 
@@ -34,13 +41,6 @@ public:
 		swap(static_cast<Chain_pairing<Master_matrix>&>(swap1),
 			 static_cast<Chain_pairing<Master_matrix>&>(swap2));
 	}
-
-	using matrix_type = typename Master_matrix::column_container_type;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
-
-	Chain_vine_swap(matrix_type& matrix);
-	Chain_vine_swap(const Chain_vine_swap &matrixToCopy);
-	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
 protected:
 	dictionnary_type pivotToPosition_;
@@ -53,7 +53,7 @@ private:
 	matrix_type* matrix_;
 
 	void _add_to(const typename Column_type::Column_type& column, std::set<index>& set);
-	bool _is_negative_in_pair(index simplexIndex);
+	bool _is_negative_in_pair(index simplexIndex) const;
 
 	void _positive_transpose(index simplexIndex1, index simplexIndex2);
 	void _negative_transpose(index simplexIndex1, index simplexIndex2);
@@ -66,6 +66,8 @@ private:
 
 	int& _death(index simplexIndex);
 	int& _birth(index simplexIndex);
+	int _death(index simplexIndex) const;
+	int _birth(index simplexIndex) const;
 };
 
 template<class Master_matrix>
@@ -171,7 +173,7 @@ inline void Chain_vine_swap<Master_matrix>::_add_to(
 }
 
 template<class Master_matrix>
-inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(index simplexIndex)
+inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(index simplexIndex) const
 {
 	return _death(simplexIndex) == static_cast<int>(simplexIndex);
 }
@@ -293,6 +295,26 @@ inline int& Chain_vine_swap<Master_matrix>::_death(index simplexIndex)
 
 template<class Master_matrix>
 inline int& Chain_vine_swap<Master_matrix>::_birth(index simplexIndex)
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		return CP::indexToBar_.at(simplexIndex)->birth;
+	} else {
+		return CP::barcode_.at(CP::indexToBar_.at(simplexIndex)).birth;
+	}
+}
+
+template<class Master_matrix>
+inline int Chain_vine_swap<Master_matrix>::_death(index simplexIndex) const
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		return CP::indexToBar_.at(simplexIndex)->death;
+	} else {
+		return CP::barcode_.at(CP::indexToBar_.at(simplexIndex)).death;
+	}
+}
+
+template<class Master_matrix>
+inline int Chain_vine_swap<Master_matrix>::_birth(index simplexIndex) const
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return CP::indexToBar_.at(simplexIndex)->birth;

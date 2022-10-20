@@ -31,15 +31,16 @@ public:
 
 	Base_matrix_with_removals();
 	template<class Boundary_type = boundary_type>
-	Base_matrix_with_removals(std::vector<Boundary_type>& orderedBoundaries);
+	Base_matrix_with_removals(const std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix_with_removals(unsigned int numberOfColumns);
 	Base_matrix_with_removals(const Base_matrix_with_removals& matrixToCopy);
 	Base_matrix_with_removals(Base_matrix_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
-	Row_type get_row(index rowIndex);
+	const Column_type& get_column(index columnIndex) const;
+	Row_type get_row(index rowIndex) const;
 	void erase_last();		//does not update barcode
 
 	dimension_type get_max_dimension() const;
@@ -54,7 +55,7 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	index get_column_with_pivot(index simplexIndex);
+	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
 	Base_matrix_with_removals& operator=(Base_matrix_with_removals other);
@@ -92,8 +93,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals()
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(
-		std::vector<Boundary_type> &orderedBoundaries)
+inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, maxDim_),
 	  Master_matrix::Base_pairing_option(),
 	  matrix_(orderedBoundaries.size()),
@@ -105,7 +105,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(
 	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		Boundary_type& b = orderedBoundaries.at(i);
+		const Boundary_type& b = orderedBoundaries.at(i);
 		matrix_.at(i) = Column_type(b);
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
@@ -162,7 +162,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(Base_
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary)
+inline void Base_matrix_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -192,7 +192,17 @@ inline typename Base_matrix_with_removals<Master_matrix>::Column_type &Base_matr
 }
 
 template<class Master_matrix>
-inline typename Base_matrix_with_removals<Master_matrix>::Row_type Base_matrix_with_removals<Master_matrix>::get_row(index rowIndex)
+inline const typename Base_matrix_with_removals<Master_matrix>::Column_type &Base_matrix_with_removals<Master_matrix>::get_column(index columnIndex) const
+{
+	if constexpr (swap_opt::isActive_){
+		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+	}
+
+	return matrix_.at(columnIndex);
+}
+
+template<class Master_matrix>
+inline typename Base_matrix_with_removals<Master_matrix>::Row_type Base_matrix_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_row' is not implemented for the chosen options.");
@@ -269,7 +279,7 @@ inline bool Base_matrix_with_removals<Master_matrix>::is_zero_column(index colum
 }
 
 template<class Master_matrix>
-inline index Base_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex)
+inline index Base_matrix_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
@@ -298,8 +308,8 @@ inline void Base_matrix_with_removals<Master_matrix>::print()
 {
 	std::cout << "Base_matrix_with_removals:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		Column_type& col = matrix_.at(i);
-		for (auto e : col.get_content(nextInsertIndex_)){
+		const Column_type& col = matrix_.at(i);
+		for (const auto e : col.get_content(nextInsertIndex_)){
 			if (e == 0u) std::cout << "- ";
 			else std::cout << e << " ";
 		}

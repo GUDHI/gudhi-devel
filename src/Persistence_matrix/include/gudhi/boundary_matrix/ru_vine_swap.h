@@ -26,6 +26,10 @@ public:
 	using Base_matrix = typename Master_matrix::Base_matrix_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 
+	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
+	RU_vine_swap(const RU_vine_swap &matrixToCopy);
+	RU_vine_swap(RU_vine_swap&& other) noexcept;
+
 	bool vine_swap_with_z_eq_1_case(index index);	//returns true if barcode was changed
 	bool vine_swap(index index);					//returns true if barcode was changed
 
@@ -37,10 +41,6 @@ public:
 		swap(static_cast<RU_pairing<Master_matrix>&>(swap1),
 			 static_cast<RU_pairing<Master_matrix>&>(swap2));
 	}
-
-	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
-	RU_vine_swap(const RU_vine_swap &matrixToCopy);
-	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
 protected:
 	static constexpr bool isActive_ = true;
@@ -65,6 +65,8 @@ private:
 
 	int& _death(index simplexIndex);
 	int& _birth(index simplexIndex);
+	int _death(index simplexIndex) const;
+	int _birth(index simplexIndex) const;
 };
 
 template<class Master_matrix>
@@ -323,6 +325,26 @@ inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
 
 template<class Master_matrix>
 inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		return RUP::indexToBar_.at(simplexIndex)->birth;
+	} else {
+		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).birth;
+	}
+}
+
+template<class Master_matrix>
+inline int RU_vine_swap<Master_matrix>::_death(index simplexIndex) const
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		return RUP::indexToBar_.at(simplexIndex)->death;
+	} else {
+		return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).death;
+	}
+}
+
+template<class Master_matrix>
+inline int RU_vine_swap<Master_matrix>::_birth(index simplexIndex) const
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return RUP::indexToBar_.at(simplexIndex)->birth;

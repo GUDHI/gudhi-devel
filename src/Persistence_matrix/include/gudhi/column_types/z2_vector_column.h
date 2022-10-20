@@ -31,10 +31,10 @@ public:
 
 	Z2_vector_column();
 	template<class Boundary_type>
-	Z2_vector_column(Boundary_type& boundary);
+	Z2_vector_column(const Boundary_type& boundary);
 	template<class Boundary_type>
-	Z2_vector_column(Boundary_type& boundary, dimension_type dimension);
-	Z2_vector_column(Z2_vector_column& column);
+	Z2_vector_column(const Boundary_type& boundary, dimension_type dimension);
+//	Z2_vector_column(Z2_vector_column& column);
 	Z2_vector_column(const Z2_vector_column& column);
 	Z2_vector_column(Z2_vector_column&& column) noexcept;
 
@@ -80,25 +80,25 @@ inline Z2_vector_column<Column_pairing_option>::Z2_vector_column() : dim_(0)
 
 template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Boundary_type &boundary)
+inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end())
 {}
 
 template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Boundary_type &boundary, dimension_type dimension)
+inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension),
 	  column_(boundary.begin(), boundary.end())
 {}
 
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Z2_vector_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
-	  column_(column.column_),
-	  erasedValues_(column.erasedValues_)
-{}
+//template<class Column_pairing_option>
+//inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Z2_vector_column &column)
+//	: Column_pairing_option(column),
+//	  dim_(column.dim_),
+//	  column_(column.column_),
+//	  erasedValues_(column.erasedValues_)
+//{}
 
 template<class Column_pairing_option>
 inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Z2_vector_column &column)

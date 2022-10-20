@@ -31,15 +31,16 @@ public:
 
 	Base_matrix();
 	template<class Boundary_type = boundary_type>
-	Base_matrix(std::vector<Boundary_type>& orderedBoundaries);
+	Base_matrix(const std::vector<Boundary_type>& orderedBoundaries);
 	Base_matrix(unsigned int numberOfColumns);
 	Base_matrix(const Base_matrix& matrixToCopy);
 	Base_matrix(Base_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
-	Row_type get_row(index rowIndex);
+	const Column_type& get_column(index columnIndex) const;
+	Row_type get_row(index rowIndex) const;
 	void erase_last();
 
 	dimension_type get_max_dimension() const;
@@ -54,7 +55,7 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	index get_column_with_pivot(index simplexIndex);
+	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
 	Base_matrix& operator=(Base_matrix other);
@@ -89,7 +90,7 @@ inline Base_matrix<Master_matrix>::Base_matrix()
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Base_matrix<Master_matrix>::Base_matrix(std::vector<Boundary_type> &orderedBoundaries)
+inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, orderedBoundaries.size()),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  matrix_(orderedBoundaries.size()),
@@ -102,7 +103,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(std::vector<Boundary_type> &order
 	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		Boundary_type& b = orderedBoundaries.at(i);
+		const Boundary_type& b = orderedBoundaries.at(i);
 		matrix_.at(i) = Column_type(b);
 		if (maxDim_ < static_cast<int>(b.size()) - 1) maxDim_ = b.size() - 1;
 
@@ -153,7 +154,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix<Master_matrix>::insert_boundary(Boundary_type &boundary)
+inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -185,7 +186,17 @@ inline typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matr
 }
 
 template<class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Row_type Base_matrix<Master_matrix>::get_row(index rowIndex)
+inline const typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matrix>::get_column(index columnIndex) const
+{
+	if constexpr (swap_opt::isActive_){
+		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+	}
+
+	return matrix_.at(columnIndex);
+}
+
+template<class Master_matrix>
+inline typename Base_matrix<Master_matrix>::Row_type Base_matrix<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_row' is not implemented for the chosen options.");
@@ -255,7 +266,7 @@ inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex)
 }
 
 template<class Master_matrix>
-inline index Base_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex)
+inline index Base_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_column_with_pivot' is not implemented for the chosen options.");

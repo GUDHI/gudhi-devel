@@ -32,10 +32,10 @@ public:
 
 	Vector_column();
 	template<class Boundary_type>
-	Vector_column(Boundary_type& boundary);
+	Vector_column(const Boundary_type& boundary);
 	template<class Boundary_type>
-	Vector_column(Boundary_type& boundary, dimension_type dimension);
-	Vector_column(Vector_column& column);
+	Vector_column(const Boundary_type& boundary, dimension_type dimension);
+//	Vector_column(Vector_column& column);
 	Vector_column(const Vector_column& column);
 	Vector_column(Vector_column&& column) noexcept;
 
@@ -91,7 +91,7 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column() 
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Boundary_type &boundary)
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(const Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.size())
 {
@@ -102,7 +102,7 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Bo
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Boundary_type &boundary, dimension_type dimension)
+inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(const Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension),
 	  column_(boundary.size())
 {
@@ -111,13 +111,13 @@ inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Bo
 	}
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
-	  column_(column.column_),
-	  erasedValues_(column.erasedValues_)
-{}
+//template<class Field_element_type, class Column_pairing_option>
+//inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(Vector_column &column)
+//	: Column_pairing_option(column),
+//	  dim_(column.dim_),
+//	  column_(column.column_),
+//	  erasedValues_(column.erasedValues_)
+//{}
 
 template<class Field_element_type, class Column_pairing_option>
 inline Vector_column<Field_element_type,Column_pairing_option>::Vector_column(const Vector_column &column)

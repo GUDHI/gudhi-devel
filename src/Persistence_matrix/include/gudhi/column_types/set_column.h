@@ -32,19 +32,19 @@ public:
 
 	Set_column();
 	template<class Boundary_type>
-	Set_column(Boundary_type& boundary);
+	Set_column(const Boundary_type& boundary);
 	template<class Boundary_type>
-	Set_column(Boundary_type& boundary, dimension_type dimension);
-	Set_column(Set_column& column);
+	Set_column(const Boundary_type& boundary, dimension_type dimension);
+//	Set_column(Set_column& column);
 	Set_column(const Set_column& column);
 	Set_column(Set_column&& column) noexcept;
 
-	std::vector<Field_element_type> get_content(unsigned int columnLength);
+	std::vector<Field_element_type> get_content(unsigned int columnLength) const;
 	bool is_non_zero(index rowIndex) const;
-	bool is_empty();
+	bool is_empty() const;
 	dimension_type get_dimension() const;
-	int get_pivot();
-	Field_element_type get_pivot_value();
+	int get_pivot() const;
+	Field_element_type get_pivot_value() const;
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
@@ -87,30 +87,30 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column() : dim_
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary_type &boundary)
+inline Set_column<Field_element_type,Column_pairing_option>::Set_column(const Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1)
 {
-	for (std::pair<index,Field_element_type>& p : boundary){
+	for (const std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
 	}
 }
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Boundary_type &boundary, dimension_type dimension)
+inline Set_column<Field_element_type,Column_pairing_option>::Set_column(const Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension)
 {
-	for (std::pair<index,Field_element_type>& p : boundary){
+	for (const std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace(p.second, p.first);
 	}
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
-	  column_(column.column_)
-{}
+//template<class Field_element_type, class Column_pairing_option>
+//inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_column &column)
+//	: Column_pairing_option(column),
+//	  dim_(column.dim_),
+//	  column_(column.column_)
+//{}
 
 template<class Field_element_type, class Column_pairing_option>
 inline Set_column<Field_element_type,Column_pairing_option>::Set_column(const Set_column &column)
@@ -127,11 +127,11 @@ inline Set_column<Field_element_type,Column_pairing_option>::Set_column(Set_colu
 {}
 
 template<class Field_element_type, class Column_pairing_option>
-inline std::vector<Field_element_type> Set_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
+inline std::vector<Field_element_type> Set_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength) const
 {
 	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = it->get_element_value();
+		container[it->get_row_index()] = it->get_element();
 	}
 	return container;
 }
@@ -143,7 +143,7 @@ inline bool Set_column<Field_element_type,Column_pairing_option>::is_non_zero(in
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline bool Set_column<Field_element_type,Column_pairing_option>::is_empty()
+inline bool Set_column<Field_element_type,Column_pairing_option>::is_empty() const
 {
 	return column_.empty();
 }
@@ -155,18 +155,17 @@ inline dimension_type Set_column<Field_element_type,Column_pairing_option>::get_
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline int Set_column<Field_element_type,Column_pairing_option>::get_pivot()
+inline int Set_column<Field_element_type,Column_pairing_option>::get_pivot() const
 {
 	if (column_.empty()) return -1;
 	return column_.rbegin()->get_row_index();
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Field_element_type Set_column<Field_element_type,Column_pairing_option>::get_pivot_value()
+inline Field_element_type Set_column<Field_element_type,Column_pairing_option>::get_pivot_value() const
 {
 	if (column_.empty()) return 0;
-	Cell c = *(column_.rbegin());
-	return c.get_element();
+	return column_.rbegin()->get_element();
 }
 
 template<class Field_element_type, class Column_pairing_option>
@@ -224,7 +223,7 @@ inline Set_column<Field_element_type,Column_pairing_option> &Set_column<Field_el
 		auto c = column_.find(v);
 		if (c != column_.end()){
 			Cell newCell(*c);
-			newCell.get_element() += v.get_element_value();
+			newCell.get_element() += v.get_element();
 			column_.erase(c);
 			if (newCell.get_element() != 0u) column_.insert(newCell);
 		} else

@@ -27,6 +27,10 @@ public:
 	using cycle_type = std::vector<index>;
 	using Base_matrix = typename Master_matrix::Base_matrix_type;
 
+	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
+	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
+	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
+
 	void update_representative_cycles();
 
 	const std::vector<cycle_type>& get_representative_cycles();
@@ -39,10 +43,6 @@ public:
 		base1.representativeCycles_.swap(base2.representativeCycles_);
 		base1.birthToCycle_.swap(base2.birthToCycle_);
 	}
-
-	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
-	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
-	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
 protected:
 	static constexpr bool isActive_ = true;

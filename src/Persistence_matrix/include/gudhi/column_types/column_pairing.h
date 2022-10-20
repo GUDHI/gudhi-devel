@@ -25,8 +25,8 @@ public:
 	Column_pairing(const Column_pairing &toCopy);
 	Column_pairing(Column_pairing&& other) noexcept;
 
-	index get_paired_chain_index();
-	bool is_paired();
+	index get_paired_chain_index() const;
+	bool is_paired() const;
 	void assign_paired_chain(index other_col);
 	void unassign_paired_chain();
 
@@ -52,12 +52,12 @@ inline Column_pairing::Column_pairing(Column_pairing &&other) noexcept
 	: pairedColumn_(std::exchange(other.pairedColumn_, 0))
 {}
 
-inline index Column_pairing::get_paired_chain_index()
+inline index Column_pairing::get_paired_chain_index() const
 {
 	return pairedColumn_;
 }
 
-inline bool Column_pairing::is_paired()
+inline bool Column_pairing::is_paired() const
 {
 	return pairedColumn_ != -1;
 }

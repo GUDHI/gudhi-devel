@@ -34,12 +34,14 @@ public:
 
 	Reduced_cell_column_with_row();
 	template<class Chain_type>
-	Reduced_cell_column_with_row(index chainIndex, Chain_type& chain, dimension_type dimension);
+	Reduced_cell_column_with_row(index chainIndex, const Chain_type& chain, dimension_type dimension);
 	Reduced_cell_column_with_row(const Reduced_cell_column_with_row& other);
 	~Reduced_cell_column_with_row();
 
 	Column_type& get_column();
+	const Column_type& get_column() const;
 	Row_type& get_row();
+	const Row_type& get_row() const;
 	int get_pivot() const;
 	Field_element_type get_pivot_value();
 	int get_lowest_simplex_index() const;
@@ -70,7 +72,7 @@ inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Fiel
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
 template<class Chain_type>
 inline Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::Reduced_cell_column_with_row(
-		index chainIndex, Chain_type& chain, dimension_type dimension)
+		index chainIndex, const Chain_type& chain, dimension_type dimension)
 	: pivot_(chain.rbegin()->first), lowestSimplexIndex_(pivot_), dim_(dimension)
 {
 	for (const std::pair<index,Field_element_type>& p : chain){
@@ -126,7 +128,19 @@ inline Column_type& Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_b
 }
 
 template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
+inline const Column_type& Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::get_column() const
+{
+	return column_;
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
 inline Row_type& Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::get_row()
+{
+	return row_;
+}
+
+template<class Cell, class Column_type, class Row_type, class Row_base_hook, class Field_element_type, class Column_pairing_option>
+inline const Row_type& Reduced_cell_column_with_row<Cell,Column_type,Row_type,Row_base_hook,Field_element_type,Column_pairing_option>::get_row() const
 {
 	return row_;
 }

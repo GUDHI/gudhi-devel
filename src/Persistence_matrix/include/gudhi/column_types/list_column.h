@@ -31,19 +31,19 @@ public:
 
 	List_column();
 	template<class Boundary_type>
-	List_column(Boundary_type& boundary);
+	List_column(const Boundary_type& boundary);
 	template<class Boundary_type>
-	List_column(Boundary_type& boundary, dimension_type dimension);
-	List_column(List_column& column);
+	List_column(const Boundary_type& boundary, dimension_type dimension);
+//	List_column(List_column& column);
 	List_column(const List_column& column);
 	List_column(List_column&& column) noexcept;
 
-	std::vector<Field_element_type> get_content(unsigned int columnLength);
+	std::vector<Field_element_type> get_content(unsigned int columnLength) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty() const;
 	dimension_type get_dimension() const;
-	int get_pivot();
-	Field_element_type get_pivot_value();
+	int get_pivot() const;
+	Field_element_type get_pivot_value() const;
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
@@ -86,30 +86,30 @@ inline List_column<Field_element_type,Column_pairing_option>::List_column() : di
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline List_column<Field_element_type,Column_pairing_option>::List_column(Boundary_type &boundary)
+inline List_column<Field_element_type,Column_pairing_option>::List_column(const Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1)
 {
-	for (std::pair<index,Field_element_type>& p : boundary){
+	for (const std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace_back(p.second, p.first);
 	}
 }
 
 template<class Field_element_type, class Column_pairing_option>
 template<class Boundary_type>
-inline List_column<Field_element_type,Column_pairing_option>::List_column(Boundary_type &boundary, dimension_type dimension)
+inline List_column<Field_element_type,Column_pairing_option>::List_column(const Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension)
 {
-	for (std::pair<index,Field_element_type>& p : boundary){
+	for (const std::pair<index,Field_element_type>& p : boundary){
 		column_.emplace_back(p.second, p.first);
 	}
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline List_column<Field_element_type,Column_pairing_option>::List_column(List_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
-	  column_(column.column_)
-{}
+//template<class Field_element_type, class Column_pairing_option>
+//inline List_column<Field_element_type,Column_pairing_option>::List_column(List_column &column)
+//	: Column_pairing_option(column),
+//	  dim_(column.dim_),
+//	  column_(column.column_)
+//{}
 
 template<class Field_element_type, class Column_pairing_option>
 inline List_column<Field_element_type,Column_pairing_option>::List_column(const List_column &column)
@@ -126,7 +126,7 @@ inline List_column<Field_element_type,Column_pairing_option>::List_column(List_c
 {}
 
 template<class Field_element_type, class Column_pairing_option>
-inline std::vector<Field_element_type> List_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength)
+inline std::vector<Field_element_type> List_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength) const
 {
 	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
@@ -157,7 +157,7 @@ inline dimension_type List_column<Field_element_type,Column_pairing_option>::get
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline int List_column<Field_element_type,Column_pairing_option>::get_pivot()
+inline int List_column<Field_element_type,Column_pairing_option>::get_pivot() const
 {
 	if (column_.empty()) return -1;
 
@@ -165,7 +165,7 @@ inline int List_column<Field_element_type,Column_pairing_option>::get_pivot()
 }
 
 template<class Field_element_type, class Column_pairing_option>
-inline Field_element_type List_column<Field_element_type,Column_pairing_option>::get_pivot_value()
+inline Field_element_type List_column<Field_element_type,Column_pairing_option>::get_pivot_value() const
 {
 	if (column_.empty()) return 0;
 
@@ -242,12 +242,12 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
 		if (curRowToAdd == curRowTarget){
-			itTarget->get_element() += itToAdd->get_element_value();
+			itTarget->get_element() += itToAdd->get_element();
 			if (itTarget->get_element() == 0u) column_.erase(itTarget++);
 			else itTarget++;
 			itToAdd++;
 		} else if (curRowToAdd < curRowTarget){
-			column_.insert(itTarget, Cell(itToAdd->get_element_value(), curRowToAdd));
+			column_.insert(itTarget, Cell(itToAdd->get_element(), curRowToAdd));
 			itToAdd++;
 		} else {
 			itTarget++;
@@ -260,7 +260,7 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 	while (itToAdd != column.column_.end()){
 		curRowToAdd = itToAdd->get_row_index();
 		if (itToAdd != column.column_.end()){
-			column_.push_back(Cell(itToAdd->get_element_value(), curRowToAdd));
+			column_.push_back(Cell(itToAdd->get_element(), curRowToAdd));
 			itToAdd++;
 		}
 	}

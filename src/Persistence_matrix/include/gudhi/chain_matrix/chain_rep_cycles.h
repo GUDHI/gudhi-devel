@@ -27,6 +27,10 @@ public:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
+	Chain_representative_cycles(matrix_type& matrix, dictionnary_type& pivotToPosition);
+	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
+	Chain_representative_cycles(Chain_representative_cycles&& other) noexcept;
+
 	void update_representative_cycles();
 
 	const std::vector<cycle_type>& get_representative_cycles();
@@ -40,10 +44,6 @@ public:
 		base1.representativeCycles_.swap(base2.representativeCycles_);
 		base1.birthToCycle_.swap(base2.birthToCycle_);
 	}
-
-	Chain_representative_cycles(matrix_type& matrix, dictionnary_type& pivotToPosition);
-	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
-	Chain_representative_cycles(Chain_representative_cycles&& other) noexcept;
 
 protected:
 	using column_type = typename Master_matrix::Column_type;

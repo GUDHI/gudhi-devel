@@ -28,12 +28,12 @@ public:
 		f1 += f2;
 		return f1;
 	}
-	Z2_field_element& operator+=(unsigned int const &v);
-	friend Z2_field_element operator+(Z2_field_element f, unsigned int const& v){
+	Z2_field_element& operator+=(unsigned int const v);
+	friend Z2_field_element operator+(Z2_field_element f, unsigned int const v){
 		f += v;
 		return f;
 	}
-	friend unsigned int operator+(unsigned int const&v, Z2_field_element const& f){
+	friend unsigned int operator+(unsigned int const v, Z2_field_element const& f){
 		return f.element_ != (v % 2);
 	}
 
@@ -42,12 +42,12 @@ public:
 		f1 -= f2;
 		return f1;
 	}
-	Z2_field_element& operator-=(unsigned int const &v);
-	friend Z2_field_element operator-(Z2_field_element f, unsigned int const& v){
+	Z2_field_element& operator-=(unsigned int const v);
+	friend Z2_field_element operator-(Z2_field_element f, unsigned int const v){
 		f -= v;
 		return f;
 	}
-	friend unsigned int operator-(unsigned int const&v, Z2_field_element const& f){
+	friend unsigned int operator-(unsigned int const v, Z2_field_element const& f){
 		return f.element_ != (v % 2);
 	}
 
@@ -56,27 +56,27 @@ public:
 		f1 *= f2;
 		return f1;
 	}
-	Z2_field_element& operator*=(unsigned int const &v);
-	friend Z2_field_element operator*(Z2_field_element f, unsigned int const& v){
+	Z2_field_element& operator*=(unsigned int const v);
+	friend Z2_field_element operator*(Z2_field_element f, unsigned int const v){
 		f *= v;
 		return f;
 	}
-	friend unsigned int operator*(unsigned int const&v, Z2_field_element const& f){
+	friend unsigned int operator*(unsigned int const v, Z2_field_element const& f){
 		return f.element_ && (v % 2);
 	}
 
 	friend bool operator==(const Z2_field_element& f1, const Z2_field_element& f2){
 		return f1.element_ == f2.element_;
 	}
-	friend bool operator==(const unsigned int& v, const Z2_field_element& f){
+	friend bool operator==(const unsigned int v, const Z2_field_element& f){
 		return (v % 2) == f.element_;
 	}
-	friend bool operator==(const Z2_field_element& f, const unsigned int& v){
+	friend bool operator==(const Z2_field_element& f, const unsigned int v){
 		return (v % 2) == f.element_;
 	}
 
 	Z2_field_element& operator=(Z2_field_element other);
-	Z2_field_element& operator=(const unsigned int& value);
+	Z2_field_element& operator=(const unsigned int value);
 	operator unsigned int() const;
 	friend void swap(Z2_field_element& f1, Z2_field_element& f2){
 		std::swap(f1.element_, f2.element_);
@@ -116,7 +116,7 @@ inline Z2_field_element &Z2_field_element::operator+=(Z2_field_element const &f)
 	return *this;
 }
 
-inline Z2_field_element &Z2_field_element::operator+=(unsigned int const &v)
+inline Z2_field_element &Z2_field_element::operator+=(unsigned int const v)
 {
 	element_ = (element_ != (v % 2));
 	return *this;
@@ -128,7 +128,7 @@ inline Z2_field_element &Z2_field_element::operator-=(const Z2_field_element &f)
 	return *this;
 }
 
-inline Z2_field_element &Z2_field_element::operator-=(unsigned int const &v)
+inline Z2_field_element &Z2_field_element::operator-=(unsigned int const v)
 {
 	element_ = (element_ != (v % 2));
 	return *this;
@@ -140,7 +140,7 @@ inline Z2_field_element &Z2_field_element::operator*=(const Z2_field_element &f)
 	return *this;
 }
 
-inline Z2_field_element &Z2_field_element::operator*=(unsigned int const &v)
+inline Z2_field_element &Z2_field_element::operator*=(unsigned int const v)
 {
 	element_ = (element_ && (v % 2));
 	return *this;
@@ -152,7 +152,7 @@ inline Z2_field_element &Z2_field_element::operator=(Z2_field_element other)
 	return *this;
 }
 
-inline Z2_field_element &Z2_field_element::operator=(unsigned int const &value)
+inline Z2_field_element &Z2_field_element::operator=(unsigned int const value)
 {
 	element_ = value % 2;
 	return *this;

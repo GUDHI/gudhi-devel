@@ -99,7 +99,7 @@ public:
 		return element_;
 	};
 
-	unsigned int get_element_value() const{
+	const Field_element_type& get_element() const{
 		return element_;
 	};
 
@@ -130,7 +130,7 @@ public:
 		return element_;
 	};
 
-	Field_element_type get_element_value() const{
+	const Field_element_type& get_element() const{
 		return element_;
 	};
 

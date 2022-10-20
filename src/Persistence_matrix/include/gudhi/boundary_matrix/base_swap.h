@@ -23,6 +23,13 @@ template<class Master_matrix>
 class Base_swap
 {
 public:
+	using matrix_type = typename Master_matrix::column_container_type;
+
+	Base_swap(matrix_type &matrix);
+	Base_swap(matrix_type &matrix, unsigned int numberOfColumns);
+	Base_swap(const Base_swap& matrixToCopy);
+	Base_swap(Base_swap&& other) noexcept;
+
 	void swap_columns(index columnIndex1, index columnIndex2);
 	void swap_rows(index rowIndex1, index rowIndex2);
 	void swap_at_indices(index index1, index index2);
@@ -34,13 +41,6 @@ public:
 		base1.rowToIndex_.swap(base2.rowToIndex_);
 		std::swap(base1.rowSwapped_, base2.rowSwapped_);
 	}
-
-	using matrix_type = typename Master_matrix::column_container_type;
-
-	Base_swap(matrix_type &matrix);
-	Base_swap(matrix_type &matrix, unsigned int numberOfColumns);
-	Base_swap(const Base_swap& matrixToCopy);
-	Base_swap(Base_swap&& other) noexcept;
 
 protected:
 	using index_dictionnary_type = typename Master_matrix::template dictionnary_type<unsigned int>;

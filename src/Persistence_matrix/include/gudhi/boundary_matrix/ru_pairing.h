@@ -24,17 +24,17 @@ class RU_pairing
 public:
 	using barcode_type = typename Master_matrix::barcode_type;
 
-	const barcode_type& get_current_barcode();
+	RU_pairing();
+	RU_pairing(const RU_pairing &matrixToCopy);
+	RU_pairing(RU_pairing&& other) noexcept;
+
+	const barcode_type& get_current_barcode() const;
 
 	RU_pairing& operator=(RU_pairing other);
 	friend void swap(RU_pairing& pairing1, RU_pairing& pairing2){
 		pairing1.barcode_.swap(pairing2.barcode_);
 		pairing1.indexToBar_.swap(pairing2.indexToBar_);
 	}
-
-	RU_pairing();
-	RU_pairing(const RU_pairing &matrixToCopy);
-	RU_pairing(RU_pairing&& other) noexcept;
 
 protected:
 	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
@@ -62,7 +62,7 @@ inline RU_pairing<Master_matrix>::RU_pairing(RU_pairing<Master_matrix> &&other) 
 
 template<class Master_matrix>
 inline const typename RU_pairing<Master_matrix>::barcode_type &
-RU_pairing<Master_matrix>::get_current_barcode()
+RU_pairing<Master_matrix>::get_current_barcode() const
 {
 	return barcode_;
 }

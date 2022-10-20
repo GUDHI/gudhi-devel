@@ -24,7 +24,11 @@ class Chain_pairing
 public:
 	using barcode_type = typename Master_matrix::barcode_type;
 
-	const barcode_type& get_current_barcode();
+	Chain_pairing();
+	Chain_pairing(const Chain_pairing &matrixToCopy);
+	Chain_pairing(Chain_pairing&& other) noexcept;
+
+	const barcode_type& get_current_barcode() const;
 
 	Chain_pairing& operator=(Chain_pairing other);
 	friend void swap(Chain_pairing& pairing1,
@@ -32,10 +36,6 @@ public:
 		pairing1.barcode_.swap(pairing2.barcode_);
 		pairing1.indexToBar_.swap(pairing2.indexToBar_);
 	}
-
-	Chain_pairing();
-	Chain_pairing(const Chain_pairing &matrixToCopy);
-	Chain_pairing(Chain_pairing&& other) noexcept;
 
 protected:
 	using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
@@ -65,7 +65,7 @@ inline Chain_pairing<Master_matrix>::Chain_pairing(Chain_pairing<Master_matrix> 
 
 template<class Master_matrix>
 inline const typename Chain_pairing<Master_matrix>::barcode_type &
-Chain_pairing<Master_matrix>::get_current_barcode()
+Chain_pairing<Master_matrix>::get_current_barcode() const
 {
 	return barcode_;
 }

@@ -32,17 +32,19 @@ public:
 
 	Chain_matrix_with_row_access_with_removals();
 	template<class Boundary_type = boundary_type>
-	Chain_matrix_with_row_access_with_removals(std::vector<Boundary_type>& orderedBoundaries);
+	Chain_matrix_with_row_access_with_removals(const std::vector<Boundary_type>& orderedBoundaries);
 	Chain_matrix_with_row_access_with_removals(unsigned int numberOfColumns);
 	Chain_matrix_with_row_access_with_removals(const Chain_matrix_with_row_access_with_removals& matrixToCopy);
 	Chain_matrix_with_row_access_with_removals(Chain_matrix_with_row_access_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
+	void insert_boundary(const Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
 	Column_type& get_column(index columnIndex);
+	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
+	const Row_type& get_row(index rowIndex) const;
 	void erase_last();
 
 	dimension_type get_max_dimension() const;
@@ -54,11 +56,11 @@ public:
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
-	bool is_zero_cell(index columnIndex, index rowIndex);
-	bool is_zero_column(index columnIndex);
+	bool is_zero_cell(index columnIndex, index rowIndex) const;
+	bool is_zero_column(index columnIndex) const;
 
-	index get_column_with_pivot(index simplexIndex);
-	index get_pivot(index columnIndex);
+	index get_column_with_pivot(index simplexIndex) const;
+	index get_pivot(index columnIndex) const;
 
 	Chain_matrix_with_row_access_with_removals& operator=(Chain_matrix_with_row_access_with_removals other);
 	friend void swap(Chain_matrix_with_row_access_with_removals& matrix1,
@@ -76,7 +78,7 @@ public:
 		std::swap(matrix1.maxDim_, matrix2.maxDim_);
 	}
 
-	void print();  //for debug
+	void print() const;  //for debug
 
 private:
 	using swap_opt = typename Master_matrix::Chain_vine_swap_option;
@@ -95,11 +97,11 @@ private:
 	dimension_type maxDim_;
 
 	template<class Chain_type>
-	void _insert_chain(Chain_type& column, dimension_type dimension);
+	void _insert_chain(const Chain_type& column, dimension_type dimension);
 	template<class Chain_type>
-	void _insert_chain(Chain_type& column, dimension_type dimension, index pair);
-	void _add_to(Column_type &column, std::set<index>& set);
-	void _add_to(Column_type &column, std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> >& set, Field_element_type& coef);
+	void _insert_chain(const Chain_type& column, dimension_type dimension, index pair);
+	void _add_to(const Column_type &column, std::set<index>& set);
+	void _add_to(const Column_type &column, std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> >& set, Field_element_type& coef);
 
 	static constexpr bool _barcode_option_is_active();
 	constexpr barcode_type& _barcode();
@@ -117,7 +119,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_with_row_access_with_removals(std::vector<Boundary_type> &orderedBoundaries)
+inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_with_row_access_with_removals(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Chain_pairing_option(),
 	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
@@ -126,7 +128,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	  nextInsertIndex_(0),
 	  maxDim_(-1)
 {
-	for (Boundary_type &b : orderedBoundaries){
+	for (const Boundary_type &b : orderedBoundaries){
 		insert_boundary(b);
 	}
 }
@@ -166,7 +168,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	std::vector<index> chains_in_F;
 	insert_boundary(boundary, chains_in_F);
@@ -174,7 +176,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_){
 		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
@@ -357,7 +359,19 @@ inline typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Colum
 }
 
 template<class Master_matrix>
+inline const typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Column_type &Chain_matrix_with_row_access_with_removals<Master_matrix>::get_column(index columnIndex) const
+{
+	return matrix_.at(columnIndex);
+}
+
+template<class Master_matrix>
 inline typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Row_type& Chain_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex)
+{
+	return matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row();
+}
+
+template<class Master_matrix>
+inline const typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Row_type& Chain_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
 	return matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row();
 }
@@ -431,25 +445,25 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::zero_colu
 }
 
 template<class Master_matrix>
-inline bool Chain_matrix_with_row_access_with_removals<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex)
+inline bool Chain_matrix_with_row_access_with_removals<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	return !matrix_.at(columnIndex).is_non_zero(rowIndex);
 }
 
 template<class Master_matrix>
-inline bool Chain_matrix_with_row_access_with_removals<Master_matrix>::is_zero_column(index columnIndex)
+inline bool Chain_matrix_with_row_access_with_removals<Master_matrix>::is_zero_column(index columnIndex) const
 {
 	return matrix_.at(columnIndex).is_empty();
 }
 
 template<class Master_matrix>
-inline index Chain_matrix_with_row_access_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex)
+inline index Chain_matrix_with_row_access_with_removals<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
 	return pivotToColumnIndex_.at(simplexIndex);
 }
 
 template<class Master_matrix>
-inline index Chain_matrix_with_row_access_with_removals<Master_matrix>::get_pivot(index columnIndex)
+inline index Chain_matrix_with_row_access_with_removals<Master_matrix>::get_pivot(index columnIndex) const
 {
 	return matrix_.at(columnIndex).get_pivot();
 }
@@ -469,23 +483,23 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix> &Chain_matrix_w
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::print()
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::print() const
 {
 	std::cout << "Column Matrix:\n";
-	for (auto p : pivotToColumnIndex_){
-		typename Column_type::Column_type& col = matrix_.at(p.second).get_column();
-		for (auto it = col.begin(); it != col.end(); it++){
-			auto &cell = *it;
+	for (const auto p : pivotToColumnIndex_){
+		const typename Column_type::Column_type& col = matrix_.at(p.second).get_column();
+		for (const auto it = col.begin(); it != col.end(); it++){
+			const auto &cell = *it;
 			std::cout << cell.get_row_index() << " ";
 		}
 		std::cout << "(" << p.first << ", " << p.second << ")\n";
 	}
 	std::cout << "\n";
 	std::cout << "Row Matrix:\n";
-	for (auto p : pivotToColumnIndex_){
-		Row_type& col = matrix_.at(p.second).get_row();
-		for (auto it = col.begin(); it != col.end(); it++){
-			auto &cell = *it;
+	for (const auto p : pivotToColumnIndex_){
+		const Row_type& col = matrix_.at(p.second).get_row();
+		for (const auto it = col.begin(); it != col.end(); it++){
+			const auto &cell = *it;
 			std::cout << cell.get_column_index() << " ";
 		}
 		std::cout << "(" << p.first << ", " << p.second << ")\n";
@@ -495,7 +509,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::print()
 
 template<class Master_matrix>
 template<class Chain_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(Chain_type &column, dimension_type dimension)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(const Chain_type &column, dimension_type dimension)
 {
 	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_));
 
@@ -512,7 +526,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 
 template<class Master_matrix>
 template<class Chain_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(Chain_type &column, dimension_type dimension, index pair)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(const Chain_type &column, dimension_type dimension, index pair)
 {
 	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_));
 	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
@@ -530,7 +544,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(Column_type &column, std::set<index> &set)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(const Column_type &column, std::set<index> &set)
 {
 	std::pair<std::set<index>::iterator,bool> res_insert;
 	for (const Cell &cell : column.get_column()) {
@@ -543,11 +557,11 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(C
 
 template<class Master_matrix>
 void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(
-		Column_type &column,
+		const Column_type &column,
 		std::set<std::pair<index, Field_element_type>, CellPairComparator<Field_element_type> > &set,
 		Field_element_type& coef)
 {
-	for (Cell &cell : column.get_column()) {
+	for (const Cell &cell : column.get_column()) {
 		std::pair<index,Field_element_type> p(cell.get_row_index(), cell.get_element());
 		auto res_it = set.find(p);
 

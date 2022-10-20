@@ -380,15 +380,17 @@ public:
 	using cycle_type = std::vector<index>;
 
 	Matrix();
-	Matrix(boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
+	Matrix(const boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
 	Matrix(const Matrix &matrixToCopy);
 	Matrix(Matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
+	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
+	const Row_type& get_row(index rowIndex) const;
 	void erase_last();
 
 	dimension_type get_max_dimension() const;
@@ -400,10 +402,10 @@ public:
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
-	bool is_zero_cell(index columnIndex, index rowIndex);
+	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	index get_column_with_pivot(index simplexIndex);
+	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
 	Matrix& operator=(Matrix other);
@@ -458,7 +460,7 @@ inline Matrix<Options>::Matrix()
 }
 
 template<class Options>
-inline Matrix<Options>::Matrix(boundary_matrix &boundaries) : matrix_(boundaries)
+inline Matrix<Options>::Matrix(const boundary_matrix &boundaries) : matrix_(boundaries)
 {
 	_assert_options();
 }
@@ -483,7 +485,7 @@ inline Matrix<Options>::Matrix(Matrix &&other) noexcept : matrix_(std::move(othe
 
 template<class Options>
 template<class Boundary_type>
-inline void Matrix<Options>::insert_boundary(Boundary_type &boundary)
+inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary)
 {
 	matrix_.insert_boundary(boundary);
 }
@@ -495,7 +497,21 @@ inline typename Matrix<Options>::Column_type &Matrix<Options>::get_column(index 
 }
 
 template<class Options>
+inline const typename Matrix<Options>::Column_type &Matrix<Options>::get_column(index columnIndex) const
+{
+	return matrix_.get_column(columnIndex);
+}
+
+template<class Options>
 inline typename Matrix<Options>::Row_type &Matrix<Options>::get_row(index rowIndex)
+{
+	static_assert(Options::has_row_access, "'get_row' is not implemented for the chosen options.");
+
+	return matrix_.get_row(rowIndex);
+}
+
+template<class Options>
+inline const typename Matrix<Options>::Row_type &Matrix<Options>::get_row(index rowIndex) const
 {
 	static_assert(Options::has_row_access, "'get_row' is not implemented for the chosen options.");
 
@@ -547,7 +563,7 @@ inline void Matrix<Options>::zero_column(index columnIndex)
 }
 
 template<class Options>
-inline bool Matrix<Options>::is_zero_cell(index columnIndex, index rowIndex)
+inline bool Matrix<Options>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	return matrix_.is_zero_cell(columnIndex, rowIndex);
 }
@@ -559,7 +575,7 @@ inline bool Matrix<Options>::is_zero_column(index columnIndex)
 }
 
 template<class Options>
-inline index Matrix<Options>::get_column_with_pivot(index simplexIndex)
+inline index Matrix<Options>::get_column_with_pivot(index simplexIndex) const
 {
 	return matrix_.get_column_with_pivot(simplexIndex);
 }

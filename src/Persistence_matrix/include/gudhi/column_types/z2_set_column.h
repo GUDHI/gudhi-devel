@@ -31,18 +31,18 @@ public:
 
 	Z2_set_column();
 	template<class Boundary_type>
-	Z2_set_column(Boundary_type& boundary);
+	Z2_set_column(const Boundary_type& boundary);
 	template<class Boundary_type>
-	Z2_set_column(Boundary_type& boundary, dimension_type dimension);
-	Z2_set_column(Z2_set_column& column);
+	Z2_set_column(const Boundary_type& boundary, dimension_type dimension);
+//	Z2_set_column(Z2_set_column& column);
 	Z2_set_column(const Z2_set_column& column);
 	Z2_set_column(Z2_set_column&& column) noexcept;
 
-	std::vector<bool> get_content(unsigned int columnLength);
+	std::vector<bool> get_content(unsigned int columnLength) const;
 	bool is_non_zero(index rowIndex) const;
-	bool is_empty();
+	bool is_empty() const;
 	dimension_type get_dimension() const;
-	int get_pivot();
+	int get_pivot() const;
 	void clear();
 	void clear(index rowIndex);
 	void reorder(std::vector<index>& valueMap);
@@ -76,24 +76,24 @@ inline Z2_set_column<Column_pairing_option>::Z2_set_column() : dim_(0)
 
 template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_set_column<Column_pairing_option>::Z2_set_column(Boundary_type &boundary)
+inline Z2_set_column<Column_pairing_option>::Z2_set_column(const Boundary_type &boundary)
 	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
 	  column_(boundary.begin(), boundary.end())
 {}
 
 template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_set_column<Column_pairing_option>::Z2_set_column(Boundary_type &boundary, dimension_type dimension)
+inline Z2_set_column<Column_pairing_option>::Z2_set_column(const Boundary_type &boundary, dimension_type dimension)
 	: dim_(dimension),
 	  column_(boundary.begin(), boundary.end())
 {}
 
-template<class Column_pairing_option>
-inline Z2_set_column<Column_pairing_option>::Z2_set_column(Z2_set_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
-	  column_(column.column_)
-{}
+//template<class Column_pairing_option>
+//inline Z2_set_column<Column_pairing_option>::Z2_set_column(Z2_set_column &column)
+//	: Column_pairing_option(column),
+//	  dim_(column.dim_),
+//	  column_(column.column_)
+//{}
 
 template<class Column_pairing_option>
 inline Z2_set_column<Column_pairing_option>::Z2_set_column(const Z2_set_column &column)
@@ -110,7 +110,7 @@ inline Z2_set_column<Column_pairing_option>::Z2_set_column(Z2_set_column &&colum
 {}
 
 template<class Column_pairing_option>
-inline std::vector<bool> Z2_set_column<Column_pairing_option>::get_content(unsigned int columnLength)
+inline std::vector<bool> Z2_set_column<Column_pairing_option>::get_content(unsigned int columnLength) const
 {
 	std::vector<bool> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
@@ -126,7 +126,7 @@ inline bool Z2_set_column<Column_pairing_option>::is_non_zero(index rowIndex) co
 }
 
 template<class Column_pairing_option>
-inline bool Z2_set_column<Column_pairing_option>::is_empty()
+inline bool Z2_set_column<Column_pairing_option>::is_empty() const
 {
 	return column_.empty();
 }
@@ -138,7 +138,7 @@ inline dimension_type Z2_set_column<Column_pairing_option>::get_dimension() cons
 }
 
 template<class Column_pairing_option>
-inline int Z2_set_column<Column_pairing_option>::get_pivot()
+inline int Z2_set_column<Column_pairing_option>::get_pivot() const
 {
 	if (column_.empty()) return -1;
 	return column_.rbegin()->get_row_index();

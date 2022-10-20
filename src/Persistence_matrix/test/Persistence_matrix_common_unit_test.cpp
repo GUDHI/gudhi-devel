@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_boundary_matrix_methods, Matrix, list_of_Zp_bou
 
 	std::set<std::pair<unsigned int,unsigned int> > rowIndices;
 	for (auto& cell : m.get_column(4)){
-		rowIndices.insert({cell.get_row_index(), cell.get_element_value()});
+		rowIndices.insert({cell.get_row_index(), cell.get_element()});
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	unsigned int i = 1;
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_boundary_matrix_methods, Matrix, list_of_Zp_bou
 
 	rowIndices.clear();
 	for (auto& cell : m.get_column(4)){
-		rowIndices.insert({cell.get_row_index(), cell.get_element_value()});
+		rowIndices.insert({cell.get_row_index(), cell.get_element()});
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 3);
 	i = 0;
@@ -461,8 +461,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_chain_matrix_methods, Matrix, list_of_Zp_chain_
 
 	std::set<std::pair<unsigned int,unsigned int> > rowIndices;
 	for (auto& cell : m.get_column(4)){
-//		std::cout << "1: " << cell.get_row_index() << ", " << cell.get_element_value() << "\n";
-		rowIndices.insert({cell.get_row_index(), cell.get_element_value()});
+//		std::cout << "1: " << cell.get_row_index() << ", " << cell.get_element() << "\n";
+		rowIndices.insert({cell.get_row_index(), cell.get_element()});
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	unsigned int i = 3;
@@ -475,8 +475,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_chain_matrix_methods, Matrix, list_of_Zp_chain_
 
 	rowIndices.clear();
 	for (auto& cell : m.get_column(4)){
-		rowIndices.insert({cell.get_row_index(), cell.get_element_value()});
-//		std::cout << "2: " << cell.get_row_index() << ", " << cell.get_element_value() << "\n";
+		rowIndices.insert({cell.get_row_index(), cell.get_element()});
+//		std::cout << "2: " << cell.get_row_index() << ", " << cell.get_element() << "\n";
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	i = 3;

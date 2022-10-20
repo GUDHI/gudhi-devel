@@ -26,6 +26,10 @@ public:
 	using barcode_type = typename Master_matrix::barcode_type;
 	using matrix_type = typename Master_matrix::column_container_type;
 
+	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
+	Base_pairing(const Base_pairing& matrixToCopy);
+	Base_pairing(Base_pairing&& other) noexcept;
+
 	const barcode_type& get_current_barcode();
 
 	Base_pairing& operator=(Base_pairing other);
@@ -36,10 +40,6 @@ public:
 		pairing1.indexToBar_.swap(pairing2.indexToBar_);
 		std::swap(pairing1.isReduced_, pairing2.isReduced_);
 	}
-
-	Base_pairing(matrix_type& matrix, dimension_type& maxDim);
-	Base_pairing(const Base_pairing& matrixToCopy);
-	Base_pairing(Base_pairing&& other) noexcept;
 
 protected:
 	using column_type = typename Master_matrix::Column_type;
