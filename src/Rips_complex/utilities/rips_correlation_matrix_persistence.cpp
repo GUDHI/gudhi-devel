@@ -118,7 +118,7 @@ void program_options(int argc, char* argv[], std::string& csv_matrix_file, std::
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "min-edge-corelation,c", po::value<Filtration_value>(&correlation_min)->default_value(0),
       "Minimal corelation of an edge for the Rips complex construction.")(
       "cpx-dimension,d", po::value<int>(&dim_max)->default_value(1),

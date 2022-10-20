@@ -163,7 +163,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
       "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
       "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-alpha-square-value,r", po::value<Filtration_value>(&alpha_square_max_value)
                                       ->default_value(std::numeric_limits<Filtration_value>::infinity()),
       "Maximal alpha square value for the Alpha complex construction.")(
