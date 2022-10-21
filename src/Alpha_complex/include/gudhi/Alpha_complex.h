@@ -45,7 +45,6 @@
 #include <stdexcept>
 #include <numeric>  // for std::iota
 #include <algorithm>  // for std::sort
-#include <initializer_list>  // for complex.insert_simplex_and_subfaces({...}, ...)
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -394,11 +393,13 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (num_vertices() > 0) {
+      std::vector<Vertex_handle> one_vertex(1);
       for (auto vertex : vertices_) {
 #ifdef DEBUG_TRACES
         std::clog << "SimplicialComplex insertion " << vertex << std::endl;
 #endif  // DEBUG_TRACES
-        complex.insert_simplex_and_subfaces({static_cast<Vertex_handle>(vertex)}, std::numeric_limits<double>::quiet_NaN());
+        one_vertex[0] = vertex;
+        complex.insert_simplex_and_subfaces(one_vertex, std::numeric_limits<double>::quiet_NaN());
       }
 
       for (auto cit = triangulation_->finite_full_cells_begin();
