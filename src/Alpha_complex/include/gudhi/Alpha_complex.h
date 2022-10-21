@@ -17,8 +17,7 @@
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 
-#include <stdlib.h>
-#include <math.h>  // isnan, fmax
+#include <cmath>  // isnan, fmax
 #include <memory>  // for std::unique_ptr
 #include <cstddef>  // for std::size_t
 
@@ -45,6 +44,8 @@
 #include <utility>  // std::pair
 #include <stdexcept>
 #include <numeric>  // for std::iota
+#include <algorithm>  // for std::sort
+#include <initializer_list>  // for complex.insert_simplex_and_subfaces({...}, ...)
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -146,6 +147,10 @@ class Alpha_complex {
   std::unique_ptr<Triangulation> triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
   A_kernel_d kernel_;
+  /** \brief Vertices to be inserted first by the create_complex method to avoid quadratic complexity.
+   * It isn't just [0, n) if some points have multiplicity (only one copy appears in the complex).
+  */
+  std::vector<std::size_t> vertices_;
 
   /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
   std::vector<Sphere> cache_, old_cache_;
@@ -279,6 +284,9 @@ class Alpha_complex {
       // structure to retrieve CGAL points from vertex handle - one vertex handle per point.
       // Needs to be constructed before as vertex handles arrives in no particular order.
       vertex_handle_to_iterator_.resize(point_cloud.size());
+      // List of sorted unique vertices in the triangulation. We take advantage of the existing loop to construct it
+      // Vertices list avoids quadratic complexity with the Simplex_tree. We should not fill it up with Toplex_map e.g.
+      vertices_.reserve(triangulation_->number_of_vertices());
       // Loop on triangulation vertices list
       for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
         if (!triangulation_->is_infinite(*vit)) {
@@ -286,8 +294,10 @@ class Alpha_complex {
           std::clog << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
           vertex_handle_to_iterator_[vit->data()] = vit;
+          vertices_.push_back(vit->data());
         }
       }
+      std::sort(vertices_.begin(), vertices_.end());
       // --------------------------------------------------------------------------------------------
     }
   }
@@ -384,12 +394,19 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (num_vertices() > 0) {
+      for (auto vertex : vertices_) {
+#ifdef DEBUG_TRACES
+        std::clog << "SimplicialComplex insertion " << vertex << std::endl;
+#endif  // DEBUG_TRACES
+        complex.insert_simplex_and_subfaces({static_cast<Vertex_handle>(vertex)}, std::numeric_limits<double>::quiet_NaN());
+      }
+
       for (auto cit = triangulation_->finite_full_cells_begin();
            cit != triangulation_->finite_full_cells_end();
            ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-        std::clog << "Simplex_tree insertion ";
+        std::clog << "SimplicialComplex insertion ";
 #endif  // DEBUG_TRACES
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           if (*vit != nullptr) {
