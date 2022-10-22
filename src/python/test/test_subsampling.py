@@ -93,7 +93,7 @@ def test_simple_choose_n_farthest_points_randomed():
 
     # Go further than point set on purpose
     for iter in range(1, 10):
-        sub_set = gudhi.choose_n_farthest_points(points=point_set, nb_points=iter)
+        sub_set = gudhi.choose_n_farthest_points(points=point_set, nb_points=iter, fast=False)
         for sub in sub_set:
             found = False
             for point in point_set:
