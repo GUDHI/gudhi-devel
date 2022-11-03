@@ -101,13 +101,17 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  */
 template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, bool Weighted = false>
 class Alpha_complex {
+ private:
+  // Vertex_handle internal type (required by triangulation_ and vertices_).
+  using Internal_vertex_handle = std::ptrdiff_t;
+
  public:
   /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
   using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
 
   // Add an int in TDS to save point index in the structure
   using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
-                                                 CGAL::Triangulation_vertex<Geom_traits, std::ptrdiff_t>,
+                                                 CGAL::Triangulation_vertex<Geom_traits, Internal_vertex_handle>,
                                                  CGAL::Triangulation_full_cell<Geom_traits> >;
 
   /** \brief A (Weighted or not) Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
@@ -132,9 +136,6 @@ class Alpha_complex {
   // Vertex_iterator type from CGAL.
   using CGAL_vertex_iterator = typename Triangulation::Vertex_iterator;
 
-  // size_type type from CGAL.
-  using size_type = typename Triangulation::size_type;
-
   // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
   using Vector_vertex_iterator = std::vector< CGAL_vertex_iterator >;
 
@@ -149,7 +150,7 @@ class Alpha_complex {
   /** \brief Vertices to be inserted first by the create_complex method to avoid quadratic complexity.
    * It isn't just [0, n) if some points have multiplicity (only one copy appears in the complex).
   */
-  std::vector<std::size_t> vertices_;
+  std::vector<Internal_vertex_handle> vertices_;
 
   /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
   std::vector<Sphere> cache_, old_cache_;
@@ -261,11 +262,11 @@ class Alpha_complex {
       std::vector<Point_d> point_cloud(first, last);
 
       // Creates a vector {0, 1, ..., N-1}
-      std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
-                                          boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
+      std::vector<Internal_vertex_handle> indices(boost::counting_iterator<Internal_vertex_handle>(0),
+                                                  boost::counting_iterator<Internal_vertex_handle>(point_cloud.size()));
 
       using Point_property_map = boost::iterator_property_map<typename std::vector<Point_d>::iterator,
-                                                              CGAL::Identity_property_map<std::ptrdiff_t>>;
+                                                              CGAL::Identity_property_map<Internal_vertex_handle>>;
       using Search_traits_d = CGAL::Spatial_sort_traits_adapter_d<Geom_traits, Point_property_map>;
 
       CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
