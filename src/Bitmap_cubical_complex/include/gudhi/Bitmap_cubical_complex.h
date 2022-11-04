@@ -249,7 +249,7 @@ class Bitmap_cubical_complex : public T {
     typedef Simplex_handle value_type;
     typedef std::ptrdiff_t difference_type;
     typedef value_type* pointer;
-    typedef value_type& reference;
+    typedef value_type reference;
 
     Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) {}
 
@@ -400,7 +400,7 @@ class Bitmap_cubical_complex : public T {
     typedef Simplex_handle value_type;
     typedef std::ptrdiff_t difference_type;
     typedef value_type* pointer;
-    typedef value_type& reference;
+    typedef value_type reference;
 
     Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
       if (globalDbg) {

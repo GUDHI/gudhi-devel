@@ -254,10 +254,10 @@ class Bitmap_cubical_complex_base {
   class All_cells_iterator {
    public:
     typedef std::input_iterator_tag iterator_category;
-    typedef T value_type;
+    typedef std::size_t value_type;
     typedef std::ptrdiff_t difference_type;
     typedef value_type* pointer;
-    typedef value_type& reference;
+    typedef value_type reference;
 
     All_cells_iterator() { this->counter = 0; }
 
@@ -364,10 +364,10 @@ class Bitmap_cubical_complex_base {
   class Top_dimensional_cells_iterator {
    public:
     typedef std::input_iterator_tag iterator_category;
-    typedef T value_type;
+    typedef std::size_t value_type;
     typedef std::ptrdiff_t difference_type;
     typedef value_type* pointer;
-    typedef value_type& reference;
+    typedef value_type reference;
 
     Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<std::size_t>(b.dimension());
