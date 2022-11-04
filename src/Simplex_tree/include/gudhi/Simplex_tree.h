@@ -24,6 +24,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 #include <boost/container/static_vector.hpp>
 
 #ifdef GUDHI_USE_TBB
@@ -1119,16 +1120,12 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph));
+    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    // This automatically sorts the vertices, the graph concept doesn't guarantee the order in which we iterate.
 
-    typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
-        v_it_end;
-    for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end;
-         ++v_it) {
-      root_.members_.emplace_hint(
-                                  root_.members_.end(), *v_it,
-                                  Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it)));
-    }
     std::pair<typename boost::graph_traits<OneSkeletonGraph>::edge_iterator,
               typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = edges(skel_graph);
     // boost_edges.first is the equivalent to boost_edges.begin()
@@ -1137,7 +1134,7 @@ class Simplex_tree {
       auto edge = *(boost_edges.first);
       auto u = source(edge, skel_graph);
       auto v = target(edge, skel_graph);
-      if (u == v) throw "Self-loops are not simplicial";
+      if (u == v) throw std::invalid_argument("Self-loops are not simplicial");
       // We cannot skip edges with the wrong orientation and expect them to
       // come a second time with the right orientation, that does not always
       // happen in practice. emplace() should be a NOP when an element with the
@@ -1154,6 +1151,21 @@ class Simplex_tree {
       sh->second.children()->members().emplace(v,
           Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge)));
     }
+  }
+
+  /** \brief Inserts several vertices.
+   * @param[in] vertices A range of Vertex_handle
+   * @param[in] filt filtration value of the new vertices (the same for all)
+   *
+   * This may be faster than inserting the vertices one by one, especially in a random order.
+   * The complex does not need to be empty before calling this function. However, if a vertex is
+   * already present, its filtration value is not modified, unlike with other insertion functions. */
+  template <class VertexRange>
+  void insert_batch_vertices(VertexRange const& vertices, Filtration_value filt = 0) {
+    auto verts = vertices | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, filt)); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    if (dimension_ < 0 && !root_.members_.empty()) dimension_ = 0;
   }
 
   /** \brief Expands the Simplex_tree containing only its one skeleton
