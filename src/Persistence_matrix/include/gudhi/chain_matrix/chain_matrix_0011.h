@@ -388,7 +388,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::erase_las
 	maxDim_ = dimensions_.size() - 1;
 
 	if constexpr (_barcode_option_is_active()){
-		index timeStamp = swap_opt::pivotToPosition_.at(nextInsertIndex_);
+		index timeStamp = swap_opt::pivotToPosition_[nextInsertIndex_];
 		typename barcode_type::iterator bar = _indexToBar().at(timeStamp);
 
 		if (bar->death == -1) _barcode().erase(bar);
@@ -398,7 +398,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::erase_las
 		swap_opt::pivotToPosition_.erase(nextInsertIndex_);
 	}
 
-	index toErase = pivotToColumnIndex_.at(nextInsertIndex_);
+	index toErase = pivotToColumnIndex_[nextInsertIndex_];
 	Column_type& c = matrix_.at(toErase);
 
 	if (c.is_paired()) matrix_.at(c.get_paired_chain_index()).unassign_paired_chain();

@@ -103,13 +103,13 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Boundary_type> 
 	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		const Boundary_type& b = orderedBoundaries.at(i);
-		matrix_.at(i) = Column_type(b);
+		const Boundary_type& b = orderedBoundaries[i];
+		matrix_[i] = Column_type(b);
 		if (maxDim_ < static_cast<int>(b.size()) - 1) maxDim_ = b.size() - 1;
 
 		if constexpr (swap_opt::isActive_){
-			swap_opt::indexToRow_.at(i) = i;
-			swap_opt::rowToIndex_.at(i) = i;
+			swap_opt::indexToRow_[i] = i;
+			swap_opt::rowToIndex_[i] = i;
 		}
 	}
 	if (maxDim_ == -1) maxDim_ = 0;
@@ -128,8 +128,8 @@ inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
 		swap_opt::rowToIndex_.resize(numberOfColumns);
 
 		for (unsigned int i = 0; i < numberOfColumns; i++){
-			swap_opt::indexToRow_.at(i) = i;
-			swap_opt::rowToIndex_.at(i) = i;
+			swap_opt::indexToRow_[i] = i;
+			swap_opt::rowToIndex_[i] = i;
 		}
 	}
 }
@@ -171,7 +171,7 @@ inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &bou
 		matrix_.resize(size * 2);
 	}
 
-	matrix_.at(nextInsertIndex_++) = Column_type(boundary);
+	matrix_[nextInsertIndex_++] = Column_type(boundary);
 	if (maxDim_ < boundary.size() - 1) maxDim_ = boundary.size() - 1;
 }
 
@@ -182,7 +182,7 @@ inline typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matr
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
 
-	return matrix_.at(columnIndex);
+	return matrix_[columnIndex];
 }
 
 template<class Master_matrix>
@@ -192,7 +192,7 @@ inline const typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Maste
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
 
-	return matrix_.at(columnIndex);
+	return matrix_[columnIndex];
 }
 
 template<class Master_matrix>
@@ -224,45 +224,45 @@ inline unsigned int Base_matrix<Master_matrix>::get_number_of_columns() const
 template<class Master_matrix>
 inline dimension_type Base_matrix<Master_matrix>::get_column_dimension(index columnIndex) const
 {
-	return matrix_.at(columnIndex).get_dimension();
+	return matrix_[columnIndex].get_dimension();
 }
 
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
-	matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
+	matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
 }
 
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
 	if constexpr (swap_opt::isActive_){
-		matrix_.at(columnIndex).clear(swap_opt::indexToRow_.at(rowIndex));
+		matrix_[columnIndex].clear(swap_opt::indexToRow_[rowIndex]);
 	} else {
-		matrix_.at(columnIndex).clear(rowIndex);
+		matrix_[columnIndex].clear(rowIndex);
 	}
 }
 
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::zero_column(index columnIndex)
 {
-	matrix_.at(columnIndex).clear();
+	matrix_[columnIndex].clear();
 }
 
 template<class Master_matrix>
 inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
-		return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
+		return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
 	} else {
-		return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
+		return !(matrix_[columnIndex].is_non_zero(rowIndex));
 	}
 }
 
 template<class Master_matrix>
 inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex)
 {
-	return matrix_.at(columnIndex).is_empty();
+	return matrix_[columnIndex].is_empty();
 }
 
 template<class Master_matrix>
@@ -275,7 +275,7 @@ inline index Base_matrix<Master_matrix>::get_column_with_pivot(index simplexInde
 template<class Master_matrix>
 inline index Base_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
-	return matrix_.at(columnIndex).get_pivot();
+	return matrix_[columnIndex].get_pivot();
 }
 
 template<class Master_matrix>
@@ -294,7 +294,7 @@ inline void Base_matrix<Master_matrix>::print()
 {
 	std::cout << "Base_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
-		Column_type& col = matrix_.at(i);
+		Column_type& col = matrix_[i];
 		for (auto e : col.get_content(nextInsertIndex_)){
 			if (e == 0u) std::cout << "- ";
 			else std::cout << e << " ";

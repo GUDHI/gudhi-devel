@@ -45,13 +45,13 @@ using Z2_set_row_type = boost::intrusive::list <
 				  , boost::intrusive::base_hook< z2_base_hook_matrix_set_row >
 				>;
 
-template<class Master_matrix>
+template<class Master_matrix, class Column_pairing_option>
 class Z2_reduced_cell_set_column_with_row
 		: public Z2_reduced_cell_column_with_row<Z2_set_cell,
 												 Z2_set_column_type,
 												 Z2_set_row_type,
 												 z2_base_hook_matrix_set_row,
-												 typename Master_matrix::Column_pairing_option>
+												 Column_pairing_option>
 {
 public:
 	using Cell = Z2_set_cell;
@@ -85,32 +85,32 @@ private:
 	void _swap_independent_rows(index rowIndex);
 };
 
-template<class Master_matrix>
-inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
+template<class Master_matrix, class Column_pairing_option>
+inline Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::Z2_reduced_cell_set_column_with_row(matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
 	: RCC(), matrix_(&matrix), pivotToColumnIndex_(&pivotToColumnIndex)
 {}
 
-template<class Master_matrix>
+template<class Master_matrix, class Column_pairing_option>
 template<class Chain_type>
-inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(
+inline Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::Z2_reduced_cell_set_column_with_row(
 		index chainIndex, const Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
 	: RCC(chainIndex, chain, dimension), matrix_(&matrix), pivotToColumnIndex_(&pivotToColumnIndex)
 {}
 
-template<class Master_matrix>
-inline Z2_reduced_cell_set_column_with_row<Master_matrix>::Z2_reduced_cell_set_column_with_row(
+template<class Master_matrix, class Column_pairing_option>
+inline Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::Z2_reduced_cell_set_column_with_row(
 		const Z2_reduced_cell_set_column_with_row& other)
 	: RCC(other), matrix_(other.matrix_), pivotToColumnIndex_(other.pivotToColumnIndex_)
 {}
 
-template<class Master_matrix>
-inline bool Z2_reduced_cell_set_column_with_row<Master_matrix>::is_non_zero(index rowIndex) const
+template<class Master_matrix, class Column_pairing_option>
+inline bool Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::is_non_zero(index rowIndex) const
 {
 	return RCC::get_column().find(Cell(pivotToColumnIndex_->at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
 }
 
-template<class Master_matrix>
-inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_column_with_row<Master_matrix>::operator+=(Z2_reduced_cell_set_column_with_row &column)
+template<class Master_matrix, class Column_pairing_option>
+inline Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option> &Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::operator+=(Z2_reduced_cell_set_column_with_row &column)
 {
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
@@ -138,8 +138,8 @@ inline Z2_reduced_cell_set_column_with_row<Master_matrix> &Z2_reduced_cell_set_c
 	return *this;
 }
 
-template<class Master_matrix>
-inline void Z2_reduced_cell_set_column_with_row<Master_matrix>::_swap_independent_rows(index rowIndex)
+template<class Master_matrix, class Column_pairing_option>
+inline void Z2_reduced_cell_set_column_with_row<Master_matrix,Column_pairing_option>::_swap_independent_rows(index rowIndex)
 {
 	std::swap(pivotToColumnIndex_->at(RCC::get_pivot()),
 			  pivotToColumnIndex_->at(rowIndex));

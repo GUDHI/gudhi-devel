@@ -217,7 +217,7 @@ inline void Vector_column<Field_element_type,Column_pairing_option>::reorder(std
 	std::vector<Cell> newColumn;
 	for (Cell& v : column_) {
 		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
-			newColumn.push_back(Cell(v.get_element(), valueMap.at(v.get_row_index())));
+			newColumn.push_back(Cell(v.get_element(), valueMap[v.get_row_index()]));
 	}
 	std::sort(newColumn.begin(), newColumn.end());
 	erasedValues_.clear();
@@ -300,8 +300,8 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 			}
 		}
 
-		curRowToAdd = itToAdd->get_row_index();
-		curRowTarget = itTarget->get_row_index();
+		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
+		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
@@ -316,7 +316,7 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 			itToAdd++;
 		}
 
-		curRowToAdd = itToAdd->get_row_index();
+		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
 	}
 
 	while (itTarget != column_.end()){
@@ -331,7 +331,7 @@ inline Vector_column<Field_element_type,Column_pairing_option> &Vector_column<Fi
 			itTarget++;
 		}
 
-		curRowTarget = itTarget->get_row_index();
+		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
 	column_.swap(newColumn);

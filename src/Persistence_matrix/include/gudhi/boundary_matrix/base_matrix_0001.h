@@ -105,8 +105,8 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const
 	}
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
-		const Boundary_type& b = orderedBoundaries.at(i);
-		matrix_.at(i) = Column_type(b);
+		const Boundary_type& b = orderedBoundaries[i];
+		matrix_.emplace(i, Column_type(b));
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -169,8 +169,8 @@ inline void Base_matrix_with_removals<Master_matrix>::insert_boundary(const Boun
 	}
 
 	if constexpr (swap_opt::isActive_){
-		swap_opt::indexToRow_.at(nextInsertIndex_) = nextInsertIndex_;
-		swap_opt::rowToIndex_.at(nextInsertIndex_) = nextInsertIndex_;
+		swap_opt::indexToRow_[nextInsertIndex_] = nextInsertIndex_;
+		swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
 	}
 
 	matrix_.at(nextInsertIndex_++) = Column_type(boundary);
@@ -259,7 +259,7 @@ inline void Base_matrix_with_removals<Master_matrix>::zero_cell(index columnInde
 template<class Master_matrix>
 inline void Base_matrix_with_removals<Master_matrix>::zero_column(index columnIndex)
 {
-	matrix_.at(columnIndex).clear();
+	matrix_[columnIndex].clear();
 }
 
 template<class Master_matrix>

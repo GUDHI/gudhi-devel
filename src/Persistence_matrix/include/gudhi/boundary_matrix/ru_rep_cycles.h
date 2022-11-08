@@ -89,7 +89,7 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 				if constexpr (Master_matrix::Option_list::column_type == Column_types::HEAP || Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)
 						std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());
 			}
-			birthToCycle_.at(i) = representativeCycles_.size() - 1;
+			birthToCycle_[i] = representativeCycles_.size() - 1;
 		}
 	}
 }
@@ -107,7 +107,7 @@ inline const typename RU_representative_cycles<Master_matrix>::cycle_type &
 RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar &bar)
 {
 	if (representativeCycles_.empty()) update_representative_cycles();
-	return representativeCycles_.at(birthToCycle_.at(bar.birth));
+	return representativeCycles_[birthToCycle_[bar.birth]];
 }
 
 template<class Master_matrix>

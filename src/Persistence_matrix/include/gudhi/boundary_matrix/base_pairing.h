@@ -82,19 +82,20 @@ template<class Master_matrix>
 inline void Base_pairing<Master_matrix>::_reduce()
 {
 	std::unordered_map<index, index> pivotsToColumn;
+	auto& matrix = *matrix_;
 
 	for (int d = *maxDim_; d > 0; d--){
 		for (unsigned int i = 0; i < matrix_->size(); i++){
-			if (!(matrix_->at(i).is_empty()) && matrix_->at(i).get_dimension() == d)
+			if (!(matrix[i].is_empty()) && matrix[i].get_dimension() == d)
 			{
-				column_type &curr = matrix_->at(i);
+				column_type &curr = matrix[i];
 				int pivot = curr.get_pivot();
 
 				while (pivot != -1 && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
 					if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
-						curr += matrix_->at(pivotsToColumn.at(pivot));
+						curr += matrix[pivotsToColumn.at(pivot)];
 					} else {
-						column_type &toadd = matrix_->at(pivotsToColumn.at(pivot));
+						column_type &toadd = matrix[pivotsToColumn.at(pivot)];
 						typename Master_matrix::Field_type coef = curr.get_pivot_value();
 						coef = coef.get_inverse();
 						coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
@@ -107,10 +108,10 @@ inline void Base_pairing<Master_matrix>::_reduce()
 
 				if (pivot != -1){
 					pivotsToColumn.emplace(pivot, i);
-					matrix_->at(pivot).clear();
+					matrix[pivot].clear();
 					barcode_.push_back(Bar(d - 1, pivot, i));
 				} else {
-					matrix_->at(i).clear();
+					matrix[i].clear();
 					barcode_.push_back(Bar(d, i, -1));
 				}
 			}

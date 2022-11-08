@@ -20,6 +20,8 @@ using Gudhi::persistence_matrix::Zp_field_element;
 
 BOOST_AUTO_TEST_CASE(Field_constructors)
 {
+	std::vector<int> v(2);
+
 	//default constructor
 	Z2_field_element z2_d;
 	BOOST_CHECK_EQUAL(z2_d, 0u);

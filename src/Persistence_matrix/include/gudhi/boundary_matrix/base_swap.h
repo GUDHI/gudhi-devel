@@ -89,15 +89,15 @@ inline Base_swap<Master_matrix>::Base_swap(Base_swap<Master_matrix> &&other) noe
 template<class Master_matrix>
 inline void Base_swap<Master_matrix>::swap_columns(index columnIndex1, index columnIndex2)
 {
-	swap(matrix_.at(columnIndex1), matrix_.at(columnIndex2));
+	swap(matrix_[columnIndex1], matrix_[columnIndex2]);
 }
 
 template<class Master_matrix>
 inline void Base_swap<Master_matrix>::swap_rows(index rowIndex1, index rowIndex2)
 {
 	rowSwapped_ = true;
-	std::swap(rowToIndex_.at(indexToRow_.at(rowIndex1)), rowToIndex_.at(indexToRow_.at(rowIndex2)));
-	std::swap(indexToRow_.at(rowIndex1), indexToRow_.at(rowIndex2));
+	std::swap(rowToIndex_[indexToRow_[rowIndex1]], rowToIndex_[indexToRow_[rowIndex2]]);
+	std::swap(indexToRow_[rowIndex1], indexToRow_[rowIndex2]);
 }
 
 template<class Master_matrix>
@@ -121,11 +121,11 @@ template<class Master_matrix>
 inline void Base_swap<Master_matrix>::_orderRows()
 {
 	for (unsigned int i = 0; i < matrix_.size(); i++){
-		matrix_.at(i).reorder(rowToIndex_);
+		matrix_[i].reorder(rowToIndex_);
 	}
 	for (unsigned int i = 0; i < matrix_.size(); i++){
-		indexToRow_.at(i) = i;
-		rowToIndex_.at(i) = i;
+		indexToRow_[i] = i;
+		rowToIndex_[i] = i;
 	}
 	rowSwapped_ = false;
 }

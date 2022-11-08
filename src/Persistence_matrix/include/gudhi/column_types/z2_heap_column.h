@@ -205,7 +205,7 @@ inline void Z2_heap_column<Column_pairing_option>::reorder(std::vector<index> &v
 	std::vector<Cell> tempCol;
 	int pivot = _pop_pivot();
 	while (pivot != -1) {
-		tempCol.push_back(valueMap.at(pivot));
+		tempCol.push_back(valueMap[pivot]);
 		pivot = _pop_pivot();
 	}
 	column_.swap(tempCol);

@@ -191,7 +191,7 @@ inline void List_column<Field_element_type,Column_pairing_option>::reorder(std::
 {
 	typename std::list<Cell>::iterator it = column_.begin();
 	while (it != column_.end()) {
-		it->setRowIndex(valueMap.at(it->get_row_index()));
+		it->setRowIndex(valueMap[it->get_row_index()]);
 		it++;
 	}
 	column_.sort();
@@ -253,8 +253,8 @@ inline List_column<Field_element_type,Column_pairing_option> &List_column<Field_
 			itTarget++;
 		}
 
-		curRowToAdd = itToAdd->get_row_index();
-		curRowTarget = itTarget->get_row_index();
+		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
+		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){

@@ -92,12 +92,12 @@ public:
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_list_column_with_row<Matrix<Options> >,
+									Z2_reduced_cell_list_column_with_row<Matrix<Options>,Column_pairing_option>,
 									Z2_list_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_list_column_with_row<Matrix<Options> >,
+									Reduced_cell_list_column_with_row<Matrix<Options>,Field_type,Column_pairing_option>,
 									List_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
@@ -112,12 +112,12 @@ public:
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::has_row_access,
-									Z2_reduced_cell_set_column_with_row<Matrix<Options> >,
+									Z2_reduced_cell_set_column_with_row<Matrix<Options>,Column_pairing_option>,
 									Z2_set_column<Column_pairing_option>
 								>::type,
 								typename std::conditional<
 									Options::has_row_access,
-									Reduced_cell_set_column_with_row<Matrix<Options> >,
+									Reduced_cell_set_column_with_row<Matrix<Options>,Field_type,Column_pairing_option>,
 									Set_column<Field_type,Column_pairing_option>
 								>::type
 							>::type;
@@ -180,13 +180,13 @@ public:
 								Field_type::get_characteristic() == 2,
 								typename std::conditional<
 									Options::column_type == Column_types::LIST,
-									typename Z2_reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
-									typename Z2_reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
+									typename Z2_reduced_cell_list_column_with_row<Matrix<Options>,Column_pairing_option>::Row_type,
+									typename Z2_reduced_cell_set_column_with_row<Matrix<Options>,Column_pairing_option>::Row_type
 								>::type,
 								typename std::conditional<
 									Options::column_type == Column_types::LIST,
-									typename Reduced_cell_list_column_with_row<Matrix<Options> >::Row_type,
-									typename Reduced_cell_set_column_with_row<Matrix<Options> >::Row_type
+									typename Reduced_cell_list_column_with_row<Matrix<Options>,Field_type,Column_pairing_option>::Row_type,
+									typename Reduced_cell_set_column_with_row<Matrix<Options>,Field_type,Column_pairing_option>::Row_type
 								>::type
 							>::type;
 

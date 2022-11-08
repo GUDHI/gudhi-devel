@@ -93,7 +93,7 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 				cycle.push_back(c.get_row_index());
 			}
 			representativeCycles_.push_back(cycle);
-			birthToCycle_.at(i) = representativeCycles_.size() - 1;
+			birthToCycle_[i] = representativeCycles_.size() - 1;
 		}
 	}
 }
@@ -111,7 +111,7 @@ inline const typename Chain_representative_cycles<Master_matrix>::cycle_type &
 Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar &bar)
 {
 	if (representativeCycles_.empty()) update_representative_cycles();
-	return representativeCycles_.at(birthToCycle_.at(bar.birth));
+	return representativeCycles_[birthToCycle_[bar.birth]];
 }
 
 template<class Master_matrix>

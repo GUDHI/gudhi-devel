@@ -184,7 +184,7 @@ template<class Field_element_type, class Column_pairing_option>
 inline void Set_column<Field_element_type,Column_pairing_option>::reorder(std::vector<index> &valueMap)
 {
 	std::set<Cell> newSet;
-	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap.at(v.get_row_index())));
+	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap[v.get_row_index()]));
 	column_.swap(newSet);
 }
 

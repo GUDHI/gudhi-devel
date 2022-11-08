@@ -181,7 +181,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 	}
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::pivotToPosition_.size() <= nextInsertIndex_) swap_opt::pivotToPosition_.resize(matrix_.size());
-		swap_opt::pivotToPosition_.at(nextInsertIndex_) = nextInsertIndex_;
+		swap_opt::pivotToPosition_[nextInsertIndex_] = nextInsertIndex_;
 	}
 	int dim = boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
@@ -201,19 +201,19 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 			return;
 		}
 
-		index col_low = pivotToColumnIndex_.at(*(column.rbegin()));
+		index col_low = pivotToColumnIndex_[*(column.rbegin())];
 		std::vector<index> chains_in_H; //for corresponding indices in H
 
-		while (matrix_.at(col_low).is_paired())
+		while (matrix_[col_low].is_paired())
 		{
-			chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());//keep the col_h with which col_g is paired
-			_add_to(matrix_.at(col_low), column);	//Reduce with the column col_g
+			chains_in_H.push_back(matrix_[col_low].get_paired_chain_index());//keep the col_h with which col_g is paired
+			_add_to(matrix_[col_low], column);	//Reduce with the column col_g
 
 			if (column.empty()) {
 				//produce the sum of all col_h in chains_in_H
 				column.insert(nextInsertIndex_);
 				for (index idx_h : chains_in_H) {
-					_add_to(matrix_.at(idx_h), column);
+					_add_to(matrix_[idx_h], column);
 				}
 				//create a new cycle (in F) sigma - \sum col_h
 				_insert_chain(column, dim);
@@ -225,20 +225,20 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 				return;
 			}
 
-			col_low = pivotToColumnIndex_.at(*(column.rbegin()));
+			col_low = pivotToColumnIndex_[*(column.rbegin())];
 		}
 
 		while (!column.empty())
 		{
-			col_low = pivotToColumnIndex_.at(*(column.rbegin()));
+			col_low = pivotToColumnIndex_[*(column.rbegin())];
 
-			if (!matrix_.at(col_low).is_paired()) {
+			if (!matrix_[col_low].is_paired()) {
 				currentEssentialCycleIndices.push_back(col_low);
 			} else {
-				chains_in_H.push_back(matrix_.at(col_low).get_paired_chain_index());
+				chains_in_H.push_back(matrix_[col_low].get_paired_chain_index());
 			}
 
-			_add_to(matrix_.at(col_low), column);
+			_add_to(matrix_[col_low], column);
 		}
 
 		index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
@@ -252,14 +252,14 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 		//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
 		column.insert(nextInsertIndex_);
 		for(index idx_h : chains_in_H){
-			_add_to(matrix_.at(idx_h), column);
+			_add_to(matrix_[idx_h], column);
 		}
 
 		//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
 		_insert_chain(column, dim, chain_fp);
 		if constexpr (_barcode_option_is_active()){
-			_barcode().at(_indexToBar().at(matrix_.at(chain_fp).get_pivot())).death = nextInsertIndex_;
-			_indexToBar().push_back(_indexToBar().at(matrix_.at(chain_fp).get_pivot()));
+			_barcode()[_indexToBar()[matrix_[chain_fp].get_pivot()]].death = nextInsertIndex_;
+			_indexToBar().push_back(_indexToBar()[matrix_[chain_fp].get_pivot()]);
 		}
 		++nextInsertIndex_;
 	} else {
@@ -277,24 +277,24 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 			return;
 		}
 
-		index col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+		index col_low = pivotToColumnIndex_[column.rbegin()->first];
 		std::vector<std::pair<index,Field_element_type> > chains_in_H; //for corresponding indices in H
 		std::vector<std::pair<index,Field_element_type> > chains_in_F; //for corresponding indices in F
 
-		while (matrix_.at(col_low).is_paired())
+		while (matrix_[col_low].is_paired())
 		{
-			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
+			Field_element_type coef = matrix_[col_low].get_pivot_value();
 			coef = coef.get_inverse();
 			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
 
-			_add_to(matrix_.at(col_low), column, coef);	//Reduce with the column col_g
-			chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);//keep the col_h with which col_g is paired
+			_add_to(matrix_[col_low], column, coef);	//Reduce with the column col_g
+			chains_in_H.emplace_back(matrix_[col_low].get_paired_chain_index(), coef);//keep the col_h with which col_g is paired
 
 			if (column.empty()) {
 				//produce the sum of all col_h in chains_in_H
 				column.emplace(nextInsertIndex_, 1);
 				for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
-					_add_to(matrix_.at(idx_h.first), column, idx_h.second);
+					_add_to(matrix_[idx_h.first], column, idx_h.second);
 				}
 				//create a new cycle (in F) sigma - \sum col_h
 				_insert_chain(column, dim);
@@ -306,25 +306,25 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 				return;
 			}
 
-			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+			col_low = pivotToColumnIndex_[column.rbegin()->first];
 		}
 
 		while (!column.empty())
 		{
-			Field_element_type coef = matrix_.at(col_low).get_pivot_value();
+			Field_element_type coef = matrix_[col_low].get_pivot_value();
 			coef = coef.get_inverse();
 			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
 
-			col_low = pivotToColumnIndex_.at(column.rbegin()->first);
+			col_low = pivotToColumnIndex_[column.rbegin()->first];
 
-			if (!matrix_.at(col_low).is_paired()) {
+			if (!matrix_[col_low].is_paired()) {
 				currentEssentialCycleIndices.push_back(col_low);
 				chains_in_F.emplace_back(col_low, coef);
 			} else {
-				chains_in_H.emplace_back(matrix_.at(col_low).get_paired_chain_index(), coef);
+				chains_in_H.emplace_back(matrix_[col_low].get_paired_chain_index(), coef);
 			}
 
-			_add_to(matrix_.at(col_low), column);
+			_add_to(matrix_[col_low], column);
 		}
 
 		index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
@@ -332,21 +332,21 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 		for (auto other_col_it = chains_in_F.begin() + 1;
 			other_col_it != chains_in_F.end(); ++other_col_it)
 		{
-			matrix_.at(chain_fp) *= other_col_it->second.get_inverse();
+			matrix_[chain_fp] *= other_col_it->second.get_inverse();
 			add_to(other_col_it->first, chain_fp);
 		}
 
 		//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
 		column.emplace(nextInsertIndex_, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chains_in_H) {
-			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
+			_add_to(matrix_[idx_h.first], column, idx_h.second);
 		}
 
 		//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
 		_insert_chain(column, dim, chain_fp);
 		if constexpr (_barcode_option_is_active()){
-			_barcode().at(_indexToBar().at(matrix_.at(chain_fp).get_pivot())).death = nextInsertIndex_;
-			_indexToBar().push_back(_indexToBar().at(matrix_.at(chain_fp).get_pivot()));
+			_barcode()[_indexToBar()[matrix_[chain_fp].get_pivot()]].death = nextInsertIndex_;
+			_indexToBar().push_back(_indexToBar()[matrix_[chain_fp].get_pivot()]);
 		}
 		++nextInsertIndex_;
 	}
@@ -355,25 +355,25 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(const B
 template<class Master_matrix>
 inline typename Chain_matrix_with_row_access<Master_matrix>::Column_type &Chain_matrix_with_row_access<Master_matrix>::get_column(index columnIndex)
 {
-	return matrix_.at(columnIndex);
+	return matrix_[columnIndex];
 }
 
 template<class Master_matrix>
 inline const typename Chain_matrix_with_row_access<Master_matrix>::Column_type &Chain_matrix_with_row_access<Master_matrix>::get_column(index columnIndex) const
 {
-	return matrix_.at(columnIndex);
+	return matrix_[columnIndex];
 }
 
 template<class Master_matrix>
 inline typename Chain_matrix_with_row_access<Master_matrix>::Row_type& Chain_matrix_with_row_access<Master_matrix>::get_row(index rowIndex)
 {
-	return matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row();
+	return matrix_[pivotToColumnIndex_[rowIndex]].get_row();
 }
 
 template<class Master_matrix>
 inline const typename Chain_matrix_with_row_access<Master_matrix>::Row_type& Chain_matrix_with_row_access<Master_matrix>::get_row(index rowIndex) const
 {
-	return matrix_.at(pivotToColumnIndex_.at(rowIndex)).get_row();
+	return matrix_[pivotToColumnIndex_[rowIndex]].get_row();
 }
 
 template<class Master_matrix>
@@ -398,13 +398,13 @@ inline unsigned int Chain_matrix_with_row_access<Master_matrix>::get_number_of_c
 template<class Master_matrix>
 inline dimension_type Chain_matrix_with_row_access<Master_matrix>::get_column_dimension(index columnIndex) const
 {
-	return matrix_.at(columnIndex).get_dimension();
+	return matrix_[columnIndex].get_dimension();
 }
 
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
-	matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
+	matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
 }
 
 template<class Master_matrix>
@@ -424,25 +424,25 @@ inline void Chain_matrix_with_row_access<Master_matrix>::zero_column(index colum
 template<class Master_matrix>
 inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
-	return !matrix_.at(columnIndex).is_non_zero(rowIndex);
+	return !matrix_[columnIndex].is_non_zero(rowIndex);
 }
 
 template<class Master_matrix>
 inline bool Chain_matrix_with_row_access<Master_matrix>::is_zero_column(index columnIndex) const
 {
-	return matrix_.at(columnIndex).is_empty();
+	return matrix_[columnIndex].is_empty();
 }
 
 template<class Master_matrix>
 inline index Chain_matrix_with_row_access<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
-	return pivotToColumnIndex_.at(simplexIndex);
+	return pivotToColumnIndex_[simplexIndex];
 }
 
 template<class Master_matrix>
 inline index Chain_matrix_with_row_access<Master_matrix>::get_pivot(index columnIndex) const
 {
-	return matrix_.at(columnIndex).get_pivot();
+	return matrix_[columnIndex].get_pivot();
 }
 
 template<class Master_matrix>
@@ -463,7 +463,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print() const
 {
 	std::cout << "Column Matrix:\n";
 	for (const auto p : pivotToColumnIndex_){
-		const typename Column_type::Column_type& col = matrix_.at(p.second).get_column();
+		const typename Column_type::Column_type& col = matrix_[p.second].get_column();
 		for (const auto it = col.begin(); it != col.end(); it++){
 			const auto &cell = *it;
 			std::cout << cell.get_row_index() << " ";
@@ -473,7 +473,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print() const
 	std::cout << "\n";
 	std::cout << "Row Matrix:\n";
 	for (const auto p : pivotToColumnIndex_){
-		const Row_type& col = matrix_.at(p.second).get_row();
+		const Row_type& col = matrix_[p.second].get_row();
 		for (const auto it = col.begin(); it != col.end(); it++){
 			const auto &cell = *it;
 			std::cout << cell.get_column_index() << " ";
@@ -486,22 +486,22 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print() const
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::_insert_chain(const std::set<index> &column, dimension_type dimension)
 {
-	matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
-	pivotToColumnIndex_.at(nextInsertIndex_) = *(column.rbegin());
-	for (Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
-		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
+	matrix_[nextInsertIndex_] = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	pivotToColumnIndex_[nextInsertIndex_] = *(column.rbegin());
+	for (Cell& cell : matrix_[nextInsertIndex_].get_column()){
+		matrix_[pivotToColumnIndex_[cell.get_row_index()]].get_row().push_back(cell);
 	}
 }
 
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::_insert_chain(const std::set<index> &column, dimension_type dimension, index pair)
 {
-	matrix_.at(nextInsertIndex_) = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
-	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
-	matrix_.at(pair).assign_paired_chain(nextInsertIndex_);
-	pivotToColumnIndex_.at(nextInsertIndex_) = *(column.rbegin());
-	for (Cell& cell : matrix_.at(nextInsertIndex_).get_column()){
-		matrix_.at(pivotToColumnIndex_.at(cell.get_row_index())).get_row().push_back(cell);
+	matrix_[nextInsertIndex_] = Column_type(nextInsertIndex_, column, dimension, matrix_, pivotToColumnIndex_);
+	matrix_[nextInsertIndex_].assign_paired_chain(pair);
+	matrix_[pair].assign_paired_chain(nextInsertIndex_);
+	pivotToColumnIndex_[nextInsertIndex_] = *(column.rbegin());
+	for (Cell& cell : matrix_[nextInsertIndex_].get_column()){
+		matrix_[pivotToColumnIndex_[cell.get_row_index()]].get_row().push_back(cell);
 	}
 }
 

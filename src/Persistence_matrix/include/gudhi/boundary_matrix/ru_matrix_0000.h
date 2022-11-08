@@ -162,10 +162,10 @@ inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &bound
 
 	boundary_type id(1);
 	if constexpr (Master_matrix::Field_type::get_characteristic() == 2) {
-		id.at(0) = nextInsertIndex_;
+		id[0] = nextInsertIndex_;
 	} else {
-		id.at(0).first = nextInsertIndex_;
-		id.at(0).second = 1;
+		id[0].first = nextInsertIndex_;
+		id[0].second = 1;
 	}
 	mirrorMatrixU_.insert_boundary(id);
 
@@ -261,7 +261,7 @@ inline bool RU_matrix<Master_matrix>::is_zero_column(index columnIndex, bool inR
 template<class Master_matrix>
 inline index RU_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
-	return pivotToColumnIndex_.at(simplexIndex);
+	return pivotToColumnIndex_[simplexIndex];
 }
 
 template<class Master_matrix>
@@ -296,11 +296,11 @@ template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::_initialize_U()
 {
 	boundary_type id(1);
-	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id.at(0).second = 1;
+	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id[0].second = 1;
 
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id.at(0) = i;
-		else id.at(0).first = i;
+		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id[0] = i;
+		else id[0].first = i;
 		mirrorMatrixU_.insert_boundary(id);
 	}
 }
@@ -318,37 +318,37 @@ inline void RU_matrix<Master_matrix>::_reduce()
 			Column_type &curr = reducedMatrixR_.get_column(i);
 			int pivot = curr.get_pivot();
 
-			while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
+			while (pivot != -1 && pivotToColumnIndex_[pivot] != -1){
 				if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
-					curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+					curr += reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
+					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 				} else {
-					Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
+					Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
 					coef = coef.get_inverse();
 					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 					curr *= coef;
 					curr += toadd;
 					mirrorMatrixU_.get_column(i) *= coef;
-					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 				}
 
 				pivot = curr.get_pivot();
 			}
 
 			if (pivot != -1){
-				pivotToColumnIndex_.at(pivot) = i;
+				pivotToColumnIndex_[pivot] = i;
 				if constexpr (_barcode_option_is_active()){
-					_barcode().at(_indexToBar().at(pivot)).death = i;
-					_indexToBar().at(i) = _indexToBar().at(pivot);
+					_barcode()[_indexToBar()[pivot]].death = i;
+					_indexToBar()[i] = _indexToBar()[pivot];
 				}
 			} else if constexpr (_barcode_option_is_active()){
 				_barcode().emplace_back(get_column_dimension(i), i, -1);
-				_indexToBar().at(i) = _barcode().size() - 1;
+				_indexToBar()[i] = _barcode().size() - 1;
 			}
 		} else if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, i, -1);
-			_indexToBar().at(i) = _barcode().size() - 1;
+			_indexToBar()[i] = _barcode().size() - 1;
 		}
 	}
 }
@@ -367,29 +367,29 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 
 	int pivot = curr.get_pivot();
 
-	while (pivot != -1 && pivotToColumnIndex_.at(pivot) != -1){
+	while (pivot != -1 && pivotToColumnIndex_[pivot] != -1){
 		if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
-			curr += reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
-			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+			curr += reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
+			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 		} else {
-			Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_.at(pivot));
+			Column_type &toadd = reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
 			typename Master_matrix::Field_type coef = curr.get_pivot_value();
 			coef = coef.get_inverse();
 			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 			curr *= coef;
 			curr += toadd;
 			mirrorMatrixU_.get_column(nextInsertIndex_) *= coef;
-			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_.at(pivot));
+			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 		}
 
 		pivot = curr.get_pivot();
 	}
 
 	if (pivot != -1){
-		pivotToColumnIndex_.at(pivot) = nextInsertIndex_;
+		pivotToColumnIndex_[pivot] = nextInsertIndex_;
 		if constexpr (_barcode_option_is_active()){
-			_barcode().at(_indexToBar().at(pivot)).death = nextInsertIndex_;
-			_indexToBar().push_back(_indexToBar().at(pivot));
+			_barcode()[_indexToBar()[pivot]].death = nextInsertIndex_;
+			_indexToBar().push_back(_indexToBar()[pivot]);
 		}
 	} else if constexpr (_barcode_option_is_active()){
 		_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);

@@ -192,7 +192,7 @@ template<class Column_pairing_option>
 inline void Z2_unordered_set_column<Column_pairing_option>::reorder(std::vector<index> &valueMap)
 {
 	std::unordered_set<Cell> newSet;
-	for (const Cell& v : column_) newSet.insert(valueMap.at(v.get_row_index()));
+	for (const Cell& v : column_) newSet.insert(valueMap[v.get_row_index()]);
 	column_.swap(newSet);
 	pivotChanged_ = true;
 }

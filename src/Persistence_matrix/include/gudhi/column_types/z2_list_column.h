@@ -167,7 +167,7 @@ inline void Z2_list_column<Column_pairing_option>::reorder(std::vector<index> &v
 {
 	std::list<Cell>::iterator it = column_.begin();
 	while (it != column_.end()) {
-		it->setRowIndex(valueMap.at(it->get_row_index()));
+		it->setRowIndex(valueMap[it->get_row_index()]);
 		it++;
 	}
 	column_.sort();
@@ -227,8 +227,8 @@ inline Z2_list_column<Column_pairing_option> &Z2_list_column<Column_pairing_opti
 			itTarget++;
 		}
 
-		valToAdd = itToAdd->get_row_index();
-		valTarget = itTarget->get_row_index();
+		if (itToAdd != column.column_.end()) valToAdd = itToAdd->get_row_index();
+		if (itTarget != column_.end()) valTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){

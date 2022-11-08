@@ -401,7 +401,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_boundary_matrix_methods, Matrix, list_of_Zp_bou
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	unsigned int i = 1;
 	for (const std::pair<unsigned int,unsigned int>&r : rowIndices){
-//		std::cout << "1: " << r.first << ", " << r.second << "\n";
 		BOOST_CHECK_EQUAL(r.first, i++);
 		BOOST_CHECK_EQUAL(r.second, 1);
 	}
@@ -415,12 +414,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_boundary_matrix_methods, Matrix, list_of_Zp_bou
 	BOOST_CHECK_EQUAL(rowIndices.size(), 3);
 	i = 0;
 	for (const std::pair<unsigned int,unsigned int>& r : rowIndices){
-//		std::cout << "2: " << r.first << ", " << r.second << "\n";
 		if (i != 1) BOOST_CHECK_EQUAL(r.second, 1);
 		else BOOST_CHECK_EQUAL(r.second, 2);
 		BOOST_CHECK_EQUAL(r.first, i++);
 	}
-//	std::cout << "end\n";
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_matrix_methods, Matrix, list_of_Z2_chain_matrix_types) {
@@ -437,7 +434,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_matrix_methods, Matrix, list_of_Z2_chain_
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	unsigned int i = 3;
 	for (unsigned int r : rowIndices){
-//		std::cout << "1: " << r << "\n";
 		BOOST_CHECK_EQUAL(r, i++);
 	}
 
@@ -449,7 +445,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_matrix_methods, Matrix, list_of_Z2_chain_
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 1);
 	BOOST_CHECK_EQUAL(*rowIndices.begin(), 4);
-//	std::cout << "end\n";
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_chain_matrix_methods, Matrix, list_of_Zp_chain_matrix_types) {
@@ -461,7 +456,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_chain_matrix_methods, Matrix, list_of_Zp_chain_
 
 	std::set<std::pair<unsigned int,unsigned int> > rowIndices;
 	for (auto& cell : m.get_column(4)){
-//		std::cout << "1: " << cell.get_row_index() << ", " << cell.get_element() << "\n";
 		rowIndices.insert({cell.get_row_index(), cell.get_element()});
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
@@ -476,7 +470,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Zp_chain_matrix_methods, Matrix, list_of_Zp_chain_
 	rowIndices.clear();
 	for (auto& cell : m.get_column(4)){
 		rowIndices.insert({cell.get_row_index(), cell.get_element()});
-//		std::cout << "2: " << cell.get_row_index() << ", " << cell.get_element() << "\n";
 	}
 	BOOST_CHECK_EQUAL(rowIndices.size(), 2);
 	i = 3;

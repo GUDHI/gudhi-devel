@@ -48,17 +48,16 @@ using Set_row_type = boost::intrusive::list <
 				  , boost::intrusive::base_hook< base_hook_matrix_set_row >
 				>;
 
-template<class Master_matrix>
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
 class Reduced_cell_set_column_with_row
-		: public Reduced_cell_column_with_row<Set_cell<typename Master_matrix::Field_type>,
-											  Set_column_type<typename Master_matrix::Field_type>,
-											  Set_row_type<typename Master_matrix::Field_type>,
+		: public Reduced_cell_column_with_row<Set_cell<Field_element_type>,
+											  Set_column_type<Field_element_type>,
+											  Set_row_type<Field_element_type>,
 											  base_hook_matrix_set_row,
-											  typename Master_matrix::Field_type,
-											  typename Master_matrix::Column_pairing_option>
+											  Field_element_type,
+											  Column_pairing_option>
 {
 public:
-	using Field_element_type = typename Master_matrix::Field_type;
 	using Cell = Set_cell<Field_element_type>;
 	using Column_type = Set_column_type<Field_element_type>;
 	using Row_type = Set_row_type<Field_element_type>;
@@ -103,40 +102,40 @@ private:
 	void _swap_independent_rows(index rowIndex);
 };
 
-template<class Master_matrix>
-inline Reduced_cell_set_column_with_row<Master_matrix>::Reduced_cell_set_column_with_row(matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::Reduced_cell_set_column_with_row(matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
 	: RCC(), matrix_(&matrix), pivotToColumnIndex_(&pivotToColumnIndex)
 {}
 
-template<class Master_matrix>
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
 template<class Chain_type>
-inline Reduced_cell_set_column_with_row<Master_matrix>::Reduced_cell_set_column_with_row(
+inline Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::Reduced_cell_set_column_with_row(
 		index chainIndex, const Chain_type& chain, dimension_type dimension, matrix_type& matrix, dictionnary_type& pivotToColumnIndex)
 	: RCC(chainIndex, chain, dimension), matrix_(&matrix), pivotToColumnIndex_(&pivotToColumnIndex)
 {}
 
-template<class Master_matrix>
-inline Reduced_cell_set_column_with_row<Master_matrix>::Reduced_cell_set_column_with_row(
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::Reduced_cell_set_column_with_row(
 		const Reduced_cell_set_column_with_row& other)
 	: RCC(other), matrix_(other.matrix_), pivotToColumnIndex_(other.pivotToColumnIndex_)
 {}
 
-template<class Master_matrix>
-inline void Reduced_cell_set_column_with_row<Master_matrix>::_swap_independent_rows(index rowIndex)
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline void Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::_swap_independent_rows(index rowIndex)
 {
 	std::swap(pivotToColumnIndex_->at(RCC::get_pivot()),
 			  pivotToColumnIndex_->at(rowIndex));
 	matrix_->at(pivotToColumnIndex_->at(RCC::get_pivot())).swap_rows(matrix_->at(pivotToColumnIndex_->at(rowIndex)));
 }
 
-template<class Master_matrix>
-inline bool Reduced_cell_set_column_with_row<Master_matrix>::is_non_zero(index rowIndex) const
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline bool Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::is_non_zero(index rowIndex) const
 {
 	return RCC::get_column().find(Cell(pivotToColumnIndex_->at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
 }
 
-template<class Master_matrix>
-inline Reduced_cell_set_column_with_row<Master_matrix> &Reduced_cell_set_column_with_row<Master_matrix>::operator+=(Reduced_cell_set_column_with_row &column)
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option> &Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::operator+=(Reduced_cell_set_column_with_row &column)
 {
 	Column_type& tc = RCC::get_column();
 	Column_type& sc = column.get_column();
@@ -167,8 +166,8 @@ inline Reduced_cell_set_column_with_row<Master_matrix> &Reduced_cell_set_column_
 	return *this;
 }
 
-template<class Master_matrix>
-inline Reduced_cell_set_column_with_row<Master_matrix> &Reduced_cell_set_column_with_row<Master_matrix>::operator*=(unsigned int v)
+template<class Master_matrix, class Field_element_type, class Column_pairing_option>
+inline Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option> &Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 

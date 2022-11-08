@@ -94,7 +94,7 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&o
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
 {
-	assert(index >= reducedMatrixR_->get_number_of_columns() - 1 && "Index to swap out of bound.");
+	assert(index < reducedMatrixR_->get_number_of_columns() - 1 && "Index to swap out of bound.");
 
 	bool iIsPositive = (_birth(index) == static_cast<int>(index));
 	bool iiIsPositive = (_birth(index + 1) == static_cast<int>(index) + 1);
@@ -113,7 +113,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::vine_swap(index index)
 {
-	assert(index >= reducedMatrixR_->get_number_of_columns() - 1 && "Index to swap out of bound.");
+	assert(index < reducedMatrixR_->get_number_of_columns() - 1 && "Index to swap out of bound.");
 
 	bool iIsPositive = (_birth(index) == static_cast<int>(index));
 	bool iiIsPositive = (_birth(index + 1) == static_cast<int>(index) + 1);
@@ -190,7 +190,7 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(index index)
 			pivotToColumnIndex_->erase(index + 1);
 		}
 	} else {
-		std::swap(pivotToColumnIndex_->at(index), pivotToColumnIndex_->at(index + 1));
+		std::swap(pivotToColumnIndex_->operator[](index), pivotToColumnIndex_->operator[](index + 1));
 	}
 
 	_birth(index) = index + 1;
@@ -217,8 +217,8 @@ inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(index inde
 			pivotToColumnIndex_->erase(index);
 		}
 	} else {
-		pivotToColumnIndex_->at(index + 1) = pivotToColumnIndex_->at(index);
-		pivotToColumnIndex_->at(index) = -1;
+		pivotToColumnIndex_->operator[](index + 1) = pivotToColumnIndex_->operator[](index);
+		pivotToColumnIndex_->operator[](index) = -1;
 	}
 
 	_birth(index) = index + 1;
@@ -236,8 +236,8 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(index inde
 			pivotToColumnIndex_->erase(index + 1);
 		}
 	} else {
-		pivotToColumnIndex_->at(index) = pivotToColumnIndex_->at(index + 1);
-		pivotToColumnIndex_->at(index + 1) = -1;
+		pivotToColumnIndex_->operator[](index) = pivotToColumnIndex_->operator[](index + 1);
+		pivotToColumnIndex_->operator[](index + 1) = -1;
 	}
 
 	_death(index) = index + 1;

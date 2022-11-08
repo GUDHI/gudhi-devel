@@ -286,7 +286,7 @@ inline const typename Id_to_position_indexation_overlay<Matrix_type,Master_matri
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
 {
-	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
+	assert(std::abs(static_cast<int>(columnIDToPosition_.at(columnIndex1)) - static_cast<int>(columnIDToPosition_.at(columnIndex2))) == 1 && "The columns to swap are not contiguous.");
 	index first = columnIDToPosition_.at(columnIndex1) < columnIDToPosition_.at(columnIndex2) ? columnIDToPosition_.at(columnIndex1) : columnIDToPosition_.at(columnIndex2);
 
 	bool change = matrix_.vine_swap_with_z_eq_1_case(first);
@@ -302,7 +302,7 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 template<class Matrix_type, class Master_matrix_type>
 inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::vine_swap(index columnIndex1, index columnIndex2)
 {
-	assert(std::abs(columnIDToPosition_.at(columnIndex1) - columnIDToPosition_.at(columnIndex2)) == 1 && "The columns to swap are not contiguous.");
+	assert(std::abs(static_cast<int>(columnIDToPosition_.at(columnIndex1)) - static_cast<int>(columnIDToPosition_.at(columnIndex2))) == 1 && "The columns to swap are not contiguous.");
 	index first = columnIDToPosition_.at(columnIndex1) < columnIDToPosition_.at(columnIndex2) ? columnIDToPosition_.at(columnIndex1) : columnIDToPosition_.at(columnIndex2);
 
 	bool change = matrix_.vine_swap(first);

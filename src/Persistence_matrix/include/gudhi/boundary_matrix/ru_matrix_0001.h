@@ -159,10 +159,10 @@ inline void RU_matrix_with_removals<Master_matrix>::insert_boundary(const Bounda
 
 	boundary_type id(1);
 	if constexpr (Master_matrix::Field_type::get_characteristic() == 2) {
-		id.at(0) = nextInsertIndex_;
+		id[0] = nextInsertIndex_;
 	} else {
-		id.at(0).first = nextInsertIndex_;
-		id.at(0).second = 1;
+		id[0].first = nextInsertIndex_;
+		id[0].second = 1;
 	}
 	mirrorMatrixU_.insert_boundary(id);
 
@@ -304,11 +304,11 @@ template<class Master_matrix>
 inline void RU_matrix_with_removals<Master_matrix>::_initialize_U()
 {
 	boundary_type id(1);
-	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id.at(0).second = 1;
+	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id[0].second = 1;
 
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id.at(0) = i;
-		else id.at(0).first = i;
+		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id[0] = i;
+		else id[0].first = i;
 		mirrorMatrixU_.insert_boundary(id);
 	}
 }

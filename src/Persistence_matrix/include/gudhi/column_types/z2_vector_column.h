@@ -187,7 +187,7 @@ inline void Z2_vector_column<Column_pairing_option>::reorder(std::vector<index> 
 	std::vector<Cell> newColumn;
 	for (const Cell& v : column_) {
 		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
-			newColumn.push_back(valueMap.at(v.get_row_index()));
+			newColumn.push_back(valueMap[v.get_row_index()]);
 	}
 	std::sort(newColumn.begin(), newColumn.end());
 	erasedValues_.clear();
@@ -267,8 +267,8 @@ inline Z2_vector_column<Column_pairing_option> &Z2_vector_column<Column_pairing_
 			}
 		}
 
-		valToAdd = itToAdd->get_row_index();
-		valTarget = itTarget->get_row_index();
+		if (itToAdd != column.column_.end()) valToAdd = itToAdd->get_row_index();
+		if (itTarget != column_.end()) valTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
