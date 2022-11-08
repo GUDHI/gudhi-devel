@@ -41,7 +41,7 @@ cdef class RipsComplex:
     cdef Rips_complex_interface thisref
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, distance_matrix=None,
+    def __init__(self, *, points=None, distance_matrix=None,
                  max_edge_length=float('inf'), sparse=None):
         """RipsComplex constructor.
 
@@ -64,7 +64,7 @@ cdef class RipsComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, distance_matrix=None,
+    def __cinit__(self, *, points=None, distance_matrix=None,
                   max_edge_length=float('inf'), sparse=None):
         if sparse is not None:
           if distance_matrix is not None:
