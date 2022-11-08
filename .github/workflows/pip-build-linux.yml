@@ -9,7 +9,7 @@ jobs:
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
     container: gudhi/pip_for_gudhi
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Build wheel for Python 3.10
