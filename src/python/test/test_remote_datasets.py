@@ -40,12 +40,14 @@ def test_fetch_remote():
     assert not exists("tmp_spiral_2d.npy")
 
 
-def _capture_license_output(fetch_method, accept_license=False):
+def _capture_license_output(fetch_method, **kwargs):
     capturedOutput = io.StringIO()
     # Redirect stdout
     sys.stdout = capturedOutput
 
-    bunny_arr = fetch_method("./tmp_for_test/data.npy", accept_license)
+    # Force file_path in forwarded arguments
+    kwargs["file_path"] = "./tmp_for_test/data.npy"
+    data_array = fetch_method(**kwargs)
     # No need to keep numpy file
     remove("./tmp_for_test/data.npy")
 
@@ -64,19 +66,17 @@ def test_bunny_license_capture():
 
 
 def test_activities_license_capture():
-    for activity_fetch_method in [
-        remote.fetch_daily_cross_training_activities,
-        remote.fetch_daily_jumping_activities,
-        remote.fetch_daily_stepper_activities,
-        remote.fetch_daily_walking_activities,
-    ]:
+    for subset in ['cross_training', 'jumping', 'stepper', 'walking']:
         # Test not printing activities.LICENSE when accept_license = True
-        assert "" == _capture_license_output(activity_fetch_method, accept_license=True).getvalue()
+        assert "" == _capture_license_output(remote.fetch_daily_activities, subset=subset, accept_license=True).getvalue()
         # Test printing activities.LICENSE file when fetching "activities".npy with accept_license = False (default)
         with open("./tmp_for_test/activities.LICENSE") as f:
-            assert f.read().rstrip("\n") == _capture_license_output(activity_fetch_method).getvalue().rstrip("\n")
+            assert f.read().rstrip("\n") == _capture_license_output(remote.fetch_daily_activities, subset=subset).getvalue().rstrip("\n")
         shutil.rmtree("./tmp_for_test")
 
+def test_activities_unknown_subset():
+    with pytest.raises(ValueError):
+        remote.fetch_daily_activities(subset="some weird subset value")
 
 def test_fetch_remote_datasets_wrapped():
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default (twice, to test case of already fetched files)
@@ -88,18 +88,20 @@ def test_fetch_remote_datasets_wrapped():
         bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
 
-        cross_training_arr = remote.fetch_daily_cross_training_activities(
-            "./another_fetch_folder_for_test/cross_training.npy"
-        )
+        cross_training_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/cross_training.npy",
+                                                           subset="cross_training")
         assert cross_training_arr.shape == (7500, 3)
 
-        jumping_arr = remote.fetch_daily_jumping_activities("./another_fetch_folder_for_test/jumping.npy")
+        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/jumping.npy",
+                                                    subset="jumping")
         assert jumping_arr.shape == (7500, 3)
 
-        stepper_arr = remote.fetch_daily_stepper_activities("./another_fetch_folder_for_test/stepper.npy")
+        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/stepper.npy",
+                                                    subset="stepper")
         assert stepper_arr.shape == (7500, 3)
 
-        walking_arr = remote.fetch_daily_walking_activities("./another_fetch_folder_for_test/walking.npy")
+        walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/walking.npy",
+                                                    subset="walking")
         assert walking_arr.shape == (7500, 3)
 
     # Check that the directory was created

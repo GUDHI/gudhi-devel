@@ -255,36 +255,39 @@ def fetch_bunny(file_path=None, accept_license=False):
     return np.load(archive_path, mmap_mode="r")
 
 
+# In wait of https://github.com/GUDHI/gudhi-data/pull/7
 # _activities_license_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE'
 _activities_license_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE"
-_activities_license_checksum = "00c8daaab2cd1d877b0a0deb4bce098e3aa93bef346e0df879a55b673577cbd7"
+_activities_license_checksum = "b1ab8aa7b77241ee2da2b353f098353baaee36a8e587e9fe653e1d9534056a44"
 
 
-def fetch_daily_activities(file_path=None, accept_license=False):
+def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     """
     Load the Daily and Sports Activities dataset. This dataset comes from
     https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
 
-    This dataset contains 1.140.000 vertices in dimension 48. Its size is about 111 Mo.
-    If you are only interested in a subset and smaller dataset, please refer to
-    :func:`~gudhi.datasets.remote.fetch_daily_cross_training_activities`,
-    :func:`~gudhi.datasets.remote.fetch_daily_jumping_activities`,
-    :func:`~gudhi.datasets.remote.fetch_daily_stepper_activities`, or
-    :func:`~gudhi.datasets.remote.fetch_daily_walking_activities`
-
     Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding DataFrame is read (compressed) from cache.
+    and the corresponding dataset is read (compressed) from cache.
 
     Parameters
     ----------
     file_path : string
         Full path of the downloaded file including filename.
 
-        Default is None, meaning that it's set to "data_home/points/activities/activities.xz".
+        Default is None, meaning that it's set to "data_home/points/activities/[activities.xz |
+        cross_training_p1_left_leg.npy | jumping_p1_left_leg.npy | stepper_p1_left_leg.npy | walking_p1_left_leg.npy]".
         In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
 
         The "data_home" directory is set by default to "~/gudhi_data",
         unless the 'GUDHI_DATA' environment variable is set.
+
+    subset : string
+        As the dataset is quite a big file to download, when specified, this argument allows to download the following subsets:
+         * 'all' (default value) This dataset contains 1.140.000 vertices in dimension 48. Its size is about 111 Mo.
+         * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
+         * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
+         * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
+         * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
 
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
@@ -293,206 +296,62 @@ def fetch_daily_activities(file_path=None, accept_license=False):
 
     Returns
     -------
-    points: Pandas DataFrame
-        Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set'.
+    points: Pandas DataFrame when `subset='all'` or numpy array otherwise
+        Depending on subset value:
+         * Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set' when `subset='all'`.
+        
+        Or
+         * Array of shape (7500, 3) otherwise.
+
     """
-    # pandas is imported only in the function as it is only an optionnal third party library
-    # ImportError if not available
-    import pandas as pd
-
-    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
-    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.xz"
-    file_checksum = "77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd"
-
-    archive_path = _get_archive_path(file_path, "points/activities/activities.xz")
-
+    load_method = np.load
+    if subset == "all":
+        # pandas is imported only in the function as it is only an optionnal third party library
+        # ImportError if not available
+        import pandas as pd
+        load_method = pd.read_pickle
+    
+        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
+        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
+        file_url = "https://github.com/VincentRouvreau/gudhi-data/raw/activities_UCIrvine_ml/points/activities/activities.xz"
+        file_checksum = "77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd"
+    
+        gudhi_data_set_path = "points/activities/activities.xz"
+    elif subset == "cross_training":
+        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
+        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
+        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy"
+        file_checksum = "2b7636a56734d4422abcf5c9c1eb523b85b22b1086ca19ea9a33d4157e6a48c8"
+    
+        gudhi_data_set_path = "points/activities/cross_training_p1_left_leg.npy"
+    elif subset == "jumping":
+        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
+        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
+        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy"
+        file_checksum = "d1d150d32772b16365a0a4cbb786e90c32f29aaa469c633e215f783e7d1d4795"
+    
+        gudhi_data_set_path = "points/activities/jumping_p1_left_leg.npy"
+    elif subset == "stepper":
+        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
+        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
+        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy"
+        file_checksum = "fef1e61572456bfdf0035448c3393751e13ce8e9dc8d7656182b89078582ed64"
+    
+        gudhi_data_set_path = "points/activities/stepper_p1_left_leg.npy"
+    elif subset == "walking":
+        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
+        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
+        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy"
+        file_checksum = "3ca1926ed824d02ce938a462011f9b1ba49bdc04024996ef2ce345a313a47032"
+    
+        gudhi_data_set_path = "points/activities/walking_p1_left_leg.npy"
+    else:
+        raise ValueError("Unknown subset value")
+    
+    archive_path = _get_archive_path(file_path, gudhi_data_set_path)
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
         license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
-    return pd.read_pickle(archive_path)
-
-
-def fetch_daily_cross_training_activities(file_path=None, accept_license=False):
-    """
-    Load a subset (only left leg magnetometer of cross training activity performed by the person 1)
-    of the Daily and Sports Activities dataset. This dataset comes from
-    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
-
-    This dataset contains 7.500 vertices in dimension 3.
-
-    Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding array is returned from cache.
-
-    Parameters
-    ----------
-    file_path : string
-        Full path of the downloaded file including filename.
-
-        Default is None, meaning that it's set to "data_home/points/activities/cross_training_p1_left_leg.npy".
-        In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
-
-        The "data_home" directory is set by default to "~/gudhi_data",
-        unless the 'GUDHI_DATA' environment variable is set.
-
-    accept_license : boolean
-        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
-
-        Default is False.
-
-    Returns
-    -------
-    points: numpy array
-        Array of shape (7500, 3).
-    """
-    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
-    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy"
-    file_checksum = "2b7636a56734d4422abcf5c9c1eb523b85b22b1086ca19ea9a33d4157e6a48c8"
-
-    archive_path = _get_archive_path(file_path, "points/activities/cross_training_p1_left_leg.npy")
-
-    if not exists(archive_path):
-        _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
-
-    return np.load(archive_path)
-
-
-def fetch_daily_jumping_activities(file_path=None, accept_license=False):
-    """
-    Load a subset (only left leg magnetometer of jumping activity performed by the person 1)
-    of the Daily and Sports Activities dataset. This dataset comes from
-    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
-
-    This dataset contains 7.500 vertices in dimension 3.
-
-    Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding array is returned from cache.
-
-    Parameters
-    ----------
-    file_path : string
-        Full path of the downloaded file including filename.
-
-        Default is None, meaning that it's set to "data_home/points/activities/jumping_p1_left_leg.npy".
-        In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
-
-        The "data_home" directory is set by default to "~/gudhi_data",
-        unless the 'GUDHI_DATA' environment variable is set.
-
-    accept_license : boolean
-        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
-
-        Default is False.
-
-    Returns
-    -------
-    points: numpy array
-        Array of shape (7500, 3).
-    """
-    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
-    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy"
-    file_checksum = "d1d150d32772b16365a0a4cbb786e90c32f29aaa469c633e215f783e7d1d4795"
-
-    archive_path = _get_archive_path(file_path, "points/activities/jumping_p1_left_leg.npy")
-
-    if not exists(archive_path):
-        _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
-
-    return np.load(archive_path)
-
-
-def fetch_daily_stepper_activities(file_path=None, accept_license=False):
-    """
-    Load a subset (only left leg magnetometer of stepper activity performed by the person 1)
-    of the Daily and Sports Activities dataset. This dataset comes from
-    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
-
-    This dataset contains 7.500 vertices in dimension 3.
-
-    Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding array is returned from cache.
-
-    Parameters
-    ----------
-    file_path : string
-        Full path of the downloaded file including filename.
-
-        Default is None, meaning that it's set to "data_home/points/activities/stepper_p1_left_leg.npy".
-        In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
-
-        The "data_home" directory is set by default to "~/gudhi_data",
-        unless the 'GUDHI_DATA' environment variable is set.
-
-    accept_license : boolean
-        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
-
-        Default is False.
-
-    Returns
-    -------
-    points: numpy array
-        Array of shape (7500, 3).
-    """
-    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
-    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy"
-    file_checksum = "fef1e61572456bfdf0035448c3393751e13ce8e9dc8d7656182b89078582ed64"
-
-    archive_path = _get_archive_path(file_path, "points/activities/stepper_p1_left_leg.npy")
-
-    if not exists(archive_path):
-        _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
-
-    return np.load(archive_path)
-
-
-def fetch_daily_walking_activities(file_path=None, accept_license=False):
-    """
-    Load a subset (only left leg magnetometer of walking activity performed by the person 1)
-    of the Daily and Sports Activities dataset. This dataset comes from
-    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
-
-    This dataset contains 7.500 vertices in dimension 3.
-
-    Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding array is returned from cache.
-
-    Parameters
-    ----------
-    file_path : string
-        Full path of the downloaded file including filename.
-
-        Default is None, meaning that it's set to "data_home/points/activities/walking_p1_left_leg.npy".
-        In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
-
-        The "data_home" directory is set by default to "~/gudhi_data",
-        unless the 'GUDHI_DATA' environment variable is set.
-
-    accept_license : boolean
-        Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
-
-        Default is False.
-
-    Returns
-    -------
-    points: numpy array
-        Array of shape (7500, 3).
-    """
-    # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
-    file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy"
-    file_checksum = "3ca1926ed824d02ce938a462011f9b1ba49bdc04024996ef2ce345a313a47032"
-
-    archive_path = _get_archive_path(file_path, "points/activities/walking_p1_left_leg.npy")
-
-    if not exists(archive_path):
-        _fetch_remote(file_url, archive_path, file_checksum)
-        license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
-
-    return np.load(archive_path)
+    return load_method(archive_path)
