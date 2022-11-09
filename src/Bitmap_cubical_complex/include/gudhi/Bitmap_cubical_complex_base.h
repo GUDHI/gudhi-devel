@@ -251,8 +251,14 @@ class Bitmap_cubical_complex_base {
    * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
-  class All_cells_iterator : std::iterator<std::input_iterator_tag, T> {
+  class All_cells_iterator {
    public:
+    typedef std::input_iterator_tag iterator_category;
+    typedef std::size_t value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
+
     All_cells_iterator() { this->counter = 0; }
 
     All_cells_iterator operator++() {
@@ -355,8 +361,14 @@ class Bitmap_cubical_complex_base {
    * @brief Iterator through top dimensional cells of the complex. The cells appear in order they are stored
    * in the structure (i.e. in lexicographical order)
    **/
-  class Top_dimensional_cells_iterator : std::iterator<std::input_iterator_tag, T> {
+  class Top_dimensional_cells_iterator {
    public:
+    typedef std::input_iterator_tag iterator_category;
+    typedef std::size_t value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
+
     Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : b(b) {
       this->counter = std::vector<std::size_t>(b.dimension());
       // std::fill( this->counter.begin() , this->counter.end() , 0 );
