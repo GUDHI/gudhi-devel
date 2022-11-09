@@ -13,8 +13,10 @@ from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+cimport cython
 import errno
 import os
+import numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -39,3 +41,17 @@ def read_points_from_off_file(off_file=''):
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                     off_file)
 
+@cython.embedsignature(True)
+def write_points_to_off_file(fname, points):
+    """Write points to an OFF file.
+
+    A simple wrapper for `numpy.savetxt`.
+
+    :param fname: Name of the OFF file.
+    :type fname: str or file handle
+    :param points: Point coordinates.
+    :type points: numpy array of shape (n, dim)
+    """
+    points = np.array(points, copy=False)
+    assert len(points.shape) == 2
+    np.savetxt(fname, points, header='nOFF\n{} {} 0 0'.format(points.shape[1], points.shape[0]), comments='')
