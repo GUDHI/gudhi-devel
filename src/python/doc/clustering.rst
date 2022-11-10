@@ -17,9 +17,8 @@ As a by-product, we produce the persistence diagram of the merge tree of the ini
    :include-source:
 
    import gudhi
-   f = open(gudhi.__root_source_dir__ + '/data/points/spiral_2d.csv', 'r')
-   import numpy as np
-   data = np.loadtxt(f)
+   from gudhi.datasets.remote import fetch_spiral_2d
+   data = fetch_spiral_2d()
    import matplotlib.pyplot as plt
    plt.scatter(data[:,0],data[:,1],marker='.',s=1)
    plt.show()
