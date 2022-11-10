@@ -17,8 +17,7 @@
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 
-#include <stdlib.h>
-#include <math.h>  // isnan, fmax
+#include <cmath>  // isnan, fmax
 #include <memory>  // for std::unique_ptr
 #include <cstddef>  // for std::size_t
 
@@ -45,6 +44,7 @@
 #include <utility>  // std::pair
 #include <stdexcept>
 #include <numeric>  // for std::iota
+#include <algorithm>  // for std::sort
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -101,13 +101,17 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  */
 template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, bool Weighted = false>
 class Alpha_complex {
+ private:
+  // Vertex_handle internal type (required by triangulation_ and vertices_).
+  using Internal_vertex_handle = std::ptrdiff_t;
+
  public:
   /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
   using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
 
   // Add an int in TDS to save point index in the structure
   using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
-                                                 CGAL::Triangulation_vertex<Geom_traits, std::ptrdiff_t>,
+                                                 CGAL::Triangulation_vertex<Geom_traits, Internal_vertex_handle>,
                                                  CGAL::Triangulation_full_cell<Geom_traits> >;
 
   /** \brief A (Weighted or not) Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
@@ -132,9 +136,6 @@ class Alpha_complex {
   // Vertex_iterator type from CGAL.
   using CGAL_vertex_iterator = typename Triangulation::Vertex_iterator;
 
-  // size_type type from CGAL.
-  using size_type = typename Triangulation::size_type;
-
   // Structure to switch from simplex tree vertex handle to CGAL vertex iterator.
   using Vector_vertex_iterator = std::vector< CGAL_vertex_iterator >;
 
@@ -146,6 +147,10 @@ class Alpha_complex {
   std::unique_ptr<Triangulation> triangulation_;
   /** \brief Kernel for triangulation_ functions access.*/
   A_kernel_d kernel_;
+  /** \brief Vertices to be inserted first by the create_complex method to avoid quadratic complexity.
+   * It isn't just [0, n) if some points have multiplicity (only one copy appears in the complex).
+  */
+  std::vector<Internal_vertex_handle> vertices_;
 
   /** \brief Cache for geometric constructions: circumcenter and squared radius of a simplex.*/
   std::vector<Sphere> cache_, old_cache_;
@@ -257,11 +262,11 @@ class Alpha_complex {
       std::vector<Point_d> point_cloud(first, last);
 
       // Creates a vector {0, 1, ..., N-1}
-      std::vector<std::ptrdiff_t> indices(boost::counting_iterator<std::ptrdiff_t>(0),
-                                          boost::counting_iterator<std::ptrdiff_t>(point_cloud.size()));
+      std::vector<Internal_vertex_handle> indices(boost::counting_iterator<Internal_vertex_handle>(0),
+                                                  boost::counting_iterator<Internal_vertex_handle>(point_cloud.size()));
 
       using Point_property_map = boost::iterator_property_map<typename std::vector<Point_d>::iterator,
-                                                              CGAL::Identity_property_map<std::ptrdiff_t>>;
+                                                              CGAL::Identity_property_map<Internal_vertex_handle>>;
       using Search_traits_d = CGAL::Spatial_sort_traits_adapter_d<Geom_traits, Point_property_map>;
 
       CGAL::spatial_sort(indices.begin(), indices.end(), Search_traits_d(std::begin(point_cloud)));
@@ -279,6 +284,9 @@ class Alpha_complex {
       // structure to retrieve CGAL points from vertex handle - one vertex handle per point.
       // Needs to be constructed before as vertex handles arrives in no particular order.
       vertex_handle_to_iterator_.resize(point_cloud.size());
+      // List of sorted unique vertices in the triangulation. We take advantage of the existing loop to construct it
+      // Vertices list avoids quadratic complexity with the Simplex_tree. We should not fill it up with Toplex_map e.g.
+      vertices_.reserve(triangulation_->number_of_vertices());
       // Loop on triangulation vertices list
       for (CGAL_vertex_iterator vit = triangulation_->vertices_begin(); vit != triangulation_->vertices_end(); ++vit) {
         if (!triangulation_->is_infinite(*vit)) {
@@ -286,8 +294,10 @@ class Alpha_complex {
           std::clog << "Vertex insertion - " << vit->data() << " -> " << vit->point() << std::endl;
 #endif  // DEBUG_TRACES
           vertex_handle_to_iterator_[vit->data()] = vit;
+          vertices_.push_back(vit->data());
         }
       }
+      std::sort(vertices_.begin(), vertices_.end());
       // --------------------------------------------------------------------------------------------
     }
   }
@@ -384,12 +394,21 @@ class Alpha_complex {
     // --------------------------------------------------------------------------------------------
     // Simplex_tree construction from loop on triangulation finite full cells list
     if (num_vertices() > 0) {
+      std::vector<Vertex_handle> one_vertex(1);
+      for (auto vertex : vertices_) {
+#ifdef DEBUG_TRACES
+        std::clog << "SimplicialComplex insertion " << vertex << std::endl;
+#endif  // DEBUG_TRACES
+        one_vertex[0] = vertex;
+        complex.insert_simplex_and_subfaces(one_vertex, std::numeric_limits<double>::quiet_NaN());
+      }
+
       for (auto cit = triangulation_->finite_full_cells_begin();
            cit != triangulation_->finite_full_cells_end();
            ++cit) {
         Vector_vertex vertexVector;
 #ifdef DEBUG_TRACES
-        std::clog << "Simplex_tree insertion ";
+        std::clog << "SimplicialComplex insertion ";
 #endif  // DEBUG_TRACES
         for (auto vit = cit->vertices_begin(); vit != cit->vertices_end(); ++vit) {
           if (*vit != nullptr) {
