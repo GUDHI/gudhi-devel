@@ -85,7 +85,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
             Xfit.append(image.flatten()[np.newaxis,:])
 
-        Xfit = np.concatenate(Xfit,0)
+        Xfit = np.concatenate(Xfit, 0)
 
         return Xfit
 
@@ -123,6 +123,15 @@ def _automatic_sample_range(sample_range, X, y):
                 pass
         return sample_range
 
+
+def _trim_on_edges(x, are_endpoints_nan):
+    if are_endpoints_nan[0]:
+        x = x[1:]
+    if are_endpoints_nan[1]:
+        x = x[:-1]
+    return x
+
+
 class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
@@ -149,6 +158,8 @@ class Landscape(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+        self.im_range = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+        self.im_range = _trim_on_edges(self.im_range, self.nan_in_range)
         return self
 
     def transform(self, X):
@@ -161,53 +172,26 @@ class Landscape(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**): output persistence landscapes.
         """
-        num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
-        step_x = x_values[1] - x_values[0]
 
-        for i in range(num_diag):
+        Xfit = []
+        x_values = self.im_range
+        for diag in X:
+            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
+            tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
+            n_points = diag.shape[0]
+            # Complete the array with zeros to get the right number of landscapes
+            if self.num_landscapes > n_points:
+                tent_functions = np.concatenate(
+                    [tent_functions, np.zeros((tent_functions.shape[0], self.num_landscapes-n_points))],
+                    axis=1
+                )
+            tent_functions.partition(tent_functions.shape[1]-self.num_landscapes, axis=1)
+            landscapes = np.sort(tent_functions[:, -self.num_landscapes:], axis=1)[:, ::-1].T
 
-            diagram, num_pts_in_diag = X[i], X[i].shape[0]
+            landscapes = np.sqrt(2) * np.ravel(landscapes)
+            Xfit.append(landscapes)
 
-            ls = np.zeros([self.num_landscapes, self.new_resolution])
-
-            events = []
-            for j in range(self.new_resolution):
-                events.append([])
-
-            for j in range(num_pts_in_diag):
-                [px,py] = diagram[j,:2]
-                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
-                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
-                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.new_resolution)
-
-                if min_idx < self.new_resolution and max_idx > 0:
-
-                    landscape_value = self.sample_range[0] + min_idx * step_x - px
-                    for k in range(min_idx, mid_idx):
-                        events[k].append(landscape_value)
-                        landscape_value += step_x
-
-                    landscape_value = py - self.sample_range[0] - mid_idx * step_x
-                    for k in range(mid_idx, max_idx):
-                        events[k].append(landscape_value)
-                        landscape_value -= step_x
-
-            for j in range(self.new_resolution):
-                events[j].sort(reverse=True)
-                for k in range( min(self.num_landscapes, len(events[j])) ):
-                    ls[k,j] = events[j][k]
-
-            if self.nan_in_range[0]:
-                ls = ls[:,1:]
-            if self.nan_in_range[1]:
-                ls = ls[:,:-1]
-            ls = np.sqrt(2)*np.reshape(ls,[1,-1])
-            Xfit.append(ls)
-
-        Xfit = np.concatenate(Xfit,0)
-
-        return Xfit
+        return np.stack(Xfit, axis=0)
 
     def __call__(self, diag):
         """
@@ -219,7 +203,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of samples = **num_landscapes** x **resolution**): output persistence landscape.
         """
-        return self.fit_transform([diag])[0,:]
+        return self.fit_transform([diag])[0, :]
 
 class Silhouette(BaseEstimator, TransformerMixin):
     """
@@ -235,6 +219,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
         self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
+        self.nan_in_range = np.isnan(np.array(self.sample_range))
+        self.new_resolution = self.resolution + self.nan_in_range.sum()
 
     def fit(self, X, y=None):
         """
@@ -245,6 +231,8 @@ class Silhouette(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+        self.im_range = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+        self.im_range = _trim_on_edges(self.im_range, self.nan_in_range)
         return self
 
     def transform(self, X):
@@ -257,44 +245,19 @@ class Silhouette(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (**resolution**): output persistence silhouettes.
         """
-        num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
-        step_x = x_values[1] - x_values[0]
+        Xfit = []
+        x_values = self.im_range
 
-        for i in range(num_diag):
-
-            diagram, num_pts_in_diag = X[i], X[i].shape[0]
-
-            sh, weights = np.zeros(self.resolution), np.zeros(num_pts_in_diag)
-            for j in range(num_pts_in_diag):
-                weights[j] = self.weight(diagram[j,:])
+        for diag in X:
+            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
+            weights = np.array([self.weight(pt) for pt in diag])
             total_weight = np.sum(weights)
 
-            for j in range(num_pts_in_diag):
+            tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
+            silhouette = np.sum(weights[None, :] / total_weight * tent_functions, axis=1)
+            Xfit.append(silhouette * np.sqrt(2))
 
-                [px,py] = diagram[j,:2]
-                weight  = weights[j] / total_weight
-                min_idx = np.clip(np.ceil((px          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                mid_idx = np.clip(np.ceil((0.5*(py+px) - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                max_idx = np.clip(np.ceil((py          - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-
-                if min_idx < self.resolution and max_idx > 0:
-
-                    silhouette_value = self.sample_range[0] + min_idx * step_x - px
-                    for k in range(min_idx, mid_idx):
-                        sh[k] += weight * silhouette_value
-                        silhouette_value += step_x
-
-                    silhouette_value = py - self.sample_range[0] - mid_idx * step_x
-                    for k in range(mid_idx, max_idx):
-                        sh[k] += weight * silhouette_value
-                        silhouette_value -= step_x
-
-            Xfit.append(np.reshape(np.sqrt(2) * sh, [1,-1]))
-
-        Xfit = np.concatenate(Xfit, 0)
-
-        return Xfit 
+        return np.stack(Xfit, axis=0)
 
     def __call__(self, diag):
         """

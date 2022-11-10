@@ -187,3 +187,67 @@ def test_kernel_empty_diagrams():
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1.)(empty_diag, empty_diag)
 #    PersistenceFisherKernel(bandwidth_fisher=1., bandwidth=1., kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])))(empty_diag, empty_diag)
 
+
+def test_silhouette_permutation_invariance():
+    dgm = _n_diags(1)[0]
+    dgm_permuted = dgm[np.random.permutation(dgm.shape[0]).astype(int)]
+    random_resolution = random.randint(50, 100) * 10
+    slt = Silhouette(resolution=random_resolution, weight=pow(2))
+
+    assert np.all(np.isclose(slt(dgm), slt(dgm_permuted)))
+
+
+def test_silhouette_multiplication_invariance():
+    dgm = _n_diags(1)[0]
+    n_repetitions = np.random.randint(2, high=10)
+    dgm_augmented = np.repeat(dgm, repeats=n_repetitions, axis=0)
+
+    random_resolution = random.randint(50, 100) * 10
+    slt = Silhouette(resolution=random_resolution, weight=pow(2))
+    assert np.all(np.isclose(slt(dgm), slt(dgm_augmented)))
+
+
+def test_silhouette_numeric():
+    dgm = np.array([[2., 3.], [5., 6.]])
+    slt = Silhouette(resolution=9, weight=pow(1), sample_range=[2., 6.])
+    #slt.fit([dgm])
+    # x_values = array([2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.])
+
+    expected_silhouette = np.array([0., 0.5, 0., 0., 0., 0., 0., 0.5, 0.])/np.sqrt(2)
+    output_silhouette = slt(dgm)
+    assert np.all(np.isclose(output_silhouette, expected_silhouette))
+
+
+def test_landscape_small_persistence_invariance():
+    dgm = np.array([[2., 6.], [2., 5.], [3., 7.]])
+    small_persistence_pts = np.random.rand(10, 2)
+    small_persistence_pts[:, 1] += small_persistence_pts[:, 0]
+    small_persistence_pts += np.min(dgm)
+    dgm_augmented = np.concatenate([dgm, small_persistence_pts], axis=0)
+
+    lds = Landscape(num_landscapes=2, resolution=5)
+    lds_dgm, lds_dgm_augmented = lds(dgm), lds(dgm_augmented)
+
+    assert np.all(np.isclose(lds_dgm, lds_dgm_augmented))
+
+
+def test_landscape_numeric():
+    dgm = np.array([[2., 6.], [3., 5.]])
+    lds_ref = np.array([
+        0., 0.5, 1., 1.5, 2., 1.5, 1., 0.5, 0.,  # tent of [2, 6]
+        0., 0., 0., 0.5, 1., 0.5, 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 0., 0., 0.,
+    ])
+    lds_ref *= np.sqrt(2)
+    lds = Landscape(num_landscapes=4, resolution=9, sample_range=[2., 6.])
+    lds_dgm = lds(dgm)
+    assert np.all(np.isclose(lds_dgm, lds_ref))
+
+
+def test_landscape_nan_range():
+    dgm = np.array([[2., 6.], [3., 5.]])
+    lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
+    lds_dgm = lds(dgm)
+    assert (lds.sample_range[0] == 2) & (lds.sample_range[1] == 6)
+    assert lds.new_resolution == 10

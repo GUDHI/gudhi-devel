@@ -391,7 +391,7 @@ The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
 mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`SciPy <http://scipy.org>`_ as a backend if explicitly requested.
+`SciPy <http://scipy.org>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
 
 TensorFlow
 ----------
