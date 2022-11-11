@@ -546,6 +546,7 @@ if(PYTHONINTERP_FOUND)
 
     # Reader utils
     add_gudhi_py_test(test_reader_utils)
+    add_gudhi_py_test(test_off)
 
     # Wasserstein
     if(OT_FOUND)

@@ -54,4 +54,9 @@ def write_points_to_off_file(fname, points):
     """
     points = np.array(points, copy=False)
     assert len(points.shape) == 2
-    np.savetxt(fname, points, header='nOFF\n{} {} 0 0'.format(points.shape[1], points.shape[0]), comments='')
+    dim = points.shape[1]
+    if dim == 3:
+        head = 'OFF\n{} 0 0'.format(points.shape[0])
+    else:
+        head = 'nOFF\n{} {} 0 0'.format(dim, points.shape[0])
+    np.savetxt(fname, points, header=head, comments='')
