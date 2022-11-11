@@ -16,6 +16,6 @@ import pytest
 def test_off_rw():
     for dim in range(2, 6):
         X = np.random.rand(123, dim)
-        gd.write_points_to_off_file('rand.off', X)
-        Y = gd.read_points_from_off_file('rand.off')
+        gd.write_points_to_off_file("rand.off", X)
+        Y = gd.read_points_from_off_file("rand.off")
         assert Y == pytest.approx(X)
