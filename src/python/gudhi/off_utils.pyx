@@ -26,7 +26,7 @@ cdef extern from "Off_reader_interface.h" namespace "Gudhi":
     vector[vector[double]] read_points_from_OFF_file(string off_file)
 
 def read_points_from_off_file(off_file=''):
-    """Read points from OFF file.
+    """Read points from an `OFF file <fileformats.html#off-file-format>`_.
 
     :param off_file: An OFF file style name.
     :type off_file: string
@@ -43,7 +43,7 @@ def read_points_from_off_file(off_file=''):
 
 @cython.embedsignature(True)
 def write_points_to_off_file(fname, points):
-    """Write points to an OFF file.
+    """Write points to an `OFF file <fileformats.html#off-file-format>`_.
 
     A simple wrapper for `numpy.savetxt`.
 
