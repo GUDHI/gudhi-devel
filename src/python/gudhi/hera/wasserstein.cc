@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <wasserstein.h> // Hera
+#include <hera/wasserstein.h> // Hera
 
 #include <pybind11_diagram_utils.h>
 
