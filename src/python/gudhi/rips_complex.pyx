@@ -41,31 +41,30 @@ cdef class RipsComplex:
     cdef Rips_complex_interface thisref
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=None, distance_matrix=None,
+    def __init__(self, *, points=None, distance_matrix=None,
                  max_edge_length=float('inf'), sparse=None):
         """RipsComplex constructor.
 
-        :param max_edge_length: Rips value.
-        :type max_edge_length: float
-
         :param points: A list of points in d-Dimension.
-        :type points: list of list of float
+        :type points: List[List[float]]
 
         Or
 
         :param distance_matrix: A distance matrix (full square or lower
             triangular).
-        :type points: list of list of float
+        :type distance_matrix: List[List[float]]
 
         And in both cases
 
+        :param max_edge_length: Rips value.
+        :type max_edge_length: float
         :param sparse: If this is not None, it switches to building a sparse
             Rips and represents the approximation parameter epsilon.
         :type sparse: float
         """
 
     # The real cython constructor
-    def __cinit__(self, points=None, distance_matrix=None,
+    def __cinit__(self, *, points=None, distance_matrix=None,
                   max_edge_length=float('inf'), sparse=None):
         if sparse is not None:
           if distance_matrix is not None:

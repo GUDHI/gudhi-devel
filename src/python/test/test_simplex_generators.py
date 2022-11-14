@@ -14,7 +14,7 @@ import numpy as np
 
 def test_flag_generators():
     pts = np.array([[0, 0], [0, 1.01], [1, 0], [1.02, 1.03], [100, 0], [100, 3.01], [103, 0], [103.02, 3.03]])
-    r = gudhi.RipsComplex(pts, max_edge_length=4)
+    r = gudhi.RipsComplex(points=pts, max_edge_length=4)
     st = r.create_simplex_tree(max_dimension=50)
     st.persistence()
     g = st.flag_persistence_generators()
