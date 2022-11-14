@@ -222,7 +222,7 @@
 }
 
 @incollection{gudhi:PersistenceRepresentationsScikitlearnInterface
-, author =  "Mathieu Carri\`ere"
+, author =  "Mathieu Carri\`ere, Gard Spreemann, Wojciech Reise"
 , title =   "Persistence representations scikit-learn like interface"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
