@@ -101,7 +101,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         """
         return self.fit_transform([diag])[0,:]
 
-def _automatic_sample_range(sample_range, X, y):
+def _automatic_sample_range(sample_range, X):
         """
         Compute and returns sample range from the persistence diagrams if one of the sample_range values is numpy.nan.
 
@@ -114,7 +114,7 @@ def _automatic_sample_range(sample_range, X, y):
         nan_in_range = np.isnan(sample_range)
         if nan_in_range.any():
             try:
-                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X,y)
+                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X)
                 [mx,my] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]]
                 [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 return np.where(nan_in_range, np.array([mx, My]), sample_range)
@@ -132,6 +132,18 @@ def _trim_endpoints(x, are_endpoints_nan):
     return x
 
 
+def _grid_from_sample_range(self, X):
+    sample_range = np.array(self.sample_range_init)
+    self.nan_in_range = np.isnan(sample_range)
+    self.new_resolution = self.resolution
+    if not self.keep_endpoints:
+        self.new_resolution += self.nan_in_range.sum()
+    self.sample_range = _automatic_sample_range(sample_range, X)
+    self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+    if not self.keep_endpoints:
+        self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
+
+
 class Landscape(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
@@ -146,11 +158,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when guessing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
-        self.nan_in_range = np.isnan(np.array(self.sample_range))
-        self.new_resolution = self.resolution
-        if not keep_endpoints:
-            self.new_resolution += self.nan_in_range.sum()
+        self.num_landscapes, self.resolution, self.sample_range_init = num_landscapes, resolution, sample_range
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -161,10 +169,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
-        self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
-        if not self.keep_endpoints:
-            self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
+        _grid_from_sample_range(self, X)
         return self
 
     def transform(self, X):
@@ -224,11 +229,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when guessing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
-        self.nan_in_range = np.isnan(np.array(self.sample_range))
-        self.new_resolution = self.resolution
-        if not keep_endpoints:
-            self.new_resolution += self.nan_in_range.sum()
+        self.weight, self.resolution, self.sample_range_init = weight, resolution, sample_range
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -239,10 +240,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
-        self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
-        if not self.keep_endpoints:
-            self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
+        _grid_from_sample_range(self, X)
         return self
 
     def transform(self, X):
@@ -323,7 +321,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         self.predefined_grid = predefined_grid
         self.resolution = resolution
-        self.sample_range = sample_range
+        self.sample_range_init = sample_range
         self.keep_endpoints = keep_endpoints
 
     def is_fitted(self):
@@ -343,14 +341,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
                 events = np.unique(np.concatenate([pd.flatten() for pd in X] + [[-np.inf]], axis=0))
                 self.grid_ = np.array(events)
             else:
-                self.nan_in_range = np.isnan(np.array(self.sample_range))
-                self.new_resolution = self.resolution
-                if not self.keep_endpoints:
-                    self.new_resolution += self.nan_in_range.sum()
-                self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
-                self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
-                if not self.keep_endpoints:
-                    self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
+                _grid_from_sample_range(self, X)
         else:
             self.grid_ = self.predefined_grid # Get the predefined grid from user
 
@@ -450,7 +441,7 @@ class Entropy(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details. Note that a previous implementation was contributed by Manuel Soriano-Trigueros.
     """
-    def __init__(self, mode="scalar", normalized=True, resolution=100, sample_range=[np.nan, np.nan]):
+    def __init__(self, mode="scalar", normalized=True, resolution=100, sample_range=[np.nan, np.nan], *, keep_endpoints=False):
         """
         Constructor for the Entropy class.
 
@@ -459,8 +450,10 @@ class Entropy(BaseEstimator, TransformerMixin):
             normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
             sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
+            keep_endpoints (bool): when guessing `sample_range`, use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.mode, self.normalized, self.resolution, self.sample_range = mode, normalized, resolution, sample_range
+        self.mode, self.normalized, self.resolution, self.sample_range_init = mode, normalized, resolution, sample_range
+        self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
         """
@@ -470,7 +463,9 @@ class Entropy(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.sample_range = _automatic_sample_range(np.array(self.sample_range), X, y)
+        if self.mode == "vector":
+            _grid_from_sample_range(self, X)
+            self.step_ = self.grid_[1] - self.grid_[0]
         return self
 
     def transform(self, X):
@@ -484,8 +479,6 @@ class Entropy(BaseEstimator, TransformerMixin):
             numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**): output entropy.
         """
         num_diag, Xfit = len(X), []
-        x_values = np.linspace(self.sample_range[0], self.sample_range[1], self.resolution)
-        step_x = x_values[1] - x_values[0]
         new_X = BirthPersistenceTransform().fit_transform(X)        
 
         for i in range(num_diag):
@@ -500,8 +493,8 @@ class Entropy(BaseEstimator, TransformerMixin):
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
                     [px,py] = orig_diagram[j,:2]
-                    min_idx = np.clip(np.ceil((px - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
-                    max_idx = np.clip(np.ceil((py - self.sample_range[0]) / step_x).astype(int), 0, self.resolution)
+                    min_idx = np.clip(np.ceil((px - self.sample_range[0]) / self.step_).astype(int), 0, self.resolution)
+                    max_idx = np.clip(np.ceil((py - self.sample_range[0]) / self.step_).astype(int), 0, self.resolution)
                     ent[min_idx:max_idx]-=p[j]*np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
