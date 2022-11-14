@@ -157,6 +157,9 @@ class Landscape(BaseEstimator, TransformerMixin):
             resolution (int): number of sample for all piecewise-linear functions (default 100).
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when guessing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
+
+        Attributes:
+            grid_ (1d array): The grid on which the landscapes are computed.
         """
         self.num_landscapes, self.resolution, self.sample_range_init = num_landscapes, resolution, sample_range
         self.keep_endpoints = keep_endpoints
@@ -228,6 +231,9 @@ class Silhouette(BaseEstimator, TransformerMixin):
             resolution (int): number of samples for the weighted average (default 100).
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when guessing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
+
+        Attributes:
+            grid_ (1d array): The grid on which the silhouette is computed.
         """
         self.weight, self.resolution, self.sample_range_init = weight, resolution, sample_range
         self.keep_endpoints = keep_endpoints
@@ -296,7 +302,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             keep_endpoints (bool): when guessing `sample_range` (fixed `resolution`, no `predefined_grid`), use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
 
         Attributes:
-            grid_ (1d array): The grid on which the Betti numbers are computed. If predefined_grid was specified, `grid_` will always be that grid, independently of data. If not, the grid is fitted to capture all filtration values at which the Betti numbers change.
+            grid_ (1d array): The grid on which the Betti numbers are computed. If predefined_grid was specified, `grid_` will always be that grid, independently of data. If not and resolution is None, the grid is fitted to capture all filtration values at which the Betti numbers change.
 
         Examples
         --------
@@ -451,6 +457,9 @@ class Entropy(BaseEstimator, TransformerMixin):
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
             sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
             keep_endpoints (bool): when guessing `sample_range`, use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
+
+        Attributes:
+            grid_ (1d array): In vector mode, the grid on which the entropy summary function is computed.
         """
         self.mode, self.normalized, self.resolution, self.sample_range_init = mode, normalized, resolution, sample_range
         self.keep_endpoints = keep_endpoints
