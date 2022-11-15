@@ -69,12 +69,6 @@ public:
 	bool is_non_zero(index rowIndex) const;
 
 	Z2_reduced_cell_list_column_with_row& operator+=(Z2_reduced_cell_list_column_with_row &column);
-	friend Z2_reduced_cell_list_column_with_row operator+(
-			Z2_reduced_cell_list_column_with_row column1,
-			Z2_reduced_cell_list_column_with_row const& column2){
-		column1 += column2;
-		return column1;
-	}
 
 private:
 	using RCC = Z2_reduced_cell_column_with_row<Cell,Column_type,Row_type,z2_base_hook_matrix_list_row,typename Master_matrix::Column_pairing_option>;

@@ -73,25 +73,7 @@ public:
 	bool is_non_zero(index rowIndex) const;
 
 	Reduced_cell_set_column_with_row& operator+=(Reduced_cell_set_column_with_row &column);
-	friend Reduced_cell_set_column_with_row operator+(
-			Reduced_cell_set_column_with_row column1,
-			Reduced_cell_set_column_with_row const& column2){
-		column1 += column2;
-		return column1;
-	}
 	Reduced_cell_set_column_with_row& operator*=(unsigned int v);
-	friend Reduced_cell_set_column_with_row operator*(
-			Reduced_cell_set_column_with_row column,
-			unsigned int const& v){
-		column *= v;
-		return column;
-	}
-	friend Reduced_cell_set_column_with_row operator*(
-			unsigned int const& v,
-			Reduced_cell_set_column_with_row column){
-		column *= v;
-		return column;
-	}
 
 private:
 	using RCC = Reduced_cell_column_with_row<Cell,Column_type,Row_type,base_hook_matrix_set_row,typename Master_matrix::Field_type,typename Master_matrix::Column_pairing_option>;
@@ -131,7 +113,7 @@ inline void Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Co
 template<class Master_matrix, class Field_element_type, class Column_pairing_option>
 inline bool Reduced_cell_set_column_with_row<Master_matrix,Field_element_type,Column_pairing_option>::is_non_zero(index rowIndex) const
 {
-	return RCC::get_column().find(Cell(pivotToColumnIndex_->at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
+	return RCC::get_column().find(Cell(1, pivotToColumnIndex_->at(RCC::get_pivot()), rowIndex)) != RCC::get_column().end();
 }
 
 template<class Master_matrix, class Field_element_type, class Column_pairing_option>

@@ -65,7 +65,7 @@ public:
 		column *= v;
 		return column;
 	}
-	friend Unordered_set_column operator*(unsigned int const& v, Unordered_set_column const column){
+	friend Unordered_set_column operator*(unsigned int const& v, Unordered_set_column column){
 		column *= v;
 		return column;
 	}

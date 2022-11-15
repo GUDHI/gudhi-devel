@@ -63,7 +63,7 @@ public:
 		column *= v;
 		return column;
 	}
-	friend List_column operator*(unsigned int const& v, List_column const column){
+	friend List_column operator*(unsigned int const& v, List_column column){
 		column *= v;
 		return column;
 	}

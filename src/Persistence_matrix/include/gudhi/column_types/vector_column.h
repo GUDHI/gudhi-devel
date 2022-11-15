@@ -64,7 +64,7 @@ public:
 		column *= v;
 		return column;
 	}
-	friend Vector_column operator*(unsigned int const& v, Vector_column const column){
+	friend Vector_column operator*(unsigned int const& v, Vector_column column){
 		column *= v;
 		return column;
 	}

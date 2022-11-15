@@ -73,25 +73,7 @@ public:
 	bool is_non_zero(index rowIndex) const;
 
 	Reduced_cell_list_column_with_row& operator+=(Reduced_cell_list_column_with_row &column);
-	friend Reduced_cell_list_column_with_row operator+(
-			Reduced_cell_list_column_with_row column1,
-			Reduced_cell_list_column_with_row const& column2){
-		column1 += column2;
-		return column1;
-	}
 	Reduced_cell_list_column_with_row& operator*=(unsigned int v);
-	friend Reduced_cell_list_column_with_row operator*(
-			Reduced_cell_list_column_with_row column,
-			unsigned int const& v){
-		column *= v;
-		return column;
-	}
-	friend Reduced_cell_list_column_with_row operator*(
-			unsigned int const& v,
-			Reduced_cell_list_column_with_row column){
-		column *= v;
-		return column;
-	}
 
 private:
 	using RCC = Reduced_cell_column_with_row<Cell,Column_type,Row_type,base_hook_matrix_list_row,Field_element_type,typename Master_matrix::Column_pairing_option>;
