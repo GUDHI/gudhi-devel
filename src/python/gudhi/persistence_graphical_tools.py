@@ -200,7 +200,7 @@ def plot_persistence_barcode(
             dimensions = set(item[0] for item in persistence)
             axes.legend(
                 handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
-                loc="lower right",
+                loc="best",
             )
 
         axes.set_title("Persistence barcode", fontsize=fontsize)
