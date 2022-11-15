@@ -528,7 +528,7 @@ def test_simplex_tree_constructor_exception():
 
 def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
-    st = SimplexTree.create_from_array(a, max_filtration=5)
+    st = SimplexTree.create_from_array(a, max_filtration=5.0)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
 
 
