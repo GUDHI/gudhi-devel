@@ -107,7 +107,7 @@ def plot_persistence_barcode(
     alpha=0.6,
     max_intervals=20000,
     inf_delta=0.1,
-    legend=False,
+    legend=True,
     colormap=None,
     axes=None,
     fontsize=16,
@@ -133,7 +133,7 @@ def plot_persistence_barcode(
         inf_delta)` above :code:`max_death` value. A reasonable value is
         between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float.
-    :param legend: Display the dimension color legend (default is False).
+    :param legend: Display the dimension color legend (default is True).
     :type legend: boolean.
     :param colormap: A matplotlib-like qualitative colormaps. Default is None
         which means :code:`matplotlib.cm.Set1.colors`.
@@ -222,7 +222,7 @@ def plot_persistence_diagram(
     band=0.0,
     max_intervals=1000000,
     inf_delta=0.1,
-    legend=False,
+    legend=True,
     colormap=None,
     axes=None,
     fontsize=16,
@@ -250,7 +250,7 @@ def plot_persistence_diagram(
         inf_delta)` above :code:`max_death` value. A reasonable value is
         between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float.
-    :param legend: Display the dimension color legend (default is False).
+    :param legend: Display the dimension color legend (default is True).
     :type legend: boolean.
     :param colormap: A matplotlib-like qualitative colormaps. Default is None
         which means :code:`matplotlib.cm.Set1.colors`.
@@ -364,7 +364,7 @@ def plot_persistence_density(
     max_intervals=1000,
     dimension=None,
     cmap=None,
-    legend=False,
+    legend=True,
     axes=None,
     fontsize=16,
     greyblock=False,
@@ -410,7 +410,7 @@ def plot_persistence_density(
     :param cmap: A matplotlib colormap (default is
         matplotlib.pyplot.cm.hot_r).
     :type cmap: cf. matplotlib colormap.
-    :param legend: Display the color bar values (default is False).
+    :param legend: Display the color bar values (default is True).
     :type legend: boolean.
     :param axes: A matplotlib-like subplot axes. If None, the plot is drawn on
         a new set of axes.

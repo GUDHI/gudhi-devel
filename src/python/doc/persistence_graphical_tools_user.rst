@@ -27,7 +27,7 @@ This function can display the persistence result as a barcode:
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence(min_persistence=0.4)
 
-    gudhi.plot_persistence_barcode(diag)
+    gudhi.plot_persistence_barcode(diag, legend=False)
     plt.show()
 
 Show persistence as a diagram
@@ -44,8 +44,7 @@ This function can display the persistence result as a diagram:
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    ax = gudhi.plot_persistence_diagram(persistence_file=persistence_file,
-        legend=True)
+    ax = gudhi.plot_persistence_diagram(persistence_file=persistence_file)
     # We can modify the title, aspect, etc.
     ax.set_title("Persistence diagram of a torus")
     ax.set_aspect("equal")  # forces to be square shaped
@@ -61,7 +60,7 @@ of shape (N x 2) encoding a persistence diagram (in a given dimension).
     import gudhi
     import numpy as np
     d = np.array([[0., 1.], [1., 2.], [1., np.inf]])
-    gudhi.plot_persistence_diagram(d)
+    gudhi.plot_persistence_diagram(d, legend=False)
     plt.show()
 
 Persistence density
@@ -86,9 +85,9 @@ If you want more information on a specific dimension, for instance:
     # Use subplots to display diagram and density side by side
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
     gudhi.plot_persistence_diagram(persistence=pers_diag,
-        axes=axes[0])
+        legend=False, axes=axes[0])
     gudhi.plot_persistence_density(persistence=pers_diag,
-        dimension=1, legend=True, axes=axes[1])
+        legend=True,  axes=axes[1])
     plt.show()
 
 LaTeX support
