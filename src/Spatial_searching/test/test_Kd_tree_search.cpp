@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_Kd_tree_search) {
 
   std::vector<std::size_t> knn_result;
   FT last_dist = -1.;
-  for (auto const& nghb : kns_range) {
+  for (auto const nghb : kns_range) {
     BOOST_CHECK(nghb.second > last_dist);
     knn_result.push_back(nghb.second);
     last_dist = nghb.second;
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_Kd_tree_search) {
 
   std::vector<std::size_t> kfn_result;
   last_dist = kfn_range.begin()->second;
-  for (auto const& nghb : kfn_range) {
+  for (auto const nghb : kfn_range) {
     BOOST_CHECK(nghb.second <= last_dist);
     kfn_result.push_back(nghb.second);
     last_dist = nghb.second;
