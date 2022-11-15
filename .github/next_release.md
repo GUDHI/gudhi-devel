@@ -9,6 +9,9 @@ Below is a list of changes made since GUDHI 3.6.0:
 - [Module](link)
      - ...
 
+- [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_user.html)
+     - Construction now rejects positional arguments, you need to specify `points=X`.
+
 - Installation
      - c++17 is the new minimal standard to compile the library. This implies Visual Studio minimal version is now 2017.
 
