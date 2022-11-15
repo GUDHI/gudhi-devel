@@ -241,26 +241,6 @@
 , year =        @GUDHI_VERSION_YEAR@
 }
 
-@incollection{gudhi:TimeDelayEmbedding
-, author =  "Yuichi Ike"
-, title =   "Time Delay Embedding"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/point_cloud.html#time-delay-embedding"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:KNearestNeighbors
-, author =  "Marc Glisse"
-, title =   "K nearest neighbors"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/point_cloud.html#module-gudhi.point_cloud.knn"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
 @incollection{gudhi:DistanceToMeasure
 , author =  "Marc Glisse"
 , title =   "Distance to measure"
