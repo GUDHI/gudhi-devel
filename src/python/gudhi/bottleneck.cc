@@ -12,6 +12,9 @@
 
 #include <pybind11_diagram_utils.h>
 
+// Indices are added internally in bottleneck_distance, they are not needed in the input.
+static auto make_point(double x, double y, py::ssize_t) { return std::pair(x, y); };
+
 // For compatibility with older versions, we want to support e=None.
 // In C++17, the recommended way is std::optional<double>.
 double bottleneck(Dgm d1, Dgm d2, py::object epsilon)
@@ -19,8 +22,8 @@ double bottleneck(Dgm d1, Dgm d2, py::object epsilon)
   double e = (std::numeric_limits<double>::min)();
   if (!epsilon.is_none()) e = epsilon.cast<double>();
   // I *think* the call to request() has to be before releasing the GIL.
-  auto diag1 = numpy_to_range_of_pairs(d1);
-  auto diag2 = numpy_to_range_of_pairs(d2);
+  auto diag1 = numpy_to_range_of_pairs(d1, make_point);
+  auto diag2 = numpy_to_range_of_pairs(d2, make_point);
 
   py::gil_scoped_release release;
 
