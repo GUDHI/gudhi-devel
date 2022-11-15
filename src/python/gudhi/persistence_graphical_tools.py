@@ -113,8 +113,8 @@ def plot_persistence_barcode(
     fontsize=16,
 ):
     """This function plots the persistence bar code from persistence values list
-    , a np.array of shape (N x 2) (representing a diagram 
-    in a single homology dimension), 
+    , a np.array of shape (N x 2) (representing a diagram
+    in a single homology dimension),
     or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
@@ -190,16 +190,17 @@ def plot_persistence_barcode(
         if colormap == None:
             colormap = plt.cm.Set1.colors
 
-        x=[birth for (dim,(birth,death)) in persistence]
-        y=[(death - birth) if death != float("inf") else (infinity - birth) for (dim,(birth,death)) in persistence]
-        c=[colormap[dim] for (dim,(birth,death)) in persistence]
+        x = [birth for (dim, (birth, death)) in persistence]
+        y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
+        c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
         axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
 
         if legend:
             dimensions = set(item[0] for item in persistence)
             axes.legend(
-                handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions], loc="lower right",
+                handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+                loc="lower right",
             )
 
         axes.set_title("Persistence barcode", fontsize=fontsize)
@@ -324,12 +325,12 @@ def plot_persistence_diagram(
         # line display of equation : birth = death
         axes.plot([axis_start, axis_end], [axis_start, axis_end], linewidth=1.0, color="k")
 
-        x=[birth for (dim,(birth,death)) in persistence]
-        y=[death if death != float("inf") else infinity for (dim,(birth,death)) in persistence]
-        c=[colormap[dim] for (dim,(birth,death)) in persistence]
+        x = [birth for (dim, (birth, death)) in persistence]
+        y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
+        c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
-        axes.scatter(x,y,alpha=alpha,color=c)
-        if float("inf") in (death for (dim,(birth,death)) in persistence):
+        axes.scatter(x, y, alpha=alpha, color=c)
+        if float("inf") in (death for (dim, (birth, death)) in persistence):
             # infinity line and text
             axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
             # Infinity label
@@ -379,9 +380,9 @@ def plot_persistence_density(
 
     :Requires: `SciPy <installation.html#scipy>`_
 
-    :param persistence: Persistence intervals values list. 
+    :param persistence: Persistence intervals values list.
                         Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, array of (birth, death)) 
+    :type persistence: an array of (dimension, array of (birth, death))
                         or an array of (birth, death).
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_
         file style name (reset persistence if both are set).
@@ -417,7 +418,7 @@ def plot_persistence_density(
     :type axes: `matplotlib.axes.Axes`
     :param fontsize: Fontsize to use in axis.
     :type fontsize: int
-    :param greyblock: if we want to plot a grey patch on the lower half plane 
+    :param greyblock: if we want to plot a grey patch on the lower half plane
                          for nicer rendering. Default False.
     :type greyblock: boolean
     :returns: (`matplotlib.axes.Axes`): The axes on which the plot was drawn.
@@ -480,7 +481,8 @@ def plot_persistence_density(
             # Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents
             k = kde.gaussian_kde([birth, death], bw_method=bw_method)
             xi, yi = np.mgrid[
-                birth_min : birth_max : nbins * 1j, death_min : death_max : nbins * 1j,
+                birth_min : birth_max : nbins * 1j,
+                death_min : death_max : nbins * 1j,
             ]
             zi = k(np.vstack([xi.flatten(), yi.flatten()]))
             # Make the plot
