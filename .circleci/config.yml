@@ -12,6 +12,7 @@ jobs:
       - run:
           name: Build and test examples
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -26,6 +27,7 @@ jobs:
       - run:
           name: Build and test unitary tests
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -40,6 +42,7 @@ jobs:
       - run:
           name: Build and test utilities
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
@@ -54,8 +57,7 @@ jobs:
       - run:
           name: Build and test python module. Generates and tests the python documentation
           command: |
-            git submodule init
-            git submodule update
+            git submodule update --init
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
@@ -85,8 +87,7 @@ jobs:
       - run:
           name: Generates the C++ documentation with doxygen
           command: |
-            git submodule init
-            git submodule update
+            git submodule update --init
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
@@ -116,6 +117,7 @@ jobs:
       - run:
           name: Build and test examples without cgal and eigen
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -130,6 +132,7 @@ jobs:
       - run:
           name: Build and test unitary tests without cgal and eigen
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -144,6 +147,7 @@ jobs:
       - run:
           name: Build and test utilities without cgal and eigen
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
@@ -158,8 +162,7 @@ jobs:
       - run:
           name: Build and test python module without cgal and eigen
           command: |
-            git submodule init
-            git submodule update
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
@@ -178,6 +181,7 @@ jobs:
       - run:
           name: Build and test examples without cgal
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -192,6 +196,7 @@ jobs:
       - run:
           name: Build and test unitary tests without cgal
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
@@ -206,6 +211,7 @@ jobs:
       - run:
           name: Build and test utilities without cgal
           command: |
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF ..
@@ -220,8 +226,7 @@ jobs:
       - run:
           name: Build and test python module without cgal
           command: |
-            git submodule init
-            git submodule update
+            git submodule update --init
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
