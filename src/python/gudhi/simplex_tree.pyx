@@ -290,6 +290,8 @@ cdef class SimplexTree:
     def insert_batch(self, some_int[:,:] vertex_array, some_float[:] filtrations):
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
+        The n-th simplex has vertices `vertex_array[0,n]`, ...,
+        `vertex_array[k,n]` and filtration value `filtrations[n]`.
         If a simplex is repeated, the smallest filtration value is used.
         Simplices with a repeated vertex are currently interpreted as lower
         dimensional simplices, but we do not guarantee this behavior in the
