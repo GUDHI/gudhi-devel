@@ -20,6 +20,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>  // for numeric_limits
+#include <cmath>
 
 namespace Gudhi {
 
@@ -31,7 +32,7 @@ namespace persistence_diagram {
  * \ingroup bottleneck_distance
  */
 class Persistence_graph {
- public:
+public:
   /** \internal \brief Constructor taking 2 PersistenceDiagrams (concept) as parameters. */
   template<typename Persistence_diagram1, typename Persistence_diagram2>
   Persistence_graph(const Persistence_diagram1& diag1, const Persistence_diagram2& diag2, double e);
@@ -58,7 +59,7 @@ class Persistence_graph {
   /** \internal \brief Returns the corresponding internal point */
   Internal_point get_v_point(int v_point_index) const;
 
- private:
+private:
   std::vector<Internal_point> u;
   std::vector<Internal_point> v;
   double b_alive;
@@ -67,29 +68,53 @@ class Persistence_graph {
 template<typename Persistence_diagram1, typename Persistence_diagram2>
 Persistence_graph::Persistence_graph(const Persistence_diagram1 &diag1,
                                      const Persistence_diagram2 &diag2, double e)
-    : u(), v(), b_alive(0.) {
+  : u(), v(), b_alive(0.) {
   std::vector<double> u_alive;
   std::vector<double> v_alive;
+  std::vector<double> u_nalive;
+  std::vector<double> v_nalive;
+  int u_inf = 0;
+  int v_inf = 0;
+  double inf = std::numeric_limits<double>::infinity();
+  double neginf = -inf;
+
   for (auto it = std::begin(diag1); it != std::end(diag1); ++it) {
-    if (std::get<1>(*it) == std::numeric_limits<double>::infinity())
-      u_alive.push_back(std::get<0>(*it));
-    else if (std::get<1>(*it) - std::get<0>(*it) > e)
-      u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
+    if (std::get<0>(*it) != inf && std::get<1>(*it) != neginf){
+      if (std::get<0>(*it) == neginf && std::get<1>(*it) == inf)
+        u_inf++;
+      else if (std::get<0>(*it) == neginf)
+        u_nalive.push_back(std::get<1>(*it));
+      else if (std::get<1>(*it) == inf)
+        u_alive.push_back(std::get<0>(*it));
+      else if (std::get<1>(*it) - std::get<0>(*it) > e)
+        u.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), u.size()));
+    }
   }
   for (auto it = std::begin(diag2); it != std::end(diag2); ++it) {
-    if (std::get<1>(*it) == std::numeric_limits<double>::infinity())
-      v_alive.push_back(std::get<0>(*it));
-    else if (std::get<1>(*it) - std::get<0>(*it) > e)
-      v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
+    if (std::get<0>(*it) != inf && std::get<1>(*it) != neginf){
+      if (std::get<0>(*it) == neginf && std::get<1>(*it) == inf)
+        v_inf++;
+      else if (std::get<0>(*it) == neginf)
+        v_nalive.push_back(std::get<1>(*it));
+      else if (std::get<1>(*it) == inf)
+        v_alive.push_back(std::get<0>(*it));
+      else if (std::get<1>(*it) - std::get<0>(*it) > e)
+        v.push_back(Internal_point(std::get<0>(*it), std::get<1>(*it), v.size()));
+    }
   }
   if (u.size() < v.size())
     swap(u, v);
-  std::sort(u_alive.begin(), u_alive.end());
-  std::sort(v_alive.begin(), v_alive.end());
-  if (u_alive.size() != v_alive.size()) {
+
+  if (u_alive.size() != v_alive.size() || u_nalive.size() != v_nalive.size() || u_inf != v_inf) {
     b_alive = std::numeric_limits<double>::infinity();
   } else {
+    std::sort(u_alive.begin(), u_alive.end());
+    std::sort(v_alive.begin(), v_alive.end());
+    std::sort(u_nalive.begin(), u_nalive.end());
+    std::sort(v_nalive.begin(), v_nalive.end());
     for (auto it_u = u_alive.cbegin(), it_v = v_alive.cbegin(); it_u != u_alive.cend(); ++it_u, ++it_v)
+      b_alive = (std::max)(b_alive, std::fabs(*it_u - *it_v));
+    for (auto it_u = u_nalive.cbegin(), it_v = v_nalive.cbegin(); it_u != u_nalive.cend(); ++it_u, ++it_v)
       b_alive = (std::max)(b_alive, std::fabs(*it_u - *it_v));
   }
 }
@@ -104,12 +129,12 @@ inline bool Persistence_graph::on_the_v_diagonal(int v_point_index) const {
 
 inline int Persistence_graph::corresponding_point_in_u(int v_point_index) const {
   return on_the_v_diagonal(v_point_index) ?
-      v_point_index - static_cast<int> (v.size()) : v_point_index + static_cast<int> (u.size());
+        v_point_index - static_cast<int> (v.size()) : v_point_index + static_cast<int> (u.size());
 }
 
 inline int Persistence_graph::corresponding_point_in_v(int u_point_index) const {
   return on_the_u_diagonal(u_point_index) ?
-      u_point_index - static_cast<int> (u.size()) : u_point_index + static_cast<int> (v.size());
+        u_point_index - static_cast<int> (u.size()) : u_point_index + static_cast<int> (v.size());
 }
 
 inline double Persistence_graph::distance(int u_point_index, int v_point_index) const {
