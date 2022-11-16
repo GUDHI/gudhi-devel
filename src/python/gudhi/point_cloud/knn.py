@@ -314,7 +314,9 @@ class KNearestNeighbors:
             return None
 
         if self.params["implementation"] == "ckdtree":
-            qargs = {key: val for key, val in self.params.items() if key in {"p", "eps", "n_jobs"}}
+            qargs = {key: val for key, val in self.params.items() if key in {"p", "eps"}}
+            # SciPy renamed n_jobs to workers
+            qargs["workers"] = self.params.get("workers") or self.params.get("n_jobs") or 1
             distances, neighbors = self.kdtree.query(X, k=self.k, **qargs)
             if k == 1:
                 # SciPy decided to squeeze the last dimension for k=1

@@ -241,10 +241,16 @@ class Bitmap_cubical_complex : public T {
    **/
   class Filtration_simplex_range;
 
-  class Filtration_simplex_iterator : std::iterator<std::input_iterator_tag, Simplex_handle> {
+  class Filtration_simplex_iterator {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
     // 'value_type' must be 'Simplex_handle'.
    public:
+    typedef std::input_iterator_tag iterator_category;
+    typedef Simplex_handle value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
+
     Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) {}
 
     Filtration_simplex_iterator() : b(NULL), position(0) {}
@@ -386,10 +392,16 @@ class Bitmap_cubical_complex : public T {
    **/
   class Skeleton_simplex_range;
 
-  class Skeleton_simplex_iterator : std::iterator<std::input_iterator_tag, Simplex_handle> {
+  class Skeleton_simplex_iterator {
     // Iterator over all simplices of the complex in the order of the indexing scheme.
     // 'value_type' must be 'Simplex_handle'.
    public:
+    typedef std::input_iterator_tag iterator_category;
+    typedef Simplex_handle value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
+
     Skeleton_simplex_iterator(Bitmap_cubical_complex* b, std::size_t d) : b(b), dimension(d) {
       if (globalDbg) {
         std::clog << "Skeleton_simplex_iterator ( Bitmap_cubical_complex* b , std::size_t d )\n";
