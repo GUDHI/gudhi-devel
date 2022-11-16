@@ -1238,6 +1238,7 @@ class Cover_complex {
 #elif defined GUDHI_GIC_USE_HERA
         double db = hera::bottleneckDistExact(this->PD, Cboot.PD);
 #else
+        double db;
         throw std::logic_error("This function requires CGAL or Hera for the bottleneck distance.");
 #endif
         if (verbose)  std::clog << db << std::endl;
