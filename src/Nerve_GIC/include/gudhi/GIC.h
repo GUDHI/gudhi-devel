@@ -20,9 +20,9 @@
 #if __has_include(<CGAL/version.h>)
 # define GUDHI_GIC_USE_CGAL 1
 # include <gudhi/Bottleneck.h>
-#elif __has_include(<bottleneck.h>)
+#elif __has_include(<hera/bottleneck.h>)
 # define GUDHI_GIC_USE_HERA 1
-# include <bottleneck.h>
+# include <hera/bottleneck.h>
 #endif
 
 #include <gudhi/Debug_utils.h>
