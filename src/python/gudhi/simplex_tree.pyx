@@ -376,7 +376,7 @@ cdef class SimplexTree:
         """
         return self.get_ptr().prune_above_filtration(filtration)
 
-    def expansion(self, max_dim):
+    def expansion(self, max_dimension):
         """Expands the simplex tree containing only its one skeleton
         until dimension max_dim.
 
@@ -390,10 +390,10 @@ cdef class SimplexTree:
         The simplex tree must contain no simplex of dimension bigger than
         1 when calling the method.
 
-        :param max_dim: The maximal dimension.
-        :type max_dim: int
+        :param max_dimension: The maximal dimension.
+        :type max_dimension: int
         """
-        cdef int maxdim = max_dim
+        cdef int maxdim = max_dimension
         with nogil:
             self.get_ptr().expansion(maxdim)
 
