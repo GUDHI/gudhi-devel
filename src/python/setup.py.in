@@ -27,7 +27,7 @@ extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
 extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
 libraries=[@GUDHI_PYTHON_LIBRARIES@]
 library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
-include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', @GUDHI_PYTHON_INCLUDE_DIRS@]
+include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', '@HERA_INCLUDE_DIR@', @GUDHI_PYTHON_INCLUDE_DIRS@]
 runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
@@ -48,8 +48,6 @@ ext_modules = cythonize(ext_modules, compiler_directives={'language_level': '3'}
 
 for module in pybind11_modules:
     my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
-    if module.startswith('hera/'):
-        my_include_dirs = ['@HERA_INCLUDE_DIR@'] + my_include_dirs
     ext_modules.append(Extension(
         'gudhi.' + module.replace('/', '.'),
         sources = [source_dir + module + '.cc'],
