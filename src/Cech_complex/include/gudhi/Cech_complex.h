@@ -1,11 +1,12 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Vincent Rouvreau
+ *    Author(s):       Vincent Rouvreau, Hind Montassif
  *
  *    Copyright (C) 2018 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
+ *      - 2022/02 Hind Montassif : Replace MiniBall with Sphere_circumradius
  */
 
 #ifndef CECH_COMPLEX_H_
