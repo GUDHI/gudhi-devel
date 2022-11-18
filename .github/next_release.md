@@ -9,6 +9,12 @@ Below is a list of changes made since GUDHI 3.6.0:
 - [Module](link)
      - ...
 
+- [Simplex tree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - New functions to initialize from a matrix or insert batches of simplices of the same dimension.
+
+- [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_user.html)
+     - Construction now rejects positional arguments, you need to specify `points=X`.
+
 - Installation
      - c++17 is the new minimal standard to compile the library. This implies Visual Studio minimal version is now 2017.
 
