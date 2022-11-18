@@ -65,46 +65,47 @@ PersLay
     diagrams = tf.RaggedTensor.from_tensor(tf.constant(diagrams, dtype=tf.float32))
 
     rho = tf.identity
-    phi = gdtf.GaussianPerslayPhi((100, 100), ((-.5, 1.5), (-.5, 1.5)), .1)
+    phi = gdtf.GaussianPerslayPhi((5, 5), ((-.5, 1.5), (-.5, 1.5)), .1)
     weight = gdtf.PowerPerslayWeight(1.,0.)
     perm_op = tf.math.reduce_sum
 
     perslay = gdtf.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
     vectors = perslay(diagrams)
+    np.set_printoptions(precision=5)
     print(vectors)
 
 .. testoutput::
 
     tf.Tensor(
-    [[[[1.7266072e-16]
-       [4.1706043e-09]
-       [1.1336876e-08]
-       [8.5738821e-12]
-       [2.1243891e-14]]
+    [[[[1.72661e-16]
+       [4.17060e-09]
+       [1.13369e-08]
+       [8.57388e-12]
+       [2.12439e-14]]
 
-      [[4.1715076e-09]
-       [1.0074080e-01]
-       [2.7384272e-01]
-       [3.0724244e-02]
-       [7.6157507e-05]]
+      [[4.17151e-09]
+       [1.00741e-01]
+       [2.73843e-01]
+       [3.07242e-02]
+       [7.61575e-05]]
 
-      [[8.0382870e-06]
-       [1.5802664e+00]
-       [8.2997030e-01]
-       [1.2395413e+01]
-       [3.0724116e-02]]
+      [[8.03829e-06]
+       [1.58027e+00]
+       [8.29970e-01]
+       [1.23954e+01]
+       [3.07241e-02]]
 
-      [[8.0269419e-06]
-       [1.3065740e+00]
-       [9.0923014e+00]
-       [6.1664842e-02]
-       [1.3949171e-06]]
+      [[8.02694e-06]
+       [1.30657e+00]
+       [9.09230e+00]
+       [6.16648e-02]
+       [1.39492e-06]]
 
-      [[9.0331329e-13]
-       [1.4954816e-07]
-       [1.5145997e-04]
-       [1.0205092e-06]
-       [7.8093526e-16]]]], shape=(1, 5, 5, 1), dtype=float32)
+      [[9.03313e-13]
+       [1.49548e-07]
+       [1.51460e-04]
+       [1.02051e-06]
+       [7.80935e-16]]]], shape=(1, 5, 5, 1), dtype=float32)
 
 Preprocessing
 -------------
