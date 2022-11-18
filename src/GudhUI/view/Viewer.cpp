@@ -31,7 +31,11 @@ void Viewer::set_bounding_box(const Point_3 & lower_left, const Point_3 & upper_
 }
 
 void Viewer::update_GL() {
+#if QGLVIEWER_VERSION >= 0x020700
+  this->update();
+#else
   this->updateGL();
+#endif
 }
 
 void Viewer::init_scene() {
