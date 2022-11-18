@@ -178,7 +178,7 @@
     The set of all simplices is filtered by the radius of their minimal enclosing ball.
     </td>
     <td width="15%">
-      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Author:</b> Vincent Rouvreau, Hind Montassif<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal

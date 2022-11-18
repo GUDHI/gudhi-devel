@@ -40,6 +40,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
   using Extended_filtration_data = typename Base::Extended_filtration_data;
   using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
+  using Siblings = typename Base::Siblings;
+  using Node = typename Base::Node;
   typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
 
  public:
@@ -60,6 +62,30 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     if (result.first != Base::null_simplex())
       Base::clear_filtration();
     return (result.second);
+  }
+
+  void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) {
+    // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,
+    // and this is a bit more efficient.
+    auto& rm = this->root()->members_;
+    for(int i=0; i<n; ++i) {
+      char* p = reinterpret_cast<char*>(filtrations) + i * stride0;
+      double fv = *reinterpret_cast<double*>(p + i * stride1);
+      if(fv > max_filtration) continue;
+      auto sh = rm.emplace_hint(rm.end(), i, Node(this->root(), fv));
+      Siblings* children = nullptr;
+      // Should we make a first pass to count the number of edges so we can reserve the right space?
+      for(int j=i+1; j<n; ++j) {
+        double fe = *reinterpret_cast<double*>(p + j * stride1);
+        if(fe > max_filtration) continue;
+        if(!children) {
+          children = new Siblings(this->root(), i);
+          sh->second.assign_children(children);
+        }
+        children->members().emplace_hint(children->members().end(), j, Node(children, fe));
+      }
+    }
+
   }
 
   // Do not interface this function, only used in alpha complex interface for complex creation
