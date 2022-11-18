@@ -68,7 +68,7 @@
 }
 
 @incollection{gudhi:CechComplex
-, author =  "Vincent Rouvreau, Hind Montassif"
+, author =  "Vincent Rouvreau and Hind Montassif"
 , title =   "\v{C}ech complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -78,7 +78,7 @@
 }
 
 @incollection{gudhi:RipsComplex
-, author =  "Cl\'ement Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse"
+, author =  "Cl\'ement Maria and Pawel Dlotko and Vincent Rouvreau and Marc Glisse"
 , title =   "Rips complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -88,7 +88,7 @@
 }
 
 @incollection{gudhi:Collapse
-, author =  "Siddharth Pritam, Marc Glisse"
+, author =  "Siddharth Pritam and Marc Glisse"
 , title =   "Edge collapse"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -168,7 +168,7 @@
 }
 
 @incollection{gudhi:SubSampling
-, author =  "Cl\'ement Jamin, Siargey Kachanovich"
+, author =  "Cl\'ement Jamin and Siargey Kachanovich"
 , title =   "Subsampling"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -192,7 +192,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 @incollection{gudhi:WeightedRipsComplex
-, author =  "Rapha\"el Tinarrage, Yuichi Ike, Masatoshi Takenouchi"
+, author =  "Rapha\"el Tinarrage and Yuichi Ike and Masatoshi Takenouchi"
 , title =   "Weighted Rips Complex"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -212,7 +212,7 @@
 }
 
 @incollection{gudhi:WassersteinDistance
-, author =  "Theo Lacombe, Marc Glisse"
+, author =  "Theo Lacombe and Marc Glisse"
 , title =   "Wasserstein distance"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
@@ -222,7 +222,7 @@
 }
 
 @incollection{gudhi:PersistenceRepresentationsScikitlearnInterface
-, author =  "Mathieu Carri\`ere, Gard Spreemann, Wojciech Reise"
+, author =  "Mathieu Carri\`ere and Gard Spreemann and Wojciech Reise"
 , title =   "Persistence representations scikit-learn like interface"
 , publisher =  "{GUDHI Editorial Board}"
 , edition =     "{@GUDHI_VERSION@}"
