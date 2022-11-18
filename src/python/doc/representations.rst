@@ -52,7 +52,12 @@ This small example is also provided
 PersLay
 ^^^^^^^
 
-.. testcode::
+.. testsetup:: perslay
+
+    import numpy
+    numpy.set_printoptions(precision=5)
+
+.. testcode:: perslay
 
     import numpy             as np
     import tensorflow        as tf
@@ -71,10 +76,13 @@ PersLay
 
     perslay = gdtf.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
     vectors = perslay(diagrams)
-    np.set_printoptions(precision=5)
     print(vectors)
 
-.. testoutput::
+.. testcleanup:: perslay
+
+    numpy.set_printoptions(precision=8)
+
+.. testoutput:: perslay
 
     tf.Tensor(
     [[[[1.72661e-16]
