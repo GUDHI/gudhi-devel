@@ -8,13 +8,20 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#define GUDHI_STR_(X) #X
+#define GUDHI_STR(X) GUDHI_STR_(X)
+#define GUDHI_CAT_(X,Y) X##Y
+#define GUDHI_CAT(X,Y) GUDHI_CAT_(X,Y)
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "delaunay_complex"
+#define BOOST_TEST_MODULE "delaunay_complex" GUDHI_STR(GUDHI_VARIANT)
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <CGAL/Epick_d.h>
-#include <CGAL/Epeck_d.h>
+#if GUDHI_TEST_VARIANT >= 2
+# include <CGAL/Epick_d.h>
+#else
+# include <CGAL/Epeck_d.h>
+#endif
 
 #include <vector>
 #include <limits>  // NaN
@@ -27,22 +34,31 @@
 #include <gudhi/Unitary_tests_utils.h>
 #include <gudhi/random_point_generators.h>
 
+#if GUDHI_TEST_VARIANT == 0
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
+typedef Exact_kernel_d TestedKernel;
+#elif GUDHI_TEST_VARIANT == 1
 // Use static dimension_tag for the user not to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dimension_tag<5> > Exact_kernel_s;
+typedef Exact_kernel_s TestedKernel;
+#elif GUDHI_TEST_VARIANT == 2
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
+typedef Inexact_kernel_d TestedKernel;
+#elif GUDHI_TEST_VARIANT == 3
 // Use static dimension_tag for the user not to be able to set dimension
 typedef CGAL::Epick_d< CGAL::Dimension_tag<5> > Inexact_kernel_s;
+typedef Inexact_kernel_s TestedKernel;
+#else
+# error
+#endif
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
-
-typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Simplex_handle = Simplex_tree::Simplex_handle;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of_kernel_variants) {
+BOOST_AUTO_TEST_CASE(GUDHI_CAT(Delaunay_complex_, GUDHI_VARIANT)) {
   std::cout << "*****************************************************************************************************";
   using Point = typename TestedKernel::Point_d;
   std::vector<Point> points;
