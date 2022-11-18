@@ -1,10 +1,11 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Siargey Kachanovich
+ *    Author(s):       Siargey Kachanovich, Marc Glisse
  *
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2022/11 Glisse: New _metric variant
  *      - YYYY/MM Author: Description of the modification
  */
 

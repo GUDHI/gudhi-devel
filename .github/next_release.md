@@ -9,6 +9,9 @@ Below is a list of changes made since GUDHI 3.6.0:
 - [Module](link)
      - ...
 
+- [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
+     - New `choose_n_farthest_points_metric` as a faster alternative of `choose_n_farthest_points`.
+
 - [Simplex tree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - New functions to initialize from a matrix or insert batches of simplices of the same dimension.
 
