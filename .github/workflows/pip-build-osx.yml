@@ -27,11 +27,16 @@ jobs:
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
+          wget https://geometrica.saclay.inria.fr/team/Marc.Glisse/tmp/lib-uni2.zip
+          unzip lib-uni2.zip
       - name: Build python wheel
         run: |
           export MACOSX_DEPLOYMENT_TARGET=10.14
           export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
           export ARCHFLAGS="-arch arm64 -arch x86_64"
+          export MPFR_LIB_DIR=$PWD/lib-uni2
+          export GMP_LIB_DIR=$PWD/lib-uni2
+          export GMPXX_LIB_DIR=$PWD/lib-uni2
           python --version
           mkdir build
           cd build
