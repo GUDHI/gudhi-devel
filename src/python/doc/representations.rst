@@ -63,18 +63,18 @@ PersLay
     import tensorflow        as tf
     from sklearn.preprocessing import MinMaxScaler
     import gudhi.representations as gdr
-    import gudhi.tensorflow as gdtf
+    import gudhi.tensorflow.perslay as prsl
 
     diagrams = [np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])]
     diagrams = gdr.DiagramScaler(use=True, scalers=[([0,1], MinMaxScaler())]).fit_transform(diagrams)
     diagrams = tf.RaggedTensor.from_tensor(tf.constant(diagrams, dtype=tf.float32))
 
     rho = tf.identity
-    phi = gdtf.GaussianPerslayPhi((5, 5), ((-.5, 1.5), (-.5, 1.5)), .1)
-    weight = gdtf.PowerPerslayWeight(1.,0.)
+    phi = prsl.GaussianPerslayPhi((5, 5), ((-.5, 1.5), (-.5, 1.5)), .1)
+    weight = prsl.PowerPerslayWeight(1.,0.)
     perm_op = tf.math.reduce_sum
 
-    perslay = gdtf.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
+    perslay = prsl.Perslay(phi=phi, weight=weight, perm_op=perm_op, rho=rho)
     vectors = perslay(diagrams)
     print(vectors)
 
@@ -145,41 +145,41 @@ Metrics
 
 PersLay
 -------
-.. autoclass:: gudhi.tensorflow.Perslay
+.. autoclass:: gudhi.tensorflow.perslay.Perslay
    :members:
    :special-members:
    :show-inheritance:
 
 Weight functions
 ^^^^^^^^^^^^^^^^
-.. autoclass:: gudhi.tensorflow.GaussianMixturePerslayWeight
+.. autoclass:: gudhi.tensorflow.perslay.GaussianMixturePerslayWeight
    :members:
    :special-members:
    :show-inheritance:
 
-.. autoclass:: gudhi.tensorflow.GridPerslayWeight
+.. autoclass:: gudhi.tensorflow.perslay.GridPerslayWeight
    :members:
    :special-members:
    :show-inheritance:
 
-.. autoclass:: gudhi.tensorflow.PowerPerslayWeight
+.. autoclass:: gudhi.tensorflow.perslay.PowerPerslayWeight
    :members:
    :special-members:
    :show-inheritance:
 
 Phi functions
 ^^^^^^^^^^^^^
-.. autoclass:: gudhi.tensorflow.FlatPerslayPhi
+.. autoclass:: gudhi.tensorflow.perslay.FlatPerslayPhi
    :members:
    :special-members:
    :show-inheritance:
 
-.. autoclass:: gudhi.tensorflow.GaussianPerslayPhi
+.. autoclass:: gudhi.tensorflow.perslay.GaussianPerslayPhi
    :members:
    :special-members:
    :show-inheritance:
 
-.. autoclass:: gudhi.tensorflow.TentPerslayPhi
+.. autoclass:: gudhi.tensorflow.perslay.TentPerslayPhi
    :members:
    :special-members:
    :show-inheritance:
