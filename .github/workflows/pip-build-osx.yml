@@ -20,12 +20,18 @@ jobs:
           architecture: x64
       - name: Install dependencies
         run: |
+          export MACOSX_DEPLOYMENT_TARGET=10.14
+          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
+          export ARCHFLAGS="-arch arm64 -arch x86_64"
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
       - name: Build python wheel
         run: |
+          export MACOSX_DEPLOYMENT_TARGET=10.14
+          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
+          export ARCHFLAGS="-arch arm64 -arch x86_64"
           python --version
           mkdir build
           cd build
@@ -34,6 +40,9 @@ jobs:
           python setup.py bdist_wheel
       - name: Install and test python wheel
         run: |
+          export MACOSX_DEPLOYMENT_TARGET=10.14
+          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
+          export ARCHFLAGS="-arch arm64 -arch x86_64"
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest src/python/test/test_alpha_complex.py
