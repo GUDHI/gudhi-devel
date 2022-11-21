@@ -13,8 +13,13 @@ import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.neighbors     import DistanceMetric
 from sklearn.metrics       import pairwise
+try:
+    # New location since 1.0
+    from sklearn.metrics     import DistanceMetric
+except ImportError:
+    # Will be removed in 1.3
+    from sklearn.neighbors     import DistanceMetric
 
 from .preprocessing import DiagramScaler, BirthPersistenceTransform
 
