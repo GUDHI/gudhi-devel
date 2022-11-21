@@ -345,10 +345,11 @@ class Tangential_complex {
     m_stars.resize(m_points.size());
     m_squared_star_spheres_radii_incl_margin.resize(m_points.size(), FT(-1));
 #ifdef GUDHI_TC_PERTURB_POSITION
-    if (m_points.empty())
+    if (m_points.empty()) {
       m_translations.clear();
-    else
+    } else {
       m_translations.resize(m_points.size(), m_k.construct_vector_d_object()(m_ambient_dim));
+    }
 #if defined(GUDHI_USE_TBB)
     delete[] m_p_perturb_mutexes;
     m_p_perturb_mutexes = new Mutex_for_perturb[m_points.size()];

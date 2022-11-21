@@ -90,10 +90,11 @@ def test_get_essential_parts():
 
 
 def test_warn_infty():
-    assert _warn_infty(matching=False)==np.inf
-    c, m = _warn_infty(matching=True)
-    assert (c == np.inf)
-    assert (m is None)
+    with pytest.warns(UserWarning):
+        assert _warn_infty(matching=False)==np.inf
+        c, m = _warn_infty(matching=True)
+        assert (c == np.inf)
+        assert (m is None)
 
 
 def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_matching=True):
