@@ -16,7 +16,7 @@
 using py::ssize_t;
 #endif
 
-#include <bottleneck.h> // Hera
+#include <hera/bottleneck.h> // Hera
 
 double bottleneck_distance(Dgm d1, Dgm d2, double delta)
 {
