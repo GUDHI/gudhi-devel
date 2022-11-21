@@ -572,6 +572,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_py_test(test_diff)
     endif()
 
+    # Perslay
+    if(TENSORFLOW_FOUND AND SKLEARN_FOUND)
+      add_gudhi_py_test(test_perslay)
+    endif()
+
     # Betti curves
     if(SKLEARN_FOUND AND SCIPY_FOUND)
       add_gudhi_py_test(test_betti_curve_representations)

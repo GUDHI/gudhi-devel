@@ -1,7 +1,7 @@
 import numpy             as np
 import tensorflow        as tf
 from sklearn.preprocessing import MinMaxScaler
-from gudhi.tensorflow import * 
+from gudhi.tensorflow.perslay import *
 import gudhi.representations as gdr
 
 def test_gaussian_perslay():
