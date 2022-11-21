@@ -27,7 +27,7 @@ jobs:
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
-          wget https://geometrica.saclay.inria.fr/team/Marc.Glisse/tmp/lib-uni2.zip
+          wget --no-check-certificate https://geometrica.saclay.inria.fr/team/Marc.Glisse/tmp/lib-uni2.zip
           unzip lib-uni2.zip
       - name: Build python wheel
         run: |
