@@ -79,7 +79,7 @@ def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein",
     if kernel == "sliced_wasserstein":
         return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="sliced_wasserstein", num_directions=kwargs["num_directions"], n_jobs=n_jobs) / kwargs["bandwidth"])
     elif kernel == "persistence_fisher":
-        return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="persistence_fisher", kernel_approx=kwargs["kernel_approx"], bandwidth=kwargs["bandwidth"], n_jobs=n_jobs) / kwargs["bandwidth_fisher"])
+        return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="persistence_fisher", kernel_approx=kwargs["kernel_approx"], bandwidth=kwargs["bandwidth_fisher"], n_jobs=n_jobs) / kwargs["bandwidth"])
     elif kernel == "persistence_scale_space":
         return _pairwise(pairwise_kernels, False, XX, YY, metric=_sklearn_wrapper(_persistence_scale_space_kernel, X, Y, **kwargs), n_jobs=n_jobs)
     elif kernel == "persistence_weighted_gaussian":
@@ -138,7 +138,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
         Returns:
             float: sliced Wasserstein kernel value.
         """
-        return np.exp(-_sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions)) / self.bandwidth
+        return np.exp(-_sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions) / self.bandwidth)
 
 class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
     """
@@ -298,5 +298,5 @@ class PersistenceFisherKernel(BaseEstimator, TransformerMixin):
         Returns:
             float: persistence Fisher kernel value.
         """
-        return np.exp(-_persistence_fisher_distance(diag1, diag2, bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)) / self.bandwidth_fisher
+        return np.exp(-_persistence_fisher_distance(diag1, diag2, bandwidth=self.bandwidth_fisher, kernel_approx=self.kernel_approx) / self.bandwidth)
 

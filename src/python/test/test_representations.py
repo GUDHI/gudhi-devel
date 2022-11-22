@@ -44,21 +44,54 @@ def _n_diags(n):
         l.append(a)
     return l
 
+metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
+    "bottleneck": (BottleneckDistance(epsilon=0.00001),
+                   dict(e=0.00001),
+                   dict(abs=1e-5)),
+    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+                    dict(order=2, internal_p=2, n_jobs=4),
+                    dict(rel=1e-3)),
+    "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
+                           dict(num_directions=100),
+                           dict(rel=1e-3)),
+    "persistence_fisher": (PersistenceFisherDistance(bandwidth=1., n_jobs=4),
+                           dict(bandwidth=1., n_jobs=4),
+                           dict(abs=1e-5)),
+}
 
-def test_multiple():
+
+def test_distance_transform_consistency():
     l1 = _n_diags(9)
-    l2 = _n_diags(11)
     l1b = l1.copy()
-    d1 = pairwise_persistence_diagram_distances(l1, e=0.00001, n_jobs=4)
-    d2 = BottleneckDistance(epsilon=0.00001).fit_transform(l1)
-    d3 = pairwise_persistence_diagram_distances(l1, l1b, e=0.00001, n_jobs=4)
-    assert d1 == pytest.approx(d2)
-    assert d3 == pytest.approx(d2, abs=1e-5)  # Because of 0 entries (on the diagonal)
-    d1 = pairwise_persistence_diagram_distances(l1, l2, metric="wasserstein", order=2, internal_p=2)
-    d2 = WassersteinDistance(order=2, internal_p=2, n_jobs=4).fit(l2).transform(l1)
-    print(d1.shape, d2.shape)
-    assert d1 == pytest.approx(d2, rel=0.02)
+    for metricName, (metricClass, metricParams, tolerance) in metrics_dict.items():
+        d1 = pairwise_persistence_diagram_distances(l1, metric=metricName, **metricParams)
+        d2 = metricClass.fit_transform(l1)
+        assert d1 == pytest.approx(d2)
+        d3 = pairwise_persistence_diagram_distances(l1, l1b, metric=metricName, **metricParams)
+        assert d3 == pytest.approx(d2, **tolerance)  # Because of 0 entries (on the diagonal)
+        d4 = metricClass.fit(l1).transform(l1b)
+        assert d4 == pytest.approx(d2, **tolerance)
 
+
+kernel_dict = {
+    "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
+                           dict(num_directions=10),
+                           dict(rel=1e-3)),
+    "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
+                           dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
+                           dict(rel=1e-3)),
+}
+def test_kernel_distance_consistency():
+    l1, l2 = _n_diags(9), _n_diags(11)
+    for kernelName, (kernelClass, kernelParams, tolerance) in kernel_dict.items():
+        f1 = kernelClass.fit_transform(l1)
+        #f1 = kernelClass.transform(l1)
+        d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
+        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+        f2 = kernelClass.transform(l2)
+        k, j = 0, 0
+        f12 = kernelClass(l1[k], l2[j])
+        assert f12 == pytest.approx(f2[k, j], **tolerance)
 
 # Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
 # Note the test below must be up to date with the Atol class documentation
