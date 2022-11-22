@@ -162,6 +162,8 @@ def plot_persistence_barcode(
             plt.rc("text", usetex=False)
             plt.rc("font", family="DejaVu Sans")
 
+        # By default, let's say the persistence is not an array of shape (N x 2) - Can be from a persistence file
+        nx2_array = False
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
@@ -287,6 +289,8 @@ def plot_persistence_diagram(
             plt.rc("text", usetex=False)
             plt.rc("font", family="DejaVu Sans")
 
+        # By default, let's say the persistence is not an array of shape (N x 2) - Can be from a persistence file
+        nx2_array = False
         if persistence_file != "":
             if path.isfile(persistence_file):
                 # Reset persistence
