@@ -44,7 +44,7 @@ function( add_gudhi_debug_info DEBUG_INFO )
 endfunction( add_gudhi_debug_info )
 
 if(PYTHONINTERP_FOUND)
-  if(PYBIND11_FOUND AND CYTHON_FOUND)
+  if(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
     add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
     # PyBind11 modules
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
@@ -629,10 +629,10 @@ if(PYTHONINTERP_FOUND)
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
-  else(PYBIND11_FOUND AND CYTHON_FOUND)
-    message("++ Python module will not be compiled because cython and/or pybind11 was/were not found")
+  else(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
+    message("++ Python module will not be compiled because numpy and/or cython and/or pybind11 was/were not found")
     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-  endif(PYBIND11_FOUND AND CYTHON_FOUND)
+  endif(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
 else(PYTHONINTERP_FOUND)
   message("++ Python module will not be compiled because no Python interpreter was found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
