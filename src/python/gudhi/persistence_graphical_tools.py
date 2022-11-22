@@ -69,6 +69,7 @@ def _array_handler(a):
     else:
         return a, False
 
+
 def _limit_to_max_intervals(persistence, max_intervals, key):
     """This function returns truncated persistence if length is bigger than max_intervals.
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
