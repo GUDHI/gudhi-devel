@@ -27,7 +27,7 @@ This function can display the persistence result as a barcode:
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence(min_persistence=0.4)
 
-    gudhi.plot_persistence_barcode(diag, legend=False)
+    gudhi.plot_persistence_barcode(diag)
     plt.show()
 
 Show persistence as a diagram
@@ -60,7 +60,7 @@ of shape (N x 2) encoding a persistence diagram (in a given dimension).
     import gudhi
     import numpy as np
     d = np.array([[0., 1.], [1., 2.], [1., np.inf]])
-    gudhi.plot_persistence_diagram(d, legend=False)
+    gudhi.plot_persistence_diagram(d)
     plt.show()
 
 Persistence density
