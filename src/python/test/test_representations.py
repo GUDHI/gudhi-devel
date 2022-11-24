@@ -75,23 +75,33 @@ def test_distance_transform_consistency():
 
 kernel_dict = {
     "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
-                           dict(num_directions=10),
-                           dict(rel=1e-3)),
+                           dict(num_directions=10), dict(rel=1e-3)),
     "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
                            dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
                            dict(rel=1e-3)),
+    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=4.,
+                                                                        weight=lambda x: x[1]-x[0]),
+                                      dict(bandwidth=4., weight=lambda x: x[1]-x[0]),
+                                      dict(rel=1e-3)),
+    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=4.),
+                                      dict(bandwidth=4.),
+                                      dict(rel=1e-3)),
 }
+def test_kernel_from_distance():
+    l1, l2 = _n_diags(9), _n_diags(11)
+    for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
+        kernelClass, kernelParams, tolerance = kernel_dict[kernelName]
+        f1 = kernelClass.fit_transform(l1)
+        d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
+        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+
 def test_kernel_distance_consistency():
     l1, l2 = _n_diags(9), _n_diags(11)
     for kernelName, (kernelClass, kernelParams, tolerance) in kernel_dict.items():
-        f1 = kernelClass.fit_transform(l1)
-        #f1 = kernelClass.transform(l1)
-        d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
-        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+        _ = kernelClass.fit(l1)
         f2 = kernelClass.transform(l2)
-        k, j = 0, 0
-        f12 = kernelClass(l1[k], l2[j])
-        assert f12 == pytest.approx(f2[k, j], **tolerance)
+        f12 = np.array([[kernelClass(l1_, l2_) for l2_ in l2] for l1_ in l1])
+        assert f12 == pytest.approx(f2, **tolerance)
 
 # Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
 # Note the test below must be up to date with the Atol class documentation
