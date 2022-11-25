@@ -10,6 +10,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test examples
           command: |
             mkdir build
@@ -23,6 +28,11 @@ jobs:
       - image: gudhi/ci_for_gudhi:latest
     steps:
       - checkout
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
       - run:
           name: Build and test unitary tests
           command: |
@@ -38,6 +48,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test utilities
           command: |
             mkdir build
@@ -52,10 +67,13 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test python module. Generates and tests the python documentation
           command: |
-            git submodule init
-            git submodule update
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
@@ -83,10 +101,13 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Generates the C++ documentation with doxygen
           command: |
-            git submodule init
-            git submodule update
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
@@ -114,6 +135,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test examples without cgal and eigen
           command: |
             mkdir build
@@ -127,6 +153,11 @@ jobs:
       - image: gudhi/ci_for_gudhi_wo_cgal:latest
     steps:
       - checkout
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
       - run:
           name: Build and test unitary tests without cgal and eigen
           command: |
@@ -142,6 +173,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test utilities without cgal and eigen
           command: |
             mkdir build
@@ -156,10 +192,13 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test python module without cgal and eigen
           command: |
-            git submodule init
-            git submodule update
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
@@ -176,6 +215,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test examples without cgal
           command: |
             mkdir build
@@ -189,6 +233,11 @@ jobs:
       - image: gudhi/ci_for_gudhi_wo_cgal:latest
     steps:
       - checkout
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
       - run:
           name: Build and test unitary tests without cgal
           command: |
@@ -204,6 +253,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test utilities without cgal
           command: |
             mkdir build
@@ -218,10 +272,13 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
           name: Build and test python module without cgal
           command: |
-            git submodule init
-            git submodule update
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
