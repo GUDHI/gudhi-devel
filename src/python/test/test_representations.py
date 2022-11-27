@@ -103,6 +103,14 @@ def test_kernel_distance_consistency():
         f12 = np.array([[kernelClass(l1_, l2_) for l2_ in l2] for l1_ in l1])
         assert f12 == pytest.approx(f2, **tolerance)
 
+def test_sliced_wasserstein_distance_value():
+    diag1 = np.array([[0., 1.], [0., 2.]])
+    diag2 = np.array([[1., 0.]])
+    SWD = SlicedWassersteinDistance(num_directions=2)
+    distance = SWD(diag1, diag2)
+    assert distance == pytest.approx(2., abs=1e-8)
+
+
 # Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
 # Note the test below must be up to date with the Atol class documentation
 def test_atol_doc():
