@@ -258,7 +258,7 @@ def fetch_bunny(file_path=None, accept_license=False):
 # In wait of https://github.com/GUDHI/gudhi-data/pull/7
 # _activities_license_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE'
 _activities_license_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE"
-_activities_license_checksum = "b1ab8aa7b77241ee2da2b353f098353baaee36a8e587e9fe653e1d9534056a44"
+_activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
 
 
 def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
@@ -314,35 +314,35 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
         # In wait of https://github.com/GUDHI/gudhi-data/pull/7
         # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
         file_url = "https://github.com/VincentRouvreau/gudhi-data/raw/activities_UCIrvine_ml/points/activities/activities.xz"
-        file_checksum = "77c45fa6686c8895dc3415e489040d6b0305ea184165153e8b25aaead42f12bd"
+        file_checksum = "cc0277aaf7883d9fa9535f1d5c19a4eaf056bfad47345552ef8a0ec7754daf76"
     
         gudhi_data_set_path = "points/activities/activities.xz"
     elif subset == "cross_training":
         # In wait of https://github.com/GUDHI/gudhi-data/pull/7
         # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
         file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy"
-        file_checksum = "2b7636a56734d4422abcf5c9c1eb523b85b22b1086ca19ea9a33d4157e6a48c8"
+        file_checksum = "ebef2e20791c895b6f6142e6a47b22f4283d6c7c3cfe9ddc13795185988e3e63"
     
         gudhi_data_set_path = "points/activities/cross_training_p1_left_leg.npy"
     elif subset == "jumping":
         # In wait of https://github.com/GUDHI/gudhi-data/pull/7
         # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
         file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy"
-        file_checksum = "d1d150d32772b16365a0a4cbb786e90c32f29aaa469c633e215f783e7d1d4795"
+        file_checksum = "2d89a4adea475a0464e3fbbb93d9e8b9bfd67d5056cd54eded84418a744da931"
     
         gudhi_data_set_path = "points/activities/jumping_p1_left_leg.npy"
     elif subset == "stepper":
         # In wait of https://github.com/GUDHI/gudhi-data/pull/7
         # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
         file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy"
-        file_checksum = "fef1e61572456bfdf0035448c3393751e13ce8e9dc8d7656182b89078582ed64"
+        file_checksum = "68250dfd6c2cd1d85fcc465c5c0e0caf69130082fc1320d0dd1d05ae2ac56914"
     
         gudhi_data_set_path = "points/activities/stepper_p1_left_leg.npy"
     elif subset == "walking":
         # In wait of https://github.com/GUDHI/gudhi-data/pull/7
         # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
         file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy"
-        file_checksum = "3ca1926ed824d02ce938a462011f9b1ba49bdc04024996ef2ce345a313a47032"
+        file_checksum = "412eb926d36d795eaf2caa29c261a912b06cc4ae5e3992a8e93af8a3604487a9"
     
         gudhi_data_set_path = "points/activities/walking_p1_left_leg.npy"
     else:
