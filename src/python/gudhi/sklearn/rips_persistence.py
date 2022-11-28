@@ -14,13 +14,6 @@ import numpy as np
 # joblib is required by scikit-learn
 from joblib import Parallel, delayed
 
-# Use Ripser if available - faster if only interested in H1
-try:
-    from ripser import ripser
-    _RIPSER_IS_AVAILABLE = True
-except ImportError as import_error:
-    _RIPSER_IS_AVAILABLE = False
-
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
 #     USER->>RipsPersistence: fit_transform(X)
@@ -103,15 +96,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         ]
 
     def __transform_only_this_dim(self, points):
-        # Use Ripser if available - faster if only interested in H1
-        if _RIPSER_IS_AVAILABLE and self.homology_dimensions == 1:
-            return ripser(points, maxdim=1, thresh=self.max_edge_length)['dgms'][1]
-        else:
-            stree = (self.__get_stree_from_points)(points, (self.homology_dimensions + 1))
-            return stree.persistence_intervals_in_dimension(self.homology_dimensions)
-
-    def is_riper_available(self):
-        return _RIPSER_IS_AVAILABLE
+        stree = (self.__get_stree_from_points)(points, (self.homology_dimensions + 1))
+        return stree.persistence_intervals_in_dimension(self.homology_dimensions)
 
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
@@ -128,7 +114,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         if self.newshape is not None:
             X = np.reshape(X, self.newshape, order='C')
         
-        #print('_RIPSER_IS_AVAILABLE=', _RIPSER_IS_AVAILABLE)
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
             # threads is preferred as Rips construction and persistence computation releases the GIL
