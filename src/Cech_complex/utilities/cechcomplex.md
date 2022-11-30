@@ -36,14 +36,14 @@ where
 
 * `-h [ --help ]` Produce help message
 * `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
-* `-r [ --max-edge-length ]` (default = inf) Maximal length of an edge for the Čech complex construction.
+* `-r [ --max-radius ]` (default = inf) Maximal length of an edge for the Čech complex construction.
 * `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Čech complex we want to compute.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
 
-Beware: this program may use a lot of RAM and take a lot of time if `max-edge-length` is set to a large value.
+Beware: this program may use a lot of RAM and take a lot of time if `max-radius` is set to a large value.
 
 **Example 1 with Z/2Z coefficients**
 
