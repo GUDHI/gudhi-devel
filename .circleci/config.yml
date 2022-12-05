@@ -126,6 +126,26 @@ jobs:
           path: /tmp/doxygen
           destination: doxygen
 
+  bibliography:
+    docker:
+      - image: gudhi/doxygen_for_gudhi:latest
+    steps:
+      - checkout
+      - run:
+          name: Checkout submodules
+          command: |
+            git submodule sync
+            git submodule update --init
+      - run:
+          name: Test the LaTeX bibliography files
+          command: |
+            mkdir build
+            cd build
+            cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
+            cd biblio/test
+            latexmk -pdf -interaction=nonstopmode test_biblio.tex
+            latexmk -pdf -interaction=nonstopmode test_gudhi_citation.tex
+
 
 ### With all third parties, except CGAL and Eigen
 
