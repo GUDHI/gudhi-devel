@@ -12,6 +12,7 @@ from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
 cimport cython
+from numpy.math cimport INFINITY
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -239,7 +240,7 @@ cdef class SimplexTree:
 
     @staticmethod
     @cython.boundscheck(False)
-    def create_from_array(filtrations, double max_filtration=np.inf):
+    def create_from_array(filtrations, double max_filtration=INFINITY):
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -281,6 +282,8 @@ cdef class SimplexTree:
 
         .. seealso:: :func:`insert_batch`
         """
+        # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+        self.get_ptr().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), INFINITY)
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             self.get_ptr().insert((edge[0], edge[1]), edge[2])
@@ -303,8 +306,7 @@ cdef class SimplexTree:
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
-        # This may be slow if we end up inserting vertices in a bad order (flat_map).
-        # We could first insert the vertices from np.unique(vertex_array), or leave it to the caller.
+        cdef vector[int] vertices = np.unique(vertex_array)
         cdef Py_ssize_t k = vertex_array.shape[0]
         cdef Py_ssize_t n = vertex_array.shape[1]
         assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
@@ -312,6 +314,9 @@ cdef class SimplexTree:
         cdef Py_ssize_t j
         cdef vector[int] v
         with nogil:
+            # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+            # NaN currently does the wrong thing
+            self.get_ptr().insert_batch_vertices(vertices, INFINITY)
             for i in range(n):
                 for j in range(k):
                     v.push_back(vertex_array[j, i])
