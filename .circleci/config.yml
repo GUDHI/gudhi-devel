@@ -324,3 +324,4 @@ workflows:
       - utils
       - python
       - doxygen
+      - bibliography
