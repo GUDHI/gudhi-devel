@@ -8,9 +8,15 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <wasserstein.h> // Hera
-
 #include <pybind11_diagram_utils.h>
+
+#ifdef _MSC_VER
+// https://github.com/grey-narn/hera/issues/3
+// ssize_t is a non-standard type (well, posix)
+using py::ssize_t;
+#endif
+
+#include <hera/wasserstein.h> // Hera
 
 double wasserstein_distance(
     Dgm d1, Dgm d2,

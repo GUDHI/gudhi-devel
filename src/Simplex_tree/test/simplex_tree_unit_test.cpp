@@ -1038,3 +1038,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
       BOOST_CHECK(opposite_vertices.size() == 0);
   }
 }
+
+BOOST_AUTO_TEST_CASE(batch_vertices) {
+  typedef Simplex_tree<> typeST;
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST BATCH VERTEX INSERTION" << std::endl;
+  typeST st;
+  st.insert_simplex_and_subfaces({3}, 1.5);
+  std::vector verts { 2, 3, 5, 6 };
+  st.insert_batch_vertices(verts);
+  BOOST_CHECK(st.num_vertices() == 4);
+  BOOST_CHECK(st.num_simplices() == 4);
+  BOOST_CHECK(st.filtration(st.find({2})) == 0.);
+  BOOST_CHECK(st.filtration(st.find({3})) == 1.5);
+}
