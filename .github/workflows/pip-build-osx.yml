@@ -2,6 +2,11 @@ name: pip build osx
 
 on: [push, pull_request]
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: 11.0
+  _PYTHON_HOST_PLATFORM: macosx-11.0-universal2
+  ARCHFLAGS: "-arch arm64 -arch x86_64"
+
 jobs:
   build:
     runs-on: macos-latest
@@ -20,23 +25,32 @@ jobs:
           architecture: x64
       - name: Install dependencies
         run: |
-          export MACOSX_DEPLOYMENT_TARGET=10.14
-          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
-          export ARCHFLAGS="-arch arm64 -arch x86_64"
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
-          wget --no-check-certificate https://geometrica.saclay.inria.fr/team/Marc.Glisse/tmp/lib-uni2.zip
-          unzip lib-uni2.zip
+          mkdir deps-amd64
+          cd deps-amd64
+          tar xf "`brew fetch --bottle-tag=big_sur gmp        | sed -ne 's/^Downloaded to: //p'`"
+          tar xf "`brew fetch --bottle-tag=big_sur mpfr       | sed -ne 's/^Downloaded to: //p'`"
+          cd ..
+          mkdir deps-arm64
+          cd deps-arm64
+          tar xf "`brew fetch --bottle-tag=arm64_big_sur gmp  | sed -ne 's/^Downloaded to: //p'`"
+          tar xf "`brew fetch --bottle-tag=arm64_big_sur mpfr | sed -ne 's/^Downloaded to: //p'`"
+          cd ..
+          mkdir -p deps-uni/lib
+          for A in gmp mpfr; do
+            for X in deps-amd64/$A/*/lib/lib*; do
+              Y=`basename $X`
+              lipo -create $X deps-arm64/$A/*/lib/$Y -output deps-uni/lib/$Y
+            done
+          done
       - name: Build python wheel
         run: |
-          export MACOSX_DEPLOYMENT_TARGET=10.14
-          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
-          export ARCHFLAGS="-arch arm64 -arch x86_64"
-          export MPFR_LIB_DIR=$PWD/lib-uni2
-          export GMP_LIB_DIR=$PWD/lib-uni2
-          export GMPXX_LIB_DIR=$PWD/lib-uni2
+          export MPFR_LIB_DIR=$PWD/deps-uni/lib
+          export GMP_LIB_DIR=$PWD/deps-uni/lib
+          export GMPXX_LIB_DIR=$PWD/deps-uni/lib
           python --version
           mkdir build
           cd build
@@ -45,9 +59,6 @@ jobs:
           python setup.py bdist_wheel
       - name: Install and test python wheel
         run: |
-          export MACOSX_DEPLOYMENT_TARGET=10.14
-          export _PYTHON_HOST_PLATFORM=macosx-10.14-universal2
-          export ARCHFLAGS="-arch arm64 -arch x86_64"
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest src/python/test/test_alpha_complex.py
