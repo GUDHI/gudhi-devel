@@ -625,8 +625,7 @@ class Tangential_complex {
 
     int max_dim = -1;
 
-    // Vertices to be inserted first by the create_complex method to avoid quadratic complexity.
-    // It isn't just [0, n) if some points have multiplicity (only one copy appears in the complex).
+    // Ordered vertices to be inserted first by the create_complex method to avoid quadratic complexity.
     std::vector<typename Simplex_tree_::Vertex_handle> vertices(m_points.size());
     std::iota(vertices.begin(), vertices.end(), 0);
     tree.insert_batch_vertices(vertices);
