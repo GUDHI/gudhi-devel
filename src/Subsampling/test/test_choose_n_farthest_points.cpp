@@ -26,10 +26,6 @@
 
 #include <CGAL/Epick_d.h>
 
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef K::FT FT;
-typedef K::Point_d Point_d;
-
 typedef boost::mpl::list<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, CGAL::Epick_d<CGAL::Dimension_tag<4>>> list_of_tested_kernels;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point, Kernel, list_of_tested_kernels) {
