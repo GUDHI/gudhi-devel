@@ -41,7 +41,7 @@ namespace subsampling {
  *
  * \include example_choose_n_farthest_points.cpp
  * 
- * There si an alternative version `choose_n_farthest_points_metric()` with the same syntax,
+ * There is an alternative version `choose_n_farthest_points_metric()` with the same syntax,
  * which can be faster in many cases.
  *
  * \section randompointexamples Example: pick_n_random_points

@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2022/11 Glisse: New _metric variant
+ *      - 2022/11 Glisse: New *_metric variant
  *      - YYYY/MM Author: Description of the modification
  */
 
