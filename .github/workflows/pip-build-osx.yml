@@ -40,13 +40,33 @@ jobs:
           tar xf "`brew fetch --bottle-tag=arm64_big_sur mpfr | sed -ne 's/^Downloaded to: //p'`"
           cd ..
           mkdir -p deps-uni/lib
-          for A in gmp mpfr; do
-            for X in deps-amd64/$A/*/lib/lib*; do
-              Y=`basename $X`
-              lipo -create $X deps-arm64/$A/*/lib/$Y -output deps-uni/lib/$Y
-            done
-          done
-          # TODO: fix the install_name of the libraries
+          GMP1=deps-amd64/gmp/*/lib/libgmp.*.dylib
+          GMP=`basename $GMP1`
+          GMPXX1=deps-amd64/gmp/*/lib/libgmpxx.*.dylib
+          GMPXX=`basename $GMPXX1`
+          MPFR1=deps-amd64/mpfr/*/lib/libmpfr.*.dylib
+          MPFR=`basename $MPFR1`
+          lipo -create $GMP1 deps-arm64/gmp/*/lib/$GMP -output deps-uni/lib/$GMP
+          lipo -create $GMPXX1 deps-arm64/gmp/*/lib/$GMPXX -output deps-uni/lib/$GMPXX
+          lipo -create $MPFR1 deps-arm64/mpfr/*/lib/$MPFR -output deps-uni/lib/$MPFR
+          install_name_tool -id $PWD/deps-uni/lib/$GMP deps-uni/lib/$GMP
+          install_name_tool -id $PWD/deps-uni/lib/$GMPXX deps-uni/lib/$GMPXX
+          install_name_tool -id $PWD/deps-uni/lib/$MPFR deps-uni/lib/$MPFR
+          otool -L deps-uni/lib/$MPFR
+          BADGMP=`otool -L deps-uni/lib/$MPFR|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'`
+          echo BADGMP $BADGMP
+          install_name_tool -change $BADGMP $PWD/deps-uni/lib/$GMP deps-uni/lib/$MPFR
+          otool -L deps-uni/lib/$MPFR
+          otool -L deps-uni/lib/$GMPXX
+          BADGMP=`otool -L deps-uni/lib/$GMPXX|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'`
+          echo BADGMP $BADGMP
+          install_name_tool -change $BADGMP $PWD/deps-uni/lib/$GMP deps-uni/lib/$GMPXX
+          otool -L deps-uni/lib/$GMPXX
+          ln -s $GMP deps-uni/lib/libgmp.dylib
+          ln -s $GMPXX deps-uni/lib/libgmpxx.dylib
+          ln -s $MPFR deps-uni/lib/libmpfr.dylib
+          ls -l deps-uni/lib
+          otool -L deps-uni/lib/*.*.dylib
       - name: Build python wheel
         run: |
           export MPFR_LIB_DIR=$PWD/deps-uni/lib
@@ -58,7 +78,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
           python setup.py bdist_wheel
-          /Users/runner/.local/bin/delocate-wheel -v build/src/python/dist/*.whl
+          /Users/runner/.local/bin/delocate-wheel -v dist/*.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v3
         with:
