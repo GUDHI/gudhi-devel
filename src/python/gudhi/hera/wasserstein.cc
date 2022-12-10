@@ -147,9 +147,9 @@ PYBIND11_MODULE(wasserstein, m) {
             order (float): Wasserstein exponent W_q
             internal_p (float): Internal Minkowski norm L^p in R^2
             delta (float): Relative error 1+delta
-            matching (bool): if ``True``, computes and returns the optimal matching between X and Y, encoded as a (n x 2) np.array [...[i,j]...], meaning the i-th point in X is matched to the j-th point in Y, with the convention that (-1) represents the diagonal.
+            matching (bool): if ``True``, computes and returns the optimal matching between X and Y, encoded as a (n x 2) np.array [...[i,j]...], meaning the i-th point in X is matched to the j-th point in Y, with the convention that (-1) represents the diagonal. If the distance between two diagrams is +inf (which happens if the cardinalities of essential parts differ) and the matching is requested, it will be set to ``None`` (any matching is optimal).
 
         Returns:
-            float|Tuple[float,numpy.array]: Approximate Wasserstein distance W_q(X,Y), and optionally the corresponding matching
+            float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the corresponding matching
     )pbdoc");
 }
