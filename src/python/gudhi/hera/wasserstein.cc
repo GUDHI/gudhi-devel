@@ -27,7 +27,7 @@ py::object wasserstein_distance(
     double wasserstein_power, double internal_p,
     double delta, bool return_matching)
 {
-  // I *think* the call to request() has to be before releasing the GIL.
+  // I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
   auto diag1 = numpy_to_range_of_pairs(d1, make_hera_point);
   auto diag2 = numpy_to_range_of_pairs(d2, make_hera_point);
   int n1 = boost::size(diag1);

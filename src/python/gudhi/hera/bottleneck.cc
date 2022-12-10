@@ -23,7 +23,7 @@ static auto make_point(double x, double y, py::ssize_t) { return std::pair(x, y)
 
 double bottleneck_distance(Dgm d1, Dgm d2, double delta)
 {
-  // I *think* the call to request() has to be before releasing the GIL.
+  // I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
   auto diag1 = numpy_to_range_of_pairs(d1, make_point);
   auto diag2 = numpy_to_range_of_pairs(d2, make_point);
 
