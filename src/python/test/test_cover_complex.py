@@ -120,4 +120,3 @@ def test_cover_complex():
     M = NerveComplex(input_type="point cloud", color=None, mask=0, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]]).fit(X)
 
     assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
-

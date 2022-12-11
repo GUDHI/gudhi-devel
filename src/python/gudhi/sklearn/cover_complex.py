@@ -21,11 +21,11 @@ from .. import SimplexTree, CoverComplex
 
 class CoverComplexPy(BaseEstimator, TransformerMixin):
     """
-    This is a mother class for MapperComplex, GraphInducedComplex and NerveComplex. 
+    This is a mother class for MapperComplex, GraphInducedComplex and NerveComplex.
 
     Attributes:
         simplex_tree (gudhi SimplexTree): simplicial complex representing the cover complex computed after calling the fit() method.
-        node_info (dictionary): various information associated to the nodes of the cover complex. 
+        node_info (dictionary): various information associated to the nodes of the cover complex.
     """
     def __init__(self, input_name="data", cover_name="cover", color_name="color", verbose=False):
         """
@@ -70,11 +70,11 @@ class CoverComplexPy(BaseEstimator, TransformerMixin):
             epsv (float): scale the node colors between [epsv, 1-epsv]
             epss (float): scale the node sizes between [epss, 1-epss]
         """
-        st = self.simplex_tree 
+        st = self.simplex_tree
         node_info = self.node_info
 
         maxv, minv = max([node_info[k]["colors"][0] for k in node_info.keys()]), min([node_info[k]["colors"][0] for k in node_info.keys()])
-        maxs, mins = max([node_info[k]["size"]      for k in node_info.keys()]), min([node_info[k]["size"]      for k in node_info.keys()])  
+        maxs, mins = max([node_info[k]["size"]      for k in node_info.keys()]), min([node_info[k]["size"]      for k in node_info.keys()])
 
         f = open(self.input_name + ".dot", "w")
         f.write("graph MAP{")
@@ -241,7 +241,7 @@ class MapperComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
         num_pts, num_filters = self.filters.shape[0], self.filters.shape[1]
 
         # If some filter limits are unspecified, automatically compute them
-        if self.filter_bnds is None: 
+        if self.filter_bnds is None:
             self.filter_bnds = np.hstack([np.min(self.filters, axis=0)[:,np.newaxis], np.max(self.filters, axis=0)[:,np.newaxis]])
 
         # If some resolutions are not specified, automatically compute them
@@ -251,7 +251,7 @@ class MapperComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
             delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
             if self.clustering is None:
                 if self.input_type == "point cloud":
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="euclidean")  
+                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="euclidean")
                 else:
                     self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="precomputed")
             if self.resolutions is None:
@@ -262,7 +262,7 @@ class MapperComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
         self.simplex_tree, self.node_info = SimplexTree(), {}
 
         if np.all(self.gains < .5):
-            
+
             # Compute which points fall in which patch or patch intersections
             interval_inds, intersec_inds = np.empty(self.filters.shape), np.empty(self.filters.shape)
             for i in range(num_filters):
@@ -358,7 +358,7 @@ class MapperComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
 
             clus_base += np.max(clusters) + 1
 
-        # Insert the simplices of the Mapper complex 
+        # Insert the simplices of the Mapper complex
         for i in range(num_pts):
             self.simplex_tree.insert(cover[i])
 
@@ -419,7 +419,7 @@ class GraphInducedComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
             self.complex.set_point_cloud_from_range(X)
         elif self.input_type == "distance matrix":
             self.complex.set_distances_from_range(X)
-            
+
         # Set vertex color
         if self.color is None:
             if self.input_type == "point cloud":
@@ -427,7 +427,7 @@ class GraphInducedComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
             elif self.input_type == "distance matrix":
                 self.color = X.max(axis=0)
         self.complex.set_color_from_range(self.color)
-            
+
         # Set underlying graph
         if self.graph == "rips":
             if self.rips_threshold is not None:
@@ -468,7 +468,7 @@ class GraphInducedComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
         self.complex.set_mask(self.mask)
         self.complex.find_simplices()
         simplex_tree = self.complex.create_simplex_tree()
-            
+
         # Normalize vertex names of simplex tree
         self.simplex_tree = SimplexTree()
         idv, names = 0, {}
@@ -488,7 +488,7 @@ class GraphInducedComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
                 node = names[v[0]]
                 pop = self.complex.subpopulation(v[0])
                 self.node_info[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
-    
+
         return self
 
 class NerveComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
@@ -533,7 +533,7 @@ class NerveComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
             self.complex.set_point_cloud_from_range(X)
         elif self.input_type == "distance matrix":
             self.complex.set_distances_from_range(X)
-            
+
         # Set vertex color
         if self.color is None:
             if self.input_type == "point cloud":
@@ -541,7 +541,7 @@ class NerveComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
             elif self.input_type == "distance matrix":
                 self.color = X.max(axis=0)
         self.complex.set_color_from_range(self.color)
-            
+
         # Set vertex cover
         self.complex.set_cover_from_range(self.assignments)
 
@@ -549,7 +549,7 @@ class NerveComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
         self.complex.set_mask(self.mask)
         self.complex.find_simplices()
         simplex_tree = self.complex.create_simplex_tree()
-            
+
         # Normalize vertex names of simplex tree
         self.simplex_tree = SimplexTree()
         idv, names = 0, {}
@@ -569,7 +569,5 @@ class NerveComplex(CoverComplexPy, BaseEstimator, TransformerMixin):
                 node = names[v[0]]
                 pop = self.complex.subpopulation(v[0])
                 self.node_info[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
-    
+
         return self
-
-

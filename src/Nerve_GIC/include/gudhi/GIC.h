@@ -395,7 +395,6 @@ class Cover_complex {
            */
   template <typename Distance>
   void compute_pairwise_distances(Distance ref_distance) {
-    double d;
     std::vector<double> zeros(n);
     for (int i = 0; i < n; i++) distances.push_back(zeros);
     if (verbose) std::clog << "Computing distances..." << std::endl;
