@@ -56,6 +56,7 @@
 #include <string>
 #include <cstddef>  // for std::size_t
 #include <optional>
+#include <numeric>  // for std::iota
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -623,6 +624,11 @@ class Tangential_complex {
 #endif
 
     int max_dim = -1;
+
+    // Ordered vertices to be inserted first by the create_complex method to avoid quadratic complexity.
+    std::vector<typename Simplex_tree_::Vertex_handle> vertices(m_points.size());
+    std::iota(vertices.begin(), vertices.end(), 0);
+    tree.insert_batch_vertices(vertices);
 
     // For each triangulation
     for (std::size_t idx = 0; idx < m_points.size(); ++idx) {
