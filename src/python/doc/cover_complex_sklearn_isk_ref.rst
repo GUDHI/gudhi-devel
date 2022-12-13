@@ -14,7 +14,7 @@ Scikit-learn class for cover complexes
      - :Requires: `Scikit-learn <installation.html#scikit-learn>`__
 
 We provide scikit-learn classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
-in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_. 
+in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_.
 
 Example of Mapper cover complex computed from a point cloud
 -----------------------------------------------------------
@@ -39,7 +39,7 @@ Example of Mapper cover complex computed from a point cloud
         gains=np.array([0.3, 0.3]),
         clustering=AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=0.6),
     )
-    
+
     Mapper.fit(X)
 
     print([s for s,_ in Mapper.simplex_tree.get_simplices()])
@@ -47,7 +47,7 @@ Example of Mapper cover complex computed from a point cloud
 .. testoutput::
 
     [[0, 1], [0], [1, 2], [1, 3], [1], [2, 4], [2], [3, 4], [3], [4, 5], [4], [5]]
-    
+
 Documentation for MapperComplex
 -------------------------------
 

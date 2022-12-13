@@ -465,8 +465,6 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
              -f human.off -n 700 -v)
 
-    add_gudhi_py_test(test_cover_complex)
-
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
@@ -609,7 +607,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Cover complex
-    if(SKLEARN_FOUND AND CGAL_FOUND)
+    if(SKLEARN_FOUND)
       add_gudhi_py_test(test_cover_complex)
     endif()
 
