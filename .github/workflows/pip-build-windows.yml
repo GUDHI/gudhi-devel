@@ -47,3 +47,8 @@ jobs:
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest ".\src\python\test\test_alpha_complex.py"
+      - name: Upload Windows python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows python wheel
+          path: build/src/python/dist/*.whl

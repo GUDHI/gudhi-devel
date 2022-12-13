@@ -25,3 +25,8 @@ jobs:
           $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
+      - name: Upload linux python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux python wheel
+          path: build_311/src/python/dist/*.whl
