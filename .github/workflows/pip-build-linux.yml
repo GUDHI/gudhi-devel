@@ -19,6 +19,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
           cd src/python
           $PYTHON311/bin/python setup.py bdist_wheel
+          auditwheel show dist/*.whl
           auditwheel repair dist/*.whl
       - name: Install and test wheel for Python 3.11
         run: |
