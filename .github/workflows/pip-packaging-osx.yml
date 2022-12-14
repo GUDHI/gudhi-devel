@@ -43,7 +43,7 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python setup.py bdist_wheel
+          python -m build
       - name: Install and test python wheel
         run: |
           python -m pip install --user pytest build/src/python/dist/*.whl
