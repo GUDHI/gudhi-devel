@@ -6,9 +6,6 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.6.0:
 
-- [Module](link)
-     - ...
-
 - [Simplex tree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - New functions to initialize from a matrix or insert batches of simplices of the same dimension.
 
@@ -16,7 +13,9 @@ Below is a list of changes made since GUDHI 3.6.0:
      - Construction now rejects positional arguments, you need to specify `points=X`.
 
 - Installation
-     - c++17 is the new minimal standard to compile the library. This implies Visual Studio minimal version is now 2017.
+     - C++17 is the new minimal standard to compile the library. This implies Visual Studio minimal version is now 2017.
+     - OSx ARM pip package is now available thanks to a universal wheel
+     - Python 3.11 pip package
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.6.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.7.0+is%3Aclosed) is available on GitHub.
@@ -32,3 +31,10 @@ Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any 
 
 For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/latest/installation.html) or [Python](https://gudhi.inria.fr/python/latest/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
 
+## Contributors
+
+- @albert-github
+- @hschreiber
+- @mglisse
+- @VincentRouvreau
+- @wreise
