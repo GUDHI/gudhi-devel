@@ -24,6 +24,7 @@ jobs:
           vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version
           ls "C:\vcpkg\installed\x64-windows\bin\"
+          python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
           python -m pip install --user build
           python -m pip list
       - name: Build python wheel and install it
