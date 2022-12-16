@@ -16,6 +16,9 @@ jobs:
         python-version: ['3.11']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
