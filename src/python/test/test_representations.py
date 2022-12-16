@@ -161,7 +161,7 @@ def test_entropy_miscalculation():
         return -np.dot(l, np.log(l))
     sce = Entropy(mode="scalar")
     assert [[pe(diag_ex)]] == sce.fit_transform([diag_ex])
-    sce = Entropy(mode="vector", resolution=4, normalized=False)
+    sce = Entropy(mode="vector", resolution=4, normalized=False, keep_endpoints=True)
     pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
            -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
            -1/2*np.log(1/2), 
@@ -170,7 +170,7 @@ def test_entropy_miscalculation():
     sce = Entropy(mode="vector", resolution=4, normalized=True)
     pefN = (sce.fit_transform([diag_ex]))[0]
     area = np.linalg.norm(pefN, ord=1)
-    assert area==1
+    assert area==pytest.approx(1)
         
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
@@ -251,3 +251,15 @@ def test_landscape_nan_range():
     lds_dgm = lds(dgm)
     assert (lds.sample_range[0] == 2) & (lds.sample_range[1] == 6)
     assert lds.new_resolution == 10
+
+def test_endpoints():
+    diags = [ np.array([[2., 3.]]) ]
+    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+        vec.fit(diags)
+        assert vec.grid_[0] > 2 and vec.grid_[-1] < 3
+    for vec in [ Landscape(keep_endpoints=True), Silhouette(keep_endpoints=True), BettiCurve(keep_endpoints=True), Entropy(mode="vector", keep_endpoints=True)]:
+        vec.fit(diags)
+        assert vec.grid_[0] == 2 and vec.grid_[-1] == 3
+    vec = BettiCurve(resolution=None)
+    vec.fit(diags)
+    assert np.equal(vec.grid_, [-np.inf, 2., 3.]).all()
