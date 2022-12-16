@@ -1,6 +1,6 @@
 We are pleased to announce the release 3.7.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers ...
+As a major new feature, the GUDHI library now offers new functions to initialize a Simplex tree. Universal wheel for OSx pip package and python 3.11 are now available.
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
