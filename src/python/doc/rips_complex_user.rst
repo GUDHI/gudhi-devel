@@ -52,6 +52,13 @@ construction of a :class:`~gudhi.RipsComplex` object asks it to build a sparse R
 parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
 regular Rips complex.
 
+Another option which is especially useful if you want to compute persistent homology in "high" dimension (2 or more,
+sometimes even 1), is to build the Rips complex only up to dimension 1 (a graph), then use
+:func:`~gudhi.SimplexTree.collapse_edges` to reduce the size of this graph, and finally call
+:func:`~gudhi.SimplexTree.expansion` to get a simplicial complex of a suitable dimension to compute its homology. This
+trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a complex that is
+often significantly smaller and thus faster to process.
+
 
 Point cloud
 -----------
@@ -210,7 +217,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [4, 6] -> 9.49
     [3, 6] -> 11.00
 
-In case this lower triangular matrix is stored in a CSV file, like data/distance_matrix/full_square_distance_matrix.csv in the Gudhi distribution, you can read it with :func:`~gudhi.read_lower_triangular_matrix_from_csv_file`.
+In case this lower triangular matrix is stored in a CSV file, like `data/distance_matrix/full_square_distance_matrix.csv` in the Gudhi distribution, you can read it with :func:`~gudhi.read_lower_triangular_matrix_from_csv_file`.
 
 Correlation matrix
 ------------------
