@@ -11,6 +11,7 @@
 
 from __future__ import print_function
 from cython cimport numeric
+from cpython cimport Py_buffer
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
@@ -31,6 +32,8 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
         Bitmap_cubical_complex_base_interface(string perseus_file) nogil
         int num_simplices() nogil
         int dimension() nogil
+        vector[unsigned] shape() nogil
+        vector[double] data
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
@@ -41,6 +44,28 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
         vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
+
+cdef class _WrapVectorDouble:
+    cplx: CubicalComplex
+    cdef Py_ssize_t shape[1]
+    def __cinit__(self, cplx):
+        self.cplx = cplx
+    # Buffer protocol
+    def __getbuffer__(self, Py_buffer *buffer, int flags):
+        self.shape[0] = self.cplx.thisptr.data.size()
+        buffer.buf = <char*> self.cplx.thisptr.data.data()
+        buffer.format = 'd'
+        buffer.internal = NULL
+        buffer.itemsize = sizeof(double)
+        buffer.len = self.cplx.thisptr.data.size() * sizeof(double)
+        buffer.ndim = 1
+        buffer.obj = self.cplx
+        buffer.readonly = 0
+        buffer.shape = self.shape
+        buffer.strides = NULL
+        buffer.suboffsets = NULL
+    def __releasebuffer__(self, Py_buffer *buffer):
+        pass
 
 # CubicalComplex python interface
 cdef class CubicalComplex:
@@ -138,6 +163,32 @@ cdef class CubicalComplex:
         :returns:  int -- the complex dimension.
         """
         return self.thisptr.dimension()
+
+    def all_cells(self):
+        """Array with the filtration values of all the cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        a = np.asarray(_WrapVectorDouble(self))
+        return a.reshape([2*d+1 for d in self.thisptr.shape()], order='F')
+        # we end up with an array with base an array with base a memoryview of the object _WrapVectorDouble...
+
+    def top_cells(self):
+        """Array with the filtration values of the top-dimensional cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(1, None, 2),) * self.thisptr.dimension()]
+
+    def vertices(self):
+        """Array with the filtration values of the vertices of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(0, None, 2),) * self.thisptr.dimension()]
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be

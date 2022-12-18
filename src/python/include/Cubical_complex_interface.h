@@ -40,6 +40,11 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOp
   Cubical_complex_interface(const std::string& perseus_file)
   : Bitmap_cubical_complex<CubicalComplexOptions>(perseus_file.c_str()) {
   }
+
+  using Bitmap_cubical_complex<CubicalComplexOptions>::data;
+
+  // not const because cython does not handle const very well
+  std::vector<unsigned>& shape() { return this->sizes; };
 };
 
 }  // namespace cubical_complex

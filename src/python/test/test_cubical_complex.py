@@ -199,3 +199,27 @@ def test_periodic_cubical_persistence_intervals_in_dimension():
     H2 = cub.persistence_intervals_in_dimension(2)
     assert np.array_equal(H2, np.array([[ 9., float("inf")]]))
     assert cub.persistence_intervals_in_dimension(3).shape == (0, 2)
+
+def test_array_access():
+    a = np.arange(6, dtype=float).reshape(3, 2)
+    cplx = CubicalComplex(top_dimensional_cells=a)
+    assert np.array_equal(cplx.top_cells(), a)
+    assert np.array_equal(
+        cplx.vertices(), np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [2.0, 2.0, 3.0], [4.0, 4.0, 5.0]])
+    )
+    assert np.array_equal(
+        cplx.all_cells(),
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [2.0, 2.0, 2.0, 3.0, 3.0],
+                [2.0, 2.0, 2.0, 3.0, 3.0],
+                [4.0, 4.0, 4.0, 5.0, 5.0],
+                [4.0, 4.0, 4.0, 5.0, 5.0],
+            ]
+        ),
+    )
+    cplx.top_cells()[0, 0] = 42
+    assert cplx.all_cells()[1, 1] == 42
