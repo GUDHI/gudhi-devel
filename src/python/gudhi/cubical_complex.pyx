@@ -11,7 +11,6 @@
 
 from __future__ import print_function
 from cython cimport numeric
-from cpython cimport Py_buffer
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
@@ -21,10 +20,14 @@ import os
 import sys
 
 import numpy as np
+cimport numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+# Necessary because of PyArray_SimpleNewFromData
+np.import_array()
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
@@ -44,28 +47,6 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
         vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
-
-cdef class _WrapVectorDouble:
-    cplx: CubicalComplex
-    cdef Py_ssize_t shape[1]
-    def __cinit__(self, cplx):
-        self.cplx = cplx
-    # Buffer protocol
-    def __getbuffer__(self, Py_buffer *buffer, int flags):
-        self.shape[0] = self.cplx.thisptr.data.size()
-        buffer.buf = <char*> self.cplx.thisptr.data.data()
-        buffer.format = 'd'
-        buffer.internal = NULL
-        buffer.itemsize = sizeof(double)
-        buffer.len = self.cplx.thisptr.data.size() * sizeof(double)
-        buffer.ndim = 1
-        buffer.obj = self.cplx
-        buffer.readonly = 0
-        buffer.shape = self.shape
-        buffer.strides = NULL
-        buffer.suboffsets = NULL
-    def __releasebuffer__(self, Py_buffer *buffer):
-        pass
 
 # CubicalComplex python interface
 cdef class CubicalComplex:
@@ -170,9 +151,10 @@ cdef class CubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        a = np.asarray(_WrapVectorDouble(self))
+        cdef np.npy_intp dim = self.thisptr.data.size()
+        a = np.PyArray_SimpleNewFromData(1, &dim, np.NPY_DOUBLE, self.thisptr.data.data())
+        np.set_array_base(a, self)
         return a.reshape([2*d+1 for d in self.thisptr.shape()], order='F')
-        # we end up with an array with base an array with base a memoryview of the object _WrapVectorDouble...
 
     def top_cells(self):
         """Array with the filtration values of the top-dimensional cells of the complex.
