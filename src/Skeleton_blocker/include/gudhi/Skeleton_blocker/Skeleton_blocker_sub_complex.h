@@ -196,10 +196,8 @@ class Skeleton_blocker_sub_complex : public ComplexType {
 };
 
 /**
- * @remark remarque perte de temps a creer un nouveau simplexe a chaque fois
- * alors qu'on pourrait utiliser a la place de 'addresses_sigma_in_link'
- * un simplex avec des valeurs sp�ciales ComplexDS::null_vertex par exemple
- * pour indiquer qu'un vertex n'appartient pas au complex
+ * @remark waste of time to create a new simplex each time when we could use instead of addresses_sigma_in_link a
+ * simplex with special values (ComplexDS::null_vertex e.g.) to indicate that a vertex does not belong to the complex.
  */
 template<typename ComplexType>
 bool proper_face_in_union(

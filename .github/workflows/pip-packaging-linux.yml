@@ -11,7 +11,7 @@ jobs:
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
     container: gudhi/pip_for_gudhi
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - name: Build wheel for Python 3.6
@@ -79,6 +79,19 @@ jobs:
           $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
+      - name: Build wheel for Python 3.11
+        run: |
+          mkdir build_311
+          cd build_311
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
+          cd src/python
+          $PYTHON311/bin/python setup.py bdist_wheel
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.11
+        run: |
+          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
+          $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
@@ -89,3 +102,4 @@ jobs:
           $PYTHON36/bin/python -m twine upload build_38/src/python/wheelhouse/*
           $PYTHON36/bin/python -m twine upload build_39/src/python/wheelhouse/*
           $PYTHON36/bin/python -m twine upload build_310/src/python/wheelhouse/*
+          $PYTHON36/bin/python -m twine upload build_311/src/python/wheelhouse/*

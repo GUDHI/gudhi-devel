@@ -112,7 +112,7 @@ void program_options(int argc, char * argv[]
   visible.add_options()
       ("help,h", "produce help message")
       ("output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-       "Name of file in which the persistence diagram is written. Default print in std::clog")
+       "Name of file in which the persistence diagram is written. Default print in standard output")
       ("max-edge-length,r",
        po::value<Filtration_value>(&threshold)->default_value(std::numeric_limits<Filtration_value>::infinity()),
        "Maximal length of an edge for the Rips complex construction.")

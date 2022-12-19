@@ -25,7 +25,7 @@ int main(void) {
   // 10-nearest neighbor query
   std::clog << "10 nearest neighbors from points[20]:\n";
   auto knn_range = points_ds.k_nearest_neighbors(points[20], 10, true);
-  for (auto const& nghb : knn_range)
+  for (auto const nghb : knn_range)
     std::clog << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
 
   // Incremental nearest neighbor query
@@ -38,7 +38,7 @@ int main(void) {
   // 10-furthest neighbor query
   std::clog << "10 furthest neighbors from points[20]:\n";
   auto kfn_range = points_ds.k_furthest_neighbors(points[20], 10, true);
-  for (auto const& nghb : kfn_range)
+  for (auto const nghb : kfn_range)
     std::clog << nghb.first << " (sq. dist. = " << nghb.second << ")\n";
 
   // Incremental furthest neighbor query

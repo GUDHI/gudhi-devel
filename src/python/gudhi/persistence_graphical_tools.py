@@ -194,19 +194,21 @@ def plot_persistence_barcode(
         y=[(death - birth) if death != float("inf") else (infinity - birth) for (dim,(birth,death)) in persistence]
         c=[colormap[dim] for (dim,(birth,death)) in persistence]
 
-        axes.barh(list(reversed(range(len(x)))), y, height=0.8, left=x, alpha=alpha, color=c, linewidth=0)
+        axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
 
         if legend:
-            dimensions = list(set(item[0] for item in persistence))
+            dimensions = set(item[0] for item in persistence)
             axes.legend(
                 handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions], loc="lower right",
             )
 
         axes.set_title("Persistence barcode", fontsize=fontsize)
+        axes.set_yticks([])
+        axes.invert_yaxis()
 
         # Ends plot on infinity value and starts a little bit before min_birth
         if len(x) != 0:
-            axes.axis([axis_start, infinity, 0, len(x)])
+            axes.set_xlim((axis_start, infinity))
         return axes
 
     except ImportError as import_error:

@@ -4,19 +4,24 @@ on:
   release:
     types: [published]
 
+env:
+  MACOSX_DEPLOYMENT_TARGET: 10.15
+  _PYTHON_HOST_PLATFORM: macosx-10.15-universal2
+  ARCHFLAGS: "-arch arm64 -arch x86_64"
+
 jobs:
   build:
     runs-on: macos-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -26,8 +31,13 @@ jobs:
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user twine delocate
+          ./scripts/build_osx_universal_gmpfr.sh
+          # Now the universal libs are in $PWD/deps-uni/lib
       - name: Build python wheel
         run: |
+          export   GMP_LIB_DIR=$PWD/deps-uni/lib
+          export GMPXX_LIB_DIR=$PWD/deps-uni/lib
+          export  MPFR_LIB_DIR=$PWD/deps-uni/lib
           python --version
           mkdir build
           cd build
@@ -45,6 +55,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           mkdir wheelhouse
-          /Users/runner/.local/bin/delocate-listdeps build/src/python/dist/*
-          /Users/runner/.local/bin/delocate-wheel --require-archs x86_64 -w wheelhouse build/src/python/dist/*
+          export PATH="$PATH:`python -m site --user-base`/bin"
+          delocate-listdeps build/src/python/dist/*
+          delocate-wheel --require-archs universal2 -w wheelhouse build/src/python/dist/*
           python -m twine upload wheelhouse/*

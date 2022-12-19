@@ -18,14 +18,17 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 string(TIMESTAMP GUDHI_VERSION_YEAR "%Y")
 configure_file(${CMAKE_SOURCE_DIR}/biblio/how_to_cite_gudhi.bib.in "${CMAKE_CURRENT_BINARY_DIR}/biblio/how_to_cite_gudhi.bib" @ONLY)
 file(COPY "${CMAKE_SOURCE_DIR}/biblio/bibliography.bib" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio/")
+file(COPY "${CMAKE_SOURCE_DIR}/biblio/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/biblio")
 
 # append cgal citation inside bibliography - sphinx cannot deal with more than one bib file
 file(READ "${CMAKE_SOURCE_DIR}/biblio/how_to_cite_cgal.bib" CGAL_CITATION_CONTENT)
 file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/biblio/bibliography.bib" "${CGAL_CITATION_CONTENT}")
 
-# Copy biblio directory for user version
+# Copy biblio files for user version
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_CURRENT_BINARY_DIR}/biblio ${GUDHI_USER_VERSION_DIR}/biblio)
+                   copy ${CMAKE_CURRENT_BINARY_DIR}/biblio/bibliography.bib ${GUDHI_USER_VERSION_DIR}/biblio/bibliography.bib)
+add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                   copy ${CMAKE_CURRENT_BINARY_DIR}/biblio/how_to_cite_gudhi.bib ${GUDHI_USER_VERSION_DIR}/biblio/how_to_cite_gudhi.bib)
 
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/README.md ${GUDHI_USER_VERSION_DIR}/README.md)
@@ -60,10 +63,9 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy_directory ${CMAKE_SOURCE_DIR}/src/GudhUI ${GUDHI_USER_VERSION_DIR}/GudhUI)
 
-if(HERA_WASSERSTEIN_INCLUDE_DIR STREQUAL HERA_WASSERSTEIN_INTERNAL_INCLUDE_DIR OR
-    HERA_BOTTLENECK_INCLUDE_DIR STREQUAL HERA_BOTTLENECK_INTERNAL_INCLUDE_DIR)
+if(HERA_INCLUDE_DIR STREQUAL HERA_INTERNAL_INCLUDE_DIR)
   add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                     copy_directory ${CMAKE_SOURCE_DIR}/ext/hera ${GUDHI_USER_VERSION_DIR}/ext/hera)
+                     copy_directory ${CMAKE_SOURCE_DIR}/ext/hera/include ${GUDHI_USER_VERSION_DIR}/ext/hera/include)
 endif()
 
 set(GUDHI_DIRECTORIES "doc;example;concept;utilities")

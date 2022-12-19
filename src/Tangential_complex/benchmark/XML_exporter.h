@@ -157,7 +157,7 @@ class Streaming_XML_exporter {
       m_xml_fstream << "  </" << m_element_name << ">" << std::endl;
 
       // Save current pointer position
-      std::ofstream::streampos pos = m_xml_fstream.tellp();
+      auto pos = m_xml_fstream.tellp();
       // Close the XML file (temporarily) so that the XML file is always correct
       m_xml_fstream << "</" << m_list_name << ">" << std::endl;
       // Restore the pointer position so that the next "add_element" will overwrite
