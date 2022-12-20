@@ -56,6 +56,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         int upper_bound_dimension() nogil
         bool find_simplex(vector[int] simplex) nogil
         bool insert(vector[int] simplex, double filtration) nogil
+        void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) nogil except +
+        void insert_batch_vertices(vector[int] v, double f) nogil except +
         vector[pair[vector[int], double]] get_star(vector[int] simplex) nogil
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex, int dimension) nogil
         void expansion(int max_dim) nogil except +

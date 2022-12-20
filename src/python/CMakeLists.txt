@@ -44,7 +44,7 @@ function( add_gudhi_debug_info DEBUG_INFO )
 endfunction( add_gudhi_debug_info )
 
 if(PYTHONINTERP_FOUND)
-  if(PYBIND11_FOUND AND CYTHON_FOUND)
+  if(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
     add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
     # PyBind11 modules
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
@@ -53,7 +53,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'datasets', ")
 
     # Cython modules
-    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_reader', ")
+    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_utils', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'cubical_complex', ")
@@ -152,7 +152,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
     endif (EIGEN3_FOUND)
 
-    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_reader', ")
+    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_utils', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'simplex_tree', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'rips_complex', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'cubical_complex', ")
@@ -163,10 +163,10 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'clustering/_tomato', ")
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/wasserstein', ")
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/bottleneck', ")
+    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'datasets/generators/_points', ")
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'bottleneck', ")
-      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     endif ()
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
@@ -432,38 +432,38 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
       add_gudhi_py_test(test_bottleneck_distance)
-
-      # Cover complex
-      file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-      file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-      file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
-      add_test(NAME cover_complex_nerve_example_py_test
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
-               -f human.off -c 2 -r 10 -g 0.3)
-
-      add_test(NAME cover_complex_coordinate_gic_example_py_test
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
-               -f human.off -c 0 -v)
-
-      add_test(NAME cover_complex_functional_gic_example_py_test
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
-               -o lucky_cat.off
-               -f lucky_cat_PCA1 -v)
-
-      add_test(NAME cover_complex_voronoi_gic_example_py_test
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
-               -f human.off -n 700 -v)
-
-      add_gudhi_py_test(test_cover_complex)
     endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+
+    # Cover complex
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/points/COIL_database/lucky_cat_PCA1 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    add_test(NAME cover_complex_nerve_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/nerve_of_a_covering.py"
+             -f human.off -c 2 -r 10 -g 0.3)
+
+    add_test(NAME cover_complex_coordinate_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/coordinate_graph_induced_complex.py"
+             -f human.off -c 0 -v)
+
+    add_test(NAME cover_complex_functional_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/functional_graph_induced_complex.py"
+             -o lucky_cat.off
+             -f lucky_cat_PCA1 -v)
+
+    add_test(NAME cover_complex_voronoi_gic_example_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+             ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
+             -f human.off -n 700 -v)
+
+    add_gudhi_py_test(test_cover_complex)
 
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Alpha
@@ -546,6 +546,7 @@ if(PYTHONINTERP_FOUND)
 
     # Reader utils
     add_gudhi_py_test(test_reader_utils)
+    add_gudhi_py_test(test_off)
 
     # Wasserstein
     if(OT_FOUND)
@@ -622,10 +623,10 @@ if(PYTHONINTERP_FOUND)
 
     # Set missing or not modules
     set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
-  else(PYBIND11_FOUND AND CYTHON_FOUND)
-    message("++ Python module will not be compiled because cython and/or pybind11 was/were not found")
+  else(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
+    message("++ Python module will not be compiled because numpy and/or cython and/or pybind11 was/were not found")
     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-  endif(PYBIND11_FOUND AND CYTHON_FOUND)
+  endif(NUMPY_FOUND AND PYBIND11_FOUND AND CYTHON_FOUND)
 else(PYTHONINTERP_FOUND)
   message("++ Python module will not be compiled because no Python interpreter was found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")

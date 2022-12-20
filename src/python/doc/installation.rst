@@ -150,7 +150,7 @@ You shall have something like:
     Cython version 0.29.25 
     Numpy version 1.21.4 
     Boost version 1.77.0
-    + Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+    + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
     + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
         euclidean_strong_witness_complex;
@@ -188,7 +188,7 @@ A complete configuration would be :
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 9107 found and used
-    + Installed modules are: bottleneck;off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+    + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
     + Missing modules are: 

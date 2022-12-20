@@ -8,13 +8,23 @@
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
-from libc.stdint cimport intptr_t
+from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
+cimport cython
+from numpy.math cimport INFINITY
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+ctypedef fused some_int:
+    int32_t
+    int64_t
+
+ctypedef fused some_float:
+    float
+    double
 
 cdef bool callback(vector[int] simplex, void *blocker_func):
     return (<object>blocker_func)(simplex)
@@ -228,6 +238,91 @@ cdef class SimplexTree:
         """
         return self.get_ptr().insert(simplex, <double>filtration)
 
+    @staticmethod
+    @cython.boundscheck(False)
+    def create_from_array(filtrations, double max_filtration=INFINITY):
+        """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
+        the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
+        caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
+
+            filtrations[np.diag_indices_from(filtrations)] = filtrations.min(axis=1)
+
+        or::
+
+            diag = filtrations.diagonal()
+            filtrations = np.fmax(np.fmax(filtrations, diag[:, None]), diag[None, :])
+
+        :param filtrations: the filtration values of the vertices and edges to insert. The matrix is assumed to be symmetric.
+        :type filtrations: numpy.ndarray of shape (n,n)
+        :param max_filtration: only insert vertices and edges with filtration values no larger than max_filtration
+        :type max_filtration: float
+        :returns: the new complex
+        :rtype: SimplexTree
+        """
+        # TODO: document which half of the matrix is actually read?
+        filtrations = np.asanyarray(filtrations, dtype=float)
+        cdef double[:,:] F = filtrations
+        ret = SimplexTree()
+        cdef int n = F.shape[0]
+        assert n == F.shape[1], 'create_from_array() expects a square array'
+        with nogil:
+            ret.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
+        return ret
+
+    def insert_edges_from_coo_matrix(self, edges):
+        """Inserts edges given by a sparse matrix in `COOrdinate format
+        <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
+        If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
+        Diagonal entries are currently interpreted as vertices, although we do not guarantee this behavior
+        in the future, and this is only useful if you want to insert vertices with a smaller filtration value
+        than the smallest edge containing it, since vertices are implicitly inserted together with the edges.
+
+        :param edges: the edges to insert and their filtration values.
+        :type edges: scipy.sparse.coo_matrix of shape (n,n)
+
+        .. seealso:: :func:`insert_batch`
+        """
+        # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+        self.get_ptr().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), INFINITY)
+        # TODO: optimize this?
+        for edge in zip(edges.row, edges.col, edges.data):
+            self.get_ptr().insert((edge[0], edge[1]), edge[2])
+
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    def insert_batch(self, some_int[:,:] vertex_array, some_float[:] filtrations):
+        """Inserts k-simplices given by a sparse array in a format similar
+        to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
+        The n-th simplex has vertices `vertex_array[0,n]`, ...,
+        `vertex_array[k,n]` and filtration value `filtrations[n]`.
+        If a simplex is repeated, the smallest filtration value is used.
+        Simplices with a repeated vertex are currently interpreted as lower
+        dimensional simplices, but we do not guarantee this behavior in the
+        future. Any time a simplex is inserted, its faces are inserted as well
+        if needed to preserve a simplicial complex.
+
+        :param vertex_array: the k-simplices to insert.
+        :type vertex_array: numpy.array of shape (k+1,n)
+        :param filtrations: the filtration values.
+        :type filtrations: numpy.array of shape (n,)
+        """
+        cdef vector[int] vertices = np.unique(vertex_array)
+        cdef Py_ssize_t k = vertex_array.shape[0]
+        cdef Py_ssize_t n = vertex_array.shape[1]
+        assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
+        cdef Py_ssize_t i
+        cdef Py_ssize_t j
+        cdef vector[int] v
+        with nogil:
+            # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+            # NaN currently does the wrong thing
+            self.get_ptr().insert_batch_vertices(vertices, INFINITY)
+            for i in range(n):
+                for j in range(k):
+                    v.push_back(vertex_array[j, i])
+                self.get_ptr().insert(v, filtrations[i])
+                v.clear()
+
     def get_simplices(self):
         """This function returns a generator with simplices and their given
         filtration values.
@@ -376,7 +471,7 @@ cdef class SimplexTree:
         """
         return self.get_ptr().prune_above_filtration(filtration)
 
-    def expansion(self, max_dim):
+    def expansion(self, max_dimension):
         """Expands the simplex tree containing only its one skeleton
         until dimension max_dim.
 
@@ -390,10 +485,10 @@ cdef class SimplexTree:
         The simplex tree must contain no simplex of dimension bigger than
         1 when calling the method.
 
-        :param max_dim: The maximal dimension.
-        :type max_dim: int
+        :param max_dimension: The maximal dimension.
+        :type max_dimension: int
         """
-        cdef int maxdim = max_dim
+        cdef int maxdim = max_dimension
         with nogil:
             self.get_ptr().expansion(maxdim)
 

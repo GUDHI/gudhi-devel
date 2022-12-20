@@ -106,7 +106,7 @@ class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
-  virtual std::size_t num_vertices() const {
+  virtual std::size_t num_vertices() const override {
     return alpha_complex_.num_vertices();
   }
 
@@ -141,7 +141,7 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
   }
 
-  virtual std::size_t num_vertices() const {
+  virtual std::size_t num_vertices() const override {
     return alpha_complex_.num_vertices();
   }
 

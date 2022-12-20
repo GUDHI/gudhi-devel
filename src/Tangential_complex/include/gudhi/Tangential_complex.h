@@ -56,6 +56,7 @@
 #include <string>
 #include <cstddef>  // for std::size_t
 #include <optional>
+#include <numeric>  // for std::iota
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -345,10 +346,11 @@ class Tangential_complex {
     m_stars.resize(m_points.size());
     m_squared_star_spheres_radii_incl_margin.resize(m_points.size(), FT(-1));
 #ifdef GUDHI_TC_PERTURB_POSITION
-    if (m_points.empty())
+    if (m_points.empty()) {
       m_translations.clear();
-    else
+    } else {
       m_translations.resize(m_points.size(), m_k.construct_vector_d_object()(m_ambient_dim));
+    }
 #if defined(GUDHI_USE_TBB)
     delete[] m_p_perturb_mutexes;
     m_p_perturb_mutexes = new Mutex_for_perturb[m_points.size()];
@@ -622,6 +624,11 @@ class Tangential_complex {
 #endif
 
     int max_dim = -1;
+
+    // Ordered vertices to be inserted first by the create_complex method to avoid quadratic complexity.
+    std::vector<typename Simplex_tree_::Vertex_handle> vertices(m_points.size());
+    std::iota(vertices.begin(), vertices.end(), 0);
+    tree.insert_batch_vertices(vertices);
 
     // For each triangulation
     for (std::size_t idx = 0; idx < m_points.size(); ++idx) {
