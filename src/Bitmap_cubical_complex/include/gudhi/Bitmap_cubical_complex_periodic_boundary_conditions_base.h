@@ -447,6 +447,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
 
   for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
+    cell1 = cell1 % this->multipliers[i - 1];
     // this cell have a nonzero length in this direction, therefore we can compute its boundary in this direction.
     if (position % 2 == 1) {
       // if there are no periodic boundary conditions in this direction, we do not have to do anything.
@@ -490,7 +491,6 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
       }
       ++sum_of_dimensions;
     }
-    cell1 = cell1 % this->multipliers[i - 1];
   }
   return boundary_elements;
 }
@@ -503,6 +503,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
   std::size_t cell1 = cell;
   for (std::size_t i = this->multipliers.size(); i != 0; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
+    cell1 = cell1 % this->multipliers[i - 1];
     // if the cell has zero length in this direction, then it will have cbd in this direction.
     if (position % 2 == 0) {
       if (!this->directions_in_which_periodic_b_cond_are_to_be_imposed[i - 1]) {
@@ -525,8 +526,6 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
         }
       }
     }
-
-    cell1 = cell1 % this->multipliers[i - 1];
   }
   return coboundary_elements;
 }
