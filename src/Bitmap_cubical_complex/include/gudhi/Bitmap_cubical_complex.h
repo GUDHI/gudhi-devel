@@ -40,6 +40,8 @@ class is_before_in_filtration;
  * Gudhi persistent homology engine. It is a template class that inherit from its template parameter. The template
  * parameter is supposed to be either Bitmap_cubical_complex_base or
  * Bitmap_cubical_complex_periodic_boundary_conditions_base class.
+ *
+ * This class implements the concept `FilteredComplex`.
  **/
 template <typename T>
 class Bitmap_cubical_complex : public T {
@@ -61,7 +63,7 @@ class Bitmap_cubical_complex : public T {
   // TODO(PD) constructor from a vector of elements of a type T. ?
 
   /**
-   * Constructor form a Perseus-style file.
+   * @param[in] perseus_style_file The name of a \ref FileFormatsPerseus "Perseus-style file".
    **/
   Bitmap_cubical_complex(const char* perseus_style_file)
       : T(perseus_style_file), key_associated_to_simplex(this->total_number_of_cells + 1) {
@@ -78,10 +80,10 @@ class Bitmap_cubical_complex : public T {
   }
 
   /**
-   * Constructor that requires vector of elements of type unsigned, which gives number of cells,
-   * either top dimensional or vertices depending on the input flag,
-   * and vector of elements of a type T with filtration on these cells.
-   * Default value of input_top_cells is true, meaning that the given cells are top dimensional.
+   * @param[in] dimensions The shape that should be used to interpret `cells` (in Fortran order).
+   * @param[in] cells The filtration values of the top-dimensional cells if `input_top_cells` is `true`,
+   * and of the vertices otherwise.
+   * @param[in] input_top_cells If `true`, `cells` represents top-dimensional cells. If `false`, it represents vertices.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& cells,
@@ -97,11 +99,11 @@ class Bitmap_cubical_complex : public T {
   }
 
   /**
-   * Constructor that requires vector of elements of type unsigned, which gives number of top dimensional cells
-   * in the following directions and vector of element of a type Filtration_value
-   * with filtration on top dimensional cells. The last parameter of the constructor is a vector of boolean of a length
-   * equal to the dimension of cubical complex.
-   * If the position i on this vector is true, then we impose periodic boundary conditions in this direction.
+   * @param[in] dimensions The shape that should be used to interpret `cells` (in Fortran order).
+   * @param[in] cells The filtration values of the top-dimensional cells if `input_top_cells` is `true`,
+   * and of the vertices otherwise.
+   * @param[in] directions_in_which_periodic_b_cond_are_to_be_imposed Specifies for each dimension (as per `dimensions`) if the space is periodic (`true`) or not (`false`), or in other words if the boundaries should be identified.
+   * @param[in] input_top_cells If `true`, `cells` represents top-dimensional cells. If `false`, it represents vertices.
    **/
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& cells,
@@ -119,7 +121,7 @@ class Bitmap_cubical_complex : public T {
   }
 
   /**
-   * Destructor of the Bitmap_cubical_complex class.
+   * Destructor.
    **/
   virtual ~Bitmap_cubical_complex() {}
 
@@ -370,19 +372,17 @@ class Bitmap_cubical_complex : public T {
   // typedef Indexing_tag
 
   /**
-   * Function needed for compatibility with Gudhi. Not useful for other purposes.
+   * Returns the extremities of edge `e`
    **/
-  std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) {
-    std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(sh);
+  std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle e) {
+    std::vector<std::size_t> bdry = this->get_boundary_of_a_cell(e);
 #ifdef DEBUG_TRACES
-    std::clog << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle sh )\n";
+    std::clog << "std::pair<Simplex_handle, Simplex_handle> endpoints( Simplex_handle e )\n";
     std::clog << "bdry.size() : " << bdry.size() << "\n";
 #endif
-    // this method returns two first elements from the boundary of sh.
-    if (bdry.size() < 2)
+    if (bdry.size() != 2)
       throw(
-          "Error in endpoints in Bitmap_cubical_complex class. The cell have less than two elements in the "
-          "boundary.");
+          "Error in endpoints in Bitmap_cubical_complex class. The cell is not an edge.");
     return std::make_pair(bdry[0], bdry[1]);
   }
 
