@@ -11,7 +11,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "persistence_matrix"
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_LIST_SIZE 30
+#define BOOST_MPL_LIMIT_LIST_SIZE 50
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
@@ -37,20 +37,131 @@ using Gudhi::persistence_matrix::Multi_persistence_options;
 using Gudhi::persistence_matrix::Cohomology_persistence_options;
 using Gudhi::persistence_matrix::Column_types;
 
-template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
-struct test_options1 : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
+using Z5 = Zp_field_element<5>;
+using Z2 = Zp_field_element<2>;
+
+template<class Field_type, Column_types column_type>
+struct opt_bar_b : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_column_pairings = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_bar_b_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_bar : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_column_pairings = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_bar_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_rep_b : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_column_pairings = true;
+	static const bool can_retrieve_representative_cycles = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_rep_b_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+	static const bool can_retrieve_representative_cycles = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_rep : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_column_pairings = true;
+	static const bool can_retrieve_representative_cycles = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_rep_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+	static const bool can_retrieve_representative_cycles = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_b : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 };
 
-template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
-struct test_options2 : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
-	static const bool has_row_access = true;
+template<class Field_type, Column_types column_type>
+struct opt_vine_b_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_removable_columns = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_r : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_b_ii : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+	static const bool is_indexed_by_position = false;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_b_r_ii : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+	static const bool is_indexed_by_position = false;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_ii : Default_options<Field_type, column_type, false, false>{
+	static const bool is_of_boundary_type = false;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_vine_r_ii : Default_options<Field_type, column_type, false, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool has_removable_columns = true;
-	static const bool is_indexed_by_position = true;
+	static const bool has_column_pairings = true;
+	static const bool has_vine_update = true;
 };
 
 void build_boundary_matrix(std::vector<std::vector<unsigned int> >& boundaries)
@@ -72,117 +183,76 @@ void build_boundary_matrix(std::vector<std::vector<std::pair<unsigned int,Field_
 	boundaries.emplace_back();
 	boundaries.emplace_back();
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{1,Field_type(1)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{2,Field_type(1)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(4)},{2,Field_type(1)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(1)}});
+	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{1,Field_type(4)}});
+	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(4)}});
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{7,Field_type(1)}});
+	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{7,Field_type(4)}});
 }
 
-typedef boost::mpl::list<Matrix<Default_options<Zp_field_element<5> > >,
-							Matrix<Default_options<Zp_field_element<2> > >,
-							Matrix<Default_options<Zp_field_element<5>,Column_types::LIST> >,
-							Matrix<Default_options<Zp_field_element<2>,Column_types::LIST> >,
-							Matrix<Default_options<Zp_field_element<5>,Column_types::UNORDERED_SET> >,
-							Matrix<Default_options<Zp_field_element<2>,Column_types::UNORDERED_SET> >,
-							Matrix<Default_options<Zp_field_element<5>,Column_types::VECTOR> >,
-							Matrix<Default_options<Zp_field_element<2>,Column_types::VECTOR> >,
-							Matrix<Default_options<Zp_field_element<2>,Column_types::HEAP> >
-						> list_of_options_with_base_matrix;
-
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_options, Matrix, list_of_options_with_base_matrix) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
-
-	boundary_matrix ordered_boundaries;
-	build_boundary_matrix(ordered_boundaries);
-
-	Matrix mb(ordered_boundaries);
-
-	BOOST_CHECK(!mb.is_zero_cell(3,0));
-	mb.zero_cell(3,0);
-	BOOST_CHECK(mb.is_zero_cell(3,0));
-
-	BOOST_CHECK(!mb.is_zero_column(6));
-	mb.zero_column(6);
-	BOOST_CHECK(mb.is_zero_column(6));
-}
-
-typedef boost::mpl::list<Matrix<Zigzag_options<> >,
-							Matrix<Zigzag_options<Column_types::LIST> >,
-
-							Matrix<Cohomology_persistence_options<Zp_field_element<5> > >,
-							Matrix<Cohomology_persistence_options<Zp_field_element<2> > >,
-
-							Matrix<test_options2<> >,
-							Matrix<test_options2<Column_types::LIST> >
-						> list_of_options_with_row_access_and_remove;
-
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Row_access_and_removable_columns_options, Matrix, list_of_options_with_row_access_and_remove) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
-
-	boundary_matrix ordered_boundaries;
-	build_boundary_matrix(ordered_boundaries);
-	ordered_boundaries.pop_back();
-	ordered_boundaries.pop_back();
-
-	Matrix mb(ordered_boundaries);
-
-	BOOST_CHECK_EQUAL(mb.get_row(0).size(), 3);
-	unsigned int i = 0;
-	for (auto& c : mb.get_row(0)){
-		BOOST_CHECK_EQUAL(c.get_row_index(), 0);
-		BOOST_CHECK_EQUAL(c.get_column_index(), i++);
-	}
-
-	BOOST_CHECK_EQUAL(mb.get_max_dimension(), 2);
-	if constexpr (Matrix::Option_list::has_vine_update){
-		const auto& barcode = mb.get_current_barcode();
-		BOOST_CHECK_EQUAL(barcode.back().death, 6);
-	}
-	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
-	mb.erase_last();
-	BOOST_CHECK_EQUAL(mb.get_max_dimension(), 1);
-	if constexpr (Matrix::Option_list::has_vine_update){
-		const auto& barcode2 = mb.get_current_barcode();
-		BOOST_CHECK_EQUAL(barcode2.back().death, -1);
-	}
-	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 6);
-}
-
-typedef boost::mpl::list<Matrix<Representative_cycles_options<Zp_field_element<5> > >,
-							Matrix<Representative_cycles_options<Zp_field_element<2> > >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::LIST> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::LIST> >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::UNORDERED_SET> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::UNORDERED_SET> >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::VECTOR> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::VECTOR> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::HEAP> >,
-
-							Matrix<Multi_persistence_options<> >,
-							Matrix<Multi_persistence_options<Column_types::LIST> >,
-							Matrix<Multi_persistence_options<Column_types::UNORDERED_SET> >,
-							Matrix<Multi_persistence_options<Column_types::VECTOR> >,
-							Matrix<Multi_persistence_options<Column_types::HEAP> >,
-
-							Matrix<Zigzag_options<> >,
-							Matrix<Zigzag_options<Column_types::LIST> >,
-
-							Matrix<test_options1<> >,
-							Matrix<test_options1<Column_types::LIST> >,
-							Matrix<test_options1<Column_types::UNORDERED_SET> >,
-							Matrix<test_options1<Column_types::VECTOR> >,
-							Matrix<test_options1<Column_types::HEAP> >,
-
-							Matrix<test_options2<> >,
-							Matrix<test_options2<Column_types::LIST> >
+typedef boost::mpl::list<Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_b<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_b<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_bar_b<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_b<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_r<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_bar_b<Z2,Column_types::SET> >,
+							Matrix<opt_bar_b<Z5,Column_types::SET> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::SET> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::SET> >,
+							Matrix<opt_bar<Z2,Column_types::SET> >,
+							Matrix<opt_bar<Z5,Column_types::SET> >,
+							Matrix<opt_bar_r<Z2,Column_types::SET> >,
+							Matrix<opt_bar_r<Z5,Column_types::SET> >,
+							Matrix<opt_bar_b<Z2,Column_types::VECTOR> >,
+							Matrix<opt_bar_b<Z5,Column_types::VECTOR> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_bar<Z2,Column_types::VECTOR> >,
+							Matrix<opt_bar<Z5,Column_types::VECTOR> >,
+							Matrix<opt_bar_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_bar_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_bar_b<Z2,Column_types::LIST> >,
+							Matrix<opt_bar_b<Z5,Column_types::LIST> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::LIST> >,
+							Matrix<opt_bar_b_r<Z5,Column_types::LIST> >,
+							Matrix<opt_bar<Z2,Column_types::LIST> >,
+							Matrix<opt_bar<Z5,Column_types::LIST> >,
+							Matrix<opt_bar_r<Z2,Column_types::LIST> >,
+							Matrix<opt_bar_r<Z5,Column_types::LIST> >,
+							Matrix<opt_bar_b<Z2,Column_types::HEAP> >,
+							Matrix<opt_bar_b_r<Z2,Column_types::HEAP> >
 						> list_of_options_with_barcode_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barcode_access) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
+	struct BarComp : std::binary_function<const std::tuple<int,int,int>&, const std::tuple<int,int,int>&, bool> {
+		bool operator()(const std::tuple<int,int,int>& c1, const std::tuple<int,int,int>& c2) const
+		{
+			if (std::get<0>(c1) == std::get<0>(c2))
+				return std::get<1>(c1) < std::get<1>(c2);
+			return std::get<0>(c1) < std::get<0>(c2);
+		}
+	};
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -190,56 +260,102 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barc
 	Matrix mb(ordered_boundaries);
 
 	const auto& barcode = mb.get_current_barcode();
-	auto it = barcode.begin();
-	BOOST_CHECK_EQUAL(it->dim, 0);
-	BOOST_CHECK_EQUAL(it->birth, 0);
-	BOOST_CHECK_EQUAL(it->death, -1);
+	std::set<std::tuple<int,int,int>,BarComp> bars;
+	//bars are not ordered the same for base matrices
+	for (auto it = barcode.begin(); it != barcode.end(); ++it){
+		bars.emplace(it->dim, it->birth, it->death);
+	}
+	auto it = bars.begin();
+	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(*it), 0);
+	BOOST_CHECK_EQUAL(std::get<2>(*it), -1);
 	++it;
-	BOOST_CHECK_EQUAL(it->dim, 0);
-	BOOST_CHECK_EQUAL(it->birth, 1);
-	BOOST_CHECK_EQUAL(it->death, 3);
+	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(*it), 1);
+	BOOST_CHECK_EQUAL(std::get<2>(*it), 3);
 	++it;
-	BOOST_CHECK_EQUAL(it->dim, 0);
-	BOOST_CHECK_EQUAL(it->birth, 2);
-	BOOST_CHECK_EQUAL(it->death, 4);
+	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(*it), 2);
+	BOOST_CHECK_EQUAL(std::get<2>(*it), 4);
 	++it;
-	BOOST_CHECK_EQUAL(it->dim, 1);
-	BOOST_CHECK_EQUAL(it->birth, 5);
-	BOOST_CHECK_EQUAL(it->death, 6);
+	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+	BOOST_CHECK_EQUAL(std::get<1>(*it), 7);
+	BOOST_CHECK_EQUAL(std::get<2>(*it), 8);
 	++it;
-	BOOST_CHECK_EQUAL(it->dim, 0);
-	BOOST_CHECK_EQUAL(it->birth, 7);
-	BOOST_CHECK_EQUAL(it->death, 8);
+	BOOST_CHECK_EQUAL(std::get<0>(*it), 1);
+	BOOST_CHECK_EQUAL(std::get<1>(*it), 5);
+	BOOST_CHECK_EQUAL(std::get<2>(*it), 6);
 	++it;
-	BOOST_CHECK(it == barcode.end());
+	BOOST_CHECK(it == bars.end());
 
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 3);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 4);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(5), 6);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(7), 8);
+		BOOST_CHECK_EQUAL(mb.get_pivot(3), 1);
+		BOOST_CHECK_EQUAL(mb.get_pivot(4), 2);
+		BOOST_CHECK_EQUAL(mb.get_pivot(6), 5);
+		BOOST_CHECK_EQUAL(mb.get_pivot(8), 7);
 	} else {
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(0), 0);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 1);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 2);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(3), 3);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(4), 4);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(5), 5);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(6), 6);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(7), 7);
-		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(8), 8);
+		BOOST_CHECK_EQUAL(mb.get_pivot(0), 0);
+		BOOST_CHECK_EQUAL(mb.get_pivot(1), 1);
+		BOOST_CHECK_EQUAL(mb.get_pivot(2), 2);
+		BOOST_CHECK_EQUAL(mb.get_pivot(3), 3);
+		BOOST_CHECK_EQUAL(mb.get_pivot(4), 4);
+		BOOST_CHECK_EQUAL(mb.get_pivot(5), 5);
+		BOOST_CHECK_EQUAL(mb.get_pivot(6), 6);
+		BOOST_CHECK_EQUAL(mb.get_pivot(7), 7);
+		BOOST_CHECK_EQUAL(mb.get_pivot(8), 8);
 	}
 }
 
-typedef boost::mpl::list<Matrix<Representative_cycles_options<Zp_field_element<5> > >,
-							Matrix<Representative_cycles_options<Zp_field_element<2> > >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::LIST> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::LIST> >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::UNORDERED_SET> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::UNORDERED_SET> >,
-							Matrix<Representative_cycles_options<Zp_field_element<5>,Column_types::VECTOR> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::VECTOR> >,
-							Matrix<Representative_cycles_options<Zp_field_element<2>,Column_types::HEAP> >
+typedef boost::mpl::list<Matrix<opt_rep_b<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_b<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_rep_b<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_b<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_rep_b<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_b<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_r<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_rep_b<Z2,Column_types::SET> >,
+							Matrix<opt_rep_b<Z5,Column_types::SET> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::SET> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::SET> >,
+							Matrix<opt_rep<Z2,Column_types::SET> >,
+							Matrix<opt_rep<Z5,Column_types::SET> >,
+							Matrix<opt_rep_r<Z2,Column_types::SET> >,
+							Matrix<opt_rep_r<Z5,Column_types::SET> >,
+							Matrix<opt_rep_b<Z2,Column_types::VECTOR> >,
+							Matrix<opt_rep_b<Z5,Column_types::VECTOR> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_rep<Z2,Column_types::VECTOR> >,
+							Matrix<opt_rep<Z5,Column_types::VECTOR> >,
+							Matrix<opt_rep_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_rep_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_rep_b<Z2,Column_types::LIST> >,
+							Matrix<opt_rep_b<Z5,Column_types::LIST> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::LIST> >,
+							Matrix<opt_rep_b_r<Z5,Column_types::LIST> >,
+							Matrix<opt_rep<Z2,Column_types::LIST> >,
+							Matrix<opt_rep<Z5,Column_types::LIST> >,
+							Matrix<opt_rep_r<Z2,Column_types::LIST> >,
+							Matrix<opt_rep_r<Z5,Column_types::LIST> >,
+							Matrix<opt_rep_b<Z2,Column_types::HEAP> >,
+							Matrix<opt_rep_b_r<Z2,Column_types::HEAP> >
 						> list_of_options_with_rep_cycles;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_options, Matrix, list_of_options_with_rep_cycles) {
@@ -257,35 +373,74 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_options, Matrix, list_of_opti
 	BOOST_CHECK_EQUAL(cycles.size(), 5);
 	for (auto& cycle : cycles){
 		BOOST_CHECK(cycle == mb.get_representative_cycle(*it));
+//		for (auto v : cycle) std::cout << v << " ";
+//		std::cout << "\n";
 		++it;
 	}
 
-	std::vector<unsigned int> tmp;
-	tmp.push_back(0);
-	BOOST_CHECK(cycles[0] == tmp);
-	tmp[0] = 1;
-	BOOST_CHECK(cycles[1] == tmp);
-	tmp[0] = 2;
-	BOOST_CHECK(cycles[2] == tmp);
-	tmp[0] = 3;
-	tmp.push_back(4);
-	tmp.push_back(5);
-	BOOST_CHECK(cycles[3] == tmp);
-	tmp.clear();
-	tmp.push_back(7);
-	BOOST_CHECK(cycles[4] == tmp);
+	if constexpr (Matrix::Option_list::is_of_boundary_type){
+		std::vector<unsigned int> tmp;
+		tmp.push_back(0);
+		BOOST_CHECK(cycles[0] == tmp);
+		tmp[0] = 1;
+		BOOST_CHECK(cycles[1] == tmp);
+		tmp[0] = 2;
+		BOOST_CHECK(cycles[2] == tmp);
+		tmp[0] = 3;
+		tmp.push_back(4);
+		tmp.push_back(5);
+		BOOST_CHECK(cycles[3] == tmp);
+		tmp.clear();
+		tmp.push_back(7);
+		BOOST_CHECK(cycles[4] == tmp);
+	} else {
+		std::vector<unsigned int> tmp;
+		tmp.push_back(0);
+		BOOST_CHECK(cycles[0] == tmp);
+		tmp.push_back(1);
+		BOOST_CHECK(cycles[1] == tmp);
+		tmp[1] = 2;
+		BOOST_CHECK(cycles[2] == tmp);
+		tmp[0] = 3;
+		tmp[1] = 4;
+		tmp.push_back(5);
+		BOOST_CHECK(cycles[3] == tmp);
+		tmp[0] = 0;
+		tmp[1] = 7;
+		tmp.pop_back();
+		BOOST_CHECK(cycles[4] == tmp);
+	}
 }
 
-typedef boost::mpl::list<Matrix<Multi_persistence_options<> >,
-							Matrix<Multi_persistence_options<Column_types::LIST> >,
-							Matrix<Multi_persistence_options<Column_types::UNORDERED_SET> >,
-							Matrix<Multi_persistence_options<Column_types::VECTOR> >,
-							Matrix<Multi_persistence_options<Column_types::HEAP> >,
-							Matrix<test_options2<> >,
-							Matrix<test_options2<Column_types::LIST> >
-						> list_of_matrix_options_with_vine_and_position_index;
+typedef boost::mpl::list<Matrix<opt_vine_b<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_b<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_b<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_b<Z2,Column_types::SET> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::SET> >,
+							Matrix<opt_vine_b<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_b<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_b<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_ii<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_ii<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_ii<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_ii<Z2,Column_types::SET> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::SET> >,
+							Matrix<opt_vine_ii<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_ii<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_r_ii<Z2,Column_types::LIST> >
+						> list_of_options_with_vine_and_position_index;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matrix, list_of_matrix_options_with_vine_and_position_index) {
+BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_position_indexing, Matrix, list_of_options_with_vine_and_position_index) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
 
 	boundary_matrix ordered_boundaries;
@@ -293,7 +448,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 
 	Matrix mb(ordered_boundaries);
 	bool change;
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 3);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 4);
@@ -338,7 +493,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 	BOOST_CHECK_EQUAL(it->death, 8);
 	++it;
 	BOOST_CHECK(it == barcode.end());
-
+//mb.print();
 	change = mb.vine_swap(6);
 	BOOST_CHECK(change);
 	change = mb.vine_swap(5);
@@ -349,7 +504,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 	BOOST_CHECK(change);
 	change = mb.vine_swap(7);
 	BOOST_CHECK(change);
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 4);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 5);
@@ -396,7 +551,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 
 	change = mb.vine_swap(0);
 	BOOST_CHECK(!change);
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 4);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 5);
@@ -443,7 +598,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 
 	change = mb.vine_swap_with_z_eq_1_case(4);
 	BOOST_CHECK(change);
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 5);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 4);
@@ -490,7 +645,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 
 	change = mb.vine_swap(5);
 	BOOST_CHECK(!change);
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 5);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 4);
@@ -537,7 +692,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 
 	change = mb.vine_swap_with_z_eq_1_case(6);
 	BOOST_CHECK(change);
-
+//mb.print();
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(1), 5);
 		BOOST_CHECK_EQUAL(mb.get_column_with_pivot(2), 4);
@@ -581,16 +736,35 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_vine_option_with_position_indexing, Matri
 	BOOST_CHECK_EQUAL(it->death, 6);
 	++it;
 	BOOST_CHECK(it == barcode.end());
+//	mb.print();
 }
 
-typedef boost::mpl::list<Matrix<Zigzag_options<> >,
-							Matrix<Zigzag_options<Column_types::LIST> >,
-
-							Matrix<test_options1<> >,
-							Matrix<test_options1<Column_types::LIST> >,
-							Matrix<test_options1<Column_types::UNORDERED_SET> >,
-							Matrix<test_options1<Column_types::VECTOR> >,
-							Matrix<test_options1<Column_types::HEAP> >
+typedef boost::mpl::list<Matrix<opt_vine_b_ii<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::SET> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::SET> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_vine<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_vine<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_vine<Z2,Column_types::SET> >,
+							Matrix<opt_vine_r<Z2,Column_types::SET> >,
+							Matrix<opt_vine<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_vine<Z2,Column_types::LIST> >,
+							Matrix<opt_vine_r<Z2,Column_types::LIST> >
 						> list_of_options_with_vine_and_id_index;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing, Matrix, list_of_options_with_vine_and_id_index) {
@@ -890,4 +1064,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing, Matrix, list_of_opti
 	++it;
 	BOOST_CHECK(it == barcode.end());
 }
+
+//TODO: test row access after operations
 

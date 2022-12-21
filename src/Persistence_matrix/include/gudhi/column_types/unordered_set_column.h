@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef UNORDEREDSETCOLUMN_H
-#define UNORDEREDSETCOLUMN_H
+#ifndef UNORDERED_SET_COLUMN_H
+#define UNORDERED_SET_COLUMN_H
 
 #include <iostream>
 #include <list>
@@ -23,32 +23,36 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Field_element_type, class Column_pairing_option>
-class Unordered_set_column : public Column_pairing_option
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+class Unordered_set_column : public Column_pairing_option, public Row_access_option
 {
 public:
-	using Cell = Base_cell<Field_element_type>;
-	using iterator = typename std::unordered_set<Cell>::iterator;
-	using const_iterator = typename std::unordered_set<Cell>::const_iterator;
+//	using Cell = Base_cell<Field_element_type>;
+	using Cell = Cell_type;
+	using Column_type = std::unordered_set<Cell>;
+	using iterator = typename Column_type::iterator;
+	using const_iterator = typename Column_type::const_iterator;
 
 	Unordered_set_column();
-	template<class Boundary_type>
-	Unordered_set_column(const Boundary_type& boundary);
-	template<class Boundary_type>
-	Unordered_set_column(const Boundary_type& boundary, dimension_type dimension);
-//	Unordered_set_column(Unordered_set_column& column);
+	template<class Container_type>
+	Unordered_set_column(const Container_type& nonZeroRowIndices);
+	template<class Container_type>
+	Unordered_set_column(const Container_type& nonZeroRowIndices, dimension_type dimension);
+	template<class Row_container_type>
+	Unordered_set_column(index columnIndex, Row_container_type &rowContainer);
+	template<class Container_type, class Row_container_type>
+	Unordered_set_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);
+	template<class Container_type, class Row_container_type>
+	Unordered_set_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Unordered_set_column(const Unordered_set_column& column);
+	Unordered_set_column(const Unordered_set_column& column, index columnIndex);
 	Unordered_set_column(Unordered_set_column&& column) noexcept;
+	~Unordered_set_column();
 
 	std::vector<Field_element_type> get_content(unsigned int columnLength) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty() const;
 	dimension_type get_dimension() const;
-	int get_pivot();
-	Field_element_type get_pivot_value();
-	void clear();
-	void clear(index rowIndex);
-	void reorder(std::vector<index>& valueMap);
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -74,245 +78,268 @@ public:
 
 	friend void swap(Unordered_set_column& col1,
 					 Unordered_set_column& col2){
+		swap(static_cast<Column_pairing_option&>(col1),
+			 static_cast<Column_pairing_option&>(col2));
+		swap(static_cast<Row_access_option&>(col1),
+			 static_cast<Row_access_option&>(col2));
 		std::swap(col1.dim_, col2.dim_);
 		col1.column_.swap(col2.column_);
-		std::swap(col1.pivotChanged_, col2.pivotChanged_);
-		std::swap(col1.pivot_, col2.pivot_);
 	}
 
-private:
+protected:
 	int dim_;
-	std::unordered_set<Cell> column_;
-	bool pivotChanged_;
-	Cell pivot_;
+	Column_type column_;
+
+	void _delete_cell(iterator& it);
+	void _insert_cell(const Field_element_type& value, index rowIndex);
 };
 
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column()
-	: dim_(0), pivotChanged_(false)
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column()
+	: dim_(0)
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(const Container_type &rows)
+	: dim_(rows.size() == 0 ? 0 : rows.size() - 1),
+	  column_(rows.size())
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+
+	for (const std::pair<index,Field_element_type>& p : rows){
+		_insert_cell(p.second, p.first);
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(const Container_type &rows, dimension_type dimension)
+	: dim_(dimension),
+	  column_(rows.size())
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+
+	for (const std::pair<index,Field_element_type>& p : rows){
+		_insert_cell(p.second, p.first);
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Row_container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(
+		index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(0)
 {}
 
-template<class Field_element_type, class Column_pairing_option>
-template<class Boundary_type>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(const Boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary.size()),
-	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type, class Row_container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(
+		index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
-	for (const std::pair<index,Field_element_type>& p : boundary){
-		column_.emplace(p.second, p.first);
+	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+		_insert_cell(p.second, p.first);
 	}
 }
 
-template<class Field_element_type, class Column_pairing_option>
-template<class Boundary_type>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(const Boundary_type &boundary, dimension_type dimension)
-	: dim_(dimension),
-	  column_(boundary.size()),
-	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type, class Row_container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(
+		index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(dimension)
 {
-	for (const std::pair<index,Field_element_type>& p : boundary){
-		column_.emplace(p.second, p.first);
+	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+		_insert_cell(p.second, p.first);
 	}
 }
 
-//template<class Field_element_type, class Column_pairing_option>
-//inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(Unordered_set_column &column)
-//	: Column_pairing_option(column),
-//	  dim_(column.dim_),
-//	  column_(column.column_),
-//	  pivotChanged_(column.pivotChanged_),
-//	  pivot_(column.pivot_)
-//{}
-
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(const Unordered_set_column &column)
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(const Unordered_set_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
-	  column_(column.column_),
-	  pivotChanged_(column.pivotChanged_),
-	  pivot_(column.pivot_)
-{}
+	  column_(column.column_)
+{
+	static_assert(!Row_access_option::isActive_,
+			"Copy constructor not available when row access option enabled.");
+}
 
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option>::Unordered_set_column(Unordered_set_column &&column) noexcept
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(
+		const Unordered_set_column &column, index columnIndex)
+	: Column_pairing_option(column),
+	  Row_access_option(columnIndex, *column.rows_),
+	  dim_(column.dim_)
+{
+	for (const Cell& cell : column.column_){
+		_insert_cell(cell.get_element(), cell.get_row_index());
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_column(Unordered_set_column &&column) noexcept
 	: Column_pairing_option(std::move(column)),
+	  Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
-	  column_(std::move(column.column_)),
-	  pivotChanged_(std::exchange(column.pivotChanged_, 0)),
-	  pivot_(std::move(column.pivot_))
+	  column_(std::move(column.column_))
 {}
 
-template<class Field_element_type, class Column_pairing_option>
-inline std::vector<Field_element_type> Unordered_set_column<Field_element_type,Column_pairing_option>::get_content(unsigned int columnLength) const
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::~Unordered_set_column()
+{
+	if constexpr (Row_access_option::isActive_){
+		for (const Cell& cell : column_)
+			Row_access_option::unlink(cell);
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline std::vector<Field_element_type> Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_content(unsigned int columnLength) const
 {
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = it->get_element();
+	for (auto it = column_.begin(); it != column_.end(); ++it){
+		if (it->get_row_index() < columnLength)
+			container[it->get_row_index()] = it->get_element();
 	}
 	return container;
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline bool Unordered_set_column<Field_element_type,Column_pairing_option>::is_non_zero(index rowIndex) const
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline bool Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::is_non_zero(index rowIndex) const
 {
-	return column_.find(Cell(0, rowIndex)) != column_.end();
+	if constexpr (Row_access_option::isActive_){
+		return column_.find(Cell(0, Row_access_option::columnIndex_, rowIndex)) != column_.end();
+	} else {
+		return column_.find(Cell(0, rowIndex)) != column_.end();
+	}
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline bool Unordered_set_column<Field_element_type,Column_pairing_option>::is_empty() const
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline bool Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::is_empty() const
 {
 	return column_.empty();
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline dimension_type Unordered_set_column<Field_element_type,Column_pairing_option>::get_dimension() const
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline dimension_type Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_dimension() const
 {
 	return dim_;
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline int Unordered_set_column<Field_element_type,Column_pairing_option>::get_pivot()
-{
-	if (pivotChanged_){
-		pivot_ = column_.size() == 0 ?
-					Cell()
-				  : *std::max_element(column_.begin(), column_.end());
-		pivotChanged_ = false;
-	}
-
-	if (pivot_.get_element() == 0u) return -1;
-	return pivot_.get_row_index();
-}
-
-template<class Field_element_type, class Column_pairing_option>
-inline Field_element_type Unordered_set_column<Field_element_type,Column_pairing_option>::get_pivot_value()
-{
-	if (pivotChanged_){
-		pivot_ = column_.size() == 0 ?
-					Cell()
-				  : *std::max_element(column_.begin(), column_.end());
-		pivotChanged_ = false;
-	}
-
-	return pivot_.get_element();
-}
-
-template<class Field_element_type, class Column_pairing_option>
-inline void Unordered_set_column<Field_element_type,Column_pairing_option>::clear()
-{
-	column_.clear();
-	pivot_ = Cell();
-	pivotChanged_ = false;
-}
-
-template<class Field_element_type, class Column_pairing_option>
-inline void Unordered_set_column<Field_element_type,Column_pairing_option>::clear(index rowIndex)
-{
-	column_.erase(Cell(0, rowIndex));
-	if (rowIndex == pivot_.get_row_index()) pivotChanged_ = true;
-}
-
-template<class Field_element_type, class Column_pairing_option>
-inline void Unordered_set_column<Field_element_type,Column_pairing_option>::reorder(std::vector<index> &valueMap)
-{
-	std::unordered_set<Cell> newSet;
-	for (const Cell& v : column_) newSet.insert(Cell(v.get_element(), valueMap[v.get_row_index()]));
-	column_.swap(newSet);
-	pivotChanged_ = true;
-}
-
-template<class Field_element_type, class Column_pairing_option>
-inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::iterator
-Unordered_set_column<Field_element_type,Column_pairing_option>::begin() noexcept
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::iterator
+Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::begin() noexcept
 {
 	return column_.begin();
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::const_iterator
-Unordered_set_column<Field_element_type,Column_pairing_option>::begin() const noexcept
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_iterator
+Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::begin() const noexcept
 {
 	return column_.begin();
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::iterator
-Unordered_set_column<Field_element_type,Column_pairing_option>::end() noexcept
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::iterator
+Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::end() noexcept
 {
 	return column_.end();
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline typename Unordered_set_column<Field_element_type,Column_pairing_option>::const_iterator
-Unordered_set_column<Field_element_type,Column_pairing_option>::end() const noexcept
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_iterator
+Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::end() const noexcept
 {
 	return column_.end();
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator+=(Unordered_set_column const &column)
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator+=(Unordered_set_column const &column)
 {
 	for (const Cell& v : column.column_){
 		auto c = column_.find(v);
 		if (c != column_.end()){
-			Cell newCell(*c);
-			newCell.get_element() += v.get_element();
-			column_.erase(c);
-			if (newCell.get_element() != 0u) column_.insert(newCell);
-			if (v == pivot_) pivotChanged_ = true;
-		} else {
-			column_.insert(v);
-			if (pivot_ < v){
-				pivot_ = v;
-				pivotChanged_ = false;
-			}
-		}
+			index r = c->get_row_index();
+			Field_element_type coef = c->get_element();
+			coef += v.get_element();
+			_delete_cell(c);
+			if (coef != 0u) _insert_cell(coef, r);
+		} else
+			_insert_cell(v.get_element(), v.get_row_index());
 	}
 
 	return *this;
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator*=(unsigned int v)
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
+	if constexpr (Row_access_option::isActive_){
+		for (const Cell& cell : column_)
+			Row_access_option::unlink(cell);
+	}
+
 	if (v == 0) {
 		column_.clear();
-		pivot_ = Cell();
-		pivotChanged_ = false;
 		return *this;
 	}
 
-	std::unordered_set<Cell> newColumn;
+	Column_type newColumn;
 
 	for (const Cell& cell : column_){
 		Cell newCell(cell);
 		newCell.get_element() *= v;
-		newColumn.insert(newCell);
+
+		if constexpr (Row_access_option::isActive_){
+			auto it = newColumn.insert(newCell);
+			Row_access_option::insert_cell(newCell.get_row_index(), *it.first);
+		} else {
+			newColumn.insert(newCell);
+		}
 	}
 
 	column_.swap(newColumn);
 
-	pivot_.get_element() *= v;
-
 	return *this;
 }
 
-template<class Field_element_type, class Column_pairing_option>
-inline Unordered_set_column<Field_element_type,Column_pairing_option> &Unordered_set_column<Field_element_type,Column_pairing_option>::operator=(Unordered_set_column other)
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator=(Unordered_set_column other)
 {
+	static_assert (!Row_access_option::isActive_, "= assignement not enabled with row access option.");
+
+	Column_pairing_option::operator=(other);
 	std::swap(dim_, other.dim_);
 	column_.swap(other.column_);
-	std::swap(pivotChanged_, other.pivotChanged_);
-	std::swap(pivot_, other.pivot_);
 	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline void Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::_delete_cell(iterator &it)
+{
+	if constexpr (Row_access_option::isActive_)
+		Row_access_option::unlink(*it);
+	column_.erase(it);
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline void Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::_insert_cell(
+		const Field_element_type &value, index rowIndex)
+{
+	if constexpr (Row_access_option::isActive_){
+		auto it = column_.emplace(value, Row_access_option::columnIndex_, rowIndex);
+		Row_access_option::insert_cell(rowIndex, *it.first);
+	} else {
+		column_.emplace(value, rowIndex);
+	}
 }
 
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // UNORDEREDSETCOLUMN_H
+#endif // UNORDERED_SET_COLUMN_H

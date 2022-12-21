@@ -231,7 +231,7 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 {
 	index pos = matrix_.get_column_with_pivot(simplexIndex);
 	unsigned int i = 0;
-	while (columnIDToPosition_[i] != pos) ++i;
+	while (columnIDToPosition_.at(i) != pos) ++i;
 	return i;
 }
 

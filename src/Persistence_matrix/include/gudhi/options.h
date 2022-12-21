@@ -26,7 +26,9 @@ enum Column_types {
 	SET,
 	HEAP,
 	VECTOR,
-	UNORDERED_SET
+	UNORDERED_SET,
+	INTRUSIVE_LIST,
+	INTRUSIVE_SET
 };
 
 template<class Field_type = Z2_field_element, Column_types col_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
@@ -37,7 +39,8 @@ struct Default_options{
 	static const bool is_separated_by_dimension = separated_by_dimension;	//not implemented yet
 	static const bool is_parallelizable = parallelizable;					//not implemented yet
 
-	static const bool has_row_access = false;								//access not implemented for boundary type matrices, option without access not implemented for chain type matrices
+	static const bool has_row_access = false;
+	static const bool has_intrusive_rows = true;							//ignored if has_row_access = false
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
@@ -45,7 +48,7 @@ struct Default_options{
 	static const bool is_double_linked = true;								//single link not implemented yet. usefull?
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = false;
-	static const bool is_indexed_by_position = false;					//not implemented yet
+	static const bool is_indexed_by_position = true;
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
@@ -54,6 +57,7 @@ struct Zigzag_options : Default_options<Z2_field_element, column_type, separated
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
 };
 
@@ -61,14 +65,12 @@ template<class Field_type = Z2_field_element, Column_types column_type = Column_
 struct Representative_cycles_options : Default_options<Field_type, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
-	static const bool is_indexed_by_position = true;
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>
 struct Multi_persistence_options : Default_options<Z2_field_element, column_type, separated_by_dimension, parallelizable>{
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
-	static const bool is_indexed_by_position = true;
 };
 
 template<class Field_type = Z2_field_element>
@@ -76,6 +78,7 @@ struct Cohomology_persistence_options : Default_options<Field_type, Column_types
 	static const bool has_row_access = true;
 	//static const bool has_column_compression = true;
 	static const bool is_of_boundary_type = false;
+	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
 };
 

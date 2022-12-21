@@ -35,6 +35,7 @@ public:
 	Base_matrix(unsigned int numberOfColumns);
 	Base_matrix(const Base_matrix& matrixToCopy);
 	Base_matrix(Base_matrix&& other) noexcept;
+//	~Base_matrix(){std::cout << "base matrix destr: " << maxDim_ << ", " << matrix_.size() << "\n";};
 
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);

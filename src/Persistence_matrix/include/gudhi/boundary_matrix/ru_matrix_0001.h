@@ -77,7 +77,7 @@ private:
 	using swap_opt = typename Master_matrix::RU_vine_swap_option;
 	using pair_opt = typename Master_matrix::RU_pairing_option;
 	using rep_opt = typename Master_matrix::RU_representative_cycles_option;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 

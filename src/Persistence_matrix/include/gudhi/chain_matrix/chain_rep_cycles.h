@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "../utilities/utilities.h"  //type definitions
+#include "../options.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -46,8 +47,6 @@ public:
 	}
 
 protected:
-	using column_type = typename Master_matrix::Column_type;
-
 	static constexpr bool isActive_ = true;
 
 private:
@@ -86,12 +85,14 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 	representativeCycles_.clear();
 
 	for (index i = 0; i < matrix_->size(); i++){
-		column_type &col = matrix_->at(pivotToPosition_->at(i));
+		auto &col = matrix_->at(pivotToPosition_->at(i));
 		if (!col.is_paired() || i < col.get_paired_chain_index()){
 			cycle_type cycle;
-			for (typename column_type::Cell c : col){
+			for (auto& c : col){
 				cycle.push_back(c.get_row_index());
 			}
+			if constexpr (Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)
+					std::sort(cycle.begin(), cycle.end());
 			representativeCycles_.push_back(cycle);
 			birthToCycle_[i] = representativeCycles_.size() - 1;
 		}

@@ -8,12 +8,14 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef Z2_VECTORCOLUMN_H
-#define Z2_VECTORCOLUMN_H
+#ifndef Z2_VECTOR_COLUMN_H
+#define Z2_VECTOR_COLUMN_H
 
 #include <iostream>
 #include <list>
 #include <unordered_set>
+
+#include <boost/iterator/indirect_iterator.hpp>
 
 #include "../utilities/utilities.h"
 #include "cell.h"
@@ -21,312 +23,372 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Column_pairing_option>
-class Z2_vector_column : public Column_pairing_option
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+class Z2_vector_column : public Column_pairing_option, public Row_access_option
 {
 public:
-	using Cell = Z2_base_cell;
-	using iterator = typename std::vector<Cell>::iterator;
-	using const_iterator = typename std::vector<Cell>::const_iterator;
+//	using Cell = Z2_base_cell;
+	using Cell = Cell_type;
+	using Column_type = std::vector<Cell*>;
+	using iterator = boost::indirect_iterator<typename Column_type::iterator>;
+	using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
 
 	Z2_vector_column();
-	template<class Boundary_type>
-	Z2_vector_column(const Boundary_type& boundary);
-	template<class Boundary_type>
-	Z2_vector_column(const Boundary_type& boundary, dimension_type dimension);
-//	Z2_vector_column(Z2_vector_column& column);
+	template<class Container_type>
+	Z2_vector_column(const Container_type& nonZeroRowIndices);
+	template<class Container_type>
+	Z2_vector_column(const Container_type& nonZeroRowIndices, dimension_type dimension);
+	template<class Row_container_type>
+	Z2_vector_column(index columnIndex, Row_container_type &rowContainer);
+	template<class Container_type, class Row_container_type>
+	Z2_vector_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);
+	template<class Container_type, class Row_container_type>
+	Z2_vector_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_vector_column(const Z2_vector_column& column);
+	Z2_vector_column(const Z2_vector_column& column, index columnIndex);
 	Z2_vector_column(Z2_vector_column&& column) noexcept;
+	~Z2_vector_column();
 
 	std::vector<bool> get_content(unsigned int columnLength);
 	bool is_non_zero(index rowIndex) const;
-	bool is_empty();
+	bool is_empty() const;
 	dimension_type get_dimension() const;
-	int get_pivot();
-	void clear();
-	void clear(index rowIndex);
-	void reorder(std::vector<index>& valueMap);
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
 	iterator end() noexcept;
 	const_iterator end() const noexcept;
 
-	Z2_vector_column& operator+=(Z2_vector_column &column);
-	friend Z2_vector_column operator+(Z2_vector_column column1, Z2_vector_column& column2){
+	Z2_vector_column& operator+=(Z2_vector_column const &column);
+	friend Z2_vector_column operator+(Z2_vector_column column1, Z2_vector_column const &column2){
 		column1 += column2;
 		return column1;
+	}
+
+	Z2_vector_column& operator*=(unsigned int v);
+	friend Z2_vector_column operator*(Z2_vector_column column, unsigned int const& v){
+		column *= v;
+		return column;
+	}
+	friend Z2_vector_column operator*(unsigned int const& v, Z2_vector_column column){
+		column *= v;
+		return column;
 	}
 
 	Z2_vector_column& operator=(Z2_vector_column other);
 
 	friend void swap(Z2_vector_column& col1, Z2_vector_column& col2){
+		swap(static_cast<Column_pairing_option&>(col1),
+			 static_cast<Column_pairing_option&>(col2));
+		swap(static_cast<Row_access_option&>(col1),
+			 static_cast<Row_access_option&>(col2));
 		std::swap(col1.dim_, col2.dim_);
 		col1.column_.swap(col2.column_);
-		col1.erasedValues_.swap(col2.erasedValues_);
 	}
 
-private:
-	int dim_;
-	std::vector<Cell> column_;
-	std::unordered_set<unsigned int> erasedValues_;
+protected:
+	using real_iterator = typename Column_type::iterator;
+	using real_const_iterator = typename Column_type::const_iterator;
 
-	void _cleanValues();
+	int dim_;
+	Column_type column_;
+
+	void _delete_cell(Cell* cell);
+	void _insert_cell(index rowIndex, Column_type& column);
+	void _update_cell(index rowIndex, index position);
 };
 
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column() : dim_(0)
-{}
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column() : dim_(0)
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+}
 
-template<class Column_pairing_option>
-template<class Boundary_type>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Boundary_type &boundary)
-	: dim_(boundary.size() == 0 ? 0 : boundary.size() - 1),
-	  column_(boundary.begin(), boundary.end())
-{}
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(const Container_type &nonZeroRowIndices)
+	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
+	  column_(nonZeroRowIndices.size())
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
-template<class Column_pairing_option>
-template<class Boundary_type>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Boundary_type &boundary, dimension_type dimension)
+	unsigned int i = 0;
+	for (index id : nonZeroRowIndices){
+		_update_cell(id, i++);
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(const Container_type &nonZeroRowIndices, dimension_type dimension)
 	: dim_(dimension),
-	  column_(boundary.begin(), boundary.end())
+	  column_(nonZeroRowIndices.size())
+{
+	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+
+	unsigned int i = 0;
+	for (index id : nonZeroRowIndices){
+		_update_cell(id, i++);
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Row_container_type>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(
+		index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(0)
 {}
 
-//template<class Column_pairing_option>
-//inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Z2_vector_column &column)
-//	: Column_pairing_option(column),
-//	  dim_(column.dim_),
-//	  column_(column.column_),
-//	  erasedValues_(column.erasedValues_)
-//{}
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type, class Row_container_type>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(
+		index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1), column_(nonZeroRowIndices.size())
+{
+	unsigned int i = 0;
+	for (index id : nonZeroRowIndices){
+		_update_cell(id, i++);
+	}
+}
 
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(const Z2_vector_column &column)
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Container_type, class Row_container_type>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(
+		index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer), dim_(dimension), column_(nonZeroRowIndices.size())
+{
+	unsigned int i = 0;
+	for (index id : nonZeroRowIndices){
+		_update_cell(id, i++);
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(const Z2_vector_column &column)
 	: Column_pairing_option(column),
 	  dim_(column.dim_),
-	  column_(column.column_),
-	  erasedValues_(column.erasedValues_)
-{}
-
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option>::Z2_vector_column(Z2_vector_column &&column) noexcept
-	: Column_pairing_option(std::move(column)),
-	  dim_(std::exchange(column.dim_, 0)),
-	  column_(std::move(column.column_)),
-	  erasedValues_(std::move(column.erasedValues_))
-{}
-
-template<class Column_pairing_option>
-inline std::vector<bool> Z2_vector_column<Column_pairing_option>::get_content(unsigned int columnLength)
+	  column_(column.column_.size())
 {
-	_cleanValues();
+	static_assert(!Row_access_option::isActive_,
+			"Copy constructor not available when row access option enabled.");
+
+	unsigned int i = 0;
+	for (const Cell* cell : column.column_){
+		_update_cell(cell->get_row_index(), i++);
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(
+		const Z2_vector_column &column, index columnIndex)
+	: Column_pairing_option(column),
+	  Row_access_option(columnIndex, *column.rows_),
+	  dim_(column.dim_),
+	  column_(column.column_.size())
+{
+	unsigned int i = 0;
+	for (const Cell* cell : column.column_){
+		_update_cell(cell->get_row_index(), i++);
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_column(Z2_vector_column &&column) noexcept
+	: Column_pairing_option(std::move(column)),
+	  Row_access_option(std::move(column)),
+	  dim_(std::exchange(column.dim_, 0)),
+	  column_(std::move(column.column_))
+{}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::~Z2_vector_column()
+{
+//	std::cout << "size: " << column_.size() << ", " << dim_ << "\n";
+//	int c = 0;
+	for (Cell* cell : column_){
+//		std::cout << c << "\n";
+//		std::cout << "destr: " << cell << ", " << cell->get_row_index() << "\n";
+		_delete_cell(cell);
+//		std::cout << c++ << "\n";
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline std::vector<bool> Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::get_content(unsigned int columnLength)
+{
 	std::vector<bool> container(columnLength, 0);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = 1;
+	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < columnLength; ++it){
+		container[(*it)->get_row_index()] = 1;
 	}
 	return container;
 }
 
-template<class Column_pairing_option>
-inline bool Z2_vector_column<Column_pairing_option>::is_non_zero(index rowIndex) const
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline bool Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::is_non_zero(index rowIndex) const
 {
-	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
-
-	for (const Cell& v : column_){
-		if (v.get_row_index() == rowIndex) return true;
+	for (const Cell* v : column_){
+		if (v->get_row_index() == rowIndex) return true;
 	}
 	return false;
 }
 
-template<class Column_pairing_option>
-inline bool Z2_vector_column<Column_pairing_option>::is_empty()
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline bool Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::is_empty() const
 {
-	_cleanValues();
 	return column_.empty();
 }
 
-template<class Column_pairing_option>
-inline dimension_type Z2_vector_column<Column_pairing_option>::get_dimension() const
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline dimension_type Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::get_dimension() const
 {
 	return dim_;
 }
 
-template<class Column_pairing_option>
-inline int Z2_vector_column<Column_pairing_option>::get_pivot()
-{
-	if (column_.empty()) return -1;
-
-	auto it = erasedValues_.find(column_.back().get_row_index());
-	while (!column_.empty() && it != erasedValues_.end()) {
-		erasedValues_.erase(it);
-		column_.pop_back();
-		it = erasedValues_.find(column_.back().get_row_index());
-	}
-
-	if (column_.empty()) return -1;
-
-	return column_.back().get_row_index();
-}
-
-template<class Column_pairing_option>
-inline void Z2_vector_column<Column_pairing_option>::clear()
-{
-	column_.clear();
-	erasedValues_.clear();
-}
-
-template<class Column_pairing_option>
-inline void Z2_vector_column<Column_pairing_option>::clear(index rowIndex)
-{
-	erasedValues_.insert(rowIndex);
-}
-
-template<class Column_pairing_option>
-inline void Z2_vector_column<Column_pairing_option>::reorder(std::vector<index> &valueMap)
-{
-	std::vector<Cell> newColumn;
-	for (const Cell& v : column_) {
-		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
-			newColumn.push_back(valueMap[v.get_row_index()]);
-	}
-	std::sort(newColumn.begin(), newColumn.end());
-	erasedValues_.clear();
-	column_.swap(newColumn);
-}
-
-template<class Column_pairing_option>
-inline typename Z2_vector_column<Column_pairing_option>::iterator
-Z2_vector_column<Column_pairing_option>::begin() noexcept
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::begin() noexcept
 {
 	return column_.begin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_vector_column<Column_pairing_option>::const_iterator
-Z2_vector_column<Column_pairing_option>::begin() const noexcept
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::const_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::begin() const noexcept
 {
 	return column_.begin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_vector_column<Column_pairing_option>::iterator
-Z2_vector_column<Column_pairing_option>::end() noexcept
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::end() noexcept
 {
 	return column_.end();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_vector_column<Column_pairing_option>::const_iterator
-Z2_vector_column<Column_pairing_option>::end() const noexcept
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::const_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::end() const noexcept
 {
 	return column_.end();
 }
 
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option> &Z2_vector_column<Column_pairing_option>::operator+=(Z2_vector_column &column)
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::operator+=(const Z2_vector_column &column)
 {
 	if (column.is_empty()) return *this;
 	if (column_.empty()){
-		column._cleanValues();
-		std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
-		erasedValues_.clear();
+		column_.resize(column.column_.size());
+		unsigned int i = 0;
+		for (const Cell* cell : column.column_)
+			_update_cell(cell->get_row_index(), i++);
 		return *this;
 	}
 
-	std::vector<Cell> newColumn;
+	Column_type newColumn;
 
-	std::vector<Cell>::iterator itToAdd = column.column_.begin();
-	std::vector<Cell>::iterator itTarget = column_.begin();
-	unsigned int valToAdd = itToAdd->get_row_index();
-	unsigned int valTarget = itTarget->get_row_index();
+	real_const_iterator itToAdd = column.column_.begin();
+	real_iterator itTarget = column_.begin();
 
 	while (itToAdd != column.column_.end() && itTarget != column_.end())
 	{
-		while (itToAdd != column.column_.end() &&
-			   column.erasedValues_.find(valToAdd) != column.erasedValues_.end()) {
-			itToAdd++;
-			valToAdd = itToAdd->get_row_index();
-		}
+		const Cell* cellToAdd = *itToAdd;
+		Cell* cellTarget = *itTarget;
+		unsigned int curRowToAdd = cellToAdd->get_row_index();
+		unsigned int curRowTarget = cellTarget->get_row_index();
 
-		while (itTarget != column_.end() &&
-			   erasedValues_.find(valTarget) != erasedValues_.end()) {
+		if (curRowToAdd == curRowTarget){
+//			std::cout << cellTarget << ", " << cellTarget->get_row_index() << "\n";
+			_delete_cell(cellTarget);
 			itTarget++;
-			valTarget = itTarget->get_row_index();
+			itToAdd++;
+		} else if (curRowToAdd < curRowTarget){
+			_insert_cell(curRowToAdd, newColumn);
+			itToAdd++;
+		} else {
+//			std::cout << "reinsert: " << cellTarget << ", " << cellTarget->get_row_index() << "\n";
+			newColumn.push_back(cellTarget);
+			itTarget++;
 		}
-
-		if (itToAdd != column.column_.end() && itTarget != column_.end()){
-			if (valToAdd == valTarget){
-				itTarget++;
-				itToAdd++;
-			} else if (valToAdd < valTarget){
-				newColumn.push_back(valToAdd);
-				itToAdd++;
-			} else {
-				newColumn.push_back(valTarget);
-				itTarget++;
-			}
-		}
-
-		if (itToAdd != column.column_.end()) valToAdd = itToAdd->get_row_index();
-		if (itTarget != column_.end()) valTarget = itTarget->get_row_index();
 	}
 
 	while (itToAdd != column.column_.end()){
-		while (itToAdd != column.column_.end() &&
-			   column.erasedValues_.find(valToAdd) != column.erasedValues_.end()) {
-			itToAdd++;
-			valToAdd = itToAdd->get_row_index();
-		}
-
-		if (itToAdd != column.column_.end()){
-			newColumn.push_back(*itToAdd);
-			itToAdd++;
-		}
+		_insert_cell((*itToAdd)->get_row_index(), newColumn);
+		itToAdd++;
 	}
 
 	while (itTarget != column_.end()){
-		while (itTarget != column_.end() &&
-			   erasedValues_.find(valTarget) != erasedValues_.end()) {
-			itTarget++;
-			valTarget = itTarget->get_row_index();
-		}
-
-		if (itTarget != column_.end()){
-			newColumn.push_back(*itTarget);
-			itTarget++;
-		}
+//		std::cout << "reinsert: " << *itTarget << ", " << (*itTarget)->get_row_index() << "\n";
+		newColumn.push_back(*itTarget);
+		itTarget++;
 	}
 
 	column_.swap(newColumn);
-	erasedValues_.clear();
 
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline Z2_vector_column<Column_pairing_option> &Z2_vector_column<Column_pairing_option>::operator=(Z2_vector_column other)
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::operator*=(unsigned int v)
 {
+	if (v % 2 == 0){
+		for (Cell* cell : column_){
+			_delete_cell(cell);
+		}
+		column_.clear();
+	}
+
+	return *this;
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::operator=(Z2_vector_column other)
+{
+	static_assert (!Row_access_option::isActive_, "= assignement not enabled with row access option.");
+
+	Column_pairing_option::operator=(other);
 	std::swap(dim_, other.dim_);
 	column_.swap(other.column_);
-	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline void Z2_vector_column<Column_pairing_option>::_cleanValues()
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline void Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::_delete_cell(Cell* cell)
 {
-	if (erasedValues_.empty()) return;
-
-	std::vector<Cell> newColumn;
-	for (const Cell& v : column_){
-		if (erasedValues_.find(v.get_row_index()) == erasedValues_.end())
-			newColumn.push_back(v);
+	if constexpr (Row_access_option::isActive_){
+		Row_access_option::unlink(cell);
 	}
-	erasedValues_.clear();
-	column_.swap(newColumn);
+	delete cell;
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline void Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::_insert_cell(index rowIndex, Column_type &column)
+{
+	if constexpr (Row_access_option::isActive_){
+		Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		column.push_back(new_cell);
+		Row_access_option::insert_cell(rowIndex, new_cell);
+	} else {
+		Cell *new_cell = new Cell(rowIndex);
+		column.push_back(new_cell);
+//		std::cout << "insert: " << new_cell << ", " << rowIndex << "\n";
+	}
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline void Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::_update_cell(index rowIndex, index position)
+{
+	if constexpr (Row_access_option::isActive_){
+		Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		column_[position] = new_cell;
+		Row_access_option::insert_cell(rowIndex, new_cell);
+	} else {
+		Cell *new_cell = new Cell(rowIndex);
+		column_[position] = new_cell;
+//		std::cout << "update: " << new_cell << ", " << rowIndex << "\n";
+	}
 }
 
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // Z2_VECTORCOLUMN_H
+#endif // Z2_VECTOR_COLUMN_H

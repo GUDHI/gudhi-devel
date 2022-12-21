@@ -13,6 +13,7 @@
 
 #include <utility>
 #include <unordered_map>
+#include <set>
 
 #include "../utilities/utilities.h"
 
@@ -115,6 +116,11 @@ inline void Base_pairing<Master_matrix>::_reduce()
 					barcode_.push_back(Bar(d, i, -1));
 				}
 			}
+		}
+	}
+	for (unsigned int i = 0; i < matrix_->size(); i++){
+		if (matrix[i].get_dimension() == 0 && pivotsToColumn.find(i) == pivotsToColumn.end()){
+			barcode_.push_back(Bar(0, i, -1));
 		}
 	}
 
