@@ -66,13 +66,11 @@ class Bitmap_cubical_complex : public T {
    * @param[in] perseus_style_file The name of a \ref FileFormatsPerseus "Perseus-style file".
    **/
   Bitmap_cubical_complex(const char* perseus_style_file)
-      : T(perseus_style_file), key_associated_to_simplex(this->total_number_of_cells + 1) {
+      : T(perseus_style_file), key_associated_to_simplex(num_simplices()) {
 #ifdef DEBUG_TRACES
     std::clog << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
 #endif
-    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
-      this->key_associated_to_simplex[i] = i;
-    }
+    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
@@ -88,10 +86,8 @@ class Bitmap_cubical_complex : public T {
   Bitmap_cubical_complex(const std::vector<unsigned>& dimensions,
                          const std::vector<Filtration_value>& cells,
                          bool input_top_cells = true)
-      : T(dimensions, cells, input_top_cells), key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
-      this->key_associated_to_simplex[i] = i;
-    }
+      : T(dimensions, cells, input_top_cells), key_associated_to_simplex(num_simplices()) {
+    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
@@ -110,10 +106,8 @@ class Bitmap_cubical_complex : public T {
                          const std::vector<bool>& directions_in_which_periodic_b_cond_are_to_be_imposed,
                          bool input_top_cells = true)
       : T(dimensions, cells, directions_in_which_periodic_b_cond_are_to_be_imposed, input_top_cells),
-        key_associated_to_simplex(this->total_number_of_cells + 1) {
-    for (std::size_t i = 0; i != this->total_number_of_cells; ++i) {
-      this->key_associated_to_simplex[i] = i;
-    }
+        key_associated_to_simplex(num_simplices()) {
+    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
