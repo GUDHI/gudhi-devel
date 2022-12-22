@@ -20,20 +20,26 @@ import os
 import sys
 
 import numpy as np
+cimport numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+# Necessary because of PyArray_SimpleNewFromData
+np.import_array()
+
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
+    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface":
         Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil except +
-        Bitmap_cubical_complex_base_interface(string perseus_file) nogil except +
+        Bitmap_cubical_complex_base_interface(const char* perseus_file) nogil except +
         int num_simplices() nogil
         int dimension() nogil
+        vector[unsigned] shape() nogil
+        vector[double] data
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
+    cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
@@ -96,13 +102,16 @@ cdef class CubicalComplex:
 
     # The real cython constructor
     def __cinit__(self, *, top_dimensional_cells=None, vertices=None, dimensions=None, perseus_file=''):
+        cdef const char* file
         self._built_from_vertices = False
         if perseus_file:
             if top_dimensional_cells is not None or vertices is not None or dimensions is not None:
                 raise ValueError("The Perseus file contains all the information, do not specify anything else")
             # FIXME: Wrong place to check if the file exists
             if os.path.isfile(perseus_file):
-                self._construct_from_file(perseus_file.encode('utf-8'))
+                perseus_file = perseus_file.encode('utf-8')
+                file = perseus_file
+                self._construct_from_file(file)
                 return
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), perseus_file)
@@ -125,7 +134,7 @@ cdef class CubicalComplex:
         with nogil:
             self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, cells, input_top_cells)
 
-    def _construct_from_file(self, string filename):
+    def _construct_from_file(self, const char* filename):
         with nogil:
             self.thisptr = new Bitmap_cubical_complex_base_interface(filename)
 
@@ -158,6 +167,33 @@ cdef class CubicalComplex:
         :returns:  int -- the complex dimension.
         """
         return self.thisptr.dimension()
+
+    def all_cells(self):
+        """Array with the filtration values of all the cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        cdef np.npy_intp dim = self.thisptr.data.size()
+        a = np.PyArray_SimpleNewFromData(1, &dim, np.NPY_DOUBLE, self.thisptr.data.data())
+        np.set_array_base(a, self)
+        return a.reshape([2*d+1 for d in self.thisptr.shape()], order='F')
+
+    def top_cells(self):
+        """Array with the filtration values of the top-dimensional cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(1, None, 2),) * self.thisptr.dimension()]
+
+    def vertices(self):
+        """Array with the filtration values of the vertices of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(0, None, 2),) * self.thisptr.dimension()]
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be

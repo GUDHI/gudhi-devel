@@ -202,7 +202,7 @@ def test_cubical_generators_from_vertices():
     cub = CubicalComplex(vertices=[[2, 1, 6, 8],
                                    [5, 9, 4, 7],
                                    [4, 7, 3, 9]])
-    assert set(cub.persistence()) == {(1, (7.0, 9.0)), (0, (1.0, inf)), (0, (3.0, 6.0)), (0, (4.0, 5.0))}
+    assert set(cub.persistence()) == {(1, (7.0, 9.0)), (0, (1.0, np.inf)), (0, (3.0, 6.0)), (0, (4.0, 5.0))}
     g = cub.vertices_of_persistence_pairs()
     assert g[1] == [[3]]
     assert len(g[0]) == 2 and np.array_equal(g[0][0], [[2, 1], [8, 6]]) and np.array_equal(g[0][1], [[5, 4]])
@@ -263,3 +263,45 @@ def test_periodic_cubical_persistence_intervals_in_dimension():
     H2 = cub.persistence_intervals_in_dimension(2)
     assert np.array_equal(H2, np.array([[ 9., float("inf")]]))
     assert cub.persistence_intervals_in_dimension(3).shape == (0, 2)
+
+def test_array_access():
+    a = np.arange(6, dtype=float).reshape(3, 2)
+    cplx = CubicalComplex(top_dimensional_cells=a)
+    assert np.array_equal(cplx.top_cells(), a)
+    assert np.array_equal(
+        cplx.vertices(), np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [2.0, 2.0, 3.0], [4.0, 4.0, 5.0]])
+    )
+    assert np.array_equal(
+        cplx.all_cells(),
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, 0.0, 1.0, 1.0],
+                [2.0, 2.0, 2.0, 3.0, 3.0],
+                [2.0, 2.0, 2.0, 3.0, 3.0],
+                [4.0, 4.0, 4.0, 5.0, 5.0],
+                [4.0, 4.0, 4.0, 5.0, 5.0],
+            ]
+        ),
+    )
+    cplx.top_cells()[0, 0] = 42
+    assert cplx.all_cells()[1, 1] == 42
+
+    a = np.array([[1.0, 2.0], [4.0, 3.0], [0.0, 5.0]])
+    cplx = PeriodicCubicalComplex(top_dimensional_cells=a, periodic_dimensions=(True, False))
+    assert np.array_equal(cplx.top_cells(), a)
+    assert np.array_equal(cplx.vertices(), np.array([[0.0, 0.0, 2.0], [1.0, 1.0, 2.0], [0.0, 0.0, 3.0]]))
+    assert np.array_equal(
+        cplx.all_cells(),
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 2.0, 2.0],
+                [1.0, 1.0, 1.0, 2.0, 2.0],
+                [1.0, 1.0, 1.0, 2.0, 2.0],
+                [4.0, 4.0, 3.0, 3.0, 3.0],
+                [0.0, 0.0, 0.0, 3.0, 3.0],
+                [0.0, 0.0, 0.0, 5.0, 5.0]
+            ]
+        ),
+    )
