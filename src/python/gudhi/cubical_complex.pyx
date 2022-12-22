@@ -27,15 +27,15 @@ __license__ = "MIT"
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
-        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil
-        Bitmap_cubical_complex_base_interface(string perseus_file) nogil
+        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil except +
+        Bitmap_cubical_complex_base_interface(string perseus_file) nogil except +
         int num_simplices() nogil
         int dimension() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except+
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
         vector[vector[int]] vertices_of_cubical_persistence_pairs() nogil
@@ -50,86 +50,76 @@ cdef class CubicalComplex:
     analysis.
     """
     cdef Bitmap_cubical_complex_base_interface * thisptr
-
     cdef Cubical_complex_persistence_interface * pcohptr
+    cdef bool _built_from_vertices
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, dimensions=None, top_dimensional_cells=None, vertices=None,
-                 perseus_file=''):
-        """CubicalComplex constructor from dimensions and
-        cells (either vertices or top dimensional)
-        or from a Perseus-style file name.
+    def __init__(self, *, top_dimensional_cells=None, vertices=None, dimensions=None, perseus_file=''):
+        """CubicalComplex constructor from the filtration values of either
+        the top-dimensional cells, or the vertices.
 
-        Note that in case the cubical complex is constructed from
-        'top_dimensional_cells' or 'vertices' using a flat array,
-        the given 'dimensions' will be considered using the
-        fortran ordering (column-major order).
-
-        :param dimensions: A list of number of top dimensional cells.
-        :type dimensions: list of int
-        :param top_dimensional_cells: A list of top dimensional cells filtration values.
-        :type top_dimensional_cells: list of double
-
-        Or
-
-        :param dimensions: A list of number of vertices.
-        :type dimensions: list of int
-        :param vertices: A list of cells filtration values corresponding to vertices.
-        :type vertices: list of double
-
-        Or
+        Note that in case `top_dimensional_cells` or `vertices` is passed as a flat array,
+        its true shape can be given in `dimensions`, which is considered using the
+        fortran ordering (column-major order). However, we recommend passing directly an
+        array of the right shape.
 
         :param top_dimensional_cells: A multidimensional array of
             top dimensional cells filtration values.
-        :type top_dimensional_cells: anything convertible to a numpy ndarray
+        :type top_dimensional_cells: anything convertible to a numpy.ndarray
 
         Or
 
         :param vertices: A multidimensional array of vertices
             filtration values.
-        :type vertices: anything convertible to a numpy ndarray
+        :type vertices: anything convertible to a numpy.ndarray
 
         Or
 
-        :param perseus_file: A Perseus-style file name.
-        :type perseus_file: string
+        :param top_dimensional_cells: Filtration values of the top-dimensional cells.
+        :type top_dimensional_cells: Iterable[float]
+        :param dimensions: Shape of the array of top dimensional cells (Fortran order).
+        :type dimensions: Iterable[int]
+
+        Or
+
+        :param vertices: Filtration values of the vertices.
+        :type vertices: Iterable[float]
+        :param dimensions: Shape of the array of vertices (Fortran order).
+        :type dimensions: Iterable[int]
+
+        Or
+
+        :param perseus_file: A Perseus-style file name, giving the filtration values
+            of top-dimensional cells.
+        :type perseus_file: str
         """
 
     # The real cython constructor
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
-                  vertices=None, perseus_file=''):
-        if ((dimensions is not None) and (top_dimensional_cells is not None)
-            and (vertices is None) and (perseus_file == '')):
-            self._construct_from_cells(dimensions, top_dimensional_cells, True)
-        elif ((dimensions is not None) and (vertices is not None)
-            and (top_dimensional_cells is None) and (perseus_file == '')):
-            self._construct_from_cells(dimensions, vertices, False)
-        elif ((dimensions is None) and (top_dimensional_cells is not None)
-            and (vertices is None) and (perseus_file == '')):
-            top_dimensional_cells = np.array(top_dimensional_cells,
-                                             copy = False,
-                                             order = 'F')
-            dimensions = top_dimensional_cells.shape
-            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            self._construct_from_cells(dimensions, top_dimensional_cells, True)
-        elif ((dimensions is None) and (vertices is not None)
-            and (top_dimensional_cells is None) and (perseus_file == '')):
-            vertices = np.array(vertices,
-                                copy = False,
-                                order = 'F')
-            dimensions = vertices.shape
-            vertices = vertices.ravel(order='F')
-            self._construct_from_cells(dimensions, vertices, False)
-        elif ((dimensions is None) and (top_dimensional_cells is None)
-            and (vertices is None) and (perseus_file != '')):
+    def __cinit__(self, *, top_dimensional_cells=None, vertices=None, dimensions=None, perseus_file=''):
+        self._built_from_vertices = False
+        if perseus_file:
+            if top_dimensional_cells is not None or vertices is not None or dimensions is not None:
+                raise ValueError("The Perseus file contains all the information, do not specify anything else")
+            # FIXME: Wrong place to check if the file exists
             if os.path.isfile(perseus_file):
                 self._construct_from_file(perseus_file.encode('utf-8'))
+                return
             else:
-                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                        perseus_file)
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), perseus_file)
+        if top_dimensional_cells is not None:
+            if vertices is not None:
+                raise ValueError("Can only specify the top dimensional cells OR the vertices, not both")
+            array = top_dimensional_cells
+        elif vertices is not None:
+            array = vertices
+            self._built_from_vertices = True
         else:
-            raise ValueError("CubicalComplex can be constructed either from top_dimensional_cells,"
-                "vertices, or a Perseus-style file name.")
+            raise ValueError("Must specify one of top_dimensional_cells, vertices, or perseus_file")
+        if dimensions is None:
+            array = np.array(array, copy=False, order='F')
+            dimensions = array.shape
+            array = array.ravel(order='F')
+        self._construct_from_cells(dimensions, array, vertices is None)
 
     def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, bool input_top_cells):
         with nogil:
@@ -247,6 +237,10 @@ cdef class CubicalComplex:
         """
 
         assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
+        assert not self._built_from_vertices, (
+                "cofaces_of_persistence_pairs() only makes sense for a complex"
+                " initialized from the values of the top-dimensional cells"
+        )
 
         cdef vector[vector[int]] persistence_result
         output = [[],[]]
@@ -297,6 +291,10 @@ cdef class CubicalComplex:
         """
 
         assert self.pcohptr != NULL, "compute_persistence() must be called before vertices_of_persistence_pairs()"
+        assert self._built_from_vertices, (
+                "vertices_of_persistence_pairs() only makes sense for a complex"
+                " initialized from the values of the vertices"
+        )
 
         cdef vector[vector[int]] persistence_result
         output = [[],[]]
