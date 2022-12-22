@@ -115,14 +115,10 @@ cdef class PeriodicCubicalComplex:
             if (top_dimensional_cells is not None or vertices is not None or
                 dimensions is not None or periodic_dimensions is not None):
                 raise ValueError("The Perseus file contains all the information, do not specify anything else")
-            # FIXME: Wrong place to check if the file exists
-            if os.path.isfile(perseus_file):
-                perseus_file = perseus_file.encode('utf-8')
-                file = perseus_file
-                self._construct_from_file(file)
-                return
-            else:
-                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), perseus_file)
+            perseus_file = perseus_file.encode('utf-8')
+            file = perseus_file
+            self._construct_from_file(file)
+            return
         if periodic_dimensions is None:
             raise ValueError("The periodic_dimensions must be specified")
         if top_dimensional_cells is not None:
