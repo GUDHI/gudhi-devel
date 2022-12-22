@@ -27,7 +27,6 @@ def test_non_existing_perseus_file_constructor():
     with pytest.raises(FileNotFoundError):
         cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
 
-
 def test_dimensions_one_cells_type_or_perseus_file_constructor():
     # Create test file
     test_file = open("CubicalOneSphere.txt", "w")
@@ -113,6 +112,9 @@ def test_constructor_from_vertices():
         dimensions=[4, 4],
         vertices=[1, 1, 2, 3, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9])
     simple_constructor(cub)
+    a = np.random.rand(10, 20, 30)
+    cub = PeriodicCubicalComplex(vertices=a, periodic_dimensions=(True, False, True))
+    assert np.array_equal(a, cub.vertices())
 
 def user_case_simple_constructor(cub):
     assert cub.__is_defined() == True
@@ -205,6 +207,7 @@ def test_cubical_generators_from_vertices():
     assert set(cub.persistence()) == {(1, (7.0, 9.0)), (0, (1.0, np.inf)), (0, (3.0, 6.0)), (0, (4.0, 5.0))}
     g = cub.vertices_of_persistence_pairs()
     assert g[1] == [[3]]
+    # The order [[8, 6], [2, 1]] would also be fine
     assert len(g[0]) == 2 and np.array_equal(g[0][0], [[2, 1], [8, 6]]) and np.array_equal(g[0][1], [[5, 4]])
 
 def test_periodic_cubical_generators_from_vertices():
@@ -217,10 +220,43 @@ def test_periodic_cubical_generators_from_vertices():
     assert np.array_equal(g[0][1], np.array([[15, 10]]))
     assert np.array_equal(g[1][0], np.array([0]))
 
-    cub = PeriodicCubicalComplex(vertices=[[2, 1, 6, 8],
-                                           [5, 9, 4, 0],
-                                           [4, 7, 3, 9]], periodic_dimensions=(True, True))
-    #TODO
+    v = np.array([[2, 1, 6, 8],
+                  [5, 8, 4, 0],
+                  [4, 7, 3, 9]], dtype=float)
+    cub = PeriodicCubicalComplex(vertices=v, periodic_dimensions=(True, True))
+    assert np.array_equal(
+        cub.all_cells(),
+        np.array(
+            [
+                [2.0, 2.0, 1.0, 6.0, 6.0, 8.0, 8.0, 8.0],
+                [5.0, 8.0, 8.0, 8.0, 6.0, 8.0, 8.0, 8.0],
+                [5.0, 8.0, 8.0, 8.0, 4.0, 4.0, 0.0, 5.0],
+                [5.0, 8.0, 8.0, 8.0, 4.0, 9.0, 9.0, 9.0],
+                [4.0, 7.0, 7.0, 7.0, 3.0, 9.0, 9.0, 9.0],
+                [4.0, 7.0, 7.0, 7.0, 6.0, 9.0, 9.0, 9.0],
+            ]
+        )
+    )
+    p = cub.persistence()
+    g = cub.vertices_of_persistence_pairs()
+    assert set(p) == {
+        (2, (9.0, np.inf)),
+        (1, (5.0, np.inf)),
+        (1, (6.0, np.inf)),
+        (1, (6.0, 8.0)),
+        (0, (0.0, np.inf)),
+        (0, (1.0, 5.0)),
+        (0, (3.0, 4.0)),
+    }
+    vr = np.ravel(v, order='F')
+    diag = set()
+    for (i,a) in enumerate(g[0]):
+        for (b,d) in a:
+            diag.add((i, (vr[b], vr[d])))
+    for (i,a) in enumerate(g[1]):
+        for b in a:
+            diag.add((i, (vr[b], np.inf)))
+    assert set(p) == diag
 
 def test_cubical_cofaces_of_persistence_pairs_when_pd_has_no_paired_birth_and_death():
     cubCpx = CubicalComplex(dimensions=[1,2], top_dimensional_cells=[0.0, 1.0])

@@ -262,12 +262,12 @@ cdef class CubicalComplex:
         :returns: The top-dimensional cells/cofaces of the positive and negative cells,
             together with the corresponding homological dimension, in two lists of numpy arrays of integers.
             The first list contains the regular persistence pairs, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 2].
+            It contains numpy arrays of shape (number_of_persistence_points, 2).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell,
             index of negative top-dimensional cell).
             The second list contains the essential features, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 1].
+            It contains numpy arrays of shape (number_of_persistence_points,).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
@@ -316,12 +316,12 @@ cdef class CubicalComplex:
         :returns: The vertices of the positive and negative cells,
             together with the corresponding homological dimension, in two lists of numpy arrays of integers.
             The first list contains the regular persistence pairs, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 2].
+            It contains numpy arrays of shape (number_of_persistence_points, 2).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive vertex,
             index of negative vertex).
             The second list contains the essential features, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 1].
+            It contains numpy arrays of shape (number_of_persistence_points,).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive vertex).
         """

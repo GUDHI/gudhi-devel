@@ -82,140 +82,140 @@ BOOST_AUTO_TEST_CASE(cellsIterator_test) {
 }
 
 BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
-  std::vector<double> boundary0;
-  std::vector<double> boundary1;
+  std::vector<size_t> boundary0;
+  std::vector<size_t> boundary1;
   boundary1.push_back(0);
   boundary1.push_back(2);
-  std::vector<double> boundary2;
-  std::vector<double> boundary3;
+  std::vector<size_t> boundary2;
+  std::vector<size_t> boundary3;
   boundary3.push_back(2);
   boundary3.push_back(4);
-  std::vector<double> boundary4;
-  std::vector<double> boundary5;
+  std::vector<size_t> boundary4;
+  std::vector<size_t> boundary5;
   boundary5.push_back(4);
   boundary5.push_back(6);
-  std::vector<double> boundary6;
-  std::vector<double> boundary7;
+  std::vector<size_t> boundary6;
+  std::vector<size_t> boundary7;
   boundary7.push_back(0);
   boundary7.push_back(14);
-  std::vector<double> boundary8;
+  std::vector<size_t> boundary8;
   boundary8.push_back(1);
   boundary8.push_back(15);
   boundary8.push_back(9);
   boundary8.push_back(7);
-  std::vector<double> boundary9;
+  std::vector<size_t> boundary9;
   boundary9.push_back(2);
   boundary9.push_back(16);
-  std::vector<double> boundary10;
+  std::vector<size_t> boundary10;
   boundary10.push_back(3);
   boundary10.push_back(17);
   boundary10.push_back(11);
   boundary10.push_back(9);
-  std::vector<double> boundary11;
+  std::vector<size_t> boundary11;
   boundary11.push_back(4);
   boundary11.push_back(18);
-  std::vector<double> boundary12;
+  std::vector<size_t> boundary12;
   boundary12.push_back(5);
   boundary12.push_back(19);
   boundary12.push_back(13);
   boundary12.push_back(11);
-  std::vector<double> boundary13;
+  std::vector<size_t> boundary13;
   boundary13.push_back(6);
   boundary13.push_back(20);
-  std::vector<double> boundary14;
-  std::vector<double> boundary15;
+  std::vector<size_t> boundary14;
+  std::vector<size_t> boundary15;
   boundary15.push_back(14);
   boundary15.push_back(16);
-  std::vector<double> boundary16;
-  std::vector<double> boundary17;
+  std::vector<size_t> boundary16;
+  std::vector<size_t> boundary17;
   boundary17.push_back(16);
   boundary17.push_back(18);
-  std::vector<double> boundary18;
-  std::vector<double> boundary19;
+  std::vector<size_t> boundary18;
+  std::vector<size_t> boundary19;
   boundary19.push_back(18);
   boundary19.push_back(20);
-  std::vector<double> boundary20;
-  std::vector<double> boundary21;
+  std::vector<size_t> boundary20;
+  std::vector<size_t> boundary21;
   boundary21.push_back(14);
   boundary21.push_back(28);
-  std::vector<double> boundary22;
+  std::vector<size_t> boundary22;
   boundary22.push_back(15);
   boundary22.push_back(29);
   boundary22.push_back(23);
   boundary22.push_back(21);
-  std::vector<double> boundary23;
+  std::vector<size_t> boundary23;
   boundary23.push_back(16);
   boundary23.push_back(30);
-  std::vector<double> boundary24;
+  std::vector<size_t> boundary24;
   boundary24.push_back(17);
   boundary24.push_back(31);
   boundary24.push_back(25);
   boundary24.push_back(23);
-  std::vector<double> boundary25;
+  std::vector<size_t> boundary25;
   boundary25.push_back(18);
   boundary25.push_back(32);
-  std::vector<double> boundary26;
+  std::vector<size_t> boundary26;
   boundary26.push_back(19);
   boundary26.push_back(33);
   boundary26.push_back(27);
   boundary26.push_back(25);
-  std::vector<double> boundary27;
+  std::vector<size_t> boundary27;
   boundary27.push_back(20);
   boundary27.push_back(34);
-  std::vector<double> boundary28;
-  std::vector<double> boundary29;
+  std::vector<size_t> boundary28;
+  std::vector<size_t> boundary29;
   boundary29.push_back(28);
   boundary29.push_back(30);
-  std::vector<double> boundary30;
-  std::vector<double> boundary31;
+  std::vector<size_t> boundary30;
+  std::vector<size_t> boundary31;
   boundary31.push_back(30);
   boundary31.push_back(32);
-  std::vector<double> boundary32;
-  std::vector<double> boundary33;
+  std::vector<size_t> boundary32;
+  std::vector<size_t> boundary33;
   boundary33.push_back(32);
   boundary33.push_back(34);
-  std::vector<double> boundary34;
-  std::vector<double> boundary35;
+  std::vector<size_t> boundary34;
+  std::vector<size_t> boundary35;
   boundary35.push_back(28);
   boundary35.push_back(42);
-  std::vector<double> boundary36;
+  std::vector<size_t> boundary36;
   boundary36.push_back(29);
   boundary36.push_back(43);
   boundary36.push_back(37);
   boundary36.push_back(35);
-  std::vector<double> boundary37;
+  std::vector<size_t> boundary37;
   boundary37.push_back(30);
   boundary37.push_back(44);
-  std::vector<double> boundary38;
+  std::vector<size_t> boundary38;
   boundary38.push_back(31);
   boundary38.push_back(45);
   boundary38.push_back(39);
   boundary38.push_back(37);
-  std::vector<double> boundary39;
+  std::vector<size_t> boundary39;
   boundary39.push_back(32);
   boundary39.push_back(46);
-  std::vector<double> boundary40;
+  std::vector<size_t> boundary40;
   boundary40.push_back(33);
   boundary40.push_back(47);
   boundary40.push_back(41);
   boundary40.push_back(39);
-  std::vector<double> boundary41;
+  std::vector<size_t> boundary41;
   boundary41.push_back(34);
   boundary41.push_back(48);
-  std::vector<double> boundary42;
-  std::vector<double> boundary43;
+  std::vector<size_t> boundary42;
+  std::vector<size_t> boundary43;
   boundary43.push_back(42);
   boundary43.push_back(44);
-  std::vector<double> boundary44;
-  std::vector<double> boundary45;
+  std::vector<size_t> boundary44;
+  std::vector<size_t> boundary45;
   boundary45.push_back(44);
   boundary45.push_back(46);
-  std::vector<double> boundary46;
-  std::vector<double> boundary47;
+  std::vector<size_t> boundary46;
+  std::vector<size_t> boundary47;
   boundary47.push_back(46);
   boundary47.push_back(48);
-  std::vector<double> boundary48;
-  std::vector<std::vector<double> > boundaries;
+  std::vector<size_t> boundary48;
+  std::vector<std::vector<size_t> > boundaries;
   boundaries.push_back(boundary0);
   boundaries.push_back(boundary1);
   boundaries.push_back(boundary2);
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE(compute_boundary_test_2) {
 
   Bitmap_cubical_complex increasing(dimensions, increasingFiltrationOfTopDimensionalCells);
 
-  std::vector<double> coboundaryElements;
+  std::vector<size_t> coboundaryElements;
   coboundaryElements.push_back(7);
   coboundaryElements.push_back(1);
   coboundaryElements.push_back(8);
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE(Filtration_simplex_iterator_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
+BOOST_AUTO_TEST_CASE(boundary_operator_2d_bitmap_with_periodic_bcond) {
   std::vector<double> filtration({0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({2, 2});
@@ -573,56 +573,56 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
 
-  std::vector<double> boundary0;
-  std::vector<double> boundary1;
+  std::vector<size_t> boundary0;
+  std::vector<size_t> boundary1;
   boundary1.push_back(2);
   boundary1.push_back(0);
-  std::vector<double> boundary2;
-  std::vector<double> boundary3;
+  std::vector<size_t> boundary2;
+  std::vector<size_t> boundary3;
   boundary3.push_back(0);
   boundary3.push_back(2);
-  std::vector<double> boundary4;
+  std::vector<size_t> boundary4;
   boundary4.push_back(8);
   boundary4.push_back(0);
-  std::vector<double> boundary5;
+  std::vector<size_t> boundary5;
   boundary5.push_back(9);
   boundary5.push_back(1);
   boundary5.push_back(4);
   boundary5.push_back(6);
-  std::vector<double> boundary6;
+  std::vector<size_t> boundary6;
   boundary6.push_back(10);
   boundary6.push_back(2);
-  std::vector<double> boundary7;
+  std::vector<size_t> boundary7;
   boundary7.push_back(11);
   boundary7.push_back(3);
   boundary7.push_back(6);
   boundary7.push_back(4);
-  std::vector<double> boundary8;
-  std::vector<double> boundary9;
+  std::vector<size_t> boundary8;
+  std::vector<size_t> boundary9;
   boundary9.push_back(10);
   boundary9.push_back(8);
-  std::vector<double> boundary10;
-  std::vector<double> boundary11;
+  std::vector<size_t> boundary10;
+  std::vector<size_t> boundary11;
   boundary11.push_back(8);
   boundary11.push_back(10);
-  std::vector<double> boundary12;
+  std::vector<size_t> boundary12;
   boundary12.push_back(0);
   boundary12.push_back(8);
-  std::vector<double> boundary13;
+  std::vector<size_t> boundary13;
   boundary13.push_back(1);
   boundary13.push_back(9);
   boundary13.push_back(12);
   boundary13.push_back(14);
-  std::vector<double> boundary14;
+  std::vector<size_t> boundary14;
   boundary14.push_back(2);
   boundary14.push_back(10);
-  std::vector<double> boundary15;
+  std::vector<size_t> boundary15;
   boundary15.push_back(3);
   boundary15.push_back(11);
   boundary15.push_back(14);
   boundary15.push_back(12);
 
-  std::vector<std::vector<double> > boundaries;
+  std::vector<std::vector<size_t> > boundaries;
   boundaries.push_back(boundary0);
   boundaries.push_back(boundary1);
   boundaries.push_back(boundary2);
@@ -648,7 +648,7 @@ BOOST_AUTO_TEST_CASE(boudary_operator_2d_bitmap_with_periodic_bcond) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
+BOOST_AUTO_TEST_CASE(coboundary_operator_2d_bitmap_with_periodic_bcond) {
   std::vector<double> filtration({0, 0, 0, 0});
 
   std::vector<unsigned> dimensions({2, 2});
@@ -658,56 +658,56 @@ BOOST_AUTO_TEST_CASE(coboudary_operator_2d_bitmap_with_periodic_bcond) {
   Bitmap_cubical_complex_periodic_boundary_conditions cmplx(dimensions, filtration, periodic_directions);
   BOOST_CHECK(cmplx.dimension() == 2);
 
-  std::vector<double> coboundary0;
+  std::vector<size_t> coboundary0;
   coboundary0.push_back(4);
   coboundary0.push_back(12);
   coboundary0.push_back(1);
   coboundary0.push_back(3);
-  std::vector<double> coboundary1;
+  std::vector<size_t> coboundary1;
   coboundary1.push_back(5);
   coboundary1.push_back(13);
-  std::vector<double> coboundary2;
+  std::vector<size_t> coboundary2;
   coboundary2.push_back(6);
   coboundary2.push_back(14);
   coboundary2.push_back(1);
   coboundary2.push_back(3);
-  std::vector<double> coboundary3;
+  std::vector<size_t> coboundary3;
   coboundary3.push_back(7);
   coboundary3.push_back(15);
-  std::vector<double> coboundary4;
+  std::vector<size_t> coboundary4;
   coboundary4.push_back(5);
   coboundary4.push_back(7);
-  std::vector<double> coboundary5;
-  std::vector<double> coboundary6;
+  std::vector<size_t> coboundary5;
+  std::vector<size_t> coboundary6;
   coboundary6.push_back(5);
   coboundary6.push_back(7);
-  std::vector<double> coboundary7;
-  std::vector<double> coboundary8;
+  std::vector<size_t> coboundary7;
+  std::vector<size_t> coboundary8;
   coboundary8.push_back(4);
   coboundary8.push_back(12);
   coboundary8.push_back(9);
   coboundary8.push_back(11);
-  std::vector<double> coboundary9;
+  std::vector<size_t> coboundary9;
   coboundary9.push_back(5);
   coboundary9.push_back(13);
-  std::vector<double> coboundary10;
+  std::vector<size_t> coboundary10;
   coboundary10.push_back(6);
   coboundary10.push_back(14);
   coboundary10.push_back(9);
   coboundary10.push_back(11);
-  std::vector<double> coboundary11;
+  std::vector<size_t> coboundary11;
   coboundary11.push_back(7);
   coboundary11.push_back(15);
-  std::vector<double> coboundary12;
+  std::vector<size_t> coboundary12;
   coboundary12.push_back(13);
   coboundary12.push_back(15);
-  std::vector<double> coboundary13;
-  std::vector<double> coboundary14;
+  std::vector<size_t> coboundary13;
+  std::vector<size_t> coboundary14;
   coboundary14.push_back(13);
   coboundary14.push_back(15);
-  std::vector<double> coboundary15;
+  std::vector<size_t> coboundary15;
 
-  std::vector<std::vector<double> > coboundaries;
+  std::vector<std::vector<size_t> > coboundaries;
   coboundaries.push_back(coboundary0);
   coboundaries.push_back(coboundary1);
   coboundaries.push_back(coboundary2);
@@ -1553,25 +1553,27 @@ BOOST_AUTO_TEST_CASE(compute_incidence_between_cells_test_periodic_boundary_cond
   std::vector<double> data(27, 0);
 
   int number_of_all_elements = (2 * sizes[0]) * (2 * sizes[1]) * (2 * sizes[2]);
-  Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity);
-  
-  std::vector<int> elems_in_boundary(number_of_all_elements, 0);  
-  for (auto it = ba.all_cells_iterator_begin();
-       it != ba.all_cells_iterator_end(); ++it) {    
-    Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
-    for (auto bd = bdrange.begin();
-         bd != bdrange.end(); ++bd) {
-      std::clog <<  *bd << " ";
-      Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
-      for (auto bd2 = second_bdrange.begin();
-           bd2 != second_bdrange.end(); ++bd2) {
-        elems_in_boundary[*bd2] +=
+  for (bool variant : { false, true }) {
+    Bitmap_cubical_complex_periodic_boundary_conditions ba(sizes, data, directions_of_periodicity, variant);
+
+    std::vector<int> elems_in_boundary(number_of_all_elements, 0);
+    for (auto it = ba.all_cells_iterator_begin();
+        it != ba.all_cells_iterator_end(); ++it) {
+      Bitmap_cubical_complex_periodic_boundary_conditions_base::Boundary_range bdrange = ba.boundary_range(*it);
+      for (auto bd = bdrange.begin();
+          bd != bdrange.end(); ++bd) {
+        std::clog <<  *bd << " ";
+        Bitmap_cubical_complex_periodic_boundary_conditions::Boundary_range second_bdrange = ba.boundary_range(*bd);
+        for (auto bd2 = second_bdrange.begin();
+            bd2 != second_bdrange.end(); ++bd2) {
+          elems_in_boundary[*bd2] +=
             ba.compute_incidence_between_cells(*it, *bd) * ba.compute_incidence_between_cells(*bd, *bd2);
+        }
       }
-    }
-    // check if there is anything nonzero in elems_in_boundary
-    for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
-      BOOST_CHECK(elems_in_boundary[i] == 0);
+      // check if there is anything nonzero in elems_in_boundary
+      for (size_t i = 0; i != elems_in_boundary.size(); ++i) {
+        BOOST_CHECK(elems_in_boundary[i] == 0);
+      }
     }
   }
 }

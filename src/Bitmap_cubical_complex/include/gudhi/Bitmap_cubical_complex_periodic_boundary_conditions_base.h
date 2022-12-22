@@ -249,6 +249,23 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     return a;
   }
 
+  /**
+   * @brief Vertices_iterator_range class provides ranges for Vertices_iterator_range
+   **/
+  class Vertices_range {
+   public:
+    Vertices_range(Bitmap_cubical_complex_periodic_boundary_conditions_base* b) : b(b) {}
+
+    Vertices_iterator begin() { return b->vertices_iterator_begin(); }
+
+    Vertices_iterator end() { return b->vertices_iterator_end(); }
+
+   private:
+    Bitmap_cubical_complex_periodic_boundary_conditions_base<T>* b;
+  };
+
+  Vertices_range vertices_range() { return Vertices_range(this); }
+
   void impose_lower_star_filtration_from_vertices();
 
  protected:
