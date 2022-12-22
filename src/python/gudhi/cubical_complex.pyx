@@ -30,16 +30,16 @@ __license__ = "MIT"
 np.import_array()
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<>":
+    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface":
         Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells) nogil
-        Bitmap_cubical_complex_base_interface(string perseus_file) nogil
+        Bitmap_cubical_complex_base_interface(const char* perseus_file) nogil
         int num_simplices() nogil
         int dimension() nogil
         vector[unsigned] shape() nogil
         vector[double] data
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<>>":
+    cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface>":
         Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except+
         vector[pair[int, pair[double, double]]] get_persistence() nogil
@@ -84,6 +84,7 @@ cdef class CubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   perseus_file=''):
+        cdef const char* file
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (perseus_file == '')):
             self._construct_from_cells(dimensions, top_dimensional_cells)
@@ -98,7 +99,9 @@ cdef class CubicalComplex:
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self._construct_from_file(perseus_file.encode('utf-8'))
+                perseus_file = perseus_file.encode('utf-8')
+                file = perseus_file
+                self._construct_from_file(file)
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                         perseus_file)
@@ -111,7 +114,7 @@ cdef class CubicalComplex:
         with nogil:
             self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, top_dimensional_cells)
 
-    def _construct_from_file(self, string filename):
+    def _construct_from_file(self, const char* filename):
         with nogil:
             self.thisptr = new Bitmap_cubical_complex_base_interface(filename)
 
