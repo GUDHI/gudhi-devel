@@ -827,8 +827,8 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus_style_file) {
-  std::ifstream inFiltration;
-  inFiltration.open(perseus_style_file);
+  std::ifstream inFiltration(perseus_style_file);
+  if(!inFiltration) throw std::ios_base::failure(std::string("Could not open the file ") + perseus_style_file);
   unsigned dimensionOfData;
   inFiltration >> dimensionOfData;
 
@@ -879,7 +879,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
   if (filtration_counter != dimensions) {
     std::string perseus_error("Bad Perseus file format. Read " + std::to_string(filtration_counter) + " expected " + \
       std::to_string(dimensions) + " values");
-    throw std::ios_base::failure(perseus_error.c_str());
+    throw std::ios_base::failure(perseus_error);
   }
 
   inFiltration.close();
