@@ -229,17 +229,17 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     Bitmap_cubical_complex_periodic_boundary_conditions_base& b;
   };
 
-  /**
+  /*
    * Function returning a Vertices_iterator to the first vertex of the bitmap.
-   **/
+   */
   Vertices_iterator vertices_iterator_begin() {
     Vertices_iterator a(*this);
     return a;
   }
 
-  /**
+  /*
    * Function returning a Vertices_iterator to the last vertex of the bitmap.
-   **/
+   */
   Vertices_iterator vertices_iterator_end() {
     Vertices_iterator a(*this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
@@ -249,9 +249,9 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     return a;
   }
 
-  /**
+  /*
    * @brief Vertices_iterator_range class provides ranges for Vertices_iterator_range
-   **/
+   */
   class Vertices_range {
    public:
     Vertices_range(Bitmap_cubical_complex_periodic_boundary_conditions_base* b) : b(b) {}
@@ -264,8 +264,13 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     Bitmap_cubical_complex_periodic_boundary_conditions_base<T>* b;
   };
 
+  /* Returns a range over all vertices. */
   Vertices_range vertices_range() { return Vertices_range(this); }
 
+  /**
+   * Set cells filtrations given those of the vertices, and based on lower star filtration.
+   * This is already called by the relevant constructors.
+   **/
   void impose_lower_star_filtration_from_vertices();
 
  protected:

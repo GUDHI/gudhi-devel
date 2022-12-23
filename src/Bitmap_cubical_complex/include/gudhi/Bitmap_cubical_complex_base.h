@@ -213,6 +213,7 @@ class Bitmap_cubical_complex_base {
 
   /**
    * Set cells filtrations given those of the vertices, and based on lower star filtration.
+   * This is already called by the relevant constructors.
    **/
   void impose_lower_star_filtration_from_vertices();  // assume that vertices are already set.
 
@@ -323,7 +324,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Function returning a All_cells_iterator to the last cell of the bitmap.
+   * Function returning a All_cells_iterator beyond the last cell of the bitmap.
    **/
   All_cells_iterator all_cells_iterator_end() {
     All_cells_iterator a;
@@ -332,7 +333,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @brief All_cells_range class provides ranges for All_cells_iterator
+   * @brief Range corresponding to All_cells_iterator
    **/
   class All_cells_range {
    public:
@@ -346,6 +347,7 @@ class Bitmap_cubical_complex_base {
     Bitmap_cubical_complex_base<T>* b;
   };
 
+  /** Returns a range over all cells. */
   All_cells_range all_cells_range() { return All_cells_range(this); }
 
   /**
@@ -463,7 +465,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * Function returning a Top_dimensional_cells_iterator to the last top dimensional cell of the bitmap.
+   * Function returning a Top_dimensional_cells_iterator beyond the last top dimensional cell of the bitmap.
    **/
   Top_dimensional_cells_iterator top_dimensional_cells_iterator_end() {
     Top_dimensional_cells_iterator a(*this);
@@ -475,7 +477,7 @@ class Bitmap_cubical_complex_base {
   }
 
   /**
-   * @brief Top_dimensional_cells_iterator_range class provides ranges for Top_dimensional_cells_iterator_range
+   * @brief Range corresponding to Top_dimensional_cells_iterator
    **/
   class Top_dimensional_cells_range {
    public:
@@ -489,6 +491,7 @@ class Bitmap_cubical_complex_base {
     Bitmap_cubical_complex_base<T>* b;
   };
 
+  /** Returns a range over all top-dimensional cells. */
   Top_dimensional_cells_range top_dimensional_cells_range() { return Top_dimensional_cells_range(this); }
 
   //****************************************************************************************************************//
@@ -573,17 +576,17 @@ class Bitmap_cubical_complex_base {
     Bitmap_cubical_complex_base& b;
   };
 
-  /**
+  /*
    * Function returning a Vertices_iterator to the first vertex of the bitmap.
-   **/
+   */
   Vertices_iterator vertices_iterator_begin() {
     Vertices_iterator a(*this);
     return a;
   }
 
-  /**
+  /*
    * Function returning a Vertices_iterator to the last vertex of the bitmap.
-   **/
+   */
   Vertices_iterator vertices_iterator_end() {
     Vertices_iterator a(*this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
@@ -593,9 +596,9 @@ class Bitmap_cubical_complex_base {
     return a;
   }
 
-  /**
+  /*
    * @brief Vertices_iterator_range class provides ranges for Vertices_iterator_range
-   **/
+   */
   class Vertices_range {
    public:
     Vertices_range(Bitmap_cubical_complex_base* b) : b(b) {}
@@ -608,6 +611,7 @@ class Bitmap_cubical_complex_base {
     Bitmap_cubical_complex_base<T>* b;
   };
 
+  /* Returns a range over all vertices. */
   Vertices_range vertices_range() { return Vertices_range(this); }
 
   //****************************************************************************************************************//
