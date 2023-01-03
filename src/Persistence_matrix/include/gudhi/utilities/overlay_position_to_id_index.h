@@ -143,14 +143,14 @@ template<class Matrix_type, class Master_matrix_type>
 inline typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Row_type &
 Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index rowIndex)
 {
-	return matrix_.get_row(columnPositionToID_.at(rowIndex));
+	return matrix_.get_row(matrix_.get_pivot(columnPositionToID_.at(rowIndex)));
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline const typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Row_type &
 Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index rowIndex) const
 {
-	return matrix_.get_row(columnPositionToID_.at(rowIndex));
+	return matrix_.get_row(matrix_.get_pivot(columnPositionToID_.at(rowIndex)));
 }
 
 template<class Matrix_type, class Master_matrix_type>

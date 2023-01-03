@@ -639,6 +639,10 @@ public:
 	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
+	//Warning: the get_column_index() function of the row cells returns not
+	//the expected type of indices: for boundary matrices, it will returns
+	//the simplex number and for chain matrices, it will return the effectiv
+	//column index, independently of the indexing chosen in the options.
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
 	void erase_last();

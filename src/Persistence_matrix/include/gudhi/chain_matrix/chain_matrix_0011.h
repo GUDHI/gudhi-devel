@@ -435,11 +435,6 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 
 	while (matrix_.at(currentPivot).is_paired())
 	{
-//		if (nextInsertIndex_ == 6){
-//			std::cout << "column0: ";
-//			for (auto& p : column) std::cout << "(" << p.first << ", " << p.second << ") ";
-//			std::cout << "\n";
-//		}
 		_reduce_by_G(column, chainsInH, currentPivot);
 
 		if (column.empty()) {

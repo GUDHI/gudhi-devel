@@ -98,26 +98,16 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  matrix_(orderedBoundaries.size()),
 	  nextInsertIndex_(orderedBoundaries.size())
-{/*std::cout << "here0\n";*/
-	if constexpr (swap_opt::isActive_){
-		swap_opt::indexToRow_.reserve(orderedBoundaries.size());
-		swap_opt::rowToIndex_.reserve(orderedBoundaries.size());
-	}
-//std::cout << "here1\n";
+{
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
 		matrix_.emplace(i, Column_type(b));
-//std::cout << "here10\n";
+
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 		++(dimensions_[dim]);
-//std::cout << "here11\n";
-		if constexpr (swap_opt::isActive_){
-			swap_opt::indexToRow_[i] = i;
-			swap_opt::rowToIndex_[i] = i;
-		}/*std::cout << "here12\n";*/
 	}
-//std::cout << "here2\n";
+
 	maxDim_ = dimensions_.size() - 1;
 }
 
@@ -128,17 +118,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(unsig
 	  matrix_(numberOfColumns),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
-{
-	if constexpr (swap_opt::isActive_){
-		swap_opt::indexToRow_.reserve(numberOfColumns);
-		swap_opt::rowToIndex_.reserve(numberOfColumns);
-
-		for (unsigned int i = 0; i < numberOfColumns; i++){
-			swap_opt::indexToRow_[i] = i;
-			swap_opt::rowToIndex_[i] = i;
-		}
-	}
-}
+{}
 
 template<class Master_matrix>
 inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const Base_matrix_with_removals &matrixToCopy)

@@ -24,7 +24,7 @@ template<class Master_matrix>
 class Chain_representative_cycles
 {
 public:
-	using cycle_type = std::vector<index>;
+	using cycle_type = std::vector<index>;	//TODO: add coefficients
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 

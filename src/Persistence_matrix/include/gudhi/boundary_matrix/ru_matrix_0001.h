@@ -37,8 +37,8 @@ public:
 
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);
-	Column_type& get_column(index columnIndex);
-	const Column_type& get_column(index columnIndex) const;
+	Column_type& get_column(index columnIndex, bool inR = true);
+	const Column_type& get_column(index columnIndex, bool inR = true) const;
 	Row_type get_row(index rowIndex) const;
 	void erase_last();
 
@@ -82,7 +82,7 @@ private:
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
 	Base_matrix_with_removals<Master_matrix> reducedMatrixR_;
-	Base_matrix_with_removals<Master_matrix> mirrorMatrixU_;
+	Base_matrix_with_removals<Master_matrix> mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
 	index nextInsertIndex_;
 
@@ -171,19 +171,28 @@ inline void RU_matrix_with_removals<Master_matrix>::insert_boundary(const Bounda
 }
 
 template<class Master_matrix>
-inline typename RU_matrix_with_removals<Master_matrix>::Column_type &RU_matrix_with_removals<Master_matrix>::get_column(index columnIndex)
+inline typename RU_matrix_with_removals<Master_matrix>::Column_type &
+RU_matrix_with_removals<Master_matrix>::get_column(index columnIndex, bool inR)
 {
-	return reducedMatrixR_.get_column(columnIndex);
+	if (inR){
+		return reducedMatrixR_.get_column(columnIndex);
+	}
+	return mirrorMatrixU_.get_column(columnIndex);
 }
 
 template<class Master_matrix>
-inline const typename RU_matrix_with_removals<Master_matrix>::Column_type &RU_matrix_with_removals<Master_matrix>::get_column(index columnIndex) const
+inline const typename RU_matrix_with_removals<Master_matrix>::Column_type &
+RU_matrix_with_removals<Master_matrix>::get_column(index columnIndex, bool inR) const
 {
-	return reducedMatrixR_.get_column(columnIndex);
+	if (inR){
+		return reducedMatrixR_.get_column(columnIndex);
+	}
+	return mirrorMatrixU_.get_column(columnIndex);
 }
 
 template<class Master_matrix>
-inline typename RU_matrix_with_removals<Master_matrix>::Row_type RU_matrix_with_removals<Master_matrix>::get_row(index rowIndex) const
+inline typename RU_matrix_with_removals<Master_matrix>::Row_type
+RU_matrix_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
 			"'get_row' is not implemented for the chosen options.");

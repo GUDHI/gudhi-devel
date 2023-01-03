@@ -87,16 +87,16 @@ inline void Base_pairing<Master_matrix>::_reduce()
 
 	for (int d = *maxDim_; d > 0; d--){
 		for (unsigned int i = 0; i < matrix_->size(); i++){
-			if (!(matrix[i].is_empty()) && matrix[i].get_dimension() == d)
+			if (!(matrix.at(i).is_empty()) && matrix.at(i).get_dimension() == d)
 			{
-				column_type &curr = matrix[i];
+				column_type &curr = matrix.at(i);
 				int pivot = curr.get_pivot();
 
 				while (pivot != -1 && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
 					if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
-						curr += matrix[pivotsToColumn.at(pivot)];
+						curr += matrix.at(pivotsToColumn.at(pivot));
 					} else {
-						column_type &toadd = matrix[pivotsToColumn.at(pivot)];
+						column_type &toadd = matrix.at(pivotsToColumn.at(pivot));
 						typename Master_matrix::Field_type coef = curr.get_pivot_value();
 						coef = coef.get_inverse();
 						coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
@@ -109,17 +109,17 @@ inline void Base_pairing<Master_matrix>::_reduce()
 
 				if (pivot != -1){
 					pivotsToColumn.emplace(pivot, i);
-					matrix[pivot].clear();
+					matrix.at(pivot).clear();
 					barcode_.push_back(Bar(d - 1, pivot, i));
 				} else {
-					matrix[i].clear();
+					matrix.at(i).clear();
 					barcode_.push_back(Bar(d, i, -1));
 				}
 			}
 		}
 	}
 	for (unsigned int i = 0; i < matrix_->size(); i++){
-		if (matrix[i].get_dimension() == 0 && pivotsToColumn.find(i) == pivotsToColumn.end()){
+		if (matrix.at(i).get_dimension() == 0 && pivotsToColumn.find(i) == pivotsToColumn.end()){
 			barcode_.push_back(Bar(0, i, -1));
 		}
 	}

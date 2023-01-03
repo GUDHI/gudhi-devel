@@ -25,7 +25,6 @@ class Row_access
 {
 public:
 	Row_access(index columnIndex, Row_container_type& rows);
-//	Row_access(const Row_access &toCopy);
 	Row_access(Row_access&& other) noexcept;
 
 	void insert_cell(index rowIndex, Cell_type *cell);
@@ -35,7 +34,6 @@ public:
 	void update_cell(const Cell_type &cell);
 	index get_column_index() const;
 
-//	Row_access& operator=(Row_access other);
 	friend void swap(Row_access& r1, Row_access& r2){
 		std::swap(r1.rows_, r2.rows_);
 		std::swap(r1.columnIndex_, r2.columnIndex_);
@@ -58,11 +56,6 @@ template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRe
 inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access(index columnIndex, Row_container_type &rows)
 	: columnIndex_(columnIndex), rows_(&rows)
 {}
-
-//template<class Master_matrix>
-//inline Row_access<Master_matrix>::Row_access(const Row_access &toCopy)
-//	: columnIndex_(toCopy.columnIndex_), rows_(toCopy.rows_)
-//{}
 
 template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
 inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access(Row_access &&other) noexcept

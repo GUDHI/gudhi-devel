@@ -68,7 +68,12 @@ inline Base_swap<Master_matrix>::Base_swap(matrix_type &matrix, unsigned int num
 	  rowToIndex_(numberOfColumns),
 	  rowSwapped_(false),
 	  matrix_(matrix)
-{}
+{
+	for (unsigned int i = 0; i < numberOfColumns; i++){
+		indexToRow_[i] = i;
+		rowToIndex_[i] = i;
+	}
+}
 
 template<class Master_matrix>
 inline Base_swap<Master_matrix>::Base_swap(const Base_swap<Master_matrix>& matrixToCopy)
@@ -89,7 +94,7 @@ inline Base_swap<Master_matrix>::Base_swap(Base_swap<Master_matrix> &&other) noe
 template<class Master_matrix>
 inline void Base_swap<Master_matrix>::swap_columns(index columnIndex1, index columnIndex2)
 {
-	swap(matrix_[columnIndex1], matrix_[columnIndex2]);
+	swap(matrix_.at(columnIndex1), matrix_.at(columnIndex2));
 }
 
 template<class Master_matrix>
@@ -121,7 +126,7 @@ template<class Master_matrix>
 inline void Base_swap<Master_matrix>::_orderRows()
 {
 	for (unsigned int i = 0; i < matrix_.size(); i++){
-		matrix_[i].reorder(rowToIndex_);
+		matrix_.at(i).reorder(rowToIndex_);
 	}
 	for (unsigned int i = 0; i < matrix_.size(); i++){
 		indexToRow_[i] = i;

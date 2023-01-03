@@ -123,6 +123,7 @@ struct opt_b_ra_i_p : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = false;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -132,6 +133,7 @@ struct opt_b_ra_p : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = false;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -141,15 +143,17 @@ struct opt_b_ra_i_r_p : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
 struct opt_b_ra_r_p : Default_options<Field_type, column_type, false, false>{
-	static const bool is_of_boundary_type = false;
+	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -159,6 +163,7 @@ struct opt_b_ra_i : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = false;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -168,6 +173,7 @@ struct opt_b_ra : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = false;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -177,15 +183,17 @@ struct opt_b_ra_i_r : Default_options<Field_type, column_type, false, false>{
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
 struct opt_b_ra_r : Default_options<Field_type, column_type, false, false>{
-	static const bool is_of_boundary_type = false;
+	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_column_pairings = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -384,7 +392,25 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r<Z5,Column_types::INTRUSIVE_SET> >,
-							Matrix<opt_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_r<Z2,Column_types::INTRUSIVE_SET> >
+						> list_of_matrix_types;
+
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_ra_p<Z5,Column_types::SET> >,
@@ -401,9 +427,10 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_ra_r<Z5,Column_types::SET> >,
 							Matrix<opt_ra_r<Z2,Column_types::SET> >
-						> list_of_matrix_types;
+						> list_of_matrix_types2;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Matrix_constructors, Matrix, list_of_matrix_types) {
+template<class Matrix>
+void test_constructors(){
 	using boundary_matrix = typename Matrix::boundary_matrix;
 
 	boundary_matrix ordered_boundaries;
@@ -457,6 +484,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Matrix_constructors, Matrix, list_of_matrix_types)
 	BOOST_CHECK_EQUAL(mb.get_column_dimension(6), 2);
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(Matrix_constructors, Matrix, list_of_matrix_types) {
+	test_constructors<Matrix>();
+}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Matrix_constructors_bis, Matrix, list_of_matrix_types2) {
+	test_constructors<Matrix>();
+}
+
 typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b<Z5,Column_types::INTRUSIVE_SET> >,
@@ -464,7 +498,23 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_r_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_r_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_SET> >,
-							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_SET> >
+							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >
 						> list_of_base_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_methods, Matrix, list_of_base_matrix_types) {
@@ -689,12 +739,28 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_methods, Matrix, list_of_chain_matrix
 typedef boost::mpl::list<Matrix<opt_b_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_r_p<Z2,Column_types::INTRUSIVE_SET> >,
-							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_SET> >
+							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >
 						> list_of_Z2_base_matrix_types;
 typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_b_r_p<Z5,Column_types::INTRUSIVE_SET> >,
-							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_SET> >
+							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >
 						> list_of_Z5_base_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_matrix_methods, Matrix, list_of_Z2_base_matrix_types) {
@@ -1058,84 +1124,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_row_access_columns_options, Matrix, list_
 	}
 }
 
-typedef boost::mpl::list<> list_of_z5_boundary_options_with_row_access;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_row_access_columns_options, Matrix, list_of_z5_boundary_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
-
-	boundary_matrix ordered_boundaries;
-	build_boundary_matrix(ordered_boundaries);
-
-	Matrix mb(ordered_boundaries);
-
-	std::vector<std::vector<std::pair<unsigned int,Z5> > > rows;
-	rows.push_back({{3,Z5(1)}});
-	rows.push_back({{3,Z5(4)},{4,Z5(1)}});
-	rows.push_back({{4,Z5(4)}});
-	rows.push_back({{6,Z5(1)}});
-	rows.push_back({{6,Z5(1)}});
-	rows.push_back({{6,Z5(4)}});
-	rows.push_back({});
-
-	//rows are unordered
-	std::vector<std::set<std::pair<unsigned int,Z5> > > ordered_rows(rows.size());
-	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
-		}
-	}
-	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(itRow->first, itChain->first);
-			BOOST_CHECK_EQUAL(itRow->second, itChain->second);
-			++itRow; ++itChain;
-		}
-	}
-}
-
-typedef boost::mpl::list<> list_of_z2_boundary_options_with_row_access;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_boundary_row_access_columns_options, Matrix, list_of_z2_boundary_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
-
-	boundary_matrix ordered_boundaries;
-	build_boundary_matrix(ordered_boundaries);
-
-	Matrix mb(ordered_boundaries);
-
-	std::vector<std::vector<unsigned int> > rows;
-	rows.push_back({3});
-	rows.push_back({3,4});
-	rows.push_back({4});
-	rows.push_back({6});
-	rows.push_back({6});
-	rows.push_back({6});
-	rows.push_back({});
-
-	//rows are unordered
-	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
-	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert(cell.get_column_index());
-		}
-	}
-	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(*itRow, *itChain);
-			++itRow; ++itChain;
-		}
-	}
-}
-
-typedef boost::mpl::list<> list_of_z5_base_options_with_row_access;
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >
+						> list_of_z5_base_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z5_base_options_with_row_access) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
@@ -1146,9 +1143,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	Matrix mb(ordered_boundaries);
 
 	std::vector<std::vector<std::pair<unsigned int,Z5> > > rows;
-	rows.push_back({{3,Z5(1)},{5,Z5(4)}});
+	rows.push_back({{3,Z5(1)},{5,Z5(1)}});
 	rows.push_back({{3,Z5(4)},{4,Z5(1)}});
-	rows.push_back({{4,Z5(4)},{5,Z5(1)}});
+	rows.push_back({{4,Z5(4)},{5,Z5(4)}});
 	rows.push_back({{6,Z5(1)}});
 	rows.push_back({{6,Z5(1)}});
 	rows.push_back({{6,Z5(4)}});
@@ -1174,7 +1171,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	}
 }
 
-typedef boost::mpl::list<> list_of_z2_base_options_with_row_access;
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >
+						> list_of_z2_base_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_of_z2_base_options_with_row_access) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
@@ -1231,7 +1236,15 @@ typedef boost::mpl::list<Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r_p<Z5,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r_p<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_r<Z5,Column_types::INTRUSIVE_SET> >,
-							Matrix<opt_r<Z2,Column_types::INTRUSIVE_SET> >
+							Matrix<opt_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >
 						> list_of_options_with_remove;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Removable_columns_options, Matrix, list_of_options_with_remove) {

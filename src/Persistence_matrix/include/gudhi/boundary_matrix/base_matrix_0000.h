@@ -98,22 +98,11 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Boundary_type> 
 	  maxDim_(0),
 	  nextInsertIndex_(orderedBoundaries.size())
 {
-	if constexpr (swap_opt::isActive_){
-		swap_opt::indexToRow_.resize(orderedBoundaries.size());
-		swap_opt::rowToIndex_.resize(orderedBoundaries.size());
-	}
-
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
 		matrix_[i] = Column_type(b);
-		if (maxDim_ < static_cast<int>(b.size()) - 1) maxDim_ = b.size() - 1;
-
-		if constexpr (swap_opt::isActive_){
-			swap_opt::indexToRow_[i] = i;
-			swap_opt::rowToIndex_[i] = i;
-		}
+		if (maxDim_ < matrix_[i].get_dimension()) maxDim_ = matrix_[i].get_dimension();
 	}
-	if (maxDim_ == -1) maxDim_ = 0;
 }
 
 template<class Master_matrix>
@@ -123,17 +112,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
 	  matrix_(numberOfColumns),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
-{
-	if constexpr (swap_opt::isActive_){
-		swap_opt::indexToRow_.resize(numberOfColumns);
-		swap_opt::rowToIndex_.resize(numberOfColumns);
-
-		for (unsigned int i = 0; i < numberOfColumns; i++){
-			swap_opt::indexToRow_[i] = i;
-			swap_opt::rowToIndex_[i] = i;
-		}
-	}
-}
+{}
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)

@@ -169,8 +169,20 @@ inline void Z2_intrusive_set_boundary_column<Cell_type,Column_pairing_option,Row
 {
 	Column_type newSet;
 	for (auto it = Base::column_.begin(); it != Base::column_.end(); ) {
-		_insert_cell(valueMap[it->get_row_index()], newSet);
-		Base::_delete_cell(it);
+		Cell *new_cell = new Cell(Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+		newSet.insert(newSet.end(), *new_cell);
+		if constexpr (Row_access_option::isActive_) {
+			auto ittemp = it;
+			++it;
+			Base::_delete_cell(ittemp);
+		}
+		else ++it;
+	}
+	//all cells have to be deleted first, to avoid problem with insertion when row is a set
+	if constexpr (Row_access_option::isActive_) {
+		for (Cell& cell : newSet) {
+			Row_access_option::insert_cell(cell.get_row_index(), &cell);
+		}
 	}
 	Base::column_.swap(newSet);
 }

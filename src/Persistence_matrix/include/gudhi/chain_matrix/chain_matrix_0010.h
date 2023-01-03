@@ -177,6 +177,7 @@ inline Chain_matrix_with_row_access<Master_matrix>::Chain_matrix_with_row_access
 	: Master_matrix::Chain_pairing_option(matrixToCopy),
 	  Master_matrix::Chain_vine_swap_option(matrixToCopy),
 	  Master_matrix::Chain_representative_cycles_option(matrixToCopy),
+	  rows_(matrixToCopy.rows_.size()),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
 	  maxDim_(matrixToCopy.maxDim_)
@@ -362,6 +363,15 @@ inline void Chain_matrix_with_row_access<Master_matrix>::print() const
 			std::cout << cell.get_column_index() << " ";
 		}
 		std::cout << "(" << i << ", " << pos << ")\n";
+	}
+	std::cout << "\n";
+	std::cout << "Row Matrix:\n";
+	for (unsigned int i = 0; i < rows_.size(); ++i){
+		const Row_type& row = rows_[i];
+		for (const auto &cell : row){
+			std::cout << cell.get_column_index() << " ";
+		}
+		std::cout << "(" << i << ")\n";
 	}
 	std::cout << "\n";
 }

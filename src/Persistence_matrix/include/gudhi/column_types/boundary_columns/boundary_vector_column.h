@@ -228,10 +228,15 @@ inline void Vector_boundary_column<Field_element_type,Cell_type,Column_pairing_o
 			newColumn.push_back(v);
 			if constexpr (Row_access_option::isActive_){
 				Row_access_option::unlink(v);
-				Row_access_option::insert_cell(v->get_row_index(), v);
 			}
 		} else {
 			Base::_delete_cell(v);
+		}
+	}
+	//all cells have to be deleted first, to avoid problem with insertion when row is a set
+	if constexpr (Row_access_option::isActive_){
+		for (Cell* cell : Base::column_) {
+			Row_access_option::insert_cell(cell->get_row_index(), cell);
 		}
 	}
 	std::sort(newColumn.begin(), newColumn.end(), [](const Cell* c1, const Cell* c2){return *c1 < *c2;});

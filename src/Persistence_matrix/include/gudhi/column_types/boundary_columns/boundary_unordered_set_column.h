@@ -229,9 +229,19 @@ inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pa
 {
 	Column_type newSet;
 	for (auto it = Base::column_.begin(); it != Base::column_.end(); ) {
-		_insert_cell(it->get_element(), valueMap[it->get_row_index()], newSet);
-		if constexpr (Row_access_option::isActive_) Base::_delete_cell(it);
+		newSet.emplace_hint(newSet.end(), it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+		if constexpr (Row_access_option::isActive_) {
+			auto ittemp = it;
+			++it;
+			Base::_delete_cell(ittemp);
+		}
 		else ++it;
+	}
+	//all cells have to be deleted first, to avoid problem with insertion when row is a set
+	if constexpr (Row_access_option::isActive_) {
+		for (auto it = newSet.begin(); it != newSet.end(); ++it) {
+			Row_access_option::insert_cell(it->get_row_index(), *it);
+		}
 	}
 	Base::column_.swap(newSet);
 	pivotChanged_ = true;

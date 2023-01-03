@@ -24,7 +24,7 @@ template<class Master_matrix>
 class RU_representative_cycles
 {
 public:
-	using cycle_type = std::vector<index>;
+	using cycle_type = std::vector<index>;	//TODO: add coefficients
 	using Base_matrix = typename Master_matrix::Base_matrix_type;
 
 	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
@@ -83,8 +83,7 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 	for (unsigned int i = 0; i < reducedMatrixR_->get_number_of_columns(); i++){
 		if (reducedMatrixR_->is_zero_column(i)){
 			representativeCycles_.push_back(cycle_type());
-			auto column = mirrorMatrixU_->get_column(i);
-			for (auto cell : column){
+			for (auto cell : mirrorMatrixU_->get_column(i)){
 				representativeCycles_.back().push_back(cell.get_row_index());
 				if constexpr (Master_matrix::Option_list::column_type == Column_types::HEAP || Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)
 						std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());

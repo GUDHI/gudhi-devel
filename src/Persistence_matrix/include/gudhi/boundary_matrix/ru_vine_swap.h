@@ -306,9 +306,9 @@ inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(index inde
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_negative_positive_vine_swap(index index)
 {
-	_add_to(index, index + 1);
-	_swap_at_index(index);
-	_add_to(index, index + 1);
+	_add_to(index, index + 1);	//useless for R?
+	_swap_at_index(index);		//if additions not made for R, do not swap R columns
+	_add_to(index, index + 1);	//useless for R?
 
 	return false;
 }

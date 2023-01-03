@@ -291,8 +291,9 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 
 	bool change = matrix_.vine_swap_with_z_eq_1_case(first);
 
+	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+
 	if (change){
-		std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
 		return columnIndex1;
 	}
 
@@ -307,8 +308,9 @@ inline index Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::
 
 	bool change = matrix_.vine_swap(first);
 
+	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
+
 	if (change){
-		std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
 		return columnIndex1;
 	}
 

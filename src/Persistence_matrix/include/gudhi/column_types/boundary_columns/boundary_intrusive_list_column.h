@@ -174,8 +174,14 @@ inline void Intrusive_list_boundary_column<Field_element_type,Cell_type,Column_p
 		Cell* cell = &(*it);
 		if constexpr (Row_access_option::isActive_) Row_access_option::unlink(cell);
 		cell->set_row_index(valueMap[cell->get_row_index()]);
-		if constexpr (Row_access_option::isActive_) Row_access_option::insert_cell(cell->get_row_index(), cell);
 		it++;
+	}
+	//all cells have to be deleted first, to avoid problem with insertion when row is a set
+	if constexpr (Row_access_option::isActive_){
+		for (auto it = Base::column_.begin(); it != Base::column_.end(); ++it) {
+			Cell* cell = &(*it);
+			Row_access_option::insert_cell(cell->get_row_index(), cell);
+		}
 	}
 	Base::column_.sort();
 }
