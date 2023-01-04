@@ -49,6 +49,7 @@ struct Default_options{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = false;
 	static const bool is_indexed_by_position = true;
+	static const bool has_dimension_access = true;							//'false' not implemented yet, simplex dimensions are always stored for now
 };
 
 template<Column_types column_type = Column_types::SET, bool separated_by_dimension = false, bool parallelizable = false>

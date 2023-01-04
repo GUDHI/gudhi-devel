@@ -30,6 +30,8 @@ public:
 	using Column_type = std::list<Cell>;
 	using iterator = typename Column_type::iterator;
 	using const_iterator = typename Column_type::const_iterator;
+	using reverse_iterator = typename Column_type::reverse_iterator;
+	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
 
 	List_column();
 	template<class Container_type>
@@ -56,6 +58,10 @@ public:
 	const_iterator begin() const noexcept;
 	iterator end() noexcept;
 	const_iterator end() const noexcept;
+	reverse_iterator rbegin() noexcept;
+	const_reverse_iterator rbegin() const noexcept;
+	reverse_iterator rend() noexcept;
+	const_reverse_iterator rend() const noexcept;
 
 	List_column& operator+=(List_column const &column);
 	friend List_column operator+(List_column column1, List_column const& column2){
@@ -254,6 +260,34 @@ inline typename List_column<Field_element_type,Cell_type,Column_pairing_option,R
 List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::end() const noexcept
 {
 	return column_.end();
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
+List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rbegin() noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
+List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rbegin() const noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
+List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rend() noexcept
+{
+	return column_.rend();
+}
+
+template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
+List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rend() const noexcept
+{
+	return column_.rend();
 }
 
 template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>

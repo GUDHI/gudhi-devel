@@ -32,6 +32,8 @@ public:
 	using Column_type = std::vector<Cell>;
 	using iterator = typename Column_type::iterator;
 	using const_iterator = typename Column_type::const_iterator;
+	using reverse_iterator = typename Column_type::reverse_iterator;
+	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
 
 	Z2_heap_column();
 	template<class Container_type>
@@ -47,7 +49,13 @@ public:
 	dimension_type get_dimension() const;
 
 	iterator begin() noexcept;
+	const_iterator begin() const noexcept;
 	iterator end() noexcept;
+	const_iterator end() const noexcept;
+	reverse_iterator rbegin() noexcept;
+	const_reverse_iterator rbegin() const noexcept;
+	reverse_iterator rend() noexcept;
+	const_reverse_iterator rend() const noexcept;
 
 	Z2_heap_column& operator+=(Z2_heap_column const &column);
 	friend Z2_heap_column operator+(Z2_heap_column column1, Z2_heap_column const& column2){
@@ -167,7 +175,13 @@ template<class Column_pairing_option>
 inline typename Z2_heap_column<Column_pairing_option>::iterator
 Z2_heap_column<Column_pairing_option>::begin() noexcept
 {
-	_prune();
+	return column_.begin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_iterator
+Z2_heap_column<Column_pairing_option>::begin() const noexcept
+{
 	return column_.begin();
 }
 
@@ -176,6 +190,41 @@ inline typename Z2_heap_column<Column_pairing_option>::iterator
 Z2_heap_column<Column_pairing_option>::end() noexcept
 {
 	return column_.end();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_iterator
+Z2_heap_column<Column_pairing_option>::end() const noexcept
+{
+	return column_.end();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::reverse_iterator
+Z2_heap_column<Column_pairing_option>::rbegin() noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_reverse_iterator
+Z2_heap_column<Column_pairing_option>::rbegin() const noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::reverse_iterator
+Z2_heap_column<Column_pairing_option>::rend() noexcept
+{
+	return column_.rend();
+}
+
+template<class Column_pairing_option>
+inline typename Z2_heap_column<Column_pairing_option>::const_reverse_iterator
+Z2_heap_column<Column_pairing_option>::rend() const noexcept
+{
+	return column_.rend();
 }
 
 template<class Column_pairing_option>

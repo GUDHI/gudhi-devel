@@ -32,6 +32,8 @@ public:
 	using Column_type = std::vector<Cell*>;
 	using iterator = boost::indirect_iterator<typename Column_type::iterator>;
 	using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
+	using reverse_iterator = typename Column_type::reverse_iterator;
+	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
 
 	Z2_vector_column();
 	template<class Container_type>
@@ -58,6 +60,10 @@ public:
 	const_iterator begin() const noexcept;
 	iterator end() noexcept;
 	const_iterator end() const noexcept;
+	reverse_iterator rbegin() noexcept;
+	const_reverse_iterator rbegin() const noexcept;
+	reverse_iterator rend() noexcept;
+	const_reverse_iterator rend() const noexcept;
 
 	Z2_vector_column& operator+=(Z2_vector_column const &column);
 	friend Z2_vector_column operator+(Z2_vector_column column1, Z2_vector_column const &column2){
@@ -270,6 +276,34 @@ inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_opti
 Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::end() const noexcept
 {
 	return column_.end();
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::rbegin() noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::rbegin() const noexcept
+{
+	return column_.rbegin();
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::rend() noexcept
+{
+	return column_.rend();
+}
+
+template<class Cell_type, class Column_pairing_option, class Row_access_option>
+inline typename Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
+Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>::rend() const noexcept
+{
+	return column_.rend();
 }
 
 template<class Cell_type, class Column_pairing_option, class Row_access_option>
