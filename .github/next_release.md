@@ -1,24 +1,20 @@
-We are pleased to announce the release 3.7.0 of the GUDHI library.
+We are pleased to announce the release 3.8.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers new functions to initialize a Simplex tree. Universal wheel for OSx pip package and python 3.11 are now available.
+As a major new feature, the GUDHI library now offers ...
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since GUDHI 3.6.0:
+Below is a list of changes made since GUDHI 3.7.0:
 
-- [Simplex tree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
-     - New functions to initialize from a matrix or insert batches of simplices of the same dimension.
+- [Module](link)
+     - ...
 
-- [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_user.html)
-     - Construction now rejects positional arguments, you need to specify `points=X`.
+- [Module](link)
+     - ...
 
-- Installation
-     - C++17 is the new minimal standard to compile the library. This implies Visual Studio minimal version is now 2017.
-     - OSx ARM pip package is now available thanks to a universal wheel
-     - Python 3.11 pip package
 
 - Miscellaneous
-     - The [list of bugs that were solved since GUDHI-3.6.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.7.0+is%3Aclosed) is available on GitHub.
+     - The [list of bugs that were solved since GUDHI-3.7.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.8.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -33,8 +29,5 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-- @albert-github
-- @hschreiber
-- @mglisse
-- @VincentRouvreau
-- @wreise
+- ...
+- ...

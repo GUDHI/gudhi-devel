@@ -34,9 +34,6 @@ A vertex name corresponds to the index of the point in the given range (aka. the
 On this example, as edges (4,5), (4,6) and (5,6) are in the complex, simplex (4,5,6) is added with the filtration value
 set with :math:`max(filtration(4,5), filtration(4,6), filtration(5,6))`. And so on for simplex (0,1,2,3).
 
-If the :doc:`RipsComplex <rips_complex_ref>` interfaces are not detailed enough for your need, please refer to
-rips_persistence_step_by_step.cpp C++ example, where the graph construction over the Simplex_tree is more detailed.
-
 A Rips complex can easily become huge, even if we limit the length of the edges
 and the dimension of the simplices. One easy trick, before building a Rips
 complex on a point cloud, is to call :func:`~gudhi.sparsify_point_set` which removes points
@@ -54,6 +51,13 @@ available in :cite:`cavanna15geometric`, and in a video
 construction of a :class:`~gudhi.RipsComplex` object asks it to build a sparse Rips with
 parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
 regular Rips complex.
+
+Another option which is especially useful if you want to compute persistent homology in "high" dimension (2 or more,
+sometimes even 1), is to build the Rips complex only up to dimension 1 (a graph), then use
+:func:`~gudhi.SimplexTree.collapse_edges` to reduce the size of this graph, and finally call
+:func:`~gudhi.SimplexTree.expansion` to get a simplicial complex of a suitable dimension to compute its homology. This
+trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a complex that is
+often significantly smaller and thus faster to process.
 
 
 Point cloud
@@ -117,54 +121,44 @@ Notice that if we use
 asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`),
 2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
 
-Example from OFF file
-^^^^^^^^^^^^^^^^^^^^^
+Example step by step
+^^^^^^^^^^^^^^^^^^^^
 
-This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
-points in an OFF file, and max_edge_length value.
-Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
-
-Finally, it is asked to display information about the Rips complex.
-
+While :doc:`RipsComplex <rips_complex_ref>` is convenient, for instance to build a simplicial complex in one line
 
 .. testcode::
 
-    import gudhi
-    off_file = gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off'
-    point_cloud = gudhi.read_points_from_off_file(off_file = off_file)
-    rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=12.0)
-    simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
-    result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
-    fmt = '%s -> %.2f'
-    for filtered_value in simplex_tree.get_filtration():
-        print(fmt % tuple(filtered_value))
+   import gudhi
+   points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+   cplx = gudhi.RipsComplex(points=points, max_edge_length=12.0).create_simplex_tree(max_dimension=2)
 
-the program output is:
+you can achieve the same result without this class for more flexibility
 
-.. testoutput::
+.. testcode::
 
-    Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    [0] -> 0.00
-    [1] -> 0.00
-    [2] -> 0.00
-    [3] -> 0.00
-    [4] -> 0.00
-    [5] -> 0.00
-    [6] -> 0.00
-    [2, 3] -> 5.00
-    [4, 5] -> 5.39
-    [0, 2] -> 5.83
-    [0, 1] -> 6.08
-    [1, 3] -> 6.32
-    [1, 2] -> 6.71
-    [5, 6] -> 7.28
-    [2, 4] -> 8.94
-    [0, 3] -> 9.43
-    [4, 6] -> 9.49
-    [3, 6] -> 11.00
+   import gudhi
+   from scipy.spatial.distance import cdist
+   points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+   distance_matrix = cdist(points, points)
+   cplx = gudhi.SimplexTree.create_from_array(distance_matrix, max_filtration=12.0)
+   cplx.expansion(2)
+
+or
+
+.. testcode::
+
+   import gudhi
+   from scipy.spatial import cKDTree
+   points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+   tree = cKDTree(points)
+   edges = tree.sparse_distance_matrix(tree, max_distance=12.0, output_type="coo_matrix")
+   cplx = gudhi.SimplexTree()
+   cplx.insert_edges_from_coo_matrix(edges)
+   cplx.expansion(2)
+
+
+This way, you can easily add a call to :func:`~gudhi.SimplexTree.collapse_edges` before the expansion,
+use a different metric to compute the matrix, or other variations.
 
 Distance matrix
 ---------------
@@ -223,54 +217,7 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [4, 6] -> 9.49
     [3, 6] -> 11.00
 
-Example from csv file
-^^^^^^^^^^^^^^^^^^^^^
-
-This example builds the :doc:`RipsComplex <rips_complex_ref>` from the given
-distance matrix in a csv file, and max_edge_length value.
-Then it creates a :doc:`SimplexTree <simplex_tree_ref>` with it.
-
-Finally, it is asked to display information about the Rips complex.
-
-
-.. testcode::
-
-    import gudhi
-    distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=gudhi.__root_source_dir__ + \
-        '/data/distance_matrix/full_square_distance_matrix.csv')
-    rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix, max_edge_length=12.0)
-    simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
-    result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
-        repr(simplex_tree.num_simplices()) + ' simplices - ' + \
-        repr(simplex_tree.num_vertices()) + ' vertices.'
-    print(result_str)
-    fmt = '%s -> %.2f'
-    for filtered_value in simplex_tree.get_filtration():
-        print(fmt % tuple(filtered_value))
-
-the program output is:
-
-.. testoutput::
-
-    Rips complex is of dimension 1 - 18 simplices - 7 vertices.
-    [0] -> 0.00
-    [1] -> 0.00
-    [2] -> 0.00
-    [3] -> 0.00
-    [4] -> 0.00
-    [5] -> 0.00
-    [6] -> 0.00
-    [2, 3] -> 5.00
-    [4, 5] -> 5.39
-    [0, 2] -> 5.83
-    [0, 1] -> 6.08
-    [1, 3] -> 6.32
-    [1, 2] -> 6.71
-    [5, 6] -> 7.28
-    [2, 4] -> 8.94
-    [0, 3] -> 9.43
-    [4, 6] -> 9.49
-    [3, 6] -> 11.00
+In case this lower triangular matrix is stored in a CSV file, like `data/distance_matrix/full_square_distance_matrix.csv` in the Gudhi distribution, you can read it with :func:`~gudhi.read_lower_triangular_matrix_from_csv_file`.
 
 Correlation matrix
 ------------------

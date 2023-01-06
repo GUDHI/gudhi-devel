@@ -249,7 +249,7 @@ def test_landscape_nan_range():
     dgm = np.array([[2., 6.], [3., 5.]])
     lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
     lds_dgm = lds(dgm)
-    assert (lds.sample_range[0] == 2) & (lds.sample_range[1] == 6)
+    assert (lds.sample_range_fixed[0] == 2) & (lds.sample_range_fixed[1] == 6)
     assert lds.new_resolution == 10
 
 def test_endpoints():
@@ -263,3 +263,7 @@ def test_endpoints():
     vec = BettiCurve(resolution=None)
     vec.fit(diags)
     assert np.equal(vec.grid_, [-np.inf, 2., 3.]).all()
+
+def test_get_params():
+    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+        vec.get_params()
