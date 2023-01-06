@@ -26,3 +26,7 @@ Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any 
 
 For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/latest/installation.html) or [Python](https://gudhi.inria.fr/python/latest/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
 
+## Contributors
+
+- ...
+- ...
