@@ -138,13 +138,13 @@ def _trim_endpoints(x, are_endpoints_nan):
 
 
 def _grid_from_sample_range(self, X):
-    sample_range = np.array(self.sample_range_init)
+    sample_range = np.array(self.sample_range)
     self.nan_in_range = np.isnan(sample_range)
     self.new_resolution = self.resolution
     if not self.keep_endpoints:
         self.new_resolution += self.nan_in_range.sum()
-    self.sample_range = _automatic_sample_range(sample_range, X)
-    self.grid_ = np.linspace(self.sample_range[0], self.sample_range[1], self.new_resolution)
+    self.sample_range_fixed = _automatic_sample_range(sample_range, X)
+    self.grid_ = np.linspace(self.sample_range_fixed[0], self.sample_range_fixed[1], self.new_resolution)
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
 
@@ -166,7 +166,7 @@ class Landscape(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.num_landscapes, self.resolution, self.sample_range_init = num_landscapes, resolution, sample_range
+        self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -240,7 +240,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum for the weighted average domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.weight, self.resolution, self.sample_range_init = weight, resolution, sample_range
+        self.weight, self.resolution, self.sample_range = weight, resolution, sample_range
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -334,7 +334,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         self.predefined_grid = predefined_grid
         self.resolution = resolution
-        self.sample_range_init = sample_range
+        self.sample_range = sample_range
         self.keep_endpoints = keep_endpoints
 
     def is_fitted(self):
@@ -468,7 +468,7 @@ class Entropy(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.mode, self.normalized, self.resolution, self.sample_range_init = mode, normalized, resolution, sample_range
+        self.mode, self.normalized, self.resolution, self.sample_range = mode, normalized, resolution, sample_range
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -509,8 +509,8 @@ class Entropy(BaseEstimator, TransformerMixin):
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
                     [px,py] = orig_diagram[j,:2]
-                    min_idx = np.clip(np.ceil((px - self.sample_range[0]) / self.step_).astype(int), 0, self.resolution)
-                    max_idx = np.clip(np.ceil((py - self.sample_range[0]) / self.step_).astype(int), 0, self.resolution)
+                    min_idx = np.clip(np.ceil((px - self.sample_range_fixed[0]) / self.step_).astype(int), 0, self.resolution)
+                    max_idx = np.clip(np.ceil((py - self.sample_range_fixed[0]) / self.step_).astype(int), 0, self.resolution)
                     ent[min_idx:max_idx]-=p[j]*np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
@@ -710,17 +710,17 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     >>> c = np.array([[3, 2, -1], [1, 2, -1]])
     >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
-    >>> atol_vectoriser.fit(X=[a, b, c]).centers # doctest: +SKIP
-    >>> # array([[ 2.        ,  0.66666667,  3.33333333],
-    >>> #        [ 2.6       ,  2.8       , -0.4       ]])
+    >>> atol_vectoriser.fit(X=[a, b, c]).centers
+    array([[ 2.6       ,  2.8       , -0.4       ],
+           [ 2.        ,  0.66666667,  3.33333333]])
     >>> atol_vectoriser(a)
-    >>> # array([1.18168665, 0.42375966]) # doctest: +SKIP
+    array([0.42375966, 1.18168665])
     >>> atol_vectoriser(c)
-    >>> # array([0.02062512, 1.25157463]) # doctest: +SKIP
-    >>> atol_vectoriser.transform(X=[a, b, c]) # doctest: +SKIP
-    >>> # array([[1.18168665, 0.42375966],
-    >>> #        [0.29861028, 1.06330156],
-    >>> #        [0.02062512, 1.25157463]])
+    array([1.25157463, 0.02062512])
+    >>> atol_vectoriser.transform(X=[a, b, c])
+    array([[0.42375966, 1.18168665],
+           [1.06330156, 0.29861028],
+           [1.25157463, 0.02062512]])
     """
     # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
@@ -771,6 +771,8 @@ class Atol(BaseEstimator, TransformerMixin):
         measures_concat = np.concatenate(X)
         self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
         self.centers = self.quantiser.cluster_centers_
+        # Hack, but some people are unhappy if the order depends on the version of sklearn
+        self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
             dist_centers = pairwise.pairwise_distances(measures_concat)
             np.fill_diagonal(dist_centers, 0)
