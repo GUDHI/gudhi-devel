@@ -6,8 +6,8 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.7.1:
 
-- [Module](link)
-     - **...**
+- [Perslay](https://gudhi.inria.fr/python/latest/representations_tflow_itf_ref.html)
+     - a TensorFlow layer for persistence diagrams representations
 
 - [Module](link)
      - **...**
@@ -28,5 +28,5 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-- **...**
+- @MathieuCarriere
 - **...**
