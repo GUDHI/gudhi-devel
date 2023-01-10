@@ -9,7 +9,7 @@ cd gudhi-devel
 ## Release note
 
 Verify that [.github/next_release.md](.github/next_release.md) is up-to-date with the development performed on the release.
-Also check [.github/change_log.md](.github/change_log.md) is appended with the release note.
+Also check [.github/changelog.md](.github/changelog.md) is appended with the release note.
 
 ## Unlabelled issues and pull requests
 
