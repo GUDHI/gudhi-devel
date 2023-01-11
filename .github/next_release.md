@@ -6,8 +6,11 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.7.1:
 
-- [Module](link)
-     - **...**
+- [Perslay](https://gudhi.inria.fr/python/latest/representations_tflow_itf_ref.html)
+     - Tensorflow model for the representations module
+
+- [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
+     - now provides matching in its interface
 
 - [Module](link)
      - **...**
