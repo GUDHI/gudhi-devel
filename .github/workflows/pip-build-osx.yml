@@ -28,7 +28,7 @@ jobs:
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user twine delocate
+          python -m pip install --user build twine delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
@@ -41,7 +41,7 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python setup.py bdist_wheel
+          python -m build -n
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-wheel --require-archs universal2 -v dist/*.whl
       - name: Install and test python wheel
@@ -49,3 +49,8 @@ jobs:
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest src/python/test/test_alpha_complex.py
+      - name: Upload OSx python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx python wheel
+          path: build/src/python/dist/*.whl
