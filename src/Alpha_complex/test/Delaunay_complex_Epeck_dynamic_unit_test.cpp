@@ -9,11 +9,9 @@
  */
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "delaunay_complex"
+#define BOOST_TEST_MODULE "delaunay_complex_exact_kernel_dynamic"
 #include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
 
-#include <CGAL/Epick_d.h>
 #include <CGAL/Epeck_d.h>
 
 #include <vector>
@@ -29,27 +27,18 @@
 
 // Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epeck_d< CGAL::Dimension_tag<5> > Exact_kernel_s;
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<5> > Inexact_kernel_s;
-// The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
-
-typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
 
 using Simplex_tree = Gudhi::Simplex_tree<>;
 using Simplex_handle = Simplex_tree::Simplex_handle;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of_kernel_variants) {
+BOOST_AUTO_TEST_CASE(Delaunay_complex_exact_kernel_dynamic_simplices_comparison) {
   std::cout << "*****************************************************************************************************";
-  using Point = typename TestedKernel::Point_d;
+  using Point = typename Exact_kernel_d::Point_d;
   std::vector<Point> points;
   // 50 points on a 4-sphere
-  points = Gudhi::generate_points_on_sphere_d<TestedKernel>(10, 5, 1.);
+  points = Gudhi::generate_points_on_sphere_d<Exact_kernel_d>(10, 5, 1.);
 
-  Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex(points);
+  Gudhi::alpha_complex::Alpha_complex<Exact_kernel_d> alpha_complex(points);
 
   // Alpha complex
   Simplex_tree stree_from_alpha_complex;
