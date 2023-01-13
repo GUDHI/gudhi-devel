@@ -30,7 +30,7 @@ jobs:
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user twine delocate
+          python -m pip install --user build twine delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libs are in $PWD/deps-uni/lib
       - name: Build python wheel
@@ -43,7 +43,7 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python setup.py bdist_wheel
+          python -m build -n
       - name: Install and test python wheel
         run: |
           python -m pip install --user pytest build/src/python/dist/*.whl

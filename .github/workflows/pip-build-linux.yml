@@ -18,10 +18,17 @@ jobs:
           cd build_311
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
           cd src/python
-          $PYTHON311/bin/python setup.py bdist_wheel
+          $PYTHON311/bin/python -m build -n
+          auditwheel show dist/*.whl
           auditwheel repair dist/*.whl
+          ls wheelhouse/*.whl
       - name: Install and test wheel for Python 3.11
         run: |
-          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
+          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/wheelhouse/*.whl
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
+      - name: Upload linux python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux python wheel
+          path: build_311/src/python/wheelhouse/*.whl
