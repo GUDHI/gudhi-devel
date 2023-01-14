@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <cstddef>
 #include <numeric>
+#include <functional>
 
 namespace Gudhi {
 
@@ -63,14 +64,14 @@ class Bitmap_cubical_complex_base {
    * the number of elements in the
    * input vector and size in the i-th dimension equal the number in the position i-of the input vector.
    */
-  Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes);
+  explicit Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes);
   /**
    * The second constructor takes as a input a Perseus style file. For more details,
    * please consult the documentations of
    * Perseus software as well as examples attached to this
    * implementation.
    **/
-  Bitmap_cubical_complex_base(const char* perseus_style_file);
+  explicit Bitmap_cubical_complex_base(const char* perseus_style_file);
   /**
    * The last constructor of a Bitmap_cubical_complex_base class accepts vector of dimensions (as the first one)
    * with vector of filtration values of vertices or top dimensional cells depending on the input_top_cells flag.

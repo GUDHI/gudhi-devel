@@ -59,7 +59,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * A constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class that takes the name of Perseus
    * style file as an input. Please consult the documentation about the specification of the file.
    */
-  Bitmap_cubical_complex_periodic_boundary_conditions_base(const char* perseusStyleFile);
+  explicit Bitmap_cubical_complex_periodic_boundary_conditions_base(const char* perseusStyleFile);
   /**
    * A constructor of Bitmap_cubical_complex_periodic_boundary_conditions_base class that takes the following
    * parameters: (1) vector with numbers of top dimensional cells in all dimensions and (2) vector of top dimensional

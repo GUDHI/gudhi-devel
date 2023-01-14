@@ -65,7 +65,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * @param[in] perseus_style_file The name of a \ref FileFormatsPerseus "Perseus-style file".
    **/
-  Bitmap_cubical_complex(const char* perseus_style_file)
+  explicit Bitmap_cubical_complex(const char* perseus_style_file)
       : T(perseus_style_file), key_associated_to_simplex(num_simplices()) {
 #ifdef DEBUG_TRACES
     std::clog << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
