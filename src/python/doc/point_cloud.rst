@@ -13,6 +13,11 @@ File Readers
 
 .. autofunction:: gudhi.read_lower_triangular_matrix_from_csv_file
 
+File Writers
+------------
+
+.. autofunction:: gudhi.write_points_to_off_file
+
 Subsampling
 -----------
 

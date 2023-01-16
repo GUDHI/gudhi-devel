@@ -24,6 +24,8 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/adaptor/transformed.hpp>
+#include <boost/range/size.hpp>
 #include <boost/container/static_vector.hpp>
 
 #ifdef GUDHI_USE_TBB
@@ -702,10 +704,10 @@ class Simplex_tree {
     return true;
   }
 
- private:
-  /** \brief Inserts a simplex represented by a vector of vertex.
-   * @param[in]  simplex    vector of Vertex_handles, representing the vertices of the new simplex. The vector must be
-   * sorted by increasing vertex handle order.
+ protected:
+  /** \brief Inserts a simplex represented by a range of vertex.
+   * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex. The range must be
+   * sorted by increasing vertex handle order, and not empty.
    * @param[in]  filtration the filtration value assigned to the new simplex.
    * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
@@ -717,12 +719,13 @@ class Simplex_tree {
    * null_simplex.
    * 
   */
-  std::pair<Simplex_handle, bool> insert_vertex_vector(const std::vector<Vertex_handle>& simplex,
+  template <class RandomVertexHandleRange = std::initializer_list<Vertex_handle>>
+  std::pair<Simplex_handle, bool> insert_simplex_raw(const RandomVertexHandleRange& simplex,
                                                      Filtration_value filtration) {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
-    for (; vi != simplex.end() - 1; ++vi) {
+    for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
       if (!(has_children(res_insert.first))) {
@@ -743,9 +746,10 @@ class Simplex_tree {
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
     // otherwise the insertion has succeeded - size is a size_type
-    if (static_cast<int>(simplex.size()) - 1 > dimension_) {
+    int dim = static_cast<int>(boost::size(simplex)) - 1;
+    if (dim > dimension_) {
       // Update dimension if needed
-      dimension_ = static_cast<int>(simplex.size()) - 1;
+      dimension_ = dim;
     }
     return res_insert;
   }
@@ -786,7 +790,7 @@ class Simplex_tree {
     // Copy before sorting
     std::vector<Vertex_handle> copy(first, last);
     std::sort(std::begin(copy), std::end(copy));
-    return insert_vertex_vector(copy, filtration);
+    return insert_simplex_raw(copy, filtration);
   }
 
     /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
@@ -1119,16 +1123,12 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph));
+    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    // This automatically sorts the vertices, the graph concept doesn't guarantee the order in which we iterate.
 
-    typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it,
-        v_it_end;
-    for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end;
-         ++v_it) {
-      root_.members_.emplace_hint(
-                                  root_.members_.end(), *v_it,
-                                  Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it)));
-    }
     std::pair<typename boost::graph_traits<OneSkeletonGraph>::edge_iterator,
               typename boost::graph_traits<OneSkeletonGraph>::edge_iterator> boost_edges = edges(skel_graph);
     // boost_edges.first is the equivalent to boost_edges.begin()
@@ -1137,7 +1137,7 @@ class Simplex_tree {
       auto edge = *(boost_edges.first);
       auto u = source(edge, skel_graph);
       auto v = target(edge, skel_graph);
-      if (u == v) throw "Self-loops are not simplicial";
+      if (u == v) throw std::invalid_argument("Self-loops are not simplicial");
       // We cannot skip edges with the wrong orientation and expect them to
       // come a second time with the right orientation, that does not always
       // happen in practice. emplace() should be a NOP when an element with the
@@ -1154,6 +1154,21 @@ class Simplex_tree {
       sh->second.children()->members().emplace(v,
           Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge)));
     }
+  }
+
+  /** \brief Inserts several vertices.
+   * @param[in] vertices A range of Vertex_handle
+   * @param[in] filt filtration value of the new vertices (the same for all)
+   *
+   * This may be faster than inserting the vertices one by one, especially in a random order.
+   * The complex does not need to be empty before calling this function. However, if a vertex is
+   * already present, its filtration value is not modified, unlike with other insertion functions. */
+  template <class VertexRange>
+  void insert_batch_vertices(VertexRange const& vertices, Filtration_value filt = 0) {
+    auto verts = vertices | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, filt)); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    if (dimension_ < 0 && !root_.members_.empty()) dimension_ = 0;
   }
 
   /** \brief Expands the Simplex_tree containing only its one skeleton
@@ -1598,7 +1613,7 @@ class Simplex_tree {
     Simplex_tree st_copy = *this;
 
     // Add point for coning the simplicial complex
-    this->insert_simplex({maxvert}, -3);
+    this->insert_simplex_raw({maxvert}, -3);
 
     // For each simplex
     std::vector<Vertex_handle> vr;

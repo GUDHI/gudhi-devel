@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps) {
   to_compute_percentage_of_active.push_back(&q);
   to_compute_percentage_of_active.push_back(&r);
   Persistence_heat_maps<constant_scaling_function> percentage_of_active;
-  percentage_of_active.compute_percentage_of_active(to_compute_percentage_of_active, 0.1);
+  percentage_of_active.compute_percentage_of_active(to_compute_percentage_of_active, 0);
 
   Persistence_heat_maps<constant_scaling_function> template_percentage_of_active;
   template_percentage_of_active.load_from_file("data/template_percentage_of_active_of_heat_maps");

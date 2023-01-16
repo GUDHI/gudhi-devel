@@ -1,168 +1,262 @@
 @book{gudhi:urm
-, title        = "{GUDHI} User and Reference Manual"
-, author      = "{The GUDHI Project}"
-, publisher     = "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, year         = @GUDHI_VERSION_YEAR@
-, url =    "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/"
-}
-
-@incollection{gudhi:FilteredComplexes
-, author =  "Cl\'ement Maria"
-, title =   "Filtered Complexes"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__simplex__tree.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:PersistentCohomology
-, author =  "Cl\'ement Maria"
-, title =   "Persistent Cohomology"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__persistent__cohomology.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:Contraction
-, author =  "David Salinas"
-, title =   "Contraction"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__contr.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:SkeletonBlocker
-, author =  "David Salinas"
-, title =   "Skeleton-Blocker"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__skbl.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:AlphaComplex
-, author =  "Vincent Rouvreau"
-, title =   "Alpha complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__alpha__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
+, title     = {GUDHI User and Reference Manual}
+, author    = {The GUDHI Project}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, year      = {@GUDHI_VERSION_YEAR@}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/}
 }
 
 @incollection{gudhi:CubicalComplex
-, author =  "Pawel Dlotko"
-, title =   "Cubical complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cubical__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
+, author    = {Pawel Dlotko}
+, title     = {Cubical complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cubical__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
-@incollection{gudhi:WitnessComplex
-, author =  "Siargey Kachanovich"
-, title =   "Witness complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__witness__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
+@incollection{gudhi:FilteredComplexes
+, author    = {Cl{\'{e}}ment Maria}
+, title     = {Filtered Complexes}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__simplex__tree.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
-@incollection{gudhi:SubSampling
-, author =  "Cl\'ement Jamin and Siargey Kachanovich"
-, title =   "Subsampling"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__subsampling.html"
-, year =        @GUDHI_VERSION_YEAR@
+@incollection{gudhi:ToplexMap
+, author    = {Fran{\c{c}}ois Godi}
+, title     = {Toplex map}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__toplex__map.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
-@incollection{gudhi:SpatialSearching
-, author =  "Cl\'ement Jamin"
-, title =   "Spatial searching"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__spatial__searching.html"
-, year =        @GUDHI_VERSION_YEAR@
+@incollection{gudhi:SkeletonBlocker
+, author    = {David Salinas}
+, title     = {Skeleton-Blocker}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__skbl.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
-@incollection{gudhi:TangentialComplex
-, author =  "Cl\'ement Jamin"
-, title =   "Tangential complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__tangential__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
+@incollection{gudhi:Contraction
+, author    = {David Salinas}
+, title     = {Contraction}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__contr.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:AlphaComplex
+, author    = {Vincent Rouvreau}
+, title     = {Alpha complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__alpha__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:CechComplex
+, author    = {Vincent Rouvreau and Hind Montassif}
+, title     = {{\v{C}}ech complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cech__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
 @incollection{gudhi:RipsComplex
-, author =  "Cl\'ement Maria and Pawel Dlotko and Vincent Rouvreau and Marc Glisse"
-, title =   "Rips complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__rips__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:BottleneckDistance
-, author =  "Fran{{\c{c}}ois Godi"
-, title =   "Bottleneck distance"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__bottleneck__distance.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:cython
-, author =  "Vincent Rouvreau"
-, title =   "Cython interface"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/python/@GUDHI_VERSION@/"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:CoverComplex
-, author =  "Mathieu Carri\`ere"
-, title =   "Cover complex"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cover__complex.html"
-, year =        @GUDHI_VERSION_YEAR@
-}
-
-@incollection{gudhi:PersistenceRepresentations
-, author =  "Pawel Dlotko"
-, title =   "Persistence representations"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group___persistence__representations.html"
-, year =        @GUDHI_VERSION_YEAR@
+, author    = {Cl{\'{e}}ment Maria and Pawel Dlotko and Vincent Rouvreau and Marc Glisse}
+, title     = {Rips complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__rips__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }
 
 @incollection{gudhi:Collapse
-, author =  "Siddharth Pritam and Marc Glisse"
-, title =   "Edge collapse"
-, publisher =  "{GUDHI Editorial Board}"
-, edition =     "{@GUDHI_VERSION@}"
-, booktitle =   "{GUDHI} User and Reference Manual"
-, url = "https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__edge__collapse.html"
-, year =        @GUDHI_VERSION_YEAR@
+, author    = {Siddharth Pritam and Marc Glisse}
+, title     = {Edge collapse}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__edge__collapse.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:WitnessComplex
+, author    = {Siargey Kachanovich}
+, title     = {Witness complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__witness__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:CoverComplex
+, author    = {Mathieu Carri{\`{e}}re}
+, title     = {Cover complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cover__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:CoxeterTriangulation
+, author    = {Siargey Kachanovich}
+, title     = {Coxeter triangulation}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__cover__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:TangentialComplex
+, author    = {Cl{\'{e}}ment Jamin}
+, title     = {Tangential complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__tangential__complex.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:PersistentCohomology
+, author    = {Cl{\'{e}}ment Maria}
+, title     = {Persistent Cohomology}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__persistent__cohomology.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:BottleneckDistance
+, author    = {Fran{\c{c}}ois Godi}
+, title     = {Bottleneck distance}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__bottleneck__distance.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:PersistenceRepresentations
+, author    = {Pawel Dlotko}
+, title     = {Persistence representations}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group___persistence__representations.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:SubSampling
+, author    = {Cl{\'{e}}ment Jamin and Siargey Kachanovich}
+, title     = {Subsampling}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__subsampling.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:SpatialSearching
+, author    = {Cl{\'{e}}ment Jamin}
+, title     = {Spatial searching}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/doc/@GUDHI_VERSION@/group__spatial__searching.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Python specific gudhi modules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@incollection{gudhi:WeightedRipsComplex
+, author    = {Rapha{\"{e}}l Tinarrage and Yuichi Ike and Masatoshi Takenouchi}
+, title     = {Weighted Rips Complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/rips_complex_user.html#weighted-rips-complex}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:DTMRipsComplex
+, author    = {Yuichi Ike}
+, title     = {DTM Rips Complex}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/rips_complex_user.html#dtm-rips-complex}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:WassersteinDistance
+, author    = {Th{\'{e}}o Lacombe and Marc Glisse}
+, title     = {Wasserstein distance}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/wasserstein_distance_user.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:PersistenceRepresentationsScikitlearnInterface
+, author    = {Mathieu Carri{\`{e}}re and Gard Spreemann and Wojciech Reise}
+, title     = {Persistence representations scikit-learn like interface}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/representations.html}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:Atol
+, author    = {Martin Royer}
+, title     = {Measure Vectorization for Automatic Topologically-Oriented Learning}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/representations.html#gudhi.representations.vector_methods.Atol}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:DistanceToMeasure
+, author    = {Marc Glisse}
+, title     = {Distance to measure}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/point_cloud.html#module-gudhi.point_cloud.knn}
+, year      = {@GUDHI_VERSION_YEAR@}
+}
+
+@incollection{gudhi:PersistenceBasedClustering
+, author    = {Marc Glisse}
+, title     = {persistence-based clustering}
+, publisher = {GUDHI Editorial Board}
+, edition   = {@GUDHI_VERSION@}
+, booktitle = {GUDHI User and Reference Manual}
+, url       = {https://gudhi.inria.fr/python/@GUDHI_VERSION@/clustering.html}
+, year      = {@GUDHI_VERSION_YEAR@}
 }

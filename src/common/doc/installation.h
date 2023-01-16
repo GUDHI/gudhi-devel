@@ -5,9 +5,9 @@
  * Examples of GUDHI headers inclusion can be found in \ref utilities.
  * 
  * \section compiling Compiling
- * The library uses c++14 and requires <a target="_blank" href="https://www.boost.org/">Boost</a>  &ge; 1.66.0
+ * The library uses c++17 and requires <a target="_blank" href="https://www.boost.org/">Boost</a>  &ge; 1.66.0
  * and <a target="_blank" href="https://cmake.org/">CMake</a> &ge; 3.5.
- * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2015.
+ * It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017.
  * 
  * \subsection utilities Utilities and examples
  * To build the utilities, run the following commands in a terminal:
@@ -45,7 +45,7 @@ make \endverbatim
  * 
  * \subsection documentationgeneration C++ documentation
  * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
- * is required (version &ge; 1.9.3 is advised). Run the following command in a terminal:
+ * is required (version &ge; 1.9.5 is advised). Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
  *

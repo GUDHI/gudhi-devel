@@ -17,6 +17,14 @@
 #include <mutex>
 #endif
 
+#if __has_include(<CGAL/version.h>)
+# define GUDHI_GIC_USE_CGAL 1
+# include <gudhi/Bottleneck.h>
+#elif __has_include(<hera/bottleneck.h>)
+# define GUDHI_GIC_USE_HERA 1
+# include <hera/bottleneck.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/reader_utils.h>
@@ -25,7 +33,6 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Bottleneck.h>
 
 #include <boost/config.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -34,8 +41,6 @@
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/subgraph.hpp>
 #include <boost/graph/graph_utility.hpp>
-
-#include <CGAL/version.h>  // for CGAL_VERSION_NR
 
 #include <iostream>
 #include <vector>
@@ -1228,7 +1233,14 @@ class Cover_complex {
         Cboot.set_cover_from_function();
         Cboot.find_simplices();
         Cboot.compute_PD();
+#ifdef GUDHI_GIC_USE_CGAL
         double db = Gudhi::persistence_diagram::bottleneck_distance(this->PD, Cboot.PD);
+#elif defined GUDHI_GIC_USE_HERA
+        double db = hera::bottleneckDistExact(this->PD, Cboot.PD);
+#else
+        double db;
+        throw std::logic_error("This function requires CGAL or Hera for the bottleneck distance.");
+#endif
         if (verbose)  std::clog << db << std::endl;
         distribution.push_back(db);
       }

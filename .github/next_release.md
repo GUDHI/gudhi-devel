@@ -1,19 +1,22 @@
-We are pleased to announce the release 3.7.0 of the GUDHI library.
+We are pleased to announce the release 3.8.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers ...
+As a major new feature, the GUDHI library now offers Perslay, a Tensorflow model for the representations module.
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since GUDHI 3.6.0:
+Below is a list of changes made since GUDHI 3.7.1:
+
+- [Perslay](https://gudhi.inria.fr/python/latest/representations_tflow_itf_ref.html)
+     - Tensorflow model for the representations module
+
+- [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
+     - now provides matching in its interface
 
 - [Module](link)
-     - ...
-
-- [Module](link)
-     - ...
+     - **...**
 
 - Miscellaneous
-     - The [list of bugs that were solved since GUDHI-3.6.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.7.0+is%3Aclosed) is available on GitHub.
+     - The [list of bugs that were solved since GUDHI-3.7.1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.8.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -26,3 +29,7 @@ Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any 
 
 For further information about downloading and installing the library ([C++](https://gudhi.inria.fr/doc/latest/installation.html) or [Python](https://gudhi.inria.fr/python/latest/installation.html)), please visit the [GUDHI web site](https://gudhi.inria.fr/).
 
+## Contributors
+
+- **...**
+- **...**
