@@ -255,16 +255,14 @@ def fetch_bunny(file_path=None, accept_license=False):
     return np.load(archive_path, mmap_mode="r")
 
 
-# In wait of https://github.com/GUDHI/gudhi-data/pull/7
-# _activities_license_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE'
-_activities_license_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/activities.LICENSE"
+_activities_license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
 _activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
 
 
 def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     """
     Load the Daily and Sports Activities dataset. This dataset comes from
-    https://archive-beta.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
+    https://archive.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding dataset is read (compressed) from cache.
@@ -274,7 +272,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     file_path : string
         Full path of the downloaded file including filename.
 
-        Default is None, meaning that it's set to "data_home/points/activities/[activities.xz |
+        Default is None, meaning that it's set to "data_home/points/activities/[activities.csv.xz |
         cross_training_p1_left_leg.npy | jumping_p1_left_leg.npy | stepper_p1_left_leg.npy | walking_p1_left_leg.npy]".
         In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
 
@@ -283,7 +281,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
 
     subset : string
         As the dataset is quite a big file to download, when specified, this argument allows to download the following subsets:
-         * 'all' (default value) This dataset contains 1.140.000 vertices in dimension 48. Its size is about 111 Mo.
+         * 'all' (default value) This dataset contains 1.140.000 vertices in dimension 48. Its size is about 150 Mo.
          * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
          * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
          * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
@@ -299,7 +297,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     points: Pandas DataFrame when `subset='all'` or numpy array otherwise
         Depending on subset value:
          * Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set' when `subset='all'`.
-        
+
         Or
          * Array of shape (7500, 3) otherwise.
 
@@ -309,45 +307,38 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
         # pandas is imported only in the function as it is only an optionnal third party library
         # ImportError if not available
         import pandas as pd
-        load_method = pd.read_pickle
-    
-        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
-        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.xz'
-        file_url = "https://github.com/VincentRouvreau/gudhi-data/raw/activities_UCIrvine_ml/points/activities/activities.xz"
-        file_checksum = "cc0277aaf7883d9fa9535f1d5c19a4eaf056bfad47345552ef8a0ec7754daf76"
-    
-        gudhi_data_set_path = "points/activities/activities.xz"
+
+        load_method = pd.read_csv
+
+        file_url = "https://github.com/GUDHI/gudhi-data/raw/main/points/activities/activities.csv.xz"
+        file_checksum = "c2437d3c6b53f16803876b62b1d277d5906d8a53ea9c89b889a797d86d50888b"
+
+        gudhi_data_set_path = "points/activities/activities.csv.xz"
     elif subset == "cross_training":
-        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
-        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy'
-        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/cross_training_p1_left_leg.npy"
+        file_url = (
+            "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy"
+        )
         file_checksum = "ebef2e20791c895b6f6142e6a47b22f4283d6c7c3cfe9ddc13795185988e3e63"
-    
+
         gudhi_data_set_path = "points/activities/cross_training_p1_left_leg.npy"
     elif subset == "jumping":
-        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
-        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy'
-        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/jumping_p1_left_leg.npy"
+        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy"
         file_checksum = "2d89a4adea475a0464e3fbbb93d9e8b9bfd67d5056cd54eded84418a744da931"
-    
+
         gudhi_data_set_path = "points/activities/jumping_p1_left_leg.npy"
     elif subset == "stepper":
-        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
-        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy'
-        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/stepper_p1_left_leg.npy"
+        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy"
         file_checksum = "68250dfd6c2cd1d85fcc465c5c0e0caf69130082fc1320d0dd1d05ae2ac56914"
-    
+
         gudhi_data_set_path = "points/activities/stepper_p1_left_leg.npy"
     elif subset == "walking":
-        # In wait of https://github.com/GUDHI/gudhi-data/pull/7
-        # file_url = 'https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy'
-        file_url = "https://raw.githubusercontent.com/VincentRouvreau/gudhi-data/activities_UCIrvine_ml/points/activities/walking_p1_left_leg.npy"
+        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy"
         file_checksum = "412eb926d36d795eaf2caa29c261a912b06cc4ae5e3992a8e93af8a3604487a9"
-    
+
         gudhi_data_set_path = "points/activities/walking_p1_left_leg.npy"
     else:
         raise ValueError("Unknown subset value")
-    
+
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)

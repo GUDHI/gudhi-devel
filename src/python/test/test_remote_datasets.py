@@ -66,17 +66,23 @@ def test_bunny_license_capture():
 
 
 def test_activities_license_capture():
-    for subset in ['cross_training', 'jumping', 'stepper', 'walking']:
+    for subset in ["cross_training", "jumping", "stepper", "walking"]:
         # Test not printing activities.LICENSE when accept_license = True
-        assert "" == _capture_license_output(remote.fetch_daily_activities, subset=subset, accept_license=True).getvalue()
+        assert (
+            "" == _capture_license_output(remote.fetch_daily_activities, subset=subset, accept_license=True).getvalue()
+        )
         # Test printing activities.LICENSE file when fetching "activities".npy with accept_license = False (default)
         with open("./tmp_for_test/activities.LICENSE") as f:
-            assert f.read().rstrip("\n") == _capture_license_output(remote.fetch_daily_activities, subset=subset).getvalue().rstrip("\n")
+            assert f.read().rstrip("\n") == _capture_license_output(
+                remote.fetch_daily_activities, subset=subset
+            ).getvalue().rstrip("\n")
         shutil.rmtree("./tmp_for_test")
+
 
 def test_activities_unknown_subset():
     with pytest.raises(ValueError):
         remote.fetch_daily_activities(subset="some weird subset value")
+
 
 def test_fetch_remote_datasets_wrapped():
     # Test fetch_spiral_2d and fetch_bunny wrapping functions with data directory different from default (twice, to test case of already fetched files)
@@ -88,20 +94,18 @@ def test_fetch_remote_datasets_wrapped():
         bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
 
-        cross_training_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/cross_training.npy",
-                                                           subset="cross_training")
+        cross_training_arr = remote.fetch_daily_activities(
+            "./another_fetch_folder_for_test/cross_training.npy", subset="cross_training"
+        )
         assert cross_training_arr.shape == (7500, 3)
 
-        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/jumping.npy",
-                                                    subset="jumping")
+        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/jumping.npy", subset="jumping")
         assert jumping_arr.shape == (7500, 3)
 
-        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/stepper.npy",
-                                                    subset="stepper")
+        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/stepper.npy", subset="stepper")
         assert stepper_arr.shape == (7500, 3)
 
-        walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/walking.npy",
-                                                    subset="walking")
+        walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/walking.npy", subset="walking")
         assert walking_arr.shape == (7500, 3)
 
     # Check that the directory was created
