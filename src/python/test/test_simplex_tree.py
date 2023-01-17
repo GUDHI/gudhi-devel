@@ -644,3 +644,14 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
     assert st.filtration([0, 1, 2, 3]) == 7.0
+
+def test_read_write_methods():
+    a = np.random.randint(10, size=(50, 50))
+    st = SimplexTree.create_from_array(a, max_filtration=9.0)
+    # Because of randomness, simplex tree can be inconsistent and from_file is not guaranteed when insert_simplex
+    st.make_filtration_non_decreasing()
+    st.expansion(2)
+    st.to_file('random.st')
+    st_copy = SimplexTree()
+    st_copy.from_file('random.st')
+    assert st == st_copy

@@ -798,5 +798,35 @@ cdef class SimplexTree:
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
 
+    def to_file(self, filename):
+        """This function writes the simplex tree in a user given file name.
+
+        :param filename: Name of the file.
+        :type filename: string
+
+        .. note::
+            Beware that if the :class:`~gudhi.SimplexTree` is not a valid filtration anymore, a simplex could have a
+            lower filtration value than one of its faces. As :meth:`from_file` is using :meth:`insert_simplex`, you may
+            not retrieve your non-valid filtration.
+            Callers are responsible for fixing this (with :meth:`make_filtration_non_decreasing` for instance) before
+            calling any function that relies on the filtration property.
+        """
+        self.get_ptr().write(filename.encode('utf-8'))
+
+    def from_file(self, filename):
+        """This function reads the simplex tree in a user given file name.
+
+        :param filename: Name of the file.
+        :type filename: string
+
+        .. note::
+            Beware that :meth:`from_file` is using :meth:`insert_simplex`. If the :class:`~gudhi.SimplexTree` defined
+            in the file is not a valid filtration (a simplex could have a lower filtration value than one of its
+            faces), you may not retrieve your non-valid filtration.
+            Callers are responsible for fixing this (with :meth:`make_filtration_non_decreasing` for instance) before
+            writting a file (with :meth:`from_file` for instance).
+        """
+        self.get_ptr().read(filename.encode('utf-8'))
+
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

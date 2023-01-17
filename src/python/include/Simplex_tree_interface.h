@@ -233,6 +233,18 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     auto boundary_srange = Base::boundary_simplex_range(bd_sh);
     return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
+
+  void read(std::string filename) {
+    std::ifstream ifs(filename.c_str());
+    ifs >> *this;
+    ifs.close();
+  }
+
+  void write(std::string filename) {
+    std::ofstream ofs(filename.c_str());
+    ofs << *this;
+    ofs.close();
+  }
 };
 
 }  // namespace Gudhi
