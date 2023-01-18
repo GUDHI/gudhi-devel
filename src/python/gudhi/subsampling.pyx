@@ -109,9 +109,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
         return subsampling_n_random_points(points, nb_points)
 
 def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
-    """:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
-
-    Outputs a subset of the input points so that the squared distance
+    """Outputs a subset of the input points so that the squared distance
     between any two points is greater than min_squared_dist.
 
     :param points: The input point set.
