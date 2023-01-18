@@ -113,11 +113,11 @@ std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std
 #else
 // ------ sparsify_point_set ------
 std::vector<std::vector<double>> subsampling_sparsify_points(const std::vector<std::vector<double>>&, double) {
-  return std::vector<std::vector<double>>{{}};
+  return std::vector<std::vector<double>>{};
 }
 
 std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std::string&, double) {
-    return std::vector<std::vector<double>>{{}};
+    return std::vector<std::vector<double>>{};
 }
 #endif
 
