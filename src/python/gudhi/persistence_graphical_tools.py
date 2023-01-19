@@ -73,7 +73,7 @@ def _array_handler(a):
 def _limit_to_max_intervals(persistence, max_intervals, key):
     """This function returns truncated persistence if length is bigger than max_intervals.
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death).
+    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death).
     :param max_intervals: maximal number of intervals to display.
         Selected intervals are those with the longest life time. Set it
         to 0 to see all. Default value is 1000.
@@ -122,7 +122,7 @@ def plot_persistence_barcode(
     or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
@@ -204,7 +204,7 @@ def plot_persistence_barcode(
         axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
 
         if legend is None and not nx2_array:
-            # By default, if persistence is an array of (dimension, array of (birth, death)), display the legend
+            # By default, if persistence is an array of (dimension, (birth, death)), display the legend
             legend = True
 
         if legend:
@@ -245,7 +245,7 @@ def plot_persistence_diagram(
     homology dimension, or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file`.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
@@ -357,7 +357,7 @@ def plot_persistence_diagram(
             axes.set_yticklabels(ytl)
 
         if legend is None and not nx2_array:
-            # By default, if persistence is an array of (dimension, array of (birth, death)), display the legend
+            # By default, if persistence is an array of (dimension, (birth, death)), display the legend
             legend = True
 
         if legend:
@@ -399,7 +399,7 @@ def plot_persistence_density(
     :Requires: `SciPy <installation.html#scipy>`_
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, array of (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_
         file style name (reset persistence if both are set).
     :type persistence_file: string
