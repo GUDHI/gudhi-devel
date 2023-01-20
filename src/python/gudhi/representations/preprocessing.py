@@ -12,6 +12,49 @@ import numpy as np
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler
 
+
+#############################################
+# Utils #####################################
+#############################################
+
+class Clamping(BaseEstimator, TransformerMixin):
+    """
+    This is a class for clamping a list of values. It is not meant to be called directly on (a list of) persistence diagrams, but it is rather meant to be used as a parameter for the DiagramScaler class. A typical use would be for instance if you want to clamp abscissae or ordinates (or both) of persistence diagrams within a pre-defined interval.
+    """
+    def __init__(self, minimum=-np.inf, maximum=np.inf):
+        """
+        Constructor for the Clamping class.
+
+        Parameters:
+            limit (float): clamping value (default np.inf).
+        """
+        self.minimum = minimum
+        self.maximum = maximum
+
+    def fit(self, X, y=None):
+        """
+        Fit the Clamping class on a list of values (this function actually does nothing but is useful when Clamping is included in a scikit-learn Pipeline).
+
+        Parameters:
+            X (numpy array of size n): input values.
+            y (n x 1 array): value labels (unused).
+        """
+        return self
+
+    def transform(self, X):
+        """
+        Clamp list of values.
+
+        Parameters:
+            X (numpy array of size n): input list of values.
+
+        Returns:
+            numpy array of size n: output list of values.
+        """
+        Xfit = np.clip(X, self.minimum, self.maximum)
+        return Xfit
+
+
 #############################################
 # Preprocessing #############################
 #############################################
@@ -66,43 +109,6 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
             n x 2 numpy array: transformed persistence diagram.
         """
         return self.fit_transform([diag])[0]
-
-class Clamping(BaseEstimator, TransformerMixin):
-    """
-    This is a class for clamping values. It can be used as a parameter for the DiagramScaler class, for instance if you want to clamp abscissae or ordinates of persistence diagrams.
-    """
-    def __init__(self, minimum=-np.inf, maximum=np.inf):
-        """
-        Constructor for the Clamping class.
-
-        Parameters:
-            limit (float): clamping value (default np.inf).
-        """
-        self.minimum = minimum
-        self.maximum = maximum
-
-    def fit(self, X, y=None):
-        """
-        Fit the Clamping class on a list of values (this function actually does nothing but is useful when Clamping is included in a scikit-learn Pipeline).
-
-        Parameters:
-            X (numpy array of size n): input values.
-            y (n x 1 array): value labels (unused).
-        """
-        return self
-
-    def transform(self, X):
-        """
-        Clamp list of values.
-
-        Parameters:
-            X (numpy array of size n): input list of values.
-
-        Returns:
-            numpy array of size n: output list of values.
-        """
-        Xfit = np.clip(X, self.minimum, self.maximum)
-        return Xfit
 
 class DiagramScaler(BaseEstimator, TransformerMixin):
     """
