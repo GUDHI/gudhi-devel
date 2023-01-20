@@ -106,6 +106,13 @@ def test_insertion():
     assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1]
     assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1]
 
+    st = SimplexTree()
+    st.insert([1])
+    st.insert([2])
+    st2 = SimplexTree()
+    st2.insert([1, 2])
+    st2.remove_maximal_simplex([1, 2])
+    assert st == st2
 
 def test_expansion():
     st = SimplexTree()
@@ -530,6 +537,9 @@ def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
     st = SimplexTree.create_from_array(a, max_filtration=5.0)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]]).dimension() == 1
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=5).dimension() == 0
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=-5).dimension() == -1
 
 
 def test_insert_edges_from_coo_matrix():
