@@ -203,7 +203,7 @@ def test_periodic_cubical_persistence_intervals_in_dimension():
 def test_array_access():
     a = np.arange(6, dtype=float).reshape(3, 2)
     cplx = CubicalComplex(top_dimensional_cells=a)
-    assert np.array_equal(cplx.top_cells(), a)
+    assert np.array_equal(cplx.top_dimensional_cells(), a)
     assert np.array_equal(
         cplx.vertices(), np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [2.0, 2.0, 3.0], [4.0, 4.0, 5.0]])
     )
@@ -221,12 +221,12 @@ def test_array_access():
             ]
         ),
     )
-    cplx.top_cells()[0, 0] = 42
+    cplx.top_dimensional_cells()[0, 0] = 42
     assert cplx.all_cells()[1, 1] == 42
 
     a = np.array([[1.0, 2.0], [4.0, 3.0], [0.0, 5.0]])
     cplx = PeriodicCubicalComplex(top_dimensional_cells=a, periodic_dimensions=(True, False))
-    assert np.array_equal(cplx.top_cells(), a)
+    assert np.array_equal(cplx.top_dimensional_cells(), a)
     assert np.array_equal(cplx.vertices(), np.array([[0.0, 0.0, 2.0], [1.0, 1.0, 2.0], [0.0, 0.0, 3.0]]))
     assert np.array_equal(
         cplx.all_cells(),

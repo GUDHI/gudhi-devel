@@ -158,7 +158,7 @@ cdef class CubicalComplex:
         np.set_array_base(a, self)
         return a.reshape([2*d+1 for d in self.thisptr.shape()], order='F')
 
-    def top_cells(self):
+    def top_dimensional_cells(self):
         """Array with the filtration values of the top-dimensional cells of the complex.
         Modifying the values is strongly discouraged.
 
