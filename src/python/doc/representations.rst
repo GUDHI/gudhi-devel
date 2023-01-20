@@ -115,12 +115,20 @@ PersLay
        [1.02051e-06]
        [7.80935e-16]]]], shape=(1, 5, 5, 1), dtype=float32)
 
+Utils
+-----
+.. autoclass:: gudhi.representations.preprocessing.Clamping
+   :members:
+   :special-members:
+   :show-inheritance:
+
 Preprocessing
 -------------
 .. automodule:: gudhi.representations.preprocessing
    :members:
    :special-members:
    :show-inheritance:
+   :exclude-members: Clamping
 
 Vector methods
 --------------
