@@ -12,6 +12,7 @@
 #define BITMAP_CUBICAL_COMPLEX_PERIODIC_BOUNDARY_CONDITIONS_BASE_H_
 
 #include <gudhi/Bitmap_cubical_complex_base.h>
+#include <gudhi/Debug_utils.h>
 
 #include <cmath>
 #include <limits>  // for numeric_limits<>
@@ -153,20 +154,20 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   // The non-periodic code works for top dimensional cells, but not vertices.
   class Vertices_iterator {
    public:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&;
+    typedef std::input_iterator_tag iterator_category;
+    typedef std::size_t value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
 
-    Vertices_iterator(Bitmap_cubical_complex_periodic_boundary_conditions_base& b) : counter(b.dimension()), b(b) {}
+    Vertices_iterator(Bitmap_cubical_complex_periodic_boundary_conditions_base* b) : counter(b->dimension()), b(b) {}
 
     Vertices_iterator operator++() {
       // first find first element of the counter that can be increased:
       std::size_t dim = 0;
-      while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim] - this->b.directions_in_which_periodic_b_cond_are_to_be_imposed[dim])) ++dim;
+      while ((dim != this->b->dimension()) && (this->counter[dim] == this->b->sizes[dim] - this->b->directions_in_which_periodic_b_cond_are_to_be_imposed[dim])) ++dim;
 
-      if (dim != this->b.dimension()) {
+      if (dim != this->b->dimension()) {
         ++this->counter[dim];
         for (std::size_t i = 0; i != dim; ++i) {
           this->counter[i] = 0;
@@ -190,8 +191,8 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     }
 
     bool operator==(const Vertices_iterator& rhs) const {
-      if (&this->b != &rhs.b) return false;
-      if (this->counter.size() != rhs.counter.size()) return false;
+      if (this->b != rhs.b) return false;
+      GUDHI_CHECK(this->counter.size() == rhs.counter.size(), "impossible");
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
         if (this->counter[i] != rhs.counter[i]) return false;
       }
@@ -212,7 +213,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     std::size_t compute_index_in_bitmap() const {
       std::size_t index = 0;
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
-        index += 2 * this->counter[i] * this->b.multipliers[i];
+        index += 2 * this->counter[i] * this->b->multipliers[i];
       }
       return index;
     }
@@ -226,14 +227,14 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
 
    protected:
     std::vector<std::size_t> counter;
-    Bitmap_cubical_complex_periodic_boundary_conditions_base& b;
+    Bitmap_cubical_complex_periodic_boundary_conditions_base* b;
   };
 
   /*
    * Function returning a Vertices_iterator to the first vertex of the bitmap.
    */
   Vertices_iterator vertices_iterator_begin() {
-    Vertices_iterator a(*this);
+    Vertices_iterator a(this);
     return a;
   }
 
@@ -241,7 +242,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
    * Function returning a Vertices_iterator to the last vertex of the bitmap.
    */
   Vertices_iterator vertices_iterator_end() {
-    Vertices_iterator a(*this);
+    Vertices_iterator a(this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
       a.counter[i] = this->sizes[i] - this->directions_in_which_periodic_b_cond_are_to_be_imposed[i];
     }
@@ -261,7 +262,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
     Vertices_iterator end() { return b->vertices_iterator_end(); }
 
    private:
-    Bitmap_cubical_complex_periodic_boundary_conditions_base<T>* b;
+    Bitmap_cubical_complex_periodic_boundary_conditions_base* b;
   };
 
   /* Returns a range over all vertices. */
@@ -530,6 +531,7 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
   return coboundary_elements;
 }
 
+// Exact same code as the non-periodic version, duplicated for now to ensure it calls the right version of vertices_iterator_begin.
 template <typename T>
 void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::impose_lower_star_filtration_from_vertices() {
   // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
@@ -543,7 +545,7 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::impose_lower_s
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
 
-  while (indices_to_consider.size()) {
+  while (indices_to_consider.size()) { // Iteration on the dimension
 #ifdef DEBUG_TRACES
     std::clog << "indices_to_consider in this iteration \n";
     for (auto index : indices_to_consider) {

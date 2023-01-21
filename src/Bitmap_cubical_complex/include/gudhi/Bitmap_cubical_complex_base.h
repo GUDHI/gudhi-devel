@@ -11,6 +11,8 @@
 #ifndef BITMAP_CUBICAL_COMPLEX_BASE_H_
 #define BITMAP_CUBICAL_COMPLEX_BASE_H_
 
+#include <gudhi/Debug_utils.h>
+
 #include <boost/config.hpp>
 
 #include <iostream>
@@ -127,8 +129,7 @@ class Bitmap_cubical_complex_base {
    * returned. Note that the input parameter can be a cell of any dimension (vertex, edge, etc).
    * On the other hand, the output is always indicating the position of
    * a vertex in the data structure.
-   * \pre The filtration values are assigned as per `impose_lower_star_filtration()` or
-   * `impose_lower_star_filtration_from_vertices()`.
+   * \pre The filtration values are assigned as per `impose_lower_star_filtration_from_vertices()`.
    **/
   inline size_t get_vertex_of_a_cell(size_t splx);
 
@@ -387,14 +388,14 @@ class Bitmap_cubical_complex_base {
     typedef value_type* pointer;
     typedef value_type reference;
 
-    Top_dimensional_cells_iterator(Bitmap_cubical_complex_base& b) : counter(b.dimension()), b(b) {}
+    Top_dimensional_cells_iterator(Bitmap_cubical_complex_base* b) : counter(b->dimension()), b(b) {}
 
     Top_dimensional_cells_iterator operator++() {
       // first find first element of the counter that can be increased:
       std::size_t dim = 0;
-      while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim] - 1)) ++dim;
+      while ((dim != this->b->dimension()) && (this->counter[dim] == this->b->sizes[dim] - 1)) ++dim;
 
-      if (dim != this->b.dimension()) {
+      if (dim != this->b->dimension()) {
         ++this->counter[dim];
         for (std::size_t i = 0; i != dim; ++i) {
           this->counter[i] = 0;
@@ -418,7 +419,7 @@ class Bitmap_cubical_complex_base {
     }
 
     bool operator==(const Top_dimensional_cells_iterator& rhs) const {
-      if (&this->b != &rhs.b) return false;
+      if (this->b != rhs.b) return false;
       if (this->counter.size() != rhs.counter.size()) return false;
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
         if (this->counter[i] != rhs.counter[i]) return false;
@@ -440,7 +441,7 @@ class Bitmap_cubical_complex_base {
     std::size_t compute_index_in_bitmap() const {
       std::size_t index = 0;
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
-        index += (2 * this->counter[i] + 1) * this->b.multipliers[i];
+        index += (2 * this->counter[i] + 1) * this->b->multipliers[i];
       }
       return index;
     }
@@ -454,14 +455,14 @@ class Bitmap_cubical_complex_base {
 
    protected:
     std::vector<std::size_t> counter;
-    Bitmap_cubical_complex_base& b;
+    Bitmap_cubical_complex_base* b;
   };
 
   /**
    * Function returning a Top_dimensional_cells_iterator to the first top dimensional cell of the bitmap.
    **/
   Top_dimensional_cells_iterator top_dimensional_cells_iterator_begin() {
-    Top_dimensional_cells_iterator a(*this);
+    Top_dimensional_cells_iterator a(this);
     return a;
   }
 
@@ -469,7 +470,7 @@ class Bitmap_cubical_complex_base {
    * Function returning a Top_dimensional_cells_iterator beyond the last top dimensional cell of the bitmap.
    **/
   Top_dimensional_cells_iterator top_dimensional_cells_iterator_end() {
-    Top_dimensional_cells_iterator a(*this);
+    Top_dimensional_cells_iterator a(this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
       a.counter[i] = this->sizes[i] - 1;
     }
@@ -501,20 +502,20 @@ class Bitmap_cubical_complex_base {
   //****************************************************************************************************************//
   class Vertices_iterator {
    public:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = T;
-    using difference_type = T;
-    using pointer = T*;
-    using reference = T&;
+    typedef std::input_iterator_tag iterator_category;
+    typedef std::size_t value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef value_type* pointer;
+    typedef value_type reference;
 
-    Vertices_iterator(Bitmap_cubical_complex_base& b) : counter(b.dimension()), b(b) {}
+    Vertices_iterator(Bitmap_cubical_complex_base* b) : counter(b->dimension()), b(b) {}
 
     Vertices_iterator operator++() {
       // first find first element of the counter that can be increased:
       std::size_t dim = 0;
-      while ((dim != this->b.dimension()) && (this->counter[dim] == this->b.sizes[dim])) ++dim;
+      while ((dim != this->b->dimension()) && (this->counter[dim] == this->b->sizes[dim])) ++dim;
 
-      if (dim != this->b.dimension()) {
+      if (dim != this->b->dimension()) {
         ++this->counter[dim];
         for (std::size_t i = 0; i != dim; ++i) {
           this->counter[i] = 0;
@@ -538,8 +539,8 @@ class Bitmap_cubical_complex_base {
     }
 
     bool operator==(const Vertices_iterator& rhs) const {
-      if (&this->b != &rhs.b) return false;
-      if (this->counter.size() != rhs.counter.size()) return false;
+      if (this->b != rhs.b) return false;
+      GUDHI_CHECK(this->counter.size() == rhs.counter.size(), "impossible");
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
         if (this->counter[i] != rhs.counter[i]) return false;
       }
@@ -560,7 +561,7 @@ class Bitmap_cubical_complex_base {
     std::size_t compute_index_in_bitmap() const {
       std::size_t index = 0;
       for (std::size_t i = 0; i != this->counter.size(); ++i) {
-        index += 2 * this->counter[i] * this->b.multipliers[i];
+        index += 2 * this->counter[i] * this->b->multipliers[i];
       }
       return index;
     }
@@ -574,14 +575,14 @@ class Bitmap_cubical_complex_base {
 
    protected:
     std::vector<std::size_t> counter;
-    Bitmap_cubical_complex_base& b;
+    Bitmap_cubical_complex_base* b;
   };
 
   /*
    * Function returning a Vertices_iterator to the first vertex of the bitmap.
    */
   Vertices_iterator vertices_iterator_begin() {
-    Vertices_iterator a(*this);
+    Vertices_iterator a(this);
     return a;
   }
 
@@ -589,7 +590,7 @@ class Bitmap_cubical_complex_base {
    * Function returning a Vertices_iterator to the last vertex of the bitmap.
    */
   Vertices_iterator vertices_iterator_end() {
-    Vertices_iterator a(*this);
+    Vertices_iterator a(this);
     for (std::size_t i = 0; i != this->dimension(); ++i) {
       a.counter[i] = this->sizes[i];
     }
@@ -609,7 +610,7 @@ class Bitmap_cubical_complex_base {
     Vertices_iterator end() { return b->vertices_iterator_end(); }
 
    private:
-    Bitmap_cubical_complex_base<T>* b;
+    Bitmap_cubical_complex_base* b;
   };
 
   /* Returns a range over all vertices. */
@@ -740,8 +741,8 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_top_dimensional_cells
     const std::vector<unsigned>& sizes_in_following_directions, const std::vector<T>& top_dimensional_cells) {
   this->set_up_containers(sizes_in_following_directions, true);
   std::size_t number_of_top_dimensional_elements = std::accumulate(std::begin(sizes_in_following_directions),
-                                                   std::end(sizes_in_following_directions), 1,
-                                                   std::multiplies<unsigned>());
+                                                   std::end(sizes_in_following_directions), std::size_t(1),
+                                                   std::multiplies<std::size_t>());
   if (number_of_top_dimensional_elements != top_dimensional_cells.size()) {
     std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<unsigned> "
               << "sizes_in_following_directions, std::vector<T> top_dimensional_cells ). Number of top dimensional "
@@ -1068,7 +1069,7 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices(
     indices_to_consider.push_back(it.compute_index_in_bitmap());
   }
 
-  while (indices_to_consider.size()) {
+  while (indices_to_consider.size()) { // Iteration on the dimension
 #ifdef DEBUG_TRACES
     std::clog << "indices_to_consider in this iteration \n";
     for (auto index : indices_to_consider) {
