@@ -85,7 +85,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
         children->members().emplace_hint(children->members().end(), j, Node(children, fe));
       }
     }
-
+    this->set_dimension(1, false);
   }
 
   // Do not interface this function, only used in alpha complex interface for complex creation
