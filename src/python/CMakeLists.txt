@@ -164,12 +164,12 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/wasserstein', ")
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/bottleneck', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
+    set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
     if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'datasets/generators/_points', ")
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'bottleneck', ")
     endif ()
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-      set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
@@ -427,9 +427,6 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
 
-      # Subsampling
-      add_gudhi_py_test(test_subsampling)
-
     endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
     if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
       # Bottleneck
@@ -542,6 +539,9 @@ if(PYTHONINTERP_FOUND)
 
     add_gudhi_py_test(test_simplex_tree)
     add_gudhi_py_test(test_simplex_generators)
+
+    # Subsampling
+    add_gudhi_py_test(test_subsampling)
 
     # Witness
     add_test(NAME witness_complex_from_nearest_landmark_table_py_test
