@@ -14,18 +14,12 @@
 # include <boost/iterator/function_output_iterator.hpp>
 
 #include <gudhi/Kd_tree_search.h>
-#include <CGAL/version.h>  // for CGAL_VERSION_NR
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 #include <gudhi/Clock.h>
 #endif
 
 #include <cstddef>
 #include <vector>
-
-// Make compilation fail - required for external projects
-#if CGAL_VERSION_NR < 1041101000
-# error subsampling::sparsify_point_set is only available with CGAL >= 4.11
-#endif
 
 namespace Gudhi {
 
