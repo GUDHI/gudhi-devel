@@ -15,7 +15,7 @@ import os
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
+__license__ = "MIT (GPL v3 for sparsify_point_set)"
 
 cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points(vector[vector[double]] points, unsigned nb_points)
@@ -26,6 +26,11 @@ cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_random_points_from_file(string off_file, unsigned nb_points)
     vector[vector[double]] subsampling_sparsify_points(vector[vector[double]] points, double min_squared_dist)
     vector[vector[double]] subsampling_sparsify_points_from_file(string off_file, double min_squared_dist)
+
+cdef extern from "Subsampling_interface.h":
+    cdef int _GUDHI_SUBSAMPLING_USE_CGAL
+
+GUDHI_SUBSAMPLING_USE_CGAL = _GUDHI_SUBSAMPLING_USE_CGAL
 
 def choose_n_farthest_points(points=None, off_file='', nb_points=0, starting_point = ''):
     """Subsample by a greedy strategy of iteratively adding the farthest point
@@ -123,6 +128,9 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     :returns:  The subsample point set.
     :rtype: List[List[float]]
     """
+    if not GUDHI_SUBSAMPLING_USE_CGAL:
+        raise NotImplementedError("subsampling sparsify_point_set is only available for CGAL >= 4.11")
+    
     if off_file:
         if os.path.isfile(off_file):
             return subsampling_sparsify_points_from_file(off_file.encode('utf-8'),
