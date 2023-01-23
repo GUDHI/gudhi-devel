@@ -56,12 +56,20 @@ Various kernels
 This small example is also provided
 :download:`diagram_vectorizations_distances_kernels.py <../example/diagram_vectorizations_distances_kernels.py>`
 
+Utils
+-----
+.. autoclass:: gudhi.representations.preprocessing.Clamping
+   :members:
+   :special-members:
+   :show-inheritance:
+
 Preprocessing
 -------------
 .. automodule:: gudhi.representations.preprocessing
    :members:
    :special-members:
    :show-inheritance:
+   :exclude-members: Clamping
 
 Vector methods
 --------------
