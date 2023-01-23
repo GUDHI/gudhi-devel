@@ -39,6 +39,8 @@ public:
 		std::swap(r1.columnIndex_, r2.columnIndex_);
 	}
 
+	void set_rows(Row_container_type *rows);
+
 protected:
 	index columnIndex_;
 	Row_container_type* rows_;					//be carefull to not destroy container before columns
@@ -59,7 +61,8 @@ inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>:
 
 template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
 inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access(Row_access &&other) noexcept
-	: columnIndex_(std::exchange(other.columnIndex_, 0)), rows_(std::move(other.rows_))
+	: columnIndex_(std::exchange(other.columnIndex_, 0)),
+	  rows_(other.rows_)
 {}
 
 template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
@@ -123,6 +126,12 @@ template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRe
 inline index Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::get_column_index() const
 {
 	return columnIndex_;
+}
+
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::set_rows(Row_container_type *rows)
+{
+	rows_ = rows;
 }
 
 } //namespace persistence_matrix

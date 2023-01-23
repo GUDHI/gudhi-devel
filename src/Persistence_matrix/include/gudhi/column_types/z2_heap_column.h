@@ -17,6 +17,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 #include "../utilities/utilities.h"
 #include "cell.h"
@@ -24,8 +25,7 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Column_pairing_option>
-class Z2_heap_column : public Column_pairing_option
+class Z2_heap_column
 {
 public:
 	using Cell = Z2_base_cell;
@@ -43,10 +43,12 @@ public:
 	Z2_heap_column(const Z2_heap_column& column);
 	Z2_heap_column(Z2_heap_column&& column) noexcept;
 
-	std::vector<bool> get_content(unsigned int columnLength);
+	std::vector<bool> get_content(int columnLength = -1) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	dimension_type get_dimension() const;
+	template<class Map_type>
+	void reorder(Map_type& valueMap);
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -73,6 +75,13 @@ public:
 		return column;
 	}
 
+	friend bool operator==(const Z2_heap_column& c1, const Z2_heap_column& c2){
+		return c1.get_content() == c2.get_content();
+	}
+	friend bool operator<(const Z2_heap_column& c1, const Z2_heap_column& c2){
+		return c1.get_content() < c2.get_content();
+	}
+
 	Z2_heap_column& operator=(Z2_heap_column other);
 
 	friend void swap(Z2_heap_column& col1, Z2_heap_column& col2){
@@ -90,13 +99,11 @@ protected:
 	int _pop_pivot();
 };
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option>::Z2_heap_column() : dim_(0), insertsSinceLastPrune_(0)
+inline Z2_heap_column::Z2_heap_column() : dim_(0), insertsSinceLastPrune_(0)
 {}
 
-template<class Column_pairing_option>
 template<class Container_type>
-inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Container_type& nonZeroRowIndices)
+inline Z2_heap_column::Z2_heap_column(const Container_type& nonZeroRowIndices)
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
 	  column_(nonZeroRowIndices.begin(), nonZeroRowIndices.end()),
 	  insertsSinceLastPrune_(0)
@@ -104,9 +111,8 @@ inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Container_typ
 	std::make_heap(column_.begin(), column_.end());
 }
 
-template<class Column_pairing_option>
 template<class Container_type>
-inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Container_type& nonZeroRowIndices, dimension_type dimension)
+inline Z2_heap_column::Z2_heap_column(const Container_type& nonZeroRowIndices, dimension_type dimension)
 	: dim_(dimension),
 	  column_(nonZeroRowIndices.begin(), nonZeroRowIndices.end()),
 	  insertsSinceLastPrune_(0)
@@ -114,35 +120,31 @@ inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Container_typ
 	std::make_heap(column_.begin(), column_.end());
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(const Z2_heap_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
+inline Z2_heap_column::Z2_heap_column(const Z2_heap_column &column)
+	: dim_(column.dim_),
 	  column_(column.column_),
 	  insertsSinceLastPrune_(column.insertsSinceLastPrune_)
 {}
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option>::Z2_heap_column(Z2_heap_column&& column) noexcept
-	: Column_pairing_option(std::move(column)),
-	  dim_(std::exchange(column.dim_, 0)),
+inline Z2_heap_column::Z2_heap_column(Z2_heap_column&& column) noexcept
+	: dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_)),
 	  insertsSinceLastPrune_(std::exchange(column.insertsSinceLastPrune_, 0))
 {}
 
-template<class Column_pairing_option>
-inline std::vector<bool> Z2_heap_column<Column_pairing_option>::get_content(unsigned int columnLength)
+inline std::vector<bool> Z2_heap_column::get_content(int columnLength) const
 {
-	_prune();
+	if (columnLength < 0) columnLength = column_.front().get_row_index() + 1;
+
 	std::vector<bool> container(columnLength, 0);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = 1;
+	for (auto it = column_.begin(); it != column_.end(); ++it){
+		if (it->get_row_index() < static_cast<unsigned int>(columnLength))
+			container[it->get_row_index()] = !container[it->get_row_index()];
 	}
 	return container;
 }
 
-template<class Column_pairing_option>
-inline bool Z2_heap_column<Column_pairing_option>::is_non_zero(index rowIndex) const
+inline bool Z2_heap_column::is_non_zero(index rowIndex) const
 {
 	unsigned int c = 0;
 
@@ -153,8 +155,7 @@ inline bool Z2_heap_column<Column_pairing_option>::is_non_zero(index rowIndex) c
 	return c % 2 != 0;
 }
 
-template<class Column_pairing_option>
-inline bool Z2_heap_column<Column_pairing_option>::is_empty()
+inline bool Z2_heap_column::is_empty()
 {
 	int pivot = _pop_pivot();
 	if (pivot != -1){
@@ -165,70 +166,75 @@ inline bool Z2_heap_column<Column_pairing_option>::is_empty()
 	return true;
 }
 
-template<class Column_pairing_option>
-inline dimension_type Z2_heap_column<Column_pairing_option>::get_dimension() const
+inline dimension_type Z2_heap_column::get_dimension() const
 {
 	return dim_;
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::iterator
-Z2_heap_column<Column_pairing_option>::begin() noexcept
+template<class Map_type>
+inline void Z2_heap_column::reorder(Map_type &valueMap)
+{
+	Column_type tempCol;
+	int pivot = _pop_pivot();
+	while (pivot != -1) {
+		tempCol.push_back(valueMap[pivot]);
+		pivot = _pop_pivot();
+	}
+	column_.swap(tempCol);
+	std::make_heap(column_.begin(), column_.end());
+
+	insertsSinceLastPrune_ = 0;
+}
+
+inline typename Z2_heap_column::iterator
+Z2_heap_column::begin() noexcept
 {
 	return column_.begin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::const_iterator
-Z2_heap_column<Column_pairing_option>::begin() const noexcept
+inline typename Z2_heap_column::const_iterator
+Z2_heap_column::begin() const noexcept
 {
 	return column_.begin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::iterator
-Z2_heap_column<Column_pairing_option>::end() noexcept
+inline typename Z2_heap_column::iterator
+Z2_heap_column::end() noexcept
 {
 	return column_.end();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::const_iterator
-Z2_heap_column<Column_pairing_option>::end() const noexcept
+inline typename Z2_heap_column::const_iterator
+Z2_heap_column::end() const noexcept
 {
 	return column_.end();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::reverse_iterator
-Z2_heap_column<Column_pairing_option>::rbegin() noexcept
+inline typename Z2_heap_column::reverse_iterator
+Z2_heap_column::rbegin() noexcept
 {
 	return column_.rbegin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::const_reverse_iterator
-Z2_heap_column<Column_pairing_option>::rbegin() const noexcept
+inline typename Z2_heap_column::const_reverse_iterator
+Z2_heap_column::rbegin() const noexcept
 {
 	return column_.rbegin();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::reverse_iterator
-Z2_heap_column<Column_pairing_option>::rend() noexcept
+inline typename Z2_heap_column::reverse_iterator
+Z2_heap_column::rend() noexcept
 {
 	return column_.rend();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_column<Column_pairing_option>::const_reverse_iterator
-Z2_heap_column<Column_pairing_option>::rend() const noexcept
+inline typename Z2_heap_column::const_reverse_iterator
+Z2_heap_column::rend() const noexcept
 {
 	return column_.rend();
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option> &Z2_heap_column<Column_pairing_option>::operator+=(Z2_heap_column const &column)
+inline Z2_heap_column &Z2_heap_column::operator+=(Z2_heap_column const &column)
 {
 	const Column_type& colToAdd = column.column_;
 	const unsigned int size = colToAdd.size();
@@ -246,8 +252,7 @@ inline Z2_heap_column<Column_pairing_option> &Z2_heap_column<Column_pairing_opti
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option> &Z2_heap_column<Column_pairing_option>::operator*=(unsigned int v)
+inline Z2_heap_column &Z2_heap_column::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
 		column_.clear();
@@ -257,8 +262,7 @@ inline Z2_heap_column<Column_pairing_option> &Z2_heap_column<Column_pairing_opti
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_column<Column_pairing_option>& Z2_heap_column<Column_pairing_option>::operator=(Z2_heap_column other)
+inline Z2_heap_column& Z2_heap_column::operator=(Z2_heap_column other)
 {
 	std::swap(dim_, other.dim_);
 	column_.swap(other.column_);
@@ -266,8 +270,7 @@ inline Z2_heap_column<Column_pairing_option>& Z2_heap_column<Column_pairing_opti
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline void Z2_heap_column<Column_pairing_option>::_prune()
+inline void Z2_heap_column::_prune()
 {
 	if (insertsSinceLastPrune_ == 0) return;
 
@@ -283,8 +286,7 @@ inline void Z2_heap_column<Column_pairing_option>::_prune()
 	insertsSinceLastPrune_ = 0;
 }
 
-template<class Column_pairing_option>
-inline int Z2_heap_column<Column_pairing_option>::_pop_pivot()
+inline int Z2_heap_column::_pop_pivot()
 {
 	if (column_.empty()) {
 		return -1;
@@ -311,5 +313,19 @@ inline int Z2_heap_column<Column_pairing_option>::_pop_pivot()
 
 } //namespace persistence_matrix
 } //namespace Gudhi
+
+template<>
+struct std::hash<Gudhi::persistence_matrix::Z2_heap_column>
+{
+	size_t operator()(const Gudhi::persistence_matrix::Z2_heap_column& column) const
+	{
+		std::size_t seed = 0;
+		unsigned int i = 0;
+		for (bool val : column.get_content()){
+			seed ^= std::hash<unsigned int>()(i++ * val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
+};
 
 #endif // Z2_HEAP_COLUMN_H

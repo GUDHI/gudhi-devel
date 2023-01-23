@@ -23,7 +23,7 @@ template<class Master_matrix>
 class RU_vine_swap : public RU_pairing<Master_matrix>
 {
 public:
-	using Base_matrix = typename Master_matrix::Base_matrix_type;
+	using Base_matrix = typename Master_matrix::Boundary_matrix_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 
 	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
@@ -35,22 +35,21 @@ public:
 
 	RU_vine_swap& operator=(RU_vine_swap other);
 	friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2){
-		std::swap(swap1.reducedMatrixR_, swap2.reducedMatrixR_);
-		std::swap(swap1.mirrorMatrixU_, swap2.mirrorMatrixU_);
-		std::swap(swap1.pivotToColumnIndex_, swap2.pivotToColumnIndex_);
+//		std::swap(swap1.reducedMatrixR_, swap2.reducedMatrixR_);
+//		std::swap(swap1.mirrorMatrixU_, swap2.mirrorMatrixU_);
+//		std::swap(swap1.pivotToColumnIndex_, swap2.pivotToColumnIndex_);
 		swap(static_cast<RU_pairing<Master_matrix>&>(swap1),
 			 static_cast<RU_pairing<Master_matrix>&>(swap2));
 	}
 
 protected:
+	Base_matrix *reducedMatrixR_;
+	Base_matrix *mirrorMatrixU_;
+	dictionnary_type *pivotToColumnIndex_;
 	static constexpr bool isActive_ = true;
 
 private:
 	using RUP = RU_pairing<Master_matrix>;
-
-	Base_matrix *reducedMatrixR_;
-	Base_matrix *mirrorMatrixU_;
-	dictionnary_type *pivotToColumnIndex_;
 
 	void _swap_at_index(index index);
 	void _add_to(index sourceIndex, index targetIndex);
@@ -86,9 +85,9 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&other) noexcept
 	: RU_pairing<Master_matrix>(std::move(other)),
-	  reducedMatrixR_(std::exchange(other.reducedMatrixR_, nullptr)),
-	  mirrorMatrixU_(std::exchange(other.mirrorMatrixU_, nullptr)),
-	  pivotToColumnIndex_(std::exchange(other.pivotToColumnIndex_, nullptr))
+	  reducedMatrixR_(other.reducedMatrixR_),
+	  mirrorMatrixU_(other.mirrorMatrixU_),
+	  pivotToColumnIndex_(other.pivotToColumnIndex_)
 {}
 
 template<class Master_matrix>
@@ -156,9 +155,9 @@ template<class Master_matrix>
 inline RU_vine_swap<Master_matrix> &RU_vine_swap<Master_matrix>::operator=(
 		RU_vine_swap<Master_matrix> other)
 {
-	std::swap(reducedMatrixR_, other.reducedMatrixR_);
-	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
-	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
+//	std::swap(reducedMatrixR_, other.reducedMatrixR_);
+//	std::swap(mirrorMatrixU_, other.mirrorMatrixU_);
+//	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
 	RU_pairing<Master_matrix>::operator=(other);
 	return *this;
 }

@@ -40,18 +40,18 @@ public:
 	Chain_representative_cycles& operator=(Chain_representative_cycles other);
 	friend void swap(Chain_representative_cycles& base1,
 					 Chain_representative_cycles& base2){
-		std::swap(base1.matrix_, base2.matrix_);
-		std::swap(base1.pivotToPosition_, base2.pivotToPosition_);
+//		std::swap(base1.matrix_, base2.matrix_);
+//		std::swap(base1.pivotToPosition_, base2.pivotToPosition_);
 		base1.representativeCycles_.swap(base2.representativeCycles_);
 		base1.birthToCycle_.swap(base2.birthToCycle_);
 	}
 
 protected:
 	static constexpr bool isActive_ = true;
-
-private:
 	matrix_type* matrix_;
 	dictionnary_type* pivotToPosition_;
+
+private:
 	std::vector<cycle_type> representativeCycles_;
 	std::vector<int> birthToCycle_;
 };
@@ -71,8 +71,8 @@ inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(c
 
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(Chain_representative_cycles<Master_matrix>&& other) noexcept
-	: matrix_(std::exchange(other.matrix_, nullptr)),
-	  pivotToPosition_(std::exchange(other.pivotToPosition_, nullptr)),
+	: matrix_(other.matrix_),
+	  pivotToPosition_(other.pivotToPosition_),
 	  representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}
@@ -118,8 +118,8 @@ Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar &
 template<class Master_matrix>
 inline Chain_representative_cycles<Master_matrix> &Chain_representative_cycles<Master_matrix>::operator=(Chain_representative_cycles<Master_matrix> other)
 {
-	std::swap(matrix_, other.matrix_);
-	std::swap(pivotToPosition_, other.pivotToPosition_);
+//	std::swap(matrix_, other.matrix_);
+//	std::swap(pivotToPosition_, other.pivotToPosition_);
 	representativeCycles_.swap(other.representativeCycles_);
 	birthToCycle_.swap(other.birthToCycle_);
 	return *this;

@@ -36,7 +36,7 @@ public:
 
 	Chain_vine_swap& operator=(Chain_vine_swap other);
 	friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2){
-		std::swap(swap1.matrix_, swap2.matrix_);
+//		std::swap(swap1.matrix_, swap2.matrix_);
 		swap1.pivotToPosition_.swap(swap2.pivotToPosition_);
 		swap(static_cast<Chain_pairing<Master_matrix>&>(swap1),
 			 static_cast<Chain_pairing<Master_matrix>&>(swap2));
@@ -44,13 +44,12 @@ public:
 
 protected:
 	dictionnary_type pivotToPosition_;
+	matrix_type* matrix_;
 	static constexpr bool isActive_ = true;
 
 private:
 	using CP = Chain_pairing<Master_matrix>;
 	using Column_type = typename Master_matrix::Column_type;
-
-	matrix_type* matrix_;
 
 	void _add_to(const typename Column_type::Column_type& column, std::set<index>& set);
 	bool _is_negative_in_pair(index simplexIndex) const;
@@ -78,14 +77,16 @@ inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(matrix_type &matrix)
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(
 		const Chain_vine_swap &matrixToCopy)
-	: Chain_pairing<Master_matrix>(matrixToCopy), pivotToPosition_(matrixToCopy.pivotToPosition_), matrix_(matrixToCopy.matrix_)
+	: Chain_pairing<Master_matrix>(matrixToCopy),
+	  pivotToPosition_(matrixToCopy.pivotToPosition_),
+	  matrix_(matrixToCopy.matrix_)
 {}
 
 template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(Chain_vine_swap<Master_matrix> &&other) noexcept
 	: Chain_pairing<Master_matrix>(std::move(other)),
 	  pivotToPosition_(std::move(other.pivotToPosition_)),
-	  matrix_(std::exchange(other.matrix_, nullptr))
+	  matrix_(other.matrix_)
 {}
 
 template<class Master_matrix>
@@ -154,7 +155,7 @@ template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix> &Chain_vine_swap<Master_matrix>::operator=(
 		Chain_vine_swap<Master_matrix> other)
 {
-	std::swap(matrix_, other.matrix_);
+//	std::swap(matrix_, other.matrix_);
 	pivotToPosition_.swap(other.pivotToPosition_);
 	Chain_pairing<Master_matrix>::operator=(other);
 	return *this;

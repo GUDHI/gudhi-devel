@@ -12,7 +12,7 @@
 #define RU_MATRIX_0001_H
 
 #include "../utilities/utilities.h"
-#include "base_matrix_0001.h"
+#include "boundary_matrix_0001.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -81,8 +81,8 @@ private:
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 
-	Base_matrix_with_removals<Master_matrix> reducedMatrixR_;
-	Base_matrix_with_removals<Master_matrix> mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
+	Boundary_matrix_with_removals<Master_matrix> reducedMatrixR_;
+	Boundary_matrix_with_removals<Master_matrix> mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
 	index nextInsertIndex_;
 
@@ -138,7 +138,17 @@ inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(const RU_
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
-{}
+{
+	if constexpr (rep_opt::isActive_){
+		rep_opt::reducedMatrixR_ = &reducedMatrixR_;
+		rep_opt::mirrorMatrixU_ = &mirrorMatrixU_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::reducedMatrixR_ = &reducedMatrixR_;
+		swap_opt::mirrorMatrixU_ = &mirrorMatrixU_;
+		swap_opt::pivotToColumnIndex_ = &pivotToColumnIndex_;
+	}
+}
 
 template<class Master_matrix>
 inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(RU_matrix_with_removals &&other) noexcept
@@ -149,7 +159,17 @@ inline RU_matrix_with_removals<Master_matrix>::RU_matrix_with_removals(RU_matrix
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
-{}
+{
+	if constexpr (rep_opt::isActive_){
+		rep_opt::reducedMatrixR_ = &reducedMatrixR_;
+		rep_opt::mirrorMatrixU_ = &mirrorMatrixU_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::reducedMatrixR_ = &reducedMatrixR_;
+		swap_opt::mirrorMatrixU_ = &mirrorMatrixU_;
+		swap_opt::pivotToColumnIndex_ = &pivotToColumnIndex_;
+	}
+}
 
 template<class Master_matrix>
 template<class Boundary_type>

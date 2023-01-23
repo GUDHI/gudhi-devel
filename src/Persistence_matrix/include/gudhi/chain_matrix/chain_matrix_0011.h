@@ -63,7 +63,7 @@ public:
 	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex) const;
 
-	Chain_matrix_with_row_access_with_removals& operator=(Chain_matrix_with_row_access_with_removals other);
+	Chain_matrix_with_row_access_with_removals& operator=(const Chain_matrix_with_row_access_with_removals& other);
 	friend void swap(Chain_matrix_with_row_access_with_removals& matrix1,
 					 Chain_matrix_with_row_access_with_removals& matrix2){
 		swap(static_cast<typename Master_matrix::Chain_pairing_option&>(matrix1),
@@ -78,6 +78,14 @@ public:
 		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 		matrix1.dimensions_.swap(matrix2.dimensions_);
 		std::swap(matrix1.maxDim_, matrix2.maxDim_);
+		for (auto& p : matrix1.matrix_){
+			Column_type& col = p.second;
+			col.set_rows(&matrix1.rows_);
+		}
+		for (auto& p : matrix2.matrix_){
+			Column_type& col = p.second;
+			col.set_rows(&matrix2.rows_);
+		}
 	}
 
 	void print() const;  //for debug
@@ -93,12 +101,12 @@ private:
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 	using Field_element_type = typename Master_matrix::Field_type;
 	using cell_rep_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Field_element_type::get_characteristic() == 2,
 								index,
 								std::pair<index,Field_element_type>
 							>::type;
 	using tmp_column_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Field_element_type::get_characteristic() == 2,
 								std::set<index>,
 								std::set<std::pair<index,Field_element_type>,
 										 CellPairComparator<Field_element_type> >
@@ -183,8 +191,16 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	  matrix_(matrixToCopy.matrix_.size()),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
+	  dimensions_(matrixToCopy.dimensions_),
 	  maxDim_(matrixToCopy.maxDim_)
 {
+	if constexpr (rep_opt::isActive_){
+		rep_opt::matrix_ = &matrix_;
+		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::matrix_ = &matrix_;
+	}
 	for (const auto& p : matrixToCopy.matrix_){
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
@@ -207,8 +223,21 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
+	  dimensions_(std::move(other.dimensions_)),
 	  maxDim_(std::exchange(other.maxDim_, -1))
-{}
+{
+	if constexpr (rep_opt::isActive_){
+		rep_opt::matrix_ = &matrix_;
+		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::matrix_ = &matrix_;
+	}
+	for (auto& p : matrix_){
+		Column_type& col = p.second;
+		col.set_rows(&rows_);
+	}
+}
 
 template<class Master_matrix>
 template<class Boundary_type>
@@ -366,18 +395,27 @@ inline index Chain_matrix_with_row_access_with_removals<Master_matrix>::get_pivo
 
 template<class Master_matrix>
 inline Chain_matrix_with_row_access_with_removals<Master_matrix> &
-Chain_matrix_with_row_access_with_removals<Master_matrix>::operator=(
-		Chain_matrix_with_row_access_with_removals other)
+Chain_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Chain_matrix_with_row_access_with_removals &other)
 {
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
-	matrix_.swap(other.matrix_);
-	rows_.swap(other.rows_);
-	pivotToColumnIndex_.swap(other.pivotToColumnIndex_);
-	std::swap(nextInsertIndex_, other.nextInsertIndex_);
-	dimensions_.swap(other.dimensions_);
-	std::swap(maxDim_, other.maxDim_);
+	rows_.reserve(other.rows_.size());
+	matrix_.reserve(other.matrix_.size());
+	pivotToColumnIndex_ = other.pivotToColumnIndex_;
+	nextInsertIndex_ = other.nextInsertIndex_;
+	dimensions_ = other.dimensions_;
+	maxDim_ = other.maxDim_;
+	for (const auto& p : other.matrix_){
+		const Column_type& col = p.second;
+		std::vector<cell_rep_type> tmp(col.begin(), col.end());
+		matrix_.emplace(p.first,
+						Column_type(col.get_column_index(),
+									tmp,
+									col.get_dimension(),
+									rows_,
+									pivotToColumnIndex_));
+	}
 	return *this;
 }
 

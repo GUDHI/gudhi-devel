@@ -23,7 +23,6 @@
 
 #include "gudhi/utilities/Zp_field.h"
 #include "gudhi/utilities/utilities.h"
-#include "gudhi/column_types/column_pairing.h"
 #include "gudhi/column_types/row_access.h"
 #include "gudhi/column_types/cell.h"
 
@@ -129,7 +128,6 @@ using Gudhi::persistence_matrix::Z2_intrusive_list_row_cell;
 using Gudhi::persistence_matrix::Z2_intrusive_set_row_cell;
 using Gudhi::persistence_matrix::base_hook_matrix_row;
 
-using Gudhi::persistence_matrix::Column_pairing;
 using Gudhi::persistence_matrix::Row_access;
 using Gudhi::persistence_matrix::dimension_type;
 
@@ -184,443 +182,239 @@ struct Dummy_row_access{
 
 ////////////// BASICS //////////////
 
-typedef boost::mpl::list<List_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							List_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Set_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Unordered_set_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Vector_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_list_column<Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_column<Z5, Intrusive_list_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_set_column<Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_column<Z5, Intrusive_set_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							List_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							List_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<List_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Set_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Unordered_set_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Vector_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Intrusive_list_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
+							Intrusive_set_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>,
+							List_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
+							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
 						> list_of_5_columns;
 
-typedef boost::mpl::list<Z2_heap_column<Column_pairing>,
-							Z2_heap_column<Dummy_column_pairing>,
-							Z2_list_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_list_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_set_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_unordered_set_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_vector_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_column<Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_column<Z2_intrusive_list_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_column<Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_column<Z2_intrusive_set_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_heap_boundary_column<Column_pairing>,
-							Z2_heap_boundary_column<Dummy_column_pairing>,
-							Z2_list_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_list_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<Z2_heap_column,
+							Z2_list_column<Z2_base_cell, Dummy_row_access>,
+							Z2_set_column<Z2_base_cell, Dummy_row_access>,
+							Z2_unordered_set_column<Z2_base_cell, Dummy_row_access>,
+							Z2_vector_column<Z2_base_cell, Dummy_row_access>,
+							Z2_intrusive_list_column<Z2_intrusive_list_cell, Dummy_row_access>,
+							Z2_intrusive_set_column<Z2_intrusive_set_cell, Dummy_row_access>,
+							Z2_heap_boundary_column,
+							Z2_list_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_set_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_vector_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_row_access>,
+							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_row_access>
 						> list_of_2_columns;
 
-typedef boost::mpl::list<List_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							List_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<List_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
+							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
+							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
 						> list_of_5_boundary_columns;
 
-typedef boost::mpl::list<Z2_heap_boundary_column<Column_pairing>,
-							Z2_heap_boundary_column<Dummy_column_pairing>,
-							Z2_list_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_list_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<Z2_heap_boundary_column,
+							Z2_list_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_set_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_vector_boundary_column<Z2_base_cell, Dummy_row_access>,
+							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_row_access>,
+							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_row_access>
 						> list_of_2_boundary_columns;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							List_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Dummy_column_pairing, Dummy_row_access>,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
+							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
 						> list_of_5_chain_columns;
 
-typedef boost::mpl::list<Z2_heap_chain_column<dict_type, Column_pairing>,
-							Z2_heap_chain_column<dict_type, Dummy_column_pairing>,
-							Z2_list_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_list_chain_column<dict_type, Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_set_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_chain_column<dict_type, Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_vector_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_chain_column<dict_type, Z2_base_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Dummy_column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Dummy_column_pairing, Dummy_row_access>
+typedef boost::mpl::list<Z2_heap_chain_column<dict_type>,
+							Z2_list_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_vector_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Dummy_row_access>,
+							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Dummy_row_access>
 						> list_of_2_chain_columns;
 
 ////////////// ROWS //////////////
 
-typedef boost::mpl::list<List_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							List_column<Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_column<Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							List_boundary_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							List_boundary_column<Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >
+typedef boost::mpl::list<List_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
+							Vector_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
+							List_boundary_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
+							Vector_boundary_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
 						> list_of_5_columns_with_row_non_intr;
 
-typedef boost::mpl::list<List_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							List_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							List_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							List_boundary_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_boundary_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_boundary_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >
+typedef boost::mpl::list<List_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Set_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Unordered_set_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Vector_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							List_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Set_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Unordered_set_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Vector_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
 						> list_of_5_columns_with_row_set_non_intr;
 
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
+							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_5_columns_with_row_intr_list;
 
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
+							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
 						> list_of_5_columns_with_row_set_intr_list;
 
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
+							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_5_columns_with_row_intr_set;
 
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
+							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
 						> list_of_5_columns_with_row_set_intr_set;
 
-typedef boost::mpl::list<Z2_list_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_list_column<Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_column<Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_list_boundary_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_list_boundary_column<Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_boundary_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_boundary_column<Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >
+typedef boost::mpl::list<Z2_list_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
+							Z2_vector_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
+							Z2_list_boundary_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
+							Z2_vector_boundary_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
 						> list_of_2_columns_with_row_non_intr;
 
-typedef boost::mpl::list<Z2_list_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_list_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_list_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_list_boundary_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_boundary_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_boundary_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_boundary_column<Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >
+typedef boost::mpl::list<Z2_list_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_set_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_unordered_set_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_vector_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_list_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_set_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_unordered_set_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_vector_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >
 						> list_of_2_columns_with_row_set_non_intr;
 
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
+							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_2_columns_with_row_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
+							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
 						> list_of_2_columns_with_row_set_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
+							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_2_columns_with_row_intr_set;
 
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
+							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
 						> list_of_2_columns_with_row_set_intr_set;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Dummy_column_pairing, RA<Intrusive_row_cell<Z5> > >
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
+							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
 						> list_of_5_chain_columns_with_row_non_intr;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							List_chain_column<dict_type, Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_chain_column<dict_type, Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, Dummy_column_pairing, RA_set<Row_cell<Z5> > >
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
 						> list_of_5_chain_columns_with_row_set_non_intr;
 
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_5_chain_columns_with_row_intr_list;
 
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
 						> list_of_5_chain_columns_with_row_set_intr_list;
 
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Dummy_column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_5_chain_columns_with_row_intr_set;
 
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Dummy_column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
 						> list_of_5_chain_columns_with_row_set_intr_set;
 
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, Dummy_column_pairing, RA<Z2_intrusive_row_cell> >
+typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
+							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
 						> list_of_2_chain_columns_with_row_non_intr;
 
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_list_chain_column<dict_type, Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_chain_column<dict_type, Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_row_cell, Dummy_column_pairing, RA_set<Z2_row_cell> >
+typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_vector_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >
 						> list_of_2_chain_columns_with_row_set_non_intr;
 
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_2_chain_columns_with_row_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
 						> list_of_2_chain_columns_with_row_set_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Dummy_column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_2_chain_columns_with_row_intr_set;
 
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, Dummy_column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
 						> list_of_2_chain_columns_with_row_set_intr_set;
 
 ////////////// PAIRING //////////////
 
-typedef boost::mpl::list<List_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_column<Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_column<Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Z2_heap_column<Column_pairing>,
-							Z2_list_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_column<Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_column<Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>,
-							List_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Z2_heap_boundary_column<Column_pairing>,
-							Z2_list_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>
-						> list_of_pairing_columns;
-
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Column_pairing, Dummy_row_access>,
-							Z2_heap_chain_column<dict_type, Column_pairing>,
-							Z2_list_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_set_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_vector_chain_column<dict_type, Z2_base_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Column_pairing, Dummy_row_access>,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Column_pairing, Dummy_row_access>
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
+							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
+							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Dummy_row_access>,
+							Z2_heap_chain_column<dict_type>,
+							Z2_list_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_vector_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
+							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Dummy_row_access>,
+							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Dummy_row_access>
 						> list_of_chain_pairing_columns;
 
-typedef boost::mpl::list<List_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							List_boundary_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >
-						> list_of_pairing_columns_with_row_non_intr;
-
-typedef boost::mpl::list<List_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							List_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >
-						> list_of_pairing_columns_with_set_row_non_intr;
-
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_pairing_columns_with_row_intr_list;
-
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
-						> list_of_pairing_columns_with_set_row_intr_list;
-
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_pairing_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
-						> list_of_pairing_columns_with_set_row_intr_set;
-
-typedef boost::mpl::list<Z2_list_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_list_boundary_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_boundary_column<Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >
-						> list_of_pairing_columns_with_row_z2_non_intr;
-
-typedef boost::mpl::list<Z2_list_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_list_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_boundary_column<Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >
-						> list_of_pairing_columns_with_set_row_z2_non_intr;
-
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_pairing_columns_with_row_z2_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
-						> list_of_pairing_columns_with_set_row_z2_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_pairing_columns_with_row_z2_intr_set;
-
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
-						> list_of_pairing_columns_with_set_row_z2_intr_set;
-
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, Column_pairing, RA<Intrusive_row_cell<Z5> > >
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
+							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
 						> list_of_pairing_chain_columns_with_row_non_intr;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Set_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, Column_pairing, RA_set<Row_cell<Z5> > >
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
+							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
 						> list_of_pairing_chain_columns_with_set_row_non_intr;
 
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_pairing_chain_columns_with_row_intr_list;
 
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
 						> list_of_pairing_chain_columns_with_set_row_intr_list;
 
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, Column_pairing, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
 						> list_of_pairing_chain_columns_with_row_intr_set;
 
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, Column_pairing, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
+typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
 						> list_of_pairing_chain_columns_with_set_row_intr_set;
 
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, Column_pairing, RA<Z2_intrusive_row_cell> >
+typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
+							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
 						> list_of_pairing_chain_columns_with_row_z2_non_intr;
 
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_set_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_row_cell, Column_pairing, RA_set<Z2_row_cell> >
+typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
+							Z2_vector_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >
 						> list_of_pairing_chain_columns_with_set_row_z2_non_intr;
 
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_pairing_chain_columns_with_row_z2_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
 						> list_of_pairing_chain_columns_with_set_row_z2_intr_list;
 
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, Column_pairing, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
 						> list_of_pairing_chain_columns_with_row_z2_intr_set;
 
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, Column_pairing, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
+typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
 						> list_of_pairing_chain_columns_with_set_row_z2_intr_set;
 
 template<class Column>
@@ -1028,6 +822,7 @@ void common_2_test(std::vector<Column> &matrix)
 	++it;
 	BOOST_CHECK(it == rows.end());
 
+	BOOST_CHECK(matrix[1].is_empty());		//forces heap column to prune.
 	BOOST_CHECK(matrix[1].begin() == matrix[1].end());
 
 	BOOST_CHECK_EQUAL(matrix[0].get_dimension(), 4);
@@ -1795,11 +1590,6 @@ void pairing_test(std::vector<Column> &matrix)
 	BOOST_CHECK_EQUAL(matrix[3].get_paired_chain_index(), -1);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_pairing_option, Column, list_of_pairing_columns) {
-	std::vector<Column> matrix(4);
-	pairing_test(matrix);
-}
-
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_pairing_option, Column, list_of_chain_pairing_columns) {
 	std::vector<Column> matrix;
 	dict_type pivotToColumnIndex{0,0,0,0};
@@ -1807,76 +1597,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_pairing_option, Column, list_of
 		matrix.push_back(Column(pivotToColumnIndex));
 
 	pairing_test(matrix);
-}
-
-template<class Column, class Rows>
-void pairing_test_with_rows(Rows &rows){
-	std::vector<Column> matrix;
-
-	for (int i = 0; i < 4; ++i)
-		matrix.push_back(Column(i, rows));
-
-	pairing_test(matrix);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_non_intr, Column, list_of_pairing_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_non_intr, Column, list_of_pairing_columns_with_set_row_non_intr) {
-	row_container_set<Row_cell<Z5> > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_intr_list, Column, list_of_pairing_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_intr_list, Column, list_of_pairing_columns_with_set_row_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_intr_set, Column, list_of_pairing_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_intr_set, Column, list_of_pairing_columns_with_set_row_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_z2_non_intr, Column, list_of_pairing_columns_with_row_z2_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_z2_non_intr, Column, list_of_pairing_columns_with_set_row_z2_non_intr) {
-	row_container_set<Z2_row_cell> rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_z2_intr_list, Column, list_of_pairing_columns_with_row_z2_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_z2_intr_list, Column, list_of_pairing_columns_with_set_row_z2_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_pairing_option_z2_intr_set, Column, list_of_pairing_columns_with_row_z2_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > rows;
-	pairing_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_pairing_option_z2_intr_set, Column, list_of_pairing_columns_with_set_row_z2_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > rows;
-	pairing_test_with_rows<Column>(rows);
 }
 
 template<class Column, class Rows>

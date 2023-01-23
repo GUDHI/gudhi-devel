@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef BASE_MATRIX_0011_H
-#define BASE_MATRIX_0011_H
+#ifndef BOUNDARY_MATRIX_0011_H
+#define BOUNDARY_MATRIX_0011_H
 
 #include "../utilities/utilities.h"
 
@@ -17,7 +17,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix_with_row_acces_with_removals
+class Boundary_matrix_with_row_access_with_removals
 		: public Master_matrix::Base_swap_option,
 		  public Master_matrix::Base_pairing_option
 {
@@ -26,12 +26,12 @@ public:
 	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = typename Master_matrix::Row_type;
 
-	Base_matrix_with_row_acces_with_removals();
+	Boundary_matrix_with_row_access_with_removals();
 	template<class Boundary_type = boundary_type>
-	Base_matrix_with_row_acces_with_removals(const std::vector<Boundary_type>& orderedBoundaries);
-	Base_matrix_with_row_acces_with_removals(unsigned int numberOfColumns);
-	Base_matrix_with_row_acces_with_removals(const Base_matrix_with_row_acces_with_removals& matrixToCopy);
-	Base_matrix_with_row_acces_with_removals(Base_matrix_with_row_acces_with_removals&& other) noexcept;
+	Boundary_matrix_with_row_access_with_removals(const std::vector<Boundary_type>& orderedBoundaries);
+	Boundary_matrix_with_row_access_with_removals(unsigned int numberOfColumns);
+	Boundary_matrix_with_row_access_with_removals(const Boundary_matrix_with_row_access_with_removals& matrixToCopy);
+	Boundary_matrix_with_row_access_with_removals(Boundary_matrix_with_row_access_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);
@@ -57,9 +57,9 @@ public:
 	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
 
-	Base_matrix_with_row_acces_with_removals& operator=(Base_matrix_with_row_acces_with_removals other);
-	friend void swap(Base_matrix_with_row_acces_with_removals& matrix1,
-					 Base_matrix_with_row_acces_with_removals& matrix2){
+	Boundary_matrix_with_row_access_with_removals& operator=(const Boundary_matrix_with_row_access_with_removals& other);
+	friend void swap(Boundary_matrix_with_row_access_with_removals& matrix1,
+					 Boundary_matrix_with_row_access_with_removals& matrix2){
 		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
 		swap(static_cast<typename Master_matrix::Base_pairing_option&>(matrix1),
@@ -69,6 +69,14 @@ public:
 		matrix1.dimensions_.swap(matrix2.dimensions_);
 		std::swap(matrix1.maxDim_, matrix2.maxDim_);
 		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+		for (auto& p : matrix1.matrix_){
+			Column_type& col = p.second;
+			col.set_rows(&matrix1.rows_);
+		}
+		for (auto& p : matrix2.matrix_){
+			Column_type& col = p.second;
+			col.set_rows(&matrix2.rows_);
+		}
 	}
 
 	void print();  //for debug
@@ -92,7 +100,7 @@ private:
 };
 
 template<class Master_matrix>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with_row_acces_with_removals()
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_matrix_with_row_access_with_removals()
 	: Master_matrix::Base_swap_option(matrix_),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
 	  maxDim_(-1),
@@ -101,7 +109,7 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with_row_acces_with_removals(
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_matrix_with_row_access_with_removals(
 		const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, orderedBoundaries.size()),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
@@ -123,7 +131,7 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with_row_acces_with_removals(
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_matrix_with_row_access_with_removals(
 		unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
@@ -134,8 +142,8 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 {}
 
 template<class Master_matrix>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with_row_acces_with_removals(
-		const Base_matrix_with_row_acces_with_removals &matrixToCopy)
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_matrix_with_row_access_with_removals(
+		const Boundary_matrix_with_row_access_with_removals &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  Master_matrix::Base_pairing_option(matrixToCopy),
 	  rows_(matrixToCopy.rows_.size()),
@@ -144,6 +152,12 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 	  maxDim_(matrixToCopy.maxDim_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
+	if constexpr (swap_opt::isActive_)
+		swap_opt::matrix_ = &matrix_;
+	if constexpr (pair_opt::isActive_){
+		pair_opt::matrix_ = &matrix_;
+		pair_opt::maxDim_ = &maxDim_;
+	}
 	for (const auto& p : matrixToCopy.matrix_){
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
@@ -157,8 +171,8 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with_row_acces_with_removals(
-		Base_matrix_with_row_acces_with_removals &&other) noexcept
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_matrix_with_row_access_with_removals(
+		Boundary_matrix_with_row_access_with_removals &&other) noexcept
 	: Master_matrix::Base_swap_option(std::move(other)),
 	  Master_matrix::Base_pairing_option(std::move(other)),
 	  rows_(std::move(other.rows_)),
@@ -166,11 +180,22 @@ inline Base_matrix_with_row_acces_with_removals<Master_matrix>::Base_matrix_with
 	  dimensions_(std::move(other.dimensions_)),
 	  maxDim_(std::exchange(other.maxDim_,-1)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
-{}
+{
+	if constexpr (swap_opt::isActive_)
+		swap_opt::matrix_ = &matrix_;
+	if constexpr (pair_opt::isActive_){
+		pair_opt::matrix_ = &matrix_;
+		pair_opt::maxDim_ = &maxDim_;
+	}
+	for (auto& p : matrix_){
+		Column_type& col = p.second;
+		col.set_rows(&rows_);
+	}
+}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -192,8 +217,8 @@ inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::insert_boun
 }
 
 template<class Master_matrix>
-inline typename Base_matrix_with_row_acces_with_removals<Master_matrix>::Column_type &
-Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column(index columnIndex)
+inline typename Boundary_matrix_with_row_access_with_removals<Master_matrix>::Column_type &
+Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_column(index columnIndex)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -203,8 +228,8 @@ Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column(index column
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix_with_row_acces_with_removals<Master_matrix>::Column_type &
-Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column(index columnIndex) const
+inline const typename Boundary_matrix_with_row_access_with_removals<Master_matrix>::Column_type &
+Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_column(index columnIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -214,8 +239,8 @@ Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column(index column
 }
 
 template<class Master_matrix>
-inline typename Base_matrix_with_row_acces_with_removals<Master_matrix>::Row_type&
-Base_matrix_with_row_acces_with_removals<Master_matrix>::get_row(index rowIndex)
+inline typename Boundary_matrix_with_row_access_with_removals<Master_matrix>::Row_type&
+Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -224,8 +249,8 @@ Base_matrix_with_row_acces_with_removals<Master_matrix>::get_row(index rowIndex)
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix_with_row_acces_with_removals<Master_matrix>::Row_type&
-Base_matrix_with_row_acces_with_removals<Master_matrix>::get_row(index rowIndex) const
+inline const typename Boundary_matrix_with_row_access_with_removals<Master_matrix>::Row_type&
+Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -234,7 +259,7 @@ Base_matrix_with_row_acces_with_removals<Master_matrix>::get_row(index rowIndex)
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::erase_last()
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::erase_last()
 {
 	--nextInsertIndex_;
 
@@ -265,33 +290,33 @@ inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::erase_last(
 }
 
 template<class Master_matrix>
-inline dimension_type Base_matrix_with_row_acces_with_removals<Master_matrix>::get_max_dimension() const
+inline dimension_type Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_max_dimension() const
 {
 	return maxDim_;
 }
 
 template<class Master_matrix>
-inline unsigned int Base_matrix_with_row_acces_with_removals<Master_matrix>::get_number_of_columns() const
+inline unsigned int Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_number_of_columns() const
 {
 	return nextInsertIndex_;
 }
 
 template<class Master_matrix>
-inline dimension_type Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column_dimension(
+inline dimension_type Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_column_dimension(
 		index columnIndex) const
 {
 	return matrix_.at(columnIndex).get_dimension();
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::add_to(
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::add_to(
 		index sourceColumnIndex, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::zero_cell(
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::zero_cell(
 		index columnIndex, index rowIndex)
 {
 	if constexpr (swap_opt::isActive_){
@@ -302,14 +327,14 @@ inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::zero_cell(
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::zero_column(
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::zero_column(
 		index columnIndex)
 {
 	matrix_.at(columnIndex).clear();
 }
 
 template<class Master_matrix>
-inline bool Base_matrix_with_row_acces_with_removals<Master_matrix>::is_zero_cell(
+inline bool Boundary_matrix_with_row_access_with_removals<Master_matrix>::is_zero_cell(
 		index columnIndex, index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
@@ -320,14 +345,14 @@ inline bool Base_matrix_with_row_acces_with_removals<Master_matrix>::is_zero_cel
 }
 
 template<class Master_matrix>
-inline bool Base_matrix_with_row_acces_with_removals<Master_matrix>::is_zero_column(
+inline bool Boundary_matrix_with_row_access_with_removals<Master_matrix>::is_zero_column(
 		index columnIndex)
 {
 	return matrix_.at(columnIndex).is_empty();
 }
 
 template<class Master_matrix>
-inline index Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column_with_pivot(
+inline index Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_column_with_pivot(
 		index simplexIndex) const
 {
 	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
@@ -335,27 +360,38 @@ inline index Base_matrix_with_row_acces_with_removals<Master_matrix>::get_column
 }
 
 template<class Master_matrix>
-inline index Base_matrix_with_row_acces_with_removals<Master_matrix>::get_pivot(
+inline index Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_pivot(
 		index columnIndex)
 {
 	return matrix_.at(columnIndex).get_pivot();
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_acces_with_removals<Master_matrix> &
-Base_matrix_with_row_acces_with_removals<Master_matrix>::operator=(Base_matrix_with_row_acces_with_removals other)
+inline Boundary_matrix_with_row_access_with_removals<Master_matrix> &
+Boundary_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Boundary_matrix_with_row_access_with_removals &other)
 {
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
-	matrix_.swap(other.matrix_);
-	dimensions_.swap(other.dimensions_);
-	std::swap(maxDim_, other.maxDim_);
-	std::swap(nextInsertIndex_, other.nextInsertIndex_);
+	rows_.reserve(other.rows_.size());
+	matrix_.reserve(other.matrix_.size());
+	dimensions_ = other.dimensions_;
+	maxDim_ = other.maxDim_;
+	nextInsertIndex_ = other.nextInsertIndex_;
+	for (const auto& p : other.matrix_){
+		const Column_type& col = p.second;
+		std::vector<cell_rep_type> tmp(col.begin(), col.end());
+		rows_.try_emplace(p.first);
+		matrix_.emplace(p.first,
+						Column_type(col.get_column_index(),
+									tmp,
+									col.get_dimension(),
+									rows_));
+	}
 	return *this;
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::print()
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::print()
 {
 	std::cout << "Base_matrix_with_row_acces_with_removals:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
@@ -381,4 +417,4 @@ inline void Base_matrix_with_row_acces_with_removals<Master_matrix>::print()
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // BASE_MATRIX_0011_H
+#endif // BOUNDARY_MATRIX_0011_H

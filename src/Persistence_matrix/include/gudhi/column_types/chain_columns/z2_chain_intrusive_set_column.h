@@ -22,11 +22,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-class Z2_intrusive_set_chain_column : public Z2_intrusive_set_column<Cell_type,Column_pairing_option,Row_access_option>
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+class Z2_intrusive_set_chain_column : public Z2_intrusive_set_column<Cell_type,Row_access_option>
 {
 private:
-	using Base = Z2_intrusive_set_column<Cell_type,Column_pairing_option,Row_access_option>;
+	using Base = Z2_intrusive_set_column<Cell_type,Row_access_option>;
 
 public:
 	using Cell = typename Base::Cell;
@@ -46,6 +46,10 @@ public:
 	Z2_intrusive_set_chain_column(Z2_intrusive_set_chain_column&& column) noexcept;
 
 	int get_pivot() const;
+	index get_paired_chain_index() const;
+	bool is_paired() const;
+	void assign_paired_chain(index other_col);
+	void unassign_paired_chain();
 
 	Z2_intrusive_set_chain_column& operator+=(Z2_intrusive_set_chain_column &column);
 	friend Z2_intrusive_set_chain_column operator+(Z2_intrusive_set_chain_column column1, Z2_intrusive_set_chain_column &column2){
@@ -64,74 +68,117 @@ public:
 	Z2_intrusive_set_chain_column& operator=(const Z2_intrusive_set_chain_column& other);
 
 	friend void swap(Z2_intrusive_set_chain_column& col1, Z2_intrusive_set_chain_column& col2){
-		swap(static_cast<Z2_intrusive_set_column<Cell_type,Column_pairing_option,Row_access_option>&>(col1),
-			 static_cast<Z2_intrusive_set_column<Cell_type,Column_pairing_option,Row_access_option>&>(col2));
+		swap(static_cast<Z2_intrusive_set_column<Cell_type,Row_access_option>&>(col1),
+			 static_cast<Z2_intrusive_set_column<Cell_type,Row_access_option>&>(col2));
+		std::swap(col1.pivotToColumnIndex_, col2.pivotToColumnIndex_);
+		std::swap(col1.pivot_, col2.pivot_);
+		std::swap(col1.pairedColumn_, col2.pairedColumn_);
 	}
 
 private:
 	Dictionnary_type* pivotToColumnIndex_;
 	int pivot_;		//simplex index associated to the chain
+	int pairedColumn_;
 };
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(Dictionnary_type& pivotToColumnIndex)
-	: Base(), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(-1)
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(Dictionnary_type& pivotToColumnIndex)
+	: Base(),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(-1),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
 template<class Chain_type>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		const Chain_type& chain, dimension_type dimension, Dictionnary_type& pivotToColumnIndex)
-	: Base(chain, dimension), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(chain.empty() ? -1 : *chain.rbegin())
+	: Base(chain, dimension),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(chain.empty() ? -1 : *chain.rbegin()),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
 template<class Row_container_type>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		index columnIndex, Row_container_type &rowContainer, Dictionnary_type &pivotToColumnIndex)
-	: Base(columnIndex, rowContainer), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(-1)
+	: Base(columnIndex, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(-1),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
 template<class Chain_type, class Row_container_type>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		index columnIndex, const Chain_type& chain, dimension_type dimension, Row_container_type &rowContainer, Dictionnary_type &pivotToColumnIndex)
-	: Base(columnIndex, chain, dimension, rowContainer), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(chain.empty() ? -1 : *chain.rbegin())
+	: Base(columnIndex, chain, dimension, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(chain.empty() ? -1 : *chain.rbegin()),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		const Z2_intrusive_set_chain_column& column)
 	: Base(static_cast<const Base&>(column)),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
-	  pivot_(column.pivot_)
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		const Z2_intrusive_set_chain_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
-	  pivot_(column.pivot_)
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::Z2_intrusive_set_chain_column(
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_intrusive_set_chain_column(
 		Z2_intrusive_set_chain_column&& column) noexcept
 	: Base(std::move(static_cast<Base&&>(column))),
 	  pivotToColumnIndex_(std::move(column.pivotToColumnIndex_)),
-	  pivot_(std::exchange(column.pivot_, -1))
+	  pivot_(std::exchange(column.pivot_, -1)),
+	  pairedColumn_(std::exchange(column.pairedColumn_, 0))
 {}
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline int Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::get_pivot() const
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline int Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::get_pivot() const
 {
 	return pivot_;
 }
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option> &
-Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::operator+=(Z2_intrusive_set_chain_column &column)
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline index Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::get_paired_chain_index() const
+{
+	return pairedColumn_;
+}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline bool Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::is_paired() const
+{
+	return pairedColumn_ != -1;
+}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline void Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::assign_paired_chain(index other_col)
+{
+	pairedColumn_ = other_col;
+}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline void Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::unassign_paired_chain()
+{
+	pairedColumn_ = -1;
+}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option> &
+Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::operator+=(Z2_intrusive_set_chain_column &column)
 {
 	Base::operator+=(column);
 
@@ -145,13 +192,14 @@ Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,R
 	return *this;
 }
 
-template<class Dictionnary_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option> &
-Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Column_pairing_option,Row_access_option>::operator=(const Z2_intrusive_set_chain_column &other)
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option> &
+Z2_intrusive_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::operator=(const Z2_intrusive_set_chain_column &other)
 {
 	Base::operator=(static_cast<const Base&>(other));
 	pivotToColumnIndex_ = other.pivotToColumnIndex_;
 	pivot_ = other.pivot_;
+	pairedColumn_ = other.pairedColumn_;
 	return *this;
 }
 

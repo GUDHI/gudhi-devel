@@ -21,11 +21,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-class List_chain_column : public List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+class List_chain_column : public List_column<Field_element_type,Cell_type,Row_access_option>
 {
 private:
-	using Base = List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>;
+	using Base = List_column<Field_element_type,Cell_type,Row_access_option>;
 
 public:
 	using Cell = typename Base::Cell;
@@ -46,6 +46,10 @@ public:
 
 	int get_pivot() const;
 	Field_element_type get_pivot_value();
+	index get_paired_chain_index() const;
+	bool is_paired() const;
+	void assign_paired_chain(index other_col);
+	void unassign_paired_chain();
 
 	List_chain_column& operator+=(List_chain_column &column);
 	friend List_chain_column operator+(List_chain_column column1, List_chain_column &column2){
@@ -64,73 +68,92 @@ public:
 	List_chain_column& operator=(List_chain_column other);
 
 	friend void swap(List_chain_column& col1, List_chain_column& col2){
-		swap(static_cast<List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>&>(col1),
-			 static_cast<List_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>&>(col2));
+		swap(static_cast<List_column<Field_element_type,Cell_type,Row_access_option>&>(col1),
+			 static_cast<List_column<Field_element_type,Cell_type,Row_access_option>&>(col2));
+		std::swap(col1.pivotToColumnIndex_, col2.pivotToColumnIndex_);
+		std::swap(col1.pivot_, col2.pivot_);
+		std::swap(col1.pairedColumn_, col2.pairedColumn_);
 	}
 
 private:
 	Dictionnary_type* pivotToColumnIndex_;
 	int pivot_;		//simplex index associated to the chain
+	int pairedColumn_;
 };
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(Dictionnary_type& pivotToColumnIndex)
-	: Base(), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(-1)
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(Dictionnary_type& pivotToColumnIndex)
+	: Base(),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(-1),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
 template<class Chain_type>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		const Chain_type& chain, dimension_type dimension, Dictionnary_type& pivotToColumnIndex)
-	: Base(chain, dimension), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(chain.empty() ? -1 : chain.rbegin()->first)
+	: Base(chain, dimension),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(chain.empty() ? -1 : chain.rbegin()->first),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
 template<class Row_container_type>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		index columnIndex, Row_container_type &rowContainer, Dictionnary_type &pivotToColumnIndex)
-	: Base(columnIndex, rowContainer), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(-1)
+	: Base(columnIndex, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(-1),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
 template<class Chain_type, class Row_container_type>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		index columnIndex, const Chain_type& chain, dimension_type dimension, Row_container_type &rowContainer, Dictionnary_type &pivotToColumnIndex)
-	: Base(columnIndex, chain, dimension, rowContainer), pivotToColumnIndex_(&pivotToColumnIndex), pivot_(chain.empty() ? -1 : chain.rbegin()->first)
+	: Base(columnIndex, chain, dimension, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(chain.empty() ? -1 : chain.rbegin()->first),
+	  pairedColumn_(-1)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		const List_chain_column& column)
 	: Base(static_cast<const Base&>(column)),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
-	  pivot_(column.pivot_)
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		const List_chain_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
-	  pivot_(column.pivot_)
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::List_chain_column(
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
 		List_chain_column&& column) noexcept
 	: Base(std::move(static_cast<Base&&>(column))),
 	  pivotToColumnIndex_(std::move(column.pivotToColumnIndex_)),
-	  pivot_(std::exchange(column.pivot_, -1))
+	  pivot_(std::exchange(column.pivot_, -1)),
+	  pairedColumn_(std::exchange(column.pairedColumn_, 0))
 {}
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline int List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_pivot() const
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline int List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::get_pivot() const
 {
 	return pivot_;
 }
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Field_element_type List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_pivot_value()
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Field_element_type List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::get_pivot_value()
 {
 	if (pivot_ == -1) return Field_element_type();
 
@@ -141,9 +164,33 @@ inline Field_element_type List_chain_column<Dictionnary_type,Field_element_type,
 	return Field_element_type();	//should never happen if chain column is used properly
 }
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &
-List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator+=(List_chain_column &column)
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline index List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::get_paired_chain_index() const
+{
+	return pairedColumn_;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline bool List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::is_paired() const
+{
+	return pairedColumn_ != -1;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline void List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::assign_paired_chain(index other_col)
+{
+	pairedColumn_ = other_col;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline void List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::unassign_paired_chain()
+{
+	pairedColumn_ = -1;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::operator+=(List_chain_column &column)
 {
 	Base::operator+=(column);
 
@@ -157,13 +204,14 @@ List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_o
 	return *this;
 }
 
-template<class Dictionnary_type, class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &
-List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator=(List_chain_column other)
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::operator=(List_chain_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
 	std::swap(pivotToColumnIndex_, other.pivotToColumnIndex_);
 	std::swap(pivot_, other.pivot_);
+	std::swap(pairedColumn_, other.pairedColumn_);
 	return *this;
 }
 

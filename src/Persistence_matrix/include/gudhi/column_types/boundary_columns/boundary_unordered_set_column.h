@@ -22,11 +22,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-class Unordered_set_boundary_column : public Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
+class Unordered_set_boundary_column : public Unordered_set_column<Field_element_type,Cell_type,Row_access_option>
 {
 private:
-	using Base = Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>;
+	using Base = Unordered_set_column<Field_element_type,Cell_type,Row_access_option>;
 
 public:
 	using Cell = typename Base::Cell;
@@ -75,8 +75,8 @@ public:
 
 	friend void swap(Unordered_set_boundary_column& col1,
 					 Unordered_set_boundary_column& col2){
-		swap(static_cast<Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>&>(col1),
-			 static_cast<Unordered_set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>&>(col2));
+		swap(static_cast<Unordered_set_column<Field_element_type,Cell_type,Row_access_option>&>(col1),
+			 static_cast<Unordered_set_column<Field_element_type,Cell_type,Row_access_option>&>(col2));
 		std::swap(col1.pivotChanged_, col2.pivotChanged_);
 		std::swap(col1.pivot_, col2.pivot_);
 	}
@@ -88,37 +88,37 @@ private:
 	void _insert_cell(const Field_element_type& value, index rowIndex, Column_type& column);
 };
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column()
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column()
 	: Base(), pivotChanged_(false)
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Boundary_type>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary)
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary)
 	: Base(boundary),
 	  pivotChanged_(false),
 	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Boundary_type>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary, dimension_type dimension)
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary, dimension_type dimension)
 	: Base(boundary, dimension),
 	  pivotChanged_(false),
 	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Row_container_type>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(
 		index columnIndex, Row_container_type &rowContainer)
 	: Base(columnIndex, rowContainer), pivotChanged_(false)
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Boundary_type, class Row_container_type>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(
 		index columnIndex, const Boundary_type& boundary, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, rowContainer),
 	  pivotChanged_(false)
@@ -132,9 +132,9 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Boundary_type, class Row_container_type>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(
 		index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, dimension, rowContainer),
 	  pivotChanged_(false)
@@ -148,30 +148,30 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(const Unordered_set_boundary_column &column)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(const Unordered_set_boundary_column &column)
 	: Base(static_cast<const Base&>(column)),
 	  pivotChanged_(column.pivotChanged_),
 	  pivot_(column.pivot_)
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(
 		const Unordered_set_boundary_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotChanged_(column.pivotChanged_),
 	  pivot_(column.pivot_)
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Unordered_set_boundary_column(Unordered_set_boundary_column &&column) noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(Unordered_set_boundary_column &&column) noexcept
 	: Base(std::move(static_cast<Base&&>(column))),
 	  pivotChanged_(std::exchange(column.pivotChanged_, 0)),
 	  pivot_(std::move(column.pivot_))
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline int Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_pivot()
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline int Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::get_pivot()
 {
 	if (pivotChanged_){
 		pivot_ = Base::column_.size() == 0 ?
@@ -184,8 +184,8 @@ inline int Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pai
 	return pivot_.get_row_index();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Field_element_type Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_pivot_value()
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Field_element_type Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::get_pivot_value()
 {
 	if (pivotChanged_){
 		pivot_ = Base::column_.size() == 0 ?
@@ -197,8 +197,8 @@ inline Field_element_type Unordered_set_boundary_column<Field_element_type,Cell_
 	return pivot_.get_element();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::clear()
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	if constexpr (Row_access_option::isActive_){
 		for (const Cell& cell : Base::column_)
@@ -209,8 +209,8 @@ inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pa
 	pivotChanged_ = false;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::clear(index rowIndex)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	iterator it;
 	if constexpr (Row_access_option::isActive_){
@@ -223,33 +223,17 @@ inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pa
 	if (rowIndex == pivot_.get_row_index()) pivotChanged_ = true;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Map_type>
-inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::reorder(Map_type &valueMap)
+inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::reorder(Map_type &valueMap)
 {
-	Column_type newSet;
-	for (auto it = Base::column_.begin(); it != Base::column_.end(); ) {
-		newSet.emplace_hint(newSet.end(), it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
-		if constexpr (Row_access_option::isActive_) {
-			auto ittemp = it;
-			++it;
-			Base::_delete_cell(ittemp);
-		}
-		else ++it;
-	}
-	//all cells have to be deleted first, to avoid problem with insertion when row is a set
-	if constexpr (Row_access_option::isActive_) {
-		for (auto it = newSet.begin(); it != newSet.end(); ++it) {
-			Row_access_option::insert_cell(it->get_row_index(), *it);
-		}
-	}
-	Base::column_.swap(newSet);
+	Base::reorder(valueMap);
 	pivotChanged_ = true;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &
-Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator+=(Unordered_set_boundary_column const &column)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Unordered_set_boundary_column const &column)
 {
 	for (const Cell& v : column.column_){
 		auto c = Base::column_.find(v);
@@ -272,9 +256,9 @@ Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &
-Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator*=(unsigned int v)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	Base::operator*=(v);
 
@@ -288,9 +272,9 @@ Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &
-Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator=(Unordered_set_boundary_column other)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator=(Unordered_set_boundary_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
 	std::swap(pivotChanged_, other.pivotChanged_);
@@ -298,8 +282,8 @@ Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::_insert_cell(
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::_insert_cell(
 		const Field_element_type &value, index rowIndex, Column_type &column)
 {
 	if constexpr (Row_access_option::isActive_){

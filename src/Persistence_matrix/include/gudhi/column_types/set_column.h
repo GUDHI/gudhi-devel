@@ -22,8 +22,8 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-class Set_column : public Column_pairing_option, public Row_access_option
+template<class Field_element_type, class Cell_type, class Row_access_option>
+class Set_column : public Row_access_option
 {
 public:
 //	using Cell = Base_cell<Field_element_type>;
@@ -50,10 +50,12 @@ public:
 	Set_column(Set_column&& column) noexcept;
 	~Set_column();
 
-	std::vector<Field_element_type> get_content(unsigned int columnLength) const;
+	std::vector<Field_element_type> get_content(int columnLength = -1) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty() const;
 	dimension_type get_dimension() const;
+	template<class Map_type>
+	void reorder(Map_type& valueMap);
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -79,11 +81,33 @@ public:
 		return column;
 	}
 
+	friend bool operator==(const Set_column& c1, const Set_column& c2){
+		auto it1 = c1.column_.begin();
+		auto it2 = c2.column_.begin();
+		if (c1.column_.size() != c2.column_.size()) return false;
+		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
+			if (it1->get_row_index() != it2->get_row_index() || it1->get_element() != it2->get_element())
+				return false;
+			++it1; ++it2;
+		}
+		return true;
+	}
+	friend bool operator<(const Set_column& c1, const Set_column& c2){
+		auto it1 = c1.column_.begin();
+		auto it2 = c2.column_.begin();
+		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
+			if (it1->get_row_index() != it2->get_row_index())
+				return it1->get_row_index() < it2->get_row_index();
+			if (it1->get_element() != it2->get_element())
+				return it1->get_element() < it2->get_element();
+			++it1; ++it2;
+		}
+		return it2 != c2.column_.end();
+	}
+
 	Set_column& operator=(Set_column other);
 
 	friend void swap(Set_column& col1, Set_column& col2){
-		swap(static_cast<Column_pairing_option&>(col1),
-			 static_cast<Column_pairing_option&>(col2));
 		swap(static_cast<Row_access_option&>(col1),
 			 static_cast<Row_access_option&>(col2));
 		std::swap(col1.dim_, col2.dim_);
@@ -98,15 +122,15 @@ protected:
 	void _insert_cell(const Field_element_type& value, index rowIndex);
 };
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column() : dim_(0)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column() : dim_(0)
 {
 	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Container_type>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(const Container_type &nonZeroRowIndices)
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(const Container_type &nonZeroRowIndices)
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
 	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
@@ -116,9 +140,9 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Container_type>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(const Container_type &nonZeroRowIndices, dimension_type dimension)
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(const Container_type &nonZeroRowIndices, dimension_type dimension)
 	: dim_(dimension)
 {
 	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
@@ -128,16 +152,16 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Row_container_type>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
 		index columnIndex, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(0)
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Container_type, class Row_container_type>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
 		index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
@@ -146,9 +170,9 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Field_element_type, class Cell_type, class Row_access_option>
 template<class Container_type, class Row_container_type>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
 		index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(dimension)
 {
@@ -157,21 +181,19 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(const Set_column &column)
-	: Column_pairing_option(column),
-	  dim_(column.dim_),
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(const Set_column &column)
+	: dim_(column.dim_),
 	  column_(column.column_)
 {
 	static_assert(!Row_access_option::isActive_,
 			"Copy constructor not available when row access option enabled.");
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
 		const Set_column &column, index columnIndex)
-	: Column_pairing_option(column),
-	  Row_access_option(columnIndex, *column.rows_),
+	: Row_access_option(columnIndex, *column.rows_),
 	  dim_(column.dim_)
 {
 	for (const Cell& cell : column.column_){
@@ -179,16 +201,15 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::Set_column(Set_column &&column) noexcept
-	: Column_pairing_option(std::move(column)),
-	  Row_access_option(std::move(column)),
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(Set_column &&column) noexcept
+	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
 	  column_(std::move(column.column_))
 {}
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::~Set_column()
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::~Set_column()
 {
 	if constexpr (Row_access_option::isActive_){
 		for (const Cell& cell : column_)
@@ -196,9 +217,11 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline std::vector<Field_element_type> Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_content(unsigned int columnLength) const
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline std::vector<Field_element_type> Set_column<Field_element_type,Cell_type,Row_access_option>::get_content(int columnLength) const
 {
+	if (columnLength < 0) columnLength = column_.rbegin()->get_row_index() + 1;
+
 	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
 		container[it->get_row_index()] = it->get_element();
@@ -206,8 +229,8 @@ inline std::vector<Field_element_type> Set_column<Field_element_type,Cell_type,C
 	return container;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline bool Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::is_non_zero(index rowIndex) const
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline bool Set_column<Field_element_type,Cell_type,Row_access_option>::is_non_zero(index rowIndex) const
 {
 	if constexpr (Row_access_option::isActive_){
 		return column_.find(Cell(0, Row_access_option::columnIndex_, rowIndex)) != column_.end();
@@ -216,76 +239,101 @@ inline bool Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_ac
 	}
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline bool Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::is_empty() const
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline bool Set_column<Field_element_type,Cell_type,Row_access_option>::is_empty() const
 {
 	return column_.empty();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline dimension_type Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::get_dimension() const
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline dimension_type Set_column<Field_element_type,Cell_type,Row_access_option>::get_dimension() const
 {
 	return dim_;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::begin() noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Map_type>
+inline void Set_column<Field_element_type,Cell_type,Row_access_option>::reorder(Map_type &valueMap)
+{
+	Column_type newSet;
+	for (auto it = column_.begin(); it != column_.end(); ) {
+		if constexpr (Row_access_option::isActive_) {
+			newSet.emplace_hint(newSet.end(), it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+			auto ittemp = it;
+			++it;
+			_delete_cell(ittemp);
+		} else {
+			newSet.emplace_hint(newSet.end(), it->get_element(), valueMap[it->get_row_index()]);
+			++it;
+		}
+	}
+	//all cells have to be deleted first, to avoid problem with insertion when row is a set
+	if constexpr (Row_access_option::isActive_) {
+		for (auto it = newSet.begin(); it != newSet.end(); ++it) {
+			Row_access_option::insert_cell(it->get_row_index(), *it);
+		}
+	}
+	column_.swap(newSet);
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::begin() noexcept
 {
 	return column_.begin();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::begin() const noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::const_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::begin() const noexcept
 {
 	return column_.begin();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::end() noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::end() noexcept
 {
 	return column_.end();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::end() const noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::const_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::end() const noexcept
 {
 	return column_.end();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rbegin() noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::reverse_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::rbegin() noexcept
 {
 	return column_.rbegin();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rbegin() const noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::const_reverse_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::rbegin() const noexcept
 {
 	return column_.rbegin();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::reverse_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rend() noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::reverse_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::rend() noexcept
 {
 	return column_.rend();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline typename Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::const_reverse_iterator
-Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::rend() const noexcept
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline typename Set_column<Field_element_type,Cell_type,Row_access_option>::const_reverse_iterator
+Set_column<Field_element_type,Cell_type,Row_access_option>::rend() const noexcept
 {
 	return column_.rend();
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator+=(Set_column const &column)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Set_column const &column)
 {
 	for (const Cell& v : column.column_){
 		auto c = column_.find(v);
@@ -302,8 +350,8 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator*=(unsigned int v)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Field_element_type,Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	v %= Field_element_type::get_characteristic();
 
@@ -336,27 +384,26 @@ inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option> &Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::operator=(Set_column other)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Field_element_type,Cell_type,Row_access_option>::operator=(Set_column other)
 {
 	static_assert (!Row_access_option::isActive_, "= assignement not enabled with row access option.");
 
-	Column_pairing_option::operator=(other);
 	std::swap(dim_, other.dim_);
 	column_.swap(other.column_);
 	return *this;
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::_delete_cell(iterator &it)
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Set_column<Field_element_type,Cell_type,Row_access_option>::_delete_cell(iterator &it)
 {
 	if constexpr (Row_access_option::isActive_)
 		Row_access_option::unlink(*it);
 	column_.erase(it);
 }
 
-template<class Field_element_type, class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_access_option>::_insert_cell(
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Set_column<Field_element_type,Cell_type,Row_access_option>::_insert_cell(
 		const Field_element_type &value, index rowIndex)
 {
 	if constexpr (Row_access_option::isActive_){
@@ -369,5 +416,18 @@ inline void Set_column<Field_element_type,Cell_type,Column_pairing_option,Row_ac
 
 } //namespace persistence_matrix
 } //namespace Gudhi
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+struct std::hash<Gudhi::persistence_matrix::Set_column<Field_element_type,Cell_type,Row_access_option> >
+{
+	size_t operator()(const Gudhi::persistence_matrix::Set_column<Field_element_type,Cell_type,Row_access_option>& column) const
+	{
+		std::size_t seed = 0;
+		for (auto& cell : column){
+			seed ^= std::hash<unsigned int>()(cell.get_row_index() * cell.get_element()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
+};
 
 #endif // SET_COLUMN_H

@@ -24,11 +24,10 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Column_pairing_option>
-class Z2_heap_boundary_column : public Z2_heap_column<Column_pairing_option>
+class Z2_heap_boundary_column : public Z2_heap_column
 {
 private:
-	using Base = Z2_heap_column<Column_pairing_option>;
+	using Base = Z2_heap_column;
 
 public:
 	using Cell = typename Base::Cell;
@@ -44,7 +43,7 @@ public:
 	Z2_heap_boundary_column(const Z2_heap_boundary_column& column);
 	Z2_heap_boundary_column(Z2_heap_boundary_column&& column) noexcept;
 
-	std::vector<bool> get_content(unsigned int columnLength);
+	std::vector<bool> get_content(int columnLength = -1) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	int get_pivot();
@@ -73,8 +72,8 @@ public:
 	Z2_heap_boundary_column& operator=(Z2_heap_boundary_column other);
 
 	friend void swap(Z2_heap_boundary_column& col1, Z2_heap_boundary_column& col2){
-		swap(static_cast<Z2_heap_column<Column_pairing_option>&>(col1),
-			 static_cast<Z2_heap_column<Column_pairing_option>&>(col2));
+		swap(static_cast<Z2_heap_column&>(col1),
+			 static_cast<Z2_heap_column&>(col2));
 		col1.erasedValues_.swap(col2.erasedValues_);
 	}
 
@@ -85,55 +84,50 @@ private:
 	int _pop_pivot();
 };
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option>::Z2_heap_boundary_column() : Base()
+inline Z2_heap_boundary_column::Z2_heap_boundary_column() : Base()
 {}
 
-template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_heap_boundary_column<Column_pairing_option>::Z2_heap_boundary_column(const Boundary_type& boundary)
+inline Z2_heap_boundary_column::Z2_heap_boundary_column(const Boundary_type& boundary)
 	: Base(boundary)
 {}
 
-template<class Column_pairing_option>
 template<class Boundary_type>
-inline Z2_heap_boundary_column<Column_pairing_option>::Z2_heap_boundary_column(const Boundary_type& boundary, dimension_type dimension)
+inline Z2_heap_boundary_column::Z2_heap_boundary_column(const Boundary_type& boundary, dimension_type dimension)
 	: Base(boundary, dimension)
 {}
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option>::Z2_heap_boundary_column(const Z2_heap_boundary_column &column)
+inline Z2_heap_boundary_column::Z2_heap_boundary_column(const Z2_heap_boundary_column &column)
 	: Base(static_cast<const Base&>(column)),
 	  erasedValues_(column.erasedValues_)
 {}
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option>::Z2_heap_boundary_column(Z2_heap_boundary_column&& column) noexcept
+inline Z2_heap_boundary_column::Z2_heap_boundary_column(Z2_heap_boundary_column&& column) noexcept
 	: Base(std::move(static_cast<Base&&>(column))),
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-template<class Column_pairing_option>
-inline std::vector<bool> Z2_heap_boundary_column<Column_pairing_option>::get_content(unsigned int columnLength)
+inline std::vector<bool> Z2_heap_boundary_column::get_content(int columnLength) const
 {
-	_prune();
+	if (columnLength < 0) columnLength = Base::column_.front().get_row_index();
+
 	std::vector<bool> container(columnLength, 0);
-	for (auto it = Base::column_.begin(); it != Base::column_.end() && it->get_row_index() < columnLength; ++it){
-		container[it->get_row_index()] = 1;
+	for (auto it = Base::column_.begin(); it != Base::column_.end(); ++it){
+		if (it->get_row_index() < static_cast<unsigned int>(columnLength) &&
+				erasedValues_.find(it->get_row_index()) == erasedValues_.end())
+			container[it->get_row_index()] = !container[it->get_row_index()];
 	}
 	return container;
 }
 
-template<class Column_pairing_option>
-inline bool Z2_heap_boundary_column<Column_pairing_option>::is_non_zero(index rowIndex) const
+inline bool Z2_heap_boundary_column::is_non_zero(index rowIndex) const
 {
 	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
 	return Base::is_non_zero(rowIndex);
 }
 
-template<class Column_pairing_option>
-inline bool Z2_heap_boundary_column<Column_pairing_option>::is_empty()
+inline bool Z2_heap_boundary_column::is_empty()
 {
 	int pivot = _pop_pivot();
 	if (pivot != -1){
@@ -144,8 +138,7 @@ inline bool Z2_heap_boundary_column<Column_pairing_option>::is_empty()
 	return true;
 }
 
-template<class Column_pairing_option>
-inline int Z2_heap_boundary_column<Column_pairing_option>::get_pivot()
+inline int Z2_heap_boundary_column::get_pivot()
 {
 	int pivot = _pop_pivot();
 	if (pivot != -1){
@@ -155,23 +148,20 @@ inline int Z2_heap_boundary_column<Column_pairing_option>::get_pivot()
 	return pivot;
 }
 
-template<class Column_pairing_option>
-inline void Z2_heap_boundary_column<Column_pairing_option>::clear()
+inline void Z2_heap_boundary_column::clear()
 {
 	Base::column_.clear();
 	Base::insertsSinceLastPrune_ = 0;
 	erasedValues_.clear();
 }
 
-template<class Column_pairing_option>
-inline void Z2_heap_boundary_column<Column_pairing_option>::clear(index rowIndex)
+inline void Z2_heap_boundary_column::clear(index rowIndex)
 {
 	erasedValues_.insert(rowIndex);
 }
 
-template<class Column_pairing_option>
 template<class Map_type>
-inline void Z2_heap_boundary_column<Column_pairing_option>::reorder(Map_type &valueMap)
+inline void Z2_heap_boundary_column::reorder(Map_type &valueMap)
 {
 	Column_type tempCol;
 	int pivot = _pop_pivot();
@@ -186,16 +176,14 @@ inline void Z2_heap_boundary_column<Column_pairing_option>::reorder(Map_type &va
 	erasedValues_.clear();
 }
 
-template<class Column_pairing_option>
-inline typename Z2_heap_boundary_column<Column_pairing_option>::iterator
-Z2_heap_boundary_column<Column_pairing_option>::begin() noexcept
+inline typename Z2_heap_boundary_column::iterator
+Z2_heap_boundary_column::begin() noexcept
 {
 	_prune();
 	return Base::column_.begin();
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option> &Z2_heap_boundary_column<Column_pairing_option>::operator+=(Z2_heap_boundary_column const &column)
+inline Z2_heap_boundary_column &Z2_heap_boundary_column::operator+=(Z2_heap_boundary_column const &column)
 {
 	const Column_type& colToAdd = column.column_;
 	const unsigned int size = colToAdd.size();
@@ -216,8 +204,7 @@ inline Z2_heap_boundary_column<Column_pairing_option> &Z2_heap_boundary_column<C
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option> &Z2_heap_boundary_column<Column_pairing_option>::operator*=(unsigned int v)
+inline Z2_heap_boundary_column &Z2_heap_boundary_column::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
 		clear();
@@ -226,16 +213,14 @@ inline Z2_heap_boundary_column<Column_pairing_option> &Z2_heap_boundary_column<C
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline Z2_heap_boundary_column<Column_pairing_option>& Z2_heap_boundary_column<Column_pairing_option>::operator=(Z2_heap_boundary_column other)
+inline Z2_heap_boundary_column& Z2_heap_boundary_column::operator=(Z2_heap_boundary_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
 	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
-template<class Column_pairing_option>
-inline void Z2_heap_boundary_column<Column_pairing_option>::_prune()
+inline void Z2_heap_boundary_column::_prune()
 {
 	if (Base::insertsSinceLastPrune_ == 0 && erasedValues_.empty()) return;
 
@@ -252,8 +237,7 @@ inline void Z2_heap_boundary_column<Column_pairing_option>::_prune()
 	erasedValues_.clear();
 }
 
-template<class Column_pairing_option>
-inline int Z2_heap_boundary_column<Column_pairing_option>::_pop_pivot()
+inline int Z2_heap_boundary_column::_pop_pivot()
 {
 	unsigned int pivot = Base::_pop_pivot();
 
@@ -265,5 +249,19 @@ inline int Z2_heap_boundary_column<Column_pairing_option>::_pop_pivot()
 
 } //namespace persistence_matrix
 } //namespace Gudhi
+
+template<>
+struct std::hash<Gudhi::persistence_matrix::Z2_heap_boundary_column>
+{
+	size_t operator()(const Gudhi::persistence_matrix::Z2_heap_boundary_column& column) const
+	{
+		std::size_t seed = 0;
+		unsigned int i = 0;
+		for (bool val : column.get_content()){
+			seed ^= std::hash<unsigned int>()(i++ * val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
+};
 
 #endif // B_Z2_HEAP_COLUMN_H

@@ -91,12 +91,12 @@ private:
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 	using Field_element_type = typename Master_matrix::Field_type;
 	using cell_rep_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Field_element_type::get_characteristic() == 2,
 								index,
 								std::pair<index,Field_element_type>
 							>::type;
 	using tmp_column_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Field_element_type::get_characteristic() == 2,
 								std::set<index>,
 								std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> >
 							>::type;
@@ -176,7 +176,15 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
 	  maxDim_(matrixToCopy.maxDim_)
-{}
+{
+	if constexpr (rep_opt::isActive_){
+		rep_opt::matrix_ = &matrix_;
+		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::matrix_ = &matrix_;
+	}
+}
 
 template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
@@ -188,7 +196,15 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
 	  maxDim_(std::exchange(other.maxDim_, -1))
-{}
+{
+	if constexpr (rep_opt::isActive_){
+		rep_opt::matrix_ = &matrix_;
+		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
+	}
+	if constexpr (swap_opt::isActive_){
+		swap_opt::matrix_ = &matrix_;
+	}
+}
 
 template<class Master_matrix>
 template<class Boundary_type>

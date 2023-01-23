@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef BASE_SWAP2_H
-#define BASE_SWAP2_H
+#ifndef BASE_SWAP_H
+#define BASE_SWAP_H
 
 #include <utility>
 #include <vector>
@@ -136,4 +136,4 @@ inline void Base_swap<Master_matrix>::_orderRows()
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // BASE_SWAP2_H
+#endif // BASE_SWAP_H

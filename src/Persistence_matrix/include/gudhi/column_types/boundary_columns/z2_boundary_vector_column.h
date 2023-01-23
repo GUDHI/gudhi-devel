@@ -21,11 +21,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-class Z2_vector_boundary_column : public Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>
+template<class Cell_type, class Row_access_option>
+class Z2_vector_boundary_column : public Z2_vector_column<Cell_type,Row_access_option>
 {
 private:
-	using Base = Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>;
+	using Base = Z2_vector_column<Cell_type,Row_access_option>;
 
 public:
 	using Cell = typename Base::Cell;
@@ -48,7 +48,7 @@ public:
 	Z2_vector_boundary_column(const Z2_vector_boundary_column& column, index columnIndex);
 	Z2_vector_boundary_column(Z2_vector_boundary_column&& column) noexcept;
 
-	std::vector<bool> get_content(unsigned int columnLength);
+	std::vector<bool> get_content(int columnLength = -1);
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty();
 	int get_pivot();
@@ -76,8 +76,8 @@ public:
 	Z2_vector_boundary_column& operator=(Z2_vector_boundary_column other);
 
 	friend void swap(Z2_vector_boundary_column& col1, Z2_vector_boundary_column& col2){
-		swap(static_cast<Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>&>(col1),
-			 static_cast<Z2_vector_column<Cell_type,Column_pairing_option,Row_access_option>&>(col2));
+		swap(static_cast<Z2_vector_column<Cell_type,Row_access_option>&>(col1),
+			 static_cast<Z2_vector_column<Cell_type,Row_access_option>&>(col2));
 		col1.erasedValues_.swap(col2.erasedValues_);
 	}
 
@@ -87,87 +87,87 @@ private:
 	void _cleanValues();
 };
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column() : Base()
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column() : Base()
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Boundary_type>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(const Boundary_type &boundary)
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(const Boundary_type &boundary)
 	: Base(boundary)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Boundary_type>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(const Boundary_type &boundary, dimension_type dimension)
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(const Boundary_type &boundary, dimension_type dimension)
 	: Base(boundary, dimension)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Row_container_type>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(
 		index columnIndex, Row_container_type &rowContainer)
 	: Base(columnIndex, rowContainer)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Boundary_type, class Row_container_type>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(
 		index columnIndex, const Boundary_type &boundary, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, rowContainer)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Boundary_type, class Row_container_type>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(
 		index columnIndex, const Boundary_type &boundary, dimension_type dimension, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, dimension, rowContainer)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(
 		const Z2_vector_boundary_column &column)
 	: Base(static_cast<const Base&>(column)),
 	  erasedValues_(column.erasedValues_)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(
 		const Z2_vector_boundary_column &column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  erasedValues_(column.erasedValues_)
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::Z2_vector_boundary_column(Z2_vector_boundary_column &&column) noexcept
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option>::Z2_vector_boundary_column(Z2_vector_boundary_column &&column) noexcept
 	: Base(std::move(static_cast<Base&&>(column))),
 	  erasedValues_(std::move(column.erasedValues_))
 {}
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline std::vector<bool> Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::get_content(unsigned int columnLength)
+template<class Cell_type, class Row_access_option>
+inline std::vector<bool> Z2_vector_boundary_column<Cell_type,Row_access_option>::get_content(int columnLength)
 {
 	_cleanValues();
 	return Base::get_content(columnLength);
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline bool Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::is_non_zero(index rowIndex) const
+template<class Cell_type, class Row_access_option>
+inline bool Z2_vector_boundary_column<Cell_type,Row_access_option>::is_non_zero(index rowIndex) const
 {
 	if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
 	return Base::is_non_zero(rowIndex);
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline bool Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::is_empty()
+template<class Cell_type, class Row_access_option>
+inline bool Z2_vector_boundary_column<Cell_type,Row_access_option>::is_empty()
 {
 	_cleanValues();
 	return Base::column_.empty();
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline int Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::get_pivot()
+template<class Cell_type, class Row_access_option>
+inline int Z2_vector_boundary_column<Cell_type,Row_access_option>::get_pivot()
 {
 	if (Base::column_.empty()) return -1;
 
@@ -184,8 +184,8 @@ inline int Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_
 	return Base::column_.back()->get_row_index();
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::clear()
+template<class Cell_type, class Row_access_option>
+inline void Z2_vector_boundary_column<Cell_type,Row_access_option>::clear()
 {
 	for (Cell* cell : Base::column_){
 		Base::_delete_cell(cell);
@@ -194,15 +194,15 @@ inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access
 	erasedValues_.clear();
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::clear(index rowIndex)
+template<class Cell_type, class Row_access_option>
+inline void Z2_vector_boundary_column<Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	erasedValues_.insert(rowIndex);
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
+template<class Cell_type, class Row_access_option>
 template<class Map_type>
-inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::reorder(Map_type &valueMap)
+inline void Z2_vector_boundary_column<Cell_type,Row_access_option>::reorder(Map_type &valueMap)
 {
 	Column_type newColumn;
 	for (Cell* v : Base::column_) {
@@ -227,8 +227,8 @@ inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access
 	Base::column_.swap(newColumn);
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::operator+=(Z2_vector_boundary_column &column)
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option> &Z2_vector_boundary_column<Cell_type,Row_access_option>::operator+=(Z2_vector_boundary_column &column)
 {
 	_cleanValues();
 	column._cleanValues();
@@ -237,8 +237,8 @@ inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_opti
 	return *this;
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::operator*=(unsigned int v)
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option> &Z2_vector_boundary_column<Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	Base::operator*=(v);
 
@@ -248,16 +248,16 @@ inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_opti
 	return *this;
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option> &Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::operator=(Z2_vector_boundary_column other)
+template<class Cell_type, class Row_access_option>
+inline Z2_vector_boundary_column<Cell_type,Row_access_option> &Z2_vector_boundary_column<Cell_type,Row_access_option>::operator=(Z2_vector_boundary_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
 	erasedValues_.swap(other.erasedValues_);
 	return *this;
 }
 
-template<class Cell_type, class Column_pairing_option, class Row_access_option>
-inline void Z2_vector_boundary_column<Cell_type,Column_pairing_option,Row_access_option>::_cleanValues()
+template<class Cell_type, class Row_access_option>
+inline void Z2_vector_boundary_column<Cell_type,Row_access_option>::_cleanValues()
 {
 	if (erasedValues_.empty()) return;
 
