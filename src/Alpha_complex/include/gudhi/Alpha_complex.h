@@ -485,6 +485,8 @@ class Alpha_complex {
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     using Filtration_value = typename SimplicialComplexForAlpha::Filtration_value;
+    // To support more general types for Filtration_value
+    using std::isnan;
 
     // ### Foreach Tau face of Sigma
     for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(f_simplex)) {
