@@ -251,6 +251,13 @@ if(PYTHONINTERP_FOUND)
         set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.14', ")
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+    # Strip dynamic libraries in release mode for smaller pip packages under linux
+    if(CMAKE_COMPILER_IS_GNUCXX)
+      if(CMAKE_BUILD_TYPE MATCHES Release)
+        set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-s', ")
+      endif(CMAKE_BUILD_TYPE MATCHES Release)
+    endif(CMAKE_COMPILER_IS_GNUCXX)
+
     # Loop on INCLUDE_DIRECTORIES PROPERTY
     get_property(GUDHI_INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
     foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
@@ -291,8 +298,8 @@ if(PYTHONINTERP_FOUND)
     # Other .py files
     file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")    
-    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
+    file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
@@ -570,6 +577,11 @@ if(PYTHONINTERP_FOUND)
     # Differentiation
     if(TENSORFLOW_FOUND)
       add_gudhi_py_test(test_diff)
+    endif()
+
+    # Perslay
+    if(TENSORFLOW_FOUND AND SKLEARN_FOUND)
+      add_gudhi_py_test(test_perslay)
     endif()
 
     # Betti curves
