@@ -556,7 +556,7 @@ class Bitmap_cubical_complex_base {
      * boundary and coboundary and dimension
      * and in function get_cell_data to get a filtration of a cell.
      */
-    std::size_t operator*() { return this->compute_index_in_bitmap(); }
+    std::size_t operator*() const { return this->compute_index_in_bitmap(); }
 
     std::size_t compute_index_in_bitmap() const {
       std::size_t index = 0;
