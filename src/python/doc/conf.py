@@ -35,7 +35,6 @@ extensions = [
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
-    'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
@@ -46,10 +45,6 @@ extensions = [
 
 bibtex_bibfiles = ['../../biblio/bibliography.bib']
 
-todo_include_todos = True
-# plot option : do not show hyperlinks (Source code, png, hires.png, pdf)
-plot_html_show_source_link = False
-plot_html_show_formats = False
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -183,7 +178,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True
