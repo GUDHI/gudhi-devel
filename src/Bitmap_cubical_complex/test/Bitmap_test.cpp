@@ -82,189 +82,57 @@ BOOST_AUTO_TEST_CASE(cellsIterator_test) {
 }
 
 BOOST_AUTO_TEST_CASE(compute_boundary_test_1) {
-  std::vector<size_t> boundary0;
-  std::vector<size_t> boundary1;
-  boundary1.push_back(0);
-  boundary1.push_back(2);
-  std::vector<size_t> boundary2;
-  std::vector<size_t> boundary3;
-  boundary3.push_back(2);
-  boundary3.push_back(4);
-  std::vector<size_t> boundary4;
-  std::vector<size_t> boundary5;
-  boundary5.push_back(4);
-  boundary5.push_back(6);
-  std::vector<size_t> boundary6;
-  std::vector<size_t> boundary7;
-  boundary7.push_back(0);
-  boundary7.push_back(14);
-  std::vector<size_t> boundary8;
-  boundary8.push_back(1);
-  boundary8.push_back(15);
-  boundary8.push_back(9);
-  boundary8.push_back(7);
-  std::vector<size_t> boundary9;
-  boundary9.push_back(2);
-  boundary9.push_back(16);
-  std::vector<size_t> boundary10;
-  boundary10.push_back(3);
-  boundary10.push_back(17);
-  boundary10.push_back(11);
-  boundary10.push_back(9);
-  std::vector<size_t> boundary11;
-  boundary11.push_back(4);
-  boundary11.push_back(18);
-  std::vector<size_t> boundary12;
-  boundary12.push_back(5);
-  boundary12.push_back(19);
-  boundary12.push_back(13);
-  boundary12.push_back(11);
-  std::vector<size_t> boundary13;
-  boundary13.push_back(6);
-  boundary13.push_back(20);
-  std::vector<size_t> boundary14;
-  std::vector<size_t> boundary15;
-  boundary15.push_back(14);
-  boundary15.push_back(16);
-  std::vector<size_t> boundary16;
-  std::vector<size_t> boundary17;
-  boundary17.push_back(16);
-  boundary17.push_back(18);
-  std::vector<size_t> boundary18;
-  std::vector<size_t> boundary19;
-  boundary19.push_back(18);
-  boundary19.push_back(20);
-  std::vector<size_t> boundary20;
-  std::vector<size_t> boundary21;
-  boundary21.push_back(14);
-  boundary21.push_back(28);
-  std::vector<size_t> boundary22;
-  boundary22.push_back(15);
-  boundary22.push_back(29);
-  boundary22.push_back(23);
-  boundary22.push_back(21);
-  std::vector<size_t> boundary23;
-  boundary23.push_back(16);
-  boundary23.push_back(30);
-  std::vector<size_t> boundary24;
-  boundary24.push_back(17);
-  boundary24.push_back(31);
-  boundary24.push_back(25);
-  boundary24.push_back(23);
-  std::vector<size_t> boundary25;
-  boundary25.push_back(18);
-  boundary25.push_back(32);
-  std::vector<size_t> boundary26;
-  boundary26.push_back(19);
-  boundary26.push_back(33);
-  boundary26.push_back(27);
-  boundary26.push_back(25);
-  std::vector<size_t> boundary27;
-  boundary27.push_back(20);
-  boundary27.push_back(34);
-  std::vector<size_t> boundary28;
-  std::vector<size_t> boundary29;
-  boundary29.push_back(28);
-  boundary29.push_back(30);
-  std::vector<size_t> boundary30;
-  std::vector<size_t> boundary31;
-  boundary31.push_back(30);
-  boundary31.push_back(32);
-  std::vector<size_t> boundary32;
-  std::vector<size_t> boundary33;
-  boundary33.push_back(32);
-  boundary33.push_back(34);
-  std::vector<size_t> boundary34;
-  std::vector<size_t> boundary35;
-  boundary35.push_back(28);
-  boundary35.push_back(42);
-  std::vector<size_t> boundary36;
-  boundary36.push_back(29);
-  boundary36.push_back(43);
-  boundary36.push_back(37);
-  boundary36.push_back(35);
-  std::vector<size_t> boundary37;
-  boundary37.push_back(30);
-  boundary37.push_back(44);
-  std::vector<size_t> boundary38;
-  boundary38.push_back(31);
-  boundary38.push_back(45);
-  boundary38.push_back(39);
-  boundary38.push_back(37);
-  std::vector<size_t> boundary39;
-  boundary39.push_back(32);
-  boundary39.push_back(46);
-  std::vector<size_t> boundary40;
-  boundary40.push_back(33);
-  boundary40.push_back(47);
-  boundary40.push_back(41);
-  boundary40.push_back(39);
-  std::vector<size_t> boundary41;
-  boundary41.push_back(34);
-  boundary41.push_back(48);
-  std::vector<size_t> boundary42;
-  std::vector<size_t> boundary43;
-  boundary43.push_back(42);
-  boundary43.push_back(44);
-  std::vector<size_t> boundary44;
-  std::vector<size_t> boundary45;
-  boundary45.push_back(44);
-  boundary45.push_back(46);
-  std::vector<size_t> boundary46;
-  std::vector<size_t> boundary47;
-  boundary47.push_back(46);
-  boundary47.push_back(48);
-  std::vector<size_t> boundary48;
-  std::vector<std::vector<size_t> > boundaries;
-  boundaries.push_back(boundary0);
-  boundaries.push_back(boundary1);
-  boundaries.push_back(boundary2);
-  boundaries.push_back(boundary3);
-  boundaries.push_back(boundary4);
-  boundaries.push_back(boundary5);
-  boundaries.push_back(boundary6);
-  boundaries.push_back(boundary7);
-  boundaries.push_back(boundary8);
-  boundaries.push_back(boundary9);
-  boundaries.push_back(boundary10);
-  boundaries.push_back(boundary11);
-  boundaries.push_back(boundary12);
-  boundaries.push_back(boundary13);
-  boundaries.push_back(boundary14);
-  boundaries.push_back(boundary15);
-  boundaries.push_back(boundary16);
-  boundaries.push_back(boundary17);
-  boundaries.push_back(boundary18);
-  boundaries.push_back(boundary19);
-  boundaries.push_back(boundary20);
-  boundaries.push_back(boundary21);
-  boundaries.push_back(boundary22);
-  boundaries.push_back(boundary23);
-  boundaries.push_back(boundary24);
-  boundaries.push_back(boundary25);
-  boundaries.push_back(boundary26);
-  boundaries.push_back(boundary27);
-  boundaries.push_back(boundary28);
-  boundaries.push_back(boundary29);
-  boundaries.push_back(boundary30);
-  boundaries.push_back(boundary31);
-  boundaries.push_back(boundary32);
-  boundaries.push_back(boundary33);
-  boundaries.push_back(boundary34);
-  boundaries.push_back(boundary35);
-  boundaries.push_back(boundary36);
-  boundaries.push_back(boundary37);
-  boundaries.push_back(boundary38);
-  boundaries.push_back(boundary39);
-  boundaries.push_back(boundary40);
-  boundaries.push_back(boundary41);
-  boundaries.push_back(boundary42);
-  boundaries.push_back(boundary43);
-  boundaries.push_back(boundary44);
-  boundaries.push_back(boundary45);
-  boundaries.push_back(boundary46);
-  boundaries.push_back(boundary47);
-  boundaries.push_back(boundary48);
+  std::vector<std::vector<size_t> > boundaries {
+    {},
+    {0, 2},
+    {},
+    {2, 4},
+    {},
+    {4, 6},
+    {},
+    {0, 14},
+    {1, 15, 9, 7},
+    {2, 16},
+    {3, 17, 11, 9},
+    {4, 18},
+    {5, 19, 13, 11},
+    {6, 20},
+    {},
+    {14, 16},
+    {},
+    {16, 18},
+    {},
+    {18, 20},
+    {},
+    {14, 28},
+    {15, 29, 23, 21},
+    {16, 30},
+    {17, 31, 25, 23},
+    {18, 32},
+    {19, 33, 27, 25},
+    {20, 34},
+    {},
+    {28, 30},
+    {},
+    {30, 32},
+    {},
+    {32, 34},
+    {},
+    {28, 42},
+    {29, 43, 37, 35},
+    {30, 44},
+    {31, 45, 39, 37},
+    {32, 46},
+    {33, 47, 41, 39},
+    {34, 48},
+    {},
+    {42, 44},
+    {},
+    {44, 46},
+    {},
+    {46, 48},
+    {}
+  };
 
   std::vector<double> increasingFiltrationOfTopDimensionalCells({1, 2, 3, 4, 5, 6, 7, 8, 9});
 
