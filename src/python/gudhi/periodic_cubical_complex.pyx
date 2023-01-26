@@ -11,26 +11,32 @@ from __future__ import print_function
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
-from libcpp.string cimport string
 from libcpp cimport bool
 import sys
 import os
 
 import numpy as np
+cimport numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+# Necessary because of PyArray_SimpleNewFromData
+np.import_array()
+
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>":
+    cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Periodic_cubical_complex_interface":
         Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions) nogil
-        Periodic_cubical_complex_base_interface(string perseus_file) nogil
+        Periodic_cubical_complex_base_interface(const char* perseus_file) nogil
         int num_simplices() nogil
         int dimension() nogil
+        vector[unsigned] shape() nogil
+        vector[bool] periodicities() nogil
+        vector[double] data
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface<Gudhi::cubical_complex::Bitmap_cubical_complex_periodic_boundary_conditions_base<double>>>":
+    cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Periodic_cubical_complex_interface>":
         Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
@@ -79,6 +85,7 @@ cdef class PeriodicCubicalComplex:
     # The real cython constructor
     def __cinit__(self, dimensions=None, top_dimensional_cells=None,
                   periodic_dimensions=None, perseus_file=''):
+        cdef const char* file
         if ((dimensions is not None) and (top_dimensional_cells is not None)
             and (periodic_dimensions is not None) and (perseus_file == '')):
             self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
@@ -93,7 +100,9 @@ cdef class PeriodicCubicalComplex:
         elif ((dimensions is None) and (top_dimensional_cells is None)
             and (periodic_dimensions is None) and (perseus_file != '')):
             if os.path.isfile(perseus_file):
-                self._construct_from_file(perseus_file.encode('utf-8'))
+                perseus_file = perseus_file.encode('utf-8')
+                file = perseus_file
+                self._construct_from_file(file)
             else:
                 print("file " + perseus_file + " not found.", file=sys.stderr)
         else:
@@ -106,7 +115,7 @@ cdef class PeriodicCubicalComplex:
         with nogil:
             self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
 
-    def _construct_from_file(self, string filename):
+    def _construct_from_file(self, const char* filename):
         with nogil:
             self.thisptr = new Periodic_cubical_complex_base_interface(filename)
 
@@ -139,6 +148,34 @@ cdef class PeriodicCubicalComplex:
         :returns:  int -- the complex dimension.
         """
         return self.thisptr.dimension()
+
+    def all_cells(self):
+        """Array with the filtration values of all the cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        cdef np.npy_intp dim = self.thisptr.data.size()
+        a = np.PyArray_SimpleNewFromData(1, &dim, np.NPY_DOUBLE, self.thisptr.data.data())
+        np.set_array_base(a, self)
+        return a.reshape([2 * d + (not p) for (d, p) in zip(self.thisptr.shape(), self.thisptr.periodicities())],
+                         order='F')
+
+    def top_dimensional_cells(self):
+        """Array with the filtration values of the top-dimensional cells of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(1, None, 2),) * self.thisptr.dimension()]
+
+    def vertices(self):
+        """Array with the filtration values of the vertices of the complex.
+        Modifying the values is strongly discouraged.
+
+        :returns:  numpy.ndarray
+        """
+        return self.all_cells()[(slice(0, None, 2),) * self.thisptr.dimension()]
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be
