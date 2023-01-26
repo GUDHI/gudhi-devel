@@ -22,6 +22,7 @@
 #if __has_include(<CGAL/version.h>)
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 #if CGAL_VERSION_NR >= 1041101000
+#undef _GUDHI_SUBSAMPLING_USE_CGAL  // To remove warning
 #define _GUDHI_SUBSAMPLING_USE_CGAL 1
 #include <CGAL/Epick_d.h>
 #include <gudhi/sparsify_point_set.h>
