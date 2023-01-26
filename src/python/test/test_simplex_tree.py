@@ -652,6 +652,5 @@ def test_read_write_methods():
     st.make_filtration_non_decreasing()
     st.expansion(2)
     st.to_file('random.st')
-    st_copy = SimplexTree()
-    st_copy.from_file('random.st')
+    st_copy = SimplexTree.create_from_file('random.st')
     assert st == st_copy

@@ -9,6 +9,7 @@
 
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t, int32_t, int64_t
+from libcpp.string cimport string
 import numpy as np
 cimport gudhi.simplex_tree
 cimport cython
@@ -811,22 +812,26 @@ cdef class SimplexTree:
             Callers are responsible for fixing this (with :meth:`make_filtration_non_decreasing` for instance) before
             calling any function that relies on the filtration property.
         """
-        self.get_ptr().write(filename.encode('utf-8'))
+        cdef string simplex_file = filename.encode('utf-8')
+        with nogil:
+            self.get_ptr().write(simplex_file)
 
-    def from_file(self, filename):
-        """This function reads the simplex tree in a user given file name.
+    @staticmethod
+    @cython.boundscheck(False)
+    def create_from_file(filename):
+        """Creates a new, empty complex and inserts the simplices read from file (created from a pickled SimplexTree
+        for instance).
 
-        :param filename: Name of the file.
+        :param filename: Name of the file with its path.
         :type filename: string
-
-        .. note::
-            Beware that :meth:`from_file` is using :meth:`insert_simplex`. If the :class:`~gudhi.SimplexTree` defined
-            in the file is not a valid filtration (a simplex could have a lower filtration value than one of its
-            faces), you may not retrieve your non-valid filtration.
-            Callers are responsible for fixing this (with :meth:`make_filtration_non_decreasing` for instance) before
-            writting a file (with :meth:`from_file` for instance).
+        :returns: the new complex
+        :rtype: SimplexTree
         """
-        self.get_ptr().read(filename.encode('utf-8'))
+        stree = SimplexTree()
+        cdef string simplex_file = filename.encode('utf-8')
+        with nogil:
+            stree.get_ptr().read(simplex_file)
+        return stree
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

@@ -235,13 +235,13 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   void read(std::string filename) {
-    std::ifstream ifs(filename.c_str());
+    std::ifstream ifs(filename);
     ifs >> *this;
     ifs.close();
   }
 
   void write(std::string filename) {
-    std::ofstream ofs(filename.c_str());
+    std::ofstream ofs(filename);
     ofs << *this;
     ofs.close();
   }
