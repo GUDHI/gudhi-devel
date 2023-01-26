@@ -14,6 +14,7 @@ from libcpp.utility cimport pair
 from libcpp cimport bool
 import sys
 import os
+import errno
 
 import numpy as np
 cimport numpy as np
@@ -27,8 +28,8 @@ np.import_array()
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_base_interface "Gudhi::Cubical_complex::Periodic_cubical_complex_interface":
-        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions) nogil
-        Periodic_cubical_complex_base_interface(const char* perseus_file) nogil
+        Periodic_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells) nogil except +
+        Periodic_cubical_complex_base_interface(const char* perseus_file) nogil except +
         int num_simplices() nogil
         int dimension() nogil
         vector[unsigned] shape() nogil
@@ -41,6 +42,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
+        vector[vector[int]] vertices_of_cubical_persistence_pairs() nogil
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
         vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
@@ -52,28 +54,49 @@ cdef class PeriodicCubicalComplex:
     analysis.
     """
     cdef Periodic_cubical_complex_base_interface * thisptr
-
     cdef Periodic_cubical_complex_persistence_interface * pcohptr
+    cdef bool _built_from_vertices
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, dimensions=None, top_dimensional_cells=None,
-                 periodic_dimensions=None, perseus_file=''):
-        """PeriodicCubicalComplex constructor from dimensions and
-        top_dimensional_cells or from a Perseus-style file name.
+                 vertices=None, periodic_dimensions=None, perseus_file=''):
+        """PeriodicCubicalComplex constructor from dimensions and cells
+        (either vertices or top dimensional) or from a Perseus-style file name.
+
+        Note that in case the periodic cubical complex is constructed from
+        'top_dimensional_cells' or 'vertices' using a flat array,
+        the given 'dimensions' will be considered using the
+        fortran ordering (column-major order).
 
         :param dimensions: A list of number of top dimensional cells.
         :type dimensions: list of int
-        :param top_dimensional_cells: A list of cells filtration values.
+        :param top_dimensional_cells: A list of top dimensional cells filtration values.
         :type top_dimensional_cells: list of double
-        :param periodic_dimensions: A list of top dimensional cells periodicity value.
+        :param periodic_dimensions: A list of cells periodicity value.
         :type periodic_dimensions: list of boolean
 
         Or
 
-        :param top_dimensional_cells: A multidimensional array of cells
-            filtration values.
+        :param dimensions: A list of number of vertices.
+        :type dimensions: list of int
+        :param vertices: A list of vertices filtration values.
+        :type vertices: list of double
+        :param periodic_dimensions: A list of cells periodicity value.
+        :type periodic_dimensions: list of boolean
+
+        Or
+
+        :param top_dimensional_cells: A multidimensional array of top
+            dimensional cells filtration values.
         :type top_dimensional_cells: anything convertible to a numpy ndarray
-        :param periodic_dimensions: A list of top dimensional cells periodicity value.
+        :param periodic_dimensions: A list of cells periodicity value.
+        :type periodic_dimensions: list of boolean
+
+        Or
+
+        :param vertices: A multidimensional array vertices filtration values.
+        :type vertices: anything convertible to a numpy ndarray
+        :param periodic_dimensions: A list of cells periodicity value.
         :type periodic_dimensions: list of boolean
 
         Or
@@ -83,37 +106,38 @@ cdef class PeriodicCubicalComplex:
         """
 
     # The real cython constructor
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None,
+    def __cinit__(self, dimensions=None, top_dimensional_cells=None, vertices=None,
                   periodic_dimensions=None, perseus_file=''):
         cdef const char* file
-        if ((dimensions is not None) and (top_dimensional_cells is not None)
-            and (periodic_dimensions is not None) and (perseus_file == '')):
-            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
-        elif ((dimensions is None) and (top_dimensional_cells is not None)
-            and (periodic_dimensions is not None) and (perseus_file == '')):
-            top_dimensional_cells = np.array(top_dimensional_cells,
-                                             copy = False,
-                                             order = 'F')
-            dimensions = top_dimensional_cells.shape
-            top_dimensional_cells = top_dimensional_cells.ravel(order='F')
-            self._construct_from_cells(dimensions, top_dimensional_cells, periodic_dimensions)
-        elif ((dimensions is None) and (top_dimensional_cells is None)
-            and (periodic_dimensions is None) and (perseus_file != '')):
-            if os.path.isfile(perseus_file):
-                perseus_file = perseus_file.encode('utf-8')
-                file = perseus_file
-                self._construct_from_file(file)
-            else:
-                print("file " + perseus_file + " not found.", file=sys.stderr)
+        self._built_from_vertices = False
+        if perseus_file:
+            if (top_dimensional_cells is not None or vertices is not None or
+                dimensions is not None or periodic_dimensions is not None):
+                raise ValueError("The Perseus file contains all the information, do not specify anything else")
+            perseus_file = perseus_file.encode('utf-8')
+            file = perseus_file
+            self._construct_from_file(file)
+            return
+        if periodic_dimensions is None:
+            raise ValueError("The periodic_dimensions must be specified")
+        if top_dimensional_cells is not None:
+            if vertices is not None:
+                raise ValueError("Can only specify the top dimensional cells OR the vertices, not both")
+            array = top_dimensional_cells
+        elif vertices is not None:
+            array = vertices
+            self._built_from_vertices = True
         else:
-            print("CubicalComplex can be constructed from dimensions, "
-              "top_dimensional_cells and periodic_dimensions, or from "
-              "top_dimensional_cells and periodic_dimensions or from "
-              "a Perseus-style file name.", file=sys.stderr)
+            raise ValueError("Must specify one of top_dimensional_cells, vertices, or perseus_file")
+        if dimensions is None:
+            array = np.array(array, copy=False, order='F')
+            dimensions = array.shape
+            array = array.ravel(order='F')
+        self._construct_from_cells(dimensions, array, periodic_dimensions, vertices is None)
 
-    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] top_dimensional_cells, vector[bool] periodic_dimensions):
+    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells):
         with nogil:
-            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, top_dimensional_cells, periodic_dimensions)
+            self.thisptr = new Periodic_cubical_complex_base_interface(dimensions, cells, periodic_dimensions, input_top_cells)
 
     def _construct_from_file(self, const char* filename):
         with nogil:
@@ -229,6 +253,11 @@ cdef class PeriodicCubicalComplex:
         coordinates to the corresponding value in the input (i.e. the filtration values of
         the top-dimensional cells) is useful for differentiation purposes.
 
+        Since the cubical complex construction from vertices is different from the top dimensional one,
+        the former may not have an equivalent with the second construction, and vice versa.
+        Therefore, using cofaces_of_persistence_pairs with a cubical complex constructed from vertices
+        can lead to an undefined behavior.
+
         This function returns a list of pairs of top-dimensional cells corresponding to
         the persistence birth and death cells of the filtration. The cells are represented by
         their indices in the input list of top-dimensional cells (and not their indices in the
@@ -239,21 +268,77 @@ cdef class PeriodicCubicalComplex:
         :returns: The top-dimensional cells/cofaces of the positive and negative cells,
             together with the corresponding homological dimension, in two lists of numpy arrays of integers.
             The first list contains the regular persistence pairs, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 2].
+            It contains numpy arrays of shape (number_of_persistence_points, 2).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell,
             index of negative top-dimensional cell).
             The second list contains the essential features, grouped by dimension.
-            It contains numpy arrays of shape [number_of_persistence_points, 1].
+            It contains numpy arrays of shape (number_of_persistence_points,).
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
         assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
-        cdef vector[vector[int]] persistence_result
+        assert not self._built_from_vertices, (
+                "cofaces_of_persistence_pairs() only makes sense for a complex"
+                " initialized from the values of the top-dimensional cells"
+        )
 
+        cdef vector[vector[int]] persistence_result
         output = [[],[]]
         with nogil:
             persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
+        pr = np.array(persistence_result)
+
+        ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
+        ess = pr[ess_ind]
+        max_h = np.max(ess[:,0])+1 if len(ess) > 0 else 0
+        for h in range(max_h):
+            hidxs = np.argwhere(ess[:,0] == h)[:,0]
+            output[1].append(ess[hidxs][:,1])
+
+        reg_ind = np.setdiff1d(np.arange(len(pr)), ess_ind)
+        reg = pr[reg_ind]
+        max_h = np.max(reg[:,0])+1 if len(reg) > 0 else 0
+        for h in range(max_h):
+            hidxs = np.argwhere(reg[:,0] == h)[:,0]
+            output[0].append(reg[hidxs][:,1:])
+        return output
+
+    def vertices_of_persistence_pairs(self):
+        """This function returns a list of pairs of vertices corresponding to
+        the persistence birth and death cells of the filtration. The cells are represented by
+        their indices in the input list of vertices (and not their indices in the
+        internal datastructure that includes non-minimal cells). Note that when two adjacent
+        vertices have the same filtration value, we arbitrarily return one of the two
+        when calling the function on one of their common faces.
+
+        Since the cubical complex construction from vertices is different from the top dimensional one,
+        the former may not have an equivalent with the second construction, and vice versa.
+        Therefore, using vertices_of_persistence_pairs with a cubical complex constructed from top_dimensional_cells
+        can lead to an undefined behavior.
+
+        :returns: The vertices of the positive and negative cells,
+            together with the corresponding homological dimension, in two lists of numpy arrays of integers.
+            The first list contains the regular persistence pairs, grouped by dimension.
+            It contains numpy arrays of shape (number_of_persistence_points, 2).
+            The indices of the arrays in the list correspond to the homological dimensions, and the
+            integers of each row in each array correspond to: (index of positive vertex,
+            index of negative vertex).
+            The second list contains the essential features, grouped by dimension.
+            It contains numpy arrays of shape (number_of_persistence_points,).
+            The indices of the arrays in the list correspond to the homological dimensions, and the
+            integers of each row in each array correspond to: (index of positive vertex).
+        """
+        assert self.pcohptr != NULL, "compute_persistence() must be called before vertices_of_persistence_pairs()"
+        assert self._built_from_vertices, (
+                "vertices_of_persistence_pairs() only makes sense for a complex"
+                " initialized from the values of the vertices"
+        )
+
+        cdef vector[vector[int]] persistence_result
+        output = [[],[]]
+        with nogil:
+            persistence_result = self.pcohptr.vertices_of_cubical_persistence_pairs()
         pr = np.array(persistence_result)
 
         ess_ind = np.argwhere(pr[:,2] == -1)[:,0]

@@ -83,19 +83,18 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
     auto&& pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
       persistent_cohomology::Field_Zp>::get_persistent_pairs();
 
-    // Gather all top-dimensional cells and store their simplex handles
-    std::vector<std::size_t> max_splx;
-    for (auto splx : stptr_->top_dimensional_cells_range())
-      max_splx.push_back(splx);
-    // Sort these simplex handles and compute the ordering function
+    // Compute the ordering function of the top-dimensional cells simplex handles
     // This function allows to go directly from the simplex handle to the position of the corresponding top-dimensional cell in the input data
     std::unordered_map<std::size_t, int> order;
-    //std::sort(max_splx.begin(), max_splx.end());
-    for (unsigned int i = 0; i < max_splx.size(); i++)  order.emplace(max_splx[i], i);
+    unsigned idx = 0;
+    for (auto splx : stptr_->top_dimensional_cells_range()) {
+      order.emplace(splx, idx);
+      idx++;
+    }
 
     std::vector<std::vector<int>> persistence_pairs;
     for (auto pair : pairs) {
-      int h = stptr_->dimension(get<0>(pair));
+      int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
       // Recursively get the top-dimensional cell / coface associated to the persistence generator
       std::size_t face0 = stptr_->get_top_dimensional_coface_of_a_cell(get<0>(pair));
       // Retrieve the index of the corresponding top-dimensional cell in the input data
@@ -106,6 +105,45 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
         // Recursively get the top-dimensional cell / coface associated to the persistence generator
         std::size_t face1 = stptr_->get_top_dimensional_coface_of_a_cell(get<1>(pair));
         // Retrieve the index of the corresponding top-dimensional cell in the input data
+        splx1 = order[face1];
+      }
+      persistence_pairs.push_back({ h, splx0, splx1 });
+    }
+    return persistence_pairs;
+  }
+
+  // This function computes the vertices associated to the positive and negative
+  // simplices of a cubical complex. The output format is a vector of vectors of three integers,
+  // which are [homological dimension, index of vertex of positive simplex,
+  // index of vertex of negative simplex]. If the topological feature is essential,
+  // then the index of vertex of negative simplex is arbitrarily set to -1.
+  std::vector<std::vector<int>> vertices_of_cubical_persistence_pairs() {
+    // Warning: this function is meant to be used with CubicalComplex only!!
+    auto&& pairs = persistent_cohomology::Persistent_cohomology<FilteredComplex,
+      persistent_cohomology::Field_Zp>::get_persistent_pairs();
+
+    // Compute the ordering function of the vertices simplex handles
+    // This function allows to go directly from the simplex handle to the position of the corresponding vertex in the input data
+    std::unordered_map<std::size_t, int> order;
+    unsigned idx = 0;
+    for (auto splx : stptr_->vertices_range()) {
+      order.emplace(splx, idx);
+      idx++;
+    }
+
+    std::vector<std::vector<int>> persistence_pairs;
+    for (auto pair : pairs) {
+      int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
+      // Recursively get the vertex associated to the persistence generator
+      std::size_t face0 = stptr_->get_vertex_of_a_cell(get<0>(pair));
+      // Retrieve the index of the corresponding vertex in the input data
+      int splx0 = order[face0];
+
+      int splx1 = -1;
+      if (get<1>(pair) != stptr_->null_simplex()){
+        // Recursively get the vertex associated to the persistence generator
+        std::size_t face1 = stptr_->get_vertex_of_a_cell(get<1>(pair));
+        // Retrieve the index of the corresponding vertex in the input data
         splx1 = order[face1];
       }
       persistence_pairs.push_back({ h, splx0, splx1 });
