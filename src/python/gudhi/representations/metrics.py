@@ -368,12 +368,6 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.order, self.internal_p, self.mode = order, internal_p, mode
-        if mode == "pot":
-            self.metric = "pot_wasserstein"
-        elif mode == "hera":
-            self.metric = "hera_wasserstein"
-        else:
-            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.delta = delta
         self.n_jobs = n_jobs
 
@@ -385,6 +379,8 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
+        if self.mode not in ("pot", "hera"):
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.diagrams_ = X
         return self
 
@@ -398,10 +394,10 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise Wasserstein distances.
         """
-        if self.metric == "hera_wasserstein":
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
+        if self.mode == "hera":
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="hera_wasserstein", order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
         else:
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="pot_wasserstein", order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -415,12 +411,14 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: Wasserstein distance.
         """
-        if self.metric == "hera_wasserstein":
+        if self.mode == "hera":
             return hera_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, delta=self.delta)
-        else:
+        elif self.mode == "pot":
             try:
                 from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
                 return pot_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False)
             except ImportError:
-                print("POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
+                print("POT (Python Optimal Transport) is not installed. Please install POT or use mode='hera'")
                 raise
+        else:
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
