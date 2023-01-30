@@ -1757,7 +1757,7 @@ class Simplex_tree {
 // Print a Simplex_tree in os.
 template<typename...T>
 std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
-  for (auto sh : st.filtration_simplex_range()) {
+  for (auto sh : st.complex_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {
       os << v << " ";
