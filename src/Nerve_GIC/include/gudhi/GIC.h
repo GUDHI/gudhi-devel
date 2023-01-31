@@ -22,6 +22,13 @@
 # include <gudhi/Bottleneck.h>
 #elif __has_include(<hera/bottleneck.h>)
 # define GUDHI_GIC_USE_HERA 1
+# ifdef _MSC_VER
+// https://github.com/grey-narn/hera/issues/3
+// ssize_t is a non-standard type (well, posix)
+#  include <type_traits>
+#  include <cstdlib>
+using ssize_t = std::make_signed_t<std::size_t>;
+# endif
 # include <hera/bottleneck.h>
 #endif
 
