@@ -82,7 +82,7 @@ If you want more information on a specific dimension, for instance:
         persistence_file=persistence_file, only_this_dim=1)
     # Use subplots to display diagram and density side by side
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-    gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0], legend=False)
+    gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0])
     gudhi.plot_persistence_density(persistence=birth_death, axes=axes[1])
     plt.show()
 
