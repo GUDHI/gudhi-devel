@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstddef>  // for std::size_t
 #include <random>
+#include <iterator>  // for std::distance
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_serialization"
@@ -52,58 +53,62 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   const std::size_t serialization_size_in_bytes = get_serialization_size<Stree>(st.num_simplices());
 
   char* serial = new char[serialization_size_in_bytes];
-  std::size_t index = 0;
+  // Set position pointer at start
+  char* position_ptr = serial;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  index += serialize(serial + index, static_cast<Vertex_type>(3));
-  index += serialize(serial + index, static_cast<Vertex_type>(0));
-  index += serialize(serial + index, static_cast<Vertex_type>(1));
-  index += serialize(serial + index, static_cast<Vertex_type>(2));
-  index += serialize(serial + index, st.filtration(st.find({0})));
-  index += serialize(serial + index, st.filtration(st.find({1})));
-  index += serialize(serial + index, st.filtration(st.find({2})));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(3));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(1));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(2));
+  position_ptr = serialize(position_ptr, st.filtration(st.find({0})));
+  position_ptr = serialize(position_ptr, st.filtration(st.find({1})));
+  position_ptr = serialize(position_ptr, st.filtration(st.find({2})));
   // 1 simplex (2) from {0, 2} and its filtration values
-  index += serialize(serial + index, static_cast<Vertex_type>(1));
-  index += serialize(serial + index, static_cast<Vertex_type>(2));
-  index += serialize(serial + index, st.filtration(st.find({0, 2})));
-  index += serialize(serial + index, static_cast<Vertex_type>(0));  // (0, 2) end of leaf
-  index += serialize(serial + index, static_cast<Vertex_type>(0));  // (1) end of leaf
-  index += serialize(serial + index, static_cast<Vertex_type>(0));  // (2) end of leaf
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(1));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(2));
+  position_ptr = serialize(position_ptr, st.filtration(st.find({0, 2})));
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (0, 2) end of leaf
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (1) end of leaf
+  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (2) end of leaf
 
+  std::size_t index = std::distance(serial, position_ptr);
   std::clog << "Serialization size in bytes = " << serialization_size_in_bytes << " - index = " << index << std::endl;
   BOOST_CHECK(serialization_size_in_bytes == index);
 
   Vertex_type vertex = 0;
   Filtration_type filtration = 0;
-  index = 0;
+  // Reset position pointer at start
+  position_ptr = serial;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 3);
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 0);
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 1);
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 2);
-  index += deserialize(serial + index, filtration);
+  position_ptr = deserialize(position_ptr, filtration);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0})));
-  index += deserialize(serial + index, filtration);
+  position_ptr = deserialize(position_ptr, filtration);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({1})));
-  index += deserialize(serial + index, filtration);
+  position_ptr = deserialize(position_ptr, filtration);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({2})));
   // 1 simplex (2) from {0, 2} and its filtration values
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 1);
-  index += deserialize(serial + index, vertex);
+  position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 2);
-  index += deserialize(serial + index, filtration);
+  position_ptr = deserialize(position_ptr, filtration);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0, 2})));
-  index += deserialize(serial + index, vertex);  // (0, 2) end of leaf
+  position_ptr = deserialize(position_ptr, vertex);  // (0, 2) end of leaf
   BOOST_CHECK(vertex == 0);
-  index += deserialize(serial + index, vertex);  // (1) end of leaf
+  position_ptr = deserialize(position_ptr, vertex);  // (1) end of leaf
   BOOST_CHECK(vertex == 0);
-  index += deserialize(serial + index, vertex);  // (2) end of leaf
+  position_ptr = deserialize(position_ptr, vertex);  // (2) end of leaf
   BOOST_CHECK(vertex == 0);
 
+  index = std::distance(serial, position_ptr);
   std::clog << "Deserialization size in bytes = " << serialization_size_in_bytes << " - index = " << index << std::endl;
   BOOST_CHECK(serialization_size_in_bytes == index);
 
