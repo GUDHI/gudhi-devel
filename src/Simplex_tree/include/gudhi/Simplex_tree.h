@@ -1777,6 +1777,53 @@ class Simplex_tree {
     }
   }
 
+ public:
+  /** \brief Deserialize the vector of char (flatten version of the tree) to create and return a Simplex tree */
+  static Simplex_tree deserialize(std::vector<char>& buffer) {
+    Simplex_tree stree;
+    // Needs to read size before recursivity to manage new siblings for children
+    Vertex_handle members_size{};
+    std::vector<char>::const_iterator opositional_itr = Gudhi::simplex_tree::deserialize(std::cbegin(buffer), members_size);
+    opositional_itr = stree.rec_deserialize(&(stree.root_), members_size, opositional_itr, 0);
+    GUDHI_CHECK(opositional_itr == std::cend(buffer), std::out_of_range("Deserialization do not match end of buffer"));
+    return stree;
+  }
+
+ private:
+  /** \brief Serialize each element of the sibling and recursively call serialization. */
+  std::vector<char>::const_iterator rec_deserialize(Siblings *sib,
+                                                    Vertex_handle members_size,
+                                                    std::vector<char>::const_iterator ipositional_itr,
+                                                    int dim) {
+    std::vector<char>::const_iterator opositional_itr = ipositional_itr;
+    // In case buffer is just a 0 char
+    if (members_size > 0) {
+      sib->members_.reserve(members_size);
+      Vertex_handle vertex{};
+      Filtration_value filtration{};
+      for (Vertex_handle idx = 0; idx < members_size; idx++) {
+        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, vertex);
+        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, filtration);
+        // Default is no children
+        sib->members_.emplace(vertex, Node(sib, filtration));
+      }
+      Vertex_handle child_size{};
+      for (auto& map_el : sib->members()) {
+        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, child_size);
+        if (child_size > 0) {
+          Siblings* child = new Siblings(sib, map_el.first);
+          map_el.second.assign_children(child);
+          opositional_itr = rec_deserialize(child, child_size, opositional_itr, dim + 1);
+        }
+      }
+    }
+    if (dim > dimension_) {
+      // Update dimension if needed
+      dimension_ = dim;
+    }
+    return opositional_itr;
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
