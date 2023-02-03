@@ -12,6 +12,7 @@
 #include <cstring>  // for std::size_t and strncmp
 #include <random>
 #include <iterator>  // for std::distance
+#include <vector>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_serialization"
@@ -49,36 +50,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   st.insert_simplex({2},    random_filtration<Filtration_type>());
   st.insert_simplex({0, 2}, random_filtration<Filtration_type>());
 
-  std::clog << "Number of simplices = " << st.num_simplices() << std::endl;
-  const std::size_t serialization_size_in_bytes = get_serialization_size<Stree>(st.num_simplices());
-
-  char* serial = new char[serialization_size_in_bytes];
-  // Set position pointer at start
-  char* position_ptr = serial;
+  std::vector<char> buffer;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(3));
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));
-  position_ptr = serialize(position_ptr, st.filtration(st.find({0})));
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(1));
-  position_ptr = serialize(position_ptr, st.filtration(st.find({1})));
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(2));
-  position_ptr = serialize(position_ptr, st.filtration(st.find({2})));
+  serialize(static_cast<Vertex_type>(3)   , buffer);
+  serialize(static_cast<Vertex_type>(0)   , buffer);
+  serialize(st.filtration(st.find({0}))   , buffer);
+  serialize(static_cast<Vertex_type>(1)   , buffer);
+  serialize(st.filtration(st.find({1}))   , buffer);
+  serialize(static_cast<Vertex_type>(2)   , buffer);
+  serialize(st.filtration(st.find({2}))   , buffer);
   // 1 simplex (2) from {0, 2} and its filtration values
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(1));
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(2));
-  position_ptr = serialize(position_ptr, st.filtration(st.find({0, 2})));
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (0, 2) end of leaf
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (1) end of leaf
-  position_ptr = serialize(position_ptr, static_cast<Vertex_type>(0));  // (2) end of leaf
+  serialize(static_cast<Vertex_type>(1)   , buffer);
+  serialize(static_cast<Vertex_type>(2)   , buffer);
+  serialize(st.filtration(st.find({0, 2})), buffer);
+  serialize(static_cast<Vertex_type>(0)   , buffer);  // (0, 2) end of leaf
+  serialize(static_cast<Vertex_type>(0)   , buffer);  // (1) end of leaf
+  serialize(static_cast<Vertex_type>(0)   , buffer);  // (2) end of leaf
 
-  std::size_t index = std::distance(serial, position_ptr);
-  std::clog << "Serialization size in bytes = " << serialization_size_in_bytes << " - index = " << index << std::endl;
-  BOOST_CHECK(serialization_size_in_bytes == index);
+  std::clog << "Serialization size in bytes = " << buffer.size() << std::endl;
+  // Sizes are expressed in bytes
+  const std::size_t vertex_size = sizeof(Vertex_type);
+  const std::size_t filtration_size = sizeof(Filtration_type);
+  const std::size_t serialization_size = vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
+  BOOST_CHECK(serialization_size == buffer.size());
 
   Vertex_type vertex = 0;
   Filtration_type filtration = 0;
   // Reset position pointer at start
-  position_ptr = serial;
+  auto position_ptr = std::cbegin(buffer);
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   position_ptr = deserialize(position_ptr, vertex);
   BOOST_CHECK(vertex == 3);
@@ -108,33 +107,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   position_ptr = deserialize(position_ptr, vertex);  // (2) end of leaf
   BOOST_CHECK(vertex == 0);
 
-  index = std::distance(serial, position_ptr);
-  std::clog << "Deserialization size in bytes = " << serialization_size_in_bytes << " - index = " << index << std::endl;
-  BOOST_CHECK(serialization_size_in_bytes == index);
+  std::size_t index = std::distance(std::cbegin(buffer), position_ptr);
+  std::clog << "Deserialization size in bytes = " << serialization_size << " - index = " << index << std::endl;
+  BOOST_CHECK(serialization_size == index);
+  BOOST_CHECK(position_ptr == std::cend(buffer));
 
-  char* stree_serial = nullptr;
-  std::size_t stree_serial_size {};
-  st.serialize(stree_serial, stree_serial_size);
+  std::vector<char> stree_buffer;
+  st.serialize(stree_buffer);
 
-  std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_serial_size << " - from " << serialization_size_in_bytes << std::endl;
-  BOOST_CHECK(serialization_size_in_bytes == stree_serial_size);
+  std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer.size() << std::endl;
+  BOOST_CHECK(serialization_size == stree_buffer.size());
 
   std::clog << "\nSerialization (from the simplex tree):\n";
-  for (std::size_t idx = 0; idx < serialization_size_in_bytes; idx++) {
+  for (std::size_t idx = 0; idx < serialization_size; idx++) {
     std::clog << std::setfill('0') 
               << std::setw(2) 
               << std::uppercase 
-              << std::hex << (0xFF & stree_serial[idx]) << " " << std::dec;
+              << std::hex << (0xFF & stree_buffer[idx]) << " " << std::dec;
   }
   std::clog << "\nSerialization (manual):\n";
-  for (std::size_t idx = 0; idx < serialization_size_in_bytes; idx++) {
+  for (std::size_t idx = 0; idx < serialization_size; idx++) {
     std::clog << std::setfill('0') 
               << std::setw(2) 
               << std::uppercase 
-              << std::hex << (0xFF & serial[idx]) << " " << std::dec;
+              << std::hex << (0xFF & buffer[idx]) << " " << std::dec;
   }
-  BOOST_CHECK(strncmp(stree_serial, serial, serialization_size_in_bytes) == 0);
-
-  delete[] serial;
-  delete[] stree_serial;
+  BOOST_CHECK(stree_buffer == buffer);
 }

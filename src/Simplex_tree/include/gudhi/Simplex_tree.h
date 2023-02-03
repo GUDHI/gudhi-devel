@@ -1746,45 +1746,35 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Serialize the Simplex tree - Flatten it in an array of char */
-  void serialize(char*& buffer, std::size_t& size) {
-    size = Gudhi::simplex_tree::get_serialization_size<Simplex_tree<Options>>(num_simplices());
-    buffer = new char[size];
-
-    [[maybe_unused]] char* end_buffer = rec_serialize(&root_, buffer);
-#ifdef DEBUG_TRACES
-    std::clog << "\nComputed serialization size = " << size << " | serialization size = "
-              << std::distance(buffer, end_buffer) << "\n";
-#endif  // DEBUG_TRACES
-    assert(std::distance(buffer, end_buffer) == size);
+  /** \brief Serialize the Simplex tree - Flatten it in a vector of char */
+  void serialize(std::vector<char>& buffer) {
+    rec_serialize(&root_, buffer);
   }
 
  private:
   /** \brief Serialize each element of the sibling and recursively call serialization. */
-  char* rec_serialize(Siblings *sib, char*& buffer) {
-    char* position_ptr = buffer;
-    position_ptr = Gudhi::simplex_tree::serialize(position_ptr, static_cast<Vertex_handle>(sib->members().size()));
+  void rec_serialize(Siblings *sib, std::vector<char>& buffer) {
+    Gudhi::simplex_tree::serialize(static_cast<Vertex_handle>(sib->members().size()), buffer);
 #ifdef DEBUG_TRACES
     std::clog << "\n" << sib->members().size() << " : ";
 #endif  // DEBUG_TRACES
     for (auto& map_el : sib->members()) {
-      position_ptr = Gudhi::simplex_tree::serialize(position_ptr, map_el.first); // Vertex
-      position_ptr = Gudhi::simplex_tree::serialize(position_ptr, map_el.second.filtration()); // Filtration
+      Gudhi::simplex_tree::serialize(map_el.first, buffer); // Vertex
+      Gudhi::simplex_tree::serialize(map_el.second.filtration(), buffer); // Filtration
 #ifdef DEBUG_TRACES
       std::clog << " [ " << map_el.first << " | " << map_el.second.filtration() << " ] ";
 #endif  // DEBUG_TRACES
     }
     for (auto& map_el : sib->members()) {
       if (has_children(&map_el)) {
-        position_ptr = rec_serialize(map_el.second.children(), position_ptr);
+        rec_serialize(map_el.second.children(), buffer);
       } else {
-        position_ptr = Gudhi::simplex_tree::serialize(position_ptr, static_cast<Vertex_handle>(0));
+        Gudhi::simplex_tree::serialize(static_cast<Vertex_handle>(0), buffer);
 #ifdef DEBUG_TRACES
         std::cout << "\n0 : ";
 #endif  // DEBUG_TRACES
       }
     }
-    return position_ptr;
   }
 
  private:

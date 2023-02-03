@@ -25,26 +25,14 @@ namespace simplex_tree {
  *  @{
  */
 
-/** \brief Computes and return the serialization size in bytes in function of the number of simplices.
- */
-template<class SimplicialComplex>
-std::size_t get_serialization_size(std::size_t num_simplices) {
-  std::size_t vh_byte_size = sizeof(typename SimplicialComplex::Vertex_handle);
-  std::size_t fv_byte_size = sizeof(typename SimplicialComplex::Filtration_value);
-  return (vh_byte_size + num_simplices * (fv_byte_size + 2 * vh_byte_size));
-}
-
-/** \brief Serialize the given value at the start position in an array of char.
- * 
- * @warning It is the user resposibility to ensure that the array of char is wide enough.
- * 
- * @return The new position in the array of char.
+/** \brief Serialize the given value and insert it at the end of the buffer.
  */
 template<class ArgumentType>
-char* serialize(char* start, ArgumentType value) {
-  std::size_t arg_size = sizeof(ArgumentType);
-  memcpy(start, &value, arg_size);
-  return (start + arg_size);
+void serialize(ArgumentType value, std::vector<char>& buffer) {
+  const std::size_t arg_size = sizeof(ArgumentType);
+  char serial[arg_size];
+  memcpy(&serial, &value, arg_size);
+  buffer.insert(std::end(buffer), std::begin(serial), std::end(serial));
 }
 
 /** \brief Deserialize at the start position in an array of char and sets the value with it.
@@ -54,9 +42,10 @@ char* serialize(char* start, ArgumentType value) {
  * @warning It is the user resposibility to ensure that the array of char is wide enough.
  */
 template<class ArgumentType>
-char* deserialize(char* start, ArgumentType& value) {
+std::vector<char>::const_iterator deserialize(std::vector<char>::const_iterator start, ArgumentType& value) {
   std::size_t arg_size = sizeof(ArgumentType);
-  memcpy(&value, start, arg_size);
+  // TODO: Not really nice, but I didn't manage to do it with std::copy.
+  memcpy(&value, &*start, arg_size);
   return (start + arg_size);
 }
 
