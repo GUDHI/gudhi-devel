@@ -5,9 +5,11 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
+from cpython.bytearray cimport PyByteArray_FromStringAndSize, PyByteArray_AsString, PyByteArray_Size
 from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
@@ -797,6 +799,35 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+    
+    def __getstate__(self):
+        """Pickle the SimplexTree data structure as a Python Byte Array
+        :returns: Serialized SimplexTree data structure
+        :rtype: Byte Array
+        """
+        cdef vector[char] buffer
+        with nogil:
+            buffer = self.get_ptr().serialize()
+        
+        return PyByteArray_FromStringAndSize(buffer.data(), buffer.size());
+
+    def __setstate__(self, state):
+        """Construct the SimplexTree data structure from a Python Byte Array
+        :param state: Serialized SimplexTree data structure
+        :type state: Byte Array
+        """
+        cdef char* buffer_start = PyByteArray_AsString(state);
+        cdef size_t buffer_size=PyByteArray_Size(state);
+        # Backup old pointer
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        cdef vector[char] buffer
+        with nogil:
+            buffer.assign(buffer_start, buffer_start+buffer_size)
+            # New pointer is a deserialized simplex tree
+            self.thisptr = <intptr_t>(ptr.deserialize(buffer))
+            # Delete old pointer
+            del ptr
+
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

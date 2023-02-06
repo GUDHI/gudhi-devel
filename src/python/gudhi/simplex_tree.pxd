@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython cimport numeric
@@ -80,6 +81,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         # Expansion with blockers
         ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
         void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
+        vector[char] serialize() nogil
+        @staticmethod
+        Simplex_tree_interface_full_featured deserialize(vector[char] buffer) nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":

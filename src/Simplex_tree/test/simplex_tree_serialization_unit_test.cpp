@@ -112,8 +112,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(serialization_size == index);
   BOOST_CHECK(position_ptr == std::cend(buffer));
 
-  std::vector<char> stree_buffer;
-  st.serialize(stree_buffer);
+  std::vector<char> stree_buffer = st.serialize();
 
   std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer.size() << std::endl;
   BOOST_CHECK(serialization_size == stree_buffer.size());
@@ -134,14 +133,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   }
   BOOST_CHECK(stree_buffer == buffer);
 
-  Stree st_from_buffer = Stree::deserialize(stree_buffer);
+  Stree* st_from_buffer = Stree::deserialize(stree_buffer);
   std::clog << std::endl << std::endl << "Iterator on simplices:\n";
-  for (auto simplex : st_from_buffer.complex_simplex_range()) {
+  for (auto simplex : st_from_buffer->complex_simplex_range()) {
     std::clog << "   ";
-    for (auto vertex : st_from_buffer.simplex_vertex_range(simplex)) {
+    for (auto vertex : st_from_buffer->simplex_vertex_range(simplex)) {
       std::clog << vertex << " ";
     }
-    std::clog << " - filtration = " << st_from_buffer.filtration(simplex) << std::endl;
+    std::clog << " - filtration = " << st_from_buffer->filtration(simplex) << std::endl;
   }
-  BOOST_CHECK(st_from_buffer == st);
+  BOOST_CHECK(*st_from_buffer == st);
 }

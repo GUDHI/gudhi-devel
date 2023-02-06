@@ -1747,8 +1747,10 @@ class Simplex_tree {
 
  public:
   /** \brief Serialize the Simplex tree - Flatten it in a vector of char */
-  void serialize(std::vector<char>& buffer) {
+  std::vector<char> serialize() {
+    std::vector<char> buffer{};
     rec_serialize(&root_, buffer);
+    return buffer;
   }
 
  private:
@@ -1779,12 +1781,12 @@ class Simplex_tree {
 
  public:
   /** \brief Deserialize the vector of char (flatten version of the tree) to create and return a Simplex tree */
-  static Simplex_tree deserialize(std::vector<char>& buffer) {
-    Simplex_tree stree;
+  static Simplex_tree* deserialize(std::vector<char>& buffer) {
+    Simplex_tree* stree = new Simplex_tree();
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size{};
     std::vector<char>::const_iterator opositional_itr = Gudhi::simplex_tree::deserialize(std::cbegin(buffer), members_size);
-    opositional_itr = stree.rec_deserialize(&(stree.root_), members_size, opositional_itr, 0);
+    opositional_itr = stree->rec_deserialize(&(stree->root_), members_size, opositional_itr, 0);
     GUDHI_CHECK(opositional_itr == std::cend(buffer), std::out_of_range("Deserialization do not match end of buffer"));
     return stree;
   }
