@@ -2,8 +2,8 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-Scikit-learn class for cover complexes
-######################################
+Class for cover complexes
+#########################
 
 .. list-table::
    :widths: 40 30 30
@@ -13,7 +13,7 @@ Scikit-learn class for cover complexes
      - :License: MIT
      - :Requires: `Scikit-learn <installation.html#scikit-learn>`__
 
-We provide scikit-learn classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
+We provide classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
 in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_.
 
 Example of Mapper cover complex computed from a point cloud
@@ -29,10 +29,8 @@ Example of Mapper cover complex computed from a point cloud
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
 
 
-    Mapper = MapperComplex(
+    mapper = MapperComplex(
         input_type="point cloud",
-        colors=None,
-        mask=0,
         filters=F,
         filter_bnds=np.array([[0.5, 2.5], [0.5, 4.5]]),
         resolutions=np.array([2, 4]),
@@ -40,9 +38,9 @@ Example of Mapper cover complex computed from a point cloud
         clustering=AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=0.6),
     )
 
-    Mapper.fit(X)
+    mapper.fit(X)
 
-    print([s for s,_ in Mapper.simplex_tree.get_simplices()])
+    print([s for s,_ in mapper.simplex_tree.get_simplices()])
 
 .. testoutput::
 

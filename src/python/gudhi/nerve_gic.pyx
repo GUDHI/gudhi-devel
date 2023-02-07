@@ -255,7 +255,7 @@ cdef class CoverComplex:
         """Creates a cover C from a vector stored in memory.
 
         :param assignments: Vector containing the assignments of the points to their corresponding cover elements. For instance, if the i-th point belongs to the 1st and 3rd cover elements, then assignments[i] = [1,3].
-        :type assignments: vector[vector[int]]
+        :type assignments: List[List[int]]
         """
         self.thisptr.set_cover_from_range(assignments)
 
@@ -421,7 +421,7 @@ cdef class CoverComplex:
         :param c: ID of the node.
         :type c: int
 
-        :rtype: double
+        :rtype: float
         :returns: Mean color value of data points.
         """
         return self.thisptr.subcolor(c)

@@ -105,7 +105,7 @@ class Cover_complex {
   std::vector<std::vector<double> > distances;  // all pairwise distances.
   int maximal_dim;                              // maximal dimension of output simplicial complex.
   int data_dimension;                           // dimension of input data.
-  int n;                                        // number of points.
+  int num_points;                                        // number of points.
 
   std::vector<double> func;       // function used to compute the output simplicial complex.
   std::vector<double> func_color; // function used to compute the colors of the nodes of the output simplicial complex.
@@ -227,9 +227,9 @@ class Cover_complex {
    *
    */
   void set_point_cloud_from_range(const std::vector<std::vector<double> > & point_cloud) {
-    n = point_cloud.size(); data_dimension = point_cloud[0].size();
-    point_cloud_name = "cloud"; cover.resize(n);
-    for(int i = 0; i < n; i++){
+    this->num_points = point_cloud.size(); data_dimension = point_cloud[0].size();
+    point_cloud_name = "cloud"; cover.resize(this->num_points);
+    for(int i = 0; i < this->num_points; i++){
       boost::add_vertex(one_skeleton_OFF);
       vertices.push_back(boost::add_vertex(one_skeleton));
     }
@@ -273,12 +273,12 @@ class Cover_complex {
         comment = line[line.find_first_not_of(' ')];
     }
     std::stringstream stream(line);
-    stream >> n;
+    stream >> this->num_points;
     stream >> numfaces;
     stream >> numedges;
 
     i = 0;
-    while (i < n) {
+    while (i < this->num_points) {
       std::getline(input, line);
       if (!line.empty() && line[line.find_first_not_of(' ')] != '#' &&
           !all_of(line.begin(), line.end(), (int (*)(int))isspace)) {
@@ -360,8 +360,8 @@ class Cover_complex {
   void set_graph_from_rips(double threshold, Distance distance) {
     remove_edges(one_skeleton);
     if (distances.size() == 0) compute_pairwise_distances(distance);
-    for (int i = 0; i < n; i++) {
-      for (int j = i + 1; j < n; j++) {
+    for (int i = 0; i < this->num_points; i++) {
+      for (int j = i + 1; j < this->num_points; j++) {
         if (distances[i][j] <= threshold) {
           boost::add_edge(vertices[i], vertices[j], one_skeleton);
           boost::put(boost::edge_weight, one_skeleton, boost::edge(vertices[i], vertices[j], one_skeleton).first,
@@ -388,9 +388,9 @@ class Cover_complex {
    *
    */
   void set_distances_from_range(const std::vector<std::vector<double> > & distance_matrix) {
-    n = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
-    cover.resize(n); point_cloud.resize(n);
-    for(int i = 0; i < n; i++){
+    this->num_points = distance_matrix.size(); data_dimension = 0; point_cloud_name = "matrix";
+    cover.resize(this->num_points); point_cloud.resize(this->num_points);
+    for(int i = 0; i < this->num_points; i++){
       boost::add_vertex(one_skeleton_OFF);
       vertices.push_back(boost::add_vertex(one_skeleton));
     }
@@ -402,13 +402,13 @@ class Cover_complex {
            */
   template <typename Distance>
   void compute_pairwise_distances(Distance ref_distance) {
-    std::vector<double> zeros(n);
-    for (int i = 0; i < n; i++) distances.push_back(zeros);
+    std::vector<double> zeros(this->num_points);
+    for (int i = 0; i < this->num_points; i++) distances.push_back(zeros);
     if (verbose) std::clog << "Computing distances..." << std::endl;
-    for (int i = 0; i < n; i++) {
-      int state = 100 * (i + 1) / n % 10;
-      if (state == 0 && verbose) std::clog << "\r" << state << "%" << std::flush;
-      for (int j = i; j < n; j++) {
+    for (int i = 0; i < this->num_points; i++) {
+      int state = 100 * (i + 1) / this->num_points;
+      if (verbose && state % 10 == 0) std::clog << "\r" << state << "%" << std::flush;
+      for (int j = i; j < this->num_points; j++) {
         double dis = ref_distance(point_cloud[i], point_cloud[j]);
         distances[i][j] = dis;
         distances[j][i] = dis;
@@ -429,11 +429,11 @@ class Cover_complex {
    */
   template <typename Distance>
   double set_graph_from_automatic_rips(Distance distance, int N = 100) {
-    int m = floor(n / std::exp((1 + rate_power) * std::log(std::log(n) / std::log(rate_constant))));
-    m = (std::min)(m, n - 1);
+    int m = floor(this->num_points / std::exp((1 + rate_power) * std::log(std::log(this->num_points) / std::log(rate_constant))));
+    m = (std::min)(m, this->num_points - 1);
     double delta = 0;
 
-    if (verbose) std::clog << n << " points in R^" << data_dimension << std::endl;
+    if (verbose) std::clog << this->num_points << " points in R^" << data_dimension << std::endl;
     if (verbose) std::clog << "Subsampling " << m << " points" << std::endl;
 
     if (distances.size() == 0) compute_pairwise_distances(distance);
@@ -444,7 +444,7 @@ class Cover_complex {
         std::vector<int> samples(m);
         SampleWithoutReplacement(n, m, samples);
         double hausdorff_dist = 0;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < this->num_points; j++) {
           double mj = distances[j][samples[0]];
           for (int k = 1; k < m; k++) mj = (std::min)(mj, distances[j][samples[k]]);
           hausdorff_dist = (std::max)(hausdorff_dist, mj);
@@ -456,9 +456,9 @@ class Cover_complex {
     #else
       for (int i = 0; i < N; i++) {
         std::vector<int> samples(m);
-        SampleWithoutReplacement(n, m, samples);
+        SampleWithoutReplacement(this->num_points, m, samples);
         double hausdorff_dist = 0;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < this->num_points; j++) {
           double mj = distances[j][samples[0]];
           for (int k = 1; k < m; k++) mj = (std::min)(mj, distances[j][samples[k]]);
           hausdorff_dist = (std::max)(hausdorff_dist, mj);
@@ -505,13 +505,13 @@ class Cover_complex {
            */
   void set_function_from_coordinate(int k) {
     if(point_cloud[0].size() > 0){
-      for (int i = 0; i < n; i++) func.push_back(point_cloud[i][k]);
+      for (int i = 0; i < this->num_points; i++) func.push_back(point_cloud[i][k]);
       functional_cover = true;
       cover_name = "coordinate " + std::to_string(k);
     }
     else{
       std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
-      for (int i = 0; i < n; i++) func.push_back(0.0);
+      for (int i = 0; i < this->num_points; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
     }
@@ -525,7 +525,7 @@ class Cover_complex {
            */
   template <class InputRange>
   void set_function_from_range(InputRange const& function) {
-    for (int i = 0; i < n; i++) func.push_back(function[i]);
+    for (int i = 0; i < this->num_points; i++) func.push_back(function[i]);
     functional_cover = true;
   }
 
@@ -613,7 +613,7 @@ class Cover_complex {
     // Read function values and compute min and max
     double minf = (std::numeric_limits<float>::max)();
     double maxf = std::numeric_limits<float>::lowest();
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < this->num_points; i++) {
       minf = (std::min)(minf, func[i]);
       maxf = (std::max)(maxf, func[i]);
     }
@@ -685,8 +685,8 @@ class Cover_complex {
     }
 
     // Sort points according to function values
-    std::vector<int> points(n);
-    for (int i = 0; i < n; i++) points[i] = i;
+    std::vector<int> points(this->num_points);
+    for (int i = 0; i < this->num_points; i++) points[i] = i;
     std::sort(points.begin(), points.end(), [this](int p1, int p2){return (this->func[p1] < this->func[p2]);});
 
     int id = 0;
@@ -705,7 +705,7 @@ class Cover_complex {
       if (i != res - 1) {
         if (i != 0) {
           std::pair<double, double> inter3 = intervals[i - 1];
-          while (func[points[tmp]] < inter3.second && tmp != n) {
+          while (func[points[tmp]] < inter3.second && tmp != this->num_points) {
             preimages[i].push_back(points[tmp]);
             tmp++;
           }
@@ -715,24 +715,24 @@ class Cover_complex {
         }
 
         std::pair<double, double> inter2 = intervals[i + 1];
-        while (func[points[tmp]] < inter2.first && tmp != n) {
+        while (func[points[tmp]] < inter2.first && tmp != this->num_points) {
           preimages[i].push_back(points[tmp]);
           tmp++;
         }
         v = inter2.first;
         pos = tmp;
-        while (func[points[tmp]] < inter1.second && tmp != n) {
+        while (func[points[tmp]] < inter1.second && tmp != this->num_points) {
           preimages[i].push_back(points[tmp]);
           tmp++;
         }
 
       } else {
         std::pair<double, double> inter3 = intervals[i - 1];
-        while (func[points[tmp]] < inter3.second && tmp != n) {
+        while (func[points[tmp]] < inter3.second && tmp != this->num_points) {
           preimages[i].push_back(points[tmp]);
           tmp++;
         }
-        while (tmp != n) {
+        while (tmp != this->num_points) {
           preimages[i].push_back(points[tmp]);
           tmp++;
         }
@@ -857,13 +857,14 @@ class Cover_complex {
  public:  // Set cover from range.
   /** \brief Creates the cover C from a vector of assignments stored in memory. The assignments, or clusters IDs, are vectors of integers.
   *
-  * @param[in] assignments input vector of vector of integers containing the cover assignments.
+  * @tparam AssignmentRange random access range of input ranges of integers.
+  * @param[in] assignments the cover assignments, specifying for each point the list of clusters it belongs to.
   *
   */
-  template <class InputRange>
-  void set_cover_from_range(InputRange const& assignments) {
+  template <class AssignmentRange>
+  void set_cover_from_range(AssignmentRange const& assignments) {    
     std::vector<int> cov_elts, cov_number;
-    for(int i=0; i < n; i++){
+    for(int i=0; i < assignments.size(); i++){
       cov_elts.clear();
       for (int cov : assignments[i]){
         cov_elts.push_back(cov);
@@ -895,13 +896,13 @@ class Cover_complex {
   template <typename Distance>
   void set_cover_from_Voronoi(Distance distance, int m = 100) {
     voronoi_subsamples.resize(m);
-    SampleWithoutReplacement(n, m, voronoi_subsamples);
+    SampleWithoutReplacement(this->num_points, m, voronoi_subsamples);
     if (distances.size() == 0) compute_pairwise_distances(distance);
     set_graph_weights();
     Weight_map weight = boost::get(boost::edge_weight, one_skeleton);
     Index_map index = boost::get(boost::vertex_index, one_skeleton);
-    std::vector<double> mindist(n);
-    for (int j = 0; j < n; j++) mindist[j] = (std::numeric_limits<double>::max)();
+    std::vector<double> mindist(this->num_points);
+    for (int j = 0; j < this->num_points; j++) mindist[j] = (std::numeric_limits<double>::max)();
 
     // Compute the geodesic distances to subsamples with Dijkstra
     #ifdef GUDHI_USE_TBB
@@ -909,13 +910,13 @@ class Cover_complex {
       std::mutex coverMutex; std::mutex mindistMutex;
       tbb::parallel_for(0, m, [&](int i){
         int seed = voronoi_subsamples[i];
-        std::vector<double> dmap(n);
+        std::vector<double> dmap(this->num_points);
         boost::dijkstra_shortest_paths(
             one_skeleton, vertices[seed],
             boost::weight_map(weight).distance_map(boost::make_iterator_property_map(dmap.begin(), index)));
 
         coverMutex.lock(); mindistMutex.lock();
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < this->num_points; j++)
           if (mindist[j] > dmap[j]) {
             mindist[j] = dmap[j];
             if (cover[j].size() == 0)
@@ -929,12 +930,12 @@ class Cover_complex {
       for (int i = 0; i < m; i++) {
         if (verbose) std::clog << "Computing geodesic distances to seed " << i << "..." << std::endl;
         int seed = voronoi_subsamples[i];
-        std::vector<double> dmap(n);
+        std::vector<double> dmap(this->num_points);
         boost::dijkstra_shortest_paths(
             one_skeleton, vertices[seed],
             boost::weight_map(weight).distance_map(boost::make_iterator_property_map(dmap.begin(), index)));
 
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j < this->num_points; j++)
           if (mindist[j] > dmap[j]) {
             mindist[j] = dmap[j];
             if (cover[j].size() == 0)
@@ -945,7 +946,7 @@ class Cover_complex {
       }
     #endif
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < this->num_points; i++) {
       cover_back[cover[i][0]].push_back(i);
       cover_color[cover[i][0]].second += func_color[i];
       cover_color[cover[i][0]].first++;
@@ -1007,13 +1008,13 @@ class Cover_complex {
            */
   void set_color_from_coordinate(int k = 0) {
     if(point_cloud[0].size() > 0){
-      for (int i = 0; i < n; i++) func_color.push_back(point_cloud[i][k]);
+      for (int i = 0; i < this->num_points; i++) func_color.push_back(point_cloud[i][k]);
       color_name = "coordinate ";
       color_name.append(std::to_string(k));
     }
     else{
       std::cerr << "Only pairwise distances provided---cannot access " << k << "th coordinate; returning null vector instead" << std::endl;
-      for (int i = 0; i < n; i++) func.push_back(0.0);
+      for (int i = 0; i < this->num_points; i++) func.push_back(0.0);
       functional_cover = true;
       cover_name = "null";
     }
@@ -1238,20 +1239,20 @@ class Cover_complex {
       for (unsigned int i = 0; i < N - sz; i++) {
         if (verbose)  std::clog << "Computing " << i << "th bootstrap, bottleneck distance = ";
 
-        Cover_complex Cboot; Cboot.n = this->n; Cboot.data_dimension = this->data_dimension; Cboot.type = this->type; Cboot.functional_cover = true;
+        Cover_complex Cboot; Cboot.num_points = this->num_points; Cboot.data_dimension = this->data_dimension; Cboot.type = this->type; Cboot.functional_cover = true;
 
-        std::vector<int> boot(this->n);
-        for (int j = 0; j < this->n; j++) {
+        std::vector<int> boot(this->num_points);
+        for (int j = 0; j < this->num_points; j++) {
           double u = GetUniform();
-          int id = std::floor(u * (this->n)); boot[j] = id;
+          int id = std::floor(u * (this->num_points)); boot[j] = id;
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
         }
         Cboot.set_color_from_range(Cboot.func);
 
-        for (int j = 0; j < n; j++) {
-          std::vector<double> dist(n);
-          for (int k = 0; k < n; k++) dist[k] = distances[boot[j]][boot[k]];
+        for (int j = 0; j < this->num_points; j++) {
+          std::vector<double> dist(this->num_points);
+          for (int k = 0; k < this->num_points; k++) dist[k] = distances[boot[j]][boot[k]];
           Cboot.distances.push_back(dist);
         }
 

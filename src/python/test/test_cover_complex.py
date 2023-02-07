@@ -103,20 +103,20 @@ def test_cover_complex():
     X = np.array([[1,1],[1,1.5],[1,2],[1,2.5],[1,3],[1.5,2],[1.5,3],[2,2],[2,2.5],[2,3],[2,3.5],[2,4]])
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
 
-    M = GraphInducedComplex(input_type="point cloud", cover="functional", color=None, mask=0, filter=F[:,1], filter_bnds=np.array([.5,4.5]), 
-         resolution=4, gain=.3, graph='rips', rips_threshold=.6, verbose=True).fit(X)
+    M = GraphInducedComplex(input_type="point cloud", cover="functional", min_points_per_node=0, filter_bnds=np.array([.5,4.5]), 
+         resolution=4, gain=.3, graph='rips', rips_threshold=.6, verbose=True).fit(X, filter=F[:,1], color=None)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([2, 3], 0.0)]
+    assert list(M.simplex_tree_.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0), ([2], 0.0), ([1, 2], 0.0), ([3], 0.0), ([2, 3], 0.0)]
 
-    M = GraphInducedComplex(input_type="point cloud", cover="voronoi", voronoi_samples=2, color=None, mask=0, graph='rips', rips_threshold=.6, verbose=True).fit(X)
+    M = GraphInducedComplex(input_type="point cloud", cover="voronoi", voronoi_samples=2, min_points_per_node=0, graph='rips', rips_threshold=.6, verbose=True).fit(X, color=None)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0)]
+    assert list(M.simplex_tree_.get_filtration()) == [([0], 0.0), ([1], 0.0), ([0, 1], 0.0)]
 
-    M = MapperComplex(input_type="point cloud", colors=None, mask=0, filters=F, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
-         resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6)).fit(X)
+    M = MapperComplex(input_type="point cloud", min_points_per_node=0, filter_bnds=np.array([[.5,2.5],[.5,4.5]]), 
+         resolutions=np.array([2,4]), gains=np.array([.3,.3]), clustering=AgglomerativeClustering(n_clusters=None, linkage='single', distance_threshold=.6)).fit(X, filters=F, colors=None)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
+    assert list(M.simplex_tree_.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
 
-    M = NerveComplex(input_type="point cloud", color=None, mask=0, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]]).fit(X)
+    M = NerveComplex(input_type="point cloud", min_points_per_node=0).fit(X, assignments=[[0],[0,1],[1],[1,2],[2],[1,3],[2,4],[3],[3,4],[4,5],[5],[5]], color=None)
 
-    assert list(M.simplex_tree.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
+    assert list(M.simplex_tree_.get_filtration()) == [([0], 0.), ([1], 0.), ([0, 1], 0.), ([2], 0.), ([1, 2], 0.), ([3], 0.), ([1, 3], 0.), ([4], 0.), ([2, 4], 0.), ([3, 4], 0.), ([5], 0.), ([4, 5], 0.)]
