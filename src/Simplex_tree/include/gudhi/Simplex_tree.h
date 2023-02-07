@@ -1762,7 +1762,8 @@ class Simplex_tree {
 #endif  // DEBUG_TRACES
     for (auto& map_el : sib->members()) {
       Gudhi::simplex_tree::serialize_trivial(map_el.first, buffer); // Vertex
-      Gudhi::simplex_tree::serialize_trivial(map_el.second.filtration(), buffer); // Filtration
+      if (Options::store_filtration)
+        Gudhi::simplex_tree::serialize_trivial(map_el.second.filtration(), buffer); // Filtration
 #ifdef DEBUG_TRACES
       std::clog << " [ " << map_el.first << " | " << map_el.second.filtration() << " ] ";
 #endif  // DEBUG_TRACES
@@ -1806,7 +1807,8 @@ class Simplex_tree {
       Filtration_value filtration{};
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
         opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, vertex);
-        opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, filtration);
+        if (Options::store_filtration)
+          opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, filtration);
         // Default is no children
         sib->members_.emplace(vertex, Node(sib, filtration));
       }

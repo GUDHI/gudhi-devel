@@ -13,6 +13,7 @@
 #include <random>
 #include <iterator>  // for std::distance
 #include <vector>
+#include <cstdint>  // for std::uint8_t
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_serialization"
@@ -26,7 +27,18 @@
 using namespace Gudhi;
 using namespace Gudhi::simplex_tree;
 
-typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>> list_of_tested_variants;
+struct Low_options : Gudhi::Simplex_tree_options_full_featured {
+  // Implicitly use 0 as filtration value for all simplices
+  static const bool store_filtration = false;
+  // The persistence algorithm needs this
+  static const bool store_key = true;
+  // I have few vertices
+  typedef std::uint8_t Vertex_handle;
+  // Maximum number of simplices to compute persistence is 2^8 - 1 = 255. One is reserved for null_key
+  typedef std::uint8_t Simplex_key;
+};
+
+typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>, Simplex_tree<Low_options>> list_of_tested_variants;
 
 template<class Filtration_type>
 Filtration_type random_filtration(Filtration_type lower_bound = 0, Filtration_type upper_bound = 1) {
@@ -54,15 +66,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   serialize_trivial(static_cast<Vertex_type>(3)   , buffer);
   serialize_trivial(static_cast<Vertex_type>(0)   , buffer);
-  serialize_trivial(st.filtration(st.find({0}))   , buffer);
+  if (Stree::Options::store_filtration)
+    serialize_trivial(st.filtration(st.find({0}))   , buffer);
   serialize_trivial(static_cast<Vertex_type>(1)   , buffer);
-  serialize_trivial(st.filtration(st.find({1}))   , buffer);
+  if (Stree::Options::store_filtration)
+    serialize_trivial(st.filtration(st.find({1}))   , buffer);
   serialize_trivial(static_cast<Vertex_type>(2)   , buffer);
-  serialize_trivial(st.filtration(st.find({2}))   , buffer);
+  if (Stree::Options::store_filtration)
+    serialize_trivial(st.filtration(st.find({2}))   , buffer);
   // 1 simplex (2) from {0, 2} and its filtration values
   serialize_trivial(static_cast<Vertex_type>(1)   , buffer);
   serialize_trivial(static_cast<Vertex_type>(2)   , buffer);
-  serialize_trivial(st.filtration(st.find({0, 2})), buffer);
+  if (Stree::Options::store_filtration)
+    serialize_trivial(st.filtration(st.find({0, 2})), buffer);
   serialize_trivial(static_cast<Vertex_type>(0)   , buffer);  // (0, 2) end of leaf
   serialize_trivial(static_cast<Vertex_type>(0)   , buffer);  // (1) end of leaf
   serialize_trivial(static_cast<Vertex_type>(0)   , buffer);  // (2) end of leaf
@@ -70,7 +86,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   std::clog << "Serialization size in bytes = " << buffer.size() << std::endl;
   // Sizes are expressed in bytes
   const std::size_t vertex_size = sizeof(Vertex_type);
-  const std::size_t filtration_size = sizeof(Filtration_type);
+  const std::size_t filtration_size = Stree::Options::store_filtration ? sizeof(Filtration_type) : 0;
   const std::size_t serialization_size = vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
   BOOST_CHECK(serialization_size == buffer.size());
 
@@ -83,23 +99,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(vertex == 3);
   position_ptr = deserialize_trivial(position_ptr, vertex);
   BOOST_CHECK(vertex == 0);
-  position_ptr = deserialize_trivial(position_ptr, filtration);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0})));
+  if (Stree::Options::store_filtration) {
+    position_ptr = deserialize_trivial(position_ptr, filtration);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0})));
+  }
   position_ptr = deserialize_trivial(position_ptr, vertex);
   BOOST_CHECK(vertex == 1);
-  position_ptr = deserialize_trivial(position_ptr, filtration);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({1})));
+  if (Stree::Options::store_filtration) {
+    position_ptr = deserialize_trivial(position_ptr, filtration);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({1})));
+  }
   position_ptr = deserialize_trivial(position_ptr, vertex);
   BOOST_CHECK(vertex == 2);
-  position_ptr = deserialize_trivial(position_ptr, filtration);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({2})));
+  if (Stree::Options::store_filtration) {
+    position_ptr = deserialize_trivial(position_ptr, filtration);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({2})));
+  }
   // 1 simplex (2) from {0, 2} and its filtration values
   position_ptr = deserialize_trivial(position_ptr, vertex);
   BOOST_CHECK(vertex == 1);
   position_ptr = deserialize_trivial(position_ptr, vertex);
   BOOST_CHECK(vertex == 2);
-  position_ptr = deserialize_trivial(position_ptr, filtration);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0, 2})));
+  if (Stree::Options::store_filtration) {
+    position_ptr = deserialize_trivial(position_ptr, filtration);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0, 2})));
+  }
   position_ptr = deserialize_trivial(position_ptr, vertex);  // (0, 2) end of leaf
   BOOST_CHECK(vertex == 0);
   position_ptr = deserialize_trivial(position_ptr, vertex);  // (1) end of leaf
