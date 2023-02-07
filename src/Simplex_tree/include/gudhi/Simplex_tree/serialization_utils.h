@@ -29,10 +29,9 @@ namespace simplex_tree {
  */
 template<class ArgumentType>
 void serialize(ArgumentType value, std::vector<char>& buffer) {
-  const std::size_t arg_size = sizeof(ArgumentType);
-  char serial[arg_size];
-  memcpy(&serial, &value, arg_size);
-  buffer.insert(std::end(buffer), std::begin(serial), std::end(serial));
+  buffer.insert(std::end(buffer),
+                reinterpret_cast<const char*>(&value),
+                reinterpret_cast<const char*>(&value + 1));
 }
 
 /** \brief Deserialize at the start position in an array of char and sets the value with it.
