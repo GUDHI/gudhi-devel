@@ -1756,13 +1756,13 @@ class Simplex_tree {
  private:
   /** \brief Serialize each element of the sibling and recursively call serialization. */
   void rec_serialize(Siblings *sib, std::vector<char>& buffer) {
-    Gudhi::simplex_tree::serialize(static_cast<Vertex_handle>(sib->members().size()), buffer);
+    Gudhi::simplex_tree::serialize_trivial(static_cast<Vertex_handle>(sib->members().size()), buffer);
 #ifdef DEBUG_TRACES
     std::clog << "\n" << sib->members().size() << " : ";
 #endif  // DEBUG_TRACES
     for (auto& map_el : sib->members()) {
-      Gudhi::simplex_tree::serialize(map_el.first, buffer); // Vertex
-      Gudhi::simplex_tree::serialize(map_el.second.filtration(), buffer); // Filtration
+      Gudhi::simplex_tree::serialize_trivial(map_el.first, buffer); // Vertex
+      Gudhi::simplex_tree::serialize_trivial(map_el.second.filtration(), buffer); // Filtration
 #ifdef DEBUG_TRACES
       std::clog << " [ " << map_el.first << " | " << map_el.second.filtration() << " ] ";
 #endif  // DEBUG_TRACES
@@ -1771,7 +1771,7 @@ class Simplex_tree {
       if (has_children(&map_el)) {
         rec_serialize(map_el.second.children(), buffer);
       } else {
-        Gudhi::simplex_tree::serialize(static_cast<Vertex_handle>(0), buffer);
+        Gudhi::simplex_tree::serialize_trivial(static_cast<Vertex_handle>(0), buffer);
 #ifdef DEBUG_TRACES
         std::cout << "\n0 : ";
 #endif  // DEBUG_TRACES
@@ -1785,7 +1785,8 @@ class Simplex_tree {
     Simplex_tree* stree = new Simplex_tree();
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size{};
-    std::vector<char>::const_iterator opositional_itr = Gudhi::simplex_tree::deserialize(std::cbegin(buffer), members_size);
+    std::vector<char>::const_iterator opositional_itr = Gudhi::simplex_tree::deserialize_trivial(std::cbegin(buffer),
+                                                                                                 members_size);
     opositional_itr = stree->rec_deserialize(&(stree->root_), members_size, opositional_itr, 0);
     GUDHI_CHECK(opositional_itr == std::cend(buffer), std::out_of_range("Deserialization do not match end of buffer"));
     return stree;
@@ -1804,14 +1805,14 @@ class Simplex_tree {
       Vertex_handle vertex{};
       Filtration_value filtration{};
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
-        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, vertex);
-        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, filtration);
+        opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, vertex);
+        opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, filtration);
         // Default is no children
         sib->members_.emplace(vertex, Node(sib, filtration));
       }
       Vertex_handle child_size{};
       for (auto& map_el : sib->members()) {
-        opositional_itr = Gudhi::simplex_tree::deserialize(opositional_itr, child_size);
+        opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, child_size);
         if (child_size > 0) {
           Siblings* child = new Siblings(sib, map_el.first);
           map_el.second.assign_children(child);

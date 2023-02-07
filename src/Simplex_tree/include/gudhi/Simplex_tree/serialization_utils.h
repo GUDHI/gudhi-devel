@@ -28,7 +28,7 @@ namespace simplex_tree {
 /** \brief Serialize the given value and insert it at the end of the buffer.
  */
 template<class ArgumentType>
-void serialize(ArgumentType value, std::vector<char>& buffer) {
+void serialize_trivial(ArgumentType value, std::vector<char>& buffer) {
   buffer.insert(std::end(buffer),
                 reinterpret_cast<const char*>(&value),
                 reinterpret_cast<const char*>(&value + 1));
@@ -41,7 +41,7 @@ void serialize(ArgumentType value, std::vector<char>& buffer) {
  * @warning It is the user resposibility to ensure that the array of char is wide enough.
  */
 template<class ArgumentType>
-std::vector<char>::const_iterator deserialize(std::vector<char>::const_iterator start, ArgumentType& value) {
+std::vector<char>::const_iterator deserialize_trivial(std::vector<char>::const_iterator start, ArgumentType& value) {
   std::size_t arg_size = sizeof(ArgumentType);
   // TODO: Not really nice, but I didn't manage to do it with std::copy.
   memcpy(&value, &*start, arg_size);
