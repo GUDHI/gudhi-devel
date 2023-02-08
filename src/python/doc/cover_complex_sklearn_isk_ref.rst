@@ -52,7 +52,7 @@ Documentation for MapperComplex
 .. autoclass:: gudhi.sklearn.MapperComplex
    :members:
    :special-members: __init__
-   :show-inheritance:
+   :inherited-members:
 
 Documentation for GraphInducedComplex
 -------------------------------------
@@ -60,7 +60,7 @@ Documentation for GraphInducedComplex
 .. autoclass:: gudhi.sklearn.GraphInducedComplex
    :members:
    :special-members: __init__
-   :show-inheritance:
+   :inherited-members:
 
 Documentation for NerveComplex
 ------------------------------
@@ -68,4 +68,4 @@ Documentation for NerveComplex
 .. autoclass:: gudhi.sklearn.NerveComplex
    :members:
    :special-members: __init__
-   :show-inheritance:
+   :inherited-members:

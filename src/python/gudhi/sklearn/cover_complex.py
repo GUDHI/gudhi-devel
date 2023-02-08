@@ -157,18 +157,6 @@ class MapperComplex(CoverComplexPy):
         """
 
         self.filter_bnds, self.resolutions, self.gains, self.clustering = filter_bnds, resolutions, gains, clustering
-
-        if self.resolutions is not None:
-            self.resolutions = np.array(self.resolutions)
-            if len(self.resolutions.shape) == 0:
-                self.resolutions = np.broadcast_to(self.resolutions, 1)
-        if self.gains is not None:
-            self.gains = np.array(self.gains)
-            if len(self.gains.shape) == 0:
-                self.gains = np.broadcast_to(self.gains, 1)
-        if self.filter_bnds is not None:
-            self.filter_bnds = np.array(self.filter_bnds)
-
         self.input_type, self.mask, self.N, self.beta, self.C = input_type, min_points_per_node, N, beta, C
         CoverComplexPy.__init__(self, verbose)
 
@@ -236,6 +224,17 @@ class MapperComplex(CoverComplexPy):
             filters (list of lists or numpy array of shape (num_points) x (num_filters)): filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points.
             colors (list of lists or numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
         """
+
+        if self.resolutions is not None:
+            self.resolutions = np.array(self.resolutions)
+            if len(self.resolutions.shape) == 0:
+                self.resolutions = np.broadcast_to(self.resolutions, 1)
+        if self.gains is not None:
+            self.gains = np.array(self.gains)
+            if len(self.gains.shape) == 0:
+                self.gains = np.broadcast_to(self.gains, 1)
+        if self.filter_bnds is not None:
+            self.filter_bnds = np.array(self.filter_bnds)
 
         self.filters, self.colors = filters, colors
 
