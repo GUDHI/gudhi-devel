@@ -226,15 +226,15 @@ class MapperComplex(CoverComplexPy):
 
         return delta, np.array(res)
 
-    def fit(self, X, filters=None, colors=None, y=None):
+    def fit(self, X, y=None, filters=None, colors=None):
         """
         Fit the MapperComplex class on a point cloud or a distance matrix: compute the Mapper complex and store it in a simplex tree called simplex_tree_.
 
         Parameters:
             X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
+            y (n x 1 array): point labels (unused).
             filters (numpy array of shape (num_points) x (num_filters)): filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points.
             colors (numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
-            y (n x 1 array): point labels (unused).
         """
 
         self.filters, self.colors = filters, colors
@@ -420,15 +420,15 @@ class GraphInducedComplex(CoverComplexPy):
         self.graph, self.rips_threshold, self.N, self.beta, self.C = graph, rips_threshold, N, beta, C
         CoverComplexPy.__init__(self, verbose)
 
-    def fit(self, X, filter=None, color=None, y=None):
+    def fit(self, X, y=None, filter=None, color=None):
         """
         Fit the GraphInducedComplex class on a point cloud or a distance matrix: compute the graph induced complex and store it in a simplex tree called simplex_tree_.
 
         Parameters:
             X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
+            y (n x 1 array): point labels (unused).
             filter (numpy array of shape (num_points)): filter function (sometimes called lens) used to compute the cover. Used only if cover = "functional".
             color (numpy array of shape (num_points)): function used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of this function on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
-            y (n x 1 array): point labels (unused).
         """
         self.data, self.filter, self.color = X, filter, color
         self.complex = CoverComplex()
@@ -534,15 +534,15 @@ class NerveComplex(CoverComplexPy):
         self.input_type, self.mask = input_type, min_points_per_node
         CoverComplexPy.__init__(self, verbose)
 
-    def fit(self, X, assignments=None, color=None, y=None):
+    def fit(self, X, y=None, assignments=None, color=None):
         """
         Fit the NerveComplex class on a point cloud or a distance matrix: compute the nerve complex and store it in a simplex tree called simplex_tree_.
 
         Parameters:
             X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
+            y (n x 1 array): point labels (unused).
             assignments (list of length (num_points) of lists of integers): cover assignment for each point.
             color (numpy array of shape (num_points) x (num_colors)): functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
-            y (n x 1 array): point labels (unused).
         """
         self.data, self.color = X, color
         self.assignments = assignments
