@@ -1818,7 +1818,7 @@ class Simplex_tree {
         if (Options::store_filtration)
           opositional_itr = Gudhi::simplex_tree::deserialize_trivial(opositional_itr, filtration);
         // Default is no children
-        sib->members_.emplace(vertex, Node(sib, filtration));
+        sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib, filtration));
       }
       Vertex_handle child_size{};
       for (auto& map_el : sib->members()) {
