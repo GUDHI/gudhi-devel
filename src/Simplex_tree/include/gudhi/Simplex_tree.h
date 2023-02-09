@@ -1746,7 +1746,11 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Serialize the Simplex tree - Flatten it in a vector of char */
+  /** \brief Serialize the Simplex tree - Flatten it in a vector of char
+   * 
+   * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
+   * SimplexTreeOptions and on a computer with the same architecture.
+   */
   std::vector<char> serialize() {
     std::vector<char> buffer{};
     rec_serialize(&root_, buffer);
@@ -1781,7 +1785,11 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Deserialize the vector of char (flatten version of the tree) to create and return a Simplex tree */
+  /** \brief Deserialize the vector of char (flatten version of the tree) to create and return a Simplex tree
+   * 
+   * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
+   * SimplexTreeOptions and on a computer with the same architecture.
+   */
   static Simplex_tree* deserialize(std::vector<char>& buffer) {
     Simplex_tree* stree = new Simplex_tree();
     // Needs to read size before recursivity to manage new siblings for children
