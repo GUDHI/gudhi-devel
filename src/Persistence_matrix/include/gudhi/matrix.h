@@ -15,6 +15,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <assert.h>
 
 #include <boost/intrusive/list.hpp>
 
@@ -103,7 +104,7 @@ public:
 	using Field_type = typename Options::field_coeff_type;
 
 	using Non_intrusive_cell_type = typename std::conditional<
-								Field_type::get_characteristic() == 2,
+								Options::is_z2,
 								typename std::conditional<
 									Options::has_row_access,
 									typename std::conditional<
@@ -125,7 +126,7 @@ public:
 							>::type;
 
 	using Intrusive_list_cell_type = typename std::conditional<
-								Field_type::get_characteristic() == 2,
+								Options::is_z2,
 								typename std::conditional<
 									Options::has_row_access,
 									typename std::conditional<
@@ -147,7 +148,7 @@ public:
 							>::type;
 
 	using Intrusive_set_cell_type = typename std::conditional<
-								Field_type::get_characteristic() == 2,
+								Options::is_z2,
 								typename std::conditional<
 									Options::has_row_access,
 									typename std::conditional<
@@ -249,18 +250,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_list_boundary_column<Cell_type, Row_access_option>,
 													List_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_list_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													List_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_list_column<Cell_type, Row_access_option>,
 												List_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -271,18 +272,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_vector_boundary_column<Cell_type, Row_access_option>,
 													Vector_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_vector_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													Vector_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_vector_column<Cell_type, Row_access_option>,
 												Vector_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -293,18 +294,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_set_boundary_column<Cell_type, Row_access_option>,
 													Set_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_set_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													Set_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_set_column<Cell_type, Row_access_option>,
 												Set_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -315,18 +316,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_unordered_set_boundary_column<Cell_type, Row_access_option>,
 													Unordered_set_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_unordered_set_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													Unordered_set_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_unordered_set_column<Cell_type, Row_access_option>,
 												Unordered_set_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -337,18 +338,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_intrusive_list_boundary_column<Cell_type, Row_access_option>,
 													Intrusive_list_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_intrusive_list_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													Intrusive_list_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_intrusive_list_column<Cell_type, Row_access_option>,
 												Intrusive_list_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -359,18 +360,18 @@ public:
 											typename std::conditional<
 												Options::is_of_boundary_type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_intrusive_set_boundary_column<Cell_type, Row_access_option>,
 													Intrusive_set_boundary_column<Field_type, Cell_type, Row_access_option>
 												>::type,
 												typename std::conditional<
-													Field_type::get_characteristic() == 2,
+													Options::is_z2,
 													Z2_intrusive_set_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
 													Intrusive_set_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
 												>::type
 											>::type,
 											typename std::conditional<
-												Field_type::get_characteristic() == 2,
+												Options::is_z2,
 												Z2_intrusive_set_column<Cell_type, Row_access_option>,
 												Intrusive_set_column<Field_type, Cell_type, Row_access_option>
 											>::type
@@ -420,7 +421,7 @@ public:
 										>::type;
 
 	using boundary_type = typename std::conditional<
-									Field_type::get_characteristic() == 2,
+									Options::is_z2,
 									std::vector<index>,
 									std::vector<std::pair<index,Field_type> >
 								>::type;
@@ -630,12 +631,12 @@ public:
 	using cycle_type = std::vector<index>;
 
 	using returned_column_type = typename std::conditional<
-									Options::has_column_compression,
+									Options::has_column_compression && !Options::has_row_access,
 									const Column_type,
 									Column_type
 								>::type;
 	using returned_row_type = typename std::conditional<
-									Options::has_column_compression,
+									Options::has_column_compression && !Options::has_row_access,
 									const Row_type,
 									Row_type
 								>::type;
@@ -646,6 +647,8 @@ public:
 	Matrix(const Matrix &matrixToCopy);
 	Matrix(Matrix&& other) noexcept;
 
+	template<class Container_type>
+	void insert_column(const Container_type& column);
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);
 	returned_column_type& get_column(index columnIndex);
@@ -665,7 +668,14 @@ public:
 
 	dimension_type get_column_dimension(index columnIndex) const;
 
+	//targetColumn += sourceColumn
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	//targetColumn += sourceColumn
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	//targetColumn = targetColumn * coefficient + sourceColumn
+	void add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
+	//targetColumn += (coefficient * sourceColumn)
+	void add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -733,6 +743,9 @@ inline Matrix<Options>::Matrix()
 template<class Options>
 inline Matrix<Options>::Matrix(const boundary_matrix &boundaries) : matrix_(boundaries)
 {
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or use another constructor and call coefficient initializer of the chosen field class.");
 	_assert_options();
 }
 
@@ -755,9 +768,24 @@ inline Matrix<Options>::Matrix(Matrix &&other) noexcept : matrix_(std::move(othe
 }
 
 template<class Options>
+template<class Container_type>
+inline void Matrix<Options>::insert_column(const Container_type& column)
+{
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
+	static_assert(!isNonBasic,
+			"'insert_column' not available for the chosen options. The input has to be in the form of a simplex boundary.");
+	matrix_.insert_column(column);
+}
+
+template<class Options>
 template<class Boundary_type>
 inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary)
 {
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
 	matrix_.insert_boundary(boundary);
 }
 
@@ -839,6 +867,28 @@ template<class Options>
 inline void Matrix<Options>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	return matrix_.add_to(sourceColumn, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+
+	return matrix_.add_to(sourceColumn, coefficient, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+
+	return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
 }
 
 template<class Options>
@@ -972,9 +1022,9 @@ inline constexpr void Matrix<Options>::_assert_options()
 	static_assert(!Options::has_row_access || (Options::column_type != Column_types::SET && Options::column_type != Column_types::UNORDERED_SET) || !Options::has_intrusive_rows, "Intrusive row access is not compatible with column types storing const elements.");
 	static_assert(!Options::has_vine_update || Options::has_column_pairings, "Vine update requires computation of the barcode (column pairing).");
 	static_assert(!Options::can_retrieve_representative_cycles || Options::has_column_pairings, "Representative cycles requires computation of the barcode (column pairing).");
-	static_assert(!Options::has_vine_update || Field_type::get_characteristic() == 2, "Vine update currently works only for Z_2 coefficients.");
+	static_assert(!Options::has_vine_update || Options::is_z2, "Vine update currently works only for Z_2 coefficients.");
 	static_assert(Options::column_type != Column_types::HEAP || !Options::has_row_access, "Row access is not possible for heap columns.");
-	static_assert(Options::column_type != Column_types::HEAP || Field_type::get_characteristic() == 2, "Heap column works only for Z_2 coefficients.");
+	static_assert(Options::column_type != Column_types::HEAP || Options::is_z2, "Heap column works only for Z_2 coefficients.");
 	static_assert(Options::column_type != Column_types::HEAP || Options::is_of_boundary_type, "Heap column works only for boundary matrices.");
 	static_assert(Options::column_type != Column_types::HEAP || !Options::has_column_compression, "Column compression not compatible with heap columns.");
 

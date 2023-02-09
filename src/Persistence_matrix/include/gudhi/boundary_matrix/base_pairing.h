@@ -93,7 +93,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
 				int pivot = curr.get_pivot();
 
 				while (pivot != -1 && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
-					if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+					if constexpr (Master_matrix::Option_list::is_z2){
 						curr += matrix.at(pivotsToColumn.at(pivot));
 					} else {
 						column_type &toadd = matrix.at(pivotsToColumn.at(pivot));

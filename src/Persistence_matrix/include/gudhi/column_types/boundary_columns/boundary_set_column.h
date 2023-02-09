@@ -149,11 +149,7 @@ inline Field_element_type Set_boundary_column<Field_element_type,Cell_type,Row_a
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	if constexpr (Row_access_option::isActive_){
-		for (const Cell& cell : Base::column_)
-			Row_access_option::unlink(cell);
-	}
-	Base::column_.clear();
+	Base::_clear();
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

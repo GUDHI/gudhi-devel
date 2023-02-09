@@ -26,6 +26,7 @@ class Chain_matrix_with_row_access_with_removals
 		  public Master_matrix::Chain_representative_cycles_option
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 	using Cell = typename Master_matrix::Cell_type;
@@ -54,6 +55,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -99,14 +103,13 @@ private:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-	using Field_element_type = typename Master_matrix::Field_type;
 	using cell_rep_type = typename std::conditional<
-								Field_element_type::get_characteristic() == 2,
+								Master_matrix::Option_list::is_z2,
 								index,
 								std::pair<index,Field_element_type>
 							>::type;
 	using tmp_column_type = typename std::conditional<
-								Field_element_type::get_characteristic() == 2,
+								Master_matrix::Option_list::is_z2,
 								std::set<index>,
 								std::set<std::pair<index,Field_element_type>,
 										 CellPairComparator<Field_element_type> >
@@ -353,17 +356,35 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(
 }
 
 template<class Master_matrix>
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex) += sourceColumn;
+}
+
+template<class Master_matrix>
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+}
+
+template<class Master_matrix>
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+}
+
+template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::zero_cell(
 		index columnIndex, index rowIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::zero_column(index columnIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'zero_column' is not implemented for the chosen options.");
 }
 
@@ -451,7 +472,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 	int dim = boundary.empty() ? 0 : boundary.size() - 1;
 
 	auto get_last = [&column](){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2)
+		if constexpr (Master_matrix::Option_list::is_z2)
 			return *(column.rbegin());
 		else
 			return column.rbegin()->first;
@@ -459,7 +480,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 
 	if (boundary.empty())
 	{
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2)
+		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(nextInsertIndex_);
 		else
 			column.emplace(nextInsertIndex_, 1);
@@ -500,7 +521,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 
 	index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
 
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2)
+	if constexpr (Master_matrix::Option_list::is_z2)
 		_update_largest_death_in_F(currentEssentialCycleIndices, chain_fp);
 	else
 		_update_largest_death_in_F(chainsInF, chain_fp);
@@ -519,7 +540,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 		index currentPivot)
 {
 	Column_type& col = matrix_.at(currentPivot);
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		_add_to(col, column);	//Reduce with the column col_g
 		chainsInH.push_back(col.get_paired_chain_index());//keep the col_h with which col_g is paired
 	} else {
@@ -541,7 +562,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 		std::vector<index>& currentEssentialCycleIndices)
 {
 	Column_type& col = matrix_.at(currentPivot);
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		_add_to(col, column);	//Reduce with the column col_g
 		currentEssentialCycleIndices.push_back(currentPivot);
 	} else {
@@ -562,7 +583,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_build_fr
 		tmp_column_type& column,
 		std::vector<cell_rep_type>& chainsInH)
 {
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		column.insert(nextInsertIndex_);
 		for (index idx_h : chainsInH) {
 			_add_to(matrix_.at(idx_h), column);
@@ -580,7 +601,7 @@ template<class Chain_type>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_update_largest_death_in_F(
 		Chain_type& chainsInF, index toUpdate)
 {
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		for (std::vector<index>::iterator other_col_it = chainsInF.begin() + 1;
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
@@ -593,10 +614,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_update_l
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
 		{
-			Field_element_type coef = other_col_it->second;
-			matrix_.at(other_col_it->first) *= coef;
-			add_to(other_col_it->first, toUpdate);
-			matrix_.at(other_col_it->first) *= coef.get_inverse();
+			add_to(other_col_it->second, matrix_.at(other_col_it->first), toUpdate);
 		}
 	}
 }
@@ -605,7 +623,7 @@ template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension)
 {
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
 		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
@@ -625,7 +643,7 @@ template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension, index pair)
 {
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
 		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
@@ -649,7 +667,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(
 		tmp_column_type &set,
 		[[maybe_unused]] unsigned int coef)
 {
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+	if constexpr (Master_matrix::Option_list::is_z2){
 		std::pair<std::set<index>::iterator,bool> res_insert;
 		for (const Cell &cell : column) {
 			res_insert = set.insert(cell.get_row_index());
@@ -666,7 +684,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_add_to(
 				p.second *= coef;
 				p.second += res_it->second;
 				set.erase(res_it);
-				if (p.second != 0){
+				if (p.second != Field_element_type::get_additive_identity()){
 					set.insert(p);
 				}
 			} else {

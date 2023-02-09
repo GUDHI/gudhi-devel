@@ -24,6 +24,7 @@ class RU_matrix_with_row_access
 		  public Master_matrix::RU_representative_cycles_option
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 	using boundary_type = typename Master_matrix::boundary_type;
@@ -50,6 +51,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -180,7 +184,7 @@ inline void RU_matrix_with_row_access<Master_matrix>::insert_boundary(const Boun
 	reducedMatrixR_.insert_boundary(boundary);
 
 	boundary_type id(1);
-	if constexpr (Master_matrix::Field_type::get_characteristic() == 2) {
+	if constexpr (Master_matrix::Option_list::is_z2) {
 		id[0] = nextInsertIndex_;
 	} else {
 		id[0].first = nextInsertIndex_;
@@ -260,16 +264,37 @@ inline void RU_matrix_with_row_access<Master_matrix>::add_to(index sourceColumnI
 }
 
 template<class Master_matrix>
+inline void RU_matrix_with_row_access<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	reducedMatrixR_.add_to(sourceColumn, targetColumnIndex);
+	mirrorMatrixU_.add_to(sourceColumn, targetColumnIndex);
+}
+
+template<class Master_matrix>
+inline void RU_matrix_with_row_access<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	reducedMatrixR_.add_to(sourceColumn, coefficient, targetColumnIndex);
+	mirrorMatrixU_.add_to(sourceColumn, coefficient, targetColumnIndex);
+}
+
+template<class Master_matrix>
+inline void RU_matrix_with_row_access<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	reducedMatrixR_.add_to(coefficient, sourceColumn, targetColumnIndex);
+	mirrorMatrixU_.add_to(coefficient, sourceColumn, targetColumnIndex);
+}
+
+template<class Master_matrix>
 inline void RU_matrix_with_row_access<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void RU_matrix_with_row_access<Master_matrix>::zero_column(index columnIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'zero_column' is not implemented for the chosen options.");
 }
 
@@ -332,7 +357,7 @@ inline void RU_matrix_with_row_access<Master_matrix>::_initialize_U()
 	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id[0].second = 1;
 
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2) id[0] = i;
+		if constexpr (Master_matrix::Option_list::is_z2) id[0] = i;
 		else id[0].first = i;
 		mirrorMatrixU_.insert_boundary(id);
 	}
@@ -352,7 +377,7 @@ inline void RU_matrix_with_row_access<Master_matrix>::_reduce()
 			int pivot = curr.get_pivot();
 
 			while (pivot != -1 && pivotToColumnIndex_[pivot] != -1){
-				if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+				if constexpr (Master_matrix::Option_list::is_z2){
 					curr += reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
 					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 				} else {
@@ -401,7 +426,7 @@ inline void RU_matrix_with_row_access<Master_matrix>::_reduce_last_column()
 	int pivot = curr.get_pivot();
 
 	while (pivot != -1 && pivotToColumnIndex_[pivot] != -1){
-		if constexpr (Master_matrix::Field_type::get_characteristic() == 2){
+		if constexpr (Master_matrix::Option_list::is_z2){
 			curr += reducedMatrixR_.get_column(pivotToColumnIndex_[pivot]);
 			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 		} else {

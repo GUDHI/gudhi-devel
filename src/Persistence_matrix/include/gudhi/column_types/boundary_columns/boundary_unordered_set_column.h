@@ -71,6 +71,11 @@ public:
 		return column;
 	}
 
+	//this = v * this + column
+	Unordered_set_boundary_column& multiply_and_add(const Field_element_type& v, const Unordered_set_boundary_column& column);
+	//this = this + column * v
+	Unordered_set_boundary_column& multiply_and_add(const Unordered_set_boundary_column& column, const Field_element_type& v);
+
 	Unordered_set_boundary_column& operator=(Unordered_set_boundary_column other);
 
 	friend void swap(Unordered_set_boundary_column& col1,
@@ -84,8 +89,6 @@ public:
 private:
 	bool pivotChanged_;
 	Cell pivot_;
-
-	void _insert_cell(const Field_element_type& value, index rowIndex, Column_type& column);
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -200,11 +203,7 @@ inline Field_element_type Unordered_set_boundary_column<Field_element_type,Cell_
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	if constexpr (Row_access_option::isActive_){
-		for (const Cell& cell : Base::column_)
-			Row_access_option::unlink(cell);
-	}
-	Base::column_.clear();
+	Base::_clear();
 	pivot_ = Cell();
 	pivotChanged_ = false;
 }
@@ -242,7 +241,8 @@ Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::o
 			Field_element_type coef = c->get_element();
 			coef += v.get_element();
 			Base::_delete_cell(c);
-			if (coef != 0u) Base::_insert_cell(coef, r);
+			if (coef != Field_element_type::get_additive_identity())
+				Base::_insert_cell(coef, r);
 			else if (v == pivot_) pivotChanged_ = true;
 		} else {
 			Base::_insert_cell(v.get_element(), v.get_row_index());
@@ -274,24 +274,64 @@ Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::o
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Unordered_set_boundary_column& column)
+{
+	if (val == 0u) {
+		Base::_clear();
+		for (const Cell& v : column.column_){
+			Base::_insert_cell(v.get_element(), v.get_row_index());
+		}
+		pivot_ = column.pivot_;
+		pivotChanged_ = column.pivotChanged_;
+		return *this;
+	}
+
+	//because the column is unordered, I don't see a way to do both operations in one go...
+	operator*=(val);
+	operator+=(column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Unordered_set_boundary_column& column, const Field_element_type& val)
+{
+	if (val == 0u) {
+		return *this;
+	}
+
+	for (const Cell& cell : column.column_){
+		auto c = Base::column_.find(cell);
+		if (c != Base::column_.end()){
+			index r = c->get_row_index();
+			Field_element_type coef = c->get_element();
+			coef += (cell.get_element() * val);
+			Base::_delete_cell(c);
+			if (coef != Field_element_type::get_additive_identity())
+				Base::_insert_cell(coef, r);
+			else if (cell == pivot_) pivotChanged_ = true;
+		} else {
+			Base::_insert_cell(cell.get_element() * val, cell.get_row_index());
+			if (pivot_ < cell){
+				pivot_ = cell;
+				pivot_.get_element *= val;
+				pivotChanged_ = false;
+			}
+		}
+	}
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
 Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator=(Unordered_set_boundary_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
 	std::swap(pivotChanged_, other.pivotChanged_);
 	std::swap(pivot_, other.pivot_);
 	return *this;
-}
-
-template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::_insert_cell(
-		const Field_element_type &value, index rowIndex, Column_type &column)
-{
-	if constexpr (Row_access_option::isActive_){
-		auto it = column.emplace(value, Row_access_option::columnIndex_, rowIndex);
-		Row_access_option::insert_cell(rowIndex, *it.first);
-	} else {
-		column.emplace(value, rowIndex);
-	}
 }
 
 } //namespace persistence_matrix

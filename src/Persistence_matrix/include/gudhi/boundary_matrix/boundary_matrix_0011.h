@@ -22,6 +22,7 @@ class Boundary_matrix_with_row_access_with_removals
 		  public Master_matrix::Base_pairing_option
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = typename Master_matrix::Row_type;
@@ -48,6 +49,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -87,7 +91,7 @@ private:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using rows_type = typename Master_matrix::row_container_type;
 	using cell_rep_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Master_matrix::Option_list::is_z2,
 								index,
 								std::pair<index,typename Master_matrix::Field_type>
 							>::type;
@@ -316,6 +320,24 @@ inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::add_to
 }
 
 template<class Master_matrix>
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex) += sourceColumn;
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+}
+
+template<class Master_matrix>
 inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::zero_cell(
 		index columnIndex, index rowIndex)
 {
@@ -355,7 +377,7 @@ template<class Master_matrix>
 inline index Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_column_with_pivot(
 		index simplexIndex) const
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
 }
 

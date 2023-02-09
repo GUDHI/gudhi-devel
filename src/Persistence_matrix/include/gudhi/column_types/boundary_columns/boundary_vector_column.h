@@ -73,6 +73,11 @@ public:
 		return column;
 	}
 
+	//this = v * this + column
+	Vector_boundary_column& multiply_and_add(const Field_element_type& v, const Vector_boundary_column& column);
+	//this = this + column * v
+	Vector_boundary_column& multiply_and_add(const Vector_boundary_column& column, const Field_element_type& v);
+
 	Vector_boundary_column& operator=(Vector_boundary_column other);
 
 	friend void swap(Vector_boundary_column& col1, Vector_boundary_column& col2){
@@ -204,10 +209,7 @@ inline Field_element_type Vector_boundary_column<Field_element_type,Cell_type,Ro
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	for (Cell* cell : Base::column_){
-		Base::_delete_cell(cell);
-	}
-	Base::column_.clear();
+	Base::_clear();
 	erasedValues_.clear();
 }
 
@@ -269,6 +271,28 @@ Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& v, const Vector_boundary_column& column)
+{
+	_clean_values();
+	column._clean_values();
+	Base::multiply_and_add(v, column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Vector_boundary_column& column, const Field_element_type& v)
+{
+	_clean_values();
+	column._clean_values();
+	Base::multiply_and_add(column, v);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option> &
 Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator=(Vector_boundary_column other)
 {
 	Base::operator=(static_cast<Base&>(other));
@@ -303,7 +327,7 @@ struct std::hash<Gudhi::persistence_matrix::Vector_boundary_column<Field_element
 		std::size_t seed = 0;
 		unsigned int i = 0;
 		for (Field_element_type& val : column.get_content()){
-			seed ^= std::hash<unsigned int>()(i++ * val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= std::hash<unsigned int>()(i++ * static_cast<unsigned int>(val)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 		return seed;
 	}

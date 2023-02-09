@@ -27,6 +27,7 @@ template<class Master_matrix>
 class Base_matrix_with_column_compression				//swap possible, but needs to be readapted: TODO later
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = void;
@@ -50,6 +51,9 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);	//adds classes and not individual columns
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -146,21 +150,21 @@ template<class Master_matrix>
 inline typename Base_matrix_with_column_compression<Master_matrix>::Row_type
 Base_matrix_with_column_compression<Master_matrix>::get_row(index rowIndex) const
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::erase_column(index columnIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_column' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::erase_row(index rowIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_row' is not implemented for the chosen options.");
 }
 
@@ -179,23 +183,53 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(index sou
 	index targetRep = res->second;
 	matrix_.erase(res);
 	target += get_column(sourceColumnIndex);
-	if (target.is_empty())
-		repToColumn_[targetRep] = nullptr;
-	else
-		_insert_column(target, targetRep);
+	_insert_column(target, targetRep);
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	Column_type target(get_column(targetColumnIndex));
+	auto res = matrix_.find(target);
+	index targetRep = res->second;
+	matrix_.erase(res);
+	target += sourceColumn;
+	_insert_column(target, targetRep);
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	Column_type target(get_column(targetColumnIndex));
+	auto res = matrix_.find(target);
+	index targetRep = res->second;
+	matrix_.erase(res);
+	target.multiply_and_add(coefficient, sourceColumn);
+	_insert_column(target, targetRep);
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	Column_type target(get_column(targetColumnIndex));
+	auto res = matrix_.find(target);
+	index targetRep = res->second;
+	matrix_.erase(res);
+	target.multiply_and_add(sourceColumn, coefficient);
+	_insert_column(target, targetRep);
 }
 
 template<class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::zero_column(index columnIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'zero_column' is not implemented for the chosen options.");
 }
 

@@ -148,11 +148,7 @@ inline Field_element_type List_boundary_column<Field_element_type,Cell_type,Row_
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void List_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	if constexpr (Row_access_option::isActive_){
-		for (Cell& cell : Base::column_)
-			Row_access_option::unlink(&cell);
-	}
-	Base::column_.clear();
+	Base::_clear();
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

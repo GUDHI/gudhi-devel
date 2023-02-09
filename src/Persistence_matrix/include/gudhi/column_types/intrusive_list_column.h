@@ -85,6 +85,11 @@ public:
 		return column;
 	}
 
+	//this = v * this + column
+	Intrusive_list_column& multiply_and_add(const Field_element_type& v, const Intrusive_list_column& column);
+	//this = this + column * v
+	Intrusive_list_column& multiply_and_add(const Intrusive_list_column& column, const Field_element_type& v);
+
 	friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2){
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
@@ -125,20 +130,31 @@ protected:
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator& position);
+	void _clear();
 
 private:
 	//Cloner object function for boost intrusive container
 	struct new_cloner
 	{
-	   Cell *operator()(const Cell &clone_this)
-	   {  return new Cell(clone_this);  }
+		Cell *operator()(const Cell &clone_this)
+		{  return new Cell(clone_this);  }
 	};
 
 	//The disposer object function for boost intrusive container
 	struct delete_disposer
 	{
-	   void operator()(Cell *delete_this)
-	   {  delete delete_this;  }
+		delete_disposer(){};
+		delete_disposer(Intrusive_list_column* col) : col_(col)
+		{};
+
+		void operator()(Cell *delete_this)
+		{
+			if constexpr (Row_access_option::isActive_)
+				col_->unlink(delete_this);
+			delete delete_this;
+		}
+
+		Intrusive_list_column* col_;
 	};
 };
 
@@ -146,7 +162,7 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::Intrusive_list_column()
 	: dim_(0)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -155,9 +171,9 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 		const Container_type &nonZeroRowIndices)
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first, column_.end());
 	}
 }
@@ -168,9 +184,9 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 		const Container_type &nonZeroRowIndices, dimension_type dimension)
 	: dim_(dimension)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first, column_.end());
 	}
 }
@@ -188,7 +204,7 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 		index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first, column_.end());
 	}
 }
@@ -199,7 +215,7 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 		index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(dimension)
 {
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first, column_.end());
 	}
 }
@@ -369,7 +385,7 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator+
 			++itSource;
 		} else {
 			itTarget->get_element() += itSource->get_element();
-			if (itTarget->get_element() == 0u){
+			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
 				_delete_cell(itTarget);
 			} else {
 				if constexpr (Row_access_option::isActive_)
@@ -392,20 +408,107 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
 Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
-	v %= Field_element_type::get_characteristic();
+//	v %= Field_element_type::get_characteristic();		//don't work because of multifields...
+	Field_element_type val(v);
 
-	if (v == 0) {
-		auto it = column_.begin();
-		while (it != column_.end()){
-			_delete_cell(it);
-		}
+	if (val == 0u) {
+		_clear();
 		return *this;
 	}
 
+	if (val == 1u) return *this;
+
 	for (Cell& cell : column_){
-		cell.get_element() *= v;
+		cell.get_element() *= val;
 		if constexpr (Row_access_option::isActive_)
 				Row_access_option::update_cell(cell);
+	}
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Intrusive_list_column& column)
+{
+	if (val == 0u) {
+		_clear();
+	}
+
+	const Column_type& sc = column.column_;
+
+	auto itTarget = column_.begin();
+	auto itSource = sc.begin();
+	while (itTarget != column_.end() && itSource != sc.end())
+	{
+		if (itTarget->get_row_index() < itSource->get_row_index()) {
+			itTarget->get_element() *= val;
+			++itTarget;
+		} else if (itTarget->get_row_index() > itSource->get_row_index()) {
+			_insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
+			++itSource;
+		} else {
+			itTarget->get_element() *= val;
+			itTarget->get_element() += itSource->get_element();
+			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
+				_delete_cell(itTarget);
+			} else {
+				if constexpr (Row_access_option::isActive_)
+						Row_access_option::update_cell(*itTarget);
+				++itTarget;
+			}
+			++itSource;
+		}
+	}
+
+	while (itTarget != column_.end()){
+		itTarget->get_element() *= val;
+		itTarget++;
+	}
+
+	while (itSource != sc.end()) {
+		_insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
+		++itSource;
+	}
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Intrusive_list_column& column, const Field_element_type& val)
+{
+	if (val == 0u) {
+		return *this;
+	}
+
+	const Column_type& sc = column.column_;
+
+	auto itTarget = column_.begin();
+	auto itSource = sc.begin();
+	while (itTarget != column_.end() && itSource != sc.end())
+	{
+		if (itTarget->get_row_index() < itSource->get_row_index()) {
+			++itTarget;
+		} else if (itTarget->get_row_index() > itSource->get_row_index()) {
+			_insert_cell(itSource->get_element() * val, itSource->get_row_index(), itTarget);
+			++itSource;
+		} else {
+			itTarget->get_element() += (itSource->get_element() * val);
+			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
+				_delete_cell(itTarget);
+			} else {
+				if constexpr (Row_access_option::isActive_)
+						Row_access_option::update_cell(*itTarget);
+				++itTarget;
+			}
+			++itSource;
+		}
+	}
+
+	while (itSource != sc.end()) {
+		_insert_cell(itSource->get_element() * val, itSource->get_row_index(), column_.end());
+		++itSource;
 	}
 
 	return *this;
@@ -425,13 +528,14 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator=
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::_delete_cell(iterator &it)
 {
-	iterator tmp_it = it;
-	++it;
-	Cell* tmp_ptr = &(*tmp_it);
-	if constexpr (Row_access_option::isActive_)
-		Row_access_option::unlink(tmp_ptr);
-	column_.erase(tmp_it);
-	delete tmp_ptr;
+//	iterator tmp_it = it;
+//	++it;
+//	Cell* tmp_ptr = &(*tmp_it);
+//	if constexpr (Row_access_option::isActive_)
+//		Row_access_option::unlink(tmp_ptr);
+//	column_.erase(tmp_it);
+//	delete tmp_ptr;
+	it = column_.erase_and_dispose(it, delete_disposer(this));
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -448,6 +552,12 @@ inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option
 	}
 }
 
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+{
+	column_.clear_and_dispose(delete_disposer(this));
+}
+
 } //namespace persistence_matrix
 } //namespace Gudhi
 
@@ -458,7 +568,7 @@ struct std::hash<Gudhi::persistence_matrix::Intrusive_list_column<Field_element_
 	{
 		std::size_t seed = 0;
 		for (auto& cell : column){
-			seed ^= std::hash<unsigned int>()(cell.get_row_index() * cell.get_element()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 		return seed;
 	}

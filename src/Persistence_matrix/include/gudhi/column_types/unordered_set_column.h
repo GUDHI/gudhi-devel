@@ -77,6 +77,11 @@ public:
 		return column;
 	}
 
+	//this = v * this + column
+	Unordered_set_column& multiply_and_add(const Field_element_type& v, const Unordered_set_column& column);
+	//this = this + column * v
+	Unordered_set_column& multiply_and_add(const Unordered_set_column& column, const Field_element_type& v);
+
 	friend bool operator==(const Unordered_set_column& c1, const Unordered_set_column& c2){
 		if (c1.column_.size() != c2.column_.size()) return false;
 		auto it1 = c1.column_.begin();
@@ -116,13 +121,14 @@ protected:
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex);
+	void _clear();
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_column()
 	: dim_(0)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -131,9 +137,9 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Uno
 	: dim_(rows.size() == 0 ? 0 : rows.size() - 1),
 	  column_(rows.size())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
-	for (const std::pair<index,Field_element_type>& p : rows){
+	for (const auto& p : rows){
 		_insert_cell(p.second, p.first);
 	}
 }
@@ -144,9 +150,9 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Uno
 	: dim_(dimension),
 	  column_(rows.size())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
-	for (const std::pair<index,Field_element_type>& p : rows){
+	for (const auto& p : rows){
 		_insert_cell(p.second, p.first);
 	}
 }
@@ -164,7 +170,7 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Uno
 		index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first);
 	}
 }
@@ -175,7 +181,7 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Uno
 		index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
 	: Row_access_option(columnIndex, rowContainer), dim_(dimension)
 {
-	for (const std::pair<index,Field_element_type>& p : nonZeroRowIndices){
+	for (const auto& p : nonZeroRowIndices){
 		_insert_cell(p.second, p.first);
 	}
 }
@@ -314,7 +320,8 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Uno
 			Field_element_type coef = c->get_element();
 			coef += v.get_element();
 			_delete_cell(c);
-			if (coef != 0u) _insert_cell(coef, r);
+			if (coef != Field_element_type::get_additive_identity())
+				_insert_cell(coef, r);
 		} else
 			_insert_cell(v.get_element(), v.get_row_index());
 	}
@@ -325,14 +332,17 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Uno
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
-	v %= Field_element_type::get_characteristic();
+//	v %= Field_element_type::get_characteristic();
+	Field_element_type val(v);
+
+	if (val == Field_element_type::get_multiplicative_identity()) return *this;
 
 	if constexpr (Row_access_option::isActive_){
 		for (const Cell& cell : column_)
 			Row_access_option::unlink(cell);
 	}
 
-	if (v == 0) {
+	if (val == 0u) {
 		column_.clear();
 		return *this;
 	}
@@ -341,7 +351,7 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Uno
 
 	for (const Cell& cell : column_){
 		Cell newCell(cell);
-		newCell.get_element() *= v;
+		newCell.get_element() *= val;
 
 		if constexpr (Row_access_option::isActive_){
 			auto it = newColumn.insert(newCell);
@@ -352,6 +362,49 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Uno
 	}
 
 	column_.swap(newColumn);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Unordered_set_column& column)
+{
+	if (val == 0u) {
+		_clear();
+		for (const Cell& v : column.column_){
+			_insert_cell(v.get_element(), v.get_row_index());
+		}
+		return *this;
+	}
+
+	//because the column is unordered, I don't see a way to do both operations in one go...
+	operator*=(val);
+	operator+=(column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Unordered_set_column& column, const Field_element_type& val)
+{
+	if (val == 0u) {
+		return *this;
+	}
+
+	for (const Cell& v : column.column_){
+		auto c = column_.find(v);
+		if (c != column_.end()){
+			index r = c->get_row_index();
+			Field_element_type coef = c->get_element();
+			coef += (v.get_element() * val);
+			_delete_cell(c);
+			if (coef != Field_element_type::get_additive_identity())
+				_insert_cell(coef, r);
+		} else
+			_insert_cell(v.get_element() * val, v.get_row_index());
+	}
 
 	return *this;
 }
@@ -387,6 +440,17 @@ inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>
 	}
 }
 
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+{
+	if constexpr (Row_access_option::isActive_){
+		for (const Cell& cell : column_)
+			Row_access_option::unlink(cell);
+	}
+
+	column_.clear();
+}
+
 } //namespace persistence_matrix
 } //namespace Gudhi
 
@@ -397,7 +461,7 @@ struct std::hash<Gudhi::persistence_matrix::Unordered_set_column<Field_element_t
 	{
 		std::size_t seed = 0;
 		for (auto& cell : column){
-			seed ^= std::hash<unsigned int>()(cell.get_row_index() * cell.get_element()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		}
 		return seed;
 	}

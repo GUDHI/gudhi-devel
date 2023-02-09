@@ -18,8 +18,11 @@ namespace persistence_matrix {
 
 class Z2_field_element {
 public:
+	using element_type = unsigned int;
+
 	Z2_field_element();
 	Z2_field_element(unsigned int element);
+	Z2_field_element(int element);
 	Z2_field_element(const Z2_field_element& toCopy);
 	Z2_field_element(Z2_field_element&& toMove) noexcept;
 
@@ -74,6 +77,15 @@ public:
 	friend bool operator==(const Z2_field_element& f, const unsigned int v){
 		return (v % 2) == f.element_;
 	}
+	friend bool operator!=(const Z2_field_element& f1, const Z2_field_element& f2){
+		return !(f1 == f2);
+	}
+	friend bool operator!=(const unsigned int v, const Z2_field_element& f){
+		return !(v == f);
+	}
+	friend bool operator!=(const Z2_field_element& f, const unsigned int v){
+		return !(v == f);
+	}
 
 	Z2_field_element& operator=(Z2_field_element other);
 	Z2_field_element& operator=(const unsigned int value);
@@ -83,12 +95,18 @@ public:
 	}
 
 	Z2_field_element get_inverse() const;
+	std::pair<Z2_field_element, unsigned int> get_partial_inverse(unsigned int product_of_characteristics) const;
 
 	static Z2_field_element get_additive_identity();
 	static Z2_field_element get_multiplicative_identity();
-	static constexpr int get_characteristic();
+	static Z2_field_element get_partial_multiplicative_identity();
+	static constexpr unsigned int get_characteristic();
 
 	unsigned int get_value() const;
+
+	static constexpr bool handles_only_z2(){
+		return true;
+	}
 
 private:
 	bool element_;
@@ -99,6 +117,10 @@ inline Z2_field_element::Z2_field_element()
 {}
 
 inline Z2_field_element::Z2_field_element(unsigned int element)
+	: element_(element % 2)
+{}
+
+inline Z2_field_element::Z2_field_element(int element)
 	: element_(element % 2)
 {}
 
@@ -168,6 +190,12 @@ inline Z2_field_element Z2_field_element::get_inverse() const
 	return element_ ? Z2_field_element(1) : Z2_field_element();
 }
 
+inline std::pair<Z2_field_element, unsigned int>
+Z2_field_element::get_partial_inverse(unsigned int product_of_characteristics) const
+{
+	return {get_inverse(), product_of_characteristics};
+}
+
 inline Z2_field_element Z2_field_element::get_additive_identity()
 {
 	return Z2_field_element();
@@ -178,7 +206,12 @@ inline Z2_field_element Z2_field_element::get_multiplicative_identity()
 	return Z2_field_element(1);
 }
 
-inline constexpr int Z2_field_element::get_characteristic()
+inline Z2_field_element Z2_field_element::get_partial_multiplicative_identity()
+{
+	return Z2_field_element(1);
+}
+
+inline constexpr unsigned int Z2_field_element::get_characteristic()
 {
 	return 2;
 }

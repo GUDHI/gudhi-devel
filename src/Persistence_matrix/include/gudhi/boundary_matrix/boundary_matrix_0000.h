@@ -25,6 +25,7 @@ class Boundary_matrix
 		  public Master_matrix::Base_pairing_option
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = void;
@@ -50,6 +51,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -198,14 +202,14 @@ inline const typename Boundary_matrix<Master_matrix>::Column_type &Boundary_matr
 template<class Master_matrix>
 inline typename Boundary_matrix<Master_matrix>::Row_type Boundary_matrix<Master_matrix>::get_row(index rowIndex) const
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::erase_last()
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_last' is not implemented for the chosen options.");
 }
 
@@ -231,6 +235,24 @@ template<class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_[targetColumnIndex] += sourceColumn;
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 }
 
 template<class Master_matrix>
@@ -268,7 +290,7 @@ inline bool Boundary_matrix<Master_matrix>::is_zero_column(index columnIndex)
 template<class Master_matrix>
 inline index Boundary_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
 }
 

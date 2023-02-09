@@ -149,10 +149,7 @@ inline Field_element_type Intrusive_list_boundary_column<Field_element_type,Cell
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	auto it = Base::column_.begin();
-	while (it != Base::column_.end()){
-		Base::_delete_cell(it);
-	}
+	Base::_clear();
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

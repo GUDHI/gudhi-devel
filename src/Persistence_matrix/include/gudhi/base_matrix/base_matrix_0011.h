@@ -21,6 +21,7 @@ class Base_matrix_with_row_access_with_removals
 		: public Master_matrix::Base_swap_option
 {
 public:
+	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 
@@ -46,6 +47,9 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -77,7 +81,7 @@ private:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using rows_type = typename Master_matrix::row_container_type;
 	using cell_rep_type = typename std::conditional<
-								Master_matrix::Field_type::get_characteristic() == 2,
+								Master_matrix::Option_list::is_z2,
 								index,
 								std::pair<index,typename Master_matrix::Field_type>
 							>::type;
@@ -258,10 +262,28 @@ inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(
 }
 
 template<class Master_matrix>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex) += sourceColumn;
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+}
+
+template<class Master_matrix>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+}
+
+template<class Master_matrix>
 inline void Base_matrix_with_row_access_with_removals<Master_matrix>::zero_cell(
 		index columnIndex, index rowIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
@@ -269,7 +291,7 @@ template<class Master_matrix>
 inline void Base_matrix_with_row_access_with_removals<Master_matrix>::zero_column(
 		index columnIndex)
 {
-	static_assert(static_cast<int>(Master_matrix::Field_type::get_characteristic()) == -1,
+	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'zero_column' is not implemented for the chosen options.");
 }
 

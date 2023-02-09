@@ -12,6 +12,7 @@ template<class Matrix_type, class Master_matrix_type>
 class Position_to_id_indexation_overlay
 {
 public:
+	using Field_element_type = typename Master_matrix_type::Field_type;
 	using boundary_type = typename Master_matrix_type::boundary_type;
 	using Column_type = typename Master_matrix_type::Column_type;
 	using Row_type = typename Master_matrix_type::Row_type;
@@ -39,6 +40,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -184,6 +188,24 @@ template<class Matrix_type, class Master_matrix_type>
 inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	return matrix_.add_to(columnPositionToID_.at(sourceColumnIndex), columnPositionToID_.at(targetColumnIndex));
+}
+
+template<class Matrix_type, class Master_matrix_type>
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	return matrix_.add_to(sourceColumn, columnPositionToID_.at(targetColumnIndex));
+}
+
+template<class Matrix_type, class Master_matrix_type>
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	return matrix_.add_to(sourceColumn, coefficient, columnPositionToID_.at(targetColumnIndex));
+}
+
+template<class Matrix_type, class Master_matrix_type>
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	return matrix_.add_to(coefficient, sourceColumn, columnPositionToID_.at(targetColumnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>

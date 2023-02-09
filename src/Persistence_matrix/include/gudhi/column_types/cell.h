@@ -135,7 +135,7 @@ class Base_cell : public Z2_base_cell
 public:
 	Base_cell()
 		: Z2_base_cell(), element_(0){};
-	Base_cell(unsigned int element, index rowIndex)
+	Base_cell(const Field_element_type& element, index rowIndex)
 		: Z2_base_cell(rowIndex), element_(element){};
 	Base_cell(const Base_cell& cell)
 		: Z2_base_cell(cell), element_(cell.element_){};
@@ -172,9 +172,11 @@ template<class Field_element_type = Zp_field_element<11> >
 class Row_cell : public Z2_row_cell
 {
 public:
+	using Field_type = Field_element_type;
+
 	Row_cell()
 		: Z2_row_cell(), element_(0){};
-	Row_cell(unsigned int element, index columnIndex, index rowIndex)
+	Row_cell(const Field_element_type& element, index columnIndex, index rowIndex)
 		: Z2_row_cell(columnIndex, rowIndex), element_(element){};
 	Row_cell(const Row_cell& cell)
 		: Z2_row_cell(cell), element_(cell.element_){};
@@ -212,7 +214,7 @@ struct Intrusive_row_cell : public Row_cell<Field_element_type>, public base_hoo
 {
 	Intrusive_row_cell()
 		: Row_cell<Field_element_type>(){};
-	Intrusive_row_cell(unsigned int element, index columnIndex, index rowIndex)
+	Intrusive_row_cell(const Field_element_type& element, index columnIndex, index rowIndex)
 		: Row_cell<Field_element_type>(element, columnIndex, rowIndex){};
 	Intrusive_row_cell(const Intrusive_row_cell& cell)
 		: Row_cell<Field_element_type>(cell){};
@@ -234,7 +236,7 @@ struct Z2_intrusive_list_cell : public Z2_base_cell, public base_hook_matrix_lis
 template<class Field_element_type>
 struct Intrusive_list_cell : public Base_cell<Field_element_type>, public base_hook_matrix_list_column
 {
-	Intrusive_list_cell(unsigned int element, index rowIndex)
+	Intrusive_list_cell(const Field_element_type& element, index rowIndex)
 		: Base_cell<Field_element_type>(element, rowIndex){};
 };
 
@@ -248,7 +250,7 @@ struct Z2_intrusive_list_row_cell : public Base_cell_type, public base_hook_matr
 template<class Base_cell_type>
 struct Intrusive_list_row_cell : public Base_cell_type, public base_hook_matrix_list_column
 {
-	Intrusive_list_row_cell(unsigned int element, index columnIndex, index rowIndex)
+	Intrusive_list_row_cell(const typename Base_cell_type::Field_type& element, index columnIndex, index rowIndex)
 		: Base_cell_type(element, columnIndex, rowIndex){};
 };
 
@@ -261,7 +263,7 @@ struct Z2_intrusive_set_cell : public Z2_base_cell, public base_hook_matrix_set_
 template<class Field_element_type>
 struct Intrusive_set_cell : public Base_cell<Field_element_type>, public base_hook_matrix_set_column
 {
-	Intrusive_set_cell(unsigned int element, index rowIndex)
+	Intrusive_set_cell(const Field_element_type& element, index rowIndex)
 		: Base_cell<Field_element_type>(element, rowIndex){};
 };
 
@@ -275,7 +277,7 @@ struct Z2_intrusive_set_row_cell : public Base_cell_type, public base_hook_matri
 template<class Base_cell_type>
 struct Intrusive_set_row_cell : public Base_cell_type, public base_hook_matrix_set_column
 {
-	Intrusive_set_row_cell(unsigned int element, index columnIndex, index rowIndex)
+	Intrusive_set_row_cell(const typename Base_cell_type::Field_type& element, index columnIndex, index rowIndex)
 		: Base_cell_type(element, columnIndex, rowIndex){};
 };
 

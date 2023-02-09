@@ -41,7 +41,7 @@ using Z5 = Zp_field_element<5>;
 using Z2 = Zp_field_element<2>;
 
 template<class Field_type, Column_types column_type>
-struct opt_b_p : Default_options<Field_type, column_type, false>{
+struct opt_b_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = false;
@@ -50,7 +50,7 @@ struct opt_b_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b : Default_options<Field_type, column_type, false>{
+struct opt_b : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
@@ -59,7 +59,7 @@ struct opt_b : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_r_p : Default_options<Field_type, column_type, false>{
+struct opt_b_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = false;
@@ -68,7 +68,7 @@ struct opt_b_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_r : Default_options<Field_type, column_type, false>{
+struct opt_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
@@ -77,19 +77,9 @@ struct opt_b_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_p_nb : Default_options<Field_type, column_type, false>{
+struct opt_b_p_nb : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
-	static const bool has_row_access = false;
-	static const bool has_removable_columns = false;
-	static const bool can_retrieve_representative_cycles = true;
-	static const bool has_column_pairings = true;
-};
-
-template<class Field_type, Column_types column_type>
-struct opt_b_nb : Default_options<Field_type, column_type, false>{
-	static const bool is_of_boundary_type = true;
-	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
 	static const bool has_removable_columns = false;
 	static const bool can_retrieve_representative_cycles = true;
@@ -97,7 +87,17 @@ struct opt_b_nb : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_r_p_nb : Default_options<Field_type, column_type, false>{
+struct opt_b_nb : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
+	static const bool is_of_boundary_type = true;
+	static const bool is_indexed_by_position = false;
+	static const bool has_row_access = false;
+	static const bool has_removable_columns = false;
+	static const bool can_retrieve_representative_cycles = true;
+	static const bool has_column_pairings = true;
+};
+
+template<class Field_type, Column_types column_type>
+struct opt_b_r_p_nb : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = false;
@@ -107,7 +107,7 @@ struct opt_b_r_p_nb : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_r_nb : Default_options<Field_type, column_type, false>{
+struct opt_b_r_nb : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
@@ -117,7 +117,7 @@ struct opt_b_r_nb : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_i_p : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_i_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -127,7 +127,7 @@ struct opt_b_ra_i_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_p : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -137,7 +137,7 @@ struct opt_b_ra_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_i_r_p : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_i_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -147,7 +147,7 @@ struct opt_b_ra_i_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_r_p : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -157,7 +157,7 @@ struct opt_b_ra_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_i : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_i : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -167,7 +167,7 @@ struct opt_b_ra_i : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra : Default_options<Field_type, column_type, false>{
+struct opt_b_ra : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -177,7 +177,7 @@ struct opt_b_ra : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_i_r : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -187,7 +187,7 @@ struct opt_b_ra_i_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_b_ra_r : Default_options<Field_type, column_type, false>{
+struct opt_b_ra_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -197,7 +197,7 @@ struct opt_b_ra_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_p : Default_options<Field_type, column_type, false>{
+struct opt_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = false;
@@ -206,7 +206,7 @@ struct opt_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt : Default_options<Field_type, column_type, false>{
+struct opt : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
@@ -215,7 +215,7 @@ struct opt : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_r_p : Default_options<Field_type, column_type, false>{
+struct opt_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = false;
@@ -224,7 +224,7 @@ struct opt_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_r : Default_options<Field_type, column_type, false>{
+struct opt_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = false;
@@ -233,7 +233,7 @@ struct opt_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i_p : Default_options<Field_type, column_type, false>{
+struct opt_ra_i_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -243,7 +243,7 @@ struct opt_ra_i_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_p : Default_options<Field_type, column_type, false>{
+struct opt_ra_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -253,7 +253,7 @@ struct opt_ra_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i : Default_options<Field_type, column_type, false>{
+struct opt_ra_i : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -263,7 +263,7 @@ struct opt_ra_i : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra : Default_options<Field_type, column_type, false>{
+struct opt_ra : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -273,7 +273,7 @@ struct opt_ra : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i_r_p : Default_options<Field_type, column_type, false>{
+struct opt_ra_i_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -283,7 +283,7 @@ struct opt_ra_i_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_r_p : Default_options<Field_type, column_type, false>{
+struct opt_ra_r_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = true;
 	static const bool has_row_access = true;
@@ -293,7 +293,7 @@ struct opt_ra_r_p : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i_r : Default_options<Field_type, column_type, false>{
+struct opt_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;
@@ -303,7 +303,7 @@ struct opt_ra_i_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_r : Default_options<Field_type, column_type, false>{
+struct opt_ra_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_row_access = true;

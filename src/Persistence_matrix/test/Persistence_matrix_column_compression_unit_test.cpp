@@ -41,7 +41,7 @@ using Z5 = Zp_field_element<5>;
 using Z2 = Zp_field_element<2>;
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i_r : Default_options<Field_type, column_type, false>{
+struct opt_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
@@ -49,7 +49,7 @@ struct opt_ra_i_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_r : Default_options<Field_type, column_type, false>{
+struct opt_ra_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
@@ -57,7 +57,7 @@ struct opt_ra_r : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra : Default_options<Field_type, column_type, false>{
+struct opt_ra : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
@@ -65,7 +65,7 @@ struct opt_ra : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_ra_i : Default_options<Field_type, column_type, false>{
+struct opt_ra_i : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
@@ -73,35 +73,35 @@ struct opt_ra_i : Default_options<Field_type, column_type, false>{
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_r : Default_options<Field_type, column_type, false>{
+struct opt_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = false;
 	static const bool has_removable_columns = true;
 };
 
 template<class Field_type, Column_types column_type>
-struct opt : Default_options<Field_type, column_type, false>{
+struct opt : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = false;
 	static const bool has_row_access = false;
 	static const bool has_removable_columns = false;
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_cc_ra : Default_options<Field_type, column_type, false>{
+struct opt_cc_ra : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = true;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_cc_ra_i : Default_options<Field_type, column_type, false>{
+struct opt_cc_ra_i : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = true;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 };
 
 template<class Field_type, Column_types column_type>
-struct opt_cc : Default_options<Field_type, column_type, false>{
+struct opt_cc : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool has_column_compression = true;
 	static const bool has_row_access = false;
 };
