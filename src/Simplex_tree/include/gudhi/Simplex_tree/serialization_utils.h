@@ -20,11 +20,6 @@ namespace Gudhi {
 
 namespace simplex_tree {
 
-/** \addtogroup simplex_tree 
- * Serialization and deserialization utils for the Simplex_tree.
- *  @{
- */
-
 /** \brief Serialize the given value and insert it at the end of the buffer.
  */
 template<class ArgumentType>
@@ -47,8 +42,6 @@ std::vector<char>::const_iterator deserialize_trivial(std::vector<char>::const_i
   memcpy(&value, &*start, arg_size);
   return (start + arg_size);
 }
-
-/** @}*/  // end addtogroup simplex_tree
 
 }  // namespace simplex_tree
 
