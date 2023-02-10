@@ -805,28 +805,30 @@ cdef class SimplexTree:
         :returns: Serialized SimplexTree data structure
         :rtype: Byte Array
         """
-        cdef vector[char] buffer
+        cdef char* buffer
+        cdef size_t buffer_size = 0
         with nogil:
-            buffer = self.get_ptr().serialize()
+            buffer = self.get_ptr().serialize(buffer_size)
         
-        return PyByteArray_FromStringAndSize(buffer.data(), buffer.size());
+        return PyByteArray_FromStringAndSize(buffer, buffer_size)
+        del buffer
 
     def __setstate__(self, state):
         """Construct the SimplexTree data structure from a Python Byte Array
         :param state: Serialized SimplexTree data structure
         :type state: Byte Array
         """
-        cdef char* buffer_start = PyByteArray_AsString(state);
-        cdef size_t buffer_size=PyByteArray_Size(state);
+        cdef char* buffer = PyByteArray_AsString(state);
+        cdef size_t buffer_size = PyByteArray_Size(state);
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
-        cdef vector[char] buffer
         with nogil:
-            buffer.assign(buffer_start, buffer_start+buffer_size)
             # New pointer is a deserialized simplex tree
-            self.thisptr = <intptr_t>(ptr.deserialize(buffer))
+            self.thisptr = <intptr_t>(ptr.deserialize_itf(buffer, buffer_size))
             # Delete old pointer
-            del ptr
+            #del ptr
+        
+        # del buffer
 
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:

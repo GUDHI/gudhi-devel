@@ -13,33 +13,46 @@
 
 #include <cstring>  // for memcpy and std::size_t
 #include <iostream>
-#include <iomanip>
-#include <memory>
 
 namespace Gudhi {
 
 namespace simplex_tree {
 
-/** \brief Serialize the given value and insert it at the end of the buffer.
+template<class SimplicialComplex>
+std::size_t get_serialization_size(std::size_t num_simplices) {
+  const std::size_t vh_byte_size = sizeof(typename SimplicialComplex::Vertex_handle);
+  const std::size_t fv_byte_size = SimplicialComplex::Options::store_filtration ?
+    sizeof(typename SimplicialComplex::Filtration_value) : 0;
+  return (vh_byte_size + num_simplices * (fv_byte_size + 2 * vh_byte_size));
+}
+
+/** \brief Serialize the given value and insert it at start position.
+ * 
+ * @param[in] value The value to serialize.
+ * @param[in] start Start position where the value is serialized.
+ * @return The new position in the array of char for the next serialization.
+ * 
+ * @warning It is the user's responsibility to provide a pointer to a buffer with enough memory space.
  */
 template<class ArgumentType>
-void serialize_trivial(ArgumentType value, std::vector<char>& buffer) {
-  buffer.insert(std::end(buffer),
-                reinterpret_cast<const char*>(&value),
-                reinterpret_cast<const char*>(&value + 1));
+char* serialize_trivial(ArgumentType value, char* start) {
+  std::size_t arg_size = sizeof(ArgumentType);
+  memcpy(start, &value, arg_size);
+  return start + arg_size;
 }
 
 /** \brief Deserialize at the start position in an array of char and sets the value with it.
  * 
- * @return The new position in the array of char.
+ * @param[in] value The value where to deserialize based on its type.
+ * @param[in] start Start position where the value is serialized.
+ * @return The new position in the array of char for the next deserialization.
  * 
- * @warning It is the user resposibility to ensure that the array of char is wide enough.
+ * @warning It is the user's responsibility to ensure that the pointer will not go out of bounds.
  */
 template<class ArgumentType>
-std::vector<char>::const_iterator deserialize_trivial(std::vector<char>::const_iterator start, ArgumentType& value) {
+char* deserialize_trivial(ArgumentType& value, char* start) {
   std::size_t arg_size = sizeof(ArgumentType);
-  // TODO: Not really nice, but I didn't manage to do it with std::copy.
-  memcpy(&value, &*start, arg_size);
+  memcpy(&value, start, arg_size);
   return (start + arg_size);
 }
 
