@@ -432,7 +432,7 @@ class Simplex_tree {
     null_vertex_ = std::move(complex_source.null_vertex_);
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
-    dimension_ = std::move(complex_source.dimension_);
+    dimension_ = complex_source.dimension_;
 
     // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
@@ -473,7 +473,7 @@ class Simplex_tree {
   /** \brief Checks if two simplex trees are equal. */
   bool operator==(Simplex_tree& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (dimension_ != st2.dimension_))
+        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
@@ -897,11 +897,13 @@ class Simplex_tree {
   }
 
   /** \brief Set a dimension for the simplicial complex.
-   *  \details This function must be used with caution because it disables dimension recomputation when required
-   * (this recomputation can be triggered by `remove_maximal_simplex()` or `prune_above_filtration()`).
+   *  \details
+   *  If `exact` is false, `dimension` is only an upper bound on the dimension of the complex.
+   *  This function must be used with caution because it disables or limits the on-demand recomputation of the dimension
+   * (the need for recomputation can be caused by `remove_maximal_simplex()` or `prune_above_filtration()`).
    */
-  void set_dimension(int dimension) {
-    dimension_to_be_lowered_ = false;
+  void set_dimension(int dimension, bool exact=true) {
+    dimension_to_be_lowered_ = !exact;
     dimension_ = dimension;
   }
 
