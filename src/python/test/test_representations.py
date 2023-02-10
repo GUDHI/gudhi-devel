@@ -100,7 +100,7 @@ def test_kernel_distance_consistency():
     for kernelName, (kernelClass, kernelParams, tolerance) in kernel_dict.items():
         _ = kernelClass.fit(l1)
         f2 = kernelClass.transform(l2)
-        f12 = np.array([[kernelClass(l1_, l2_) for l2_ in l2] for l1_ in l1])
+        f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
         assert f12 == pytest.approx(f2, **tolerance)
 
 def test_sliced_wasserstein_distance_value():
