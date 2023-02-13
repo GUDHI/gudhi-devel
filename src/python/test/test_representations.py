@@ -93,7 +93,7 @@ def test_kernel_from_distance():
         kernelClass, kernelParams, tolerance = kernel_dict[kernelName]
         f1 = kernelClass.fit_transform(l1)
         d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
-        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+        assert np.exp(-d1/kernelClass.bandwidth) == pytest.approx(f1, **tolerance)
 
 def test_kernel_distance_consistency():
     l1, l2 = _n_diags(9), _n_diags(11)
