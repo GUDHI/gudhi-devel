@@ -1754,6 +1754,25 @@ class Simplex_tree {
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    */
+  /* Let's take the following simplicial complex as example:         */
+  /* (vertices are represented as letters to ease the understanding) */
+  /*  o---o---o */
+  /*  a   b\X/c */
+  /*        o   */
+  /*        d   */
+  /* The simplex tree is: */
+  /* a o  b o     c o   d o   */
+  /*   |    |\      |         */
+  /* b o  c o o d   o d       */
+  /*        |                 */
+  /*      d o                 */
+  /* The serialization is (without filtration values that comes right after vertex handle value):                    */
+  /* 04(number of vertices)0a 0b 0c 0d(list of vertices)01(number of [a] children)0b([a,b] simplex)                  */
+  /* 00(number of [a,b] children)02(number of [b] children)0c 0d(list of [b] children)01(number of [b,c] children)   */
+  /* 0d(list of [b,c] children)00(number of [b,c,d] children)00(number of [b,d] children)01(number of [c] children)  */
+  /* 0d(list of [c] children)00(number of [b,d] children)00(number of [d] children)                                  */
+  /* Without explanation and with filtration values:                                                                 */
+  /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   char* serialize(std::size_t& size) {
     const std::size_t buf_size = Gudhi::simplex_tree::get_serialization_size<Simplex_tree<Options>>(num_simplices());
 #ifdef DEBUG_TRACES
