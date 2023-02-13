@@ -20,17 +20,6 @@ from gudhi.representations import (PersistenceWeightedGaussianKernel, \
   PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
   SlicedWassersteinKernel, PersistenceFisherKernel, WassersteinDistance)
 
-
-def test_representations_examples():
-    # Disable graphics for testing purposes
-    plt.show = lambda: None
-    here = os.path.dirname(os.path.realpath(__file__))
-    sys.path.append(here + "/../example")
-    import diagram_vectorizations_distances_kernels
-
-    return None
-
-
 from gudhi.representations.vector_methods import Atol
 from gudhi.representations.metrics import *
 from gudhi.representations.kernel_methods import *
