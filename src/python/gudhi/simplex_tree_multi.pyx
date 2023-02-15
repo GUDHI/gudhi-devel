@@ -394,28 +394,28 @@ cdef class SimplexTreeMulti:
 		"""
 		self.get_ptr().remove_maximal_simplex(simplex)
 
-	def prune_above_filtration(self, filtration)->bool:
-		"""Prune above filtration value given as parameter.
+	# def prune_above_filtration(self, filtration)->bool:
+	# 	"""Prune above filtration value given as parameter.
 
-		:param filtration: Maximum threshold value.
-		:type filtration: float
-		:returns: The filtration modification information.
-		:rtype: bool
+	# 	:param filtration: Maximum threshold value.
+	# 	:type filtration: float
+	# 	:returns: The filtration modification information.
+	# 	:rtype: bool
 
 
-		.. note::
+	# 	.. note::
 
-			Note that the dimension of the simplicial complex may be lower
-			after calling
-			:func:`prune_above_filtration`
-			than it was before. However,
-			:func:`upper_bound_dimension`
-			will return the old value, which remains a
-			valid upper bound. If you care, you can call
-			:func:`dimension`
-			method to recompute the exact dimension.
-		"""
-		return self.get_ptr().prune_above_filtration(filtration)
+	# 		Note that the dimension of the simplicial complex may be lower
+	# 		after calling
+	# 		:func:`prune_above_filtration`
+	# 		than it was before. However,
+	# 		:func:`upper_bound_dimension`
+	# 		will return the old value, which remains a
+	# 		valid upper bound. If you care, you can call
+	# 		:func:`dimension`
+	# 		method to recompute the exact dimension.
+	# 	"""
+	# 	return self.get_ptr().prune_above_filtration(filtration)
 
 	def expansion(self, max_dim)->SimplexTreeMulti:
 		"""Expands the simplex tree containing only its one skeleton
@@ -717,6 +717,12 @@ cdef class SimplexTreeMulti:
 			Shows the progress bar.
 		overwrite:bool = False
 			If true, will overwrite the previous file if it already exists.
+		ignore_last_generators:bool=True
+			If true, does not write the final generators to the file. Rivet ignores them.
+		reverse_block:bool=True
+			Some obscure programs reverse the inside-block order.
+		rivet_compatible:bool=False
+			Returns a firep (old scc2020) format instead. Only Rivet uses this.
 
 		Returns
 		-------
@@ -784,9 +790,22 @@ cdef class SimplexTreeMulti:
 		file.close()
 		return
 
-	def get_filtration_grid(self, resolution, box=None, grid_strategy:str="regular"):
+	def get_filtration_grid(self, resolution:list[int]|np.ndarray, box=None, grid_strategy:str="regular"):
 		"""
 		Returns a grid over the n-filtration, from the simplextree. Usefull for grid_squeeze. TODO : multicritical
+
+		Parameters
+		----------
+			resolution: list[int]
+				resolution of the grid, for each parameter
+			box=None : pair[list[float]]
+				Grid bounds. format : [low bound, high bound]
+				If None is given, will use the filtration bounds of the simplextree.
+			grid_strategy="regular" : string
+				Either "regular" or "quantile".
+		Returns
+		-------
+			List of filtration values, for each parameter, defining the grid.
 		"""
 		if resolution is None:
 			warn("Provide a grid on which to squeeze !")
@@ -918,6 +937,7 @@ cdef class SimplexTreeMulti:
 #			assert len(points.shape) in [1,2]
 #			if len(points.shape) == 1:
 #				points = [points]
+		points = np.asarray(points)
 		assert points.ndim == 2
 		return np.array(self.get_ptr().euler_char(points), dtype=int)
 	
@@ -948,52 +968,3 @@ def _simplextree_multify(simplextree:SimplexTree, num_parameters:int=2)->Simplex
 	with nogil:
 		multify(old_ptr, new_ptr, c_num_parameters)
 	return st
-
-
-
-# def from_firep(path:str, enfore_1critical=True): ## Not finished yet
-# 	st = SimplexTreeMulti()
-# 	contains_pv = lambda line : ';' in line 
-# 	is_comment = lambda line : line[0] == "#"
-# 	def get_splx_filtration(line:str):
-# 		line += " "
-# 		filtration, splx = line.split(";")
-# 		splx = [truc for truc in splx.split(" ") if truc != ""]
-# 		boundary = [truc for truc in splx.split(" ") if truc != ""]
-# 		splx = convert(splx)
-# 		return filtration, splx
-# 	n_inserted_splxs = [0]*2
-# 	def convert(splx):
-# 		if len(splx) <= 0: return [n_inserted_splxs[0]]
-# 		dim:int = len(splx)-1
-# 		new_splx = []
-# 		if dim == 1:
-# 			k = n_inserted_splxs[0]
-# 			for s in splx:
-# 				new_splx.append(k-s-1)
-# 			return new_splx
-# 		if dim > 2: 
-# 			warn("OSKOUR")
-# 			return new_splx
-# 		k = sum(n_inserted_splxs)
-# 		for s in splx:
-# 			new_splx.append(k-s-1)
-# 		return new_splx
-
-# 	t,s,r = [-1]*3
-# 	with open(path, "r") as f:
-# 		passed  == false
-# 		for line in f.readlines()[::-1]:
-# 			if is_comment(line):	continue
-# 			if not contains_pv:	break
-# 			filtration, splx = get_splx_filtration(line)
-# 			if not st.insert(splx, filtration):
-# 				old_filtration = st.filtration(splx)
-# 				st.assign_filtration(splx,old_filtration + filtration)
-# 			else:
-# 				n_inserted_splxs[max(len(splx)-1,0)] += 1
-# 	return st
-
-
-
-
