@@ -31,10 +31,13 @@ struct Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base
   typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Simplex_key Simplex_key;
 
-  Simplex_tree_node_explicit_storage(Siblings * sib = nullptr,
-                                     Filtration_value filtration = 0)
+  Simplex_tree_node_explicit_storage(Siblings * sib,
+                                     Filtration_value filtration) //MULTIPERS : init to 0 not possible
       : children_(sib) {
     this->assign_filtration(filtration);
+  }
+  Simplex_tree_node_explicit_storage() // Empty constructor necessary
+      : children_(nullptr) {
   }
 
   /*

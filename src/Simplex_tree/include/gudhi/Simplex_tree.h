@@ -1754,6 +1754,17 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   int dimension_;
   bool dimension_to_be_lowered_ = false;
+
+//MULTIPERS STUFF
+public: 
+  void set_number_of_parameters(unsigned int num){
+		number_of_parameters_ = num;
+	}
+	unsigned int get_number_of_parameters() const{
+		return number_of_parameters_;
+	}
+private:
+	unsigned int number_of_parameters_;
 };
 
 // Print a Simplex_tree in os.
