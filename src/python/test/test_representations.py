@@ -6,6 +6,7 @@ import pytest
 import random
 
 from sklearn.cluster import KMeans
+from sklearn.kernel_approximation import RBFSampler
 
 # Vectorization
 from gudhi.representations import (Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
@@ -48,8 +49,11 @@ metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
     "bottleneck": (BottleneckDistance(epsilon=0.00001),
                    dict(e=0.00001),
                    dict(abs=1e-5)),
-    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+    "pot_wasserstein": (WassersteinDistance(order=2, mode="pot", internal_p=2, n_jobs=4),
                     dict(order=2, internal_p=2, n_jobs=4),
+                    dict(rel=1e-3)),
+    "hera_wasserstein": (WassersteinDistance(order=2, mode="hera", delta=0.001, internal_p=2, n_jobs=4),
+                    dict(order=2, internal_p=2, n_jobs=4, delta=0.001,),
                     dict(rel=1e-3)),
     "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
                            dict(num_directions=100),
@@ -87,6 +91,8 @@ kernel_dict = {
                                       dict(bandwidth=4.),
                                       dict(rel=1e-3)),
 }
+
+kernel_approx = RBFSampler(gamma=1./2, n_components=100000)
 def test_kernel_from_distance():
     l1, l2 = _n_diags(9), _n_diags(11)
     for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
@@ -102,6 +108,10 @@ def test_kernel_distance_consistency():
         f2 = kernelClass.transform(l2)
         f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
         assert f12 == pytest.approx(f2, **tolerance)
+        kernelClass.kernel_approx_ = kernel_approx
+        _ = kernelClass.fit(l1)
+        f2_approx = kernelClass.transform(l2)
+        assert f2_approx == pytest.approx(f2, **tolerance)
 
 def test_sliced_wasserstein_distance_value():
     diag1 = np.array([[0., 1.], [0., 2.]])
