@@ -18,7 +18,7 @@
 //#include <gudhi/Flag_complex_edge_collapser.h>
 #include <gudhi/Simplex_tree.h>
 #include "Simplex_tree_multi.h"
-#include <omp.h>
+// #include <omp.h>
 
 #include <iostream>
 #include <vector>
@@ -291,7 +291,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 					return false;
 			return true;
 		};
-#pragma omp parallel for
+// #pragma omp parallel for
 		for (unsigned int i = 0; i< npts; i++){ // Maybe add a pragma here for parallel
 			auto &euler_char_at_point = out[i];
 // #pragma omp parallel for reduction(+:euler_char_at_point) // GUDHI : not possible, need a RANDOM ACCESS ITERATOR

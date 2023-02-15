@@ -81,7 +81,7 @@ inline Box<T>::Box(const std::pair<corner_type, corner_type> &box)
 template<typename T>
 inline void Box<T>::inflate(T delta)
 {
-#pragma omp simd
+// #pragma omp simd
 	for (unsigned int i = 0; i < bottomCorner_.size(); i++){
 		bottomCorner_[i] -= delta;
 		upperCorner_[i] += delta;
