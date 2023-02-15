@@ -64,7 +64,7 @@ html_theme_options = {
     },
 }
 
-html_sidebars = {"**": ["version-switcher", "sidebar-gudhi.html", "search-field.html"]}
+html_sidebars = {"**": ["version-switcher", "sidebar-gudhi.html", "search-gudhi-field.html"]}
 
 html_title = f"{project} v{version} documentation"
 
