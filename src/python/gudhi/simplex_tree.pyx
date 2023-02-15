@@ -823,13 +823,12 @@ cdef class SimplexTree:
         cdef size_t buffer_size = PyByteArray_Size(state);
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
         with nogil:
             # New pointer is a deserialized simplex tree
-            self.thisptr = <intptr_t>(ptr.deserialize_itf(buffer, buffer_size))
+            self.get_ptr().deserialize(buffer, buffer_size)
             # Delete old pointer
-            #del ptr
-        
-        # del buffer
+            del ptr
 
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:

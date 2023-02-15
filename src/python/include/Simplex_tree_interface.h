@@ -233,12 +233,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     auto boundary_srange = Base::boundary_simplex_range(bd_sh);
     return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
-
-  Simplex_tree_interface* deserialize_itf(char* buffer, const std::size_t buffer_size) {
-    auto b_ptr = Base::deserialize(buffer, buffer_size);
-    // dynamic_cast should be ok, but compilation fails
-    return reinterpret_cast<Simplex_tree_interface*>(b_ptr);
-  }
 };
 
 }  // namespace Gudhi

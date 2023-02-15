@@ -1817,30 +1817,29 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Deserialize the vector of char (flatten version of the tree) to create and return a Simplex tree
+  /** \brief Deserialize the vector of char (flatten version of the tree) to initialize a Simplex tree.
+   * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    * 
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
    * @param[in] buffer_size The size of the buffer.
-   * @return A pointer on a new Simplex_tree created from deserialization of buffer.
-   *   It is user's responsibility to delete it.
    * 
    * @exception std::out_of_range In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    * 
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
+   * 
    */
-  static Simplex_tree* deserialize(char* buffer, const std::size_t buffer_size) {
-    Simplex_tree* stree = new Simplex_tree();
+  void deserialize(char* buffer, const std::size_t buffer_size) {
+    GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     char* ptr = buffer;
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size{};
     ptr = Gudhi::simplex_tree::deserialize_trivial(members_size, ptr);
-    ptr = stree->rec_deserialize(&(stree->root_), members_size, ptr, 0);
+    ptr = rec_deserialize(&root_, members_size, ptr, 0);
     if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
-      delete stree;
       throw std::out_of_range("Deserialization do not match end of buffer");
     }
-    return stree;
   }
 
  private:

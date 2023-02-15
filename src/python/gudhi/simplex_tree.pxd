@@ -82,7 +82,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
         void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
         char* serialize(size_t& size) nogil except +
-        Simplex_tree_interface_full_featured* deserialize_itf(char* buffer, const size_t size) nogil except +
+        void deserialize(char* buffer, const size_t buffer_size) nogil except +
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":

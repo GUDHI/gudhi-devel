@@ -59,10 +59,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   using Filtration_type = typename Stree::Filtration_value;
   using Vertex_type = typename Stree::Vertex_handle;
 
-  st.insert_simplex({0},    random_filtration<Filtration_type>());
-  st.insert_simplex({1},    random_filtration<Filtration_type>());
-  st.insert_simplex({2},    random_filtration<Filtration_type>());
-  st.insert_simplex({0, 2}, random_filtration<Filtration_type>());
+  if (Stree::Options::store_filtration)
+    st.insert_simplex({0},    random_filtration<Filtration_type>());
+  else
+    st.insert_simplex({0});
+  if (Stree::Options::store_filtration)
+    st.insert_simplex({1},    random_filtration<Filtration_type>());
+  else
+    st.insert_simplex({1});
+  if (Stree::Options::store_filtration)
+    st.insert_simplex({2},    random_filtration<Filtration_type>());
+  else
+    st.insert_simplex({2});
+  if (Stree::Options::store_filtration)
+    st.insert_simplex({0, 2}, random_filtration<Filtration_type>());
+  else
+    st.insert_simplex({0, 2});
 
   char* buffer = new char[256];
   char* ptr = buffer;
@@ -161,16 +173,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   }
   BOOST_CHECK(strncmp(stree_buffer, buffer, stree_buffer_size) == 0);
 
-  Stree* st_from_buffer = Stree::deserialize(stree_buffer, stree_buffer_size);
+  Stree st_from_buffer;
+  st_from_buffer.deserialize(stree_buffer, stree_buffer_size);
   std::clog << std::endl << std::endl << "Iterator on simplices:\n";
-  for (auto simplex : st_from_buffer->complex_simplex_range()) {
+  for (auto simplex : st_from_buffer.complex_simplex_range()) {
     std::clog << "   ";
-    for (auto vertex : st_from_buffer->simplex_vertex_range(simplex)) {
+    for (auto vertex : st_from_buffer.simplex_vertex_range(simplex)) {
       std::clog << vertex << " ";
     }
-    std::clog << " - filtration = " << st_from_buffer->filtration(simplex) << std::endl;
+    std::clog << " - filtration = " << st_from_buffer.filtration(simplex) << std::endl;
   }
-  BOOST_CHECK(*st_from_buffer == st);
+  BOOST_CHECK(st_from_buffer == st);
 
   // Do not forget to delete Simplex_tree::serialize resulted buffer
   delete stree_buffer;
@@ -188,7 +201,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_deserialization_exception, Stree, lis
               << std::hex << (0xFF & buffer[idx]) << " " << std::dec;
   }
   std::clog << std::endl;
-  BOOST_CHECK_THROW(Stree::deserialize(buffer, too_long_buffer_size), std::out_of_range);
+  Stree st;
+  BOOST_CHECK_THROW(st.deserialize(buffer, too_long_buffer_size), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, list_of_tested_variants) {
@@ -200,11 +214,32 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, l
   std::size_t stree_buffer_size {};
   char* stree_buffer = st.serialize(stree_buffer_size);
 
-  Stree* st_from_buffer = Stree::deserialize(stree_buffer, stree_buffer_size);
-  std::clog << "Empty Simplex_tree dimension = " << st_from_buffer->dimension() << std::endl;
+  Stree st_from_buffer;
+  st_from_buffer.deserialize(stree_buffer, stree_buffer_size);
+  std::clog << "Empty Simplex_tree dimension = " << st_from_buffer.dimension() << std::endl;
 
-  BOOST_CHECK(*st_from_buffer == st);
+  BOOST_CHECK(st_from_buffer == st);
 
   // Do not forget to delete Simplex_tree::serialize resulted buffer
   delete stree_buffer;
 }
+
+
+#ifdef GUDHI_DEBUG
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "NON EMPTY SIMPLEX TREE DESERIALIZATION EXCEPTION" << std::endl;
+  Stree st;
+  std::size_t stree_buffer_size {};
+  char* stree_buffer = st.serialize(stree_buffer_size);
+
+  Stree st_from_buffer;
+  if (Stree::Options::store_filtration)
+    st_from_buffer.insert_simplex({0}, random_filtration<typename Stree::Filtration_value>());
+  else
+    st_from_buffer.insert_simplex({0});
+  std::clog << "Check exception throw in debug mode" << std::endl;
+  // throw excpt because st_from_buffer is not empty
+  BOOST_CHECK_THROW (st_from_buffer.deserialize(stree_buffer, stree_buffer_size), std::logic_error);
+}
+#endif
