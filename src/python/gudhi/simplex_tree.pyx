@@ -802,6 +802,7 @@ cdef class SimplexTree:
     
     def __getstate__(self):
         """Pickle the SimplexTree data structure as a Python Byte Array
+        :raises MemoryError: In the case the serialization allocates a too large block of memory.
         :returns: Serialized SimplexTree data structure
         :rtype: Byte Array
         """

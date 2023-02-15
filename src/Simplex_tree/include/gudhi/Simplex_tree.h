@@ -1751,6 +1751,8 @@ class Simplex_tree {
    * @param[in] size The returned buffer size.
    * @return A pointer on the created buffer. It is user's responsibility to delete it.
    * 
+   * @exception std::bad_alloc In the case the serialization allocates a too large block of memory.
+   * 
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    */
