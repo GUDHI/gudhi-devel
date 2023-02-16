@@ -31,16 +31,15 @@ Example of Mapper cover complex computed from a point cloud
 
     mapper = MapperComplex(
         input_type="point cloud",
-        filters=F,
         filter_bnds=np.array([[0.5, 2.5], [0.5, 4.5]]),
         resolutions=np.array([2, 4]),
         gains=np.array([0.3, 0.3]),
         clustering=AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=0.6),
     )
 
-    mapper.fit(X)
+    mapper.fit(X, filters=F)
 
-    print([s for s,_ in mapper.simplex_tree.get_simplices()])
+    print([s for s,_ in mapper.simplex_tree_.get_simplices()])
 
 .. testoutput::
 
