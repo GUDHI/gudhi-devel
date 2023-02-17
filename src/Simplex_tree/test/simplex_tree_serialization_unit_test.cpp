@@ -109,45 +109,45 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   Vertex_type vertex = 0;
   Filtration_type filtration = 0;
   // Reset position pointer at start
-  ptr = buffer;
+  const char* c_ptr = buffer;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 3);
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 0);
   if (Stree::Options::store_filtration) {
-    ptr = deserialize_trivial(filtration, ptr);
+    c_ptr = deserialize_trivial(filtration, c_ptr);
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0})));
   }
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 1);
   if (Stree::Options::store_filtration) {
-    ptr = deserialize_trivial(filtration, ptr);
+    c_ptr = deserialize_trivial(filtration, c_ptr);
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({1})));
   }
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
-    ptr = deserialize_trivial(filtration, ptr);
+    c_ptr = deserialize_trivial(filtration, c_ptr);
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({2})));
   }
   // 1 simplex (2) from {0, 2} and its filtration values
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 1);
-  ptr = deserialize_trivial(vertex, ptr);
+  c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
-    ptr = deserialize_trivial(filtration, ptr);
+    c_ptr = deserialize_trivial(filtration, c_ptr);
     GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0, 2})));
   }
-  ptr = deserialize_trivial(vertex, ptr);  // (0, 2) end of leaf
+  c_ptr = deserialize_trivial(vertex, c_ptr);  // (0, 2) end of leaf
   BOOST_CHECK(vertex == 0);
-  ptr = deserialize_trivial(vertex, ptr);  // (1) end of leaf
+  c_ptr = deserialize_trivial(vertex, c_ptr);  // (1) end of leaf
   BOOST_CHECK(vertex == 0);
-  ptr = deserialize_trivial(vertex, ptr);  // (2) end of leaf
+  c_ptr = deserialize_trivial(vertex, c_ptr);  // (2) end of leaf
   BOOST_CHECK(vertex == 0);
 
-  std::size_t index = static_cast<std::size_t>(ptr - buffer);
+  std::size_t index = static_cast<std::size_t>(c_ptr - buffer);
   std::clog << "Deserialization size in bytes = " << serialization_size << " - index = " << index << std::endl;
   BOOST_CHECK(serialization_size == index);
 
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(st_from_buffer == st);
 
   // Do not forget to delete Simplex_tree::serialize resulted buffer
-  delete stree_buffer;
+  delete[] stree_buffer;
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_deserialization_exception, Stree, list_of_tested_variants) {
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_deserialization_exception, Stree, lis
   }
   std::clog << std::endl;
   Stree st;
-  BOOST_CHECK_THROW(st.deserialize(buffer, too_long_buffer_size), std::out_of_range);
+  BOOST_CHECK_THROW(st.deserialize(buffer, too_long_buffer_size), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, list_of_tested_variants) {
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, l
   BOOST_CHECK(st_from_buffer == st);
 
   // Do not forget to delete Simplex_tree::serialize resulted buffer
-  delete stree_buffer;
+  delete[] stree_buffer;
 }
 
 
@@ -241,5 +241,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
   std::clog << "Check exception throw in debug mode" << std::endl;
   // throw excpt because st_from_buffer is not empty
   BOOST_CHECK_THROW (st_from_buffer.deserialize(stree_buffer, stree_buffer_size), std::logic_error);
+  delete[] stree_buffer;
 }
 #endif

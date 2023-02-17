@@ -50,7 +50,7 @@ char* serialize_trivial(ArgumentType value, char* start) {
  * @warning It is the user's responsibility to ensure that the pointer will not go out of bounds.
  */
 template<class ArgumentType>
-char* deserialize_trivial(ArgumentType& value, char* start) {
+const char* deserialize_trivial(ArgumentType& value, const char* start) {
   std::size_t arg_size = sizeof(ArgumentType);
   memcpy(&value, start, arg_size);
   return (start + arg_size);

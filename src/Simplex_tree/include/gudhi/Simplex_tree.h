@@ -1749,7 +1749,7 @@ class Simplex_tree {
   /** \brief Serialize the Simplex tree - Flatten it in a vector of char
    * 
    * @param[in] size The returned buffer size.
-   * @return A pointer on the created buffer. It is user's responsibility to delete it.
+   * @return A pointer on the created buffer. It is user's responsibility to delete it with `delete[]`.
    * 
    * @exception std::bad_alloc In the case the serialization allocates a too large block of memory.
    * 
@@ -1823,28 +1823,28 @@ class Simplex_tree {
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
    * @param[in] buffer_size The size of the buffer.
    * 
-   * @exception std::out_of_range In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    * 
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    * 
    */
-  void deserialize(char* buffer, const std::size_t buffer_size) {
+  void deserialize(const char* buffer, const std::size_t buffer_size) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
-    char* ptr = buffer;
+    const char* ptr = buffer;
     // Needs to read size before recursivity to manage new siblings for children
-    Vertex_handle members_size{};
+    Vertex_handle members_size;
     ptr = Gudhi::simplex_tree::deserialize_trivial(members_size, ptr);
     ptr = rec_deserialize(&root_, members_size, ptr, 0);
     if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
-      throw std::out_of_range("Deserialization do not match end of buffer");
+      throw std::invalid_argument("Deserialization do not match end of buffer");
     }
   }
 
  private:
   /** \brief Serialize each element of the sibling and recursively call serialization. */
-  char* rec_deserialize(Siblings *sib, Vertex_handle members_size, char* ptr, int dim) {
+  const char* rec_deserialize(Siblings *sib, Vertex_handle members_size, const char* ptr, int dim) {
     // In case buffer is just a 0 char
     if (members_size > 0) {
       sib->members_.reserve(members_size);
