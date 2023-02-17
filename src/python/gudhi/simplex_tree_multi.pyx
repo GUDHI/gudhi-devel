@@ -651,7 +651,8 @@ cdef class SimplexTreeMulti:
 #		return self.get_ptr().get_edge_list()
 	
 	def collapse_edges(self, max_dimension:int=None, num:int=1, progress:bool=False, strong:bool=True, full:bool=False, ignore_warning:bool=False):
-		"""(Strong) collapse of 1 critical clique complex, compatible with 2-parameter filtration.
+		"""Edge collapse for 1-critical 2-parameter clique complex (see https://arxiv.org/abs/2211.05574).
+		It uses the code from the github repository https://github.com/aj-alonso/filtration_domination .
 
 		Parameters
 		----------
@@ -660,9 +661,9 @@ cdef class SimplexTreeMulti:
 		num:int
 			The number of collapses to do.
 		strong:bool
-			Whether to use strong collapses or collapses (slower, but may remove more edges)
+			Whether to use strong collapses or standard collapses (slower, but may remove more edges)
 		full:bool
-			Collapses the maximum number of edges if true, i.e., will do at most 100 strong collapses and 100 non-strong collapses afterward.
+			Collapses the maximum number of edges if true, i.e., will do (at most) 100 strong collapses and (at most) 100 non-strong collapses afterward.
 		progress:bool
 			If true, shows the progress of the number of collapses.
 
@@ -672,8 +673,8 @@ cdef class SimplexTreeMulti:
 			- This is for 1 critical simplices, with 2 parameter persistence.
 		Returns
 		-------
-		self:SimplexTree
-			A simplex tree that has the same homology over this bifiltration.
+		self:SimplexTreeMulti
+			A (smaller) simplex tree that has the same homology over this bifiltration.
 
 		"""
 		from filtration_domination import remove_strongly_filtration_dominated, remove_filtration_dominated
