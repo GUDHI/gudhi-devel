@@ -19,6 +19,7 @@
 #include <gudhi/Simplex_tree.h>
 #include "Simplex_tree_multi.h"
 // #include <omp.h>
+#include "finitely_critical_filtrations/finitely_critical_filtrations.h"
 
 #include <iostream>
 #include <vector>
@@ -45,8 +46,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
   typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
   using euler_chars_type = std::vector<int>;
-  using point_type = std::vector<double>;
-  using points_type = std::vector<point_type>;
 
 
  public:
@@ -218,8 +217,8 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 
 
 // ######################## MULTIPERS STUFF
-  void reset_keys(){
-	unsigned int count = 0;
+  void set_keys_to_enumerate(){
+	int count = 0;
 	for (auto sh : Base::filtration_simplex_range())
 		Base::assign_key(sh, count++);
   }
@@ -256,7 +255,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 			simplex_list.push_back(simplex);
 		}
 	}
-	simplex_list.shrink_to_fit();
+/*	simplex_list.shrink_to_fit();*/
 	return simplex_list;
   }
   using edge_list = std::vector<std::pair<std::pair<int,int>, std::pair<double, double>>>;
@@ -272,33 +271,34 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 			simplex_list.push_back({simplex, {f[0], f[1]}});
 		}
 	}
-	simplex_list.shrink_to_fit();
+/*	simplex_list.shrink_to_fit();*/
 	return simplex_list;
   }
 
-  euler_chars_type euler_char(const std::vector<std::vector<double>> &point_list){ // TODO multi-critical 
-		const unsigned int npts = point_list.size();
+  euler_chars_type euler_char(const std::vector<std::vector<options_multi::value_type>> &point_list){ // TODO multi-critical 
+		const int npts = point_list.size();
 		if (npts == 0){
 			return {};
 		}
-		const unsigned int nparameters = point_list[0].size();
 		
 		euler_chars_type out(point_list.size(), 0.);
 
-		auto is_greater = [nparameters](const point_type &a, const point_type &b){ //french greater
-			for (unsigned int i = 0; i< nparameters; i++)
-				if( a[i] < b[i])
-					return false;
-			return true;
-		};
+		// auto is_greater = [nparameters](const point_type &a, const point_type &b){ //french greater
+		// 	for (int i = 0; i< nparameters; i++)
+		// 		if( a[i] < b[i])
+		// 			return false;
+		// 	return true;
+		// };
 // #pragma omp parallel for
-		for (unsigned int i = 0; i< npts; i++){ // Maybe add a pragma here for parallel
+		for (int i = 0; i< npts; i++){ // Maybe add a pragma here for parallel
 			auto &euler_char_at_point = out[i];
 // #pragma omp parallel for reduction(+:euler_char_at_point) // GUDHI : not possible, need a RANDOM ACCESS ITERATOR
 			for(const auto &SimplexHandle : Base::complex_simplex_range()){
-				const auto &pt = point_list[i]; 
-				const auto &filtration = Base::filtration(SimplexHandle);
-				if (is_greater(pt, filtration)){
+				const Finitely_critical_multi_filtration<options_multi::value_type> &pt = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&point_list[i]);
+				const std::vector<options_multi::value_type>& filtration_ = Base::filtration(SimplexHandle);
+				const Finitely_critical_multi_filtration<options_multi::value_type> &filtration = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&filtration_);
+				// if (is_greater(pt, filtration)){
+				if (filtration <= pt){
 					int sign = Base::dimension(SimplexHandle) %2 ? -1 : 1;  
 					euler_char_at_point += sign;
 				}
@@ -309,7 +309,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 	void resize_all_filtrations(int num){ //TODO : that is for 1 critical filtrations
 		if (num < 0)	return;
 		for(const auto &SimplexHandle : Base::complex_simplex_range()){
-			std::vector<double> new_filtration_value = Base::filtration(SimplexHandle);
+			std::vector<options_multi::value_type> new_filtration_value = Base::filtration(SimplexHandle);
 			new_filtration_value.resize(num);
 			Base::assign_filtration(SimplexHandle, new_filtration_value);
 		}

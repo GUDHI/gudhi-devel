@@ -70,7 +70,7 @@ cdef extern from "Simplex_tree_interface_multi.h" namespace "Gudhi":
 		vector[pair[simplex_type, filtration_type]] get_cofaces(vector[int] simplex, int dimension) nogil
 		void expansion(int max_dim) nogil except +
 		void remove_maximal_simplex(simplex_type simplex) nogil
-		bool prune_above_filtration(filtration_type filtration) nogil
+		# bool prune_above_filtration(filtration_type filtration) nogil
 		# bool make_filtration_non_decreasing() nogil
 		# void compute_extended_filtration() nogil
 		Simplex_tree_multi_interface* collapse_edges(int nb_collapse_iteration) nogil except +
@@ -90,7 +90,7 @@ cdef extern from "Simplex_tree_interface_multi.h" namespace "Gudhi":
 		void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
 
 		## MULTIPERS STUFF
-		void reset_keys() nogil
+		void set_keys_to_enumerate() nogil
 		int get_key(const simplex_type) nogil
 		void set_key(simplex_type, int) nogil
 		void fill_lowerstar(vector[double], int) nogil

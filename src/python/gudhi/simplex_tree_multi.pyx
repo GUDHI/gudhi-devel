@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#	- 2023 David Loiseaux : Conversions with standard simplextree, scc2020 format, edge collapses, euler characteristic, grid filtrations.
 #	- 2022/11 Hannah Schreiber / David Loiseaux : adapt for multipersistence. 
 #   - YYYY/MM Author: Description of the modification
 
@@ -14,10 +15,21 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-
+from libc.stdint cimport intptr_t, int32_t, int64_t
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t
 from libc.stdint cimport uintptr_t
+
+
+ctypedef fused some_int:
+	int32_t
+	int64_t
+
+ctypedef fused some_float:
+	float
+	double
+
+
 from typing import Any
 
 cimport numpy as cnp
@@ -28,7 +40,7 @@ cimport gudhi.simplex_tree_multi
 cimport cython
 from gudhi import SimplexTree ## Small hack for typing
 
-from filtration_domination import remove_strongly_filtration_dominated, remove_filtration_dominated
+
 
 
 from warnings import warn
@@ -36,10 +48,10 @@ from warnings import warn
 ctypedef double value_type
 
 cdef extern from "Simplex_tree_multi.h" namespace "Gudhi":
-	void multify(const uintptr_t, const uintptr_t, const unsigned int) nogil
+	void multify(const uintptr_t, const uintptr_t, const unsigned int) nogil except +
 	void flatten(const uintptr_t, const uintptr_t, const unsigned int) nogil
 	void flatten_diag(const uintptr_t, const uintptr_t, const vector[value_type], int) nogil
-	void squeeze_filtration(uintptr_t, const vector[vector[value_type]]&, bool) nogil
+	void squeeze_filtration(uintptr_t, const vector[vector[value_type]]&, bool) nogil except +
 	vector[vector[value_type]] get_filtration_values(uintptr_t) nogil
 
 
@@ -54,8 +66,8 @@ cdef class SimplexTreeMulti:
 	Tree: An Efficient Data Structure for General Simplicial Complexes.
 	Algorithmica, pages 1–22, 2014.
 
-	This class is a filtered, with keys, and non contiguous vertices version
-	of the simplex tree.
+	This class is a multi-filtered, with keys, and non contiguous vertices version
+	of the simplex tree. 
 	"""
 	# unfortunately 'cdef public Simplex_tree_multi_interface* thisptr' is not possible
 	# Use intptr_t instead to cast the pointer
@@ -69,17 +81,18 @@ cdef class SimplexTreeMulti:
 	# cdef Simplex_tree_persistence_interface * pcohptr
 	# Fake constructor that does nothing but documenting the constructor
 	def __init__(self, other = None, num_parameters:int=2):
-		"""SimplexTree constructor.
-
-		:param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
-			If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
-		:type other: SimplexTree (Optional)
+		"""SimplexTreeMulti constructor.
+		
+		:param other: If `other` is `None` (default value), an empty `SimplexTreeMulti` is created.
+			If `other` is a `SimplexTree`, the `SimplexTreeMulti` is constructed from a deep copy of `other`.
+			If `other` is a `SimplexTreeMulti`, the `SimplexTreeMulti` is constructed from a deep copy of `other`.
+		:type other: SimplexTree or SimplexTreeMulti (Optional)
+		:param num_parameters: The number of parameter of the multi-parameter filtration.
+		:type num_parameters: int
 		:returns: An empty or a copy simplex tree.
-		:rtype: SimplexTree
+		:rtype: SimplexTreeMulti
 
-		:raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
-		:note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
-			you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
+		:raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`, nor a `SimplexTreeMulti`.
 		"""
 		
 	# The real cython constructor
@@ -118,7 +131,7 @@ cdef class SimplexTreeMulti:
 	def copy(self)->SimplexTreeMulti:
 		"""
 		:returns: A simplex tree that is a deep copy of itself.
-		:rtype: SimplexTree
+		:rtype: SimplexTreeMulti
 
 		:note: The persistence information is not copied. If you need it in the clone, you have to call
 			:func:`compute_persistence` on it even if you had already computed it in the original.
@@ -130,28 +143,26 @@ cdef class SimplexTreeMulti:
 	def __deepcopy__(self):
 		return self.copy()
 
-	def filtration(self, simplex)->filtration_type:
+	def filtration(self, simplex:list[int]|np.ndarray)->filtration_type:
 		"""This function returns the filtration value for a given N-simplex in
 		this simplicial complex, or +infinity if it is not in the complex.
 
 		:param simplex: The N-simplex, represented by a list of vertex.
 		:type simplex: list of int
-		:returns:  The simplicial complex filtration value.
-		:rtype:  float
+		:returns:  The simplicial complex multi-critical filtration value.
+		:rtype:  numpy array of shape (-1, num_parameters)
 		"""
-		# filtration_vector = self.get_ptr().simplex_filtration(simplex)
-		# filtrations = np.array_split(filtration_vector, len(filtration_vector) // self.num_parameters)
-		# return filtrations.squeeze() # If 1 critical returns only 1 filtration
-		return self.get_ptr().simplex_filtration(simplex) # Same output type, better
+		filtration_vector = np.array(self.get_ptr().simplex_filtration(simplex))
+		return filtration_vector.reshape((-1, self.num_parameters))
 
-	def assign_filtration(self, simplex, filtration:list[float]|np.ndarray):
-		"""This function assigns a new filtration value to a
+	def assign_filtration(self, simplex:list[int]|np.ndarray, filtration:list[float]|np.ndarray):
+		"""This function assigns a new multi-critical filtration value to a
 		given N-simplex.
 
 		:param simplex: The N-simplex, represented by a list of vertex.
 		:type simplex: list of int
-		:param filtration:  The new filtration value.
-		:type filtration:  float
+		:param filtration:  The new filtration(s) value(s), concatenated.
+		:type filtration:  list[float] or np.ndarray[float, ndim=1]
 
 		.. note::
 			Beware that after this operation, the structure may not be a valid
@@ -252,22 +263,67 @@ cdef class SimplexTreeMulti:
 			otherwise (whatever its original filtration value).
 		:rtype:  bool
 		"""
-		# TODO C++
+		# TODO C++, to be compatible with insert_batch and multicritical filtrations
 		num_parameters = self.get_ptr().get_number_of_parameters()
 		if filtration is None:
 			filtration = np.array([-np.inf]*num_parameters, dtype = np.float)
 		simplex_already_exists = not self.get_ptr().insert(simplex, <filtration_type>filtration)
 		if simplex_already_exists:
-			old_filtration  = np.array(self.filtration(simplex))
-			old_filtrations = np.array_split(old_filtration, old_filtration.shape[0] // num_parameters)
-			filtration = np.array(filtration)
+			old_filtrations  = self.filtration(simplex)
 			for f in old_filtrations:
 				if np.all(f >= filtration) or np.all(f <= filtration):
 					return False
-			new_filtration = np.concatenate([old_filtration, filtration], axis = 0)
+			new_filtration = np.concatenate([*old_filtrations, filtration], axis = 0)
 			self.assign_filtration(simplex, new_filtration)
 			return True
 		return True
+		
+	@cython.boundscheck(False)
+	@cython.wraparound(False)
+	def insert_batch(self,some_int[:,:] vertex_array, some_float[:,:]  filtrations):
+		"""Inserts k-simplices given by a sparse array in a format similar
+		to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
+		The n-th simplex has vertices `vertex_array[0,n]`, ...,
+		`vertex_array[k,n]` and filtration value `filtrations[n,num_parameters]`.
+		/!\ Only compatible with 1-critical filtrations. If a simplex is repeated, 
+		only one filtration value will be taken into account.
+
+		:param vertex_array: the k-simplices to insert.
+		:type vertex_array: numpy.array of shape (k+1,n)
+		:param filtrations: the filtration values.
+		:type filtrations: numpy.array of shape (n,num_parameters)
+		"""
+		# TODO : multi-critical
+		cdef vector[int] vertices = np.unique(vertex_array)
+		cdef Py_ssize_t k = vertex_array.shape[0]
+		cdef Py_ssize_t n = vertex_array.shape[1]
+		assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
+		assert filtrations.shape[1] == self.num_parameters
+		cdef Py_ssize_t i
+		cdef Py_ssize_t j
+		cdef vector[int] v
+		cdef vector[double] w
+		cdef int n_parameters = self.num_parameters
+		with nogil:
+			# Without this, it we end up inserting vertic could be slow ifes in a bad order (flat_map).
+			# NaN currently does the wrong thing
+			# self.get_ptr().insert_batch_vertices(vertices, INFINITY) ## TODO
+			
+#			if k !=1: # Ensure all vertices are already insered first.
+#				for vertex in vertices:
+#					if not self.get_ptr().find_simplex([vertex]):
+#						warn("Failed. Insert all vertices first !")
+#						return
+				
+			for i in range(n):
+				for j in range(k):
+					v.push_back(vertex_array[j, i])
+				for j in range(n_parameters):
+					w.push_back(filtrations[i,j])
+				self.get_ptr().insert(v, w)
+				v.clear()
+				w.clear()
+		return self
 
 	def get_simplices(self):
 		"""This function returns a generator with simplices and their given
@@ -454,6 +510,23 @@ cdef class SimplexTreeMulti:
 		# return self.get_ptr().make_filtration_non_decreasing()
 		if start_dimension <= 0:
 			start_dimension = 1
+#		cdef Simplex_tree_skeleton_iterator it
+#		cdef Simplex_tree_skeleton_iterator end
+##		cdef Simplex_tree_simplex_handle sh = dereference(it)
+#		cdef pair[vector[int], double] simplex_filtration
+#		cdef int dim
+#		cdef int c_start_dimension = start_dimension
+#		cdef int c_stop_dimension = self.dimension()+1
+#		cdef cnp.ndarray[float, ]
+#		with nogil:
+#			for dim in range(c_start_dimension, c_stop_dimension):
+#				it = self.get_ptr().get_skeleton_iterator_begin(dim)
+#				end = self.get_ptr().get_skeleton_iterator_end(dim)
+#				while it != end:
+#					simplex_filtration = self.get_ptr().get_simplex_and_filtration(dereference(it))
+#					if simplex_filtration.size() == dim+1:
+#						# TODO, 
+#					preincrement(it)
 		for dim in range(start_dimension, self.dimension()+1):
 			for splx, f in self.get_skeleton(dim):
 				if len(splx) != dim + 1:	continue
@@ -573,10 +646,11 @@ cdef class SimplexTreeMulti:
 	#     self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
 	#     return self.pcohptr.get_persistence()
 
-	def get_edge_list(self):
-		return self.get_ptr().get_edge_list()
+## This function is only meant for the edge collapse interface.
+#	def get_edge_list(self):
+#		return self.get_ptr().get_edge_list()
 	
-	def collapse_edges(self, max_dimension:int=None, num:int=1, progress:bool=False, strong:bool=True, full:bool=False, ignore_warning:bool=False)->SimplexTreeMulti:
+	def collapse_edges(self, max_dimension:int=None, num:int=1, progress:bool=False, strong:bool=True, full:bool=False, ignore_warning:bool=False):
 		"""(Strong) collapse of 1 critical clique complex, compatible with 2-parameter filtration.
 
 		Parameters
@@ -602,6 +676,7 @@ cdef class SimplexTreeMulti:
 			A simplex tree that has the same homology over this bifiltration.
 
 		"""
+		from filtration_domination import remove_strongly_filtration_dominated, remove_filtration_dominated
 		# TODO : find a way to do multiple edge collapses without python conversions.
 		assert self.num_parameters == 2
 		if self.dimension() > 1 and not ignore_warning: warn("This method ignores simplices of dimension > 1 !")
@@ -632,11 +707,23 @@ cdef class SimplexTreeMulti:
 			else:
 				n = len(edges)
 				# n = edges.size()
+				
 		reduced_tree = SimplexTreeMulti(num_parameters=self.num_parameters)
-		for splx, f in self.get_skeleton(0): # Adds vertices back
-			reduced_tree.insert(splx, f)
-		for e, (f1, f2) in edges:			# Adds reduced edges back # TODO : with insert_batch
-			reduced_tree.insert(e, [f1,f2])
+		
+		## Adds vertices back, with good filtration
+		vertices = np.array([splx for splx, f in self.get_skeleton(0)], dtype=int).T
+		vertices_filtration = np.array([f for splx, f in self.get_skeleton(0)], dtype=float)
+		reduced_tree.insert_batch(vertices, vertices_filtration)
+		
+		## Adds edges again
+		edges_filtration = np.array([f for e,f in edges])
+		edges = np.array([e for e, _ in edges], dtype=int).T
+		reduced_tree.insert_batch(edges, edges_filtration)
+		
+#		for splx, f in self.get_skeleton(0): # Adds vertices back
+#			reduced_tree.insert(splx, f)
+#		for e, (f1, f2) in edges:			# Adds reduced edges back # TODO : with insert_batch
+#			reduced_tree.insert(e, [f1,f2])
 		self.thisptr, reduced_tree.thisptr = reduced_tree.thisptr, self.thisptr # Swaps self and reduced tree (self is a local variable)
 		self.expansion(max_dimension) # Expands back the simplextree to the original dimension.
 		# self.make_filtration_non_decreasing(2)
@@ -663,8 +750,7 @@ cdef class SimplexTreeMulti:
 		from os import remove
 		if exists(path):
 			if not(overwrite):
-				print(f"The file {path} already exists. Use the `overwrite` flag if you want to overwrite.")
-				return
+				raise Exception(f"The file {path} already exists. Use the `overwrite` flag if you want to overwrite.")
 			remove(path)
 		file = open(path, "a")
 		file.write("--datatype bifiltration\n")
@@ -692,11 +778,11 @@ cdef class SimplexTreeMulti:
 	def num_parameters(self)->int:
 		return self.get_ptr().get_number_of_parameters()
 	def get_simplices_of_dimension(self, dim:int):
-		return self.get_ptr().get_simplices_of_dimension(dim)
+		return np.asarray(self.get_ptr().get_simplices_of_dimension(dim), dtype=int)
 	def key(self, simplex:list|np.ndarray):
 		return self.get_ptr().get_key(simplex)
-	def reset_keys(self)->None:
-		self.get_ptr().reset_keys()
+	def set_keys_to_enumerate(self)->None:
+		self.get_ptr().set_keys_to_enumerate()
 		return
 	def set_key(self,simplex:list|np.ndarray, key:int)->None:
 		self.get_ptr().set_key(simplex, key)
@@ -728,15 +814,14 @@ cdef class SimplexTreeMulti:
 		-------
 		Nothing
 		"""
-		### GUDHI BUGFIX
-		self.reset_keys()
+		### initialize keys
+		self.set_keys_to_enumerate()
 		### File 
 		from os.path import exists
 		from os import remove
 		if exists(path):
 			if not(overwrite):
-				print(f"The file {path} already exists. Use the `overwrite` flag if you want to overwrite.")
-				return
+				raise Exception(f"The file {path} already exists. Use the `overwrite` flag if you want to overwrite.")
 			remove(path)
 		file = open(path, "a")
 		file.write("scc2020\n") if not rivet_compatible else file.write("firep\n")
@@ -778,7 +863,7 @@ cdef class SimplexTreeMulti:
 			if not strip_comments: file.write(f"# Block of dimension {dim}\n")
 			if reverse_block:	tsr[dim].reverse()
 			for splx in tsr[dim]: # for simplices of dimension
-				F = self.filtration(splx)
+				F = np.concatenate(self.filtration(splx), axis=0)
 				nbirth = (int)(len(F)//num_parameters)
 				for i in range(nbirth):
 					simplex_filtration = F[i*num_parameters:(i+1)*num_parameters]
@@ -824,12 +909,16 @@ cdef class SimplexTreeMulti:
 		return filtration_grid
 	
 
-	def grid_squeeze(self, box = None, resolution = None, filtration_grid:np.ndarray|list|None = None, grid_strategy:str="regular", coordinate_values:bool=False):
+	def grid_squeeze(self, filtration_grid:np.ndarray|list, coordinate_values:bool=False):
 		"""
-		Fit the filtration of the simplextree to a grid. TODO : multi-critical
+		Fit the filtration of the simplextree to a grid.
+		
+		:param filtration_grid: The grid on which to squeeze. An example of grid can be given by the `get_filtration_grid` method.
+		:type filtration_grid: list[list[float]]
+		:param coordinate_values: If true, the filtrations values of the simplices will be set to the coordinate of the filtration grid.
+		:type coordinate_values: bool
 		"""
-		if filtration_grid is None:
-			filtration_grid = self.get_filtration_grid(resolution, grid_strategy=grid_strategy, box=box)
+		#TODO : multi-critical
 		
 		cdef vector[vector[value_type]] c_filtration_grid = filtration_grid
 		cdef intptr_t ptr = self.thisptr
@@ -861,7 +950,7 @@ cdef class SimplexTreeMulti:
 
 		Returns
 		-------
-		self:SimplexTree
+		self:SimplexTreeMulti
 		"""
 		# for s, sf in self.get_simplices():
 		# 	self.assign_filtration(s, [f if i != dimension else np.max(np.array(F)[s]) for i,f in enumerate(sf)])
@@ -882,7 +971,7 @@ cdef class SimplexTreeMulti:
 			There are no safeguard yet, it WILL crash if asking for a parameter that is not filled.
 		Returns
 		-------
-			A gudhi simplextree with chosen 1D filtration.
+			A SimplexTree with chosen 1D filtration.
 		"""
 		# FIXME : deal with multicritical filtrations
 		import gudhi as gd
@@ -916,19 +1005,19 @@ cdef class SimplexTreeMulti:
 		"""
 		return dereference(self.get_ptr()) == dereference(other.get_ptr())
 	
-	def euler_char(self, points:np.ndarray) -> np.ndarray:
+	def euler_char(self, points:np.ndarray|list) -> np.ndarray:
 		""" Computes the Euler Characteristic of the filtered complex at given (multiparameter) time
 
 		Parameters
 		----------
 		points: 2-dimensional array.
 			List of filtration values on which to compute the euler characteristic.
-			WARNING FIXME : the points have to have the same dimension as the simplextree.
 
 		Returns
 		-------
 		The list of euler characteristic values
 		"""
+		# TODO : muticritical, compute it from a coordinate simplextree, tbb.
 #		if len(points) == 0:
 #			return cnp.empty()
 #		if type(points[0]) is float:
@@ -937,10 +1026,9 @@ cdef class SimplexTreeMulti:
 #			assert len(points.shape) in [1,2]
 #			if len(points.shape) == 1:
 #				points = [points]
-		points = np.asarray(points)
-		assert points.ndim == 2
-		return np.array(self.get_ptr().euler_char(points), dtype=int)
-	
+		cdef cnp.ndarray[double, ndim=2] c_points = np.asarray(points)
+		assert c_points.shape[1] == self.num_parameters
+		return np.asarray(self.get_ptr().euler_char(c_points))
 
 
 cdef intptr_t _get_copy_intptr(SimplexTreeMulti stree) nogil:

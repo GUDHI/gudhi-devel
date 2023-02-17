@@ -1757,14 +1757,14 @@ class Simplex_tree {
 
 //MULTIPERS STUFF
 public: 
-  void set_number_of_parameters(unsigned int num){
+  void set_number_of_parameters(int num){
 		number_of_parameters_ = num;
 	}
-	unsigned int get_number_of_parameters() const{
+	int get_number_of_parameters() const{
 		return number_of_parameters_;
 	}
 private:
-	unsigned int number_of_parameters_;
+	int number_of_parameters_;
 };
 
 // Print a Simplex_tree in os.

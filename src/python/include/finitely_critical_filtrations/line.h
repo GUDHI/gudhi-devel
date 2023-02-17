@@ -16,22 +16,22 @@
 #ifndef LINE_FILTRATION_TRANSLATION_H_INCLUDED
 #define LINE_FILTRATION_TRANSLATION_H_INCLUDED
 
-#include "utilities.h"
 #include "box.h"
+#include "finitely_critical_filtrations.h"
 
-namespace utils{
-	using point_type = std::vector<value_type>;
-	template<typename T=value_type>
+namespace Gudhi{
+
+	template<typename T>
 	class Line
 	{
-	
+		using point_type = std::vector<T>;
 	public:
 		Line();
 		Line(point_type x);
 		Line(point_type x, point_type v);
 		point_type push_forward(point_type x) const;
 		point_type push_back(point_type x) const;
-		dimension_type get_dim() const;
+		int get_dim() const;
 		std::pair<point_type, point_type> get_bounds(const Box<T> &box) const;
 
 
@@ -54,37 +54,39 @@ namespace utils{
 		this->direction_.swap(v);
 	}
 	template<typename T>
-	point_type Line<T>::push_forward(point_type x) const{ //TODO remove copy
-		x -= basepoint_;
-		value_type t=negInf;
+	std::vector<T> Line<T>::push_forward(std::vector<T> x) const{ //TODO remove copy
+		Finitely_critical_multi_filtration<T>& y = *(Finitely_critical_multi_filtration<T>*)(&x);
+		const Finitely_critical_multi_filtration<T>& basepoint = *(Finitely_critical_multi_filtration<T>*)(&basepoint_);
+		y -= basepoint;
+		T t = - std::numeric_limits<T>::infinity();;
 		for (unsigned int i = 0; i<x.size(); i++){
-			value_type dir  = this->direction_.size() > i ? direction_[i] : 1;
+			T dir  = this->direction_.size() > i ? direction_[i] : 1;
 			t = std::max(t, x[i]/dir);
 		}
-		point_type out(basepoint_.size());
+		std::vector<T> out(basepoint_.size());
 		for (unsigned int i = 0; i < out.size(); i++)
 			out[i] = basepoint_[i] + t * (this->direction_.size() > i ? direction_[i] : 1) ;
 		return out;
 	}
 	template<typename T>
-	point_type Line<T>::push_back(point_type x) const{
+	std::vector<T> Line<T>::push_back(std::vector<T> x) const{
 		x -= basepoint_;
-		value_type t=inf;
+		T t = std::numeric_limits<T>::infinity();
 		for (unsigned int i = 0; i<x.size(); i++){
-			value_type dir  = this->direction_.size() > i ? direction_[i] : 1;
+			T dir  = this->direction_.size() > i ? direction_[i] : 1;
 			t = std::min(t, x[i]/dir);
 		}
-		point_type out(basepoint_.size());
+		std::vector<T> out(basepoint_.size());
 		for (unsigned int i = 0; i < out.size(); i++)
 			out[i] = basepoint_[i] + t * (this->direction_.size() > i ? direction_[i] : 1) ;
 		return out;
 	}
 	template<typename T>
-	dimension_type Line<T>::get_dim() const{
+	int Line<T>::get_dim() const{
 		return basepoint_.size();
 	}
 	template<typename T>
-	std::pair<point_type, point_type> Line<T>::get_bounds(const Box<T> &box) const{
+	std::pair<std::vector<T>, std::vector<T>> Line<T>::get_bounds(const Box<T> &box) const{
 		return {this->push_forward(box.get_bottom_corner()), this->push_back(box.get_upper_corner())};
 	}
 

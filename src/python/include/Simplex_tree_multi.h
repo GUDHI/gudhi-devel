@@ -14,8 +14,10 @@
 
 #include <algorithm>
 #include <gudhi/Simplex_tree.h>
-#include "utils/box.h"
-#include "utils/line.h"
+#include "finitely_critical_filtrations/finitely_critical_filtrations.h"
+#include "finitely_critical_filtrations/line.h"
+
+
 
 
 
@@ -25,38 +27,31 @@ namespace Gudhi {
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
  * (about 4 billions of simplices). */
 
-using value_type = double;
+
 struct Simplex_tree_options_multidimensional_filtration {
 public:
 	typedef linear_indexing_tag Indexing_tag;
 	typedef int Vertex_handle;
-	typedef std::vector<value_type> Filtration_value;
+	typedef double value_type;
+	using Filtration_value = std::vector<value_type>; // Cannot put Finitely_critical_multi_filtration, cython doesn't know how to convert inheritence
 	typedef std::uint32_t Simplex_key;
 	static const bool store_key = true;
 	static const bool store_filtration = true;
 	static const bool contiguous_vertices = false;
 };
 
-using option_multi = Simplex_tree_options_multidimensional_filtration;
-using option_std = Simplex_tree_options_full_featured;
-bool operator<(const std::vector<value_type>& v1, const std::vector<value_type>& v2)
-{
-	bool isSame = true;
-	if (v1.size() != v2.size()) isSame = false;
-	for (unsigned int i = 0; i < std::min(v1.size(), v2.size()); ++i){
-		if (v1[i] > v2[i]) return false;
-		if (isSame && v1[i] != v2[i]) isSame = false;
-	}
-	if (isSame) return false;
-	return true;
-}
+using options_multi = Simplex_tree_options_multidimensional_filtration;
+using options_std = Simplex_tree_options_full_featured;
+using multi_filtration_type = std::vector<options_multi::value_type>;
+using multi_filtration_grid = std::vector<multi_filtration_type>;
 
-void multify(const uintptr_t splxptr, const uintptr_t newsplxptr, const unsigned int dimension){
-	Simplex_tree<option_std> &st = *(Gudhi::Simplex_tree<option_std>*)(splxptr);
-	Simplex_tree<option_multi> &st_multi = *(Gudhi::Simplex_tree<option_multi>*)(newsplxptr);;
+
+void multify(const uintptr_t splxptr, const uintptr_t newsplxptr, const int dimension){
+	Simplex_tree<options_std> &st = *(Gudhi::Simplex_tree<options_std>*)(splxptr);
+	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(newsplxptr);
 	if (dimension <= 0)
-		{std::cout << "Empty filtration\n"; return ;}
-	std::vector<value_type> f(dimension);
+		{std::cerr << "Empty filtration\n"; throw ;}
+	Finitely_critical_multi_filtration<Simplex_tree_options_multidimensional_filtration::value_type> f(dimension);
 	for (auto &simplex_handle : st.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st.simplex_vertex_range(simplex_handle))
@@ -65,31 +60,31 @@ void multify(const uintptr_t splxptr, const uintptr_t newsplxptr, const unsigned
 		st_multi.insert_simplex(simplex,f);
 	}
 }
-void flatten(const uintptr_t splxptr, const uintptr_t newsplxptr, const unsigned int dimension = 0){
-	Simplex_tree<option_std> &st = *(Gudhi::Simplex_tree<option_std>*)(newsplxptr);
-	Simplex_tree<option_multi> &st_multi = *(Gudhi::Simplex_tree<option_multi>*)(splxptr);
-
+void flatten(const uintptr_t splxptr, const uintptr_t newsplxptr, const int dimension = 0){
+	Simplex_tree<options_std> &st = *(Gudhi::Simplex_tree<options_std>*)(newsplxptr);
+	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
-		value_type f = st_multi.filtration(simplex_handle)[dimension];
+		Simplex_tree_options_multidimensional_filtration::value_type f = dimension >= 0 ? st_multi.filtration(simplex_handle)[dimension] : 0;
 		st.insert_simplex(simplex,f);
 	}
 }
 
-void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std::vector<value_type> basepoint, int dimension){
-	Simplex_tree<option_std> &st = *(Gudhi::Simplex_tree<option_std>*)(newsplxptr);
-	Simplex_tree<option_multi> &st_multi = *(Gudhi::Simplex_tree<option_multi>*)(splxptr);
-	utils::Line l(basepoint);
+template<typename T>
+void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std::vector<T> basepoint, int dimension){
+	Simplex_tree<options_std> &st = *(Gudhi::Simplex_tree<options_std>*)(newsplxptr);
+	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
+	Gudhi::Line<T> l(basepoint);
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
 		
-		std::vector<value_type> f = st_multi.filtration(simplex_handle);
+		std::vector<options_multi::value_type> f = st_multi.filtration(simplex_handle);
 		if (dimension <0)	 dimension = 0;
-		value_type new_filtration = l.push_forward(f)[dimension];
+		options_multi::value_type new_filtration = l.push_forward(f)[dimension];
 		st.insert_simplex(simplex,new_filtration);
 	}
 
@@ -97,17 +92,16 @@ void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std
 }
 
 
-using filtration_grid = std::vector<std::vector<value_type>>;
-using grid_value = std::vector<value_type>;
+
 template<typename out_type=int>
-std::vector<out_type> find_coordinates(const grid_value &x, const filtration_grid &grid){
-	// TODO: optimize with dichotomy
+std::vector<out_type> find_coordinates(const std::vector<options_multi::value_type> &x, const multi_filtration_grid &grid){
+	// TODO: optimize with, e.g., dichotomy
 	std::vector<out_type> coordinates(grid.size());
-	for (unsigned int parameter = 0; parameter< grid.size(); parameter++){
+	for (int parameter = 0; parameter< (int)grid.size(); parameter++){
 		const auto& filtration = grid[parameter];
 		const auto& to_project = x[parameter];
-		grid_value distance_vector(filtration.size());
-		for (unsigned int i = 0; i < filtration.size(); i++){
+		std::vector<options_multi::value_type> distance_vector(filtration.size());
+		for (int i = 0; i < (int)filtration.size(); i++){
 			distance_vector[i] = std::abs(to_project - filtration[i]);
 		}
 		coordinates[parameter] = std::distance(distance_vector.begin(), std::min_element(distance_vector.begin(), distance_vector.end()));
@@ -117,36 +111,36 @@ std::vector<out_type> find_coordinates(const grid_value &x, const filtration_gri
 
 // TODO integer filtrations, does this help with performance ?
 // projects filtrations values to the grid. If coordinate_values is set to true, the filtration values are the coordinates of this grid
-void squeeze_filtration(uintptr_t splxptr, const std::vector<std::vector<value_type>> &grid, bool coordinate_values=true){
+void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bool coordinate_values=true){
 	
-	Simplex_tree<option_multi> &st_multi = *(Gudhi::Simplex_tree<option_multi>*)(splxptr);
-	unsigned int num_parameters = st_multi.get_number_of_parameters();
-	if (grid.size() != num_parameters){
+	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
+	int num_parameters = st_multi.get_number_of_parameters();
+	if ((int)grid.size() != num_parameters){
 		std::cerr << "Bad grid !" << std::endl;
-		return;
+		throw;
 	}
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
-		std::vector<value_type> simplex_filtration = st_multi.filtration(simplex_handle);
+		std::vector<options_multi::value_type> simplex_filtration = st_multi.filtration(simplex_handle);
 		if (coordinate_values)
-			st_multi.assign_filtration(simplex_handle, find_coordinates<value_type>(simplex_filtration, grid));
+			st_multi.assign_filtration(simplex_handle, find_coordinates<double>(simplex_filtration, grid));
 		else{
 			auto coordinates = find_coordinates<int>(simplex_filtration, grid);
-			grid_value squeezed_filtration(num_parameters);
-			for (unsigned int parameter = 0; parameter < num_parameters; parameter++)
+			std::vector<options_multi::value_type> squeezed_filtration(num_parameters);
+			for (int parameter = 0; parameter < num_parameters; parameter++)
 				squeezed_filtration[parameter] = grid[parameter][coordinates[parameter]];
 			st_multi.assign_filtration(simplex_handle, squeezed_filtration);
 		}
 	}
 	return;
 }
-std::vector<std::vector<value_type>> get_filtration_values(const uintptr_t splxptr){
-	Simplex_tree<option_multi> &st_multi = *(Gudhi::Simplex_tree<option_multi>*)(splxptr);
-	unsigned int num_parameters = st_multi.get_number_of_parameters();
-	std::vector<std::vector<value_type>> out(num_parameters, std::vector<value_type>(st_multi.num_simplices()));
-	unsigned int count = 0;
+multi_filtration_grid get_filtration_values(const uintptr_t splxptr){
+	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
+	int num_parameters = st_multi.get_number_of_parameters();
+	multi_filtration_grid out(num_parameters, multi_filtration_type(st_multi.num_simplices()));
+	int count = 0;
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		const auto filtration = st_multi.filtration(simplex_handle);
-		for (unsigned int parameter=0; parameter < num_parameters; parameter++){
+		for (int parameter=0; parameter < num_parameters; parameter++){
 			out[parameter][count] = filtration[parameter];
 		}
 		count++;
@@ -160,24 +154,21 @@ std::vector<std::vector<value_type>> get_filtration_values(const uintptr_t splxp
 namespace std {
 
 template<>
-class numeric_limits<std::vector<Gudhi::value_type> >
+class numeric_limits<Gudhi::multi_filtration_type>
 {
 public:
-	static std::vector<Gudhi::value_type> infinity() throw(){
-		return std::vector<Gudhi::value_type>(1, numeric_limits<Gudhi::value_type>::infinity());
+	static Gudhi::multi_filtration_type infinity() throw(){
+		return Gudhi::multi_filtration_type(1, std::numeric_limits<Gudhi::Simplex_tree_options_multidimensional_filtration::value_type>::infinity());
 	};
 
 
-	static std::vector<Gudhi::value_type> quiet_NaN() throw(){
-		return std::vector<Gudhi::value_type>(1, numeric_limits<Gudhi::value_type>::quiet_NaN());
+	static Gudhi::multi_filtration_type quiet_NaN() throw(){
+		return Gudhi::multi_filtration_type(1, numeric_limits<Gudhi::Simplex_tree_options_multidimensional_filtration::value_type>::quiet_NaN());
 	};
 
 };
 
-}	// namespace std
-
-
-
+}
 
 
 #endif  // SIMPLEX_TREE_MULTI_H_
