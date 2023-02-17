@@ -14,6 +14,17 @@ endmacro()
 set (CMAKE_CXX_STANDARD 17)
 # This number needs to be changed in python/CMakeLists.txt at the same time
 
+try_compile(CXX17_VECTOR_TEMPLATE_DEDUCTION
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/vector_template_deduction.cpp
+  CMAKE_FLAGS -DCMAKE_CXX_STANDARD=17
+  OUTPUT_VARIABLE OUTPUT
+  )
+
+if (NOT CXX17_VECTOR_TEMPLATE_DEDUCTION)
+  message(FATAL_ERROR "Your compiler does not support c++17, this is mandatory to compile the GUDHI library. ${CXX17_VECTOR_TEMPLATE_DEDUCTION} - ${OUTPUT}")
+endif()
+
 enable_testing()
 
 if(MSVC)
