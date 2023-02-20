@@ -16,6 +16,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_edge_collapser.h>
+#include <gudhi/Simplex_tree/serialization_utils.h>
 
 #include <iostream>
 #include <vector>
@@ -233,6 +234,11 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
     auto boundary_srange = Base::boundary_simplex_range(bd_sh);
     return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
+
+  std::size_t get_serialization_size() {
+    return Gudhi::simplex_tree::get_serialization_size<Simplex_tree_interface>(this->num_simplices());
+  }
+
 };
 
 }  // namespace Gudhi

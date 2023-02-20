@@ -806,13 +806,12 @@ cdef class SimplexTree:
         :returns: Serialized SimplexTree data structure
         :rtype: Byte Array
         """
-        cdef char* buffer
-        cdef size_t buffer_size = 0
-        with nogil:
-            buffer = self.get_ptr().serialize(buffer_size)
+        cdef size_t buffer_size = self.get_ptr().get_serialization_size()
+        # Let's use numpy to allocate a buffer. Will be deleted automatically
+        cdef char[:] buffer = np.empty(buffer_size, dtype='B')
+        self.get_ptr().serialize(&buffer[0], buffer_size)
         
-        return PyByteArray_FromStringAndSize(buffer, buffer_size)
-        del buffer
+        return PyByteArray_FromStringAndSize(&buffer[0], buffer_size)
 
     def __setstate__(self, state):
         """Construct the SimplexTree data structure from a Python Byte Array

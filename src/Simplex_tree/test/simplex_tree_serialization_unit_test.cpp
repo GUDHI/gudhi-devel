@@ -23,7 +23,7 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>  // for get_serialization_size, serialize, deserialize
+#include <gudhi/Simplex_tree/serialization_utils.h>  // for get_serialization_size, de/serialize_trivial
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
 
 using namespace Gudhi;
@@ -151,21 +151,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   std::clog << "Deserialization size in bytes = " << serialization_size << " - index = " << index << std::endl;
   BOOST_CHECK(serialization_size == index);
 
-  std::size_t stree_buffer_size {};
-  char* stree_buffer = st.serialize(stree_buffer_size);
-
+  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
   std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
   BOOST_CHECK(serialization_size == stree_buffer_size);
+  char* stree_buffer = new char[stree_buffer_size];
+  st.serialize(stree_buffer, stree_buffer_size);
+
 
   std::clog << "\nSerialization (from the simplex tree):\n";
-  for (std::size_t idx = 0; idx < serialization_size; idx++) {
+  for (std::size_t idx = 0; idx < stree_buffer_size; idx++) {
     std::clog << std::setfill('0') 
               << std::setw(2) 
               << std::uppercase 
               << std::hex << (0xFF & stree_buffer[idx]) << " " << std::dec;
   }
   std::clog << "\nSerialization (manual):\n";
-  for (std::size_t idx = 0; idx < serialization_size; idx++) {
+  for (std::size_t idx = 0; idx < stree_buffer_size; idx++) {
     std::clog << std::setfill('0') 
               << std::setw(2) 
               << std::uppercase 
@@ -174,7 +175,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(strncmp(stree_buffer, buffer, stree_buffer_size) == 0);
 
   Stree st_from_buffer;
-  st_from_buffer.deserialize(stree_buffer, stree_buffer_size);
+  st_from_buffer.deserialize(stree_buffer, serialization_size);
   std::clog << std::endl << std::endl << "Iterator on simplices:\n";
   for (auto simplex : st_from_buffer.complex_simplex_range()) {
     std::clog << "   ";
@@ -185,8 +186,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   }
   BOOST_CHECK(st_from_buffer == st);
 
-  // Do not forget to delete Simplex_tree::serialize resulted buffer
   delete[] stree_buffer;
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_serialization_exception, Stree, list_of_tested_variants) {
+  const std::size_t too_long_buffer_size = 256;
+  char* buffer = new char[too_long_buffer_size];
+
+  std::clog << "Serialization of a too long buffer:\n";
+  for (std::size_t idx = 0; idx < too_long_buffer_size; idx++) {
+    std::clog << std::setfill('0') 
+              << std::setw(2) 
+              << std::uppercase 
+              << std::hex << (0xFF & buffer[idx]) << " " << std::dec;
+  }
+  std::clog << std::endl;
+  Stree st;
+  BOOST_CHECK_THROW(st.serialize(buffer, too_long_buffer_size), std::invalid_argument);
+  delete[] buffer;
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_deserialization_exception, Stree, list_of_tested_variants) {
@@ -211,8 +228,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, l
   Stree st;
   std::clog << "Empty Simplex_tree dimension = " << st.dimension() << std::endl;
 
-  std::size_t stree_buffer_size {};
-  char* stree_buffer = st.serialize(stree_buffer_size);
+  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
+  std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
+  char* stree_buffer = new char[stree_buffer_size];
+
+  st.serialize(stree_buffer, stree_buffer_size);
 
   Stree st_from_buffer;
   st_from_buffer.deserialize(stree_buffer, stree_buffer_size);
@@ -220,7 +240,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, l
 
   BOOST_CHECK(st_from_buffer == st);
 
-  // Do not forget to delete Simplex_tree::serialize resulted buffer
   delete[] stree_buffer;
 }
 
@@ -230,8 +249,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
   std::clog << "********************************************************************" << std::endl;
   std::clog << "NON EMPTY SIMPLEX TREE DESERIALIZATION EXCEPTION" << std::endl;
   Stree st;
-  std::size_t stree_buffer_size {};
-  char* stree_buffer = st.serialize(stree_buffer_size);
+
+  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
+  std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
+  char* stree_buffer = new char[stree_buffer_size];
+
+  st.serialize(stree_buffer, stree_buffer_size);
 
   Stree st_from_buffer;
   if (Stree::Options::store_filtration)
@@ -239,8 +262,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
   else
     st_from_buffer.insert_simplex({0});
   std::clog << "Check exception throw in debug mode" << std::endl;
-  // throw excpt because st_from_buffer is not empty
-  BOOST_CHECK_THROW (st_from_buffer.deserialize(stree_buffer, stree_buffer_size), std::logic_error);
+  // throw exception because st_from_buffer is not empty
+  BOOST_CHECK_THROW (st_from_buffer.deserialize(stree_buffer, stree_buffer_size),
+                     std::logic_error);
   delete[] stree_buffer;
 }
 #endif
+

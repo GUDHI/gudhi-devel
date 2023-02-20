@@ -1746,12 +1746,12 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Serialize the Simplex tree - Flatten it in a vector of char
+  /** @private @brief Serialize the Simplex tree - Flatten it in a user given array of char
    * 
-   * @param[in] size The returned buffer size.
-   * @return A pointer on the created buffer. It is user's responsibility to delete it with `delete[]`.
+   * @param[in] buffer An array of char allocated with enough space (cf. Gudhi::simplex_tree::get_serialization_size)
+   * @param[in] buffer_size The buffer size.
    * 
-   * @exception std::bad_alloc In the case the serialization allocates a too large block of memory.
+   * @exception std::invalid_argument If serialization does not match exactly the buffer_size value.
    * 
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
@@ -1775,16 +1775,10 @@ class Simplex_tree {
   /* 0d(list of [c] children)00(number of [b,d] children)00(number of [d] children)                                  */
   /* Without explanation and with filtration values:                                                                 */
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
-  char* serialize(std::size_t& size) {
-    const std::size_t buf_size = Gudhi::simplex_tree::get_serialization_size<Simplex_tree<Options>>(num_simplices());
-#ifdef DEBUG_TRACES
-    std::clog << "Simplex_tree::serialize - buffer size = " << buf_size << std::endl;
-#endif  // DEBUG_TRACES
-    char* buffer = new char[buf_size];
+  void serialize(char* buffer, const std::size_t buffer_size) {
     char* buffer_end = rec_serialize(&root_, buffer);
-    size = buffer_end - buffer;
-    GUDHI_CHECK(size == buf_size, std::out_of_range("Serialization do not match end of buffer"));
-    return buffer;
+    if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
+      throw std::invalid_argument("Serialization does not match end of buffer");
   }
 
  private:
@@ -1817,7 +1811,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Deserialize the vector of char (flatten version of the tree) to initialize a Simplex tree.
+  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    * 
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
@@ -1838,7 +1832,7 @@ class Simplex_tree {
     ptr = Gudhi::simplex_tree::deserialize_trivial(members_size, ptr);
     ptr = rec_deserialize(&root_, members_size, ptr, 0);
     if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
-      throw std::invalid_argument("Deserialization do not match end of buffer");
+      throw std::invalid_argument("Deserialization does not match end of buffer");
     }
   }
 
@@ -1852,10 +1846,14 @@ class Simplex_tree {
       Filtration_value filtration;
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
         ptr = Gudhi::simplex_tree::deserialize_trivial(vertex, ptr);
-        if (Options::store_filtration)
+        if (Options::store_filtration) {
           ptr = Gudhi::simplex_tree::deserialize_trivial(filtration, ptr);
-        // Default is no children
-        sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib, filtration));
+          // Default is no children
+          sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib, filtration));
+        } else {
+          // Default is no children
+          sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib));
+        }
       }
       Vertex_handle child_size;
       for (auto& map_el : sib->members()) {
