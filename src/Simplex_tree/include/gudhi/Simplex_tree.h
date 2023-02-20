@@ -1848,8 +1848,8 @@ class Simplex_tree {
     // In case buffer is just a 0 char
     if (members_size > 0) {
       sib->members_.reserve(members_size);
-      Vertex_handle vertex{};
-      Filtration_value filtration{};
+      Vertex_handle vertex;
+      Filtration_value filtration;
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
         ptr = Gudhi::simplex_tree::deserialize_trivial(vertex, ptr);
         if (Options::store_filtration)
@@ -1857,7 +1857,7 @@ class Simplex_tree {
         // Default is no children
         sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib, filtration));
       }
-      Vertex_handle child_size{};
+      Vertex_handle child_size;
       for (auto& map_el : sib->members()) {
         ptr = Gudhi::simplex_tree::deserialize_trivial(child_size, ptr);
         if (child_size > 0) {
