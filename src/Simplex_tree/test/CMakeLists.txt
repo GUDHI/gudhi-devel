@@ -42,7 +42,4 @@ endif()
 gudhi_add_boost_test(Simplex_tree_graph_expansion_test_unit)
 
 add_executable ( Simplex_tree_serialization_test_unit simplex_tree_serialization_unit_test.cpp )
-if (TBB_FOUND)
-  target_link_libraries(Simplex_tree_serialization_test_unit ${TBB_LIBRARIES})
-endif()
 gudhi_add_boost_test(Simplex_tree_serialization_test_unit)
