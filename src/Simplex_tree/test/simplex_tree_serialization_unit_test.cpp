@@ -23,7 +23,7 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>  // for get_serialization_size, de/serialize_trivial
+#include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_trivial
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
 
 using namespace Gudhi;
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   std::clog << "Deserialization size in bytes = " << serialization_size << " - index = " << index << std::endl;
   BOOST_CHECK(serialization_size == index);
 
-  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
+  const std::size_t stree_buffer_size = st.get_serialization_size();
   std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
   BOOST_CHECK(serialization_size == stree_buffer_size);
   char* stree_buffer = new char[stree_buffer_size];
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_empty_serialize_deserialize, Stree, l
   Stree st;
   std::clog << "Empty Simplex_tree dimension = " << st.dimension() << std::endl;
 
-  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
+  const std::size_t stree_buffer_size = st.get_serialization_size();
   std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
   char* stree_buffer = new char[stree_buffer_size];
 
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
   std::clog << "NON EMPTY SIMPLEX TREE DESERIALIZATION EXCEPTION" << std::endl;
   Stree st;
 
-  const std::size_t stree_buffer_size = Gudhi::simplex_tree::get_serialization_size<Stree>(st.num_simplices());
+  const std::size_t stree_buffer_size = st.get_serialization_size();
   std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
   char* stree_buffer = new char[stree_buffer_size];
 

@@ -18,26 +18,6 @@ namespace Gudhi {
 
 namespace simplex_tree {
 
-/** \brief Returns the serialization size for a given SimplicialComplex and its number of simplices.
- * 
- * @param[in] num_simplices The number of simplices in the simplicial complex.
- * @return The exact serialization required size in number of bytes.
- * 
- * @warning It is meant to be return the same size with the same SimplicialComplex and on a computer with the same
- *   architecture.
- */
-template<class SimplicialComplex>
-constexpr std::size_t get_serialization_size(std::size_t num_simplices) {
-  const std::size_t vh_byte_size = sizeof(typename SimplicialComplex::Vertex_handle);
-  const std::size_t fv_byte_size = SimplicialComplex::Options::store_filtration ?
-    sizeof(typename SimplicialComplex::Filtration_value) : 0;
-  const std::size_t buffer_byte_size = vh_byte_size + num_simplices * (fv_byte_size + 2 * vh_byte_size);
-#ifdef DEBUG_TRACES
-    std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
-#endif  // DEBUG_TRACES
-  return buffer_byte_size;
-}
-
 /** \brief Serialize the given value and insert it at start position.
  * 
  * @param[in] value The value to serialize.

@@ -1746,6 +1746,23 @@ class Simplex_tree {
   }
 
  public:
+   /** @private @brief Returns the serialization required buffer size.
+   * 
+   * @return The exact serialization required size in number of bytes.
+   * 
+   * @warning It is meant to return the same size with the same SimplexTreeOptions and on a computer with the same
+   *   architecture.
+   */
+  std::size_t get_serialization_size() {
+    const std::size_t vh_byte_size = sizeof(Vertex_handle);
+    const std::size_t fv_byte_size = SimplexTreeOptions::store_filtration ? sizeof(Filtration_value) : 0;
+    const std::size_t buffer_byte_size = vh_byte_size + num_simplices() * (fv_byte_size + 2 * vh_byte_size);
+#ifdef DEBUG_TRACES
+      std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
+#endif  // DEBUG_TRACES
+    return buffer_byte_size;
+  }
+  
   /** @private @brief Serialize the Simplex tree - Flatten it in a user given array of char
    * 
    * @param[in] buffer An array of char allocated with enough space (cf. Gudhi::simplex_tree::get_serialization_size)
