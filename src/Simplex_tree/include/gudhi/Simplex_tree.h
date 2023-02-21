@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - Vincent Rouvreau: Add de/serialize methods for pickle feature
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -15,7 +16,7 @@
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::get_serialization_size, serialize, deserialize
+#include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::de/serialize_trivial
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>

@@ -13,11 +13,6 @@ import numpy as np
 import pickle
 import pytest
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2023 Inria"
-__license__ = "MIT"
-
-
 def test_pickle_simplex_tree():
     st = SimplexTree.create_from_array(np.random.rand(10, 10))
     for dim in [1, 2, 3]:

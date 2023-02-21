@@ -16,7 +16,6 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_edge_collapser.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>
 
 #include <iostream>
 #include <vector>
