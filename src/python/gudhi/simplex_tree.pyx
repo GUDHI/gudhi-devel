@@ -9,7 +9,6 @@
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
-from cpython.bytearray cimport PyByteArray_FromStringAndSize, PyByteArray_AsString, PyByteArray_Size
 from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
@@ -804,28 +803,32 @@ cdef class SimplexTree:
         """Pickle the SimplexTree data structure as a Python Byte Array
         :raises MemoryError: In the case the serialization allocates a too large block of memory.
         :returns: Serialized SimplexTree data structure
-        :rtype: Byte Array
+        :rtype: numpy.array of shape (n,)
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
         # Let's use numpy to allocate a buffer. Will be deleted automatically
-        cdef char[:] buffer = np.empty(buffer_size, dtype='B')
-        self.get_ptr().serialize(&buffer[0], buffer_size)
+        np_buffer = np.empty(buffer_size, dtype='B')
+        cdef char[:] buffer = np_buffer
+        cdef char* buffer_start = &buffer[0]
+        with nogil:
+            self.get_ptr().serialize(buffer_start, buffer_size)
         
-        return PyByteArray_FromStringAndSize(&buffer[0], buffer_size)
+        return np_buffer
 
     def __setstate__(self, state):
         """Construct the SimplexTree data structure from a Python Byte Array
         :param state: Serialized SimplexTree data structure
-        :type state: Byte Array
+        :type state: numpy.array of shape (n,)
         """
-        cdef char* buffer = PyByteArray_AsString(state);
-        cdef size_t buffer_size = PyByteArray_Size(state);
+        cdef char[:] buffer = state
+        cdef size_t buffer_size = state.shape[0]
         # Backup old pointer
         cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
         self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+        cdef char* buffer_start = &buffer[0]
         with nogil:
             # New pointer is a deserialized simplex tree
-            self.get_ptr().deserialize(buffer, buffer_size)
+            self.get_ptr().deserialize(buffer_start, buffer_size)
             # Delete old pointer
             del ptr
 
