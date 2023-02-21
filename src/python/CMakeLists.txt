@@ -541,6 +541,7 @@ if(PYTHONINTERP_FOUND)
 
     add_gudhi_py_test(test_simplex_tree)
     add_gudhi_py_test(test_simplex_generators)
+    add_gudhi_py_test(test_simplex_tree_serialization)
 
     # Subsampling
     add_gudhi_py_test(test_subsampling)
