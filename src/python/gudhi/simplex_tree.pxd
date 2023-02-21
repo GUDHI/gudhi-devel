@@ -81,7 +81,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         # Expansion with blockers
         ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
         void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
-        void serialize(char*& buffer, const size_t buffer_size) nogil except +
+        void serialize(char* buffer, const size_t buffer_size) nogil except +
         void deserialize(const char* buffer, const size_t buffer_size) nogil except +
         size_t get_serialization_size() nogil
 
