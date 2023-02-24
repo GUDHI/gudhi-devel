@@ -316,7 +316,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     ds = np.load(archive_path, allow_pickle=True)
 
     if subset in ["cross_training", "jumping", "stepper", "walking"]:
-        ds = ds[ds[:,3] == 'jumping']
+        ds = ds[ds[:,3] == subset]
         ds = np.delete(ds, np.s_[3], axis=1)
         ds = ds.astype('float32')
     elif subset != "all":
