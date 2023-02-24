@@ -351,13 +351,6 @@ You can still deactivate LaTeX rendering by saying:
     import gudhi as gd
     gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
 
-Pandas
--------
-
-`Pandas <https://pandas.pydata.org>`_ provides data structures and operations for data analysis.
-:func:`~gudhi.datasets.remote.fetch_daily_activities` returns a
-`pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
-
 PyKeOps
 -------
 

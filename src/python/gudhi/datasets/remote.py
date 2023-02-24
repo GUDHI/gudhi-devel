@@ -261,7 +261,7 @@ _activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be
 
 def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     """
-    Load the Daily and Sports Activities dataset. This dataset comes from
+    Load a subset of the Daily and Sports Activities dataset. This dataset comes from
     https://archive.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
@@ -272,8 +272,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     file_path : string
         Full path of the downloaded file including filename.
 
-        Default is None, meaning that it's set to "data_home/points/activities/[activities.csv.xz |
-        cross_training_p1_left_leg.npy | jumping_p1_left_leg.npy | stepper_p1_left_leg.npy | walking_p1_left_leg.npy]".
+        Default is None, meaning that it's set to "data_home/points/activities/activities_p1_left_leg.npy".
         In this case, the LICENSE file would be downloaded as "data_home/points/activities/activities.LICENSE".
 
         The "data_home" directory is set by default to "~/gudhi_data",
@@ -281,11 +280,11 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
 
     subset : string
         As the dataset is quite a big file to download, when specified, this argument allows to download the following subsets:
-         * 'all' (default value) This dataset contains 1.140.000 vertices in dimension 48. Its size is about 150 Mo.
-         * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
-         * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
-         * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
-         * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3. File size is about 175 Ko
+         * 'all' (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column ()
+         * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3.
+         * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3.
+         * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3.
+         * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3.
 
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
@@ -294,50 +293,19 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
 
     Returns
     -------
-    points: Pandas DataFrame when `subset='all'` or numpy array otherwise
+    points: numpy array
         Depending on subset value:
-         * Table of shape (1140000, 48) - points in dimension 45, 'activity', 'individual' and 'set' when `subset='all'`.
+         * Array of shape (7500, 3, dtype = object) when `subset='all'`.
 
         Or
-         * Array of shape (7500, 3) otherwise.
+         * Array of shape (7500, 3, dtype = double) otherwise.
 
     """
-    load_method = np.load
-    if subset == "all":
-        # pandas is imported only in the function as it is only an optionnal third party library
-        # ImportError if not available
-        import pandas as pd
-
-        load_method = pd.read_csv
-
-        file_url = "https://github.com/GUDHI/gudhi-data/raw/main/points/activities/activities.csv.xz"
-        file_checksum = "c2437d3c6b53f16803876b62b1d277d5906d8a53ea9c89b889a797d86d50888b"
-
-        gudhi_data_set_path = "points/activities/activities.csv.xz"
-    elif subset == "cross_training":
-        file_url = (
-            "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/cross_training_p1_left_leg.npy"
-        )
-        file_checksum = "ebef2e20791c895b6f6142e6a47b22f4283d6c7c3cfe9ddc13795185988e3e63"
-
-        gudhi_data_set_path = "points/activities/cross_training_p1_left_leg.npy"
-    elif subset == "jumping":
-        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/jumping_p1_left_leg.npy"
-        file_checksum = "2d89a4adea475a0464e3fbbb93d9e8b9bfd67d5056cd54eded84418a744da931"
-
-        gudhi_data_set_path = "points/activities/jumping_p1_left_leg.npy"
-    elif subset == "stepper":
-        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/stepper_p1_left_leg.npy"
-        file_checksum = "68250dfd6c2cd1d85fcc465c5c0e0caf69130082fc1320d0dd1d05ae2ac56914"
-
-        gudhi_data_set_path = "points/activities/stepper_p1_left_leg.npy"
-    elif subset == "walking":
-        file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/walking_p1_left_leg.npy"
-        file_checksum = "412eb926d36d795eaf2caa29c261a912b06cc4ae5e3992a8e93af8a3604487a9"
-
-        gudhi_data_set_path = "points/activities/walking_p1_left_leg.npy"
-    else:
-        raise ValueError("Unknown subset value")
+    file_url = (
+        "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
+    )
+    file_checksum = "83a3b7cfc0cfce60ff249bebcf65c87bf5ab1dc45f2a13e40172b203d0f6285d"
+    gudhi_data_set_path = "points/activities/activities_p1_left_leg.npy"
 
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
     if not exists(archive_path):
@@ -345,4 +313,13 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
         license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
-    return load_method(archive_path)
+    ds = np.load(archive_path, allow_pickle=True)
+
+    if subset in ["cross_training", "jumping", "stepper", "walking"]:
+        ds = ds[ds[:,3] == 'jumping']
+        ds = np.delete(ds, np.s_[3], axis=1)
+        ds = ds.astype('float32')
+    elif subset != "all":
+        raise ValueError("Unknown subset value")
+
+    return ds

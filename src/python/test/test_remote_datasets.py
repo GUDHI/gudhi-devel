@@ -15,6 +15,7 @@ import shutil
 import io
 import sys
 import pytest
+import numpy as np
 
 from os.path import isdir, expanduser, exists
 from os import remove, environ
@@ -66,7 +67,7 @@ def test_bunny_license_capture():
 
 
 def test_activities_license_capture():
-    for subset in ["cross_training", "jumping", "stepper", "walking"]:
+    for subset in ["all", "cross_training", "jumping", "stepper", "walking"]:
         # Test not printing activities.LICENSE when accept_license = True
         assert (
             "" == _capture_license_output(remote.fetch_daily_activities, subset=subset, accept_license=True).getvalue()
@@ -90,23 +91,33 @@ def test_fetch_remote_datasets_wrapped():
     for i in range(2):
         spiral_2d_arr = remote.fetch_spiral_2d("./another_fetch_folder_for_test/spiral_2d.npy")
         assert spiral_2d_arr.shape == (114562, 2)
+        assert spiral_2d_arr.dtype == np.dtype('float32')
 
         bunny_arr = remote.fetch_bunny("./another_fetch_folder_for_test/bunny.npy")
         assert bunny_arr.shape == (35947, 3)
+        assert bunny_arr.dtype == np.dtype('float32')
+
+        activities_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="all")
+        assert activities_arr.shape == (30000, 4)
+        assert activities_arr.dtype == np.dtype('object')
 
         cross_training_arr = remote.fetch_daily_activities(
-            "./another_fetch_folder_for_test/cross_training.npy", subset="cross_training"
+            "./another_fetch_folder_for_test/activities.npy", subset="cross_training"
         )
         assert cross_training_arr.shape == (7500, 3)
+        assert cross_training_arr.dtype == np.dtype('float32')
 
-        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/jumping.npy", subset="jumping")
+        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="jumping")
         assert jumping_arr.shape == (7500, 3)
+        assert jumping_arr.dtype == np.dtype('float32')
 
-        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/stepper.npy", subset="stepper")
+        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="stepper")
         assert stepper_arr.shape == (7500, 3)
+        assert stepper_arr.dtype == np.dtype('float32')
 
-        walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/walking.npy", subset="walking")
+        walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="walking")
         assert walking_arr.shape == (7500, 3)
+        assert walking_arr.dtype == np.dtype('float32')
 
     # Check that the directory was created
     assert isdir("./another_fetch_folder_for_test")
@@ -115,10 +126,7 @@ def test_fetch_remote_datasets_wrapped():
     assert exists("./another_fetch_folder_for_test/bunny.npy")
     assert exists("./another_fetch_folder_for_test/bunny.LICENSE")
 
-    assert exists("./another_fetch_folder_for_test/cross_training.npy")
-    assert exists("./another_fetch_folder_for_test/jumping.npy")
-    assert exists("./another_fetch_folder_for_test/stepper.npy")
-    assert exists("./another_fetch_folder_for_test/walking.npy")
+    assert exists("./another_fetch_folder_for_test/activities.npy")
     assert exists("./another_fetch_folder_for_test/activities.LICENSE")
 
     # Remove test folders
