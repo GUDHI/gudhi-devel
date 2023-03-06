@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # GUDHI documentation build configuration file, created by
 # sphinx-quickstart on Thu Jun 30 09:55:51 2016.
 #
