@@ -50,6 +50,14 @@ def test_simple_constructor_from_flattened_cells():
     np.testing.assert_array_equal(diags[0], CUBICAL_PERSISTENCE_H0_IMG0)
 
 
+def test_simple_constructor_from_top_cells_list():
+    digits = datasets.load_digits().images[:10]
+    cp = CubicalPersistence(homology_dimensions=0, input_type='vertices', n_jobs=-2)
+    diags = cp.fit_transform(digits)
+    assert len(diags) == 10
+    np.testing.assert_array_equal(diags[2], [[8, 13], [0, 15], [0, np.inf]])
+
+
 def test_1d():
     a = np.array([2, 4, 3, 5])
     r = np.array([[3, 4], [2, np.inf]])

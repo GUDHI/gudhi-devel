@@ -36,6 +36,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         self,
         homology_dimensions,
         newshape=None,
+        input_type='top_dimensional_cells',
         homology_coeff_field=11,
         min_persistence=0.0,
         n_jobs=None,
@@ -51,6 +52,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
                 (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`), set `newshape`
                 to perform `numpy.reshape(X, newshape, order='C')` in
                 :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform` method.
+            input_type (str): 'top_dimensional_cells' if the filtration values passed to `transform()` are those of the
+                top-dimensional cells, 'vertices' if they correspond to the vertices.
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
@@ -58,6 +61,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         """
         self.homology_dimensions = homology_dimensions
         self.newshape = newshape
+        self.input_type = input_type
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
         self.n_jobs = n_jobs
@@ -78,7 +82,12 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             # Wasteful if dim_list_ does not contain 0, but that seems unlikely.
             return [res if i == 0 else np.empty((0,2)) for i in self.dim_list_]
 
-        cubical_complex = CubicalComplex(top_dimensional_cells=cells)
+        if self.input_type == 'top_dimensional_cells':
+            cubical_complex = CubicalComplex(top_dimensional_cells=cells)
+        elif self.input_type == 'vertices':
+            cubical_complex = CubicalComplex(vertices=cells)
+        else:
+            raise ValueError("input_type can only be 'top_dimensional_cells' or 'vertices'")
         cubical_complex.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
