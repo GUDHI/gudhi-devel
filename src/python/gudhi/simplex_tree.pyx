@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
@@ -12,6 +13,7 @@ from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
 cimport cython
+from numpy.math cimport INFINITY
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -239,7 +241,7 @@ cdef class SimplexTree:
 
     @staticmethod
     @cython.boundscheck(False)
-    def create_from_array(filtrations, double max_filtration=np.inf):
+    def create_from_array(filtrations, double max_filtration=INFINITY):
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -281,6 +283,8 @@ cdef class SimplexTree:
 
         .. seealso:: :func:`insert_batch`
         """
+        # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+        self.get_ptr().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), INFINITY)
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             self.get_ptr().insert((edge[0], edge[1]), edge[2])
@@ -303,8 +307,7 @@ cdef class SimplexTree:
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
-        # This may be slow if we end up inserting vertices in a bad order (flat_map).
-        # We could first insert the vertices from np.unique(vertex_array), or leave it to the caller.
+        cdef vector[int] vertices = np.unique(vertex_array)
         cdef Py_ssize_t k = vertex_array.shape[0]
         cdef Py_ssize_t n = vertex_array.shape[1]
         assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
@@ -312,6 +315,9 @@ cdef class SimplexTree:
         cdef Py_ssize_t j
         cdef vector[int] v
         with nogil:
+            # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+            # NaN currently does the wrong thing
+            self.get_ptr().insert_batch_vertices(vertices, INFINITY)
             for i in range(n):
                 for j in range(k):
                     v.push_back(vertex_array[j, i])
@@ -792,6 +798,39 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+    
+    def __getstate__(self):
+        """Pickle the SimplexTree data structure as a Python Byte Array
+        :raises MemoryError: In the case the serialization allocates a too large block of memory.
+        :returns: Serialized SimplexTree data structure
+        :rtype: numpy.array of shape (n,)
+        """
+        cdef size_t buffer_size = self.get_ptr().get_serialization_size()
+        # Let's use numpy to allocate a buffer. Will be deleted automatically
+        np_buffer = np.empty(buffer_size, dtype='B')
+        cdef char[:] buffer = np_buffer
+        cdef char* buffer_start = &buffer[0]
+        with nogil:
+            self.get_ptr().serialize(buffer_start, buffer_size)
+        
+        return np_buffer
+
+    def __setstate__(self, state):
+        """Construct the SimplexTree data structure from a Python Byte Array
+        :param state: Serialized SimplexTree data structure
+        :type state: numpy.array of shape (n,)
+        """
+        cdef char[:] buffer = state
+        cdef size_t buffer_size = state.shape[0]
+        cdef char* buffer_start = &buffer[0]
+        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        del ptr
+        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+        with nogil:
+            # New pointer is a deserialized simplex tree
+            self.get_ptr().deserialize(buffer_start, buffer_size)
+
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

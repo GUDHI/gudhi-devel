@@ -44,20 +44,71 @@ def _n_diags(n):
         l.append(a)
     return l
 
+metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
+    "bottleneck": (BottleneckDistance(epsilon=0.00001),
+                   dict(e=0.00001),
+                   dict(abs=1e-5)),
+    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+                    dict(order=2, internal_p=2, n_jobs=4),
+                    dict(rel=1e-3)),
+    "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
+                           dict(num_directions=100),
+                           dict(rel=1e-3)),
+    "persistence_fisher": (PersistenceFisherDistance(bandwidth=1., n_jobs=4),
+                           dict(bandwidth=1., n_jobs=4),
+                           dict(abs=1e-5)),
+}
 
-def test_multiple():
+
+def test_distance_transform_consistency():
     l1 = _n_diags(9)
-    l2 = _n_diags(11)
     l1b = l1.copy()
-    d1 = pairwise_persistence_diagram_distances(l1, e=0.00001, n_jobs=4)
-    d2 = BottleneckDistance(epsilon=0.00001).fit_transform(l1)
-    d3 = pairwise_persistence_diagram_distances(l1, l1b, e=0.00001, n_jobs=4)
-    assert d1 == pytest.approx(d2)
-    assert d3 == pytest.approx(d2, abs=1e-5)  # Because of 0 entries (on the diagonal)
-    d1 = pairwise_persistence_diagram_distances(l1, l2, metric="wasserstein", order=2, internal_p=2)
-    d2 = WassersteinDistance(order=2, internal_p=2, n_jobs=4).fit(l2).transform(l1)
-    print(d1.shape, d2.shape)
-    assert d1 == pytest.approx(d2, rel=0.02)
+    for metricName, (metricClass, metricParams, tolerance) in metrics_dict.items():
+        d1 = pairwise_persistence_diagram_distances(l1, metric=metricName, **metricParams)
+        d2 = metricClass.fit_transform(l1)
+        assert d1 == pytest.approx(d2)
+        d3 = pairwise_persistence_diagram_distances(l1, l1b, metric=metricName, **metricParams)
+        assert d3 == pytest.approx(d2, **tolerance)  # Because of 0 entries (on the diagonal)
+        d4 = metricClass.fit(l1).transform(l1b)
+        assert d4 == pytest.approx(d2, **tolerance)
+
+
+kernel_dict = {
+    "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
+                           dict(num_directions=10), dict(rel=1e-3)),
+    "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
+                           dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
+                           dict(rel=1e-3)),
+    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=4.,
+                                                                        weight=lambda x: x[1]-x[0]),
+                                      dict(bandwidth=4., weight=lambda x: x[1]-x[0]),
+                                      dict(rel=1e-3)),
+    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=4.),
+                                      dict(bandwidth=4.),
+                                      dict(rel=1e-3)),
+}
+def test_kernel_from_distance():
+    l1, l2 = _n_diags(9), _n_diags(11)
+    for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
+        kernelClass, kernelParams, tolerance = kernel_dict[kernelName]
+        f1 = kernelClass.fit_transform(l1)
+        d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
+        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+
+def test_kernel_distance_consistency():
+    l1, l2 = _n_diags(9), _n_diags(11)
+    for kernelName, (kernelClass, kernelParams, tolerance) in kernel_dict.items():
+        _ = kernelClass.fit(l1)
+        f2 = kernelClass.transform(l2)
+        f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
+        assert f12 == pytest.approx(f2, **tolerance)
+
+def test_sliced_wasserstein_distance_value():
+    diag1 = np.array([[0., 1.], [0., 2.]])
+    diag2 = np.array([[1., 0.]])
+    SWD = SlicedWassersteinDistance(num_directions=2)
+    distance = SWD(diag1, diag2)
+    assert distance == pytest.approx(2., abs=1e-8)
 
 
 # Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
@@ -161,7 +212,7 @@ def test_entropy_miscalculation():
         return -np.dot(l, np.log(l))
     sce = Entropy(mode="scalar")
     assert [[pe(diag_ex)]] == sce.fit_transform([diag_ex])
-    sce = Entropy(mode="vector", resolution=4, normalized=False)
+    sce = Entropy(mode="vector", resolution=4, normalized=False, keep_endpoints=True)
     pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
            -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
            -1/2*np.log(1/2), 
@@ -170,7 +221,7 @@ def test_entropy_miscalculation():
     sce = Entropy(mode="vector", resolution=4, normalized=True)
     pefN = (sce.fit_transform([diag_ex]))[0]
     area = np.linalg.norm(pefN, ord=1)
-    assert area==1
+    assert area==pytest.approx(1)
         
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
@@ -249,5 +300,21 @@ def test_landscape_nan_range():
     dgm = np.array([[2., 6.], [3., 5.]])
     lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
     lds_dgm = lds(dgm)
-    assert (lds.sample_range[0] == 2) & (lds.sample_range[1] == 6)
+    assert (lds.sample_range_fixed[0] == 2) & (lds.sample_range_fixed[1] == 6)
     assert lds.new_resolution == 10
+
+def test_endpoints():
+    diags = [ np.array([[2., 3.]]) ]
+    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+        vec.fit(diags)
+        assert vec.grid_[0] > 2 and vec.grid_[-1] < 3
+    for vec in [ Landscape(keep_endpoints=True), Silhouette(keep_endpoints=True), BettiCurve(keep_endpoints=True), Entropy(mode="vector", keep_endpoints=True)]:
+        vec.fit(diags)
+        assert vec.grid_[0] == 2 and vec.grid_[-1] == 3
+    vec = BettiCurve(resolution=None)
+    vec.fit(diags)
+    assert np.equal(vec.grid_, [-np.inf, 2., 3.]).all()
+
+def test_get_params():
+    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+        vec.get_params()

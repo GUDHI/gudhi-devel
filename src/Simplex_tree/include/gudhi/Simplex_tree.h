@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - Vincent Rouvreau: Add de/serialize methods for pickle feature
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -15,6 +16,7 @@
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
 #include <gudhi/Simplex_tree/indexing_tag.h>
+#include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::de/serialize_trivial
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
@@ -432,7 +434,7 @@ class Simplex_tree {
     null_vertex_ = std::move(complex_source.null_vertex_);
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
-    dimension_ = std::move(complex_source.dimension_);
+    dimension_ = complex_source.dimension_;
 
     // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
@@ -473,7 +475,7 @@ class Simplex_tree {
   /** \brief Checks if two simplex trees are equal. */
   bool operator==(Simplex_tree& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (dimension_ != st2.dimension_))
+        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
@@ -897,11 +899,13 @@ class Simplex_tree {
   }
 
   /** \brief Set a dimension for the simplicial complex.
-   *  \details This function must be used with caution because it disables dimension recomputation when required
-   * (this recomputation can be triggered by `remove_maximal_simplex()` or `prune_above_filtration()`).
+   *  \details
+   *  If `exact` is false, `dimension` is only an upper bound on the dimension of the complex.
+   *  This function must be used with caution because it disables or limits the on-demand recomputation of the dimension
+   * (the need for recomputation can be caused by `remove_maximal_simplex()` or `prune_above_filtration()`).
    */
-  void set_dimension(int dimension) {
-    dimension_to_be_lowered_ = false;
+  void set_dimension(int dimension, bool exact=true) {
+    dimension_to_be_lowered_ = !exact;
     dimension_ = dimension;
   }
 
@@ -1740,6 +1744,150 @@ class Simplex_tree {
         rec_reset_filtration(sh->second.children(), filt_value, min_depth - 1);
       }
     }
+  }
+
+ public:
+   /** @private @brief Returns the serialization required buffer size.
+   * 
+   * @return The exact serialization required size in number of bytes.
+   * 
+   * @warning It is meant to return the same size with the same SimplexTreeOptions and on a computer with the same
+   *   architecture.
+   */
+  std::size_t get_serialization_size() {
+    const std::size_t vh_byte_size = sizeof(Vertex_handle);
+    const std::size_t fv_byte_size = SimplexTreeOptions::store_filtration ? sizeof(Filtration_value) : 0;
+    const std::size_t buffer_byte_size = vh_byte_size + num_simplices() * (fv_byte_size + 2 * vh_byte_size);
+#ifdef DEBUG_TRACES
+      std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
+#endif  // DEBUG_TRACES
+    return buffer_byte_size;
+  }
+  
+  /** @private @brief Serialize the Simplex tree - Flatten it in a user given array of char
+   * 
+   * @param[in] buffer An array of char allocated with enough space (cf. Gudhi::simplex_tree::get_serialization_size)
+   * @param[in] buffer_size The buffer size.
+   * 
+   * @exception std::invalid_argument If serialization does not match exactly the buffer_size value.
+   * 
+   * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
+   * SimplexTreeOptions and on a computer with the same architecture.
+   */
+  /* Let's take the following simplicial complex as example:         */
+  /* (vertices are represented as letters to ease the understanding) */
+  /*  o---o---o */
+  /*  a   b\X/c */
+  /*        o   */
+  /*        d   */
+  /* The simplex tree is: */
+  /* a o  b o     c o   d o   */
+  /*   |    |\      |         */
+  /* b o  c o o d   o d       */
+  /*        |                 */
+  /*      d o                 */
+  /* The serialization is (without filtration values that comes right after vertex handle value):                    */
+  /* 04(number of vertices)0a 0b 0c 0d(list of vertices)01(number of [a] children)0b([a,b] simplex)                  */
+  /* 00(number of [a,b] children)02(number of [b] children)0c 0d(list of [b] children)01(number of [b,c] children)   */
+  /* 0d(list of [b,c] children)00(number of [b,c,d] children)00(number of [b,d] children)01(number of [c] children)  */
+  /* 0d(list of [c] children)00(number of [b,d] children)00(number of [d] children)                                  */
+  /* Without explanation and with filtration values:                                                                 */
+  /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
+  void serialize(char* buffer, const std::size_t buffer_size) {
+    char* buffer_end = rec_serialize(&root_, buffer);
+    if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
+      throw std::invalid_argument("Serialization does not match end of buffer");
+  }
+
+ private:
+  /** \brief Serialize each element of the sibling and recursively call serialization. */
+  char* rec_serialize(Siblings *sib, char* buffer) {
+    char* ptr = buffer;
+    ptr = Gudhi::simplex_tree::serialize_trivial(static_cast<Vertex_handle>(sib->members().size()), ptr);
+#ifdef DEBUG_TRACES
+    std::clog << "\n" << sib->members().size() << " : ";
+#endif  // DEBUG_TRACES
+    for (auto& map_el : sib->members()) {
+      ptr = Gudhi::simplex_tree::serialize_trivial(map_el.first, ptr); // Vertex
+      if (Options::store_filtration)
+        ptr = Gudhi::simplex_tree::serialize_trivial(map_el.second.filtration(), ptr); // Filtration
+#ifdef DEBUG_TRACES
+      std::clog << " [ " << map_el.first << " | " << map_el.second.filtration() << " ] ";
+#endif  // DEBUG_TRACES
+    }
+    for (auto& map_el : sib->members()) {
+      if (has_children(&map_el)) {
+        ptr = rec_serialize(map_el.second.children(), ptr);
+      } else {
+        ptr = Gudhi::simplex_tree::serialize_trivial(static_cast<Vertex_handle>(0), ptr);
+#ifdef DEBUG_TRACES
+        std::cout << "\n0 : ";
+#endif  // DEBUG_TRACES
+      }
+    }
+    return ptr;
+  }
+
+ public:
+  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
+   * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
+   * 
+   * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
+   * @param[in] buffer_size The size of the buffer.
+   * 
+   * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
+   * 
+   * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
+   * SimplexTreeOptions and on a computer with the same architecture.
+   * 
+   */
+  void deserialize(const char* buffer, const std::size_t buffer_size) {
+    GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
+    const char* ptr = buffer;
+    // Needs to read size before recursivity to manage new siblings for children
+    Vertex_handle members_size;
+    ptr = Gudhi::simplex_tree::deserialize_trivial(members_size, ptr);
+    ptr = rec_deserialize(&root_, members_size, ptr, 0);
+    if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
+      throw std::invalid_argument("Deserialization does not match end of buffer");
+    }
+  }
+
+ private:
+  /** \brief Serialize each element of the sibling and recursively call serialization. */
+  const char* rec_deserialize(Siblings *sib, Vertex_handle members_size, const char* ptr, int dim) {
+    // In case buffer is just a 0 char
+    if (members_size > 0) {
+      sib->members_.reserve(members_size);
+      Vertex_handle vertex;
+      Filtration_value filtration;
+      for (Vertex_handle idx = 0; idx < members_size; idx++) {
+        ptr = Gudhi::simplex_tree::deserialize_trivial(vertex, ptr);
+        if (Options::store_filtration) {
+          ptr = Gudhi::simplex_tree::deserialize_trivial(filtration, ptr);
+          // Default is no children
+          sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib, filtration));
+        } else {
+          // Default is no children
+          sib->members_.emplace_hint(sib->members_.end(), vertex, Node(sib));
+        }
+      }
+      Vertex_handle child_size;
+      for (auto& map_el : sib->members()) {
+        ptr = Gudhi::simplex_tree::deserialize_trivial(child_size, ptr);
+        if (child_size > 0) {
+          Siblings* child = new Siblings(sib, map_el.first);
+          map_el.second.assign_children(child);
+          ptr = rec_deserialize(child, child_size, ptr, dim + 1);
+        }
+      }
+      if (dim > dimension_) {
+        // Update dimension if needed
+        dimension_ = dim;
+      }
+    }
+    return ptr;
   }
 
  private:

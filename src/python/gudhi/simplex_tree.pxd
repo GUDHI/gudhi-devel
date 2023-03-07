@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython cimport numeric
@@ -56,7 +57,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         int upper_bound_dimension() nogil
         bool find_simplex(vector[int] simplex) nogil
         bool insert(vector[int] simplex, double filtration) nogil
-        void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) nogil
+        void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) nogil except +
+        void insert_batch_vertices(vector[int] v, double f) nogil except +
         vector[pair[vector[int], double]] get_star(vector[int] simplex) nogil
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex, int dimension) nogil
         void expansion(int max_dim) nogil except +
@@ -79,6 +81,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         # Expansion with blockers
         ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
         void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
+        void serialize(char* buffer, const size_t buffer_size) nogil except +
+        void deserialize(const char* buffer, const size_t buffer_size) nogil except +
+        size_t get_serialization_size() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":

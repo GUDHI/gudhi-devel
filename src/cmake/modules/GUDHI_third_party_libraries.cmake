@@ -173,14 +173,9 @@ if (WITH_GUDHI_PYTHON)
   if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
     if(SPHINX_FOUND)
       # Documentation generation is available through sphinx
-      find_program( SPHINX_PATH sphinx-build )
-  
-      if(NOT SPHINX_PATH)
-        if(PYTHON_VERSION_MAJOR EQUAL 3)
-          # In Python3, just hack sphinx-build if it does not exist
-          set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "-m" "sphinx.cmd.build")
-        endif(PYTHON_VERSION_MAJOR EQUAL 3)
-      endif(NOT SPHINX_PATH)
+      #find_program( SPHINX_PATH sphinx-build )
+      # Calling sphinx-build may use a different version of python and fail
+      set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "-m" "sphinx.cmd.build")
     endif(SPHINX_FOUND)
   endif(PYTHONINTERP_FOUND AND CYTHON_FOUND)
 endif (WITH_GUDHI_PYTHON)
