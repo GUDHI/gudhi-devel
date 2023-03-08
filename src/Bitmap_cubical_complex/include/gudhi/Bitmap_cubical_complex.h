@@ -11,6 +11,7 @@
 #ifndef BITMAP_CUBICAL_COMPLEX_H_
 #define BITMAP_CUBICAL_COMPLEX_H_
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Bitmap_cubical_complex_base.h>
 #include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h>
 
@@ -70,7 +71,6 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
     std::clog << "Bitmap_cubical_complex( const char* perseus_style_file )\n";
 #endif
-    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
@@ -87,7 +87,6 @@ class Bitmap_cubical_complex : public T {
                          const std::vector<Filtration_value>& cells,
                          bool input_top_cells = true)
       : T(dimensions, cells, input_top_cells), key_associated_to_simplex(num_simplices()) {
-    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
@@ -107,7 +106,6 @@ class Bitmap_cubical_complex : public T {
                          bool input_top_cells = true)
       : T(dimensions, cells, directions_in_which_periodic_b_cond_are_to_be_imposed, input_top_cells),
         key_associated_to_simplex(num_simplices()) {
-    std::iota(key_associated_to_simplex.begin(), key_associated_to_simplex.end(), std::size_t(0));
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
@@ -183,23 +181,19 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_key key(const Simplex_handle& sh)\n";
 #endif
-    if (sh != null_simplex()) {
-      return this->key_associated_to_simplex[sh];
-    }
-    return this->null_key();
+    GUDHI_CHECK(sh != null_simplex(), std::invalid_argument("key(null_simplex()) is not supported"));
+    return this->key_associated_to_simplex[sh];
   }
 
   /**
-   * Return the Simplex_handle given the key of the cube.
+   * Return the k-th Simplex_handle in filtration order.
    **/
-  Simplex_handle simplex(Simplex_key key) {
+  Simplex_handle simplex(Simplex_key k) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_handle simplex(Simplex_key key)\n";
 #endif
-    if (key != null_key()) {
-      return this->simplex_associated_to_key[key];
-    }
-    return null_simplex();
+    GUDHI_CHECK (k != null_key(), std::invalid_argument("simplex(null_key()) is not supported"));
+    return this->simplex_associated_to_key[k];
   }
 
   /**
@@ -209,9 +203,8 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
     std::clog << "void assign_key(Simplex_handle& sh, Simplex_key key)\n";
 #endif
-    if (key == null_key()) return;
+    GUDHI_CHECK(sh != null_simplex(), std::invalid_argument("assign_key(null_simplex()) is not supported"));
     this->key_associated_to_simplex[sh] = key;
-    this->simplex_associated_to_key[key] = sh;
   }
 
   /**
@@ -529,11 +522,6 @@ void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
 #else
   std::sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(), is_before_in_filtration<T>(this));
 #endif
-
-  // we still need to deal here with a key_associated_to_simplex:
-  for (std::size_t i = 0; i != simplex_associated_to_key.size(); ++i) {
-    this->key_associated_to_simplex[simplex_associated_to_key[i]] = i;
-  }
 }
 
 template <typename T>
