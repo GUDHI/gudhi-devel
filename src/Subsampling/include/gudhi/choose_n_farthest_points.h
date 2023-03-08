@@ -20,8 +20,9 @@
 
 #include <iterator>
 #include <vector>
+#include <utility>
 #include <random>
-#include <limits>  // for numeric_limits<>
+#include <limits>
 
 namespace Gudhi {
 
@@ -90,7 +91,7 @@ void choose_n_farthest_points(Distance dist,
 
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
   typedef double FT;
-  static_assert(std::numeric_limits<double>::has_infinity, "the number type needs to support infinity()");
+  static_assert(std::numeric_limits<FT>::has_infinity, "the number type needs to support infinity()");
 
   *output_it++ = input_pts[starting_point];
   *dist_it++ = std::numeric_limits<FT>::infinity();
@@ -303,10 +304,8 @@ void choose_n_farthest_points_metric(Distance dist_,
         // to avoid a costly test for each w in the loop above, but it does not seem to help.
         update_radius(ngb);
         // if (ngb_info.voronoi.empty()) radius_priority.erase(ngb_info.position_in_queue);
-        return true;
-      } else {
-        return false;
       }
+      // We could easily return true/false here to say whether anything was modified, if useful.
     };
     auto handle_neighbor_neighbors = [&](std::size_t ngb)
     {
