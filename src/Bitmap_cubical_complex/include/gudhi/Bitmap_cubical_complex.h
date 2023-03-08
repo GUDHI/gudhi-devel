@@ -74,7 +74,7 @@ class Bitmap_cubical_complex : public T {
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
-    this->initialize_simplex_associated_to_key();
+    this->initialize_filtration();
   }
 
   /**
@@ -90,7 +90,7 @@ class Bitmap_cubical_complex : public T {
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
-    this->initialize_simplex_associated_to_key();
+    this->initialize_filtration();
   }
 
   /**
@@ -109,7 +109,7 @@ class Bitmap_cubical_complex : public T {
     // we initialize this only once, in each constructor, when the bitmap is constructed.
     // If the user decide to change some elements of the bitmap, then this procedure need
     // to be called again.
-    this->initialize_simplex_associated_to_key();
+    this->initialize_filtration();
   }
 
   /**
@@ -193,7 +193,7 @@ class Bitmap_cubical_complex : public T {
     std::clog << "Simplex_handle simplex(Simplex_key key)\n";
 #endif
     GUDHI_CHECK (k != null_key(), std::invalid_argument("simplex(null_key()) is not supported"));
-    return this->simplex_associated_to_key[k];
+    return this->sorted_cells[k];
   }
 
   /**
@@ -210,7 +210,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Function called from a constructor. It is needed for Filtration_simplex_iterator to work.
    **/
-  void initialize_simplex_associated_to_key();
+  void initialize_filtration();
 
   //*********************************************//
   // Iterators
@@ -284,7 +284,7 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
       std::clog << "Simplex_handle operator*()\n";
 #endif
-      return this->b->simplex_associated_to_key[this->position];
+      return this->b->sorted_cells[this->position];
     }
 
     friend class Filtration_simplex_range;
@@ -318,7 +318,7 @@ class Bitmap_cubical_complex : public T {
       std::clog << "Filtration_simplex_iterator end()\n";
 #endif
       Filtration_simplex_iterator it(this->b);
-      it.position = this->b->simplex_associated_to_key.size();
+      it.position = this->b->sorted_cells.size();
       return it;
     }
 
@@ -506,21 +506,21 @@ class Bitmap_cubical_complex : public T {
 
  protected:
   std::vector<std::size_t> key_associated_to_simplex;
-  std::vector<std::size_t> simplex_associated_to_key;
+  std::vector<std::size_t> sorted_cells;
 };  // Bitmap_cubical_complex
 
 template <typename T>
-void Bitmap_cubical_complex<T>::initialize_simplex_associated_to_key() {
+void Bitmap_cubical_complex<T>::initialize_filtration() {
 #ifdef DEBUG_TRACES
   std::clog << "void Bitmap_cubical_complex<T>::initialize_elements_ordered_according_to_filtration() \n";
 #endif
-  this->simplex_associated_to_key = std::vector<std::size_t>(this->data.size());
-  std::iota(std::begin(simplex_associated_to_key), std::end(simplex_associated_to_key), 0);
+  this->sorted_cells = std::vector<std::size_t>(this->data.size());
+  std::iota(std::begin(sorted_cells), std::end(sorted_cells), 0);
 #ifdef GUDHI_USE_TBB
-  tbb::parallel_sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(),
+  tbb::parallel_sort(sorted_cells.begin(), sorted_cells.end(),
                      is_before_in_filtration<T>(this));
 #else
-  std::sort(simplex_associated_to_key.begin(), simplex_associated_to_key.end(), is_before_in_filtration<T>(this));
+  std::sort(sorted_cells.begin(), sorted_cells.end(), is_before_in_filtration<T>(this));
 #endif
 }
 
