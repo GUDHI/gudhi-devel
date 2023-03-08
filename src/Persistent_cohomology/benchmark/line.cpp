@@ -14,9 +14,6 @@
 #include <gudhi/Persistence_on_a_line.h>
 #include <gudhi/Clock.h>
 
-#include <boost/range/iterator_range.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-
 #include <vector>
 #include <cstdlib>
 #include <random>

@@ -14,6 +14,7 @@
 #include <vector>
 #include <limits>
 #include <type_traits>
+#include <stdexcept>
 #include <gudhi/Debug_utils.h>
 
 namespace Gudhi::persistent_cohomology {
@@ -104,7 +105,7 @@ state312:
     } else {
       out(data.end()[-2], data.end()[-3]);
       data.erase(data.end()-3, data.end());
-      GUDHI_CHECK (!data.empty(), "Logic error");
+      GUDHI_CHECK (!data.empty(), std::logic_error("Bug in Gudhi"));
       goto up;
     }
   } else {
