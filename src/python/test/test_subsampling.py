@@ -51,7 +51,8 @@ def test_simple_choose_n_farthest_points_with_a_starting_point():
 
         # From off file test
         for i in range(0, 7):
-            assert len(gudhi.choose_n_farthest_points(off_file="subsample.off", nb_points=i, starting_point=i, fast=fast)) == i
+            r = gudhi.choose_n_farthest_points(off_file="subsample.off", nb_points=i, starting_point=i, fast=fast)
+            assert len(r) == i
 
     points = np.random.rand(100, 2)
     r1 = gudhi.choose_n_farthest_points(points=points, nb_points=10, starting_point=17, fast=False)
@@ -133,5 +134,3 @@ def test_simple_sparsify_points():
     else:
         with pytest.raises(NotImplementedError):
             gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.0)
-
-
