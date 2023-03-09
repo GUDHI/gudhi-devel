@@ -278,6 +278,7 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed;
 
   void set_up_containers(const std::vector<unsigned>& sizes, bool is_pos_inf) {
+    // The fact that multipliers[0]=1 is relied on by optimizations in other functions
     unsigned multiplier = 1;
     for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
