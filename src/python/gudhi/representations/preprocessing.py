@@ -201,7 +201,7 @@ class Padding(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         """
-        Fit the Padding class on a list of persistence diagrams (this function actually does nothing but is useful when Padding is included in a scikit-learn Pipeline).
+        Fit the Padding class on a list of persistence diagrams.
 
         Parameters:
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
