@@ -60,6 +60,7 @@ def _persistence_scale_space_kernel(D1, D2, kernel_approx=None, bandwidth=1.):
     weight_pss = lambda x: 1 if x[1] >= x[0] else -1
     return 0.5 * _persistence_weighted_gaussian_kernel(DD1, DD2, weight=weight_pss, kernel_approx=kernel_approx, bandwidth=bandwidth)
 
+
 def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein", n_jobs=None, **kwargs):
     """
     This function computes the kernel matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
@@ -79,7 +80,7 @@ def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein",
     if kernel == "sliced_wasserstein":
         return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="sliced_wasserstein", num_directions=kwargs["num_directions"], n_jobs=n_jobs) / kwargs["bandwidth"])
     elif kernel == "persistence_fisher":
-        return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="persistence_fisher", kernel_approx=kwargs["kernel_approx"], bandwidth=kwargs["bandwidth"], n_jobs=n_jobs) / kwargs["bandwidth_fisher"])
+        return np.exp(-pairwise_persistence_diagram_distances(X, Y, metric="persistence_fisher", kernel_approx=kwargs["kernel_approx"], bandwidth=kwargs["bandwidth_fisher"], n_jobs=n_jobs) / kwargs["bandwidth"])
     elif kernel == "persistence_scale_space":
         return _pairwise(pairwise_kernels, False, XX, YY, metric=_sklearn_wrapper(_persistence_scale_space_kernel, X, Y, **kwargs), n_jobs=n_jobs)
     elif kernel == "persistence_weighted_gaussian":
@@ -123,7 +124,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise sliced Wasserstein kernel values.
+            numpy array of shape (number of diagrams in X) x (number of diagrams in **diagrams**): matrix of pairwise sliced Wasserstein kernel values.
         """
         return pairwise_persistence_diagram_kernels(X, self.diagrams_, kernel="sliced_wasserstein", bandwidth=self.bandwidth, num_directions=self.num_directions, n_jobs=self.n_jobs)
 
@@ -138,7 +139,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
         Returns:
             float: sliced Wasserstein kernel value.
         """
-        return np.exp(-_sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions)) / self.bandwidth
+        return np.exp(-_sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions) / self.bandwidth)
 
 class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
     """
@@ -177,7 +178,7 @@ class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence weighted Gaussian kernel values.
+            numpy array of shape (number of diagrams in X) x (number of diagrams in **diagrams**): matrix of pairwise persistence weighted Gaussian kernel values.
         """
         return pairwise_persistence_diagram_kernels(X, self.diagrams_, kernel="persistence_weighted_gaussian", bandwidth=self.bandwidth, weight=self.weight, kernel_approx=self.kernel_approx, n_jobs=self.n_jobs)
 
@@ -229,7 +230,7 @@ class PersistenceScaleSpaceKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence scale space kernel values.
+            numpy array of shape (number of diagrams in X) x (number of diagrams in **diagrams**): matrix of pairwise persistence scale space kernel values.
         """
         return pairwise_persistence_diagram_kernels(X, self.diagrams_, kernel="persistence_scale_space", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx, n_jobs=self.n_jobs)
 
@@ -283,7 +284,7 @@ class PersistenceFisherKernel(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher kernel values.
+            numpy array of shape (number of diagrams in X) x (number of diagrams in **diagrams**): matrix of pairwise persistence Fisher kernel values.
         """
         return pairwise_persistence_diagram_kernels(X, self.diagrams_, kernel="persistence_fisher", bandwidth=self.bandwidth, bandwidth_fisher=self.bandwidth_fisher, kernel_approx=self.kernel_approx, n_jobs=self.n_jobs)
 
@@ -298,5 +299,5 @@ class PersistenceFisherKernel(BaseEstimator, TransformerMixin):
         Returns:
             float: persistence Fisher kernel value.
         """
-        return np.exp(-_persistence_fisher_distance(diag1, diag2, bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)) / self.bandwidth_fisher
+        return np.exp(-_persistence_fisher_distance(diag1, diag2, bandwidth=self.bandwidth_fisher, kernel_approx=self.kernel_approx) / self.bandwidth)
 

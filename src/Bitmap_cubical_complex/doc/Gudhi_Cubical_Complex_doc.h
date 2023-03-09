@@ -76,7 +76,8 @@ namespace cubical_complex {
  * \section inputformat Input Format
  *
  * In the current implementation, filtration is given at the maximal cubes, and it is then extended by the lower star
- * filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
+ * filtration to all cubes. Alternatively, it is also possible to give the filtration at the vertices and extend it to
+ * all cubes. There are a number of constructors that can be used to construct cubical complex by users
  * who want to use the code directly. They can be found in the \a Bitmap_cubical_complex class.
  * Currently one input from a text file is used. It uses a format inspired from the Perseus software
  * (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.

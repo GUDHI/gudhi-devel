@@ -373,6 +373,11 @@ class Alpha_complex {
                       Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
                       bool exact = false,
                       bool default_filtration_value = false) {
+    // Filtration_value must be capable to represent the special value "Not-A-Number"
+    static_assert(std::numeric_limits<Filtration_value>::has_quiet_NaN);
+    // To support more general types for Filtration_value
+    using std::isnan;
+
     // From SimplicialComplexForAlpha type required to insert into a simplicial complex (with or without subfaces).
     using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
     using Simplex_handle = typename SimplicialComplexForAlpha::Simplex_handle;
@@ -400,7 +405,7 @@ class Alpha_complex {
         std::clog << "SimplicialComplex insertion " << vertex << std::endl;
 #endif  // DEBUG_TRACES
         one_vertex[0] = vertex;
-        complex.insert_simplex_and_subfaces(one_vertex, std::numeric_limits<double>::quiet_NaN());
+        complex.insert_simplex_and_subfaces(one_vertex, std::numeric_limits<Filtration_value>::quiet_NaN());
       }
 
       for (auto cit = triangulation_->finite_full_cells_begin();
@@ -423,7 +428,7 @@ class Alpha_complex {
         std::clog << std::endl;
 #endif  // DEBUG_TRACES
         // Insert each simplex and its subfaces in the simplex tree - filtration is NaN
-        complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<double>::quiet_NaN());
+        complex.insert_simplex_and_subfaces(vertexVector, std::numeric_limits<Filtration_value>::quiet_NaN());
       }
     }
     // --------------------------------------------------------------------------------------------
@@ -438,7 +443,7 @@ class Alpha_complex {
           int f_simplex_dim = complex.dimension(f_simplex);
           if (decr_dim == f_simplex_dim) {
             // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-            if (std::isnan(complex.filtration(f_simplex))) {
+            if (isnan(complex.filtration(f_simplex))) {
               Filtration_value alpha_complex_filtration = 0.0;
               // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
               if (Weighted || f_simplex_dim > 0) {
@@ -480,6 +485,8 @@ class Alpha_complex {
   void propagate_alpha_filtration(SimplicialComplexForAlpha& complex, Simplex_handle f_simplex) {
     // From SimplicialComplexForAlpha type required to assign filtration values.
     using Filtration_value = typename SimplicialComplexForAlpha::Filtration_value;
+    // To support more general types for Filtration_value
+    using std::isnan;
 
     // ### Foreach Tau face of Sigma
     for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(f_simplex)) {
@@ -491,10 +498,10 @@ class Alpha_complex {
         std::clog << vertex << " ";
       }
       std::clog << "is a face of Sigma\n";
-      std::clog << " | isnan(complex.filtration(Tau)=" << std::isnan(complex.filtration(f_boundary)) << std::endl;
+      std::clog << " | isnan(complex.filtration(Tau)=" << isnan(complex.filtration(f_boundary)) << std::endl;
 #endif  // DEBUG_TRACES
       // ### If filt(Tau) is not NaN
-      if (!std::isnan(complex.filtration(f_boundary))) {
+      if (!isnan(complex.filtration(f_boundary))) {
         // ### filt(Tau) = fmin(filt(Tau), filt(Sigma))
         Filtration_value alpha_complex_filtration = fmin(complex.filtration(f_boundary),
                                                                              complex.filtration(f_simplex));

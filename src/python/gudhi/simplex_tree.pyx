@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
@@ -797,6 +798,39 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+    
+    def __getstate__(self):
+        """Pickle the SimplexTree data structure as a Python Byte Array
+        :raises MemoryError: In the case the serialization allocates a too large block of memory.
+        :returns: Serialized SimplexTree data structure
+        :rtype: numpy.array of shape (n,)
+        """
+        cdef size_t buffer_size = self.get_ptr().get_serialization_size()
+        # Let's use numpy to allocate a buffer. Will be deleted automatically
+        np_buffer = np.empty(buffer_size, dtype='B')
+        cdef char[:] buffer = np_buffer
+        cdef char* buffer_start = &buffer[0]
+        with nogil:
+            self.get_ptr().serialize(buffer_start, buffer_size)
+        
+        return np_buffer
+
+    def __setstate__(self, state):
+        """Construct the SimplexTree data structure from a Python Byte Array
+        :param state: Serialized SimplexTree data structure
+        :type state: numpy.array of shape (n,)
+        """
+        cdef char[:] buffer = state
+        cdef size_t buffer_size = state.shape[0]
+        cdef char* buffer_start = &buffer[0]
+        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        del ptr
+        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+        with nogil:
+            # New pointer is a deserialized simplex tree
+            self.get_ptr().deserialize(buffer_start, buffer_size)
+
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

@@ -23,7 +23,7 @@ struct SimplicialComplexForAlpha {
   typedef unspecified Simplex_handle;
   /** Handle to specify a vertex. Must be a non-negative integer. */
   typedef unspecified Vertex_handle;
-  /** Handle to specify the simplex filtration value. */
+  /** Simplex filtration value type. Must be capable to represent the special value "Not-A-Number"*/
   typedef unspecified Filtration_value;
 
   /** Returns the number of vertices in the simplicial complex. */
