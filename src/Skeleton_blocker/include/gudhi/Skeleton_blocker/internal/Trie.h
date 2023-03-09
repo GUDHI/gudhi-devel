@@ -150,7 +150,7 @@ struct Trie {
     ++s_pos;
     while (s_pos != s.end() && current != 0) {
       bool found = false;
-      for (const auto child : current->childs) {
+	  for (const auto& child : current->childs) {
         if (child->v == *s_pos) {
           ++s_pos;
           current = child.get();

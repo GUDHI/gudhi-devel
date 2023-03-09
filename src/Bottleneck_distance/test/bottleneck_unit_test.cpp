@@ -159,3 +159,81 @@ BOOST_AUTO_TEST_CASE(global) {
   BOOST_CHECK(bottleneck_distance(empty, empty) == 0);
   BOOST_CHECK(bottleneck_distance(empty, one) == 1);
 }
+
+BOOST_AUTO_TEST_CASE(neg_global) {
+  std::uniform_real_distribution<double> unif1(0., upper_bound);
+  std::uniform_real_distribution<double> unif2(upper_bound / 10000., upper_bound / 100.);
+  std::default_random_engine re;
+  std::vector< std::pair<double, double> > v1, v2;
+  for (int i = 0; i < n1; i++) {
+    double a = std::log(unif1(re));
+    double b = std::log(unif1(re));
+    double x = std::log(unif2(re));
+    double y = std::log(unif2(re));
+    v1.emplace_back(std::min(a, b), std::max(a, b));
+    v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
+    if (i % 5 == 0)
+      v1.emplace_back(std::min(a, b), std::min(a, b) + x);
+    if (i % 3 == 0)
+      v2.emplace_back(std::max(a, b), std::max(a, b) + y);
+  }
+  BOOST_CHECK(bottleneck_distance(v1, v2, 0.) <= upper_bound / 100.);
+  BOOST_CHECK(bottleneck_distance(v1, v2, upper_bound / 10000.) <= upper_bound / 100. + upper_bound / 10000.);
+  BOOST_CHECK(std::abs(bottleneck_distance(v1, v2, 0.) - bottleneck_distance(v1, v2, upper_bound / 10000.)) <= upper_bound / 10000.);
+
+  std::vector< std::pair<double, double> > empty;
+  std::vector< std::pair<double, double> > one = {{8, 10}};
+  BOOST_CHECK(bottleneck_distance(empty, empty) == 0);
+  BOOST_CHECK(bottleneck_distance(empty, one) == 1);
+}
+
+BOOST_AUTO_TEST_CASE(bottleneck_simple_test) {
+  std::vector< std::pair<double, double> > v1, v2;
+  double inf = std::numeric_limits<double>::infinity();
+  double neginf = -inf;
+  double b;
+
+  v1.emplace_back(9.6, 14.);
+  v2.emplace_back(9.5, 14.1);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.09 && b < 0.11);
+
+  v1.emplace_back(-34.974, -34.2);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.386 && b < 0.388);
+
+  v1.emplace_back(neginf, 3.7);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK_EQUAL(b, inf);
+
+  v2.emplace_back(neginf, 4.45);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.74 && b < 0.76);
+
+  v1.emplace_back(-60.6, 52.1);
+  v2.emplace_back(-61.5, 53.);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.89 && b < 0.91);
+
+  v1.emplace_back(3., inf);
+  v2.emplace_back(3.2, inf);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.89 && b < 0.91);
+
+  v1.emplace_back(neginf, inf);
+  v2.emplace_back(neginf, inf);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK(b > 0.89 && b < 0.91);
+
+  v2.emplace_back(6, inf);
+
+  b = Gudhi::persistence_diagram::bottleneck_distance(v1, v2, 0.);
+  BOOST_CHECK_EQUAL(b, inf);
+}

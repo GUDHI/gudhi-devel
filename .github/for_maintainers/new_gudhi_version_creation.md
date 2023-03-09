@@ -6,6 +6,16 @@ git clone https://github.com/GUDHI/gudhi-devel.git
 cd gudhi-devel
 ```
 
+## Release note
+
+Verify that [.github/next_release.md](.github/next_release.md) is up-to-date with the development performed on the release.
+Also check [.github/changelog.md](.github/changelog.md) is appended with the release note.
+
+## Unlabelled issues and pull requests
+
+Check there are no [unlabelled closed issues](https://github.com/GUDHI/gudhi-devel/issues?q=is%3Aissue+is%3Aclosed+no%3Alabel)
+nor [unlabelled closed PRs](https://github.com/GUDHI/gudhi-devel/pulls?q=is%3Apr+is%3Aclosed+no%3Alabel) related to the release.
+
 ## Version file modification
 
 **Edit the file CMakeGUDHIVersion.txt**, and increment major, minor, or patch version number, in function of the version new delivery.
@@ -18,11 +28,10 @@ Checkin the modifications, build and test the version:
 ```bash
 git submodule update --init
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
 make user_version
 date +"%d-%m-%Y-%T" > gudhi.@GUDHI_VERSION@/timestamp.txt
 tar -czvf gudhi.@GUDHI_VERSION@.tar.gz gudhi.@GUDHI_VERSION@
-md5sum gudhi.@GUDHI_VERSION@.tar.gz > md5sum.txt
 sha256sum gudhi.@GUDHI_VERSION@.tar.gz > sha256sum.txt
 sha512sum gudhi.@GUDHI_VERSION@.tar.gz > sha512sum.txt
 
@@ -87,7 +96,7 @@ Copy gudhi WebDAV python/@GUDHI_VERSION@ as python/latest (no symbolic link with
 * Name the tag: tags/gudhi-release-@GUDHI_VERSION@
 * Name the release GUDHI @GUDHI_VERSION@ release
 * Write the release note
-* Drag'n drop *gudhi.@GUDHI_VERSION@.tar.gz*, *md5sum.txt*, *sha256sum.txt*, *sha512sum.txt* files
+* Drag'n drop *gudhi.@GUDHI_VERSION@.tar.gz*, *sha256sum.txt*, *sha512sum.txt* files
 * Tick the *This is a pre-release* check button if this is a release candidate (untick if this is an official version)
 * Click the *Publish the release* button
 
@@ -128,3 +137,9 @@ docker image on docker hub.
 Send version mail to the following lists :
 * gudhi-devel@inria.fr
 * gudhi-users@inria.fr (not for release candidate)
+
+## File to update after the release
+
+**Edit the file CMakeGUDHIVersion.txt**, and increment major, minor, or patch version number, in function of the future version (something like `3.X+1.0a0`).
+
+Reset [.github/next_release.md](.github/next_release.md) with [.github/for_maintainers/next_release_template.md](.github/for_maintainers/next_release_template.md).

@@ -16,6 +16,7 @@
 #include <boost/program_options.hpp>
 
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
+#include <CGAL/Epick_d.h>  // For FAST version
 
 #include <string>
 #include <vector>
@@ -25,41 +26,66 @@
 using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_persistence>;
 using Filtration_value = Simplex_tree::Filtration_value;
 
-using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-using Point = typename Kernel::Point_d;
-using Points_off_reader = Gudhi::Points_off_reader<Point>;
-using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
 using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
-void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& max_radius, int& dim_max, int& p, Filtration_value& min_persistence);
+void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
+                     std::string& filediag, Filtration_value& max_radius, int& dim_max, int& p,
+                     Filtration_value& min_persistence);
+
+template<class Kernel>
+Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_version,
+                                 Filtration_value max_radius, int dim_max) {
+  using Point = typename Kernel::Point_d;
+  using Points_off_reader = Gudhi::Points_off_reader<Point>;
+  using Cech_complex = Gudhi::cech_complex::Cech_complex<Kernel, Simplex_tree>;
+
+  Simplex_tree stree;
+
+  Points_off_reader off_reader(off_file_points);
+  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), max_radius, exact_version);
+  cech_complex_from_file.create_complex(stree, dim_max);
+
+  return stree;
+}
 
 int main(int argc, char* argv[]) {
   std::string off_file_points;
   std::string filediag;
+  bool exact_version = false;
+  bool fast_version = false;
   Filtration_value max_radius;
   int dim_max;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, filediag, max_radius, dim_max, p, min_persistence);
+  program_options(argc, argv, off_file_points, exact_version, fast_version, filediag, max_radius, dim_max, p,
+                  min_persistence);
 
-  Points_off_reader off_reader(off_file_points);
-  Cech_complex cech_complex_from_file(off_reader.get_point_cloud(), max_radius);
+  if ((exact_version) && (fast_version)) {
+    std::cerr << "You cannot set the exact and the fast version." << std::endl;
+    exit(-1);
+  }
 
-  // Construct the Cech complex in a Simplex Tree
-  Simplex_tree simplex_tree;
+  Simplex_tree stree;
+  if (fast_version) {
+    // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
+    // (i.e. when the points are on a grid)
+    using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+    stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_radius, dim_max);
+  } else {
+    using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
+    stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_radius, dim_max);
+  }
 
-  cech_complex_from_file.create_complex(simplex_tree, dim_max);
-  std::clog << "The complex contains " << simplex_tree.num_simplices() << " simplices \n";
-  std::clog << "   and has dimension " << simplex_tree.dimension() << " \n";
+  std::clog << "The complex contains " << stree.num_simplices() << " simplices \n";
+  std::clog << "   and has dimension " << stree.dimension() << " \n";
 
   // Sort the simplices in the order of the filtration
-  simplex_tree.initialize_filtration();
+  stree.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  Persistent_cohomology pcoh(simplex_tree);
+  Persistent_cohomology pcoh(stree);
   // initializes the coefficient field for homology
   pcoh.init_coefficients(p);
 
@@ -77,8 +103,9 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void program_options(int argc, char* argv[], std::string& off_file_points, std::string& filediag,
-                     Filtration_value& max_radius, int& dim_max, int& p, Filtration_value& min_persistence) {
+void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
+                     std::string& filediag, Filtration_value& max_radius, int& dim_max, int& p,
+                     Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
   hidden.add_options()("input-file", po::value<std::string>(&off_file_points),
@@ -86,8 +113,12 @@ void program_options(int argc, char* argv[], std::string& off_file_points, std::
 
   po::options_description visible("Allowed options", 100);
   visible.add_options()("help,h", "produce help message")(
+      "exact,e", po::bool_switch(&exact),
+      "To activate exact version of Cech complex (default is false, not available if fast is set)")(
+      "fast,f", po::bool_switch(&fast),
+      "To activate fast version of Cech complex (default is false, not available if exact is set)")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-radius,r",
       po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
       "Maximal length of an edge for the Cech complex construction.")(

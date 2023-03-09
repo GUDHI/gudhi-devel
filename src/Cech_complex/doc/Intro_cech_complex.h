@@ -17,7 +17,7 @@ namespace cech_complex {
 
 /**  \defgroup cech_complex Čech complex
  * 
- * \author    Vincent Rouvreau
+ * \author    Vincent Rouvreau, Hind montassif
  * 
  * @{
  * 

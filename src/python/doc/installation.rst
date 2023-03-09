@@ -39,7 +39,7 @@ If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
 
-The library uses c++14 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
+The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
 Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
@@ -150,7 +150,7 @@ You shall have something like:
     Cython version 0.29.25 
     Numpy version 1.21.4 
     Boost version 1.77.0
-    + Installed modules are: off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+    + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
     + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
         euclidean_strong_witness_complex;
@@ -188,7 +188,7 @@ A complete configuration would be :
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 9107 found and used
-    + Installed modules are: bottleneck;off_reader;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
+    + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
     + Missing modules are: 
@@ -391,16 +391,18 @@ The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
 mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`SciPy <http://scipy.org>`_ as a backend if explicitly requested.
+`SciPy <http://scipy.org>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
 
 TensorFlow
 ----------
 
+:class:`~gudhi.tensorflow.perslay.Perslay` from the :doc:`persistence representations </representations>` module
+requires `TensorFlow <https://www.tensorflow.org/>`_.
 The :doc:`cubical complex </cubical_complex_tflow_itf_ref>`, :doc:`simplex tree </ls_simplex_tree_tflow_itf_ref>`
-and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow <https://www.tensorflow.org>`_
+and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow`_
 for incorporating them in neural nets. 
 
-`TensorFlow <https://www.tensorflow.org>`_ is also used in some automatic differentiation tests.
+`TensorFlow`_ is also used in some automatic differentiation tests.
 
 Bug reports and contributions
 *****************************

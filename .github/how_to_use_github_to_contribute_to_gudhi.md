@@ -17,7 +17,7 @@ You can see your fork at https://github.com/LOGIN/gudhi-devel
 
 ## Create a local clone on your computer
 ```bash
-git clone https://github.com/LOGIN/gudhi-devel.git
+git clone --recurse-submodules https://github.com/LOGIN/gudhi-devel.git
 ```
 
 This creates a directory gudhi-devel, which you are free to move around or rename. For the following, change to that directory:
@@ -25,16 +25,14 @@ This creates a directory gudhi-devel, which you are free to move around or renam
 cd gudhi-devel
 ```
 
-When you clone the repository, you also need to download the *submodules*.
-
 ## Submodules
-Hera, used for Wasserstein distance, is available on an external git repository. To download it:
+When you clone the repository, you also need to download the *submodules*. This is done automatically thanks to `--recurse-submodules`.
+If you forgot this option, you can still download them with
 ```bash
 git submodule update --init
 ```
 
-[gudhi-deploy](https://github.com/GUDHI/gudhi-deploy) is used for Continuous Integration python
-requirements and will also be downloaded by the above command.
+The submodules appear in the `ext/` subdirectory. There are currently 2, [Hera](https://github.com/anigmetov/hera) for distances between persistence diagrams, and [gudhi-deploy](https://github.com/GUDHI/gudhi-deploy) for Continuous Integration.
 
 ## Configuring a remote for a fork
 ```bash
@@ -68,6 +66,11 @@ It is safe, it will not mess with your files.
 git submodule sync
 git submodule update --init
 ```
+You can configure `git` to do this automatically with
+```bash
+git config submodule.recurse true
+```
+(add `--global` if you want it to apply to other projects as well)
 
 ## Create a branch, based on the current master
 ```bash

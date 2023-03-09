@@ -23,23 +23,27 @@ namespace Gudhi {
 
 namespace cubical_complex {
 
-template<typename CubicalComplexOptions = Bitmap_cubical_complex_base<double>>
-class Cubical_complex_interface : public Bitmap_cubical_complex<CubicalComplexOptions> {
+/* These classes are only needed to circumvent the protected access. */
+
+class Cubical_complex_interface : public Bitmap_cubical_complex<Bitmap_cubical_complex_base<double>> {
+  typedef Bitmap_cubical_complex<Bitmap_cubical_complex_base<double>> Base;
  public:
-  Cubical_complex_interface(const std::vector<unsigned>& dimensions,
-                            const std::vector<double>& top_dimensional_cells)
-  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells) {
-  }
+  using Base::Base; // inheriting constructors
+  using Base::data;
 
-  Cubical_complex_interface(const std::vector<unsigned>& dimensions,
-                            const std::vector<double>& top_dimensional_cells,
-                            const std::vector<bool>& periodic_dimensions)
-  : Bitmap_cubical_complex<CubicalComplexOptions>(dimensions, top_dimensional_cells, periodic_dimensions) {
-  }
+  // not const because cython does not handle const very well
+  std::vector<unsigned>& shape() { return this->sizes; };
+};
 
-  Cubical_complex_interface(const std::string& perseus_file)
-  : Bitmap_cubical_complex<CubicalComplexOptions>(perseus_file.c_str()) {
-  }
+class Periodic_cubical_complex_interface : public Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base<double>> {
+  typedef Bitmap_cubical_complex<Bitmap_cubical_complex_periodic_boundary_conditions_base<double>> Base;
+ public:
+  using Base::Base; // inheriting constructors
+  using Base::data;
+
+  // not const because cython does not handle const very well
+  std::vector<unsigned>& shape() { return this->sizes; };
+  std::vector<bool>& periodicities() { return this->directions_in_which_periodic_b_cond_are_to_be_imposed; }
 };
 
 }  // namespace cubical_complex

@@ -12,23 +12,28 @@ import gudhi as gd
 import numpy as np
 import matplotlib as plt
 import pytest
+import warnings
 
 
 def test_array_handler():
     diags = np.array([[1, 2], [3, 4], [5, 6]], float)
-    arr_diags = gd.persistence_graphical_tools._array_handler(diags)
+    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    assert nx2_array
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         np.testing.assert_array_equal(arr_diags[idx][1], diags[idx])
 
     diags = [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-    arr_diags = gd.persistence_graphical_tools._array_handler(diags)
+    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    assert nx2_array
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         assert arr_diags[idx][1] == diags[idx]
 
     diags = [(0, (1.0, 2.0)), (0, (3.0, 4.0)), (0, (5.0, 6.0))]
-    assert gd.persistence_graphical_tools._array_handler(diags) == diags
+    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    assert not nx2_array
+    assert arr_diags == diags
 
 
 def test_min_birth_max_death():
@@ -71,13 +76,13 @@ def test_limit_to_max_intervals():
         (0, (0.0, 0.106382)),
     ]
     # check no warnings if max_intervals equals to the diagrams number
-    with pytest.warns(None) as record:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         truncated_diags = gd.persistence_graphical_tools._limit_to_max_intervals(
             diags, 10, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         # check diagrams are not sorted
         assert truncated_diags == diags
-    assert len(record) == 0
 
     # check warning if max_intervals lower than the diagrams number
     with pytest.warns(UserWarning) as record:

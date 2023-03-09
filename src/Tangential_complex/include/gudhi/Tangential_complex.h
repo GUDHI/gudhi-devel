@@ -36,7 +36,6 @@
 #include <Eigen/Eigen>
 #include <Eigen/src/Core/util/Macros.h>  // for EIGEN_VERSION_AT_LEAST
 
-#include <boost/optional.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/counting_range.hpp>
@@ -56,6 +55,8 @@
 #include <cmath>  // for std::sqrt
 #include <string>
 #include <cstddef>  // for std::size_t
+#include <optional>
+#include <numeric>  // for std::iota
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_for.h>
@@ -345,10 +346,11 @@ class Tangential_complex {
     m_stars.resize(m_points.size());
     m_squared_star_spheres_radii_incl_margin.resize(m_points.size(), FT(-1));
 #ifdef GUDHI_TC_PERTURB_POSITION
-    if (m_points.empty())
+    if (m_points.empty()) {
       m_translations.clear();
-    else
+    } else {
       m_translations.resize(m_points.size(), m_k.construct_vector_d_object()(m_ambient_dim));
+    }
 #if defined(GUDHI_USE_TBB)
     delete[] m_p_perturb_mutexes;
     m_p_perturb_mutexes = new Mutex_for_perturb[m_points.size()];
@@ -622,6 +624,11 @@ class Tangential_complex {
 #endif
 
     int max_dim = -1;
+
+    // Ordered vertices to be inserted first by the create_complex method to avoid quadratic complexity.
+    std::vector<typename Simplex_tree_::Vertex_handle> vertices(m_points.size());
+    std::iota(vertices.begin(), vertices.end(), 0);
+    tree.insert_batch_vertices(vertices);
 
     // For each triangulation
     for (std::size_t idx = 0; idx < m_points.size(); ++idx) {
@@ -994,7 +1001,7 @@ class Tangential_complex {
     // circumspheres of the star of "center_vertex"
     // If th the m_max_squared_edge_length is set the maximal radius of the "star sphere"
     // is at most square root of m_max_squared_edge_length
-    boost::optional<FT> squared_star_sphere_radius_plus_margin = m_max_squared_edge_length;
+    std::optional<FT> squared_star_sphere_radius_plus_margin = m_max_squared_edge_length;
 
     // Insert points until we find a point which is outside "star sphere"
     for (auto nn_it = ins_range.begin(); nn_it != ins_range.end(); ++nn_it) {
@@ -1036,7 +1043,7 @@ class Tangential_complex {
 
           // Let's recompute squared_star_sphere_radius_plus_margin
           if (triangulation.current_dimension() >= tangent_space_dim) {
-            squared_star_sphere_radius_plus_margin = boost::none;
+            squared_star_sphere_radius_plus_margin = std::nullopt;
             // Get the incident cells and look for the biggest circumsphere
             std::vector<Tr_full_cell_handle> incident_cells;
             triangulation.incident_full_cells(center_vertex, std::back_inserter(incident_cells));
@@ -1044,7 +1051,7 @@ class Tangential_complex {
                  cit != incident_cells.end(); ++cit) {
               Tr_full_cell_handle cell = *cit;
               if (triangulation.is_infinite(cell)) {
-                squared_star_sphere_radius_plus_margin = boost::none;
+                squared_star_sphere_radius_plus_margin = std::nullopt;
                 break;
               } else {
                 // Note that this uses the perturbed point since it uses
@@ -2030,7 +2037,7 @@ class Tangential_complex {
   // and their center vertex
   Stars_container m_stars;
   std::vector<FT> m_squared_star_spheres_radii_incl_margin;
-  boost::optional<FT> m_max_squared_edge_length;
+  std::optional<FT> m_max_squared_edge_length;
 
 #ifdef GUDHI_TC_USE_ANOTHER_POINT_SET_FOR_TANGENT_SPACE_ESTIM
   Points m_points_for_tse;

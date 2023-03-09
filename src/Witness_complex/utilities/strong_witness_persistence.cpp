@@ -108,7 +108,7 @@ void program_options(int argc, char* argv[], int& nbL, std::string& file_name, s
   visible.add_options()("help,h", "produce help message")("landmarks,l", po::value<int>(&nbL),
                                                           "Number of landmarks to choose from the point cloud.")(
       "output-file,o", po::value<std::string>(&filediag)->default_value(std::string()),
-      "Name of file in which the persistence diagram is written. Default print in std::clog")(
+      "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-sq-alpha,a", po::value<Filtration_value>(&max_squared_alpha)->default_value(default_alpha),
       "Maximal squared relaxation parameter.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),

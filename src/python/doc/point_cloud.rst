@@ -13,10 +13,13 @@ File Readers
 
 .. autofunction:: gudhi.read_lower_triangular_matrix_from_csv_file
 
+File Writers
+------------
+
+.. autofunction:: gudhi.write_points_to_off_file
+
 Subsampling
 -----------
-
-:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
 
 .. automodule:: gudhi.subsampling
    :members:
