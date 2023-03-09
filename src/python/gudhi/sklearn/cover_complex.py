@@ -85,20 +85,22 @@ class CoverComplexPy(BaseEstimator):
         maxv, minv = max([node_info_[k]["colors"][0] for k in node_info_.keys()]), min([node_info_[k]["colors"][0] for k in node_info_.keys()])
         maxs, mins = max([node_info_[k]["size"]      for k in node_info_.keys()]), min([node_info_[k]["size"]      for k in node_info_.keys()])
 
-        f = open(file_name + ".dot", "w")
-        f.write("graph MAP{")
-        cols = []
-        for (simplex,_) in st.get_skeleton(0):
-            cnode = (1.-2*eps_color) * (node_info_[simplex[0]]["colors"][0] - minv)/(maxv-minv) + eps_color if maxv != minv else 0
-            snode = (1.-2*eps_size) * (node_info_[simplex[0]]["size"]-mins)/(maxs-mins) + eps_size if maxs != mins else 1
-            f.write(  str(simplex[0]) + "[shape=circle width=" + str(snode) + " fontcolor=black color=black label=\""  + "\" style=filled fillcolor=\"" + str(cnode) + ", 1, 1\"]")
-            cols.append(cnode)
-        for (simplex,_) in st.get_simplices():
-            if len(simplex) == 2:
-                f.write("  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];")
-        f.write("}")
-        f.close()
+        if not file_name.lower().endswith(".dot"):
+            file_name += ".dot"
 
+        with open(file_name, "w") as f:
+            f.write("graph MAP{")
+            cols = []
+            for (simplex,_) in st.get_skeleton(0):
+                cnode = (1.-2*eps_color) * (node_info_[simplex[0]]["colors"][0] - minv)/(maxv-minv) + eps_color if maxv != minv else 0
+                snode = (1.-2*eps_size) * (node_info_[simplex[0]]["size"]-mins)/(maxs-mins) + eps_size if maxs != mins else 1
+                f.write(  str(simplex[0]) + "[shape=circle width=" + str(snode) + " fontcolor=black color=black label=\""  + "\" style=filled fillcolor=\"" + str(cnode) + ", 1, 1\"]")
+                cols.append(cnode)
+            for (simplex,_) in st.get_simplices():
+                if len(simplex) == 2:
+                    f.write("  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];")
+            f.write("}")
+        
         L = np.linspace(eps_color, 1.-eps_color, 100)
         colsrgb = []
         import colorsys
@@ -128,23 +130,26 @@ class CoverComplexPy(BaseEstimator):
             name to use for the color used to color the cover complex nodes, default "color". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
         """
         st = self.simplex_tree_
-        f = open(file_name + ".txt", "w")
-        f.write(data_name + "\n")
-        f.write(cover_name + "\n")
-        f.write(color_name + "\n")
-        f.write("0 0\n")
-        f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
-        name2id = {}
-        idv = 0
-        for s,_ in st.get_skeleton(0):
-            f.write(str(idv) + " " + str(self.node_info_[s[0]]["colors"][0]) + " " + str(self.node_info_[s[0]]["size"]) + "\n")
-            name2id[s[0]] = idv
-            idv += 1
-        for s,_ in st.get_skeleton(1):
-            if len(s) == 2:
-                f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
-        f.close()
 
+        if not file_name.lower().endswith(".txt"):
+            file_name += ".txt"
+
+        with open(file_name, "w") as f:
+            f.write(data_name + "\n")
+            f.write(cover_name + "\n")
+            f.write(color_name + "\n")
+            f.write("0 0\n")
+            f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
+            name2id = {}
+            idv = 0
+            for s,_ in st.get_skeleton(0):
+                f.write(str(idv) + " " + str(self.node_info_[s[0]]["colors"][0]) + " " + str(self.node_info_[s[0]]["size"]) + "\n")
+                name2id[s[0]] = idv
+                idv += 1
+            for s,_ in st.get_skeleton(1):
+                if len(s) == 2:
+                    f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
+    
     class _constant_clustering():
         def fit_predict(X):
             return np.zeros([len(X)], dtype=np.int32)
@@ -169,7 +174,7 @@ class MapperComplex(CoverComplexPy):
         resolutions : list or numpy array of shape num_filters containing integers
             resolution of each filter function, ie number of intervals required to cover each filter image. If None, it is estimated from data.
         gains : list or numpy array of shape num_filters containing doubles in [0,1]
-            gain of each filter function, ie overlap percentage of the intervals covering each filter image. If None, it is set as 0.33, since in the automatic parameter selection method in http://www.jmlr.org/papers/volume19/17-291/17-291.pdf, any arbitrary value between 1/3 and 1/2 works, so we go with the minimal one (ensuring that the complex is a graph if only given one filter).
+            gain of each filter function, ie overlap percentage of the intervals covering each filter image. If None, it is set as 1/3 for all filters, since in the automatic parameter selection method in http://www.jmlr.org/papers/volume19/17-291/17-291.pdf, any arbitrary value between 1/3 and 1/2 works, so we go with the minimal one (ensuring that the complex is a graph if only given one filter).
         clustering : class
             clustering class (default sklearn.cluster.DBSCAN()). Common clustering classes can be found in the scikit-learn library (such as AgglomerativeClustering for instance). If None, it is set to hierarchical clustering, with scale estimated from data.
         N : int
@@ -315,7 +320,7 @@ class MapperComplex(CoverComplexPy):
 
         # If some resolutions are not specified, automatically compute them
         if self.gains is None:
-            self.gains = .33 * np.ones(num_filters)
+            self.gains = np.broadcast_to(1/3, num_filters)
         if self.resolutions is None or self.clustering is None:
             delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
             if self.clustering is None:
@@ -467,7 +472,7 @@ class GraphInducedComplex(CoverComplexPy):
 
     def fit(self, X, y=None, filter=None, color=None):
         """
-        Fit the GraphInducedComplex class on a point cloud or a distance matrix: compute the graph induced complex and store it in a simplex tree called simplex_tree_.
+        Fit the GraphInducedComplex class on a point cloud or a distance matrix: compute the graph induced complex and store it in a simplex tree called `simplex_tree_`.
 
         Parameters:
             X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
@@ -581,7 +586,7 @@ class NerveComplex(CoverComplexPy):
 
     def fit(self, X, y=None, assignments=None, color=None):
         """
-        Fit the NerveComplex class on a point cloud or a distance matrix: compute the nerve complex and store it in a simplex tree called simplex_tree_.
+        Fit the NerveComplex class on a point cloud or a distance matrix: compute the nerve complex and store it in a simplex tree called `simplex_tree_`.
 
         Parameters:
             X (numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix): input point cloud or distance matrix.
