@@ -208,7 +208,7 @@ class Bitmap_cubical_complex : public T {
   }
 
   /**
-   * Function called from a constructor. It is needed for Filtration_simplex_iterator to work.
+   * Function called from a constructor. It is needed for Filtration_simplex_range to work.
    **/
   void initialize_filtration();
 
@@ -223,108 +223,12 @@ class Bitmap_cubical_complex : public T {
   typedef typename std::vector<Simplex_handle> Boundary_simplex_range;
 
   /**
-   * Filtration_simplex_iterator class provides an iterator though the whole structure in the order of filtration.
+   * Filtration_simplex_range range of all the cells in filtration order.
    * Secondary criteria for filtration are:
    * (1) Dimension of a cube (lower dimensional comes first).
    * (2) Position in the data structure (the ones that are earliest in the data structure come first).
    **/
-  class Filtration_simplex_range;
-
-  class Filtration_simplex_iterator {
-    // Iterator over all simplices of the complex in the order of the indexing scheme.
-   public:
-    typedef std::input_iterator_tag iterator_category;
-    typedef Simplex_handle value_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef value_type* pointer;
-    typedef value_type reference;
-
-    Filtration_simplex_iterator(Bitmap_cubical_complex* b) : b(b), position(0) {}
-
-    Filtration_simplex_iterator() : b(NULL), position(0) {}
-
-    Filtration_simplex_iterator operator++() {
-#ifdef DEBUG_TRACES
-      std::clog << "Filtration_simplex_iterator operator++\n";
-#endif
-      ++this->position;
-      return (*this);
-    }
-
-    Filtration_simplex_iterator operator++(int) {
-      Filtration_simplex_iterator result = *this;
-      ++(*this);
-      return result;
-    }
-
-    Filtration_simplex_iterator& operator=(const Filtration_simplex_iterator& rhs) {
-#ifdef DEBUG_TRACES
-      std::clog << "Filtration_simplex_iterator operator =\n";
-#endif
-      this->b = rhs.b;
-      this->position = rhs.position;
-      return (*this);
-    }
-
-    bool operator==(const Filtration_simplex_iterator& rhs) const {
-#ifdef DEBUG_TRACES
-      std::clog << "bool operator == ( const Filtration_simplex_iterator& rhs )\n";
-#endif
-      return (this->position == rhs.position);
-    }
-
-    bool operator!=(const Filtration_simplex_iterator& rhs) const {
-#ifdef DEBUG_TRACES
-      std::clog << "bool operator != ( const Filtration_simplex_iterator& rhs )\n";
-#endif
-      return !(*this == rhs);
-    }
-
-    Simplex_handle operator*() {
-#ifdef DEBUG_TRACES
-      std::clog << "Simplex_handle operator*()\n";
-#endif
-      return this->b->sorted_cells[this->position];
-    }
-
-    friend class Filtration_simplex_range;
-
-   private:
-    Bitmap_cubical_complex<T>* b;
-    std::size_t position;
-  };
-
-  /**
-   * @brief Filtration_simplex_range provides the ranges for Filtration_simplex_iterator.
-   **/
-  class Filtration_simplex_range {
-    // Range over the simplices of the complex in the order of the filtration.
-    // .begin() and .end() return type Filtration_simplex_iterator.
-   public:
-    typedef Filtration_simplex_iterator const_iterator;
-    typedef Filtration_simplex_iterator iterator;
-
-    Filtration_simplex_range(Bitmap_cubical_complex<T>* b) : b(b) {}
-
-    Filtration_simplex_iterator begin() {
-#ifdef DEBUG_TRACES
-      std::clog << "Filtration_simplex_iterator begin() \n";
-#endif
-      return Filtration_simplex_iterator(this->b);
-    }
-
-    Filtration_simplex_iterator end() {
-#ifdef DEBUG_TRACES
-      std::clog << "Filtration_simplex_iterator end()\n";
-#endif
-      Filtration_simplex_iterator it(this->b);
-      it.position = this->b->sorted_cells.size();
-      return it;
-    }
-
-   private:
-    Bitmap_cubical_complex<T>* b;
-  };
+  typedef std::vector<Simplex_handle> Filtration_simplex_range;
 
   //*********************************************//
   // Methods to access iterators from the container:
@@ -336,15 +240,14 @@ class Bitmap_cubical_complex : public T {
   Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) { return this->get_boundary_of_a_cell(sh); }
 
   /**
-   * filtration_simplex_range creates an object of a Filtration_simplex_range class
-   * that provides ranges for the Filtration_simplex_iterator.
+   * filtration_simplex_range provides a range for the Filtration_simplex_iterator.
    **/
-  Filtration_simplex_range filtration_simplex_range() {
+  Filtration_simplex_range const& filtration_simplex_range() {
 #ifdef DEBUG_TRACES
     std::clog << "Filtration_simplex_range filtration_simplex_range()\n";
 #endif
     // Returns a range over the simplices of the complex in the order of the filtration
-    return Filtration_simplex_range(this);
+    return sorted_cells;
   }
   //*********************************************//
 
@@ -464,7 +367,7 @@ class Bitmap_cubical_complex : public T {
    **/
   class Skeleton_simplex_range {
     // Range over the simplices of the complex in the order of the filtration.
-    // .begin() and .end() return type Filtration_simplex_iterator.
+    // .begin() and .end() return type Skeleton_simplex_iterator.
    public:
     typedef Skeleton_simplex_iterator const_iterator;
     typedef Skeleton_simplex_iterator iterator;
