@@ -635,6 +635,7 @@ class Bitmap_cubical_complex_base {
   std::size_t total_number_of_cells;
 
   void set_up_containers(const std::vector<unsigned>& sizes, bool is_pos_inf) {
+    // The fact that multipliers[0]=1 is relied on by optimizations in other functions
     unsigned multiplier = 1;
     for (std::size_t i = 0; i != sizes.size(); ++i) {
       this->sizes.push_back(sizes[i]);
@@ -659,10 +660,13 @@ class Bitmap_cubical_complex_base {
   std::vector<unsigned> compute_counter_for_given_cell(std::size_t cell) const {
     std::vector<unsigned> counter;
     counter.reserve(this->sizes.size());
-    for (std::size_t dim = this->sizes.size(); dim != 0; --dim) {
-      counter.push_back(cell / this->multipliers[dim - 1]);
+    for (std::size_t dim = this->sizes.size(); dim > 1; --dim) {
+      std::size_t quot = cell / this->multipliers[dim - 1];
       cell = cell % this->multipliers[dim - 1];
+      counter.push_back(quot);
     }
+    // Split out the last iteration to save a costly division by multipliers[0]=1
+    counter.push_back(cell);
     std::reverse(counter.begin(), counter.end());
     return counter;
   }
@@ -939,8 +943,9 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(
 
   std::size_t sum_of_dimensions = 0;
   std::size_t cell1 = cell;
-  for (std::size_t i = this->multipliers.size(); i != 0; --i) {
+  for (std::size_t i = this->multipliers.size(); i > 1; --i) {
     unsigned position = cell1 / this->multipliers[i - 1];
+    cell1 = cell1 % this->multipliers[i - 1];
     if (position % 2 == 1) {
       if (sum_of_dimensions % 2) {
         boundary_elements.push_back(cell + this->multipliers[i - 1]);
@@ -951,7 +956,17 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_boundary_of_a_cell(
       }
       ++sum_of_dimensions;
     }
-    cell1 = cell1 % this->multipliers[i - 1];
+  }
+  // Split out the last iteration to save a costly division by multipliers[0]=1
+  if (cell1 % 2 == 1) {
+    if (sum_of_dimensions % 2) {
+      boundary_elements.push_back(cell + 1);
+      boundary_elements.push_back(cell - 1);
+    } else {
+      boundary_elements.push_back(cell - 1);
+      boundary_elements.push_back(cell + 1);
+    }
+    ++sum_of_dimensions;
   }
 
   return boundary_elements;
@@ -962,8 +977,10 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cel
   std::vector<unsigned> counter = this->compute_counter_for_given_cell(cell);
   std::vector<std::size_t> coboundary_elements;
   std::size_t cell1 = cell;
-  for (std::size_t i = this->multipliers.size(); i != 0; --i) {
+  for (std::size_t i = this->multipliers.size(); i > 1; --i) {
+    // It is a bit sad to recompute those divisions when we just did them in compute_counter_for_given_cell.
     unsigned position = cell1 / this->multipliers[i - 1];
+    cell1 = cell1 % this->multipliers[i - 1];
     if (position % 2 == 0) {
       if ((cell > this->multipliers[i - 1]) && (counter[i - 1] != 0)) {
         coboundary_elements.push_back(cell - this->multipliers[i - 1]);
@@ -972,7 +989,14 @@ std::vector<std::size_t> Bitmap_cubical_complex_base<T>::get_coboundary_of_a_cel
         coboundary_elements.push_back(cell + this->multipliers[i - 1]);
       }
     }
-    cell1 = cell1 % this->multipliers[i - 1];
+  }
+  if (cell1 % 2 == 0) {
+    if ((cell > 1) && (counter[0] != 0)) {
+      coboundary_elements.push_back(cell - 1);
+    }
+    if ((cell + 1 < this->data.size()) && (counter[0] != 2 * this->sizes[0])) {
+      coboundary_elements.push_back(cell + 1);
+    }
   }
   return coboundary_elements;
 }
@@ -983,8 +1007,9 @@ unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(std::size_t cel
   std::clog << "\n\n\n Computing position o a cell of an index : " << cell << std::endl;
 #endif
   unsigned dimension = 0;
-  for (std::size_t i = this->multipliers.size(); i != 0; --i) {
+  for (std::size_t i = this->multipliers.size(); i > 1; --i) {
     unsigned position = cell / this->multipliers[i - 1];
+    std::size_t newcell = cell % this->multipliers[i - 1];
 
 #ifdef DEBUG_TRACES
     std::clog << "i-1 :" << i - 1 << std::endl;
@@ -999,8 +1024,23 @@ unsigned Bitmap_cubical_complex_base<T>::get_dimension_of_a_cell(std::size_t cel
 #endif
       dimension++;
     }
-    cell = cell % this->multipliers[i - 1];
+    cell = newcell;
   }
+  // Split out the last iteration to save a costly division by multipliers[0]=1
+#ifdef DEBUG_TRACES
+  std::clog << "i-1 :" << 0 << std::endl;
+  std::clog << "cell : " << cell << std::endl;
+  std::clog << "position : " << cell << std::endl;
+  std::clog << "multipliers[" << 0 << "] = " << 1 << std::endl;
+#endif
+
+  if (cell % 2 == 1) {
+#ifdef DEBUG_TRACES
+    std::clog << "Nonzero length in this direction \n";
+#endif
+    dimension++;
+  }
+
   return dimension;
 }
 
