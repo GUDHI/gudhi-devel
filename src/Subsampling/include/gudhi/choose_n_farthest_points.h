@@ -189,7 +189,7 @@ bool Compare_landmark_radius<FT>::operator()(std::size_t a, std::size_t b)const{
  *  \tparam Point_range Random access range of points.
  *  \tparam PointOutputIterator Output iterator whose value type is the point type.
  *  \tparam DistanceOutputIterator Output iterator for distances.
- * @param[in] dist Distance function.
+ * @param[in] dist_ Distance function.
  * @param[in] input_pts The input points.
  * @param[in] final_size The size of the subsample to compute (reduced to the number of input points if `final_size` is larger).
  * @param[in] starting_point The seed in the farthest point algorithm.
