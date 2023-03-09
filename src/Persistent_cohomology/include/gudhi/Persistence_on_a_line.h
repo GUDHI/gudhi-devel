@@ -19,7 +19,7 @@
 
 namespace Gudhi::persistent_cohomology {
 /**
- * \brief Computes the persistent homology of the sublevelsets of a PL function defined on ℝ in linear time.
+ * \brief Computes the persistent homology of the sublevelsets of a PL function defined on \f$\mathbb{R}\f$ in linear time.
  *
  * \ingroup persistent_cohomology
  *

@@ -248,7 +248,7 @@ filtration values.
 
 \section specialcasepersistence Special cases
 
-In order to compute the persistent homology of a piecewise-linear function on ℝ, the standard strategy would be to
+In order to compute the persistent homology of a piecewise-linear function on \f$\mathbb{R}\f$, the standard strategy would be to
 create a path complex (special case of cubical or simplicial complex), define a lower-star filtration on it, and finally
 apply a general persistence algorithm. compute_persistence_of_function_on_line() computes this persistence diagram
 directly on the function in linear time using the algorithm of \cite arxivpers1d .
