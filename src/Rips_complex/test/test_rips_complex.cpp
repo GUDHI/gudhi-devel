@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(Sparse_rips_complex_from_points) {
   // Init of a Rips complex from the list of points
   // ----------------------------------------------------------------------------
   // .001 is small enough that we get a deterministic result matching the exact Rips
-  Sparse_rips_complex sparse_rips(points, Custom_square_euclidean_distance(), .001);
+  Sparse_rips_complex sparse_rips(points, Gudhi::Euclidean_distance(), .001);
 
   std::clog << "========== Sparse_rips_complex_from_points ==========" << std::endl;
   Simplex_tree st;
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE(Sparse_rips_complex_from_points) {
       case 1:
       case 2:
       case 3:
-        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), 2.0);
+        GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), std::sqrt(2.0));
         break;
       default:
         BOOST_CHECK(false);  // Shall not happen
