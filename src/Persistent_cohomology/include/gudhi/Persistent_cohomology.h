@@ -20,6 +20,7 @@
 #include <boost/intrusive/list.hpp>
 
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <list>
 #include <vector>
@@ -726,7 +727,7 @@ class Persistent_cohomology {
   /*  Dictionary establishing the correspondence between the Simplex_key of
    * the root vertex in the union-find ds and the Simplex_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
-  std::map<Simplex_key, Simplex_key> zero_cocycles_;
+  std::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
   /*  Key -> row. */
   std::map<Simplex_key, cocycle> transverse_idx_;
   /* Persistent intervals. */
