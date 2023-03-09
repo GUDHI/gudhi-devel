@@ -35,19 +35,22 @@ namespace Gudhi::persistent_cohomology {
  */
 template<class FiltrationRange, class OutputFunctor, class Compare = std::less<>>
 void compute_persistence_of_function_on_line(FiltrationRange const& input, OutputFunctor&& out, Compare&& lt = {}) {
+  // We process the elements of input 1 by 1, simplifying and outputting as much as possible.
+  // The simplified sequence with the elements that are still active is stored in data.
+  // Invariant: data contains a sequence of type 1 9 2 8 3 7 ...
   using std::begin;
   using std::end;
   auto it = begin(input);
   auto stop = end(input);
   if (it == stop) return;
   typedef std::decay_t<decltype(*it)> Filtration;
-  std::vector<Filtration> data; // Invariant: data contains a sequence of type 1 9 2 8 3 7 ...
+  std::vector<Filtration> data;
   Filtration v;
   auto le = [&lt](auto& x, auto& y){ return !lt(y, x); };
   auto ge = [&lt](auto& x, auto& y){ return !lt(x, y); };
   auto gt = [&lt](auto& x, auto& y){ return  lt(y, x); };
   data.push_back(*it++);
-state1:
+state1: // data contains a single element
   if (it == stop) goto infinite;
   v = *it++;
   if (le(v, data[0])) {
@@ -57,7 +60,7 @@ state1down:
   }
   data.push_back(v);
   goto state12;
-state12:
+state12: // data contains only 2 elements, necessarily data[0] < data[1]
   if (it == stop) goto endup;
   v = *it++;
   if (ge(v, data[1])) {
@@ -73,7 +76,7 @@ state12down:
   }
   data.push_back(v);
   goto state132;
-state132:
+state132: // data[-3] < data[-1] < data[-2]
   if (it == stop) goto enddown;
   v = *it++;
   if (le(v, data.back())) {
@@ -96,7 +99,7 @@ state132up:
       goto state312;
     }
   }
-state312:
+state312: // data[-2] < data[-1] < data[-3]
   if (it == stop) goto endup;
   v = *it++;
   if (ge(v, data.back())) {
@@ -119,10 +122,10 @@ state312down:
       goto state132;
     }
   }
-up:
+up: // data[-1] < v after a simplification
   if (data.size() == 1) { data.push_back(v); goto state12; }
   goto state132up;
-down:
+down: // v < data[-1] after a simplification
   switch (data.size()) {
     case 1:
       goto state1down;
@@ -131,17 +134,18 @@ down:
     default:
       goto state312down;
   }
-endup:
+  // From here on, we have finished reading input
+endup: // data[-2] < data[-1]
   data.pop_back();
   goto enddown;
-enddown:
+enddown: // data[-1] < data[-2]
   if (data.size() > 1) {
     out(data.end()[-1], data.end()[-2]);
     data.erase(data.end()-2, data.end());
     goto enddown;
   }
   goto infinite;
-infinite:
+infinite: // data only contains the global minimum
   out(data[0], std::numeric_limits<Filtration>::infinity());
 }
 } // namespace Gudhi::persistent_cohomology
