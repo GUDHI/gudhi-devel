@@ -208,7 +208,7 @@ def plot_persistence_barcode(
             legend = True
 
         if legend:
-            dimensions = set(item[0] for item in persistence)
+            dimensions = {item[0] for item in persistence}
             axes.legend(
                 handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
                 loc="best",
@@ -240,7 +240,7 @@ def plot_persistence_diagram(
     fontsize=16,
     greyblock=True,
 ):
-    """This function plots the persistence diagram from persistence values
+    r"""This function plots the persistence diagram from persistence values
     list, a np.array of shape (N x 2) representing a diagram in a single
     homology dimension, or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file`.
 
@@ -361,7 +361,7 @@ def plot_persistence_diagram(
             legend = True
 
         if legend:
-            dimensions = list(set(item[0] for item in persistence))
+            dimensions = list({item[0] for item in persistence})
             axes.legend(
                 handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
                 loc="lower right",
