@@ -11,6 +11,10 @@ cd gudhi-devel
 Verify that [.github/next_release.md](.github/next_release.md) is up-to-date with the development performed on the release.
 Also check [.github/changelog.md](.github/changelog.md) is appended with the release note.
 
+## Python documentation version switcher
+
+Verify that [.github/for_maintainers/switcher.json](.github/for_maintainers/switcher.json) contains the new version (not necessary for release candidates versions).
+
 ## Unlabelled issues and pull requests
 
 Check there are no [unlabelled closed issues](https://github.com/GUDHI/gudhi-devel/issues?q=is%3Aissue+is%3Aclosed+no%3Alabel)
@@ -89,6 +93,7 @@ Upload the content of the directory gudhi.doc.@GUDHI_VERSION@/python in a new di
 Delete the directory python/latest on gudhi WebDAV.
 Copy gudhi WebDAV python/@GUDHI_VERSION@ as python/latest (no symbolic link with WebDAV).
 
+Upload [.github/for_maintainers/switcher.json](.github/for_maintainers/switcher.json) at root of gudhi WebDAV server.
 
 ## Put a version label on files
 

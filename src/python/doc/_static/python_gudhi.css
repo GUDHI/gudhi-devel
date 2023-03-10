@@ -1,0 +1,20 @@
+/* for a bigger font size 
+   cf. https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/styling.html#base-variables */
+html {
+  --pst-font-size-base: 17px;
+}
+
+/* For article (main text without left and right sidebar) to take 100% of the width */
+.bd-main .bd-content .bd-article-container{
+  max-width:100%;
+}
+
+/* For total page to take 100% of the width */
+.bd-page-width {
+  max-width:100%;
+}
+
+/* For left sidebar to take 15% (max) of the width */
+.bd-sidebar-primary {
+  max-width:15%;
+}

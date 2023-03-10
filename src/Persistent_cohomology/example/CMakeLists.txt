@@ -68,3 +68,6 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   endif(TBB_FOUND)
   add_test(NAME Persistent_cohomology_example_custom_persistence_sort COMMAND $<TARGET_FILE:custom_persistence_sort>)
 endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+
+add_executable(persistence_on_a_line persistence_on_a_line.cpp)
+add_test(NAME persistence_on_a_line COMMAND $<TARGET_FILE:persistence_on_a_line>)

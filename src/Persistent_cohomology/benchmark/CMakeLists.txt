@@ -12,3 +12,6 @@ if(GMP_FOUND)
      endif()
    endif(GMPXX_FOUND)
 endif(GMP_FOUND)
+
+add_executable ( line line.cpp )
+add_test(NAME Compare_pers_on_line COMMAND $<TARGET_FILE:line> 1000 10)

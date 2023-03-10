@@ -12,6 +12,9 @@ Below is a list of changes made since GUDHI 3.7.1:
 - [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
      - now provides matching in its interface
 
+- [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
+     - New `choose_n_farthest_points_metric` as a faster alternative of `choose_n_farthest_points`.
+
 - [Module](link)
      - **...**
 

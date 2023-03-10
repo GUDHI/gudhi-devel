@@ -123,8 +123,8 @@ class Sparse_rips_complex {
     GUDHI_CHECK(epsilon > 0, "epsilon must be positive");
     auto dist_fun = [&](Vertex_handle i, Vertex_handle j) { return distance(points[i], points[j]); };
     // TODO: stop choose_n_farthest_points once it reaches mini or 0?
-    subsampling::choose_n_farthest_points(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
-                                          std::back_inserter(sorted_points), std::back_inserter(params));
+    subsampling::choose_n_farthest_points_metric(dist_fun, boost::irange<Vertex_handle>(0, boost::size(points)), -1, -1,
+                                                 std::back_inserter(sorted_points), std::back_inserter(params));
     compute_sparse_graph(dist_fun, epsilon, mini, maxi);
   }
 

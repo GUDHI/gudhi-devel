@@ -194,7 +194,7 @@ class Padding(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.max_pts = max([len(diag) for diag in X])
+        self.max_pts = max(len(diag) for diag in X)
         return self
 
     def transform(self, X):
