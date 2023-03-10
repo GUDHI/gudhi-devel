@@ -168,7 +168,7 @@
 }
 
 @incollection{gudhi:SubSampling
-, author    = {Cl{\'{e}}ment Jamin and Siargey Kachanovich}
+, author    = {Cl{\'{e}}ment Jamin and Siargey Kachanovich and Marc Glisse}
 , title     = {Subsampling}
 , publisher = {GUDHI Editorial Board}
 , edition   = {@GUDHI_VERSION@}

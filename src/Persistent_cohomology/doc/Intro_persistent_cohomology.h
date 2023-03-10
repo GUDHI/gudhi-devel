@@ -23,7 +23,8 @@ namespace persistent_cohomology {
   Computation of persistent cohomology using the algorithm of 
   \cite DBLP:journals/dcg/SilvaMV11 and \cite DBLP:conf/compgeom/DeyFW14
   and the Compressed Annotation Matrix 
-  implementation of \cite DBLP:conf/esa/BoissonnatDM13 
+  implementation of \cite DBLP:conf/esa/BoissonnatDM13 . Some \ref specialcasepersistence "special cases"
+  using different algorithms are also provided at the end of this page.
        
   The theory of homology consists in attaching to a topological space a sequence of 
   (homology) groups, 
@@ -245,6 +246,19 @@ More details on the <a href="../../alphacomplex/">Alpha complex utilities</a> de
 \li \gudhi_example_link{Persistent_cohomology,plain_homology.cpp} computes the plain homology of a simple simplicial complex without
 filtration values.
 
+\section specialcasepersistence Special cases
+
+In order to compute the persistent homology of a piecewise-linear function on \f$\mathbb{R}\f$, the standard strategy would be to
+create a path complex (special case of cubical or simplicial complex), define a lower-star filtration on it, and finally
+apply a general persistence algorithm. compute_persistence_of_function_on_line() computes this persistence diagram
+directly on the function in linear time using the algorithm of \cite arxivpers1d .
+\include persistence_on_a_line.cpp
+outputs
+\code
+0.7 1.5
+0 3.1
+-1 inf
+\endcode
  */
 
 }  // namespace persistent_cohomology

@@ -18,7 +18,7 @@ namespace subsampling {
 
 /**  \defgroup subsampling Subsampling
  * 
- * \author Cl&eacute;ment Jamin, Siargey Kachanovich
+ * \author Cl&eacute;ment Jamin, Siargey Kachanovich, Marc Glisse
  * 
  * @{
  * 
@@ -37,10 +37,13 @@ namespace subsampling {
  * \section farthestpointexamples Example: choose_n_farthest_points
  *
  * This example outputs a subset of 100 points obtained by Gonz&aacute;lez algorithm,
- * starting with a random point.
+ * starting with a random point, and greedily adding the point farthest from those already picked.
  *
  * \include example_choose_n_farthest_points.cpp
  * 
+ * There is an alternative version `choose_n_farthest_points_metric()` with the same syntax,
+ * which can be faster in many cases.
+ *
  * \section randompointexamples Example: pick_n_random_points
  *
  * This example outputs a subset of 100 points picked randomly.
