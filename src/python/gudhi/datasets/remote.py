@@ -110,7 +110,7 @@ def _fetch_remote(url, file_path, file_checksum = None):
         if file_checksum != checksum:
             # Remove file and raise error
             remove(file_path)
-            raise IOError("{} has a SHA256 checksum : {}, "
+            raise OSError("{} has a SHA256 checksum : {}, "
                         "different from expected : {}."
                         "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum))
 
@@ -217,7 +217,7 @@ def fetch_bunny(file_path = None, accept_license = False):
         # Print license terms unless accept_license is set to True
         if not accept_license:
             if exists(license_path):
-                with open(license_path, 'r') as f:
+                with open(license_path) as f:
                     print(f.read())
 
     return np.load(archive_path, mmap_mode='r')
