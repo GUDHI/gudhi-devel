@@ -52,6 +52,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void initialize_filtration() nogil
         int num_vertices() nogil
         int num_simplices() nogil
+        bool is_empty() nogil
         void set_dimension(int dimension) nogil
         int dimension() nogil
         int upper_bound_dimension() nogil
