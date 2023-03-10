@@ -133,7 +133,7 @@ class Simplex_tree {
       Key_simplex_base;
 
   struct Filtration_simplex_base_real {
-    Filtration_simplex_base_real() : filt_(0) {}
+    Filtration_simplex_base_real() : filt_{} {}
     void assign_filtration(Filtration_value f) { filt_ = f; }
     Filtration_value filtration() const { return filt_; }
    private:

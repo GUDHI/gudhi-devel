@@ -19,13 +19,15 @@
 #include "box.h"
 #include "finitely_critical_filtrations.h"
 
-namespace Gudhi{
+namespace Gudhi::multi_filtrations{
 
+	
 	template<typename T>
 	class Line
 	{
-		using point_type = std::vector<T>;
+		
 	public:
+		using point_type = Finitely_critical_multi_filtration<T>;
 		Line();
 		Line(point_type x);
 		Line(point_type x, point_type v);
@@ -54,29 +56,27 @@ namespace Gudhi{
 		this->direction_.swap(v);
 	}
 	template<typename T>
-	std::vector<T> Line<T>::push_forward(std::vector<T> x) const{ //TODO remove copy
-		Finitely_critical_multi_filtration<T>& y = *(Finitely_critical_multi_filtration<T>*)(&x);
-		const Finitely_critical_multi_filtration<T>& basepoint = *(Finitely_critical_multi_filtration<T>*)(&basepoint_);
-		y -= basepoint;
+	typename Line<T>::point_type Line<T>::push_forward(point_type x) const { //TODO remove copy
+		x -= basepoint_;
 		T t = - std::numeric_limits<T>::infinity();;
-		for (unsigned int i = 0; i<x.size(); i++){
+		for (std::size_t i = 0; i<x.size(); i++){
 			T dir  = this->direction_.size() > i ? direction_[i] : 1;
 			t = std::max(t, x[i]/dir);
 		}
-		std::vector<T> out(basepoint_.size());
+		point_type out(basepoint_.size());
 		for (unsigned int i = 0; i < out.size(); i++)
 			out[i] = basepoint_[i] + t * (this->direction_.size() > i ? direction_[i] : 1) ;
 		return out;
 	}
 	template<typename T>
-	std::vector<T> Line<T>::push_back(std::vector<T> x) const{
+	typename Line<T>::point_type Line<T>::push_back(point_type x) const{
 		x -= basepoint_;
 		T t = std::numeric_limits<T>::infinity();
 		for (unsigned int i = 0; i<x.size(); i++){
 			T dir  = this->direction_.size() > i ? direction_[i] : 1;
 			t = std::min(t, x[i]/dir);
 		}
-		std::vector<T> out(basepoint_.size());
+		point_type out(basepoint_.size());
 		for (unsigned int i = 0; i < out.size(); i++)
 			out[i] = basepoint_[i] + t * (this->direction_.size() > i ? direction_[i] : 1) ;
 		return out;
@@ -86,11 +86,9 @@ namespace Gudhi{
 		return basepoint_.size();
 	}
 	template<typename T>
-	std::pair<std::vector<T>, std::vector<T>> Line<T>::get_bounds(const Box<T> &box) const{
+	std::pair<typename Line<T>::point_type, typename Line<T>::point_type> Line<T>::get_bounds(const Box<T> &box) const{
 		return {this->push_forward(box.get_bottom_corner()), this->push_back(box.get_upper_corner())};
 	}
-
-
 }
 
 #endif // LINE_FILTRATION_TRANSLATION_H_INCLUDED

@@ -19,7 +19,7 @@
 #include <gudhi/Simplex_tree.h>
 #include "Simplex_tree_multi.h"
 // #include <omp.h>
-#include "finitely_critical_filtrations/finitely_critical_filtrations.h"
+#include "multi_filtrations/finitely_critical_filtrations.h"
 
 #include <iostream>
 #include <vector>
@@ -32,13 +32,14 @@ namespace Gudhi {
 template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
 class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
  public:
+  using Python_filtration_type = std::vector<typename SimplexTreeOptions::value_type>; // TODO : std::conditional
   using Base = Simplex_tree<SimplexTreeOptions>;
   using Filtration_value = typename Base::Filtration_value;
   using Vertex_handle = typename Base::Vertex_handle;
   using Simplex_handle = typename Base::Simplex_handle;
   using Insertion_result = typename std::pair<Simplex_handle, bool>;
   using Simplex = std::vector<Vertex_handle>;
-  using Simplex_and_filtration = std::pair<Simplex, Filtration_value>;
+  using Simplex_and_filtration = std::pair<Simplex, Python_filtration_type>;
   using Filtered_simplices = std::vector<Simplex_and_filtration>;
   using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
   using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
@@ -46,7 +47,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
   typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
   using euler_chars_type = std::vector<int>;
-
 
  public:
 
@@ -92,7 +92,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 	return (result.second);
   }
 
-  Filtration_value simplex_filtration(const Simplex& simplex) {
+  Python_filtration_type simplex_filtration(const Simplex& simplex) {
 	return Base::filtration(Base::find(simplex));
   }
 
@@ -275,11 +275,12 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 	return simplex_list;
   }
 
-  euler_chars_type euler_char(const std::vector<std::vector<options_multi::value_type>> &point_list){ // TODO multi-critical 
+  euler_chars_type euler_char(std::vector<std::vector<options_multi::value_type>> &point_list){ // TODO multi-critical 
 		const int npts = point_list.size();
 		if (npts == 0){
 			return {};
 		}
+		using Gudhi::multi_filtrations::Finitely_critical_multi_filtration;
 		
 		euler_chars_type out(point_list.size(), 0.);
 
@@ -294,9 +295,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 			auto &euler_char_at_point = out[i];
 // #pragma omp parallel for reduction(+:euler_char_at_point) // GUDHI : not possible, need a RANDOM ACCESS ITERATOR
 			for(const auto &SimplexHandle : Base::complex_simplex_range()){
-				const Finitely_critical_multi_filtration<options_multi::value_type> &pt = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&point_list[i]);
-				const std::vector<options_multi::value_type>& filtration_ = Base::filtration(SimplexHandle);
-				const Finitely_critical_multi_filtration<options_multi::value_type> &filtration = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&filtration_);
+				// const Finitely_critical_multi_filtration<options_multi::value_type> &pt = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&point_list[i]);
+				options_multi::Filtration_value filtration = Base::filtration(SimplexHandle);
+				// const Finitely_critical_multi_filtration<options_multi::value_type> &filtration = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&filtration_);
+				Finitely_critical_multi_filtration<options_multi::value_type> pt(point_list[i]);
 				// if (is_greater(pt, filtration)){
 				if (filtration <= pt){
 					int sign = Base::dimension(SimplexHandle) %2 ? -1 : 1;  

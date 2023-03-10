@@ -14,8 +14,8 @@
 
 #include <algorithm>
 #include <gudhi/Simplex_tree.h>
-#include "finitely_critical_filtrations/finitely_critical_filtrations.h"
-#include "finitely_critical_filtrations/line.h"
+#include "multi_filtrations/finitely_critical_filtrations.h"
+#include "multi_filtrations/line.h"
 
 
 
@@ -33,12 +33,14 @@ public:
 	typedef linear_indexing_tag Indexing_tag;
 	typedef int Vertex_handle;
 	typedef double value_type;
-	using Filtration_value = std::vector<value_type>; // Cannot put Finitely_critical_multi_filtration, cython doesn't know how to convert inheritence
+	using Filtration_value = Gudhi::multi_filtrations::Finitely_critical_multi_filtration<value_type>; // Cannot put Finitely_critical_multi_filtration, cython doesn't know how to convert inheritence
 	typedef std::uint32_t Simplex_key;
 	static const bool store_key = true;
 	static const bool store_filtration = true;
 	static const bool contiguous_vertices = false;
 };
+
+
 
 using options_multi = Simplex_tree_options_multidimensional_filtration;
 using options_std = Simplex_tree_options_full_featured;
@@ -46,12 +48,13 @@ using multi_filtration_type = std::vector<options_multi::value_type>;
 using multi_filtration_grid = std::vector<multi_filtration_type>;
 
 
+
 void multify(const uintptr_t splxptr, const uintptr_t newsplxptr, const int dimension){
 	Simplex_tree<options_std> &st = *(Gudhi::Simplex_tree<options_std>*)(splxptr);
 	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(newsplxptr);
 	if (dimension <= 0)
 		{std::cerr << "Empty filtration\n"; throw ;}
-	Finitely_critical_multi_filtration<Simplex_tree_options_multidimensional_filtration::value_type> f(dimension);
+	options_multi::Filtration_value f(dimension);
 	for (auto &simplex_handle : st.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st.simplex_vertex_range(simplex_handle))
@@ -76,7 +79,7 @@ template<typename T>
 void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std::vector<T> basepoint, int dimension){
 	Simplex_tree<options_std> &st = *(Gudhi::Simplex_tree<options_std>*)(newsplxptr);
 	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
-	Gudhi::Line<T> l(basepoint);
+	Gudhi::multi_filtrations::Line<T> l(basepoint);
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
@@ -87,8 +90,6 @@ void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std
 		options_multi::value_type new_filtration = l.push_forward(f)[dimension];
 		st.insert_simplex(simplex,new_filtration);
 	}
-
-
 }
 
 

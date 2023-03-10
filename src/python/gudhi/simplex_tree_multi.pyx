@@ -32,9 +32,9 @@ ctypedef fused some_float:
 
 from typing import Any
 
-cimport numpy as cnp
+# cimport numpy as cnp
 import numpy as np
-cnp.import_array()
+# cnp.import_array()
 
 cimport gudhi.simplex_tree_multi
 cimport cython
@@ -926,7 +926,7 @@ cdef class SimplexTreeMulti:
 		cdef bool c_coordinate_values = coordinate_values
 		with nogil:
 			squeeze_filtration(ptr, c_filtration_grid, c_coordinate_values)
-		return filtration_grid
+		return self
 
 	def filtration_bounds(self):
 		"""
@@ -1027,7 +1027,7 @@ cdef class SimplexTreeMulti:
 #			assert len(points.shape) in [1,2]
 #			if len(points.shape) == 1:
 #				points = [points]
-		cdef cnp.ndarray[double, ndim=2] c_points = np.asarray(points)
+		c_points = np.asarray(points)
 		assert c_points.shape[1] == self.num_parameters
 		return np.asarray(self.get_ptr().euler_char(c_points))
 

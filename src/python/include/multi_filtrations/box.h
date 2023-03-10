@@ -22,7 +22,7 @@
 #include <limits>
 #include <cassert>
 
-
+#include "finitely_critical_filtrations.h"
 
 
 
@@ -31,13 +31,13 @@
  * @brief Holds the square box on which to compute.
  */
 
-namespace Gudhi{
+namespace Gudhi::multi_filtrations{
 
 template<typename T>
 class Box
 {
 
-	using point_type = std::vector<T>;
+	using point_type = Finitely_critical_multi_filtration<T>;
 public:
 	Box();
 	Box(const point_type& bottomCorner, const point_type& upperCorner);
@@ -47,7 +47,7 @@ public:
 	const point_type& get_bottom_corner() const;
 	const point_type& get_upper_corner() const;
 	bool contains(const point_type& point) const;
-	void infer_from_filters(const std::vector<std::vector<T>> &Filters_list);
+	void infer_from_filters(const std::vector<point_type> &Filters_list);
     bool is_trivial() const ;
 
 private:
@@ -65,8 +65,9 @@ inline Box<T>::Box(const point_type &bottomCorner, const point_type &upperCorner
 	  upperCorner_(upperCorner)
 {
 	assert(bottomCorner.size() == upperCorner.size()
-		   && is_smaller(bottomCorner, upperCorner)
-		   && "This box is trivial !");
+		//    && is_smaller(bottomCorner, upperCorner)
+			&& bottomCorner <= upperCorner
+			&& "This box is trivial !");
 }
 
 template<typename T>
@@ -80,14 +81,16 @@ template<typename T>
 inline void Box<T>::inflate(T delta)
 {
 // #pragma omp simd
-	for (int i = 0; i < bottomCorner_.size(); i++){
-		bottomCorner_[i] -= delta;
-		upperCorner_[i] += delta;
-	}
+	// for (int i = 0; i < bottomCorner_.size(); i++){
+	// 	bottomCorner_[i] -= delta;
+	// 	upperCorner_[i] += delta;
+	// }
+	bottomCorner_ -= delta;
+	upperCorner_ += delta;
 }
 
 template<typename T>
-inline void Box<T>::infer_from_filters(const std::vector<std::vector<T>> &Filters_list){
+inline void Box<T>::infer_from_filters(const std::vector<point_type> &Filters_list){
 	int dimension = Filters_list.size();
 	int nsplx = Filters_list[0].size();
 	std::vector<T> lower(dimension);
@@ -111,28 +114,29 @@ inline bool Box<T>::is_trivial() const {
 }
 
 template<typename T>
-inline const std::vector<T> &Box<T>::get_bottom_corner() const
+inline const typename Box<T>::point_type &Box<T>::get_bottom_corner() const
 {
 	return bottomCorner_;
 }
 
 template<typename T>
-inline const std::vector<T> &Box<T>::get_upper_corner() const
+inline const typename Box<T>::point_type &Box<T>::get_upper_corner() const
 {
 	return upperCorner_;
 }
 
 template<typename T>
-inline bool Box<T>::contains(const std::vector<T> &point) const
+inline bool Box<T>::contains(const point_type &point) const
 {
 	if (point.size() != bottomCorner_.size()) return false;
 
-	for (int i = 0; i < (int)point.size(); i++){
-		if (point[i] < bottomCorner_[i]) return false;
-		if (point[i] > upperCorner_[i]) return false;
-	}
+	// for (int i = 0; i < (int)point.size(); i++){
+	// 	if (point[i] < bottomCorner_[i]) return false;
+	// 	if (point[i] > upperCorner_[i]) return false;
+	// }
 
-	return true;
+	// return true;
+	return bottomCorner_ <= point && point <= upperCorner_;
 }
 
 template<typename T>
