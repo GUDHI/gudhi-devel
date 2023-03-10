@@ -38,36 +38,22 @@ namespace Gudhi {
 namespace subsampling {
 
 // ------ choose_n_farthest_points ------
-std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector<std::vector<double>>& points,
-                                                               unsigned nb_points) {
+std::vector<std::vector<double>> subsampling_n_farthest_points(bool metric, const std::vector<std::vector<double>>& points,
+                                                               std::size_t nb_points, std::size_t starting_point = random_starting_point) {
   std::vector<std::vector<double>> landmarks;
-  choose_n_farthest_points(Euclidean_distance(), points, nb_points,
-                           random_starting_point, std::back_inserter(landmarks));
+  if (metric)
+    choose_n_farthest_points_metric(Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
+  else
+    choose_n_farthest_points(Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
 
   return landmarks;
 }
 
-std::vector<std::vector<double>> subsampling_n_farthest_points(const std::vector<std::vector<double>>& points,
-                                                               unsigned nb_points, unsigned starting_point) {
-  std::vector<std::vector<double>> landmarks;
-  choose_n_farthest_points(Euclidean_distance(), points, nb_points,
-                           starting_point, std::back_inserter(landmarks));
-
-  return landmarks;
-}
-
-std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(const std::string& off_file,
-                                                                         unsigned nb_points) {
-  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
-  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
-  return subsampling_n_farthest_points(points, nb_points);
-}
-
-std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(const std::string& off_file,
-                                                                         unsigned nb_points, unsigned starting_point) {
+std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(bool metric, const std::string& off_file,
+                                                                         std::size_t nb_points, std::size_t starting_point = random_starting_point) {
     Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
     std::vector<std::vector<double>> points = off_reader.get_point_cloud();
-    return subsampling_n_farthest_points(points, nb_points, starting_point);
+    return subsampling_n_farthest_points(metric, points, nb_points, starting_point);
 }
 
 // ------ pick_n_random_points ------
