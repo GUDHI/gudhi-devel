@@ -14,6 +14,8 @@
 #include <gudhi/Debug_utils.h>
 
 #include <boost/config.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include <iostream>
 #include <vector>
@@ -230,13 +232,6 @@ class Bitmap_cubical_complex_base {
   inline std::size_t size() const { return this->data.size(); }
 
   /**
-   * Writing to stream operator. By using it we get the values T of cells in order in which they are stored in the
-   * structure. This procedure is used for debugging purposes.
-   **/
-  template <typename K>
-  friend std::ostream& operator<<(std::ostream& os, const Bitmap_cubical_complex_base<K>& b);
-
-  /**
    * Function that put the input data to bins. By putting data to bins we mean rounding them to a sequence of values
    * equally distributed in the range of data.
    * Sometimes if most of the cells have different birth-death times, the performance of the algorithms to compute
@@ -269,88 +264,25 @@ class Bitmap_cubical_complex_base {
    * @brief Iterator through all cells in the complex (in order they appear in the structure -- i.e.
    * in lexicographical order).
    **/
-  class All_cells_iterator {
-   public:
-    typedef std::input_iterator_tag iterator_category;
-    typedef std::size_t value_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef value_type* pointer;
-    typedef value_type reference;
-
-    All_cells_iterator() { this->counter = 0; }
-
-    All_cells_iterator operator++() {
-      // first find first element of the counter that can be increased:
-      ++this->counter;
-      return *this;
-    }
-
-    All_cells_iterator operator++(int) {
-      All_cells_iterator result = *this;
-      ++(*this);
-      return result;
-    }
-
-    All_cells_iterator& operator=(const All_cells_iterator& rhs) {
-      this->counter = rhs.counter;
-      return *this;
-    }
-
-    bool operator==(const All_cells_iterator& rhs) const {
-      if (this->counter != rhs.counter) return false;
-      return true;
-    }
-
-    bool operator!=(const All_cells_iterator& rhs) const { return !(*this == rhs); }
-
-    /*
-     * The operator * returns position of a cube in the structure of cubical complex. This position can be then used as
-     * an argument of the following functions:
-     * get_boundary_of_a_cell, get_coboundary_of_a_cell, get_dimension_of_a_cell to get information about the cell
-     * boundary and coboundary and dimension
-     * and in function get_cell_data to get a filtration of a cell.
-     */
-    std::size_t operator*() { return this->counter; }
-    friend class Bitmap_cubical_complex_base;
-
-   protected:
-    std::size_t counter;
-  };
+  typedef boost::counting_iterator<std::size_t> All_cells_iterator;
 
   /**
    * Function returning a All_cells_iterator to the first cell of the bitmap.
    **/
-  All_cells_iterator all_cells_iterator_begin() {
-    All_cells_iterator a;
-    return a;
-  }
+  All_cells_iterator all_cells_iterator_begin() const { return All_cells_iterator(0); }
 
   /**
    * Function returning a All_cells_iterator beyond the last cell of the bitmap.
    **/
-  All_cells_iterator all_cells_iterator_end() {
-    All_cells_iterator a;
-    a.counter = this->data.size();
-    return a;
-  }
+  All_cells_iterator all_cells_iterator_end() const { return All_cells_iterator(data.size()); }
 
   /**
    * @brief Range corresponding to All_cells_iterator
    **/
-  class All_cells_range {
-   public:
-    All_cells_range(Bitmap_cubical_complex_base* b) : b(b) {}
-
-    All_cells_iterator begin() { return b->all_cells_iterator_begin(); }
-
-    All_cells_iterator end() { return b->all_cells_iterator_end(); }
-
-   private:
-    Bitmap_cubical_complex_base<T>* b;
-  };
+  typedef boost::iterator_range<All_cells_iterator> All_cells_range;
 
   /** Returns a range over all cells. */
-  All_cells_range all_cells_range() { return All_cells_range(this); }
+  All_cells_range all_cells_range() const { return All_cells_range(all_cells_iterator_begin(), all_cells_iterator_end()); }
 
   /**
    * Boundary_range class provides ranges for boundary iterators.
@@ -724,15 +656,6 @@ std::pair<T, T> Bitmap_cubical_complex_base<T>::min_max_filtration() {
     if (this->data[i] > min_max.second) min_max.second = this->data[i];
   }
   return min_max;
-}
-
-template <typename K>
-std::ostream& operator<<(std::ostream& out, const Bitmap_cubical_complex_base<K>& b) {
-  for (auto it = b.all_cells_const_begin();
-       it != b.all_cells_const_end(); ++it) {
-    out << *it << " ";
-  }
-  return out;
 }
 
 template <typename T>
