@@ -184,12 +184,6 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
       return result;
     }
 
-    Vertices_iterator& operator=(const Vertices_iterator& rhs) {
-      this->counter = rhs.counter;
-      this->b = rhs.b;
-      return *this;
-    }
-
     bool operator==(const Vertices_iterator& rhs) const {
       if (this->b != rhs.b) return false;
       GUDHI_CHECK(this->counter.size() == rhs.counter.size(), "impossible");

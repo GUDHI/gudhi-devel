@@ -344,12 +344,6 @@ class Bitmap_cubical_complex_base {
       return result;
     }
 
-    Top_dimensional_cells_iterator& operator=(const Top_dimensional_cells_iterator& rhs) {
-      this->counter = rhs.counter;
-      this->b = rhs.b;
-      return *this;
-    }
-
     bool operator==(const Top_dimensional_cells_iterator& rhs) const {
       if (this->b != rhs.b) return false;
       if (this->counter.size() != rhs.counter.size()) return false;
@@ -462,12 +456,6 @@ class Bitmap_cubical_complex_base {
       Vertices_iterator result = *this;
       ++(*this);
       return result;
-    }
-
-    Vertices_iterator& operator=(const Vertices_iterator& rhs) {
-      this->counter = rhs.counter;
-      this->b = rhs.b;
-      return *this;
     }
 
     bool operator==(const Vertices_iterator& rhs) const {

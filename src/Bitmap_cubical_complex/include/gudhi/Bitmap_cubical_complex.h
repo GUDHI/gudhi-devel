@@ -318,16 +318,6 @@ class Bitmap_cubical_complex : public T {
       return result;
     }
 
-    Skeleton_simplex_iterator& operator=(const Skeleton_simplex_iterator& rhs) {
-#ifdef DEBUG_TRACES
-      std::clog << "Skeleton_simplex_iterator operator =\n";
-#endif
-      this->b = rhs.b;
-      this->position = rhs.position;
-      this->dimension = rhs.dimension;
-      return (*this);
-    }
-
     bool operator==(const Skeleton_simplex_iterator& rhs) const {
 #ifdef DEBUG_TRACES
       std::clog << "bool operator ==\n";
