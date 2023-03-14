@@ -21,11 +21,13 @@ def test_insertion():
     st = SimplexTree()
     assert st.__is_defined() == True
     assert st.__is_persistence_defined() == False
+    assert st.is_empty()
 
     # insert test
     assert st.insert([0, 1]) == True
 
     assert st.dimension() == 1
+    assert not st.is_empty()
 
     assert st.insert([0, 1, 2], filtration=4.0) == True
 
