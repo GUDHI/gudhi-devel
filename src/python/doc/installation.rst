@@ -180,7 +180,7 @@ A complete configuration would be :
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
     Sphinx-paramlinks version 0.5.2 
-    python_docs_theme found
+    pydata-sphinx-theme version 0.10.1
     Eigen3 version 3.4.0
     Boost version 1.74.0
     CGAL version 5.3
