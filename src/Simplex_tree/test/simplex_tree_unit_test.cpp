@@ -41,6 +41,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
+  BOOST_CHECK(tst.is_empty());
   typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
@@ -115,6 +116,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
   // Check
   BOOST_CHECK(st.num_simplices() == 143353);
   BOOST_CHECK(st.dimension() == 3);
+  BOOST_CHECK(!st.is_empty());
 
   int previous_size = 0;
   for (auto f_simplex : st.filtration_simplex_range()) {
