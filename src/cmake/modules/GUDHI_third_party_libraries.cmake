@@ -161,7 +161,7 @@ if (WITH_GUDHI_PYTHON)
     find_python_module_no_version("hnswlib")
     find_python_module("tensorflow")
     find_python_module("sphinx_paramlinks")
-    find_python_module_no_version("python_docs_theme")
+    find_python_module("pydata_sphinx_theme")
   endif()
   
   if(NOT GUDHI_PYTHON_PATH)
