@@ -656,3 +656,9 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
     assert st.filtration([0, 1, 2, 3]) == 7.0
+
+
+def test_assign_filtration_missing():
+    st = SimplexTree()
+    with pytest.raises(ValueError):
+        st.assign_filtration([1, 2], 3)
