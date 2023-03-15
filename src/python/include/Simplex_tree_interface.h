@@ -53,7 +53,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration) {
-    Base::assign_filtration(Base::find(simplex), filtration);
+    Simplex_handle sh = Base::find(simplex);
+    if (sh == Base::null_simplex())
+      throw std::invalid_argument("Cannot assign a filtration to a simplex that is not in the complex");
+    Base::assign_filtration(sh, filtration);
     Base::clear_filtration();
   }
 
