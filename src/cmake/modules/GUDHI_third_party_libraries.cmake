@@ -52,10 +52,13 @@ option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
 # Find TBB package for parallel sort - not mandatory, just optional.
 if(WITH_GUDHI_USE_TBB)
-  set(TBB_FIND_QUIETLY ON)
   find_package(TBB)
-  if (TBB_FOUND)
-    include(${TBB_USE_FILE})
+  if (TARGET TBB::tbb)
+    # get required compilation information from onetbb target - mainly for the python module
+    get_target_property(TBB_LIBRARY TBB::tbb LOCATION)
+    get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc LOCATION)
+    get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
+    get_filename_component(TBB_LIBRARY_DIRS ${TBB_LIBRARY} DIRECTORY)
     message("TBB found in ${TBB_LIBRARY_DIRS}")
     add_definitions(-DGUDHI_USE_TBB)
   endif()

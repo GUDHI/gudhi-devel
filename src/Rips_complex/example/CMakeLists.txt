@@ -16,13 +16,13 @@ add_executable ( Rips_complex_example_sparse example_sparse_rips.cpp )
 # Correlation matrix
 add_executable (  Rips_complex_example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp )
 
-if (TBB_FOUND)
-  target_link_libraries(Rips_complex_example_from_off ${TBB_LIBRARIES})
-  target_link_libraries(Rips_complex_example_one_skeleton_from_points ${TBB_LIBRARIES})
-  target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix ${TBB_LIBRARIES})
-  target_link_libraries(Rips_complex_example_from_csv_distance_matrix ${TBB_LIBRARIES})
-  target_link_libraries(Rips_complex_example_sparse ${TBB_LIBRARIES})
-  target_link_libraries(Rips_complex_example_one_skeleton_rips_from_correlation_matrix ${TBB_LIBRARIES})
+if (TARGET TBB::tbb)
+  target_link_libraries(Rips_complex_example_from_off TBB::tbb)
+  target_link_libraries(Rips_complex_example_one_skeleton_from_points TBB::tbb)
+  target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix TBB::tbb)
+  target_link_libraries(Rips_complex_example_from_csv_distance_matrix TBB::tbb)
+  target_link_libraries(Rips_complex_example_sparse TBB::tbb)
+  target_link_libraries(Rips_complex_example_one_skeleton_rips_from_correlation_matrix TBB::tbb)
 endif()
 
 add_test(NAME Rips_complex_example_one_skeleton_from_points
