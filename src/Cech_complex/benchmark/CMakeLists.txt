@@ -8,7 +8,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
     add_executable(cech_complex_benchmark cech_complex_benchmark.cpp)
     target_link_libraries(cech_complex_benchmark Boost::filesystem)
   
-    if (TARGET TBB::tbb)
+    if(TBB_FOUND)
       target_link_libraries(cech_complex_benchmark TBB::tbb)
     endif()
   endif()

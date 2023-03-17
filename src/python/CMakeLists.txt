@@ -265,9 +265,11 @@ if(PYTHONINTERP_FOUND)
     endforeach()
     set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/include', ")
 
-    if (TARGET TBB::tbb AND WITH_GUDHI_USE_TBB)
-      add_gudhi_debug_info("TBB found and used")
+    if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
+      add_gudhi_debug_info("TBB version ${TBB_VERSION} found and used")
       add_gudhi_debug_info("TBB_LIBRARY = ${TBB_LIBRARY}")
+      add_gudhi_debug_info("TBB_MALLOC_LIBRARY = ${TBB_MALLOC_LIBRARY}")
+
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
       add_GUDHI_PYTHON_lib("${TBB_LIBRARY}")
       add_GUDHI_PYTHON_lib("${TBB_MALLOC_LIBRARY}")

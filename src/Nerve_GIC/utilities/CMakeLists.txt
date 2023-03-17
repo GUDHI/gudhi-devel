@@ -3,7 +3,7 @@ project(Nerve_GIC_examples)
 add_executable ( Nerve Nerve.cpp )
 add_executable ( VoronoiGIC VoronoiGIC.cpp )
 
-if (TARGET TBB::tbb)
+if(TBB_FOUND)
   target_link_libraries(Nerve TBB::tbb)
   target_link_libraries(VoronoiGIC TBB::tbb)
 endif()

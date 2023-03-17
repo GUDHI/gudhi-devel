@@ -4,7 +4,7 @@ if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   include(GUDHI_boost_test)
 
   add_executable ( Bottleneck_distance_test_unit bottleneck_unit_test.cpp )
-  if (TARGET TBB::tbb)
+  if(TBB_FOUND)
     target_link_libraries(Bottleneck_distance_test_unit TBB::tbb)
   endif()
 

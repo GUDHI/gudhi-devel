@@ -5,7 +5,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
     target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} Boost::program_options)
 
-    if (TARGET TBB::tbb)
+    if(TBB_FOUND)
       target_link_libraries(alpha_complex_persistence TBB::tbb)
     endif()
     add_test(NAME Alpha_complex_utilities_safe_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
@@ -34,7 +34,7 @@ if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   if (TARGET Boost::program_options)
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
     target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} Boost::program_options)
-    if (TARGET TBB::tbb)
+    if(TBB_FOUND)
       target_link_libraries(alpha_complex_3d_persistence TBB::tbb)
     endif()
 

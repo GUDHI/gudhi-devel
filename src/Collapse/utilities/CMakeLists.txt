@@ -6,7 +6,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
     add_executable ( point_cloud_edge_collapse_rips_persistence point_cloud_edge_collapse_rips_persistence.cpp )
     target_link_libraries(point_cloud_edge_collapse_rips_persistence Boost::program_options)
   
-    if (TARGET TBB::tbb)
+    if(TBB_FOUND)
       target_link_libraries(point_cloud_edge_collapse_rips_persistence TBB::tbb)
     endif()
     add_test(NAME Edge_collapse_utilities_point_cloud_rips_persistence COMMAND $<TARGET_FILE:point_cloud_edge_collapse_rips_persistence>
@@ -18,7 +18,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
     add_executable ( distance_matrix_edge_collapse_rips_persistence distance_matrix_edge_collapse_rips_persistence.cpp )
     target_link_libraries(distance_matrix_edge_collapse_rips_persistence Boost::program_options)
   
-    if (TARGET TBB::tbb)
+    if(TBB_FOUND)
       target_link_libraries(distance_matrix_edge_collapse_rips_persistence TBB::tbb)
     endif()
     add_test(NAME Edge_collapse_utilities_distance_matrix_rips_persistence COMMAND $<TARGET_FILE:distance_matrix_edge_collapse_rips_persistence>
