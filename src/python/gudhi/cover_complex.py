@@ -17,7 +17,7 @@ from sklearn.cluster         import DBSCAN, AgglomerativeClustering
 from sklearn.metrics         import pairwise_distances
 from scipy.spatial.distance  import directed_hausdorff
 
-from .. import SimplexTree, CoverComplex
+from . import SimplexTree, CoverComplex
 
 class CoverComplexPy(BaseEstimator):
     """
