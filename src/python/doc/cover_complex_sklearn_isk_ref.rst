@@ -23,7 +23,7 @@ Example of Mapper cover complex computed from a point cloud
 
     import numpy as np
     from sklearn.cluster import AgglomerativeClustering
-    from gudhi.sklearn import MapperComplex
+    from gudhi.cover_complex import MapperComplex
 
     X = np.array([[1,1],[1,1.5],[1,2],[1,2.5],[1,3],[1.5,2],[1.5,3],[2,2],[2,2.5],[2,3],[2,3.5],[2,4]])
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T
