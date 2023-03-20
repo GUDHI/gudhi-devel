@@ -445,9 +445,15 @@ class Tangential_complex {
       if (boost::is_convertible<Concurrency_tag, CGAL::Parallel_tag>::value) {
         tbb::combinable<std::size_t> num_inconsistencies;
         tbb::combinable<std::vector<std::size_t> > tls_updated_points;
+
         tbb::parallel_for(tbb::blocked_range<size_t>(0, m_triangulations.size()),
-                          Try_to_solve_inconsistencies_in_a_local_triangulation(*this, max_perturb, num_inconsistencies,
-                                                                                tls_updated_points));
+                          [&]( tbb::blocked_range<size_t> r ) {
+                            for (size_t i = r.begin(); i != r.end(); ++i) {
+                              num_inconsistencies.local() += try_to_solve_inconsistencies_in_a_local_triangulation(
+                                i, max_perturb, std::back_inserter(tls_updated_points.local()));
+                            }
+                          });
+
         num_inconsistent_stars = num_inconsistencies.combine(std::plus<std::size_t>());
         updated_points =
             tls_updated_points.combine([](std::vector<std::size_t> const &x, std::vector<std::size_t> const &y) {
@@ -1565,42 +1571,6 @@ class Tangential_complex {
       return !(std::find(star.begin(), star.end(), s) == star.end());
     }
   }
-
-#ifdef GUDHI_USE_TBB
-  // Functor for try_to_solve_inconsistencies_in_a_local_triangulation function
-  class Try_to_solve_inconsistencies_in_a_local_triangulation {
-    Tangential_complex &m_tc;
-    double m_max_perturb;
-    tbb::combinable<std::size_t> &m_num_inconsistencies;
-    tbb::combinable<std::vector<std::size_t> > &m_updated_points;
-
-   public:
-    // Constructor
-    Try_to_solve_inconsistencies_in_a_local_triangulation(Tangential_complex &tc, double max_perturb,
-                                                          tbb::combinable<std::size_t> &num_inconsistencies,
-                                                          tbb::combinable<std::vector<std::size_t> > &updated_points)
-        : m_tc(tc),
-          m_max_perturb(max_perturb),
-          m_num_inconsistencies(num_inconsistencies),
-          m_updated_points(updated_points) {}
-
-    // Constructor
-    Try_to_solve_inconsistencies_in_a_local_triangulation(
-        const Try_to_solve_inconsistencies_in_a_local_triangulation &tsilt)
-        : m_tc(tsilt.m_tc),
-          m_max_perturb(tsilt.m_max_perturb),
-          m_num_inconsistencies(tsilt.m_num_inconsistencies),
-          m_updated_points(tsilt.m_updated_points) {}
-
-    // operator()
-    void operator()(const tbb::blocked_range<size_t> &r) const {
-      for (size_t i = r.begin(); i != r.end(); ++i) {
-        m_num_inconsistencies.local() += m_tc.try_to_solve_inconsistencies_in_a_local_triangulation(
-            i, m_max_perturb, std::back_inserter(m_updated_points.local()));
-      }
-    }
-  };
-#endif  // GUDHI_USE_TBB
 
   void perturb(std::size_t point_idx, double max_perturb) {
     const Tr_traits &local_tr_traits = m_triangulations[point_idx].tr().geom_traits();
