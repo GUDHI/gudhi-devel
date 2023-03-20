@@ -435,3 +435,72 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
 
 }
+
+BOOST_AUTO_TEST_CASE(mini_prune_above_dimension) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "MINI PRUNE ABOVE DIMENSION" << std::endl;
+
+  Mini_stree st;
+
+  st.insert_simplex_and_subfaces({0, 1, 6, 7});
+  st.insert_simplex_and_subfaces({3, 4, 5});
+  st.insert_simplex_and_subfaces({3, 0});
+  st.insert_simplex_and_subfaces({2, 1, 0});
+
+  // st:
+  //    1   6
+  //    o---o
+  //   /X\7/
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
+
+  st.initialize_filtration();
+  
+  // Display the Simplex_tree
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  bool simplex_is_changed = st.prune_above_dimension(3);
+  //if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::clog << "The complex pruned at 'dimension=3' contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  simplex_is_changed = st.prune_above_dimension(2);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::clog << "The complex pruned at 'dimension=2' contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 26);
+
+  simplex_is_changed = st.prune_above_dimension(1);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::clog << "The complex pruned at 'dimension=1' contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 20);
+
+  // Keep only the vertices
+  simplex_is_changed = st.prune_above_dimension(0);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::clog << "The complex pruned at 'dimension=0' contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 8);
+
+  // Remove all simplices shall be possible
+  simplex_is_changed = st.prune_above_dimension(-1);
+  if (simplex_is_changed)
+    st.initialize_filtration();
+  // Display the Simplex_tree
+  std::clog << "The complex pruned at 'dimension=-1' contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 8);
+}

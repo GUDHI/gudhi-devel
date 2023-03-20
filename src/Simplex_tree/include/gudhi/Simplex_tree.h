@@ -1497,6 +1497,42 @@ class Simplex_tree {
     return modified;
   }
 
+ public:
+  /** \brief Prune above dimension value given as parameter.
+   * @param[in] dimension Maximum dimension value.
+   * @return True if any simplex was removed, false if all simplices already had a value below the dimension.
+   * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_dimension()`
+   * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
+   * bound. If you care, you can call `dimension()` to recompute the exact dimension.
+   */
+  bool prune_above_dimension(int dimension) {
+    bool modified = rec_prune_above_dimension(root(), dimension, 0);
+    if(modified)
+      clear_filtration(); // Drop the cache.
+    return modified;
+  }
+
+ private:
+  bool rec_prune_above_dimension(Siblings* sib, int dim, int actual_dim) {
+    bool modified = false;
+    auto&& list = sib->members();
+
+    for (auto&& simplex : list)
+      if (has_children(&simplex)) {
+        if (actual_dim >= dim) {
+          rec_delete(simplex.second.children());
+          simplex.second.assign_children(sib);
+          // dimension may need to be lowered
+          dimension_to_be_lowered_ = true;
+          modified = true;
+        } else {
+          modified |= rec_prune_above_dimension(simplex.second.children(), dim, actual_dim + 1);
+        }
+      }
+
+    return modified;
+  }
+
  private:
   /** \brief Deep search simplex tree dimension recompute.
    * @return True if the dimension was modified, false otherwise.
