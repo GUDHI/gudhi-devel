@@ -2,9 +2,9 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-================================
-Cover complexes reference manual
-================================
+=============================================
+:class:`~gudhi.CoverComplex` reference manual
+=============================================
 
 .. autoclass:: gudhi.CoverComplex
    :members:

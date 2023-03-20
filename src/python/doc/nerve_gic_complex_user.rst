@@ -2,35 +2,11 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-Cover complexes user manual
-===========================
-Definition
-----------
 
-.. include:: nerve_gic_complex_sum.inc
+:class:`~gudhi.CoverComplex` user manual
+========================================
 
-We provide two types of classes for computing cover complexes: one is comprised of the :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` classes, which correspond to the Nerve, Graph Induced and Mapper complexes respectively, and are written in a scikit-learn format,
-while the other type is :class:`~gudhi.CoverComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
-while :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex` need the inputs to be stored in memory).
-
-Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5. On the other hand, Mapper complexes accept resolutions and gains with any length.
-
-These classes can print output files, which can then be visualized with either
-neato (from `graphviz <http://www.graphviz.org/>`_),
-`geomview <http://www.geomview.org/>`_,
-`KeplerMapper <https://github.com/scikit-tda/kepler-mapper>`_.
-Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
-In the following, we provide examples for CoverComplex, and we refer to `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_ for examples of :class:`~gudhi.sklearn.NerveComplex`, :class:`~gudhi.sklearn.GraphInducedComplex` and :class:`~gudhi.sklearn.MapperComplex`.
-
-Covers
-------
-
-Mapper, Nerve and Graph Induced complexes require a cover C of the input point cloud P,
-that is, a set of subsets of P whose union is P itself.
-Very often, this cover is obtained from the preimage of a family of hypercubes covering
-the image of some function f sending P to Euclidean space. This family is parameterized
-by its resolution, which is the number of hypercubes,
-and its gain, which is the overlap percentage between consecutive hypercubes (ordered by their lower corners).
+In the following, we provide examples for the :class:`~gudhi.CoverComplex` class (see :doc:`cover_complex_sklearn_user` for a general introduction).
 
 Nerves
 ------
