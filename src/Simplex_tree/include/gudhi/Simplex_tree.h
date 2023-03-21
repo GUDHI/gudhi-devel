@@ -577,6 +577,11 @@ class Simplex_tree {
     return root_.members_.size();
   }
 
+  /** \brief Returns whether the complex is empty. */
+  bool is_empty() const {
+    return root_.members_.empty();
+  }
+
  public:
   /** \brief returns the number of simplices in the simplex_tree. */
   size_t num_simplices() {

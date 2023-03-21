@@ -167,6 +167,14 @@ cdef class SimplexTree:
         """
         return self.get_ptr().num_simplices()
 
+    def is_empty(self):
+        """This function returns whether the simplicial complex is empty.
+
+        :returns:  True if the simplicial complex is empty.
+        :rtype:  bool
+        """
+        return self.get_ptr().is_empty()
+
     def dimension(self):
         """This function returns the dimension of the simplicial complex.
 

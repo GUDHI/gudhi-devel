@@ -235,7 +235,9 @@ class Alpha_complex {
    * @exception std::out_of_range In case vertex is not found (cf. std::vector::at).
    */
   const Point_d& get_point(std::size_t vertex) const {
-    return vertex_handle_to_iterator_.at(vertex)->point();
+    auto it = vertex_handle_to_iterator_.at(vertex);
+    if (it == nullptr) throw std::out_of_range("This vertex is missing, maybe hidden by a duplicate or another heavier point.");
+    return it->point();
   }
 
  private:
