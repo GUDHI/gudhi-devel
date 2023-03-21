@@ -1506,9 +1506,25 @@ class Simplex_tree {
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_dimension(int dimension) {
-    bool modified = rec_prune_above_dimension(root(), dimension, 0);
-    if(modified)
+    if (dimension >= dimension_)
+      return false;
+    
+    bool modified = false;
+    if (dimension < 0) {
+      if (num_vertices() > 0) {
+        root_members_recursive_deletion();
+        modified = true;
+      }
+      // Force dimension to -1, in case user calls `prune_above_dimension(-10)`
+      dimension = -1;
+    } else {
+      modified = rec_prune_above_dimension(root(), dimension, 0);
+    }
+    if(modified) {
+      // Thanks to `if (dimension >= dimension_)` and dimension forced to -1 `if (dimension < 0)`, we know the new dimension
+      dimension_ = dimension;
       clear_filtration(); // Drop the cache.
+    }
     return modified;
   }
 
@@ -1522,8 +1538,6 @@ class Simplex_tree {
         if (actual_dim >= dim) {
           rec_delete(simplex.second.children());
           simplex.second.assign_children(sib);
-          // dimension may need to be lowered
-          dimension_to_be_lowered_ = true;
           modified = true;
         } else {
           modified |= rec_prune_above_dimension(simplex.second.children(), dim, actual_dim + 1);
