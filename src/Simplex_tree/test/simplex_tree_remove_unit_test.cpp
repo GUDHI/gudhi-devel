@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(remove_maximal_simplex) {
   std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 3);
 
-  // Check dimension calls upper_bound_dimension to recompute dimension
+  // Check dimension calls lower_upper_bound_dimension to recompute dimension
   BOOST_CHECK(st.dimension() == 2);
   BOOST_CHECK(st.upper_bound_dimension() == 2);
 
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.set_dimension(1);
   std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 1);
-  // check dimension() and upper_bound_dimension() is not giving the right answer because dimension is too low
+  // check dimension() and lower_upper_bound_dimension() is not giving the right answer because dimension is too low
   BOOST_CHECK(st.dimension() == 1);
 
 
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(auto_dimension_set) {
   st.set_dimension(6);
   std::clog << "st.upper_bound_dimension()=" << st.upper_bound_dimension() << std::endl;
   BOOST_CHECK(st.upper_bound_dimension() == 6);
-  // check dimension() do not launch upper_bound_dimension()
+  // check dimension() do not launch lower_upper_bound_dimension()
   BOOST_CHECK(st.dimension() == 6);
 
 
