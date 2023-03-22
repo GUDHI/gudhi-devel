@@ -481,7 +481,7 @@ cdef class SimplexTree:
         return self.get_ptr().prune_above_filtration(filtration)
 
     def prune_above_dimension(self, dimension):
-        """Prune above filtration value given as parameter.
+        """Remove all simplices of dimension greater than a given value.
 
         :param dimension: Maximum dimension value.
         :type dimension: int

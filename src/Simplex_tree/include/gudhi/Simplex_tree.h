@@ -1498,7 +1498,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Prune above dimension value given as parameter.
+  /** \brief Remove all simplices of dimension greater than a given value.
    * @param[in] dimension Maximum dimension value.
    * @return True if any simplex was removed, false if all simplices already had a value below the dimension.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_dimension()`
