@@ -48,6 +48,10 @@ const std::size_t ONLY_LOAD_THE_FIRST_N_POINTS = 20000000;
 #include <fstream>
 #include <cmath>  // for std::sqrt
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/global_control.h>
+#include <tbb/task_arena.h>
+#endif
 #include "XML_exporter.h"
 #include "RIB_exporter.h"
 #define GUDHI_TC_EXPORT_PERFORMANCE_DATA
@@ -110,6 +114,7 @@ class XML_perf_data {
     subelements.push_back("Param3");
     subelements.push_back("Intrinsic_dim");
     subelements.push_back("Ambient_dim");
+    subelements.push_back("Num_threads");
     subelements.push_back("Sparsity");
     subelements.push_back("Max_perturb");
     subelements.push_back("Num_points_in_input");
@@ -553,6 +558,14 @@ void make_tc(std::vector<Point> &points,
 int main() {
   CGAL::set_error_behaviour(CGAL::ABORT);
 
+#ifdef GUDHI_USE_TBB
+#ifdef _DEBUG
+  int num_threads = 1;
+#else
+  int num_threads = tbb::this_task_arena::max_concurrency() - 4;
+#endif
+#endif
+
   std::ifstream script_file;
   script_file.open(BENCHMARK_SCRIPT_FILENAME);
   // Script?
@@ -563,9 +576,21 @@ int main() {
   //    - Number of iterations with these parameters
   if (script_file.is_open()) {
     int i = 1;
+#ifdef GUDHI_USE_TBB
+#ifdef BENCHMARK_WITH_1_TO_MAX_THREADS
+    for (num_threads = 1;
+         num_threads <= tbb::this_task_arena::max_concurrency();
+         ++num_threads)
+#endif
+#endif
       /*for (Concurrent_mesher_config::get().num_work_items_per_batch = 5 ;
         Concurrent_mesher_config::get().num_work_items_per_batch < 100 ;
         Concurrent_mesher_config::get().num_work_items_per_batch += 5)*/ {
+#ifdef GUDHI_USE_TBB
+      if (num_threads > 0)
+        tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+#endif
+
       std::cerr << "Script file '" << BENCHMARK_SCRIPT_FILENAME << "' found.\n";
       script_file.seekg(0);
       while (script_file.good()) {
@@ -627,6 +652,14 @@ int main() {
             GUDHI_TC_SET_PERFORMANCE_DATA("Intrinsic_dim", intrinsic_dim);
             GUDHI_TC_SET_PERFORMANCE_DATA("Perturb_technique", "Tangential_translation");
             GUDHI_TC_SET_PERFORMANCE_DATA("Perturb_which_points", "Center_vertex");
+
+#ifdef GUDHI_USE_TBB
+            GUDHI_TC_SET_PERFORMANCE_DATA(
+                                          "Num_threads",
+                                          (num_threads == -1 ? tbb::this_task_arena::max_concurrency() : num_threads));
+#else
+            GUDHI_TC_SET_PERFORMANCE_DATA("Num_threads", "N/A");
+#endif
 
             std::cerr << "\nTC #" << i << "...\n";
 
