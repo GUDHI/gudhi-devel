@@ -279,7 +279,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
         unless the 'GUDHI_DATA' environment variable is set.
 
     subset : string
-        As the dataset is quite a big file to download, when specified, this argument allows to download the following subsets:
+        This argument allows to download the following subsets:
          * 'all' (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column ()
          * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3.
@@ -295,10 +295,10 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     -------
     points: numpy array
         Depending on subset value:
-         * Array of shape (7500, 3, dtype = object) when `subset='all'`.
+         * Array of shape (30.000, 4, dtype = object) when `subset='all'`.
 
         Or
-         * Array of shape (7500, 3, dtype = double) otherwise.
+         * Array of shape (7.500, 3, dtype = double) otherwise.
 
     """
     file_url = (
