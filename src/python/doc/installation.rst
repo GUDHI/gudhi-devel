@@ -180,7 +180,7 @@ A complete configuration would be :
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
     Sphinx-paramlinks version 0.5.2 
-    python_docs_theme found
+    pydata-sphinx-theme version 0.10.1
     Eigen3 version 3.4.0
     Boost version 1.74.0
     CGAL version 5.3
@@ -200,7 +200,7 @@ Documentation
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
-`python-docs-theme <https://github.com/python/python-docs-theme>`_ are
+`pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
 `Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
 also mandatory to build the documentation.

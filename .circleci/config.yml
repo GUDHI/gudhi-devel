@@ -74,6 +74,7 @@ jobs:
       - run:
           name: Build and test python module. Generates and tests the python documentation
           command: |
+            pip3 install pydata-sphinx-theme
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..

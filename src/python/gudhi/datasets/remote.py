@@ -103,7 +103,7 @@ def _fetch_remote(url, file_path, file_checksum=None):
 
     Raises
     ------
-    IOError
+    OSError
         If the computed SHA256 checksum of file does not match the one given by the user.
     """
 
@@ -115,7 +115,7 @@ def _fetch_remote(url, file_path, file_checksum=None):
         if file_checksum != checksum:
             # Remove file and raise error
             remove(file_path)
-            raise IOError(
+            raise OSError(
                 "{} has a SHA256 checksum : {}, "
                 "different from expected : {}."
                 "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum)
@@ -138,14 +138,14 @@ def _fetch_remote_license(license_url, license_path, license_checksum=None, acce
 
     Raises
     ------
-    IOError
+    OSError
         If the computed SHA256 checksum of file does not match the one given by the user.
     """
     _fetch_remote(license_url, license_path, license_checksum)
     # Print license terms unless accept_license is set to True
     if not accept_license:
         if exists(license_path):
-            with open(license_path, "r") as f:
+            with open(license_path) as f:
                 print(f.read())
 
 

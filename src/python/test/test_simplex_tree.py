@@ -21,11 +21,13 @@ def test_insertion():
     st = SimplexTree()
     assert st.__is_defined() == True
     assert st.__is_persistence_defined() == False
+    assert st.is_empty()
 
     # insert test
     assert st.insert([0, 1]) == True
 
     assert st.dimension() == 1
+    assert not st.is_empty()
 
     assert st.insert([0, 1, 2], filtration=4.0) == True
 
@@ -654,3 +656,9 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
     assert st.filtration([0, 1, 2, 3]) == 7.0
+
+
+def test_assign_filtration_missing():
+    st = SimplexTree()
+    with pytest.raises(ValueError):
+        st.assign_filtration([1, 2], 3)
