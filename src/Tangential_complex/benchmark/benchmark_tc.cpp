@@ -587,8 +587,8 @@ int main() {
         Concurrent_mesher_config::get().num_work_items_per_batch < 100 ;
         Concurrent_mesher_config::get().num_work_items_per_batch += 5)*/ {
 #ifdef GUDHI_USE_TBB
-      if (num_threads > 0)
-        tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+      tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism,
+                                       num_threads > 0 ? num_threads : tbb::this_task_arena::max_concurrency());
 #endif
 
       std::cerr << "Script file '" << BENCHMARK_SCRIPT_FILENAME << "' found.\n";
