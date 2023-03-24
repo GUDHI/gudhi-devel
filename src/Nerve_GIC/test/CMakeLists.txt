@@ -3,7 +3,7 @@ project(Graph_induced_complex_tests)
 include(GUDHI_boost_test)
 
 add_executable ( Nerve_GIC_test_unit test_GIC.cpp )
-if(TARGET TBB::tbb)
+if(TBB_FOUND)
   target_link_libraries(Nerve_GIC_test_unit TBB::tbb)
 endif()
 

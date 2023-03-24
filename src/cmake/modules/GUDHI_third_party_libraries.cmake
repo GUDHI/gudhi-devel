@@ -52,9 +52,12 @@ option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
 # Find TBB package for parallel sort - not mandatory, just optional.
 if(WITH_GUDHI_USE_TBB)
-  find_package(TBB)
-  if(TARGET TBB::tbb)
-    # Specific windows case with its debug/release management
+  find_package(TBB QUIET)
+  # `if (TARGET TBB::tbb)` does not work, but should. Let's use `if(TBB_FOUND)` instead.
+  # cf. https://github.com/oneapi-src/oneTBB/blob/master/cmake/README.md for TBB CMake variables.
+  if(TBB_FOUND)
+    # get required compilation information from onetbb target - mainly for the python module
+    # cf. https://github.com/oneapi-src/oneTBB/blob/a6a884ad0a4920415c4db88ea8927e5877dbe545/cmake/templates/TBBConfig.cmake.in#L66-L76
     if(CMAKE_BUILD_TYPE MATCHES Debug)
       get_target_property(TBB_LIBRARY TBB::tbb IMPORTED_LOCATION_DEBUG)
       get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc IMPORTED_LOCATION_DEBUG)
@@ -67,7 +70,8 @@ if(WITH_GUDHI_USE_TBB)
       get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc LOCATION)
     endif()
     if (NOT TBB_LIBRARY)
-      message(WARNING "++ TBB found but not ${TBB_LIBRARY}")
+      message("++ TBB found but not ${TBB_LIBRARY}")
+      set(TBB_FOUND FALSE)
     else()
       get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
       get_filename_component(TBB_LIBRARY_DIRS ${TBB_LIBRARY} DIRECTORY)

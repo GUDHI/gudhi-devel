@@ -6,7 +6,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   # Point cloud
   add_executable ( Edge_collapse_example_basic edge_collapse_basic_example.cpp )
   
-  if(TARGET TBB::tbb)
+  if(TBB_FOUND)
     target_link_libraries(Edge_collapse_example_basic TBB::tbb)
   endif()
   
@@ -15,7 +15,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   # Point cloud
   add_executable ( Edge_collapse_conserve_persistence edge_collapse_conserve_persistence.cpp )
   
-  if(TARGET TBB::tbb)
+  if(TBB_FOUND)
     target_link_libraries(Edge_collapse_conserve_persistence TBB::tbb)
   endif()
   

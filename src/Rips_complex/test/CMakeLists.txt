@@ -3,7 +3,7 @@ project(Rips_complex_tests)
 include(GUDHI_boost_test)
 
 add_executable ( Rips_complex_test_unit test_rips_complex.cpp )
-if(TARGET TBB::tbb)
+if(TBB_FOUND)
   target_link_libraries(Rips_complex_test_unit TBB::tbb)
 endif()
 

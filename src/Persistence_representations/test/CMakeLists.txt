@@ -27,7 +27,7 @@ gudhi_add_boost_test(kernels_unit)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable (Persistence_intervals_with_distances_test_unit persistence_intervals_with_distances_test.cpp )
-  if(TARGET TBB::tbb)
+  if(TBB_FOUND)
   target_link_libraries(Persistence_intervals_with_distances_test_unit TBB::tbb)
   endif()
   gudhi_add_boost_test(Persistence_intervals_with_distances_test_unit)
