@@ -265,7 +265,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     https://archive.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
-    and the corresponding dataset is read (compressed) from cache.
+    and the corresponding dataset is read from cache.
 
     Parameters
     ----------
