@@ -298,7 +298,7 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
          * Array of shape (30.000, 4, dtype = object) when `subset='all'`.
 
         Or
-         * Array of shape (7.500, 3, dtype = double) otherwise.
+         * Array of shape (7.500, 3, dtype = float) otherwise.
 
     """
     file_url = (
