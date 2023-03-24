@@ -3,7 +3,7 @@ project(Nerve_GIC_examples)
 add_executable ( CoordGIC CoordGIC.cpp )
 add_executable ( FuncGIC FuncGIC.cpp )
 
-if(TBB_FOUND)
+if(TARGET TBB::tbb)
   target_link_libraries(CoordGIC TBB::tbb)
   target_link_libraries(FuncGIC TBB::tbb)
 endif()

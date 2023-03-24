@@ -52,12 +52,9 @@ option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
 # Find TBB package for parallel sort - not mandatory, just optional.
 if(WITH_GUDHI_USE_TBB)
-  find_package(TBB QUIET)
-  # `if (TARGET TBB::tbb)` does not work, but should. Let's use `if(TBB_FOUND)` instead.
-  # cf. https://github.com/oneapi-src/oneTBB/blob/master/cmake/README.md for TBB CMake variables.
-  if(TBB_FOUND)
-    # get required compilation information from onetbb target - mainly for the python module
-    # cf. https://github.com/oneapi-src/oneTBB/blob/a6a884ad0a4920415c4db88ea8927e5877dbe545/cmake/templates/TBBConfig.cmake.in#L66-L76
+  find_package(TBB CONFIG)
+  if(TARGET TBB::tbb)
+    # Specific windows case with its debug/release management
     if(CMAKE_BUILD_TYPE MATCHES Debug)
       get_target_property(TBB_LIBRARY TBB::tbb IMPORTED_LOCATION_DEBUG)
       get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc IMPORTED_LOCATION_DEBUG)
@@ -65,25 +62,33 @@ if(WITH_GUDHI_USE_TBB)
       get_target_property(TBB_LIBRARY TBB::tbb IMPORTED_LOCATION_RELEASE)
       get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc IMPORTED_LOCATION_RELEASE)
     endif()
+    # Generic case
     if (NOT TBB_LIBRARY)
       get_target_property(TBB_LIBRARY TBB::tbb LOCATION)
       get_target_property(TBB_MALLOC_LIBRARY TBB::tbbmalloc LOCATION)
     endif()
-    if (NOT TBB_LIBRARY)
-      message("++ TBB found but not ${TBB_LIBRARY}")
-      set(TBB_FOUND FALSE)
+    # TBB Error management
+    if (TBB_VERSION VERSION_LESS 2019.0.11007)
+      # TBBTargets.cmake was introduced in 2019.7, so this case should not happen
+      # cf. https://github.com/oneapi-src/oneTBB/blob/2019_U7/CHANGES
+      message(WARNING "++ TBB found but version ${TBB_VERSION} is too old - GUDHI cannot compile with TBB")
     else()
-      get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
-      get_filename_component(TBB_LIBRARY_DIRS ${TBB_LIBRARY} DIRECTORY)
-      message("++ TBB found in ${TBB_LIBRARY_DIRS} - includes in ${TBB_INCLUDE_DIRS}")
-      add_definitions(-DGUDHI_USE_TBB)
-      if(MSVC)
-        # cf. https://github.com/oneapi-src/oneTBB/issues/573
-        add_definitions(-DNOMINMAX)
+      if (NOT TBB_LIBRARY)
+        message(WARNING "++ TBB found but not ${TBB_LIBRARY} - GUDHI cannot compile with TBB")
+      else()
+        # A correct version of TBB was found
+        get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
+        get_filename_component(TBB_LIBRARY_DIRS ${TBB_LIBRARY} DIRECTORY)
+        message("++ TBB version ${TBB_VERSION} found in ${TBB_LIBRARY_DIRS} - includes in ${TBB_INCLUDE_DIRS}")
+        add_definitions(-DGUDHI_USE_TBB)
+        if(MSVC)
+          # cf. https://github.com/oneapi-src/oneTBB/issues/573
+          add_definitions(-DNOMINMAX)
+        endif()
       endif()
     endif()
   endif()
-endif(WITH_GUDHI_USE_TBB)
+endif()
 
 set(CGAL_WITH_EIGEN3_VERSION 0.0.0)
 find_package(Eigen3 3.1.0)

@@ -143,7 +143,8 @@ make doxygen\endverbatim
  * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
  * future-proof scalability.
  * 
- * Having Intel&reg; TBB installed is recommended to parallelize and accelerate some GUDHI computations.
+ * Having Intel&reg; TBB (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
+ * computations.
  * 
  * The following examples/utilities are using Intel&reg; TBB if installed:
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}

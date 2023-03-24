@@ -267,12 +267,11 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :m
 Threading Building Blocks
 -------------------------
 
-`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
-parallel C++ programs that take full advantage of multicore performance, that
-are portable and composable, and that have future-proof scalability.
+`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write parallel C++ programs that take full
+advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
-Having Intel® TBB installed is recommended to parallelize and accelerate some
-GUDHI computations.
+Having Intel® TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
+computations.
 
 Run time dependencies
 =====================
