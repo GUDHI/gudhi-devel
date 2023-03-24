@@ -9,7 +9,7 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
     add_executable ( Witness_complex_weak_witness_persistence weak_witness_persistence.cpp )
     target_link_libraries(Witness_complex_weak_witness_persistence Boost::program_options)
 
-    if(TBB_FOUND)
+    if(TARGET TBB::tbb)
       target_link_libraries(Witness_complex_strong_witness_persistence TBB::tbb)
       target_link_libraries(Witness_complex_weak_witness_persistence TBB::tbb)
     endif()

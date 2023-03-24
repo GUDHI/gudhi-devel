@@ -5,7 +5,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
     add_executable(cech_persistence cech_persistence.cpp)
     target_link_libraries(cech_persistence Boost::program_options)
 
-    if(TBB_FOUND)
+    if(TARGET TBB::tbb)
       target_link_libraries(cech_persistence TBB::tbb)
     endif()
 

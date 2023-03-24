@@ -31,7 +31,7 @@ if (OPENGL_FOUND)
         target_link_libraries( GudhUI Qt5::Widgets Qt5::Xml Qt5::OpenGL )
         target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
         target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )
-        if(TBB_FOUND)
+        if(TARGET TBB::tbb)
           target_link_libraries( GudhUI TBB::tbb)
         endif()
 
