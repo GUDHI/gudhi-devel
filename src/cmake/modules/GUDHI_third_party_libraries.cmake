@@ -53,8 +53,8 @@ option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 # Find TBB package for parallel sort - not mandatory, just optional.
 if(WITH_GUDHI_USE_TBB)
   find_package(TBB QUIET)
-  # cf. https://github.com/oneapi-src/oneTBB/blob/master/cmake/README.md
-  # if (TARGET TBB::tbb) # does not work...
+  # `if (TARGET TBB::tbb)` does not work, but should. Let's use `if(TBB_FOUND)` instead.
+  # cf. https://github.com/oneapi-src/oneTBB/blob/master/cmake/README.md for TBB CMake variables.
   if(TBB_FOUND)
     # get required compilation information from onetbb target - mainly for the python module
     # cf. https://github.com/oneapi-src/oneTBB/blob/a6a884ad0a4920415c4db88ea8927e5877dbe545/cmake/templates/TBBConfig.cmake.in#L66-L76

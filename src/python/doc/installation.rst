@@ -188,8 +188,8 @@ A complete configuration would be :
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 2021.7.0 found and used
-    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
-    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so
+    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so
+    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
     + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
