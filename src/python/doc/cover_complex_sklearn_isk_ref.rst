@@ -14,7 +14,7 @@ Mapper/GIC/Nerve complexes reference manual
    :inherited-members:
 
 :class:`~gudhi.cover_complex.GraphInducedComplex` reference manual
-------------------------------------------------------------
+------------------------------------------------------------------
 
 .. autoclass:: gudhi.cover_complex.GraphInducedComplex
    :members:
@@ -22,7 +22,7 @@ Mapper/GIC/Nerve complexes reference manual
    :inherited-members:
 
 :class:`~gudhi.cover_complex.NerveComplex` reference manual
-------------------------------------------------------------
+-----------------------------------------------------------
 
 .. autoclass:: gudhi.cover_complex.NerveComplex
    :members:

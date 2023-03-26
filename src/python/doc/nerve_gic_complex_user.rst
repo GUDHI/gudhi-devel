@@ -6,7 +6,7 @@
 :class:`~gudhi.CoverComplex` user manual
 ========================================
 
-In the following, we provide examples for the :class:`~gudhi.CoverComplex` class (see :doc:`cover_complex_sklearn_user` for a general introduction).
+In the following, we provide examples for the old :class:`~gudhi.CoverComplex` class (see :doc:`cover_complex_sklearn_user` for a general introduction and links to newer alternatives).
 
 Nerves
 ------
