@@ -98,5 +98,4 @@ Cubical complex persistence scikit-learn like interface reference
 
 .. autoclass:: gudhi.sklearn.cubical_persistence.CubicalPersistence
    :members:
-   :special-members: __init__
    :show-inheritance:
