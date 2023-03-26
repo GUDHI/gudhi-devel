@@ -1526,6 +1526,53 @@ class Simplex_tree {
     return modified;
   }
 
+ public:
+  /** \brief Remove all simplices of dimension greater than a given value.
+   * @param[in] dimension Maximum dimension value.
+   * @return True if any simplex was removed, false if all simplices already had a value below the dimension.
+   */
+  bool prune_above_dimension(int dimension) {
+    if (dimension >= dimension_)
+      return false;
+    
+    bool modified = false;
+    if (dimension < 0) {
+      if (num_vertices() > 0) {
+        root_members_recursive_deletion();
+        modified = true;
+      }
+      // Force dimension to -1, in case user calls `prune_above_dimension(-10)`
+      dimension = -1;
+    } else {
+      modified = rec_prune_above_dimension(root(), dimension, 0);
+    }
+    if(modified) {
+      // Thanks to `if (dimension >= dimension_)` and dimension forced to -1 `if (dimension < 0)`, we know the new dimension
+      dimension_ = dimension;
+      clear_filtration(); // Drop the cache.
+    }
+    return modified;
+  }
+
+ private:
+  bool rec_prune_above_dimension(Siblings* sib, int dim, int actual_dim) {
+    bool modified = false;
+    auto&& list = sib->members();
+
+    for (auto&& simplex : list)
+      if (has_children(&simplex)) {
+        if (actual_dim >= dim) {
+          rec_delete(simplex.second.children());
+          simplex.second.assign_children(sib);
+          modified = true;
+        } else {
+          modified |= rec_prune_above_dimension(simplex.second.children(), dim, actual_dim + 1);
+        }
+      }
+
+    return modified;
+  }
+
  private:
   /** \brief Deep search simplex tree dimension recompute.
    * @return True if the dimension was modified, false otherwise.
