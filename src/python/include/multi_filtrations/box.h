@@ -40,12 +40,15 @@ class Box
 	using point_type = Finitely_critical_multi_filtration<T>;
 public:
 	Box();
+	Box(T a, T b, T c, T d) : bottomCorner_({a,b}), upperCorner_({c,d}) {};
 	Box(const point_type& bottomCorner, const point_type& upperCorner);
 	Box(const std::pair<point_type, point_type>& box);
 
 	void inflate(T delta);
 	const point_type& get_bottom_corner() const;
 	const point_type& get_upper_corner() const;
+	point_type& get_bottom_corner();
+	point_type& get_upper_corner();
 	bool contains(const point_type& point) const;
 	void infer_from_filters(const std::vector<point_type> &Filters_list);
     bool is_trivial() const ;
@@ -121,6 +124,18 @@ inline const typename Box<T>::point_type &Box<T>::get_bottom_corner() const
 
 template<typename T>
 inline const typename Box<T>::point_type &Box<T>::get_upper_corner() const
+{
+	return upperCorner_;
+}
+
+template<typename T>
+inline typename Box<T>::point_type &Box<T>::get_bottom_corner() 
+{
+	return bottomCorner_;
+}
+
+template<typename T>
+inline typename Box<T>::point_type &Box<T>::get_upper_corner()
 {
 	return upperCorner_;
 }

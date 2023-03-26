@@ -231,10 +231,11 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 	Base::assign_key(Base::find(simplex), key);
 	return;
   }
-  void fill_lowerstar(std::vector<double> filtration, int axis){
+  void fill_lowerstar(std::vector<options_multi::value_type> filtration, int axis){
+	using value_type=options_multi::value_type;
 	for (auto &SimplexHandle : Base::complex_simplex_range()){
-		std::vector<double> current_birth = Base::filtration(SimplexHandle);
-		double to_assign = -1*std::numeric_limits<double>::infinity();
+		std::vector<value_type> current_birth = Base::filtration(SimplexHandle);
+		value_type to_assign = -1*std::numeric_limits<value_type>::infinity();
 		for (auto vertex : Base::simplex_vertex_range(SimplexHandle)){
 			to_assign = std::max(filtration[vertex], to_assign);
 		}
@@ -262,7 +263,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   edge_list get_edge_list(){
 	edge_list simplex_list;
 	simplex_list.reserve(Base::num_simplices());
-	for (auto &simplexHandle : Base::skeleton_simplex_range(2)){
+	for (auto &simplexHandle : Base::skeleton_simplex_range(1)){
 		if (Base::dimension(simplexHandle) == 1){
 			std::pair<int,int> simplex;
 			auto it = Base::simplex_vertex_range(simplexHandle).begin();
@@ -274,7 +275,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 /*	simplex_list.shrink_to_fit();*/
 	return simplex_list;
   }
-
+// DEPRECATED, USE COORDINATE SIMPLEX TREE
   euler_chars_type euler_char(std::vector<std::vector<options_multi::value_type>> &point_list){ // TODO multi-critical 
 		const int npts = point_list.size();
 		if (npts == 0){
@@ -316,7 +317,6 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
 			Base::assign_filtration(SimplexHandle, new_filtration_value);
 		}
 	}
-
 	
 };
 

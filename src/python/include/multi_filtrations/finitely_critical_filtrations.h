@@ -1,6 +1,9 @@
-#pragma once
+#ifndef FINITELY_CRITICAL_FILTRATIONS_H_
+#define FINITELY_CRITICAL_FILTRATIONS_H_
+
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 namespace Gudhi::multi_filtrations{
 
@@ -11,10 +14,11 @@ public:
 	// explicit Finitely_critical_multi_filtration(std::vector<T>& v) : ptr_(&v) {
 	// }; // Conversion
 	Finitely_critical_multi_filtration() : std::vector<T>() {};
-	Finitely_critical_multi_filtration(int n) : std::vector<T>(n) {};
+	Finitely_critical_multi_filtration(int n) : std::vector<T>(n, -std::numeric_limits<T>::infinity()) {}; // minus infinity by default
 	Finitely_critical_multi_filtration(int n, T value) : std::vector<T>(n,value) {};
 	Finitely_critical_multi_filtration(std::initializer_list<T> init) : std::vector<T>(init) {};
 	Finitely_critical_multi_filtration(const std::vector<T>& v) : std::vector<T>(v) {};
+	
 
 	operator std::vector<T>&() const {
 		return *this;
@@ -122,8 +126,21 @@ public:
 	static std::vector<Finitely_critical_multi_filtration<T>> from_python(const std::vector<std::vector<T>>& to_convert){
 		return std::vector<Finitely_critical_multi_filtration<T>>(to_convert.begin(), to_convert.end());;
 	}
+	void push_to(const Finitely_critical_multi_filtration<T>& x){
+		if (this->size() != x.size())
+			{std::cerr << "Does only work with 1-critical filtrations ! Sizes " << this->size() << " and " << x.size() << "are different !" << std::endl; return;}
+		for (unsigned int i = 0; i < x.size(); i++)
+			this->at(i) = this->at(i) > x[i] ? this->at(i) : x[i];
+	}
+	// Warning, this function  assumes that the comparisons checks have already been made !
+	void insert_new(Finitely_critical_multi_filtration to_concatenate){
+		this->insert(
+			this->end(), std::move_iterator(to_concatenate.begin()), std::move_iterator(to_concatenate.end())
+		);
+	}
 
 };
 
 
 } // namespace Gudhi
+#endif  // FINITELY_CRITICAL_FILTRATIONS_H_
