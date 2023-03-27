@@ -17,7 +17,7 @@ import hashlib
 import shutil
 
 import numpy as np
-
+from numpy.lib import recfunctions as rfn
 
 def _get_data_home(data_home=None):
     """
@@ -259,7 +259,7 @@ _activities_license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/ma
 _activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
 
 
-def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
+def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
     """
     Load a subset of the Daily and Sports Activities dataset. This dataset comes from
     https://archive.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
@@ -280,11 +280,11 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
 
     subset : string
         This argument allows to download the following subsets:
-         * 'all' (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column ()
          * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3.
+         * None (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column ('cross_training', 'jumping', 'stepper', or 'walking')
 
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
@@ -295,16 +295,15 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
     -------
     points: numpy array
         Depending on subset value:
-         * Array of shape (30.000, 4, dtype = object) when `subset='all'`.
+         * Array of shape (7.500, 3, dtype = float).
 
         Or
-         * Array of shape (7.500, 3, dtype = float) otherwise.
-
+         * Structured array of shape (30.000, 4, dtype = [('LL_xmag', float), ('LL_ymag', float), ('LL_zmag', float), ('activity', string)]) when `subset is None`.
     """
     file_url = (
         "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     )
-    file_checksum = "83a3b7cfc0cfce60ff249bebcf65c87bf5ab1dc45f2a13e40172b203d0f6285d"
+    file_checksum = "911be187afae700b24b3cd9f4e5fd0f3a230d6ebd8fbbe0edec3c77e757c6cc6"
     gudhi_data_set_path = "points/activities/activities_p1_left_leg.npy"
 
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
@@ -313,13 +312,14 @@ def fetch_daily_activities(file_path=None, subset="all", accept_license=False):
         license_path = join(split(archive_path)[0], "activities.LICENSE")
         _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
 
-    ds = np.load(archive_path, allow_pickle=True)
+    ds = np.load(archive_path)
 
     if subset in ["cross_training", "jumping", "stepper", "walking"]:
+        ds = rfn.structured_to_unstructured(ds)
         ds = ds[ds[:,3] == subset]
         ds = np.delete(ds, np.s_[3], axis=1)
         ds = ds.astype('float32')
-    elif subset != "all":
+    elif subset is not None:
         raise ValueError("Unknown subset value")
 
     return ds

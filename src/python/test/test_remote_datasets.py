@@ -67,7 +67,7 @@ def test_bunny_license_capture():
 
 
 def test_activities_license_capture():
-    for subset in ["all", "cross_training", "jumping", "stepper", "walking"]:
+    for subset in [None, "cross_training", "jumping", "stepper", "walking"]:
         # Test not printing activities.LICENSE when accept_license = True
         assert (
             "" == _capture_license_output(remote.fetch_daily_activities, subset=subset, accept_license=True).getvalue()
@@ -97,9 +97,9 @@ def test_fetch_remote_datasets_wrapped():
         assert bunny_arr.shape == (35947, 3)
         assert bunny_arr.dtype == np.dtype('float32')
 
-        activities_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="all")
-        assert activities_arr.shape == (30000, 4)
-        assert activities_arr.dtype == np.dtype('object')
+        activities_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset=None)
+        assert activities_arr.shape == (30000,)
+        assert len(activities_arr.dtype) == 4
 
         cross_training_arr = remote.fetch_daily_activities(
             "./another_fetch_folder_for_test/activities.npy", subset="cross_training"
