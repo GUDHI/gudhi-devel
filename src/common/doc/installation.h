@@ -138,15 +138,15 @@ make doxygen\endverbatim
  * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_custom_function.cpp}
  * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_flat_torus_with_boundary.cpp}
  *
- * \subsection tbb Threading Building Blocks
- * <a target="_blank" href="https://github.com/oneapi-src/oneTBB">Intel&reg; TBB</a> lets you easily write parallel
- * C++ programs that take full advantage of multicore performance, that are portable and composable, and that have
- * future-proof scalability.
+ * \subsection tbb oneAPI Threading Building Blocks
+ * <a target="_blank" href="https://github.com/oneapi-src/oneTBB">Intel&reg; oneAPI TBB</a> lets you easily write
+ * parallel C++ programs that take full advantage of multicore performance, that are portable and composable, and that
+ * have future-proof scalability.
  * 
- * Having Intel&reg; TBB (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
- * computations.
+ * Having Intel&reg; oneAPI TBB (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some
+ * GUDHI computations.
  * 
- * The following examples/utilities are using Intel&reg; TBB if installed:
+ * The following examples/utilities are using Intel&reg; oneAPI TBB if installed:
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
  * \li \gudhi_example_link{Alpha_complex,alpha_complex_3d_persistence.cpp}

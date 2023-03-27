@@ -264,13 +264,13 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :m
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-Threading Building Blocks
--------------------------
+oneAPI Threading Building Blocks
+--------------------------------
 
-`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write parallel C++ programs that take full
-advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
+`Intel® oneAPI TBB <https://github.com/oneapi-src/oneTBB>`_ lets you easily write parallel C++ programs that take
+full advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
-Having Intel® TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
+Having Intel® oneAPI TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
 computations.
 
 Run time dependencies
