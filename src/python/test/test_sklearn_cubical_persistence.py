@@ -61,6 +61,12 @@ def test_simple_constructor_from_top_cells_list():
 def test_1d():
     a = np.array([2, 4, 3, 5])
     r = np.array([[3, 4], [2, np.inf]])
-    np.testing.assert_array_equal(r, CubicalPersistence(0).fit_transform([a])[0])
-    np.testing.assert_array_equal(r, CubicalPersistence(0).fit_transform([a.astype("float32")[::-1]])[0])
-    np.testing.assert_array_equal(r, CubicalPersistence([0]).fit_transform([a.astype("float64")])[0][0])
+    ri = CubicalPersistence(0).fit_transform([a])[0]
+    rf = CubicalPersistence(0).fit_transform([a.astype("float32")[::-1]])[0]
+    rd = CubicalPersistence([0]).fit_transform([a.astype("float64")])[0][0]
+    assert ri.dtype == np.dtype("float64")
+    assert rf.dtype == np.dtype("float32")
+    assert rd.dtype == np.dtype("float64")
+    np.testing.assert_array_equal(r, ri)
+    np.testing.assert_array_equal(r, rf)
+    np.testing.assert_array_equal(r, rd)
