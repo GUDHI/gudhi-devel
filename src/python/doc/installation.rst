@@ -187,7 +187,9 @@ A complete configuration would be :
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
-    TBB version 9107 found and used
+    TBB version 2021.7.0 found and used
+    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so
+    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
     + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
@@ -262,15 +264,14 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :m
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-Threading Building Blocks
--------------------------
+oneAPI Threading Building Blocks
+--------------------------------
 
-`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
-parallel C++ programs that take full advantage of multicore performance, that
-are portable and composable, and that have future-proof scalability.
+`Intel® oneAPI TBB <https://github.com/oneapi-src/oneTBB>`_ lets you easily write parallel C++ programs that take
+full advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
-Having Intel® TBB installed is recommended to parallelize and accelerate some
-GUDHI computations.
+Having Intel® oneAPI TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
+computations.
 
 Run time dependencies
 =====================
