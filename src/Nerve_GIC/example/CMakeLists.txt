@@ -3,9 +3,9 @@ project(Nerve_GIC_examples)
 add_executable ( CoordGIC CoordGIC.cpp )
 add_executable ( FuncGIC FuncGIC.cpp )
 
-if (TBB_FOUND)
-  target_link_libraries(CoordGIC ${TBB_LIBRARIES})
-  target_link_libraries(FuncGIC ${TBB_LIBRARIES})
+if(TARGET TBB::tbb)
+  target_link_libraries(CoordGIC TBB::tbb)
+  target_link_libraries(FuncGIC TBB::tbb)
 endif()
 
 # Copy files for not to pollute sources when testing
