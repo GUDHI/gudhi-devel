@@ -112,7 +112,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns number of all cubes in the complex.
    **/
-  std::size_t num_simplices() const { return this->total_number_of_cells; }
+  std::size_t num_simplices() const { return this->data.size(); }
 
   /**
    * Returns a Simplex_handle to a cube that do not exist in this complex.
