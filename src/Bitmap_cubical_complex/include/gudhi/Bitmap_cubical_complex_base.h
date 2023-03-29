@@ -628,11 +628,19 @@ class Bitmap_cubical_complex_base {
   //****************************************************************************************************************//
   //****************************************************************************************************************//
 
+  /// @private @brief execute the function on each cell id corresponding to a vertex, in increasing order.
+  template <class F> void for_each_vertex(F&&f) {
+    for_each_vertex_rec(f, 0, multipliers.size()-1);
+  }
+
  protected:
   std::vector<unsigned> sizes;
   std::vector<unsigned> multipliers;
   std::vector<T> data;
   std::size_t total_number_of_cells;
+
+  template <class F> void for_each_vertex_rec(F&&f, std::size_t base, int dim);
+  void propagate_from_vertices_rec(int special_dim, int current_dim, std::size_t base);
 
   void set_up_containers(const std::vector<unsigned>& sizes, bool is_pos_inf) {
     // The fact that multipliers[0]=1 is relied on by optimizations in other functions
@@ -773,11 +781,11 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
                                                                     const std::vector<T>& vertices) {
   std::vector<unsigned> top_cells_sizes;
   std::transform (sizes_in_following_directions.begin(), sizes_in_following_directions.end(), std::back_inserter(top_cells_sizes),
-               [](int i){ return --i;});
+               [](int i){ return i-1;});
   this->set_up_containers(top_cells_sizes, false);
   std::size_t number_of_vertices = std::accumulate(std::begin(sizes_in_following_directions),
-                                                   std::end(sizes_in_following_directions), 1,
-                                                   std::multiplies<unsigned>());
+                                                   std::end(sizes_in_following_directions), (std::size_t)1,
+                                                   std::multiplies<std::size_t>());
   if (number_of_vertices != vertices.size()) {
     std::cerr << "Error in constructor Bitmap_cubical_complex_base ( std::vector<unsigned> "
               << "sizes_in_following_directions, std::vector<T> vertices ). Number of vertices "
@@ -790,12 +798,7 @@ void Bitmap_cubical_complex_base<T>::setup_bitmap_based_on_vertices(const std::v
         "sizes_in_following_directions vector is different from the size of vertices vector.");
   }
 
-  std::size_t index = 0;
-  for (auto it = this->vertices_iterator_begin();
-       it != this->vertices_iterator_end(); ++it) {
-    this->get_cell_data(*it) = vertices[index];
-    ++index;
-  }
+  for_each_vertex([this, &vertices, index=(std::size_t)0] (auto cell) mutable { get_cell_data(cell) = vertices[index++]; });
   this->impose_lower_star_filtration_from_vertices();
 }
 
@@ -1051,7 +1054,6 @@ inline T& Bitmap_cubical_complex_base<T>::get_cell_data(std::size_t cell) {
 
 template <typename T>
 void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
-
   // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
   std::vector<bool> is_this_cell_considered(this->data.size(), false);
 
@@ -1097,49 +1099,43 @@ void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration() {
 }
 
 template <typename T>
+template <class F>
+void Bitmap_cubical_complex_base<T>::for_each_vertex_rec(F&&f, std::size_t base, int dim) {
+  if (dim > 0)
+    for(std::size_t i = 0; i < sizes[dim] + 1; ++i)
+      for_each_vertex_rec(f, base + multipliers[dim] * 2 * i, dim - 1);
+  else
+    for(std::size_t i = 0; i < sizes[0] + 1; ++i)
+      f(base + 2 * i);
+}
+
+template <typename T>
 void Bitmap_cubical_complex_base<T>::impose_lower_star_filtration_from_vertices() {
-  // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
-  std::vector<bool> is_this_cell_considered(this->data.size(), false);
+  int max_dim = multipliers.size()-1;
+  for (int dim = max_dim; dim >= 0; --dim)
+    propagate_from_vertices_rec(dim, max_dim, 0);
+}
 
-  std::vector<std::size_t> indices_to_consider;
-  // we assume here that we already have a filtration on the vertices and
-  // we have to extend it to higher ones.
-  for (auto it = this->vertices_iterator_begin();
-       it != this->vertices_iterator_end(); ++it) {
-    indices_to_consider.push_back(it.compute_index_in_bitmap());
+template <typename T>
+void Bitmap_cubical_complex_base<T>::propagate_from_vertices_rec (int special_dim, int current_dim, std::size_t base) {
+  if (special_dim == current_dim) {
+    propagate_from_vertices_rec(special_dim, current_dim - 1, base);
+    return;
   }
-
-  while (indices_to_consider.size()) { // Iteration on the dimension
-#ifdef DEBUG_TRACES
-    std::clog << "indices_to_consider in this iteration \n";
-    for (auto index : indices_to_consider) {
-      std::clog << index << "  ";
+  if (current_dim < 0) {
+    std::size_t step = multipliers[special_dim];
+    for(std::size_t i = 0; i < sizes[special_dim]; ++i) {
+      std::size_t ref = base + step * 2 * i;
+      data[ref + step] = std::max(data[ref], data[ref + 2 * step]);
     }
-#endif
-    std::vector<std::size_t> new_indices_to_consider;
-    for (auto index : indices_to_consider) {
-      std::vector<std::size_t> cbd = this->get_coboundary_of_a_cell(index);
-      for (auto coboundary : cbd) {
-#ifdef DEBUG_TRACES
-        std::clog << "filtration of a cell : " << coboundary << " is : " << this->data[coboundary]
-                  << " while of a cell: " << index << " is: " << this->data[index]
-                  << std::endl;
-#endif
-        if (this->data[coboundary] < this->data[index]) {
-          this->data[coboundary] = this->data[index];
-#ifdef DEBUG_TRACES
-          std::clog << "Setting the value of a cell : " << coboundary
-                    << " to : " << this->data[index] << std::endl;
-#endif
-        }
-        if (is_this_cell_considered[coboundary] == false) {
-          new_indices_to_consider.push_back(coboundary);
-          is_this_cell_considered[coboundary] = true;
-        }
-      }
-    }
-    indices_to_consider.swap(new_indices_to_consider);
+    return;
   }
+  if (current_dim < special_dim)
+    for(std::size_t i = 0; i < sizes[current_dim] + 1; ++i)
+      propagate_from_vertices_rec(special_dim, current_dim - 1, base + multipliers[current_dim] * 2 * i);
+  else
+    for(std::size_t i = 0; i < 2 * sizes[current_dim] + 1; ++i)
+      propagate_from_vertices_rec(special_dim, current_dim - 1, base + multipliers[current_dim] * i);
 }
 
 template <typename T>
