@@ -271,9 +271,6 @@ class Bitmap_cubical_complex : public T {
     return std::make_pair(bdry[0], bdry[1]);
   }
 
-  /**
-   * Class needed for compatibility with Gudhi. Not useful for other purposes.
-   **/
   class Skeleton_simplex_range;
 
   class Skeleton_simplex_iterator {
@@ -348,7 +345,7 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * @brief Class needed for compatibility with Gudhi. Not useful for other purposes.
+   * @brief A range containing all the cells of dimension at most k.
    **/
   class Skeleton_simplex_range {
     // Range over the simplices of the complex in the order of the filtration.
@@ -381,7 +378,7 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * Function needed for compatibility with Gudhi. Not useful for other purposes.
+   * Returns a range containing all the cells of dimension at most `dimension`.
    **/
   Skeleton_simplex_range skeleton_simplex_range(unsigned dimension) {
 #ifdef DEBUG_TRACES
