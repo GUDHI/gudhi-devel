@@ -136,12 +136,12 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
     std::clog << "unsigned dimension(const Simplex_handle& sh)\n";
 #endif
-    if (sh != null_simplex()) return this->get_dimension_of_a_cell(sh);
-    return -1;
+    GUDHI_CHECK(sh != null_simplex(), std::logic_error("Only real cells have a dimension"));
+    return this->get_dimension_of_a_cell(sh);
   }
 
   /**
-   * Return the filtration of a cell pointed by the Simplex_handle.
+   * Return the filtration of a cell pointed by the Simplex_handle, or +inf for `null_simplex()`.
    **/
   Filtration_value filtration(Simplex_handle sh) {
 #ifdef DEBUG_TRACES
