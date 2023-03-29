@@ -32,7 +32,7 @@ void Menu_uniform_neighbors::connectActions(QMainWindow* parent) {
 }
 
 void Menu_uniform_neighbors::send_compute_uniform_neighbors() {
-  emit(compute_uniform_neighbors(doubleSpinBoxAlpha->value()));
+  /*emit*/ compute_uniform_neighbors(doubleSpinBoxAlpha->value());
 }
 
 void Menu_uniform_neighbors::accept() {
@@ -41,7 +41,7 @@ void Menu_uniform_neighbors::accept() {
 
 void Menu_uniform_neighbors::update_alpha(double alpha) {
   if (checkBoxAutoUpdate->isChecked())
-    emit(compute_uniform_neighbors(doubleSpinBoxAlpha->value()));
+    /*emit*/ compute_uniform_neighbors(doubleSpinBoxAlpha->value());
 }
 
 #include "Menu_uniform_neighbors.moc"

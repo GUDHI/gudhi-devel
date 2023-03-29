@@ -32,6 +32,7 @@ if (OPENGL_FOUND)
         target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
         target_link_libraries( GudhUI ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )
         if(TARGET TBB::tbb)
+          add_compile_definitions( QT_NO_EMIT )
           target_link_libraries( GudhUI TBB::tbb)
         endif()
 
