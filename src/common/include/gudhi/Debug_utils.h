@@ -11,7 +11,6 @@
 #define DEBUG_UTILS_H_
 
 #include <iostream>
-#include <stdexcept> // Most users of GUDHI_CHECK need it
 
 #ifndef NDEBUG
   // GUDHI_DEBUG is the Gudhi official flag for debug mode.

@@ -25,6 +25,7 @@
 #include <vector>
 #include <numeric>  // for iota
 #include <cstddef>
+#include <stdexcept>
 
 namespace Gudhi {
 
