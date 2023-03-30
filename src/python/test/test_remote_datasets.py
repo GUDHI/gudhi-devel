@@ -98,27 +98,19 @@ def test_fetch_remote_datasets_wrapped():
         assert bunny_arr.dtype == np.dtype('float32')
 
         activities_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset=None)
-        assert activities_arr.shape == (30000,)
-        assert len(activities_arr.dtype) == 4
+        assert activities_arr.shape == (30000, 4)
+        assert activities_arr.dtype == np.dtype('float32')
 
-        cross_training_arr = remote.fetch_daily_activities(
-            "./another_fetch_folder_for_test/activities.npy", subset="cross_training"
-        )
-        assert cross_training_arr.shape == (7500, 3)
-        assert cross_training_arr.dtype == np.dtype('float32')
-
-        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="jumping")
-        assert jumping_arr.shape == (7500, 3)
-        assert jumping_arr.dtype == np.dtype('float32')
-
-        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="stepper")
-        assert stepper_arr.shape == (7500, 3)
-        assert stepper_arr.dtype == np.dtype('float32')
-
+        # Order is important
         walking_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="walking")
-        assert walking_arr.shape == (7500, 3)
-        assert walking_arr.dtype == np.dtype('float32')
-
+        np.testing.assert_array_equal(walking_arr, activities_arr[activities_arr[:,3] == 9.][:,0:3])
+        stepper_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="stepper")
+        np.testing.assert_array_equal(stepper_arr, activities_arr[activities_arr[:,3] == 13.][:,0:3])
+        cross_training_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="cross_training")
+        np.testing.assert_array_equal(cross_training_arr, activities_arr[activities_arr[:,3] == 14.][:,0:3])
+        jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="jumping")
+        np.testing.assert_array_equal(jumping_arr, activities_arr[activities_arr[:,3] == 18.][:,0:3])
+        
     # Check that the directory was created
     assert isdir("./another_fetch_folder_for_test")
     # Check downloaded files

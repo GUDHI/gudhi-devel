@@ -284,7 +284,7 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
          * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3.
          * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3.
-         * None (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column ('cross_training', 'jumping', 'stepper', or 'walking')
+         * None (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column (`14.` for 'cross_training', `18.` for 'jumping', `13.` for 'stepper', or `9.` for 'walking')
 
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.
@@ -298,12 +298,12 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
          * Array of shape (7.500, 3, dtype = float).
 
         Or
-         * Structured array of shape (30.000, 4, dtype = [('LL_xmag', float), ('LL_ymag', float), ('LL_zmag', float), ('activity', string)]) when `subset is None`.
+         * Array of shape (30.000, 4, dtype = float) when `subset is None`. 
     """
     file_url = (
         "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     )
-    file_checksum = "911be187afae700b24b3cd9f4e5fd0f3a230d6ebd8fbbe0edec3c77e757c6cc6"
+    file_checksum = "ff813f717dbd3c8f8a95e59a7d8496d0b43c440e85a4db1f2b338cbfa9c02f25"
     gudhi_data_set_path = "points/activities/activities_p1_left_leg.npy"
 
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
@@ -314,11 +314,11 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
 
     ds = np.load(archive_path)
 
-    if subset in ["cross_training", "jumping", "stepper", "walking"]:
-        ds = rfn.structured_to_unstructured(ds)
-        ds = ds[ds[:,3] == subset]
-        ds = np.delete(ds, np.s_[3], axis=1)
-        ds = ds.astype('float32')
+    if subset in ["walking", "stepper", "cross_training", "jumping"]:
+        activity_pos = {"walking": 0, "stepper": 1, "cross_training": 2, "jumping": 3}
+        per_activity = 7500
+        start_pos = activity_pos[subset] * per_activity
+        ds = ds[start_pos:(start_pos + per_activity), 0:3]
     elif subset is not None:
         raise ValueError("Unknown subset value")
 
