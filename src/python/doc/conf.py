@@ -19,6 +19,8 @@ extensions = [
     "sphinx_paramlinks",
 ]
 
+autodoc_class_signature = "separated"
+
 bibtex_bibfiles = ["../../biblio/bibliography.bib"]
 
 templates_path = ["_templates"]
