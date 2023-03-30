@@ -9,6 +9,7 @@
 """
 
 from gudhi.sklearn.cubical_persistence import CubicalPersistence
+import gudhi
 import numpy as np
 from sklearn import datasets
 
@@ -70,3 +71,24 @@ def test_1d():
     np.testing.assert_array_equal(r, ri)
     np.testing.assert_array_equal(r, rf)
     np.testing.assert_array_equal(r, rd)
+
+def cmp(a):
+    dim_list = list(range(len(a.shape)))
+    d1 = CubicalPersistence(homology_dimensions=dim_list, input_type='top_dimensional_cells').fit_transform([a])[0]
+    p = gudhi.CubicalComplex(top_dimensional_cells=a).persistence()
+    # Ideally we would compare multisets, but length + set should be good enough.
+    assert sum(len(d) for d in d1) == len(p)
+    d1 = [{(a, b) for [a, b] in d} for d in d1]
+    d2 = [set() for _ in dim_list]
+    for (dim, i) in p:
+        d2[dim].add(i)
+    assert d1 == d2
+
+def test_compare_top_cells():
+    cmp(np.random.rand(20,15,10))
+    cmp(np.random.rand(20,10))
+    cmp(np.random.rand(20,2))
+    cmp(np.random.rand(2,20))
+    cmp(np.random.rand(20,1))
+    cmp(np.random.rand(1,20))
+    cmp(np.random.rand(20))

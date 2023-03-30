@@ -8,7 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from .. import CubicalComplex
-from .._persline import persistence_on_a_line
+from .._pers_cub_lowdim import _persistence_on_a_line, _persistence_on_rectangle_from_top_cells
 from sklearn.base import BaseEstimator, TransformerMixin
 
 import numpy as np
@@ -75,12 +75,25 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def __transform(self, cells):
         cells = np.asarray(cells)
         if len(cells.shape) == 1 and self.min_persistence >= 0:
-            res = persistence_on_a_line(cells)
+            res = _persistence_on_a_line(cells)
             if self.min_persistence > 0:
-                # It would be more efficient inside persistence_on_a_line, but not worth it?
+                # It would be more efficient inside _persistence_on_a_line, but not worth it?
                 res = res[res[:, 1] - res[:, 0] > self.min_persistence]
             # Wasteful if dim_list_ does not contain 0, but that seems unlikely.
             return [res if i == 0 else np.empty((0,2)) for i in self.dim_list_]
+
+        if len(cells.shape) == 2 and self.input_type == 'top_dimensional_cells' and self.min_persistence >= 0:
+            if cells.size == 0:
+                diags = [np.empty((0,2)), np.empty((0,2))]
+            elif cells.shape[0] == 1 or cells.shape[1] == 1:
+                diags = [_persistence_on_a_line(cells.reshape(-1)), np.empty((0,2))]
+            elif cells.shape[0] == 2:
+                diags = [_persistence_on_a_line(cells.min(0)), np.empty((0,2))]
+            elif cells.shape[1] == 2:
+                diags = [_persistence_on_a_line(cells.min(1)), np.empty((0,2))]
+            else:
+                diags = _persistence_on_rectangle_from_top_cells(cells, self.min_persistence)
+            return [diags[i] if i in (0, 1) else np.empty((0,2)) for i in self.dim_list_]
 
         if self.input_type == 'top_dimensional_cells':
             cubical_complex = CubicalComplex(top_dimensional_cells=cells)
