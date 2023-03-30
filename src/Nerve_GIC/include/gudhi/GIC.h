@@ -442,7 +442,7 @@ class Cover_complex {
     std::mutex deltamutex;
     tbb::parallel_for(0, N, [&](int i){
         std::vector<int> samples(m);
-        SampleWithoutReplacement(n, m, samples);
+        SampleWithoutReplacement(this->num_points, m, samples);
         double hausdorff_dist = 0;
         for (int j = 0; j < this->num_points; j++) {
           double mj = distances[j][samples[0]];
