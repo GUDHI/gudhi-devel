@@ -292,6 +292,8 @@ if(PYTHONINTERP_FOUND)
     endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+    file(READ "introduction.rst" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
+    string(REPLACE "\n" "' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
     # Generate gudhi/__init__.py
@@ -314,7 +316,6 @@ if(PYTHONINTERP_FOUND)
 
 
     # Some files for pip package
-    file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
     file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
     add_custom_command(
