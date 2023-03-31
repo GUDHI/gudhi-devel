@@ -323,7 +323,7 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
 
     ds = _load_and_cache_activity(archive_path)
 
-    if subset in ["walking", "stepper", "cross_training", "jumping"]:
+    if subset is not None:
         activity_pos = {"walking": 0, "stepper": 1, "cross_training": 2, "jumping": 3}
         per_activity = 7500
         start_pos = activity_pos[subset] * per_activity
