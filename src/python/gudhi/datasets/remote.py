@@ -15,6 +15,7 @@ from os import makedirs, remove, environ
 from urllib.request import urlretrieve
 import hashlib
 import shutil
+from functools import cache
 
 import numpy as np
 from numpy.lib import recfunctions as rfn
@@ -255,9 +256,9 @@ def fetch_bunny(file_path=None, accept_license=False):
     return np.load(archive_path, mmap_mode="r")
 
 
-_activities_license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
-_activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
-
+@cache
+def _load_and_cache_activity(file_path):
+    return np.load(file_path)
 
 def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
     """
@@ -308,15 +309,19 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
         "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     )
     file_checksum = "ff813f717dbd3c8f8a95e59a7d8496d0b43c440e85a4db1f2b338cbfa9c02f25"
+    activities_license_url = (
+        "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
+    )
+    activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
     gudhi_data_set_path = "points/activities/activities_p1_left_leg.npy"
 
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
         license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(_activities_license_url, license_path, _activities_license_checksum, accept_license)
+        _fetch_remote_license(activities_license_url, license_path, activities_license_checksum, accept_license)
 
-    ds = np.load(archive_path)
+    ds = _load_and_cache_activity(archive_path)
 
     if subset in ["walking", "stepper", "cross_training", "jumping"]:
         activity_pos = {"walking": 0, "stepper": 1, "cross_training": 2, "jumping": 3}
