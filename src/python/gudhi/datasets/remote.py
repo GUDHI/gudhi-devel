@@ -15,7 +15,7 @@ from os import makedirs, remove, environ
 from urllib.request import urlretrieve
 import hashlib
 import shutil
-from functools import cache
+from functools import lru_cache
 
 import numpy as np
 from numpy.lib import recfunctions as rfn
@@ -257,7 +257,7 @@ def fetch_bunny(file_path=None, accept_license=False):
     return np.load(archive_path, mmap_mode="r")
 
 
-@cache
+@lru_cache(maxsize=None)
 def _load_and_cache_activity(file_path):
     return np.load(file_path, mmap_mode="r")
 
