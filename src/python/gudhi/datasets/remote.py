@@ -20,6 +20,7 @@ from functools import cache
 import numpy as np
 from numpy.lib import recfunctions as rfn
 
+
 def _get_data_home(data_home=None):
     """
     Return the path of the remote datasets directory.
@@ -258,7 +259,8 @@ def fetch_bunny(file_path=None, accept_license=False):
 
 @cache
 def _load_and_cache_activity(file_path):
-    return np.load(file_path)
+    return np.load(file_path, mmap_mode="r")
+
 
 def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
     """
@@ -299,15 +301,13 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
          * Array of shape (7.500, 3, dtype = float).
 
         Or
-         * Array of shape (30.000, 4, dtype = float) when `subset is None`. 
+         * Array of shape (30.000, 4, dtype = float) when `subset is None`.
     """
     # To avoid download when subset is not correct
     if subset not in ["walking", "stepper", "cross_training", "jumping", None]:
         raise ValueError("Unknown subset value")
-    
-    file_url = (
-        "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
-    )
+
+    file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     file_checksum = "ff813f717dbd3c8f8a95e59a7d8496d0b43c440e85a4db1f2b338cbfa9c02f25"
     activities_license_url = (
         "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
@@ -327,6 +327,6 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
         activity_pos = {"walking": 0, "stepper": 1, "cross_training": 2, "jumping": 3}
         per_activity = 7500
         start_pos = activity_pos[subset] * per_activity
-        ds = ds[start_pos:(start_pos + per_activity), 0:3]
+        ds = ds[start_pos : (start_pos + per_activity), 0:3]
 
     return ds
