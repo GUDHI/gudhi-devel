@@ -192,9 +192,9 @@ def plot_persistence_barcode(
         infinity = max_death + delta
         axis_start = min_birth - delta
 
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
-        if colormap == None:
+        if colormap is None:
             colormap = plt.cm.Set1.colors
 
         x = [birth for (dim, (birth, death)) in persistence]
@@ -319,9 +319,9 @@ def plot_persistence_diagram(
         axis_end = max_death + delta / 2
         axis_start = min_birth - delta
 
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
-        if colormap == None:
+        if colormap is None:
             colormap = plt.cm.Set1.colors
         # bootstrap band
         if band > 0.0:
@@ -456,7 +456,7 @@ def plot_persistence_density(
         # default cmap value cannot be done at argument definition level as matplotlib is not yet defined.
         if cmap is None:
             cmap = plt.cm.hot_r
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
 
         try:
