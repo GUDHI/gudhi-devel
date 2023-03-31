@@ -375,9 +375,12 @@ PyTorch
 Scikit-learn
 ------------
 
-The :doc:`persistence representations </representations>` module require
+The :doc:`persistence representations </representations>` module requires
 `scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
+
+Some classes of the :doc:`cover complex </cover_complex_sklearn_isk_ref>` module
+also follow and require the `scikit-learn <https://scikit-learn.org/>`_ interface.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly

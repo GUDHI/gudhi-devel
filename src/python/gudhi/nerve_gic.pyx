@@ -42,6 +42,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_color_from_file(string color_file_name)
         void set_color_from_range(vector[double] color)
         void set_cover_from_file(string cover_file_name)
+        void set_cover_from_range(vector[vector[int]] assignments)
         void set_cover_from_function()
         void set_cover_from_Euclidean_Voronoi(int m)
         void set_function_from_coordinate(int k)
@@ -59,6 +60,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         void set_type(string type)
         void set_verbose(bool verbose)
         vector[int] subpopulation(int c)
+        double subcolor(int c)
         void write_info()
         void plot_DOT()
         void plot_OFF()
@@ -123,6 +125,7 @@ cdef class CoverComplex:
 
         :param distance: Bottleneck distance.
         :type distance: double
+
         :rtype: double
         :returns: Confidence level.
         """
@@ -134,6 +137,7 @@ cdef class CoverComplex:
 
         :param alpha: Confidence level.
         :type alpha: double
+
         :rtype: double
         :returns: Bottleneck distance.
         """
@@ -183,6 +187,7 @@ cdef class CoverComplex:
 
         :param off_file: Name of the input .OFF or .nOFF file.
         :type off_file: string
+
         :rtype: bool
         :returns: Read file status.
         """
@@ -246,6 +251,14 @@ cdef class CoverComplex:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                     cover_file_name)
 
+    def set_cover_from_range(self, assignments):
+        """Creates a cover C from a vector stored in memory.
+
+        :param assignments: Vector containing the assignments of the points to their corresponding cover elements. For instance, if the i-th point belongs to the 1st and 3rd cover elements, then assignments[i] = [1,3].
+        :type assignments: List[List[int]]
+        """
+        self.thisptr.set_cover_from_range(assignments)
+
     def set_cover_from_function(self):
         """Creates a cover C from the preimages of the function f.
         """
@@ -300,8 +313,7 @@ cdef class CoverComplex:
         """Creates a graph G from a Rips complex whose threshold value is
         automatically tuned with subsampling - see :cite:`Carriere17c`.
 
-        :param N: Number of subsampling iteration (the default reasonable value
-            is 100, but there is no guarantee on how to choose it).
+        :param N: Number of subsampling iteration (the default reasonable value is 100, but there is no guarantee on how to choose it).
         :type N: int
         :rtype: double
         :returns: Delta threshold used for computing the Rips complex.
@@ -368,6 +380,7 @@ cdef class CoverComplex:
 
         :param constant: Constant.
         :type constant: double
+
         :param power: Power.
         :type resolution: double
         """
@@ -395,10 +408,23 @@ cdef class CoverComplex:
 
         :param c: ID of the node.
         :type c: int
+
         :rtype: vector[int]
         :returns: Vector of IDs of data points.
         """
         return self.thisptr.subpopulation(c)
+
+    def subcolor(self, c):
+        """Returns the mean color value corresponding to a specific node of the
+        created complex.
+
+        :param c: ID of the node.
+        :type c: int
+
+        :rtype: float
+        :returns: Mean color value of data points.
+        """
+        return self.thisptr.subcolor(c)
 
     def write_info(self):
         """Creates a .txt file called SC.txt describing the 1-skeleton, which can
