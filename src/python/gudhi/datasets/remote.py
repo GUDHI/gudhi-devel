@@ -300,6 +300,10 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
         Or
          * Array of shape (30.000, 4, dtype = float) when `subset is None`. 
     """
+    # To avoid download when subset is not correct
+    if subset not in ["walking", "stepper", "cross_training", "jumping", None]:
+        raise ValueError("Unknown subset value")
+    
     file_url = (
         "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     )
@@ -319,7 +323,5 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
         per_activity = 7500
         start_pos = activity_pos[subset] * per_activity
         ds = ds[start_pos:(start_pos + per_activity), 0:3]
-    elif subset is not None:
-        raise ValueError("Unknown subset value")
 
     return ds
