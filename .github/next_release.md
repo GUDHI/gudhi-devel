@@ -1,6 +1,6 @@
 We are pleased to announce the release 3.8.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers Perslay, a Tensorflow model for the representations module.
+As a major new feature, the GUDHI library now offers Perslay, a Tensorflow model for the representations module, scikit-learn like interfaces for Cover Complexes and a new function to compute persistence of a function on $\mathbb{R}$.
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
@@ -9,14 +9,24 @@ Below is a list of changes made since GUDHI 3.7.1:
 - [Perslay](https://gudhi.inria.fr/python/latest/representations_tflow_itf_ref.html)
      - a TensorFlow layer for persistence diagrams representations
 
+- [Cover Complex](https://gudhi.inria.fr/python/latest/cover_complex_sklearn_user.html)
+     - Mapper, Graph Induced complexes and Nerve complexes scikit-learn like interfaces
+
+- [Persistent cohomology](https://gudhi.inria.fr/doc/latest/group__persistent__cohomology.html)
+     - New function to compute persistence of a function on $\mathbb{R}$
+
+- [Cubical complex](https://gudhi.inria.fr/doc/latest/group__cubical__complex.html)
+     - New constructor from vertices and their filtration values
+     - Faster persistence computation of 1d cubical complexes
+
 - [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
      - now provides matching in its interface
 
 - [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
      - New `choose_n_farthest_points_metric` as a faster alternative of `choose_n_farthest_points`.
 
-- [Module](link)
-     - **...**
+- [Python documentation](https://gudhi.inria.fr/python/latest/installation.html)
+     - [pydata-sphinx-theme](https://pydata-sphinx-theme.readthedocs.io/en/stable/) is the new sphinx theme of the python documentation.
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.7.1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.8.0+is%3Aclosed) is available on GitHub.
@@ -34,5 +44,8 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
+- @Hind-M
 - @MathieuCarriere
-- **...**
+- @mglisse
+- @wreise
+- @VincentRouvreau
