@@ -92,3 +92,7 @@ def test_compare_top_cells():
     cmp(np.random.rand(20,1))
     cmp(np.random.rand(1,20))
     cmp(np.random.rand(20))
+    a = np.random.rand(20,10)
+    cmp(np.array(a, order='F'))
+    cmp(a[0:18])
+    cmp(a[::2,::-1])
