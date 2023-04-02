@@ -15,6 +15,18 @@ Below is a list of changes made since GUDHI 3.7.1:
 - [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
      - New `choose_n_farthest_points_metric` as a faster alternative of `choose_n_farthest_points`.
 
+- [SimplexTree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - `SimplexTree` can now be used with `pickle`.
+
+- [Persistent cohomology](https://gudhi.inria.fr/doc/latest/group__persistent__cohomology.html)
+     - New linear-time `compute_persistence_of_function_on_line`, also available though `CubicalPersistence` in Python.
+
+- [Cubical complex](https://gudhi.inria.fr/doc/latest/group__cubical__complex.html)
+     - Add possibility to build a lower-star filtration from vertices instead of top-dimensional cubes.
+
+- [Cover complex](https://gudhi.inria.fr/python/latest/cover_complex_sklearn_user.html)
+     - New classes to compute Mapper, Graph Induced complex and Nerves.
+
 - [Module](link)
      - **...**
 
