@@ -59,6 +59,7 @@ using ssize_t = std::make_signed_t<std::size_t>;
 #include <random>
 #include <cassert>
 #include <cmath>
+#include <cstddef>    // for std::size_t
 
 namespace Gudhi {
 
@@ -864,7 +865,7 @@ class Cover_complex {
   template <class AssignmentRange>
   void set_cover_from_range(AssignmentRange const& assignments) {    
     std::vector<int> cov_elts, cov_number;
-    for(int i=0; i < assignments.size(); i++){
+    for(std::size_t i=0; i < assignments.size(); i++){
       cov_elts.clear();
       for (int cov : assignments[i]){
         cov_elts.push_back(cov);
