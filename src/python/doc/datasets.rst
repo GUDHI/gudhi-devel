@@ -130,4 +130,6 @@ Alternatively, it can be set using the **'GUDHI_DATA'** environment variable.
 
      2D spiral with 114562 vertices.
 
+.. autofunction:: gudhi.datasets.remote.fetch_daily_activities
+
 .. autofunction:: gudhi.datasets.remote.clear_data_home
