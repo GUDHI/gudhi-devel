@@ -49,6 +49,7 @@ def _capture_license_output(fetch_method, **kwargs):
     # Force file_path in forwarded arguments
     kwargs["file_path"] = "./tmp_for_test/data.npy"
     data_array = fetch_method(**kwargs)
+    del data_array
     # No need to keep numpy file
     remove("./tmp_for_test/data.npy")
 
