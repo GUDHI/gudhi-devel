@@ -48,14 +48,13 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays.
 
 .. testcode::
 
-    import gudhi.wasserstein
+    from gudhi.wasserstein import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
     import numpy as np
 
     dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
     dgm2 = np.array([[2.8, 4.45],[9.5, 14.1]])
 
-    message = "Wasserstein distance value = " + '%.2f' % gudhi.wasserstein.wasserstein_distance(dgm1, dgm2, order=1., internal_p=2.)
-    print(message)
+    print(f"Wasserstein distance value = {wasserstein_distance(dgm1, dgm2, order=1., internal_p=2.):.2f}")
 
 The output is:
 
@@ -72,33 +71,33 @@ any matching has a cost +inf and thus can be considered to be optimal. In such a
 
 .. testcode::
 
-    import gudhi.wasserstein
+    from gudhi.wasserstein import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
     import numpy as np
 
     dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3, np.inf]])
     dgm2 = np.array([[2.8, 4.45], [5, 6], [9.5, 14.1], [4, np.inf]])
-    cost, matchings = gudhi.wasserstein.wasserstein_distance(dgm1, dgm2, matching=True, order=1, internal_p=2)
+    cost, matchings = wasserstein_distance(dgm1, dgm2, matching=True, order=1, internal_p=2)
 
     message_cost = "Wasserstein distance value = %.2f" %cost
-    print(message_cost)
+    print(f"Wasserstein distance value = {cost:.2f}")
     dgm1_to_diagonal = matchings[matchings[:,1] == -1, 0]
     dgm2_to_diagonal = matchings[matchings[:,0] == -1, 1]
     off_diagonal_match = np.delete(matchings, np.where(matchings == -1)[0], axis=0)
 
     for i,j in off_diagonal_match:
-        print("point %s in dgm1 is matched to point %s in dgm2" %(i,j))
+        print(f"point {i} in dgm1 is matched to point {j} in dgm2")
     for i in dgm1_to_diagonal:
-        print("point %s in dgm1 is matched to the diagonal" %i)
+        print(f"point {i} in dgm1 is matched to the diagonal")
     for j in dgm2_to_diagonal:
-        print("point %s in dgm2 is matched to the diagonal" %j)
+        print(f"point {j} in dgm2 is matched to the diagonal")
 
     # An example where essential part cardinalities differ
     dgm3 = np.array([[1, 2], [0, np.inf]])
     dgm4 = np.array([[1, 2], [0, np.inf], [1, np.inf]])
-    cost, matchings = gudhi.wasserstein.wasserstein_distance(dgm3, dgm4, matching=True, order=1, internal_p=2)
+    cost, matchings = wasserstein_distance(dgm3, dgm4, matching=True, order=1, internal_p=2)
     print("\nSecond example:")
-    print("cost:", cost)
-    print("matchings:", matchings)
+    print(f"cost: {cost}")
+    print(f"matchings: {matchings}")
 
 
 The output is: 
@@ -180,8 +179,7 @@ Note that persistence diagrams must be submitted as
     pdiagset = [dg1, dg2, dg3, dg4]
     bary = lagrangian_barycenter(pdiagset=pdiagset,init=3)
 
-    message = "Wasserstein barycenter estimated:"
-    print(message)
+    print("Wasserstein barycenter estimated:")
     print(bary)
 
 The output is:
