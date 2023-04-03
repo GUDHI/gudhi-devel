@@ -49,7 +49,9 @@ def _capture_license_output(fetch_method, **kwargs):
     # Force file_path in forwarded arguments
     kwargs["file_path"] = "./tmp_for_test/data.npy"
     data_array = fetch_method(**kwargs)
+    # No need for basic usage, but necessary because the file is removed in the test
     del data_array
+    remote._load_and_cache_activity.cache_clear()
     # No need to keep numpy file
     remove("./tmp_for_test/data.npy")
 
@@ -111,7 +113,11 @@ def test_fetch_remote_datasets_wrapped():
         np.testing.assert_array_equal(cross_training_arr, activities_arr[activities_arr[:,3] == 14.][:,0:3])
         jumping_arr = remote.fetch_daily_activities("./another_fetch_folder_for_test/activities.npy", subset="jumping")
         np.testing.assert_array_equal(jumping_arr, activities_arr[activities_arr[:,3] == 18.][:,0:3])
-        
+    
+    # No need for basic usage, but necessary because the file is removed in the test
+    del spiral_2d_arr, bunny_arr, activities_arr, walking_arr, stepper_arr, cross_training_arr, jumping_arr
+    remote._load_and_cache_activity.cache_clear()
+
     # Check that the directory was created
     assert isdir("./another_fetch_folder_for_test")
     # Check downloaded files
@@ -132,5 +138,8 @@ def test_gudhi_data_env():
     bunny_arr = remote.fetch_bunny()
     assert exists("./test_folder_from_env_var/points/bunny/bunny.npy")
     assert exists("./test_folder_from_env_var/points/bunny/bunny.LICENSE")
+    # No need for basic usage, but necessary because the file is removed in the test
+    del bunny_arr
+    
     # Remove test folder
     shutil.rmtree("./test_folder_from_env_var")

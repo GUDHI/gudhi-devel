@@ -60,6 +60,8 @@ def clear_data_home(data_home=None):
         If `None` and the 'GUDHI_DATA' environment variable does not exist,
         the default directory to be removed is set to "~/gudhi_data".
     """
+    # On windows, needs to clear cache before removing a file - no lazy file deletion
+    _load_and_cache_activity.cache_clear()
     data_home = _get_data_home(data_home)
     shutil.rmtree(data_home)
 
