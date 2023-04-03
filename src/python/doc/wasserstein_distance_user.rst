@@ -78,7 +78,6 @@ any matching has a cost +inf and thus can be considered to be optimal. In such a
     dgm2 = np.array([[2.8, 4.45], [5, 6], [9.5, 14.1], [4, np.inf]])
     cost, matchings = wasserstein_distance(dgm1, dgm2, matching=True, order=1, internal_p=2)
 
-    message_cost = "Wasserstein distance value = %.2f" %cost
     print(f"Wasserstein distance value = {cost:.2f}")
     dgm1_to_diagonal = matchings[matchings[:,1] == -1, 0]
     dgm2_to_diagonal = matchings[matchings[:,0] == -1, 1]
