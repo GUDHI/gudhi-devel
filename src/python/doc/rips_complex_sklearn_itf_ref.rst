@@ -16,21 +16,12 @@ Rips complex persistence scikit-learn like interface
 Rips complex persistence scikit-learn like interface example
 ------------------------------------------------------------
 
-a TDA scikit-learn pipeline is constructed and is composed of:
-
-#. :class:`~gudhi.sklearn.rips_persistence.RipsPersistence` that builds a Rips complex from the inputs and
-   returns its persistence diagrams
-#. :class:`~gudhi.representations.preprocessing.DiagramSelector` that removes non-finite persistence diagrams values
-#. :class:`~gudhi.representations.vector_methods.Landscape` that builds the persistence landscapes from persistence diagrams
-#. `bootstrap <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html>`_ that computes a two-sided
-    bootstrap confidence interval of a statistic.
-
 The example below has been taken from the publication "Subsampling Methods for Persistent Homology" :cite:`icml2014`,
 the one with magnetometer data from different activities.
 For each activity, 7500 consecutive measurements are considered as a 3D point cloud in the Euclidean space.
 Each activity is subsampled as a series of 80, that each contains 200 points.
 
-a TDA scikit-learn pipeline is constructed and is composed of:
+The TDA scikit-learn pipeline is constructed and is composed of:
 
 #. :class:`~gudhi.sklearn.rips_persistence.RipsPersistence` that builds a Rips complex from the inputs and
    returns its persistence diagrams
@@ -128,5 +119,4 @@ Rips complex persistence scikit-learn like interface reference
 
 .. autoclass:: gudhi.sklearn.rips_persistence.RipsPersistence
    :members:
-   :special-members: __init__
    :show-inheritance:
