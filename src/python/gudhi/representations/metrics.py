@@ -240,7 +240,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         return _sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions)
 
 class BottleneckDistance(BaseEstimator, TransformerMixin):
-    """
+    r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
     :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0

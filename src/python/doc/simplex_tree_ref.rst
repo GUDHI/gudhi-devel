@@ -9,5 +9,3 @@ Simplex tree reference manual
 .. autoclass:: gudhi.SimplexTree
    :members:
    :show-inheritance:
-
-   .. automethod:: gudhi.SimplexTree.__init__

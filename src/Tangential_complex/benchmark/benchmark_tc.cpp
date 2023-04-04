@@ -49,7 +49,8 @@ const std::size_t ONLY_LOAD_THE_FIRST_N_POINTS = 20000000;
 #include <cmath>  // for std::sqrt
 
 #ifdef GUDHI_USE_TBB
-#include <tbb/task_scheduler_init.h>
+#include <tbb/global_control.h>
+#include <tbb/task_arena.h>
 #endif
 #include "XML_exporter.h"
 #include "RIB_exporter.h"
@@ -561,7 +562,7 @@ int main() {
 #ifdef _DEBUG
   int num_threads = 1;
 #else
-  int num_threads = tbb::task_scheduler_init::default_num_threads() - 4;
+  int num_threads = tbb::this_task_arena::max_concurrency() - 4;
 #endif
 #endif
 
@@ -578,7 +579,7 @@ int main() {
 #ifdef GUDHI_USE_TBB
 #ifdef BENCHMARK_WITH_1_TO_MAX_THREADS
     for (num_threads = 1;
-         num_threads <= tbb::task_scheduler_init::default_num_threads();
+         num_threads <= tbb::this_task_arena::max_concurrency();
          ++num_threads)
 #endif
 #endif
@@ -586,8 +587,8 @@ int main() {
         Concurrent_mesher_config::get().num_work_items_per_batch < 100 ;
         Concurrent_mesher_config::get().num_work_items_per_batch += 5)*/ {
 #ifdef GUDHI_USE_TBB
-      tbb::task_scheduler_init init(
-                                    num_threads > 0 ? num_threads : tbb::task_scheduler_init::automatic);
+      tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism,
+                                       num_threads > 0 ? num_threads : tbb::this_task_arena::max_concurrency());
 #endif
 
       std::cerr << "Script file '" << BENCHMARK_SCRIPT_FILENAME << "' found.\n";
@@ -655,7 +656,7 @@ int main() {
 #ifdef GUDHI_USE_TBB
             GUDHI_TC_SET_PERFORMANCE_DATA(
                                           "Num_threads",
-                                          (num_threads == -1 ? tbb::task_scheduler_init::default_num_threads() : num_threads));
+                                          (num_threads == -1 ? tbb::this_task_arena::max_concurrency() : num_threads));
 #else
             GUDHI_TC_SET_PERFORMANCE_DATA("Num_threads", "N/A");
 #endif

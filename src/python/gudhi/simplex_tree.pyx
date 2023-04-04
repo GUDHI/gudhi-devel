@@ -167,6 +167,14 @@ cdef class SimplexTree:
         """
         return self.get_ptr().num_simplices()
 
+    def is_empty(self):
+        """This function returns whether the simplicial complex is empty.
+
+        :returns:  True if the simplicial complex is empty.
+        :rtype:  bool
+        """
+        return self.get_ptr().is_empty()
+
     def dimension(self):
         """This function returns the dimension of the simplicial complex.
 
@@ -471,6 +479,16 @@ cdef class SimplexTree:
             method to recompute the exact dimension.
         """
         return self.get_ptr().prune_above_filtration(filtration)
+
+    def prune_above_dimension(self, dimension):
+        """Remove all simplices of dimension greater than a given value.
+
+        :param dimension: Maximum dimension value.
+        :type dimension: int
+        :returns: The modification information.
+        :rtype: bool
+        """
+        return self.get_ptr().prune_above_dimension(dimension)
 
     def expansion(self, max_dimension):
         """Expands the simplex tree containing only its one skeleton

@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
       };
 
       Gudhi::Clock clock_cub1("Cubical complex from top cells");
-      Cubical cub1({{ (unsigned)data.size() }}, data, false);
+      Cubical cub1({{ (unsigned)data.size() }}, data, true);
       Gudhi::persistent_cohomology::Persistent_cohomology<Cubical, Field_Zp> pcub1(cub1);
       pcub1.init_coefficients(2);
       pcub1.compute_persistent_cohomology();
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
       std::sort(res_cub1.begin(), res_cub1.end());
 
       Gudhi::Clock clock_cub2("Cubical complex from vertices");
-      Cubical cub2({{ (unsigned)data.size() }}, data, true);
+      Cubical cub2({{ (unsigned)data.size() }}, data, false);
       Gudhi::persistent_cohomology::Persistent_cohomology<Cubical, Field_Zp> pcub2(cub2);
       pcub2.init_coefficients(2);
       pcub2.compute_persistent_cohomology();

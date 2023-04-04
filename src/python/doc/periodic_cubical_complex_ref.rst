@@ -9,5 +9,3 @@ Periodic cubical complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.PeriodicCubicalComplex.__init__

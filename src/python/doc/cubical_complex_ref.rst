@@ -9,5 +9,3 @@ Cubical complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.CubicalComplex.__init__

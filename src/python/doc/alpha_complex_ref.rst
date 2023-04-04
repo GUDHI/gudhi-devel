@@ -9,5 +9,3 @@ Alpha complex reference manual
 .. autoclass:: gudhi.AlphaComplex
    :members:
    :undoc-members:
-
-   .. automethod:: gudhi.AlphaComplex.__init__
