@@ -864,7 +864,7 @@ class Cover_complex {
   template <class AssignmentRange>
   void set_cover_from_range(AssignmentRange const& assignments) {    
     std::vector<int> cov_elts, cov_number;
-    for(int i=0; i < assignments.size(); i++){
+    for(int i=0; i < static_cast<int>(assignments.size()); i++){
       cov_elts.clear();
       for (int cov : assignments[i]){
         cov_elts.push_back(cov);
