@@ -23,8 +23,6 @@ Subsampling
 
 .. automodule:: gudhi.subsampling
    :members:
-   :special-members:
-   :show-inheritance:
 
 Time Delay Embedding
 --------------------
