@@ -14,7 +14,11 @@ from gudhi.representations import PersistenceImage, DiagramSelector
 
 X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False)
 
-# reshapes the 1d inputs as images in 28 x 28.
+# Take only the 500 images from this 70.000 images dataset
+# Remove these 2 lines if you want to test the full dataset
+X=X[:500]
+y=y[:500]
+# Reshapes the 1d inputs as images in 28 x 28.
 X = X.reshape((-1, 28, 28))
 
 # Target is: "is an eight ?"
@@ -43,3 +47,7 @@ pipe.fit(X_train, y_train)
 predicted = pipe.predict(X_test)
 
 print(f"Classification report for TDA pipeline {pipe}:\n" f"{metrics.classification_report(y_test, predicted)}\n")
+
+report = metrics.classification_report(y_test, predicted, output_dict=True)
+assert report['0']['f1-score'] > 0.65
+assert report['0']['f1-score'] > 0.65
