@@ -92,8 +92,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
 
-        :param X: List of cells filtration values.
-        :type X: list of list of float OR list of numpy.ndarray
+        :param X: Filtration values of the top-dimensional cells or vertices for each complex.
+        :type X: list of array-like
 
         :return: Persistence diagrams in the format:
 
