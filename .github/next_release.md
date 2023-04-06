@@ -18,6 +18,7 @@ Below is a list of changes made since GUDHI 3.7.1:
 - [Cubical complex](https://gudhi.inria.fr/doc/latest/group__cubical__complex.html)
      - Add possibility to build a lower-star filtration from vertices instead of top-dimensional cubes.
      - Naming the arguments is now mandatory in CubicalComplex python constructor.
+     - Remove `newshape` mechanism from [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
 
 - [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
      - now provides matching in its interface.
