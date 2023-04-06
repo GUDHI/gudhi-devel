@@ -44,8 +44,7 @@ This function can display the persistence result as a diagram:
     # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    ax = gudhi.plot_persistence_diagram(persistence_file=persistence_file,
-        legend=True)
+    ax = gudhi.plot_persistence_diagram(persistence_file=persistence_file)
     # We can modify the title, aspect, etc.
     ax.set_title("Persistence diagram of a torus")
     ax.set_aspect("equal")  # forces to be square shaped
@@ -80,15 +79,11 @@ If you want more information on a specific dimension, for instance:
     persistence_file=gudhi.__root_source_dir__ + \
         '/data/persistence_diagram/rips_on_tore3D_1307.pers'
     birth_death = gudhi.read_persistence_intervals_in_dimension(
-        persistence_file=persistence_file,
-        only_this_dim=1)
-    pers_diag = [(1, elt) for elt in birth_death]
+        persistence_file=persistence_file, only_this_dim=1)
     # Use subplots to display diagram and density side by side
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-    gudhi.plot_persistence_diagram(persistence=pers_diag,
-        axes=axes[0])
-    gudhi.plot_persistence_density(persistence=pers_diag,
-        dimension=1, legend=True, axes=axes[1])
+    gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0])
+    gudhi.plot_persistence_density(persistence=birth_death, axes=axes[1])
     plt.show()
 
 LaTeX support

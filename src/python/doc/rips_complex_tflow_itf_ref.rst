@@ -44,5 +44,4 @@ Documentation for RipsLayer
 
 .. autoclass:: gudhi.tensorflow.RipsLayer
    :members:
-   :special-members: __init__
    :show-inheritance:

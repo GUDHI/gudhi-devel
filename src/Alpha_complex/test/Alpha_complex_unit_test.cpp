@@ -214,4 +214,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_with_duplicated_points, TestedKernel
   std::clog << "simplex_tree.num_vertices()=" << simplex_tree.num_vertices()
       << std::endl;
   BOOST_CHECK(simplex_tree.num_vertices() < points.size());
+
+  int found = 0;
+  for (int i = -1; i < (int)points.size() + 2; ++i)
+    try {
+      alpha_complex_from_points.get_point(i);
+      ++found;
+    } catch (...) {}
+  BOOST_CHECK(found == simplex_tree.num_vertices());
 }

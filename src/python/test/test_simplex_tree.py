@@ -21,11 +21,13 @@ def test_insertion():
     st = SimplexTree()
     assert st.__is_defined() == True
     assert st.__is_persistence_defined() == False
+    assert st.is_empty()
 
     # insert test
     assert st.insert([0, 1]) == True
 
     assert st.dimension() == 1
+    assert not st.is_empty()
 
     assert st.insert([0, 1, 2], filtration=4.0) == True
 
@@ -654,3 +656,48 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
     assert st.filtration([0, 1, 2, 3]) == 7.0
+
+
+def test_assign_filtration_missing():
+    st = SimplexTree()
+    with pytest.raises(ValueError):
+        st.assign_filtration([1, 2], 3)
+
+def test_prune_above_dimension():
+    st = SimplexTree()
+
+    # insert test
+    assert st.insert([0, 1, 3], filtration=0.5) == True
+    assert st.insert([0, 1, 2], filtration=1.0) == True
+
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 11
+
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+
+    assert st.prune_above_dimension(2000) == False
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 11
+
+    assert st.prune_above_dimension(1) == True
+    assert st.dimension() == 1
+    assert st.upper_bound_dimension() == 1
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 9
+
+    assert st.prune_above_dimension(0) == True
+    assert st.dimension() == 0
+    assert st.upper_bound_dimension() == 0
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 4
+
+    assert st.prune_above_dimension(-1) == True
+    assert st.dimension() == -1
+    assert st.upper_bound_dimension() == -1
+    assert st.num_vertices() ==  0
+    assert st.num_simplices() == 0
+
+    assert st.prune_above_dimension(-200) == False

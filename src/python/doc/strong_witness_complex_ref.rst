@@ -10,5 +10,3 @@ Strong witness complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.StrongWitnessComplex.__init__

@@ -73,8 +73,9 @@ each cube. Further details can be found in the literature.
 Input Format
 ------------
 
-In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
-filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
+In the current implantation, filtration is given either at the maximal cubes or at the vertices, and it is then
+extended by the lower star filtration to all cubes.
+There are a number of constructors that can be used to construct cubical complex by users
 who want to use the code directly. They can be found in the :doc:`cubical_complex_ref`.
 Currently one input from a text file is used. It uses a format inspired from the Perseus software
 `Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.

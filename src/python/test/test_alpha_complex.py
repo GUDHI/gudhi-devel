@@ -313,3 +313,12 @@ def test_float_relative_precision():
         assert filtrations[idx][0] == filtrations_better_resolution[idx][0]
         # check filtration is about the same with a relative precision of the worst case
         assert filtrations[idx][1] == pytest.approx(filtrations_better_resolution[idx][1], rel=1e-5)
+
+def test_numpy_arrays():
+    points=np.array([[ 1., -1., -1.],
+                    [-1.,  1., -1.],
+                    [-1., -1.,  1.],
+                    [ 1.,  1.,  1.],
+                    [ 2.,  2.,  2.]])
+    weights=np.array([4., 4., 4., 4., 1.])
+    alpha = AlphaComplex(points=points, weights=weights)

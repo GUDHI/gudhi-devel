@@ -70,11 +70,13 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
     # Modules that should not be auto-imported in __init__.py
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'sklearn', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cover_complex', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
@@ -118,9 +120,9 @@ if(PYTHONINTERP_FOUND)
     if(SPHINX_PARAMLINKS_FOUND)
       add_gudhi_debug_info("Sphinx-paramlinks version ${SPHINX_PARAMLINKS_VERSION}")
     endif()
-    if(PYTHON_DOCS_THEME_FOUND)
+    if(PYDATA_SPHINX_THEME_FOUND)
       # Does not have a version number...
-      add_gudhi_debug_info("python_docs_theme found")
+      add_gudhi_debug_info("pydata_sphinx_theme version ${PYDATA_SPHINX_THEME_VERSION}")
     endif()
 
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
@@ -131,6 +133,8 @@ if(PYTHONINTERP_FOUND)
     if(MSVC)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'/std:c++17', ")
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'/fp:strict', ")
+      # cf. https://github.com/oneapi-src/oneTBB/issues/573
+      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DNOMINMAX', ")
     else(MSVC)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-std=c++17', ")
     endif(MSVC)
@@ -177,6 +181,7 @@ if(PYTHONINTERP_FOUND)
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
+    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_persline', ")
 
     # from windows vcpkg eigen 3.4.0#2 : build fails with
     # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -266,15 +271,13 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/include', ")
 
     if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
-      add_gudhi_debug_info("TBB version ${TBB_INTERFACE_VERSION} found and used")
+      add_gudhi_debug_info("TBB version ${TBB_VERSION} found and used")
+      add_gudhi_debug_info("TBB_LIBRARY = ${TBB_LIBRARY}")
+      add_gudhi_debug_info("TBB_MALLOC_LIBRARY = ${TBB_MALLOC_LIBRARY}")
+
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
-      if((CMAKE_BUILD_TYPE MATCHES Debug) AND TBB_DEBUG_LIBRARY)
-        add_GUDHI_PYTHON_lib("${TBB_DEBUG_LIBRARY}")
-        add_GUDHI_PYTHON_lib("${TBB_MALLOC_DEBUG_LIBRARY}")
-      else()
-        add_GUDHI_PYTHON_lib("${TBB_RELEASE_LIBRARY}")
-        add_GUDHI_PYTHON_lib("${TBB_MALLOC_RELEASE_LIBRARY}")
-      endif()
+      add_GUDHI_PYTHON_lib("${TBB_LIBRARY}")
+      add_GUDHI_PYTHON_lib("${TBB_MALLOC_LIBRARY}")
       add_GUDHI_PYTHON_lib_dir(${TBB_LIBRARY_DIRS})
       message("** Add tbb ${TBB_LIBRARY_DIRS}")
       set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
@@ -289,6 +292,8 @@ if(PYTHONINTERP_FOUND)
     endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
     # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+    file(READ "introduction.rst" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
+    string(REPLACE "\n" "' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
     # Generate gudhi/__init__.py
@@ -304,13 +309,13 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/weighted_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/cover_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 
     # Some files for pip package
-    file(COPY "introduction.rst" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
     file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
     add_custom_command(
@@ -331,7 +336,7 @@ if(PYTHONINTERP_FOUND)
   # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
   if(SPHINX_PATH)
     if(SPHINX_PARAMLINKS_FOUND)
-      if(PYTHON_DOCS_THEME_FOUND)
+      if(PYDATA_SPHINX_THEME_FOUND)
         if(MATPLOTLIB_FOUND)
           if(NUMPY_FOUND)
             if(SCIPY_FOUND)
@@ -381,10 +386,10 @@ if(PYTHONINTERP_FOUND)
           message("++ Python documentation module will not be compiled because matplotlib was not found")
           set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
         endif(MATPLOTLIB_FOUND)
-      else(PYTHON_DOCS_THEME_FOUND)
-        message("++ Python documentation module will not be compiled because python-docs-theme was not found")
+      else(PYDATA_SPHINX_THEME_FOUND)
+        message("++ Python documentation module will not be compiled because pydata_sphinx_theme was not found")
         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-      endif(PYTHON_DOCS_THEME_FOUND)
+      endif(PYDATA_SPHINX_THEME_FOUND)
     else(SPHINX_PARAMLINKS_FOUND)
       message("++ Python documentation module will not be compiled because sphinxcontrib-paramlinks was not found")
       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -467,8 +472,6 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
              -f human.off -n 700 -v)
 
-    add_gudhi_py_test(test_cover_complex)
-
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
@@ -539,6 +542,7 @@ if(PYTHONINTERP_FOUND)
 
     add_gudhi_py_test(test_simplex_tree)
     add_gudhi_py_test(test_simplex_generators)
+    add_gudhi_py_test(test_simplex_tree_serialization)
 
     # Subsampling
     add_gudhi_py_test(test_subsampling)
@@ -616,6 +620,11 @@ if(PYTHONINTERP_FOUND)
     # DTM Rips
     if(SCIPY_FOUND)
       add_gudhi_py_test(test_dtm_rips_complex)
+    endif()
+
+    # Cover complex
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_cover_complex)
     endif()
 
     # Fetch remote datasets
