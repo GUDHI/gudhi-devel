@@ -28,7 +28,7 @@ jobs:
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user build twine delocate
+          python -m pip install --user delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
