@@ -33,6 +33,8 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
           cd ".\src\python\"
           python -m build -n
+          ls ".\dist\"
+          cd ".\dist\"
           Get-ChildItem *.whl | ForEach-Object{python -m delvewheel show $_.Name --add-path="C:\vcpkg\installed\x64-windows\bin\"}
           Get-ChildItem *.whl | ForEach-Object{python -m delvewheel repair $_.Name --add-path="C:\vcpkg\installed\x64-windows\bin\"}
           Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
