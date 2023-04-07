@@ -28,12 +28,11 @@ Below is a list of changes made since GUDHI 3.7.1:
 
 - [SimplexTree](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - `SimplexTree` can now be used with `pickle`.
+     - new `prune_above_dimension` method.
 
 - Installation
      - CMake 3.8 is the new minimal standard to compile the library.
      - Support for oneAPI TBB (instead of deprecated TBB) to take advantage of multicore performance.
-
-- [Python documentation](https://gudhi.inria.fr/python/latest/installation.html)
      - [pydata-sphinx-theme](https://pydata-sphinx-theme.readthedocs.io/en/stable/) is the new sphinx theme of the python documentation.
 
 - Miscellaneous

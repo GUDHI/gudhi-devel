@@ -1,5 +1,10 @@
 [
     {
+        "name": "v3.8.0rc1",
+        "version": "3.8.0rc1",
+        "url": "https://gudhi.inria.fr/python/3.8.0rc1/"
+    },
+    {
         "name": "v3.7.1 (latest)",
         "version": "3.7.1",
         "url": "https://gudhi.inria.fr/python/latest/"
