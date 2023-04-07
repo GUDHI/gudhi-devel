@@ -299,9 +299,9 @@ def test_landscape_numeric():
 def test_landscape_nan_range():
     dgm = np.array([[2., 6.], [3., 5.]])
     lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
-    lds_dgm = lds(dgm)
-    assert (lds.sample_range_fixed[0] == 2) & (lds.sample_range_fixed[1] == 6)
-    assert lds.new_resolution == 10
+    lds_dgm = lds.fit([dgm])
+    assert lds.sample_range_fixed_[0] == 2 and lds.sample_range_fixed_[1] == 6
+    assert lds.new_resolution_ == 10
 
 def test_endpoints():
     diags = [ np.array([[2., 3.]]) ]

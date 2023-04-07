@@ -21,7 +21,7 @@ except ImportError:
     # Will be removed in 1.3
     from sklearn.neighbors     import DistanceMetric
 
-from .preprocessing import DiagramScaler, BirthPersistenceTransform
+from .preprocessing import DiagramScaler, BirthPersistenceTransform, _maybe_fit_transform
 
 #############################################
 # Finite Vectorization methods ##############
@@ -53,14 +53,15 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if np.isnan(np.array(self.im_range)).any():
-            try:
+            if all(len(d) == 0 for d in X):
+                self.im_range_fixed_ = self.im_range
+            else:
                 new_X = BirthPersistenceTransform().fit_transform(X)
                 pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
                 [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-                self.im_range = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
-            except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                pass
+                self.im_range_fixed_ = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+        else:
+            self.im_range_fixed_ = self.im_range
         return self
 
     def transform(self, X):
@@ -84,7 +85,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             for j in range(num_pts_in_diag):
                 w[j] = self.weight(diagram[j,:])
 
-            x_values, y_values = np.linspace(self.im_range[0], self.im_range[1], self.resolution[0]), np.linspace(self.im_range[2], self.im_range[3], self.resolution[1])
+            x_values, y_values = np.linspace(self.im_range_fixed_[0], self.im_range_fixed_[1], self.resolution[0]), np.linspace(self.im_range_fixed_[2], self.im_range_fixed_[3], self.resolution[1])
             Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
             image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
 
@@ -97,6 +98,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply PersistenceImage on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -104,7 +106,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of pixels = **resolution[0]** x **resolution[1]**):: output persistence image.
         """
-        return self.fit_transform([diag])[0,:]
+        return _maybe_fit_transform(self, 'im_range_fixed_', diag)
 
 def _automatic_sample_range(sample_range, X):
         """
@@ -139,14 +141,14 @@ def _trim_endpoints(x, are_endpoints_nan):
 
 def _grid_from_sample_range(self, X):
     sample_range = np.array(self.sample_range)
-    self.nan_in_range = np.isnan(sample_range)
-    self.new_resolution = self.resolution
+    self.nan_in_range_ = np.isnan(sample_range)
+    self.new_resolution_ = self.resolution
     if not self.keep_endpoints:
-        self.new_resolution += self.nan_in_range.sum()
-    self.sample_range_fixed = _automatic_sample_range(sample_range, X)
-    self.grid_ = np.linspace(self.sample_range_fixed[0], self.sample_range_fixed[1], self.new_resolution)
+        self.new_resolution_ += self.nan_in_range_.sum()
+    self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
+    self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
     if not self.keep_endpoints:
-        self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range)
+        self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
 
 class Landscape(BaseEstimator, TransformerMixin):
@@ -214,6 +216,7 @@ class Landscape(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply Landscape on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -221,7 +224,7 @@ class Landscape(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of samples = **num_landscapes** x **resolution**): output persistence landscape.
         """
-        return self.fit_transform([diag])[0, :]
+        return _maybe_fit_transform(self, 'grid_', diag)
 
 class Silhouette(BaseEstimator, TransformerMixin):
     """
@@ -281,6 +284,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply Silhouette on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -288,7 +292,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**resolution**): output persistence silhouette.
         """
-        return self.fit_transform([diag])[0,:]
+        return _maybe_fit_transform(self, 'grid_', diag)
 
 
 class BettiCurve(BaseEstimator, TransformerMixin):
@@ -445,8 +449,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Shorthand for transform on a single persistence diagram.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
         """
-        return self.fit_transform([diag])[0, :]
+        return _maybe_fit_transform(self, 'grid_', diag)
 
 
 
@@ -509,8 +514,8 @@ class Entropy(BaseEstimator, TransformerMixin):
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
                     [px,py] = orig_diagram[j,:2]
-                    min_idx = np.clip(np.ceil((px - self.sample_range_fixed[0]) / self.step_).astype(int), 0, self.resolution)
-                    max_idx = np.clip(np.ceil((py - self.sample_range_fixed[0]) / self.step_).astype(int), 0, self.resolution)
+                    min_idx = np.clip(np.ceil((px - self.sample_range_fixed_[0]) / self.step_).astype(int), 0, self.resolution)
+                    max_idx = np.clip(np.ceil((py - self.sample_range_fixed_[0]) / self.step_).astype(int), 0, self.resolution)
                     ent[min_idx:max_idx]-=p[j]*np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
@@ -522,6 +527,7 @@ class Entropy(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply Entropy on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -529,7 +535,7 @@ class Entropy(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (1 if **mode** = "scalar" else **resolution**): output entropy.
         """
-        return self.fit_transform([diag])[0,:]
+        return _maybe_fit_transform(self, 'grid_', diag)
 
 class TopologicalVector(BaseEstimator, TransformerMixin):
     """
@@ -600,7 +606,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**threshold**): output topological vector.
         """
-        return self.fit_transform([diag])[0,:]
+        return self.transform([diag])[0,:]
 
 class ComplexPolynomial(BaseEstimator, TransformerMixin):
     """
@@ -672,7 +678,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**threshold**): output complex vector of coefficients.
         """
-        return self.fit_transform([diag])[0,:]
+        return self.transform([diag])[0,:]
 
 def _lapl_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
@@ -785,7 +791,7 @@ class Atol(BaseEstimator, TransformerMixin):
 
     def __call__(self, measure, sample_weight=None):
         """
-        Apply measure vectorisation on a single measure.
+        Apply measure vectorisation on a single measure. Only available after `fit` has been called.
 
         Parameters:
             measure (n x d numpy array): input measure in R^d.
