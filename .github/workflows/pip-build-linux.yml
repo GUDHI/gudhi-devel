@@ -18,7 +18,7 @@ jobs:
           cd build_311
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
           cd src/python
-          $PYTHON311/bin/python -m build -n
+          $PYTHON311/bin/python -m build -n -w
           auditwheel show dist/*.whl
           auditwheel repair dist/*.whl
           ls wheelhouse/*.whl
