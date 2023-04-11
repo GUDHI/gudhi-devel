@@ -43,7 +43,7 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python -m build -n
+          python -m build -n -w
       - name: Install and test python wheel
         run: |
           python -m pip install --user pytest build/src/python/dist/*.whl
@@ -56,6 +56,6 @@ jobs:
         run: |
           mkdir wheelhouse
           export PATH="$PATH:`python -m site --user-base`/bin"
-          delocate-listdeps build/src/python/dist/*
-          delocate-wheel --require-archs universal2 -w wheelhouse build/src/python/dist/*
-          python -m twine upload wheelhouse/*
+          delocate-listdeps build/src/python/dist/*.whl
+          delocate-wheel --require-archs universal2 -w wheelhouse build/src/python/dist/*.whl
+          python -m twine upload wheelhouse/*.whl
