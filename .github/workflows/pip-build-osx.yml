@@ -41,7 +41,7 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python -m build -n
+          python -m build -n -w
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-wheel --require-archs universal2 -v dist/*.whl
       - name: Install and test python wheel
