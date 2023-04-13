@@ -14,17 +14,19 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.8 is 1.17.3 for instance
+        # numpy~=1.17.3 means any numpy=1.17.*, but also numpy>=1.17.3 (numpy~=1.17 do not work as it means any numpy==1.*)
         include:
           - python-version: '3.7'
-            numpy-version: '1.15'
+            numpy-version: '1.15.0'
           - python-version: '3.8'
-            numpy-version: '1.17'
+            numpy-version: '1.17.3'
           - python-version: '3.9'
-            numpy-version: '1.19'
+            numpy-version: '1.19.3'
           - python-version: '3.10'
-            numpy-version: '1.21'
+            numpy-version: '1.21.6'
           - python-version: '3.11'
-            numpy-version: '1.23'
+            numpy-version: '1.23.2'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
@@ -62,6 +64,9 @@ jobs:
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest src/python/test/test_alpha_complex.py
+          python -m pytest src/python/test/test_bottleneck_distance.py"
+          python -m pytest src/python/test/test_cubical_complex.py"
+          python -m pytest src/python/test/test_rips_complex.py"
       - name: Upload OSx python wheel
         uses: actions/upload-artifact@v3
         with:

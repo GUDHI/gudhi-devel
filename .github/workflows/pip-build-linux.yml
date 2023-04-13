@@ -26,6 +26,9 @@ jobs:
           $PYTHON37/bin/python -m pip install numpy --upgrade
           $PYTHON37/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON37/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON37/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON37/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON37/bin/python -m pytest src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
         run: |
           mkdir build_39
@@ -42,6 +45,9 @@ jobs:
           $PYTHON39/bin/python -m pip install numpy --upgrade
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_rips_complex.py
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v3
         with:
