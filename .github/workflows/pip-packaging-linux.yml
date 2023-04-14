@@ -27,10 +27,10 @@ jobs:
           $PYTHON36/bin/python -m pip install --user pytest build_36/src/python/dist/*.whl
           $PYTHON36/bin/python -m pip install numpy --upgrade
           $PYTHON36/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON36/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON36/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON36/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON36/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.7
         run: |
           mkdir build_37
@@ -44,10 +44,10 @@ jobs:
           $PYTHON37/bin/python -m pip install --user pytest build_37/src/python/dist/*.whl
           $PYTHON37/bin/python -m pip install numpy --upgrade
           $PYTHON37/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON37/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON37/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON37/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON37/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON37/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON37/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON37/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON37/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.8
         run: |
           mkdir build_38
@@ -61,10 +61,10 @@ jobs:
           $PYTHON38/bin/python -m pip install --user pytest build_38/src/python/dist/*.whl
           $PYTHON38/bin/python -m pip install numpy --upgrade
           $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON38/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON38/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON38/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON38/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
         run: |
           mkdir build_39
@@ -78,10 +78,10 @@ jobs:
           $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
           $PYTHON39/bin/python -m pip install numpy --upgrade
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.10
         run: |
           mkdir build_310
@@ -95,10 +95,10 @@ jobs:
           $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
           $PYTHON310/bin/python -m pip install numpy --upgrade
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON310/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON310/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON310/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.11
         run: |
           mkdir build_311
@@ -112,10 +112,10 @@ jobs:
           $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
           $PYTHON311/bin/python -m pip install numpy --upgrade
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON311/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON311/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON311/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__

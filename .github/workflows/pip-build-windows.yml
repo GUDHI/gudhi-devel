@@ -58,10 +58,10 @@ jobs:
           python -m pip install --user  numpy --upgrade
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
-          python -m pytest ".\src\python\test\test_alpha_complex.py"
-          python -m pytest ".\src\python\test\test_bottleneck_distance.py"
-          python -m pytest ".\src\python\test\test_cubical_complex.py"
-          python -m pytest ".\src\python\test\test_rips_complex.py"
+          python -m pytest -v ".\src\python\test\test_alpha_complex.py"
+          python -m pytest -v ".\src\python\test\test_bottleneck_distance.py"
+          python -m pytest -v ".\src\python\test\test_cubical_complex.py"
+          python -m pytest -v ".\src\python\test\test_rips_complex.py"
       - name: Upload Windows python wheel
         uses: actions/upload-artifact@v3
         with:
