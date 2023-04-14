@@ -3,8 +3,8 @@ name: pip build osx
 on: [push, pull_request]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 10.14
-  _PYTHON_HOST_PLATFORM: macosx-10.14-universal2
+  MACOSX_DEPLOYMENT_TARGET: 10.15
+  _PYTHON_HOST_PLATFORM: macosx-10.15-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
@@ -13,7 +13,12 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.11']
+        # numpy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4
+        # and python 3.8+
+        python-version: ['3.8']
+        include:
+          - python-version: '3.8'
+            numpy-version: '1.21.4'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
@@ -27,6 +32,7 @@ jobs:
         run: |
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user delocate
           ./scripts/build_osx_universal_gmpfr.sh
@@ -46,9 +52,13 @@ jobs:
           delocate-wheel --require-archs universal2 -v dist/*.whl
       - name: Install and test python wheel
         run: |
+          python -m pip install --user  numpy --upgrade
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
-          python -m pytest src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_bottleneck_distance.py
+          python -m pytest -v src/python/test/test_cubical_complex.py
+          python -m pytest -v src/python/test/test_rips_complex.py
       - name: Upload OSx python wheel
         uses: actions/upload-artifact@v3
         with:

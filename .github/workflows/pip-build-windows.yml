@@ -8,7 +8,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.11']
+        python-version: ['3.7']
+        include:
+          - python-version: '3.7'
+            numpy-version: '1.15.0'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +27,7 @@ jobs:
           vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version
           ls "C:\vcpkg\installed\x64-windows\bin\"
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
       - name: Build python wheel and install it
         run: |
@@ -41,9 +45,13 @@ jobs:
         run: |
           Get-Location
           dir
+          python -m pip install --user  numpy --upgrade
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
-          python -m pytest ".\src\python\test\test_alpha_complex.py"
+          python -m pytest -v ".\src\python\test\test_alpha_complex.py"
+          python -m pytest -v ".\src\python\test\test_bottleneck_distance.py"
+          python -m pytest -v ".\src\python\test\test_cubical_complex.py"
+          python -m pytest -v ".\src\python\test\test_rips_complex.py"
       - name: Upload Windows python wheel
         uses: actions/upload-artifact@v3
         with:
