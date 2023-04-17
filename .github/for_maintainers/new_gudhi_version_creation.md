@@ -132,9 +132,16 @@ ARG GUDHI_VERSION="3.X.X"
 ...
 ```
 
-After pushing the changes the docker image build will be automatically performed for
+After pushing the changes in gudhi-deploy repo main branch, the docker image needs to be built and pushed at
 [latest_gudhi_version](https://hub.docker.com/repository/docker/gudhi/latest_gudhi_version)
-docker image on docker hub.
+docker image on docker hub:
+
+```bash
+docker build -t gudhi/latest_gudhi_version:3.X.X -f Dockerfile_for_gudhi_installation .
+docker tag gudhi/latest_gudhi_version:3.X.X gudhi/latest_gudhi_version:latest
+docker login
+docker push gudhi/latest_gudhi_version:3.X.X gudhi/latest_gudhi_version:latest
+```
 
 ***[Check there are no error]***
 
