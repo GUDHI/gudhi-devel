@@ -25,7 +25,7 @@ nor [unlabelled closed PRs](https://github.com/GUDHI/gudhi-devel/pulls?q=is%3Apr
 **Edit the file CMakeGUDHIVersion.txt**, and increment major, minor, or patch version number, in function of the version new delivery.
 ```bash
 # cf. .gitignore - ignore this if it is a fresh clone version
-rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lucky_cat.off_sc.dot data/points/KleinBottle5D.off_dist data/points/KleinBottle5D.off_sc.dot data/points/human.off_dist data/points/human.off_sc.off data/points/human.off_sc.txt
+rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lucky_cat.off_sc.dot data/points/KleinBottle5D.off_dist data/points/KleinBottle5D.off_sc.dot data/points/human.off_dist data/points/human.off_sc.off data/points/human.off_sc.txt src/python/test/__pycache__
 ```
 
 Checkin the modifications, build and test the version:
