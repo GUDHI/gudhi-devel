@@ -55,7 +55,7 @@ mkdir gudhi.doc.@GUDHI_VERSION@
 cd gudhi.@GUDHI_VERSION@
 rm -rf build; mkdir build; cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
-make doxygen  2>&1 | tee dox.log && grep warning dox.log
+make doxygen && grep warning doxygen.log
 ```
 
 ***[Check there are no error and the warnings]***
