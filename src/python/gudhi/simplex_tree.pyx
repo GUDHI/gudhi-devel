@@ -812,6 +812,7 @@ cdef class SimplexTree:
 
     def __eq__(self, other:SimplexTree):
         """Test for structural equality
+
         :returns: True if the 2 simplex trees are equal, False otherwise.
         :rtype: bool
         """
@@ -819,9 +820,11 @@ cdef class SimplexTree:
     
     def __getstate__(self):
         """Pickle the SimplexTree data structure as a Python Byte Array
-        :raises MemoryError: In the case the serialization allocates a too large block of memory.
+
         :returns: Serialized SimplexTree data structure
         :rtype: numpy.array of shape (n,)
+
+        :raises MemoryError: In the case the serialization allocates a too large block of memory.
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
         # Let's use numpy to allocate a buffer. Will be deleted automatically
@@ -835,6 +838,7 @@ cdef class SimplexTree:
 
     def __setstate__(self, state):
         """Construct the SimplexTree data structure from a Python Byte Array
+        
         :param state: Serialized SimplexTree data structure
         :type state: numpy.array of shape (n,)
         """
