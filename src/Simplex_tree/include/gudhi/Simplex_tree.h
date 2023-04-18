@@ -33,6 +33,8 @@
 #include <boost/range/size.hpp>
 #include <boost/container/static_vector.hpp>
 
+#include <boost/intrusive/list.hpp>
+
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
 #endif
@@ -1814,7 +1816,7 @@ class Simplex_tree {
 
  public:
   // intrusive list of Nodes with same label using the hooks
-  typedef boost::intrusive::member_hook<Hooks_simplex_base_link_nodes, Member_hook_t,
+  typedef boost::intrusive::member_hook<Hooks_simplex_base_link_nodes, typename Hooks_simplex_base_link_nodes::Member_hook_t,
                                         &Hooks_simplex_base_link_nodes::list_max_vertex_hook_>
       List_member_hook_t;
   // auto_unlink in Member_hook_t is incompatible with constant time size
@@ -1824,11 +1826,13 @@ class Simplex_tree {
   // type of hooks stored in each Node, Node inherits from Hooks_simplex_base
   typedef typename std::conditional<Options::link_nodes_by_label, Hooks_simplex_base_link_nodes,
                                     Hooks_simplex_base_dummy>::type Hooks_simplex_base;
-
+  /** Data structure to access all Nodes with a given label u. Can be used for faster
+   * computation. */
+ private:
   // if Options::link_nodes_by_label is true, store the lists of Nodes with
   // same label
-  typedef typename std::conditional<Options::link_nodes_by_label, nodes_by_label_intrusive_list<Simplex_tree>,
-                                    nodes_by_label_dummy<Simplex_tree>>::type Nodes_by_label_data_structure;
+  typedef typename std::conditional<Options::link_nodes_by_label, Nodes_by_label_intrusive_list<Simplex_tree>,
+                                    Nodes_by_label_dummy<Simplex_tree>>::type Nodes_by_label_data_structure;
 
   /** Only if Options::link_nodes_by_label is true, nodes_with_label_[u] returns a
    * range of all Nodes in the Simplex_tree with the label u.*/
@@ -2148,6 +2152,22 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
+};
+
+/** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
+ * `link_nodes_by_label` option.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+struct Simplex_tree_options_fast_cofaces {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
 };
 
 /** @}*/  // end addtogroup simplex_tree

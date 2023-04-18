@@ -40,7 +40,10 @@ struct Low_options : Gudhi::Simplex_tree_options_full_featured {
   typedef std::uint8_t Simplex_key;
 };
 
-typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>, Simplex_tree<Low_options>> list_of_tested_variants;
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_persistence>,
+                         Simplex_tree<Low_options>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
 
 template<class Filtration_type>
 Filtration_type random_filtration(Filtration_type lower_bound = 0, Filtration_type upper_bound = 1) {
