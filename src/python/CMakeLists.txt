@@ -291,9 +291,12 @@ if(PYTHONINTERP_FOUND)
       set( GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}")
     endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
-    # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
-    file(READ "introduction.rst" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
+    # doc/pip_introduction.inc is a restructured text file (extension changed because of sphinx warning) that describes
+    # the GUDHI project on https://pypi.org/project/gudhi/
+    file(READ "doc/pypi_introduction.inc" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
     string(REPLACE "\n" "\\n' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
+
+    # Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
     configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
     # Generate gudhi/__init__.py
