@@ -1372,6 +1372,7 @@ class Simplex_tree {
         Siblings * new_sib = new Siblings(siblings,  // oncles
                                           simplex->first,  // parent
                                           boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
+        simplex->second.assign_children(new_sib);
         std::vector<Vertex_handle> blocked_new_sib_vertex_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
         for (auto new_sib_member = new_sib->members().begin();
@@ -1392,7 +1393,6 @@ class Simplex_tree {
             update_simplex_tree_after_node_insertion(it);
           }
           // ensure the children property
-          simplex->second.assign_children(new_sib);
           simplex->second.assign_children(siblings);
         } else {
           for (auto& blocked_new_sib_member : blocked_new_sib_vertex_list) {
