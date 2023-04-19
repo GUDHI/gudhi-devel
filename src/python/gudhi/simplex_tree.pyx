@@ -817,12 +817,8 @@ cdef class SimplexTree:
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
     
     def __getstate__(self):
-        """Pickle the SimplexTree data structure as a Python Byte Array
-
-        :returns: Serialized SimplexTree data structure
+        """:returns: Serialized (or flattened) SimplexTree data structure for the SimplexTree to be pickled.
         :rtype: numpy.array of shape (n,)
-
-        :raises MemoryError: In the case the serialization allocates a too large block of memory.
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
         # Let's use numpy to allocate a buffer. Will be deleted automatically
