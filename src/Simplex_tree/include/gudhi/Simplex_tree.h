@@ -5,7 +5,8 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same label in an intrusive list.
+ *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -48,6 +49,7 @@
 #include <algorithm>  // for std::max
 #include <cstdint>  // for std::uint32_t
 #include <iterator>  // for std::distance
+#include <type_traits>  // for std::conditional
 
 namespace Gudhi {
 
@@ -664,7 +666,12 @@ class Simplex_tree {
     return (sh->second.children()->parent() == sh->first);
   }
 
-    /** \brief Given a range of Vertex_handles, returns the Simplex_handle
+  /** \brief Returns the children of the node in the simplex tree pointed by sh.
+   * Invalid if sh has no children.
+  */
+  Siblings* children(Simplex_handle sh) const { return sh->second.children(); }
+
+  /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
    * vertices. Return null_simplex() if the simplex is not in the complex.
    *
