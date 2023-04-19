@@ -811,9 +811,7 @@ cdef class SimplexTree:
             del ptr
 
     def __eq__(self, other:SimplexTree):
-        """Test for structural equality
-
-        :returns: True if the 2 simplex trees are equal, False otherwise.
+        """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
