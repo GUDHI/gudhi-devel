@@ -817,7 +817,7 @@ cdef class SimplexTree:
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
     
     def __getstate__(self):
-        """:returns: Serialized (or flattened) SimplexTree data structure for the SimplexTree to be pickled.
+        """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
         :rtype: numpy.array of shape (n,)
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
@@ -831,7 +831,8 @@ cdef class SimplexTree:
         return np_buffer
 
     def __setstate__(self, state):
-        """Construct the SimplexTree data structure from a Python Byte Array
+        """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
+        in order to unpickle a SimplexTree.
         
         :param state: Serialized SimplexTree data structure
         :type state: numpy.array of shape (n,)
