@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <queue>
+#include <stdexcept>
 
 namespace Gudhi {
 
@@ -105,10 +106,10 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator(SimplexTree* cpx,
                                                                   const std::vector<Vertex_handle>& simp)
       : predicate_(cpx, simp), st_(cpx) {
-    GUDHI_CHECK(!simp.empty(), "cannot call for cofaces of an empty simplex");
+    GUDHI_CHECK(!simp.empty(), std::invalid_argument("cannot call for cofaces of an empty simplex"));
     max_v_ = *(simp.begin());
     auto list_ptr = st_->nodes_by_label(max_v_);
-    GUDHI_CHECK(list_ptr != nullptr, "invalid call to cofaces forest");
+    GUDHI_CHECK(list_ptr != nullptr, std::runtime_error("invalid call to cofaces forest"));
 
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());

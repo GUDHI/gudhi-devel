@@ -767,6 +767,10 @@ class Simplex_tree {
     for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
+      // update extra data structures in the insertion is successful
+      if (res_insert.second) {
+        update_simplex_tree_after_node_insertion(res_insert.first);
+      }
       if (!(has_children(res_insert.first))) {
         res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
       }
@@ -885,6 +889,11 @@ class Simplex_tree {
     Vertex_handle vertex_one = *first;
     auto&& dict = sib->members();
     auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
+    // update extra data structures in the insertion is successful
+    if (insertion_result.second) {
+      update_simplex_tree_after_node_insertion(insertion_result.first);
+    }
+
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
@@ -1171,6 +1180,7 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
+    root_.members_.reserve(num_vertices(skel_graph));  // probably useless in most cases
     typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it, v_it_end;
     for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end; ++v_it) {
       auto it = (root_.members_.emplace_hint(root_.members_.end(), *v_it,
@@ -1387,20 +1397,21 @@ class Simplex_tree {
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
              new_sib_member++) {
+           // update data structures for all new simplices
+           update_simplex_tree_after_node_insertion(new_sib_member);
            bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
            // add it to the list to be removed - do not perform it while looping on it
            if (blocker_result) {
              blocked_new_sib_vertex_list.push_back(new_sib_member->first);
+             // update data structures for all deleted simplices
+             // can be done in the loop as part of another datastructure
+             update_simplex_tree_before_node_removal(new_sib_member);
            }
         }
         if (blocked_new_sib_vertex_list.size() == new_sib->members().size()) {
           // Specific case where all have to be deleted
           delete new_sib;
-          // update data structures for all new simplices
-          for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
-            update_simplex_tree_after_node_insertion(it);
-          }
           // ensure the children property
           simplex->second.assign_children(siblings);
         } else {
@@ -1886,10 +1897,6 @@ class Simplex_tree {
     if constexpr (Options::link_nodes_by_label) {
       nodes_by_label_.insert(sh);
     }
-    // every cell is critical by default
-    /*if constexpr (Options::store_morse_matching) {
-      make_critical(sh);  // make Morse critical by default
-    }*/
   }
 
   // update all extra data structures in the Simplex_tree. Must be called before
@@ -1898,13 +1905,6 @@ class Simplex_tree {
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
     }
-    /*if constexpr (Options::store_morse_matching) {
-      if (!critical(sh)) {  // if paired, make the simplices critical
-        auto p_sh = paired_with(sh);
-        make_critical(p_sh);
-        make_critical(sh);
-      }
-    }*/
   }
 
  public:

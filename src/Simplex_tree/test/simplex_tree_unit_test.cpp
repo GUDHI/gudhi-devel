@@ -592,18 +592,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 
 template<class typeST, class Vertex_handle>
 void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
-  typename typeST::Cofaces_simplex_range cofaces;
-  if (dim == 0)
-    cofaces = st.star_simplex_range(st.find(expected));
-  else
-    cofaces = st.cofaces_simplex_range(st.find(expected), dim);
-  for (auto simplex = cofaces.begin(); simplex != cofaces.end(); ++simplex) {
-    typename typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
-    for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
-      std::clog << "(" << *vertex << ")";
+  if (dim == 0) {
+    typename typeST::Star_simplex_range stars = st.star_simplex_range(st.find(expected));
+    for (auto simplex = stars.begin(); simplex != stars.end(); ++simplex) {
+      typename typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
+      for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
+        std::clog << "(" << *vertex << ")";
+      }
+      std::clog << std::endl;
+      BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
     }
-    std::clog << std::endl;
-    BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
+  } else {
+    typename typeST::Cofaces_simplex_range cofaces = st.cofaces_simplex_range(st.find(expected), dim);
+    for (auto simplex = cofaces.begin(); simplex != cofaces.end(); ++simplex) {
+      typename typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
+      for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
+        std::clog << "(" << *vertex << ")";
+      }
+      std::clog << std::endl;
+      BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
+    }
   }
 }
 
