@@ -787,6 +787,9 @@ class Simplex_tree {
       }
       // if filtration value unchanged
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
+    } else {
+      // update extra data structures in the insertion is successful
+      update_simplex_tree_after_node_insertion(res_insert.first);
     }
     // otherwise the insertion has succeeded - size is a size_type
     int dim = static_cast<int>(boost::size(simplex)) - 1;
@@ -1894,6 +1897,7 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called after all
   // simplex insertions.
   void update_simplex_tree_after_node_insertion(Simplex_handle sh) {
+    std::cout << "update_simplex_tree_after_node_insertion" << std::endl;
     if constexpr (Options::link_nodes_by_label) {
       nodes_by_label_.insert(sh);
     }
@@ -1902,6 +1906,7 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called before
   // all simplex removals
   void update_simplex_tree_before_node_removal(Simplex_handle sh) {
+    std::cout << "update_simplex_tree_before_node_removal" << std::endl;
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
     }
