@@ -63,8 +63,7 @@ for module in pybind11_modules:
 setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
-    author='GUDHI Editorial Board',
-    author_email='gudhi-contact@inria.fr',
+    author='GUDHI Editorial Board <https://gudhi.inria.fr/contact/>',
     version='@GUDHI_VERSION@',
     url='https://gudhi.inria.fr/',
     project_urls={

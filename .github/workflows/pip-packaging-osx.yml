@@ -15,7 +15,20 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        # numpy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4
+        # and python 3.8+
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        include:
+        # numpy >= 1.21.4 fort osx x86 and arm, but minimal numpy version for python 3.10 is 1.21.6 for instance
+        # numpy~=1.21.6 means any numpy=1.21.*, but also numpy>=1.21.6 (numpy~=1.21 do not work as it means any numpy==1.*)
+          - python-version: '3.8'
+            numpy-version: '1.21.4'
+          - python-version: '3.9'
+            numpy-version: '1.21.4'
+          - python-version: '3.10'
+            numpy-version: '1.21.6'
+          - python-version: '3.11'
+            numpy-version: '1.23.2'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +42,9 @@ jobs:
         run: |
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user build twine delocate
+          python -m pip install --user twine delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libs are in $PWD/deps-uni/lib
       - name: Build python wheel
@@ -43,12 +57,16 @@ jobs:
           cd build
           cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
           cd src/python
-          python -m build -n
+          python -m build -n -w
       - name: Install and test python wheel
         run: |
+          python -m pip install --user  numpy --upgrade
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
-          python -m pytest src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_bottleneck_distance.py
+          python -m pytest -v src/python/test/test_cubical_complex.py
+          python -m pytest -v src/python/test/test_rips_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
@@ -56,6 +74,6 @@ jobs:
         run: |
           mkdir wheelhouse
           export PATH="$PATH:`python -m site --user-base`/bin"
-          delocate-listdeps build/src/python/dist/*
-          delocate-wheel --require-archs universal2 -w wheelhouse build/src/python/dist/*
-          python -m twine upload wheelhouse/*
+          delocate-listdeps build/src/python/dist/*.whl
+          delocate-wheel --require-archs universal2 -w wheelhouse build/src/python/dist/*.whl
+          python -m twine upload wheelhouse/*.whl

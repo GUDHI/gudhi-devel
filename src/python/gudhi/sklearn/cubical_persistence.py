@@ -35,7 +35,6 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         homology_dimensions,
-        newshape=None,
         input_type='top_dimensional_cells',
         homology_coeff_field=11,
         min_persistence=0.0,
@@ -48,10 +47,6 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
-            newshape (tuple of ints): If cells filtration values require to be reshaped
-                (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`), set `newshape`
-                to perform `numpy.reshape(X, newshape, order='C')` in
-                :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform` method.
             input_type (str): 'top_dimensional_cells' if the filtration values passed to `transform()` are those of the
                 top-dimensional cells, 'vertices' if they correspond to the vertices.
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
@@ -60,7 +55,6 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
         self.homology_dimensions = homology_dimensions
-        self.newshape = newshape
         self.input_type = input_type
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
@@ -98,8 +92,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
 
-        :param X: List of cells filtration values (`numpy.reshape(X, newshape, order='C'` if `newshape` is set with a tuple of ints).
-        :type X: list of list of float OR list of numpy.ndarray
+        :param X: Filtration values of the top-dimensional cells or vertices for each complex.
+        :type X: list of array-like
 
         :return: Persistence diagrams in the format:
 
@@ -107,9 +101,6 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
               - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
-        if self.newshape is not None:
-            X = np.reshape(X, self.newshape, order='C')
-        
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
             unwrap = True

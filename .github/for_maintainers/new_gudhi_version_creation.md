@@ -25,14 +25,14 @@ nor [unlabelled closed PRs](https://github.com/GUDHI/gudhi-devel/pulls?q=is%3Apr
 **Edit the file CMakeGUDHIVersion.txt**, and increment major, minor, or patch version number, in function of the version new delivery.
 ```bash
 # cf. .gitignore - ignore this if it is a fresh clone version
-rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lucky_cat.off_sc.dot data/points/KleinBottle5D.off_dist data/points/KleinBottle5D.off_sc.dot data/points/human.off_dist data/points/human.off_sc.off data/points/human.off_sc.txt
+rm -rf data/points/COIL_database/lucky_cat.off_dist data/points/COIL_database/lucky_cat.off_sc.dot data/points/KleinBottle5D.off_dist data/points/KleinBottle5D.off_sc.dot data/points/human.off_dist data/points/human.off_sc.off data/points/human.off_sc.txt src/python/test/__pycache__
 ```
 
 Checkin the modifications, build and test the version:
 ```bash
 git submodule update --init
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
 make user_version
 date +"%d-%m-%Y-%T" > gudhi.@GUDHI_VERSION@/timestamp.txt
 tar -czvf gudhi.@GUDHI_VERSION@.tar.gz gudhi.@GUDHI_VERSION@
@@ -54,8 +54,8 @@ mkdir gudhi.doc.@GUDHI_VERSION@
 ```bash
 cd gudhi.@GUDHI_VERSION@
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
-make doxygen  2>&1 | tee dox.log && grep warning dox.log
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+make doxygen && grep warning doxygen.log
 ```
 
 ***[Check there are no error and the warnings]***
@@ -132,9 +132,16 @@ ARG GUDHI_VERSION="3.X.X"
 ...
 ```
 
-After pushing the changes the docker image build will be automatically performed for
+After pushing the changes in gudhi-deploy repo main branch, the docker image needs to be built and pushed at
 [latest_gudhi_version](https://hub.docker.com/repository/docker/gudhi/latest_gudhi_version)
-docker image on docker hub.
+docker image on docker hub:
+
+```bash
+docker build -t gudhi/latest_gudhi_version:3.X.X -f Dockerfile_for_gudhi_installation .
+docker tag gudhi/latest_gudhi_version:3.X.X gudhi/latest_gudhi_version:latest
+docker login
+docker push gudhi/latest_gudhi_version:3.X.X gudhi/latest_gudhi_version:latest
+```
 
 ***[Check there are no error]***
 
