@@ -37,7 +37,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions,
         max_edge_length=float('inf'),
         nb_collapse=1,
-        newshape=None,
         homology_coeff_field=11,
         min_persistence=0.0,
         n_jobs=None,
@@ -53,10 +52,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             nb_collapse (int): The number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform on the
                 SimplexTree. Edges are automatically collapsed if the maximal persistence diagrams dimension is greater
                 than 1. Default is 1.
-            newshape (tuple of ints): If cells filtration values require to be reshaped
-                (cf. :func:`~gudhi.sklearn.rips_persistence.RipsPersistence.transform`), set `newshape`
-                to perform `numpy.reshape(X, newshape, order='C')` in
-                :func:`~gudhi.sklearn.rips_persistence.RipsPersistence.transform` method.
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
@@ -65,7 +60,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.homology_dimensions = homology_dimensions
         self.max_edge_length = max_edge_length
         self.nb_collapse = nb_collapse
-        self.newshape = newshape
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
         self.n_jobs = n_jobs
@@ -102,7 +96,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
 
-        :param X: List of cells filtration values (`numpy.reshape(X, newshape, order='C'` if `newshape` is set with a tuple of ints).
+        :param X: List of point clouds.
         :type X: list of list of float OR list of numpy.ndarray
 
         :return: Persistence diagrams in the format:
@@ -111,9 +105,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
               - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
-        if self.newshape is not None:
-            X = np.reshape(X, self.newshape, order='C')
-        
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
             # threads is preferred as Rips construction and persistence computation releases the GIL
