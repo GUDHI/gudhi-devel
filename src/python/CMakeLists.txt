@@ -425,6 +425,11 @@ if(PYTHONINTERP_FOUND)
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/cubical_complex_sklearn_itf.py")
+
+      add_test(NAME rips_complex_sklearn_itf_py_test
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-diagram")
     endif()
 
     # Test examples
