@@ -249,12 +249,12 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[0])) == 4);
   BOOST_CHECK(get<1>(persistent_pairs[0]) == st.null_simplex());
 
-  // persistent_pairs[1] = 2  0 2 inf
+  // persistent_pairs[1] = 2  0 1 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[1])) == 0);
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[1])) == 1);
   BOOST_CHECK(get<1>(persistent_pairs[1]) == st.null_simplex());
 
-  // persistent_pairs[2] = 2  0 1 inf
+  // persistent_pairs[2] = 2  0 2 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[2])) == 0);
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[2])) == 2);
   BOOST_CHECK(get<1>(persistent_pairs[2]) == st.null_simplex());
