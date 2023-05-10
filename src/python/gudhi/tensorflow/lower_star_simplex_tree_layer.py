@@ -56,7 +56,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         super().__init__(dynamic=True, **kwargs)
         self.dimensions  = homology_dimensions
         self.simplextree = simplextree
-        self.min_persistence = min_persistence if min_persistence != None else [0. for _ in range(len(self.dimensions))]
+        self.min_persistence = min_persistence if min_persistence is not None else [0. for _ in range(len(self.dimensions))]
         self.hcf = homology_coeff_field
         assert len(self.min_persistence) == len(self.dimensions)
 

@@ -66,7 +66,7 @@ Menu_edge_contraction::update_gui_numbers(int new_value) {
 
 void
 Menu_edge_contraction::send_contract_edges() {
-  emit(contract_edges(num_collapses()));
+  /*emit*/ contract_edges(num_collapses());
   update_gui_numbers();
 }
 

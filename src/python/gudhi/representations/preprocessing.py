@@ -17,6 +17,17 @@ from sklearn.preprocessing import StandardScaler
 # Utils #####################################
 #############################################
 
+def _maybe_fit_transform(obj, attr, diag):
+    """
+    In __call__, use transform on the object itself if it has been fitted,
+    otherwise fit_transform on a clone of the object so it doesn't affect future calls.
+    """
+    if hasattr(obj, attr):
+        result = obj.transform([diag])
+    else:
+        result = obj.__class__(**obj.get_params()).fit_transform([diag])
+    return result[0]
+
 class Clamping(BaseEstimator, TransformerMixin):
     """
     This is a class for clamping a list of values. It is not meant to be called directly on (a list of) persistence diagrams, but it is rather meant to be used as a parameter for the DiagramScaler class. As such it has the same methods and purpose as common scalers from sklearn.preprocessing such as MinMaxScaler, RobustScaler, StandardScaler, etc. A typical use would be for instance if you want to clamp abscissae or ordinates (or both) of persistence diagrams within a pre-defined interval.
@@ -108,7 +119,7 @@ class BirthPersistenceTransform(BaseEstimator, TransformerMixin):
         Returns:
             n x 2 numpy array: transformed persistence diagram.
         """
-        return self.fit_transform([diag])[0]
+        return self.transform([diag])[0]
 
 class DiagramScaler(BaseEstimator, TransformerMixin):
     """
@@ -133,6 +144,7 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
+        self.is_fitted_ = True
         if self.use:
             if len(X) == 1:
                 P = X[0]
@@ -164,6 +176,7 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply DiagramScaler on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -171,7 +184,7 @@ class DiagramScaler(BaseEstimator, TransformerMixin):
         Returns:
             n x 2 numpy array: transformed persistence diagram.
         """
-        return self.fit_transform([diag])[0]
+        return _maybe_fit_transform(self, 'is_fitted_', diag)
 
 class Padding(BaseEstimator, TransformerMixin):
     """
@@ -188,13 +201,13 @@ class Padding(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         """
-        Fit the Padding class on a list of persistence diagrams (this function actually does nothing but is useful when Padding is included in a scikit-learn Pipeline).
+        Fit the Padding class on a list of persistence diagrams.
 
         Parameters:
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        self.max_pts = max([len(diag) for diag in X])
+        self.max_pts_ = max(len(diag) for diag in X)
         return self
 
     def transform(self, X):
@@ -210,7 +223,7 @@ class Padding(BaseEstimator, TransformerMixin):
         if self.use:
             Xfit, num_diag = [], len(X)
             for diag in X:
-                diag_pad = np.pad(diag, ((0,max(0, self.max_pts - diag.shape[0])), (0,1)), "constant", constant_values=((0,0),(0,0)))
+                diag_pad = np.pad(diag, ((0,max(0, self.max_pts_ - diag.shape[0])), (0,1)), "constant", constant_values=((0,0),(0,0)))
                 diag_pad[:diag.shape[0],2] = np.ones(diag.shape[0])
                 Xfit.append(diag_pad)                    
         else:
@@ -220,6 +233,7 @@ class Padding(BaseEstimator, TransformerMixin):
     def __call__(self, diag):
         """
         Apply Padding on a single persistence diagram and outputs the result.
+        If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
 
         Parameters:
             diag (n x 2 numpy array): input persistence diagram.
@@ -227,7 +241,7 @@ class Padding(BaseEstimator, TransformerMixin):
         Returns:
             n x 2 numpy array: padded persistence diagram.
         """
-        return self.fit_transform([diag])[0]
+        return _maybe_fit_transform(self, 'max_pts_', diag)
 
 class ProminentPoints(BaseEstimator, TransformerMixin):
     """
@@ -312,7 +326,7 @@ class ProminentPoints(BaseEstimator, TransformerMixin):
         Returns:
             n x 2 numpy array: thresholded persistence diagram.
         """
-        return self.fit_transform([diag])[0]
+        return self.transform([diag])[0]
 
 class DiagramSelector(BaseEstimator, TransformerMixin):
     """
@@ -369,7 +383,7 @@ class DiagramSelector(BaseEstimator, TransformerMixin):
         Returns:
             n x 2 numpy array: extracted persistence diagram.
         """
-        return self.fit_transform([diag])[0]
+        return self.transform([diag])[0]
 
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/

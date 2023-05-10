@@ -435,3 +435,90 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
   std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
 
 }
+
+BOOST_AUTO_TEST_CASE(mini_prune_above_dimension) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "MINI PRUNE ABOVE DIMENSION" << std::endl;
+
+  Mini_stree st;
+
+  st.insert_simplex_and_subfaces({0, 1, 6, 7});
+  st.insert_simplex_and_subfaces({3, 4, 5});
+  st.insert_simplex_and_subfaces({3, 0});
+  st.insert_simplex_and_subfaces({2, 1, 0});
+
+  // st:
+  //    1   6
+  //    o---o
+  //   /X\7/
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
+
+  st.initialize_filtration();
+  
+  // Display the Simplex_tree
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  bool simplex_is_changed = st.prune_above_dimension(200);
+  std::clog << "The complex pruned at 'dimension=3' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 27);
+  // First check upper_bound_dimension(), then dimension() that recomputes it by a deep search
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
+  BOOST_CHECK(st.dimension() == 3);
+
+  simplex_is_changed = st.prune_above_dimension(3);
+  std::clog << "The complex pruned at 'dimension=3' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 27);
+  BOOST_CHECK(st.upper_bound_dimension() == 3);
+  BOOST_CHECK(st.dimension() == 3);
+
+  simplex_is_changed = st.prune_above_dimension(2);
+  std::clog << "The complex pruned at 'dimension=2' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 26);
+  BOOST_CHECK(st.upper_bound_dimension() == 2);
+  BOOST_CHECK(st.dimension() == 2);
+
+  simplex_is_changed = st.prune_above_dimension(1);
+  std::clog << "The complex pruned at 'dimension=1' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 20);
+  BOOST_CHECK(st.upper_bound_dimension() == 1);
+  BOOST_CHECK(st.dimension() == 1);
+
+  // Keep only the vertices
+  simplex_is_changed = st.prune_above_dimension(0);
+  std::clog << "The complex pruned at 'dimension=0' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 8);
+  BOOST_CHECK(st.upper_bound_dimension() == 0);
+  BOOST_CHECK(st.dimension() == 0);
+
+  // Remove all simplices, even vertices shall be possible
+  simplex_is_changed = st.prune_above_dimension(-1);
+  std::clog << "The complex pruned at 'dimension=-1' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 0);
+  BOOST_CHECK(st.upper_bound_dimension() == -1);
+  BOOST_CHECK(st.dimension() == -1);
+
+  // Test at the limit
+  simplex_is_changed = st.prune_above_dimension(-200);
+  std::clog << "The complex pruned at 'dimension=-1' contains " << st.num_simplices() << " simplices - dimension is"
+            << st.dimension() << std::endl;
+  BOOST_CHECK(!simplex_is_changed);
+  BOOST_CHECK(st.num_simplices() == 0);
+  BOOST_CHECK(st.upper_bound_dimension() == -1);
+  BOOST_CHECK(st.dimension() == -1);
+}

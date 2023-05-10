@@ -53,7 +53,10 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
   }
 
   void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration) {
-    Base::assign_filtration(Base::find(simplex), filtration);
+    Simplex_handle sh = Base::find(simplex);
+    if (sh == Base::null_simplex())
+      throw std::invalid_argument("Cannot assign a filtration to a simplex that is not in the complex");
+    Base::assign_filtration(sh, filtration);
     Base::clear_filtration();
   }
 
@@ -85,7 +88,7 @@ class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
         children->members().emplace_hint(children->members().end(), j, Node(children, fe));
       }
     }
-
+    this->set_dimension(1, false);
   }
 
   // Do not interface this function, only used in alpha complex interface for complex creation

@@ -18,14 +18,13 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/choose_n_farthest_points.h>
+#include <gudhi/distance_functions.h>
 #include <vector>
 #include <iterator>
+#include <random>
+#include <array>
 
 #include <CGAL/Epick_d.h>
-
-typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> K;
-typedef typename K::FT FT;
-typedef typename K::Point_d Point_d;
 
 typedef boost::mpl::list<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, CGAL::Epick_d<CGAL::Dimension_tag<4>>> list_of_tested_kernels;
 
@@ -110,4 +109,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
   BOOST_CHECK(distances[1] == 1);
   BOOST_CHECK(distances[2] == 0);
   landmarks.clear(); distances.clear();
+}
+
+BOOST_AUTO_TEST_CASE(test_compare_choose_farthest_point)
+{
+  std::default_random_engine e;
+  std::uniform_real_distribution<double> r(0,1);
+  typedef std::array<double, 2> Point;
+  typedef std::vector<Point> Cloud;
+  Cloud orig;
+  for(int i=0; i<1000; ++i) {
+    orig.push_back({ r(e), r(e) });
+  }
+  Cloud out1, out2;
+  std::vector<double> dist1, dist2;
+  Gudhi::Euclidean_distance d;
+  int start = 0;
+  Gudhi::subsampling::choose_n_farthest_points(d, orig, -1, start, std::back_inserter(out1), std::back_inserter(dist1));
+  Gudhi::subsampling::choose_n_farthest_points_metric(d, orig, -1, start, std::back_inserter(out2), std::back_inserter(dist2));
+  // With a million points, we would see differences because several edges
+  // would have the same length, but with just 1000 that should be very rare.
+  BOOST_CHECK(out1 == out2);
+  BOOST_CHECK(dist1 == dist2);
+  // We may need to replace this last == with an approximate check (or not test dist).
 }

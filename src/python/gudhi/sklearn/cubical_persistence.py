@@ -8,6 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from .. import CubicalComplex
+from .._persline import persistence_on_a_line
 from sklearn.base import BaseEstimator, TransformerMixin
 
 import numpy as np
@@ -34,7 +35,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         homology_dimensions,
-        newshape=None,
+        input_type='top_dimensional_cells',
         homology_coeff_field=11,
         min_persistence=0.0,
         n_jobs=None,
@@ -46,17 +47,15 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
-            newshape (tuple of ints): If cells filtration values require to be reshaped
-                (cf. :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform`), set `newshape`
-                to perform `numpy.reshape(X, newshape, order='C')` in
-                :func:`~gudhi.sklearn.cubical_persistence.CubicalPersistence.transform` method.
+            input_type (str): 'top_dimensional_cells' if the filtration values passed to `transform()` are those of the
+                top-dimensional cells, 'vertices' if they correspond to the vertices.
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
         self.homology_dimensions = homology_dimensions
-        self.newshape = newshape
+        self.input_type = input_type
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
         self.n_jobs = n_jobs
@@ -68,26 +67,33 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, cells):
-        cubical_complex = CubicalComplex(top_dimensional_cells=cells)
+        cells = np.asarray(cells)
+        if len(cells.shape) == 1 and self.min_persistence >= 0:
+            res = persistence_on_a_line(cells)
+            if self.min_persistence > 0:
+                # It would be more efficient inside persistence_on_a_line, but not worth it?
+                res = res[res[:, 1] - res[:, 0] > self.min_persistence]
+            # Wasteful if dim_list_ does not contain 0, but that seems unlikely.
+            return [res if i == 0 else np.empty((0,2)) for i in self.dim_list_]
+
+        if self.input_type == 'top_dimensional_cells':
+            cubical_complex = CubicalComplex(top_dimensional_cells=cells)
+        elif self.input_type == 'vertices':
+            cubical_complex = CubicalComplex(vertices=cells)
+        else:
+            raise ValueError("input_type can only be 'top_dimensional_cells' or 'vertices'")
         cubical_complex.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
         return [
-            cubical_complex.persistence_intervals_in_dimension(dim) for dim in self.homology_dimensions
+            cubical_complex.persistence_intervals_in_dimension(dim) for dim in self.dim_list_
         ]
-
-    def __transform_only_this_dim(self, cells):
-        cubical_complex = CubicalComplex(top_dimensional_cells=cells)
-        cubical_complex.compute_persistence(
-            homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
-        )
-        return cubical_complex.persistence_intervals_in_dimension(self.homology_dimensions)
 
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
 
-        :param X: List of cells filtration values (`numpy.reshape(X, newshape, order='C'` if `newshape` is set with a tuple of ints).
-        :type X: list of list of float OR list of numpy.ndarray
+        :param X: Filtration values of the top-dimensional cells or vertices for each complex.
+        :type X: list of array-like
 
         :return: Persistence diagrams in the format:
 
@@ -95,16 +101,17 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
               - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
-        if self.newshape is not None:
-            X = np.reshape(X, self.newshape, order='C')
-        
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
-            # threads is preferred as cubical construction and persistence computation releases the GIL
-            return Parallel(n_jobs=self.n_jobs, prefer="threads")(
-                delayed(self.__transform_only_this_dim)(cells) for cells in X
-            )
+            unwrap = True
+            self.dim_list_ = [ self.homology_dimensions ]
         else:
-            # threads is preferred as cubical construction and persistence computation releases the GIL
-            return Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
+            unwrap = False
+            self.dim_list_ = self.homology_dimensions
+
+        # threads is preferred as cubical construction and persistence computation releases the GIL
+        res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
+        if unwrap:
+            res = [d[0] for d in res]
+        return res
 
