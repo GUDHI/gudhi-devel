@@ -10,12 +10,16 @@ from gudhi.representations import DiagramSelector, Landscape
 # To fetch the dataset
 from gudhi.datasets import remote
 
+no_plot = False
+
+# Mainly for tests purpose - removed from documentation
 import argparse
 parser = argparse.ArgumentParser(description='Plot average landscapes')
-parser.add_argument("--no-diagram", default=False, action="store_true")
+parser.add_argument("--no-plot", default=False, action="store_true")
 args = parser.parse_args()
+no_plot = args.no_plot
 
-# constants for subsample
+# Constants for subsample
 nb_times = 80
 nb_points = 200
 
@@ -26,7 +30,7 @@ def subsample(array):
         sub.append(array[np.random.choice(array.shape[0], nb_points, replace=False)])
     return sub
 
-# constant for plot_average_landscape
+# Constant for plot_average_landscape
 landscape_resolution = 1000
 # Nothing interesting after 0.4, you can set this filter to 1 (number of landscapes) if you want to check
 filter = int(0.4 * landscape_resolution)
@@ -38,17 +42,11 @@ def plot_average_landscape(landscapes, color, label):
     ci_l, ci_u = res.confidence_interval
     plt.fill_between(np.arange(0,filter,1), ci_l, ci_u, alpha=.3, color=color, label=label)
 
-walking_ds = remote.fetch_daily_activities(subset="walking")
-walking = subsample(walking_ds)
-
-stepper_ds = remote.fetch_daily_activities(subset="stepper")
-stepper = subsample(stepper_ds)
-
-cross_ds = remote.fetch_daily_activities(subset="cross_training")
-cross = subsample(cross_ds)
-
-jumping_ds = remote.fetch_daily_activities(subset="jumping")
-jumping = subsample(jumping_ds)
+# Fetch datasets and subsample them
+walking = subsample(remote.fetch_daily_activities(subset="walking"))
+stepper = subsample(remote.fetch_daily_activities(subset="stepper"))
+cross = subsample(remote.fetch_daily_activities(subset="cross_training"))
+jumping = subsample(remote.fetch_daily_activities(subset="jumping"))
 
 pipe = Pipeline(
     [
@@ -58,19 +56,16 @@ pipe = Pipeline(
     ]
 )
 
-walking_landscapes = pipe.fit_transform(walking)
-plot_average_landscape(walking_landscapes, 'black', 'walking')
+# Fit the model with the complete dataset - mainly for the landscape window computation
+pipe.fit(walking + stepper + cross + jumping)
 
-stepper_landscapes = pipe.fit_transform(stepper)
-plot_average_landscape(stepper_landscapes, 'green', 'stepper')
-
-cross_landscapes = pipe.fit_transform(cross)
-plot_average_landscape(cross_landscapes, 'red', 'cross tr.')
-
-jumping_landscapes = pipe.fit_transform(jumping)
-plot_average_landscape(jumping_landscapes, 'blue', 'jumping')
+# Compute Rips, persistence, landscapes and plot average landscapes
+plot_average_landscape(pipe.transform(walking), 'black', 'walking')
+plot_average_landscape(pipe.transform(stepper), 'green', 'stepper')
+plot_average_landscape(pipe.transform(cross), 'red', 'cross tr.')
+plot_average_landscape(pipe.transform(jumping), 'blue', 'jumping')
 
 plt.title('Average landscapes')
 plt.legend()
-if args.no_diagram == False:
+if no_plot == False:
     plt.show()

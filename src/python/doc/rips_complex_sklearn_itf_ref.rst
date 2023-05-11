@@ -37,6 +37,7 @@ These confidence intervals are displayed, and one can see that it is possible to
 activities performed while wearing only magnetic sensor unit on the left leg.
 
 .. literalinclude:: ../../python/example/rips_complex_sklearn_itf.py
+   :lines: 1-14,22-
    :language: python
 
 

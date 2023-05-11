@@ -429,7 +429,7 @@ if(PYTHONINTERP_FOUND)
       add_test(NAME rips_complex_sklearn_itf_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-diagram")
+               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-plot")
     endif()
 
     # Test examples
