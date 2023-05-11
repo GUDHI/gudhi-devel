@@ -36,7 +36,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self,
         homology_dimensions,
         max_edge_length=float('inf'),
-        nb_collapse=1,
+        nb_collapse=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
         n_jobs=None,
@@ -50,8 +50,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 dimension matters (in other words, when `homology_dimensions` is an int).
             max_edge_length (float): Rips value. Default is +Inf.
             nb_collapse (int): The number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform on the
-                SimplexTree. Edges are automatically collapsed if the maximal persistence diagrams dimension is greater
-                than 1. Default is 1.
+                SimplexTree. Default is -1, which means "automatic" (a relatively good enough number of iterations is
+                choosen).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
@@ -71,13 +71,20 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __get_stree_from_points(self, points, max_dimension):
+        # nb_collapse "automatic" case management
+        if self.nb_collapse < 0:
+            nb_collapse = 1
+        else:
+            nb_collapse = self.nb_collapse
+        
         rips = RipsComplex(points=points, max_edge_length = self.max_edge_length)
         if max_dimension > 1:
             stree = rips.create_simplex_tree(max_dimension=1)
-            stree.collapse_edges(nb_iterations = self.nb_collapse)
+            stree.collapse_edges(nb_iterations = nb_collapse)
             stree.expansion(max_dimension)
         else:
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
+        
         stree.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
