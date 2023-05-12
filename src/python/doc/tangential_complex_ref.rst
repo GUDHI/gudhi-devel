@@ -10,5 +10,3 @@ Tangential complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.TangentialComplex.__init__

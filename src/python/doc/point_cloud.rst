@@ -21,12 +21,8 @@ File Writers
 Subsampling
 -----------
 
-:Requires: `Eigen <installation.html#eigen>`_ :math:`\geq` 3.1.0 and `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
-
 .. automodule:: gudhi.subsampling
    :members:
-   :special-members:
-   :show-inheritance:
 
 Time Delay Embedding
 --------------------
@@ -41,7 +37,6 @@ K nearest neighbors
 .. automodule:: gudhi.point_cloud.knn
    :members:
    :undoc-members:
-   :special-members: __init__
 
 Distance to measure
 -------------------
@@ -49,4 +44,3 @@ Distance to measure
 .. automodule:: gudhi.point_cloud.dtm
    :members:
    :undoc-members:
-   :special-members: __init__

@@ -21,11 +21,13 @@ def test_insertion():
     st = SimplexTree()
     assert st.__is_defined() == True
     assert st.__is_persistence_defined() == False
+    assert st.is_empty()
 
     # insert test
     assert st.insert([0, 1]) == True
 
     assert st.dimension() == 1
+    assert not st.is_empty()
 
     assert st.insert([0, 1, 2], filtration=4.0) == True
 
@@ -106,6 +108,13 @@ def test_insertion():
     assert st.persistent_betti_numbers(4.0, 10000.0) == [1, 1]
     assert st.persistent_betti_numbers(9999.0, 10000.0) == [1, 1]
 
+    st = SimplexTree()
+    st.insert([1])
+    st.insert([2])
+    st2 = SimplexTree()
+    st2.insert([1, 2])
+    st2.remove_maximal_simplex([1, 2])
+    assert st == st2
 
 def test_expansion():
     st = SimplexTree()
@@ -530,6 +539,9 @@ def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
     st = SimplexTree.create_from_array(a, max_filtration=5.0)
     assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]]).dimension() == 1
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=5).dimension() == 0
+    assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=-5).dimension() == -1
 
 
 def test_insert_edges_from_coo_matrix():
@@ -644,3 +656,48 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
     assert st.filtration([0, 1, 2, 3]) == 7.0
+
+
+def test_assign_filtration_missing():
+    st = SimplexTree()
+    with pytest.raises(ValueError):
+        st.assign_filtration([1, 2], 3)
+
+def test_prune_above_dimension():
+    st = SimplexTree()
+
+    # insert test
+    assert st.insert([0, 1, 3], filtration=0.5) == True
+    assert st.insert([0, 1, 2], filtration=1.0) == True
+
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 11
+
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+
+    assert st.prune_above_dimension(2000) == False
+    assert st.dimension() == 2
+    assert st.upper_bound_dimension() == 2
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 11
+
+    assert st.prune_above_dimension(1) == True
+    assert st.dimension() == 1
+    assert st.upper_bound_dimension() == 1
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 9
+
+    assert st.prune_above_dimension(0) == True
+    assert st.dimension() == 0
+    assert st.upper_bound_dimension() == 0
+    assert st.num_vertices() == 4
+    assert st.num_simplices() == 4
+
+    assert st.prune_above_dimension(-1) == True
+    assert st.dimension() == -1
+    assert st.upper_bound_dimension() == -1
+    assert st.num_vertices() ==  0
+    assert st.num_simplices() == 0
+
+    assert st.prune_above_dimension(-200) == False

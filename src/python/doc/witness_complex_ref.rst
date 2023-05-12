@@ -10,5 +10,3 @@ Witness complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.WitnessComplex.__init__

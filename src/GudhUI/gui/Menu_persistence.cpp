@@ -24,8 +24,8 @@ void Menu_persistence::connectActions(QMainWindow* parent) {
 }
 
 void Menu_persistence::send_compute_persistence() {
-  emit(compute_persistence(p_spinBox->value(), threshold_doubleSpinBox->value(),
-                           maxdimension_spinBox->value(), minpersistence_doubleSpinBox->value()));
+  /*emit*/ compute_persistence(p_spinBox->value(), threshold_doubleSpinBox->value(),
+                           maxdimension_spinBox->value(), minpersistence_doubleSpinBox->value());
 }
 
 void Menu_persistence::accept() {
@@ -34,7 +34,7 @@ void Menu_persistence::accept() {
 
 // void Menu_persistence::compute_persistence(int p_fied,double threshold,int dim_max,double min_persistence) {
 //  if(checkBoxAutoUpdate->isChecked())
-//    emit(compute_k_nearest_neighbors((unsigned)spinBoxK->value()));
+//    /*emit*/ compute_k_nearest_neighbors((unsigned)spinBoxK->value());
 // }
 
 #include "Menu_persistence.moc"

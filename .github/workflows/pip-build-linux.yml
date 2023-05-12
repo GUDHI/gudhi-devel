@@ -7,28 +7,30 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi
+    container: gudhi/pip_for_gudhi:latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Build wheel for Python 3.11
+      - name: Build wheel for Python 3.6
         run: |
-          mkdir build_311
-          cd build_311
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
+          mkdir build_36
+          cd build_36
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON36/bin/python ..
           cd src/python
-          $PYTHON311/bin/python -m build -n
-          auditwheel show dist/*.whl
+          $PYTHON36/bin/python -m build -n -w
           auditwheel repair dist/*.whl
-          ls wheelhouse/*.whl
-      - name: Install and test wheel for Python 3.11
+      - name: Install and test wheel for Python 3.6
         run: |
-          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/wheelhouse/*.whl
-          $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON36/bin/python -m pip install --user pytest build_36/src/python/dist/*.whl
+          $PYTHON36/bin/python -m pip install numpy --upgrade
+          $PYTHON36/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON36/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v3
         with:
           name: linux python wheel
-          path: build_311/src/python/wheelhouse/*.whl
+          path: build_36/src/python/wheelhouse/*.whl

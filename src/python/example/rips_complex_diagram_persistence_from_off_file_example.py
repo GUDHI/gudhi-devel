@@ -42,7 +42,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-with open(args.file, "r") as f:
+with open(args.file) as f:
     first_line = f.readline()
     if (first_line == "OFF\n") or (first_line == "nOFF\n"):
         print("##############################################################")

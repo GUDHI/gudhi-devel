@@ -5,9 +5,9 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
     target_link_libraries(alpha_complex_persistence ${CGAL_LIBRARY} Boost::program_options)
 
-    if (TBB_FOUND)
-      target_link_libraries(alpha_complex_persistence ${TBB_LIBRARIES})
-    endif(TBB_FOUND)
+    if(TARGET TBB::tbb)
+      target_link_libraries(alpha_complex_persistence TBB::tbb)
+    endif()
     add_test(NAME Alpha_complex_utilities_safe_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
         "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-p" "2" "-m" "0.45" "-o" "safe.pers")
     add_test(NAME Alpha_complex_utilities_fast_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
@@ -34,9 +34,9 @@ if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
   if (TARGET Boost::program_options)
     add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
     target_link_libraries(alpha_complex_3d_persistence ${CGAL_LIBRARY} Boost::program_options)
-    if (TBB_FOUND)
-      target_link_libraries(alpha_complex_3d_persistence ${TBB_LIBRARIES})
-    endif(TBB_FOUND)
+    if(TARGET TBB::tbb)
+      target_link_libraries(alpha_complex_3d_persistence TBB::tbb)
+    endif()
 
     add_test(NAME Alpha_complex_utilities_alpha_complex_3d COMMAND $<TARGET_FILE:alpha_complex_3d_persistence>
             "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off"
