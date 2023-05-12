@@ -44,6 +44,7 @@ struct Default_options{
 
 	static const bool has_row_access = false;
 	static const bool has_intrusive_rows = true;							//ignored if has_row_access = false
+	static const bool has_removable_rows = false;							//ignored if has_row_access = false
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
@@ -61,6 +62,7 @@ struct Zigzag_options : Default_options<true, Z2_field_element, column_type, par
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 };
 
 template<bool is_z2_only = true, class Field_type = Z2_field_element, Column_types column_type = Column_types::SET, bool parallelizable = false>
@@ -79,6 +81,8 @@ template<bool is_z2_only = true, class Field_type = Z2_field_element, Column_typ
 struct Cohomology_persistence_options : Default_options<is_z2_only, Field_type, column_type>{
 	static const bool has_row_access = true;
 	static const bool has_column_compression = true;
+	static const bool has_removable_rows = true;
+//	static const bool has_intrusive_rows = false;
 };
 
 } //namespace persistence_matrix

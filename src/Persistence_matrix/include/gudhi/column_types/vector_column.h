@@ -33,8 +33,8 @@ public:
 	using Column_type = std::vector<Cell*>;
 	using iterator = boost::indirect_iterator<typename Column_type::iterator>;
 	using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
-	using reverse_iterator = typename Column_type::reverse_iterator;
-	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
+	using reverse_iterator = boost::indirect_iterator<typename Column_type::reverse_iterator>;
+	using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
 	Vector_column();
 	template<class Container_type>
@@ -49,6 +49,8 @@ public:
 	Vector_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Vector_column(const Vector_column& column);
 	Vector_column(const Vector_column& column, index columnIndex);
+	template<class Row_container_type>
+	Vector_column(const Vector_column& column, index columnIndex, Row_container_type &rowContainer);
 	Vector_column(Vector_column&& column) noexcept;
 	~Vector_column();
 
@@ -58,6 +60,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -68,7 +71,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Vector_column& operator+=(Vector_column const &column);
+	template<class Cell_range>
+	Vector_column& operator+=(Cell_range const &column);
 	friend Vector_column operator+(Vector_column column1, Vector_column const &column2){
 		column1 += column2;
 		return column1;
@@ -84,11 +88,15 @@ public:
 	}
 
 	//this = v * this + column
-	Vector_column& multiply_and_add(const Field_element_type& v, const Vector_column& column);
+	template<class Cell_range>
+	Vector_column& multiply_and_add(const Field_element_type& v, const Cell_range& column);
 	//this = this + column * v
-	Vector_column& multiply_and_add(const Vector_column& column, const Field_element_type& v);
+	template<class Cell_range>
+	Vector_column& multiply_and_add(const Cell_range& column, const Field_element_type& v);
 
 	friend bool operator==(const Vector_column& c1, const Vector_column& c2){
+		if (&c1 == &c2) return true;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
@@ -99,6 +107,8 @@ public:
 		return it1 == c1.column_.end() && it2 == c2.column_.end();
 	}
 	friend bool operator<(const Vector_column& c1, const Vector_column& c2){
+		if (&c1 == &c2) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
@@ -130,7 +140,6 @@ protected:
 	void _delete_cell(Cell* cell);
 	void _insert_cell(const Field_element_type& value, index rowIndex, Column_type& column);
 	void _update_cell(const Field_element_type& value, index rowIndex, index position);
-	void _clear();
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -226,6 +235,20 @@ inline Vector_column<Field_element_type,Cell_type,Row_access_option>::Vector_col
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Vector_column<Field_element_type,Cell_type,Row_access_option>::Vector_column(
+		const Vector_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_),
+	  column_(column.column_.size(), nullptr)
+{
+	unsigned int i = 0;
+	for (const Cell* cell : column.column_){
+		_update_cell(cell->get_element(), cell->get_row_index(), i++);
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Vector_column<Field_element_type,Cell_type,Row_access_option>::Vector_column(Vector_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -246,7 +269,7 @@ inline std::vector<Field_element_type> Vector_column<Field_element_type,Cell_typ
 	if (columnLength < 0) columnLength = column_.back()->get_row_index() + 1;
 
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[(*it)->get_row_index()] = (*it)->get_element();
 	}
 	return container;
@@ -349,36 +372,34 @@ Vector_column<Field_element_type,Cell_type,Row_access_option>::rend() const noex
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_column<Field_element_type,Cell_type,Row_access_option>::operator+=(const Vector_column &column)
+template<class Cell_range>
+inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_column<Field_element_type,Cell_type,Row_access_option>::operator+=(const Cell_range &column)
 {
-	if (column.is_empty()) return *this;
+	if (column.begin() == column.end()) return *this;
 
 	if (column_.empty()){
-		if constexpr (Row_access_option::isActive_){
-			column_.resize(column.column_.size());
-			unsigned int i = 0;
-			for (const Cell* cell : column.column_)
-				_update_cell(cell->get_element(), cell->get_row_index(), i++);
-		} else {
-			std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
-		}
+//		column_.resize(column.column_.size());
+//		unsigned int i = 0;
+		for (const Cell& cell : column)
+			_insert_cell(cell.get_element(), cell.get_row_index(), column_);
+//			_update_cell(cell->get_element(), cell->get_row_index(), i++);
 		return *this;
 	}
 
 	Column_type newColumn;
 
-	real_const_iterator itToAdd = column.column_.begin();
+	auto itToAdd = column.begin();
 	real_iterator itTarget = column_.begin();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
-		Cell* cellToAdd = *itToAdd;
+		Cell& cellToAdd = *itToAdd;
 		Cell* cellTarget = *itTarget;
-		unsigned int curRowToAdd = cellToAdd->get_row_index();
+		unsigned int curRowToAdd = cellToAdd.get_row_index();
 		unsigned int curRowTarget = cellTarget->get_row_index();
 
 		if (curRowToAdd == curRowTarget){
-			Field_element_type sum = cellTarget->get_element() + cellToAdd->get_element();
+			Field_element_type sum = cellTarget->get_element() + cellToAdd.get_element();
 			if (sum != Field_element_type::get_additive_identity()) {
 				cellTarget->set_element(sum);
 				newColumn.push_back(cellTarget);
@@ -390,7 +411,7 @@ inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_col
 			itTarget++;
 			itToAdd++;
 		} else if (curRowToAdd < curRowTarget){
-			_insert_cell(cellToAdd->get_element(), curRowToAdd, newColumn);
+			_insert_cell(cellToAdd.get_element(), curRowToAdd, newColumn);
 			itToAdd++;
 		} else {
 			newColumn.push_back(cellTarget);
@@ -398,8 +419,8 @@ inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_col
 		}
 	}
 
-	while (itToAdd != column.column_.end()){
-		_insert_cell((*itToAdd)->get_element(), (*itToAdd)->get_row_index(), newColumn);
+	while (itToAdd != column.end()){
+		_insert_cell(itToAdd->get_element(), itToAdd->get_row_index(), newColumn);
 		itToAdd++;
 	}
 
@@ -420,7 +441,7 @@ inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_col
 	Field_element_type val(v);
 
 	if (val == 0u) {
-		_clear();
+		clear();
 		return *this;
 	}
 
@@ -436,38 +457,36 @@ inline Vector_column<Field_element_type,Cell_type,Row_access_option> &Vector_col
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Vector_column<Field_element_type,Cell_type,Row_access_option> &
-Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Vector_column& column)
+Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Cell_range& column)
 {
 	if (val == 0u) {
-		_clear();
+		clear();
 	}
 	if (column_.empty()){
-		if constexpr (Row_access_option::isActive_){
-			column_.resize(column.column_.size());
-			unsigned int i = 0;
-			for (const Cell* cell : column.column_)
-				_update_cell(cell->get_element(), cell->get_row_index(), i++);
-		} else {
-			std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
-		}
+//		column_.resize(column.column_.size());
+//		unsigned int i = 0;
+		for (const Cell& cell : column)
+			_insert_cell(cell.get_element(), cell.get_row_index(), column_);
+//			_update_cell(cell->get_element(), cell->get_row_index(), i++);
 		return *this;
 	}
 
 	Column_type newColumn;
 
-	real_const_iterator itToAdd = column.column_.begin();
+	auto itToAdd = column.begin();
 	real_iterator itTarget = column_.begin();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
-		Cell* cellToAdd = *itToAdd;
+		Cell& cellToAdd = *itToAdd;
 		Cell* cellTarget = *itTarget;
-		unsigned int curRowToAdd = cellToAdd->get_row_index();
+		unsigned int curRowToAdd = cellToAdd.get_row_index();
 		unsigned int curRowTarget = cellTarget->get_row_index();
 
 		if (curRowToAdd == curRowTarget){
-			Field_element_type sum = (cellTarget->get_element() * val) + cellToAdd->get_element();	//why did I not directly modify cellTarget->get_element() again ?
+			Field_element_type sum = (cellTarget->get_element() * val) + cellToAdd.get_element();	//why did I not directly modify cellTarget->get_element() again ?
 			if (sum != Field_element_type::get_additive_identity()) {
 				cellTarget->set_element(sum);
 				newColumn.push_back(cellTarget);
@@ -479,23 +498,28 @@ Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(
 			itTarget++;
 			itToAdd++;
 		} else if (curRowToAdd < curRowTarget){
-			_insert_cell(cellToAdd->get_element(), curRowToAdd, newColumn);
+			_insert_cell(cellToAdd.get_element(), curRowToAdd, newColumn);
 			itToAdd++;
 		} else {
 			cellTarget->set_element(cellTarget->get_element() * val);
 			newColumn.push_back(cellTarget);
+			if constexpr (Row_access_option::isActive_)
+					Row_access_option::update_cell(*cellTarget);
 			itTarget++;
 		}
 	}
 
-	while (itToAdd != column.column_.end()){
-		_insert_cell((*itToAdd)->get_element(), (*itToAdd)->get_row_index(), newColumn);
+	while (itToAdd != column.end()){
+		_insert_cell(itToAdd->get_element(), itToAdd->get_row_index(), newColumn);
 		itToAdd++;
 	}
 
 	while (itTarget != column_.end()){
-		(*itTarget)->set_element((*itTarget)->get_element() * val);
-		newColumn.push_back(*itTarget);
+		Cell* cellTarget = *itTarget;
+		cellTarget->set_element(cellTarget->get_element() * val);
+		newColumn.push_back(cellTarget);
+		if constexpr (Row_access_option::isActive_)
+				Row_access_option::update_cell(*cellTarget);
 		itTarget++;
 	}
 
@@ -505,27 +529,28 @@ Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Vector_column<Field_element_type,Cell_type,Row_access_option> &
-Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Vector_column& column, const Field_element_type& val)
+Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Cell_range& column, const Field_element_type& val)
 {
-	if (val == 0u || column.column_.empty()) {
+	if (val == 0u || column.begin() == column.end()) {
 		return *this;
 	}
 
 	Column_type newColumn;
 
-	real_const_iterator itToAdd = column.column_.begin();
+	auto itToAdd = column.begin();
 	real_iterator itTarget = column_.begin();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
-		Cell* cellToAdd = *itToAdd;
+		Cell& cellToAdd = *itToAdd;
 		Cell* cellTarget = *itTarget;
-		unsigned int curRowToAdd = cellToAdd->get_row_index();
+		unsigned int curRowToAdd = cellToAdd.get_row_index();
 		unsigned int curRowTarget = cellTarget->get_row_index();
 
 		if (curRowToAdd == curRowTarget){
-			Field_element_type sum = cellTarget->get_element() + (cellToAdd->get_element() * val);	//why did I not directly modify cellTarget->get_element() again ?
+			Field_element_type sum = cellTarget->get_element() + (cellToAdd.get_element() * val);	//why did I not directly modify cellTarget->get_element() again ?
 			if (sum != Field_element_type::get_additive_identity()) {
 				cellTarget->set_element(sum);
 				newColumn.push_back(cellTarget);
@@ -537,7 +562,7 @@ Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(
 			itTarget++;
 			itToAdd++;
 		} else if (curRowToAdd < curRowTarget){
-			_insert_cell(cellToAdd->get_element() * val, curRowToAdd, newColumn);
+			_insert_cell(cellToAdd.get_element() * val, curRowToAdd, newColumn);
 			itToAdd++;
 		} else {
 			newColumn.push_back(cellTarget);
@@ -545,8 +570,8 @@ Vector_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(
 		}
 	}
 
-	while (itToAdd != column.column_.end()){
-		_insert_cell((*itToAdd)->get_element() * val, (*itToAdd)->get_row_index(), newColumn);
+	while (itToAdd != column.end()){
+		_insert_cell(itToAdd->get_element() * val, itToAdd->get_row_index(), newColumn);
 		itToAdd++;
 	}
 
@@ -605,7 +630,7 @@ inline void Vector_column<Field_element_type,Cell_type,Row_access_option>::_upda
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Vector_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+inline void Vector_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	for (Cell* cell : column_){
 		_delete_cell(cell);

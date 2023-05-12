@@ -136,7 +136,7 @@ using Z2 = Zp_field_element<2>;
 using dict_type = std::vector<unsigned int>;
 
 template<class Cell_type>
-struct RowCellComp : std::binary_function<const Cell_type&, const Cell_type&, bool> {
+struct RowCellComp {
 	bool operator()(const Cell_type& c1, const Cell_type& c2) const
 	{
 		if (c1.get_row_index() == c2.get_row_index())

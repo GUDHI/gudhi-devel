@@ -27,6 +27,7 @@ class Z2_list_chain_column : public Z2_list_column<Cell_type,Row_access_option>
 {
 private:
 	using Base = Z2_list_column<Cell_type,Row_access_option>;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;

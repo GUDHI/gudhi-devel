@@ -26,6 +26,7 @@ class Z2_vector_chain_column : public Z2_vector_column<Cell_type,Row_access_opti
 {
 private:
 	using Base = Z2_vector_column<Cell_type,Row_access_option>;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;

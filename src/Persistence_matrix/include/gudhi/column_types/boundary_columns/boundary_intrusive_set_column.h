@@ -27,6 +27,8 @@ class Intrusive_set_boundary_column : public Intrusive_set_column<Field_element_
 {
 private:
 	using Base = Intrusive_set_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -51,9 +53,10 @@ public:
 
 	int get_pivot() const;
 	Field_element_type get_pivot_value() const;
-	void clear();
+	using Base::clear;
 	void clear(index rowIndex);
 
+	Intrusive_set_boundary_column& operator+=(Intrusive_set_boundary_column const &column);
 	friend Intrusive_set_boundary_column operator+(Intrusive_set_boundary_column column1, Intrusive_set_boundary_column const& column2){
 		column1 += column2;
 		return column1;
@@ -66,6 +69,11 @@ public:
 		column *= v;
 		return column;
 	}
+
+	//this = v * this + column
+	Intrusive_set_boundary_column& multiply_and_add(const Field_element_type& v, const Intrusive_set_boundary_column& column);
+	//this = this + column * v
+	Intrusive_set_boundary_column& multiply_and_add(const Intrusive_set_boundary_column& column, const Field_element_type& v);
 
 	Intrusive_set_boundary_column& operator=(const Intrusive_set_boundary_column& other);
 
@@ -151,12 +159,6 @@ inline Field_element_type Intrusive_set_boundary_column<Field_element_type,Cell_
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
-{
-	Base::_clear();
-}
-
-template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	iterator it;
@@ -167,6 +169,33 @@ inline void Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_acces
 	}
 	if (it != Base::column_.end())
 		Base::_delete_cell(it);
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_set_boundary_column const &column)
+{
+	Base::operator+=(column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Intrusive_set_boundary_column& column)
+{
+	Base::multiply_and_add(val, column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Intrusive_set_boundary_column& column, const Field_element_type& val)
+{
+	Base::multiply_and_add(column, val);
+
+	return *this;
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

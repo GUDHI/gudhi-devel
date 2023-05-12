@@ -30,28 +30,36 @@ public:
 	Zp_field_element(const Zp_field_element& toCopy);
 	Zp_field_element(Zp_field_element&& toMove) noexcept;
 
-	Zp_field_element& operator+=(Zp_field_element const &f);
+	friend void operator+=(Zp_field_element& f1, Zp_field_element const& f2){
+		f1.element_ = Zp_field_element::_add(f1.element_, f2.element_);
+	}
 	friend Zp_field_element operator+(Zp_field_element f1, Zp_field_element const& f2){
 		f1 += f2;
 		return f1;
 	}
-	Zp_field_element& operator+=(unsigned int const v);
+	friend void operator+=(Zp_field_element& f, unsigned int const v){
+		f.element_ = Zp_field_element::_add(f.element_, v < characteristic ? v : v % characteristic);
+	}
 	friend Zp_field_element operator+(Zp_field_element f, unsigned int const v){
 		f += v;
 		return f;
 	}
 	friend unsigned int operator+(unsigned int v, Zp_field_element const& f){
 		v += f.element_;
-		v %= characteristic;
+		if (v >= characteristic) v %= characteristic;
 		return v;
 	}
 
-	Zp_field_element& operator-=(Zp_field_element const &f);
+	friend void operator-=(Zp_field_element& f1, Zp_field_element const& f2){
+		f1.element_ = Zp_field_element::_substract(f1.element_, f2.element_);
+	}
 	friend Zp_field_element operator-(Zp_field_element f1, Zp_field_element const& f2){
 		f1 -= f2;
 		return f1;
 	}
-	Zp_field_element& operator-=(unsigned int const v);
+	friend void operator-=(Zp_field_element& f, unsigned int const v){
+		f.element_ = Zp_field_element::_substract(f.element_, v < characteristic ? v : v % characteristic);
+	}
 	friend Zp_field_element operator-(Zp_field_element f, unsigned int const v){
 		f -= v;
 		return f;
@@ -63,12 +71,16 @@ public:
 		return v;
 	}
 
-	Zp_field_element& operator*=(Zp_field_element const &f);
+	friend void operator*=(Zp_field_element& f1, Zp_field_element const& f2){
+		f1.element_ = Zp_field_element::_multiply(f1.element_, f2.element_);
+	}
 	friend Zp_field_element operator*(Zp_field_element f1, Zp_field_element const& f2){
 		f1 *= f2;
 		return f1;
 	}
-	Zp_field_element& operator*=(unsigned int const v);
+	friend void operator*=(Zp_field_element& f, unsigned int const v){
+		f.element_ = Zp_field_element::_multiply(f.element_, v < characteristic ? v : v % characteristic);
+	}
 	friend Zp_field_element operator*(Zp_field_element f, unsigned int const v){
 		f *= v;
 		return f;
@@ -141,10 +153,10 @@ private:
 	unsigned int element_;
 	static inline std::array<unsigned int,characteristic> inverse_;
 
-	void _add(unsigned int v);
-	void _substract(unsigned int v);
-	void _multiply(unsigned int v);
-	int _get_inverse() const;
+	static unsigned int _add(unsigned int element, unsigned int v);
+	static unsigned int _substract(unsigned int element, unsigned int v);
+	static unsigned int _multiply(unsigned int element, unsigned int v);
+	static int _get_inverse(unsigned int element);
 
 	static constexpr bool _is_prime();
 };
@@ -158,15 +170,18 @@ inline Zp_field_element<characteristic>::Zp_field_element()
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(unsigned int element)
-	: element_(element % characteristic)
+	: element_(element < characteristic ? element : element % characteristic)
 {
 	static_assert(_is_prime(), "Characteristic has to be a prime number.");
 }
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(int element)
-	: element_(element % characteristic)
 {
+	int res = element < static_cast<int>(characteristic) ? element : element % static_cast<int>(characteristic);
+	if (res < 0) res += characteristic;
+	element_ = res;
+
 	static_assert(_is_prime(), "Characteristic has to be a prime number.");
 }
 
@@ -180,47 +195,47 @@ inline Zp_field_element<characteristic>::Zp_field_element(Zp_field_element<chara
 	: element_(std::exchange(toMove.element_, 0))
 {}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(Zp_field_element<characteristic> const &f)
-{
-	_add(f.element_);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(Zp_field_element<characteristic> const &f)
+//{
+//	_add(f.element_);
+//	return *this;
+//}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(unsigned int const v)
-{
-	_add(v % characteristic);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(unsigned int const v)
+//{
+//	_add(v % characteristic);
+//	return *this;
+//}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(Zp_field_element<characteristic> const &f)
-{
-	_substract(f.element_);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(Zp_field_element<characteristic> const &f)
+//{
+//	_substract(f.element_);
+//	return *this;
+//}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(unsigned int const v)
-{
-	_substract(v % characteristic);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(unsigned int const v)
+//{
+//	_substract(v % characteristic);
+//	return *this;
+//}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(Zp_field_element<characteristic> const &f)
-{
-	_multiply(f.element_);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(Zp_field_element<characteristic> const &f)
+//{
+//	_multiply(f.element_);
+//	return *this;
+//}
 
-template<unsigned int characteristic>
-inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(unsigned int const v)
-{
-	_multiply(v % characteristic);
-	return *this;
-}
+//template<unsigned int characteristic>
+//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(unsigned int const v)
+//{
+//	_multiply(v % characteristic);
+//	return *this;
+//}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator=(Zp_field_element other)
@@ -232,7 +247,7 @@ inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::opera
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator=(unsigned int const value)
 {
-	element_ = value % characteristic;
+	element_ = value < characteristic ? value : value % characteristic;
 	return *this;
 }
 
@@ -245,8 +260,8 @@ inline Zp_field_element<characteristic>::operator unsigned int() const
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> Zp_field_element<characteristic>::get_inverse() const
 {
-	if (element_ != 0 && inverse_[element_] == 0) {
-		inverse_[element_] = _get_inverse();
+	if (element_ != 0 && inverse_[element_] == 0) {		//initialize everything at instanciation instead?
+		inverse_[element_] = _get_inverse(element_);
 	}
 
 	return Zp_field_element<characteristic>(inverse_[element_]);
@@ -290,40 +305,44 @@ inline unsigned int Zp_field_element<characteristic>::get_value() const
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::_add(unsigned int v)
+inline unsigned int Zp_field_element<characteristic>::_add(unsigned int element, unsigned int v)
 {
-	if (UINT_MAX - element_ < v) {
+	if (UINT_MAX - element < v) {
 		//automatic unsigned integer overflow behaviour will make it work
-		element_ += v;
-		element_ -= characteristic;
-		return;
+		element += v;
+		element -= characteristic;
+		return element;
 	}
 
-	element_ += v;
-	if (element_ >= characteristic) element_ -= characteristic;
+	element += v;
+	if (element >= characteristic) element -= characteristic;
+
+	return element;
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::_substract(unsigned int v)
+inline unsigned int Zp_field_element<characteristic>::_substract(unsigned int element, unsigned int v)
 {
-	if (element_ < v){
-		element_ += characteristic;
+	if (element < v){
+		element += characteristic;
 	}
-	element_ -= v;
+	element -= v;
+
+	return element;
 }
 
 template<unsigned int characteristic>
-inline void Zp_field_element<characteristic>::_multiply(unsigned int v)
+inline unsigned int Zp_field_element<characteristic>::_multiply(unsigned int element, unsigned int v)
 {
-	unsigned int a = element_;
-	element_ = 0;
+	unsigned int a = element;
+	element = 0;
 	unsigned int temp_b;
 
 	while (a != 0) {
 		if (a & 1) {
-			if (v >= characteristic - element_)
-				element_ -= characteristic;
-			element_ += v;
+			if (v >= characteristic - element)
+				element -= characteristic;
+			element += v;
 		}
 		a >>= 1;
 
@@ -332,14 +351,16 @@ inline void Zp_field_element<characteristic>::_multiply(unsigned int v)
 			temp_b -= characteristic;
 		v += temp_b;
 	}
+
+	return element;
 }
 
 template<unsigned int characteristic>
-inline int Zp_field_element<characteristic>::_get_inverse() const
+inline int Zp_field_element<characteristic>::_get_inverse(unsigned int element)
 {
 	//to solve: Ax + My = 1
 	int M = characteristic;
-	int A = element_;
+	int A = element;
 	int y = 0, x = 1;
 	//extended euclidien division
 	while (A > 1) {

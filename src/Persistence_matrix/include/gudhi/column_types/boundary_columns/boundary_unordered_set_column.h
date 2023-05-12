@@ -27,6 +27,8 @@ class Unordered_set_boundary_column : public Unordered_set_column<Field_element_
 {
 private:
 	using Base = Unordered_set_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -203,7 +205,7 @@ inline Field_element_type Unordered_set_boundary_column<Field_element_type,Cell_
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	Base::_clear();
+	Base::clear();
 	pivot_ = Cell();
 	pivotChanged_ = false;
 }
@@ -277,7 +279,7 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_opt
 Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Unordered_set_boundary_column& column)
 {
 	if (val == 0u) {
-		Base::_clear();
+		Base::clear();
 		for (const Cell& v : column.column_){
 			Base::_insert_cell(v.get_element(), v.get_row_index());
 		}

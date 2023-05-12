@@ -27,6 +27,8 @@ class Unordered_set_chain_column : public Unordered_set_column<Field_element_typ
 {
 private:
 	using Base = Unordered_set_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -65,6 +67,9 @@ public:
 		column *= v;
 		return column;
 	}
+
+	Unordered_set_chain_column& multiply_and_add(const Field_element_type& v, Unordered_set_chain_column& column);
+	Unordered_set_chain_column& multiply_and_add(Unordered_set_chain_column& column, const Field_element_type& v);
 
 	Unordered_set_chain_column& operator=(Unordered_set_chain_column other);
 
@@ -199,6 +204,38 @@ inline Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,
 Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::operator+=(Unordered_set_chain_column &column)
 {
 	Base::operator+=(column);
+
+	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
+	if (!Base::is_non_zero(pivot_)){
+		std::swap(pivotToColumnIndex_->at(pivot_),
+				  pivotToColumnIndex_->at(column.get_pivot()));
+		std::swap(pivot_, column.pivot_);
+	}
+
+	return *this;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& v, Unordered_set_chain_column& column)
+{
+	Base::multiply_and_add(v, column);
+
+	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
+	if (!Base::is_non_zero(pivot_)){
+		std::swap(pivotToColumnIndex_->at(pivot_),
+				  pivotToColumnIndex_->at(column.get_pivot()));
+		std::swap(pivot_, column.pivot_);
+	}
+
+	return *this;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+Unordered_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::multiply_and_add(Unordered_set_chain_column& column, const Field_element_type& val)
+{
+	Base::multiply_and_add(column, val);
 
 	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
 	if (!Base::is_non_zero(pivot_)){

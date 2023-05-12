@@ -46,6 +46,7 @@ struct opt_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -54,6 +55,7 @@ struct opt_ra_r : Default_options<Field_type::get_characteristic() == 2, Field_t
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 };
 
 template<class Field_type, Column_types column_type>
@@ -314,7 +316,6 @@ void test_basic_methods(){
 	BOOST_CHECK(!m.is_zero_column(7));
 	BOOST_CHECK(!m.is_zero_column(8));
 	BOOST_CHECK(!m.is_zero_column(9));
-
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 10);
 	m.insert_boundary(boundary1);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 11);
@@ -631,11 +632,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	std::vector<std::vector<std::pair<unsigned int,Z5> > > rows;
 	if constexpr (Matrix::Option_list::has_column_compression){
 		//if the union find structure changes, the column_index values of de cells could also change. Change the test with all possibilities?
-		rows.push_back({{9,Z5(1)},{10,Z5(1)}});
-		rows.push_back({{8,Z5(1)},{9,Z5(4)}});
-		rows.push_back({{8,Z5(4)}});
+//		rows.push_back({{9,Z5(1)},{10,Z5(1)}});
+//		rows.push_back({{8,Z5(1)},{9,Z5(4)}});
+//		rows.push_back({{8,Z5(4)}});
+//		rows.push_back({{7,Z5(1)}});
+//		rows.push_back({{7,Z5(1)},{9,Z5(1)},{10,Z5(4)}});
+//		rows.push_back({{7,Z5(4)}});
+		rows.push_back({{3,Z5(1)},{6,Z5(1)}});
+		rows.push_back({{3,Z5(4)},{5,Z5(1)}});
+		rows.push_back({{5,Z5(4)}});
 		rows.push_back({{7,Z5(1)}});
-		rows.push_back({{7,Z5(1)},{9,Z5(1)},{10,Z5(4)}});
+		rows.push_back({{3,Z5(1)},{6,Z5(4)},{7,Z5(1)}});
 		rows.push_back({{7,Z5(4)}});
 	} else {
 		rows.push_back({{3,Z5(1)},{6,Z5(1)},{9,Z5(1)},{10,Z5(1)},{11,Z5(1)}});
@@ -651,7 +658,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	for (unsigned int i = 0; i < rows.size(); ++i){
 		for (const auto& cell : mb.get_row(i)){
 			ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
+//			std::cout << cell.get_column_index() << ", " << cell.get_element() << "\n";
 		}
+//		std::cout << "\n";
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
 		auto& row = ordered_rows[i];
@@ -709,11 +718,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_o
 	std::vector<std::vector<unsigned int> > rows;
 	if constexpr (Matrix::Option_list::has_column_compression){
 		//if the union find structure changes, the column_index values of de cells could also change. Change the test with all possibilities?
-		rows.push_back({9,10});
-		rows.push_back({8,9});
-		rows.push_back({8});
+//		rows.push_back({9,10});
+//		rows.push_back({8,9});
+//		rows.push_back({8});
+//		rows.push_back({7});
+//		rows.push_back({7,9,10});
+//		rows.push_back({7});
+		rows.push_back({3,6});
+		rows.push_back({3,5});
+		rows.push_back({5});
 		rows.push_back({7});
-		rows.push_back({7,9,10});
+		rows.push_back({3,6,7});
 		rows.push_back({7});
 	} else {
 		rows.push_back({3,6,9,10,11});
@@ -743,7 +758,29 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_o
 	}
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Removable_columns_options, Matrix, list_of_matrix_types_with_removable_columns) {
+typedef boost::mpl::list<Matrix<opt_ra_i_r<Z5,Column_types::LIST> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::LIST> >,
+							Matrix<opt_ra_i_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_ra_r<Z5,Column_types::LIST> >,
+							Matrix<opt_ra_r<Z2,Column_types::LIST> >,
+							Matrix<opt_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_ra_r<Z5,Column_types::VECTOR> >,
+							Matrix<opt_ra_r<Z2,Column_types::VECTOR> >,
+							Matrix<opt_ra_r<Z5,Column_types::UNORDERED_SET> >,
+							Matrix<opt_ra_r<Z2,Column_types::UNORDERED_SET> >,
+							Matrix<opt_ra_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z5,Column_types::INTRUSIVE_SET> >,
+							Matrix<opt_ra_r<Z2,Column_types::INTRUSIVE_SET> >
+						> list_of_matrix_types_with_removable_columns_and_row_access;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Removable_columns_options, Matrix, list_of_matrix_types_with_removable_columns_and_row_access) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
 
 	boundary_matrix ordered_boundaries;

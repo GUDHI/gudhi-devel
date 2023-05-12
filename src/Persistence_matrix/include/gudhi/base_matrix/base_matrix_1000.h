@@ -51,9 +51,12 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);	//adds classes and not individual columns
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -187,7 +190,8 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(index sou
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	Column_type target(get_column(targetColumnIndex));
 	auto res = matrix_.find(target);
@@ -198,7 +202,8 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Col
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	Column_type target(get_column(targetColumnIndex));
 	auto res = matrix_.find(target);
@@ -209,7 +214,8 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Col
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	Column_type target(get_column(targetColumnIndex));
 	auto res = matrix_.find(target);

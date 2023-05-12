@@ -31,28 +31,36 @@ public:
 
 	static void initialize(unsigned int characteristic);
 
-	Shared_Zp_field_element& operator+=(Shared_Zp_field_element const &f);
+	friend void operator+=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
+		f1.element_ = Shared_Zp_field_element::_add(f1.element_, f2.element_);
+	}
 	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
 		f1 += f2;
 		return f1;
 	}
-	Shared_Zp_field_element& operator+=(unsigned int const v);
+	friend void operator+=(Shared_Zp_field_element& f, unsigned int const v){
+		f.element_ = Shared_Zp_field_element::_add(f.element_, v < characteristic_ ? v : v % characteristic_);
+	}
 	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f, unsigned int const v){
 		f += v;
 		return f;
 	}
 	friend unsigned int operator+(unsigned int v, Shared_Zp_field_element const& f){
 		v += f.element_;
-		v %= characteristic_;
+		if (v >= characteristic_) v %= characteristic_;
 		return v;
 	}
 
-	Shared_Zp_field_element& operator-=(Shared_Zp_field_element const &f);
+	friend void operator-=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
+		f1.element_ = Shared_Zp_field_element::_substract(f1.element_, f2.element_);
+	}
 	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
 		f1 -= f2;
 		return f1;
 	}
-	Shared_Zp_field_element& operator-=(unsigned int const v);
+	friend void operator-=(Shared_Zp_field_element& f, unsigned int const v){
+		f.element_ = Shared_Zp_field_element::_substract(f.element_, v < characteristic_ ? v : v % characteristic_);
+	}
 	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f, unsigned int const v){
 		f -= v;
 		return f;
@@ -64,12 +72,16 @@ public:
 		return v;
 	}
 
-	Shared_Zp_field_element& operator*=(Shared_Zp_field_element const &f);
+	friend void operator*=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
+		f1.element_ = Shared_Zp_field_element::_multiply(f1.element_, f2.element_);
+	}
 	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
 		f1 *= f2;
 		return f1;
 	}
-	Shared_Zp_field_element& operator*=(unsigned int const v);
+	friend void operator*=(Shared_Zp_field_element& f, unsigned int const v){
+		f.element_ = Shared_Zp_field_element::_multiply(f.element_, v < characteristic_ ? v : v % characteristic_);
+	}
 	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f, unsigned int const v){
 		f *= v;
 		return f;
@@ -143,9 +155,9 @@ private:
 	static inline unsigned int characteristic_;
 	static inline std::vector<unsigned int> inverse_;
 
-	void _add(unsigned int v);
-	void _substract(unsigned int v);
-	void _multiply(unsigned int v);
+	static unsigned int _add(unsigned int element, unsigned int v);
+	static unsigned int _substract(unsigned int element, unsigned int v);
+	static unsigned int _multiply(unsigned int element, unsigned int v);
 };
 
 //unsigned int Shared_Zp_field_element::characteristic_;
@@ -156,7 +168,7 @@ inline Shared_Zp_field_element::Shared_Zp_field_element()
 {}
 
 inline Shared_Zp_field_element::Shared_Zp_field_element(unsigned int element)
-	: element_(element % characteristic_)
+	: element_(element < characteristic_ ? element : element % characteristic_)
 {
 //	if (characteristic_ != 0)
 //		element_ %= characteristic_;
@@ -165,7 +177,7 @@ inline Shared_Zp_field_element::Shared_Zp_field_element(unsigned int element)
 inline Shared_Zp_field_element::Shared_Zp_field_element(int element)
 	: element_()
 {
-	int res = element % static_cast<int>(characteristic_);
+	int res = element < static_cast<int>(characteristic_) ? element : element % static_cast<int>(characteristic_);
 	if (res < 0) res += characteristic_;
 	element_ = res;
 }
@@ -202,41 +214,41 @@ inline void Shared_Zp_field_element::initialize(unsigned int characteristic)
 //	std::cout << characteristic_ << "\n";
 }
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(Shared_Zp_field_element const &f)
-{
-	_add(f.element_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(Shared_Zp_field_element const &f)
+//{
+//	element_ = _add(element_, f.element_);
+//	return *this;
+//}
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(unsigned int const v)
-{
-	_add(v % characteristic_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(unsigned int const v)
+//{
+//	element_ = _add(element_, v % characteristic_);
+//	return *this;
+//}
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(Shared_Zp_field_element const &f)
-{
-	_substract(f.element_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(Shared_Zp_field_element const &f)
+//{
+//	element_ = _substract(element_, f.element_);
+//	return *this;
+//}
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(unsigned int const v)
-{
-	_substract(v % characteristic_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(unsigned int const v)
+//{
+//	element_ = _substract(element_, v % characteristic_);
+//	return *this;
+//}
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(Shared_Zp_field_element const &f)
-{
-	_multiply(f.element_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(Shared_Zp_field_element const &f)
+//{
+//	element_ = _multiply(element_, f.element_);
+//	return *this;
+//}
 
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(unsigned int const v)
-{
-	_multiply(v % characteristic_);
-	return *this;
-}
+//inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(unsigned int const v)
+//{
+//	element_ = _multiply(element_, v % characteristic_);
+//	return *this;
+//}
 
 inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(Shared_Zp_field_element other)
 {
@@ -246,7 +258,7 @@ inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(Shared_Zp_fie
 
 inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(unsigned int const value)
 {
-	element_ = value % characteristic_;
+	element_ = value < characteristic_ ? value : value % characteristic_;
 	return *this;
 }
 
@@ -291,38 +303,42 @@ inline unsigned int Shared_Zp_field_element::get_value() const
 	return element_;
 }
 
-inline void Shared_Zp_field_element::_add(unsigned int v)
+inline unsigned int Shared_Zp_field_element::_add(unsigned int element, unsigned int v)
 {
-	if (UINT_MAX - element_ < v) {
+	if (UINT_MAX - element < v) {
 		//automatic unsigned integer overflow behaviour will make it work
-		element_ += v;
-		element_ -= characteristic_;
-		return;
+		element += v;
+		element -= characteristic_;
+		return element;
 	}
 
-	element_ += v;
-	if (element_ >= characteristic_) element_ -= characteristic_;
+	element += v;
+	if (element >= characteristic_) element -= characteristic_;
+
+	return element;
 }
 
-inline void Shared_Zp_field_element::_substract(unsigned int v)
+inline unsigned int Shared_Zp_field_element::_substract(unsigned int element, unsigned int v)
 {
-	if (element_ < v){
-		element_ += characteristic_;
+	if (element < v){
+		element += characteristic_;
 	}
-	element_ -= v;
+	element -= v;
+
+	return element;
 }
 
-inline void Shared_Zp_field_element::_multiply(unsigned int v)
+inline unsigned int Shared_Zp_field_element::_multiply(unsigned int element, unsigned int v)
 {
-	unsigned int a = element_;
-	element_ = 0;
+	unsigned int a = element;
+	element = 0;
 	unsigned int temp_b;
 
 	while (a != 0) {
 		if (a & 1) {
-			if (v >= characteristic_ - element_)
-				element_ -= characteristic_;
-			element_ += v;
+			if (v >= characteristic_ - element)
+				element -= characteristic_;
+			element += v;
 		}
 		a >>= 1;
 
@@ -331,6 +347,8 @@ inline void Shared_Zp_field_element::_multiply(unsigned int v)
 			temp_b -= characteristic_;
 		v += temp_b;
 	}
+
+	return element;
 }
 
 } //namespace persistence_matrix

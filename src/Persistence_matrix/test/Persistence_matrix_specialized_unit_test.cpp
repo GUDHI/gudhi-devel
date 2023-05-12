@@ -245,7 +245,7 @@ typedef boost::mpl::list<Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barcode_access) {
 	using boundary_matrix = typename Matrix::boundary_matrix;
-	struct BarComp : std::binary_function<const std::tuple<int,int,int>&, const std::tuple<int,int,int>&, bool> {
+	struct BarComp {
 		bool operator()(const std::tuple<int,int,int>& c1, const std::tuple<int,int,int>& c2) const
 		{
 			if (std::get<0>(c1) == std::get<0>(c2))
@@ -1076,6 +1076,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_bar_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_row_access = true;
 };
@@ -1093,6 +1094,7 @@ struct opt_ra_bar_r : Default_options<Field_type::get_characteristic() == 2, Fie
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_row_access = true;
 };
@@ -1109,6 +1111,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_rep_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool has_row_access = true;
@@ -1128,6 +1131,7 @@ struct opt_ra_rep_r : Default_options<Field_type::get_characteristic() == 2, Fie
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool has_row_access = true;
@@ -1145,6 +1149,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_vine_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;
@@ -1164,6 +1169,7 @@ struct opt_ra_vine_r : Default_options<Field_type::get_characteristic() == 2, Fi
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;
@@ -1182,6 +1188,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_vine_b_r_ii : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool is_indexed_by_position = false;
@@ -1200,6 +1207,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_vine_r_ii : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;
@@ -1217,6 +1225,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_ni_bar_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
@@ -1236,6 +1245,7 @@ struct opt_ra_ni_bar_r : Default_options<Field_type::get_characteristic() == 2, 
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
@@ -1254,6 +1264,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_ni_rep_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool has_row_access = true;
@@ -1275,6 +1286,7 @@ struct opt_ra_ni_rep_r : Default_options<Field_type::get_characteristic() == 2, 
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool can_retrieve_representative_cycles = true;
 	static const bool has_row_access = true;
@@ -1294,6 +1306,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_ni_vine_b_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;
@@ -1315,6 +1328,7 @@ struct opt_ra_ni_vine_r : Default_options<Field_type::get_characteristic() == 2,
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;
@@ -1335,6 +1349,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_ni_vine_b_r_ii : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool is_indexed_by_position = false;
@@ -1355,6 +1370,7 @@ template<class Field_type, Column_types column_type>
 struct opt_ra_ni_vine_r_ii : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
 	static const bool is_of_boundary_type = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 	static const bool has_vine_update = true;
 	static const bool has_row_access = true;

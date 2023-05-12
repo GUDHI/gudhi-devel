@@ -46,6 +46,8 @@ public:
 	Z2_list_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_list_column(const Z2_list_column& column);
 	Z2_list_column(const Z2_list_column& column, index columnIndex);
+	template<class Row_container_type>
+	Z2_list_column(const Z2_list_column& column, index columnIndex, Row_container_type &rowContainer);
 	Z2_list_column(Z2_list_column&& column) noexcept;
 	~Z2_list_column();
 
@@ -55,6 +57,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -65,7 +68,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Z2_list_column& operator+=(Z2_list_column const &column);
+	template<class Cell_range>
+	Z2_list_column& operator+=(Cell_range const &column);
 	friend Z2_list_column operator+(Z2_list_column column1, Z2_list_column const& column2){
 		column1 += column2;
 		return column1;
@@ -82,9 +86,11 @@ public:
 	}
 
 	friend bool operator==(const Z2_list_column& c1, const Z2_list_column& c2){
+		if (&c1 == &c2) return true;
 		return c1.column_ == c2.column_;
 	}
 	friend bool operator<(const Z2_list_column& c1, const Z2_list_column& c2){
+		if (&c1 == &c2) return false;
 		return c1.column_ < c2.column_;
 	}
 
@@ -109,7 +115,7 @@ protected:
 template<class Cell_type, class Row_access_option>
 inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column() : dim_(0)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Cell_type, class Row_access_option>
@@ -118,7 +124,7 @@ inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column(const Contain
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
 	  column_(nonZeroRowIndices.begin(), nonZeroRowIndices.end())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Cell_type, class Row_access_option>
@@ -127,7 +133,7 @@ inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column(const Contain
 	: dim_(dimension),
 	  column_(nonZeroRowIndices.begin(), nonZeroRowIndices.end())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Cell_type, class Row_access_option>
@@ -184,6 +190,20 @@ inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column(
 }
 
 template<class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column(
+		const Z2_list_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_),
+	  column_(column.column_.size())
+{
+	auto it = column_.begin();
+	for (const Cell& cell : column.column_){
+		_update_cell(cell.get_row_index(), it++);
+	}
+}
+
+template<class Cell_type, class Row_access_option>
 inline Z2_list_column<Cell_type,Row_access_option>::Z2_list_column(Z2_list_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -205,7 +225,7 @@ inline std::vector<bool> Z2_list_column<Cell_type,Row_access_option>::get_conten
 	if (columnLength < 0) columnLength = column_.back().get_row_index() + 1;
 
 	std::vector<bool> container(columnLength, 0);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[it->get_row_index()] = 1;
 	}
 	return container;
@@ -251,6 +271,16 @@ inline void Z2_list_column<Cell_type,Row_access_option>::reorder(Map_type &value
 		}
 	}
 	column_.sort();
+}
+
+template<class Cell_type, class Row_access_option>
+inline void Z2_list_column<Cell_type,Row_access_option>::clear()
+{
+	if constexpr (Row_access_option::isActive_){
+		for (Cell& cell : column_)
+			Row_access_option::unlink(&cell);
+	}
+	column_.clear();
 }
 
 template<class Cell_type, class Row_access_option>
@@ -310,25 +340,27 @@ Z2_list_column<Cell_type,Row_access_option>::rend() const noexcept
 }
 
 template<class Cell_type, class Row_access_option>
-inline Z2_list_column<Cell_type,Row_access_option> &Z2_list_column<Cell_type,Row_access_option>::operator+=(Z2_list_column const &column)
+template<class Cell_range>
+inline Z2_list_column<Cell_type,Row_access_option> &Z2_list_column<Cell_type,Row_access_option>::operator+=(Cell_range const &column)
 {
-	if (column.is_empty()) return *this;
+	if (column.begin() == column.end()) return *this;
 	if (column_.empty()){
 		if constexpr (Row_access_option::isActive_){
-			column_.resize(column.column_.size());
-			auto it = column_.begin();
-			for (const Cell& cell : column.column_)
-				_update_cell(cell.get_row_index(), it++);
+//			column_.resize(column.column_.size());
+//			auto it = column_.begin();
+			for (const Cell& cell : column)
+				_insert_cell(cell.get_row_index(), column_.end());
+//				_update_cell(cell.get_row_index(), it++);
 		} else {
-			std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
+			std::copy(column.begin(), column.end(), std::back_inserter(column_));
 		}
 		return *this;
 	}
 
-	const_iterator itToAdd = column.column_.begin();
+	const_iterator itToAdd = column.begin();
 	iterator itTarget = column_.begin();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
 		unsigned int valToAdd = itToAdd->get_row_index();
 		unsigned int valTarget = itTarget->get_row_index();
@@ -344,7 +376,7 @@ inline Z2_list_column<Cell_type,Row_access_option> &Z2_list_column<Cell_type,Row
 		}
 	}
 
-	while (itToAdd != column.column_.end()){
+	while (itToAdd != column.end()){
 		_insert_cell(itToAdd->get_row_index(), column_.end());
 		itToAdd++;
 	}
@@ -356,11 +388,7 @@ template<class Cell_type, class Row_access_option>
 inline Z2_list_column<Cell_type,Row_access_option> &Z2_list_column<Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
-		if constexpr (Row_access_option::isActive_){
-			for (Cell& cell : column_)
-				Row_access_option::unlink(&cell);
-		}
-		column_.clear();
+		clear();
 	}
 
 	return *this;

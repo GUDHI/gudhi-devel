@@ -27,6 +27,8 @@ class Intrusive_list_chain_column : public Intrusive_list_column<Field_element_t
 {
 private:
 	using Base = Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -65,6 +67,9 @@ public:
 		column *= v;
 		return column;
 	}
+
+	Intrusive_list_chain_column& multiply_and_add(const Field_element_type& v, Intrusive_list_chain_column& column);
+	Intrusive_list_chain_column& multiply_and_add(Intrusive_list_chain_column& column, const Field_element_type& v);
 
 	Intrusive_list_chain_column& operator=(const Intrusive_list_chain_column& other);
 
@@ -195,6 +200,38 @@ inline Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type
 Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_list_chain_column &column)
 {
 	Base::operator+=(column);
+
+	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
+	if (!Base::is_non_zero(pivot_)){
+		std::swap(pivotToColumnIndex_->at(pivot_),
+				  pivotToColumnIndex_->at(column.get_pivot()));
+		std::swap(pivot_, column.pivot_);
+	}
+
+	return *this;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& v, Intrusive_list_chain_column& column)
+{
+	Base::multiply_and_add(v, column);
+
+	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
+	if (!Base::is_non_zero(pivot_)){
+		std::swap(pivotToColumnIndex_->at(pivot_),
+				  pivotToColumnIndex_->at(column.get_pivot()));
+		std::swap(pivot_, column.pivot_);
+	}
+
+	return *this;
+}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::multiply_and_add(Intrusive_list_chain_column& column, const Field_element_type& val)
+{
+	Base::multiply_and_add(column, val);
 
 	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
 	if (!Base::is_non_zero(pivot_)){

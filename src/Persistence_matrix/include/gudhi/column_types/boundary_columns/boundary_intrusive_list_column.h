@@ -25,6 +25,8 @@ class Intrusive_list_boundary_column : public Intrusive_list_column<Field_elemen
 {
 private:
 	using Base = Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -49,9 +51,10 @@ public:
 
 	int get_pivot() const;
 	Field_element_type get_pivot_value() const;
-	void clear();
+	using Base::clear;
 	void clear(index rowIndex);
 
+	Intrusive_list_boundary_column& operator+=(Intrusive_list_boundary_column const &column);
 	friend Intrusive_list_boundary_column operator+(Intrusive_list_boundary_column column1, Intrusive_list_boundary_column const& column2){
 		column1 += column2;
 		return column1;
@@ -64,6 +67,11 @@ public:
 		column *= v;
 		return column;
 	}
+
+	//this = v * this + column
+	Intrusive_list_boundary_column& multiply_and_add(const Field_element_type& v, const Intrusive_list_boundary_column& column);
+	//this = this + column * v
+	Intrusive_list_boundary_column& multiply_and_add(const Intrusive_list_boundary_column& column, const Field_element_type& v);
 
 	Intrusive_list_boundary_column& operator=(const Intrusive_list_boundary_column& other);
 
@@ -147,17 +155,38 @@ inline Field_element_type Intrusive_list_boundary_column<Field_element_type,Cell
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
-{
-	Base::_clear();
-}
-
-template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	auto it = Base::column_.begin();
 	while (it != Base::column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != Base::column_.end()) Base::_delete_cell(it);
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_list_boundary_column const &column)
+{
+	Base::operator+=(column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Intrusive_list_boundary_column& column)
+{
+	Base::multiply_and_add(val, column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+Intrusive_list_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Intrusive_list_boundary_column& column, const Field_element_type& val)
+{
+	Base::multiply_and_add(column, val);
+
+	return *this;
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

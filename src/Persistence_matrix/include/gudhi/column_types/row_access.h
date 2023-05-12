@@ -15,12 +15,12 @@
 #include <cassert>
 
 #include "../utilities/utilities.h"
-#include "cell.h"	//why??
+//#include "cell.h"	//why??
 
 namespace Gudhi {
 namespace persistence_matrix {
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
 class Row_access
 {
 public:
@@ -48,112 +48,119 @@ protected:
 	static constexpr bool isActive_ = true;
 };
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access() : rows_(nullptr)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::Row_access() : rows_(nullptr)
 {}
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access(index columnIndex, Row_container_type &rows)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::Row_access(index columnIndex, Row_container_type &rows)
 	: columnIndex_(columnIndex), rows_(&rows)
 {}
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::Row_access(Row_access &&other) noexcept
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::Row_access(Row_access &&other) noexcept
 	: columnIndex_(std::exchange(other.columnIndex_, 0)),
 	  rows_(other.rows_)
 {}
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::insert_cell(index rowIndex, Cell_type *cell)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::insert_cell(index rowIndex, Cell_type *cell)
 {
 	if (rows_ == nullptr) return;
 
-	if constexpr (hasRemovableColumns)
-		rows_->try_emplace(rowIndex);
-	else {
-		if (rows_->size() < rowIndex + 1)
-			rows_->resize(rowIndex + 1);
-//		while (rows_->size() < rowIndex + 1) {
-//			rows_->emplace_back();
+	if constexpr (hasRemovableRows){
+//		auto res = rows_->try_emplace(rowIndex);
+//		if constexpr (isIntrusive){
+//			res.first->second.push_back(*cell);
+//		} else {
+//			res.first->second.insert(*cell);
 //		}
-	}
-	if constexpr (isIntrusive){
-		if constexpr (hasRemovableColumns)
-			rows_->at(rowIndex).push_back(*cell);
-		else {
+		if constexpr (isIntrusive){
 			rows_->operator[](rowIndex).push_back(*cell);
+		} else {
+			rows_->operator[](rowIndex).insert(*cell);
 		}
 	} else {
-		if constexpr (hasRemovableColumns)
-			rows_->at(rowIndex).insert(*cell);
-		else {
+		if (rows_->size() < rowIndex + 1)
+			rows_->resize(rowIndex + 1);
+
+		if constexpr (isIntrusive){
+			rows_->operator[](rowIndex).push_back(*cell);
+		} else {
 			rows_->operator[](rowIndex).insert(*cell);
 		}
 	}
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::insert_cell(index rowIndex, const Cell_type &cell)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::insert_cell(index rowIndex, const Cell_type &cell)
 {
 	static_assert(!isIntrusive, "Cannot insert const cell in intrusive container.");
 
 	if (rows_ == nullptr) return;
 
-	if constexpr (hasRemovableColumns)
-		rows_->try_emplace(rowIndex);
-	else {
+	if constexpr (hasRemovableRows){
+		auto res = rows_->try_emplace(rowIndex);
+		res.first->second.insert(cell);
+	} else {
 		if (rows_->size() < rowIndex + 1)
 			rows_->resize(rowIndex + 1);
+		rows_->operator[](rowIndex).insert(cell);
 	}
-
-	rows_->at(rowIndex).insert(cell);
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::unlink(Cell_type *cell)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::unlink(Cell_type *cell)
 {
 	if (rows_ == nullptr) return;
 
 	if constexpr (isIntrusive){
 		cell->base_hook_matrix_row::unlink();
 	} else {
-		rows_->at(cell->get_row_index()).erase(*cell);
+		if constexpr (hasRemovableRows){
+			auto it = rows_->find(cell->get_row_index());
+			it->second.erase(*cell);
+		} else {
+			rows_->operator[](cell->get_row_index()).erase(*cell);
+		}
 	}
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::unlink(const Cell_type &cell)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::unlink(const Cell_type &cell)
 {
 	static_assert(!isIntrusive, "Cannot unlink const cell from intrusive container.");
 
 	if (rows_ == nullptr) return;
 
-	rows_->at(cell.get_row_index()).erase(cell);
+	if constexpr (hasRemovableRows){
+		auto it = rows_->find(cell.get_row_index());
+		it->second.erase(cell);
+	} else {
+		rows_->operator[](cell.get_row_index()).erase(cell);
+	}
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::update_cell(const Cell_type &cell)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::update_cell(const Cell_type &cell)
 {
 	if constexpr (!isIntrusive){
 		if (rows_ == nullptr) return;
-
 		auto& row = rows_->at(cell.get_row_index());
 		auto it = row.find(cell);
 		it = row.erase(it);
 		row.insert(it, cell);
-//		rows_->at(cell.get_row_index()).erase(cell);
-//		rows_->at(cell.get_row_index()).insert(cell);
 	}
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline index Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::get_column_index() const
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline index Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::get_column_index() const
 {
 	return columnIndex_;
 }
 
-template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableColumns>
-inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableColumns>::set_rows(Row_container_type *rows)
+template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRemovableRows>
+inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows>::set_rows(Row_container_type *rows)
 {
 	rows_ = rows;
 }

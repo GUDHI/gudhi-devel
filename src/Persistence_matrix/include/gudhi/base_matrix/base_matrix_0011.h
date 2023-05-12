@@ -47,9 +47,12 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -102,10 +105,13 @@ template<class Container_type>
 inline Base_matrix_with_row_access_with_removals<Master_matrix>::Base_matrix_with_row_access_with_removals(
 		const std::vector<Container_type> &columns)
 	: Master_matrix::Base_swap_option(matrix_, columns.size()),
-	  rows_(columns.size()),
+//	  rows_(columns.size()),
 	  matrix_(columns.size()),
 	  nextInsertIndex_(columns.size())
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(columns.size());
+	}
 	for (unsigned int i = 0; i < columns.size(); i++){
 		rows_.try_emplace(i);
 		matrix_.emplace(i, Column_type(i, columns[i], rows_));
@@ -116,19 +122,26 @@ template<class Master_matrix>
 inline Base_matrix_with_row_access_with_removals<Master_matrix>::Base_matrix_with_row_access_with_removals(
 		unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
-	  rows_(numberOfColumns),
+//	  rows_(numberOfColumns),
 	  matrix_(numberOfColumns),
 	  nextInsertIndex_(0)
-{}
+{
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(numberOfColumns);
+	}
+}
 
 template<class Master_matrix>
 inline Base_matrix_with_row_access_with_removals<Master_matrix>::Base_matrix_with_row_access_with_removals(
 		const Base_matrix_with_row_access_with_removals &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
-	  rows_(matrixToCopy.rows_.size()),
+//	  rows_(matrixToCopy.rows_.size()),
 	  matrix_(matrixToCopy.matrix_.size()),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(matrixToCopy.rows_.size());
+	}
 	if constexpr (swap_opt::isActive_)
 		swap_opt::matrix_ = &matrix_;
 	for (const auto& p : matrixToCopy.matrix_){
@@ -262,19 +275,22 @@ inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex) += sourceColumn;
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
 }

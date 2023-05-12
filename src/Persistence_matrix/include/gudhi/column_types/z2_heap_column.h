@@ -49,6 +49,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -59,7 +60,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Z2_heap_column& operator+=(Z2_heap_column const &column);
+	template<class Cell_range>
+	Z2_heap_column& operator+=(Cell_range const &column);
 	friend Z2_heap_column operator+(Z2_heap_column column1, Z2_heap_column const& column2){
 		column1 += column2;
 		return column1;
@@ -76,9 +78,13 @@ public:
 	}
 
 	friend bool operator==(const Z2_heap_column& c1, const Z2_heap_column& c2){
+		if (&c1 == &c2) return true;
+
 		return c1.get_content() == c2.get_content();
 	}
 	friend bool operator<(const Z2_heap_column& c1, const Z2_heap_column& c2){
+		if (&c1 == &c2) return false;
+
 		return c1.get_content() < c2.get_content();
 	}
 
@@ -186,6 +192,15 @@ inline void Z2_heap_column::reorder(Map_type &valueMap)
 	insertsSinceLastPrune_ = 0;
 }
 
+inline void Z2_heap_column::clear()
+{
+//	for (Cell* cell : column_){
+//		_delete_cell(cell);
+//	}
+	column_.clear();
+	insertsSinceLastPrune_ = 0;
+}
+
 inline typename Z2_heap_column::iterator
 Z2_heap_column::begin() noexcept
 {
@@ -234,14 +249,15 @@ Z2_heap_column::rend() const noexcept
 	return column_.rend();
 }
 
-inline Z2_heap_column &Z2_heap_column::operator+=(Z2_heap_column const &column)
+template<class Cell_range>
+inline Z2_heap_column &Z2_heap_column::operator+=(Cell_range const &column)
 {
-	const Column_type& colToAdd = column.column_;
-	const unsigned int size = colToAdd.size();
+	unsigned int size = 0;
 
-	if (size == 0) return *this;
+//	if (column.begin() == column.end()) return *this;
 
-	for (const Cell& v : colToAdd) {
+	for (const Cell& v : column) {
+		++size;
 		column_.push_back(v);
 		std::push_heap(column_.begin(), column_.end());
 	}
@@ -255,8 +271,7 @@ inline Z2_heap_column &Z2_heap_column::operator+=(Z2_heap_column const &column)
 inline Z2_heap_column &Z2_heap_column::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
-		column_.clear();
-		insertsSinceLastPrune_ = 0;
+		clear();
 	}
 
 	return *this;

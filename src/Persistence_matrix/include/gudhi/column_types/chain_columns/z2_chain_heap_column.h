@@ -29,6 +29,7 @@ class Z2_heap_chain_column : public Z2_heap_column
 {
 private:
 	using Base = Z2_heap_column;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;

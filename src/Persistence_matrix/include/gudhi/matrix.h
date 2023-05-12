@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <functional>
 #include <assert.h>
 
@@ -180,7 +181,7 @@ public:
 							>::type;
 
 	template<class Cell_type>
-	struct RowCellComp : std::binary_function<const Cell_type&, const Cell_type&, bool> {
+	struct RowCellComp {
 		bool operator()(const Cell_type& c1, const Cell_type& c2) const
 		{
 			return c1.get_column_index() < c2.get_column_index();
@@ -194,8 +195,9 @@ public:
 							>::type;
 
 	using row_container_type = typename std::conditional<
-											Options::has_removable_columns,
-											std::unordered_map<index,Row_type>,
+											Options::has_removable_rows,
+											std::map<index,Row_type>,
+//											std::unordered_map<index,Row_type>,
 											std::vector<Row_type>
 										>::type;
 
@@ -210,19 +212,7 @@ public:
 
 	using Row_access_option = typename std::conditional<
 											Options::has_row_access,
-											typename std::conditional<
-												Options::has_intrusive_rows,
-												typename std::conditional<
-													Options::has_removable_columns,
-													Row_access<row_container_type, Cell_type, true, true>,
-													Row_access<row_container_type, Cell_type, true, false>
-												>::type,
-												typename std::conditional<
-													Options::has_removable_columns,
-													Row_access<row_container_type, Cell_type, false, true>,
-													Row_access<row_container_type, Cell_type, false, false>
-												>::type
-											>::type,
+											Row_access<row_container_type, Cell_type, Options::has_intrusive_rows, Options::has_removable_rows>,
 											Dummy_row_access
 										>::type;
 
@@ -631,12 +621,12 @@ public:
 	using cycle_type = std::vector<index>;
 
 	using returned_column_type = typename std::conditional<
-									Options::has_column_compression && !Options::has_row_access,
+									Options::has_column_compression,
 									const Column_type,
 									Column_type
 								>::type;
 	using returned_row_type = typename std::conditional<
-									Options::has_column_compression && !Options::has_row_access,
+									Options::has_column_compression && Options::has_row_access,
 									const Row_type,
 									Row_type
 								>::type;
@@ -670,12 +660,21 @@ public:
 
 	//targetColumn += sourceColumn
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+
 	//targetColumn += sourceColumn
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, index targetColumnIndex);
+//	template<class Cell_range>
+//	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+
 	//targetColumn = targetColumn * coefficient + sourceColumn
-	void add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
+
 	//targetColumn += (coefficient * sourceColumn)
-	void add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Field_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Field_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -798,6 +797,8 @@ inline typename Matrix<Options>::returned_column_type &Matrix<Options>::get_colu
 template<class Options>
 inline const typename Matrix<Options>::Column_type &Matrix<Options>::get_column(index columnIndex) const
 {
+	static_assert(!Options::has_column_compression, "'get_column' cannot be a const method with column compression.");
+
 	return matrix_.get_column(columnIndex);
 }
 
@@ -836,7 +837,7 @@ inline void Matrix<Options>::erase_column(index columnIndex)
 template<class Options>
 inline void Matrix<Options>::erase_row(index rowIndex)
 {
-	static_assert(Options::has_removable_columns && !isNonBasic, "'erase_row' is not available for the chosen options.");
+	static_assert(Options::has_removable_rows && !isNonBasic, "'erase_row' is not available for the chosen options.");
 
 	matrix_.erase_row(rowIndex);
 }
@@ -870,13 +871,22 @@ inline void Matrix<Options>::add_to(index sourceColumnIndex, index targetColumnI
 }
 
 template<class Options>
-inline void Matrix<Options>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+inline void Matrix<Options>::add_to(Column_type& sourceColumn, index targetColumnIndex)
 {
 	return matrix_.add_to(sourceColumn, targetColumnIndex);
 }
 
+//template<class Options>
+//template<class Cell_range>
+//inline void Matrix<Options>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+//{
+//	static_assert(!isNonBasic, "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain algebraic consistency.");
+
+//	return matrix_.add_to(sourceColumn, targetColumnIndex);
+//}
+
 template<class Options>
-inline void Matrix<Options>::add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
+inline void Matrix<Options>::add_to(Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
 {
 	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
 
@@ -884,9 +894,29 @@ inline void Matrix<Options>::add_to(const Column_type& sourceColumn, const Field
 }
 
 template<class Options>
-inline void Matrix<Options>::add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Matrix<Options>::add_to(const Cell_range& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
 {
 	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+	static_assert(!isNonBasic, "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain algebraic consistency.");
+
+	return matrix_.add_to(sourceColumn, coefficient, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Field_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+
+	return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
+}
+
+template<class Options>
+template<class Cell_range>
+inline void Matrix<Options>::add_to(const Field_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+	static_assert(!isNonBasic, "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain algebraic consistency.");
 
 	return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
 }

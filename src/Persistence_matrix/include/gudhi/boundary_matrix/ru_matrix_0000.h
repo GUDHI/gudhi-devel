@@ -380,10 +380,31 @@ inline void RU_matrix<Master_matrix>::_reduce()
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
 					coef = coef.get_inverse();
 					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
-					curr *= coef;
-					curr += toadd;
-					mirrorMatrixU_.get_column(i) *= coef;
-					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
+
+//					std::cout << "before:\n";
+//					for (auto& cell : curr){
+//						std::cout << cell.get_row_index() << " ";
+//					}
+//					std::cout << "\n";
+//					for (auto& cell : toadd){
+//						std::cout << cell.get_row_index() << " ";
+//					}
+//					std::cout << "\n";
+//					std::cout << curr.get_pivot_value() << "(" << curr.get_pivot_value().get_inverse() << ") - " << toadd.get_pivot_value() << " - " << coef << "\n";
+
+					curr.multiply_and_add(coef, toadd);
+
+//					std::cout << "after:\n";
+//					for (auto& cell : curr){
+//						std::cout << cell.get_row_index() << " ";
+//					}
+//					std::cout << "\n";
+//					std::cout << curr.rbegin()->get_element() << "\n";
+//					curr *= coef;
+//					curr += toadd;
+					mirrorMatrixU_.get_column(i).multiply_and_add(coef, mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]));
+//					mirrorMatrixU_.get_column(i) *= coef;
+//					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 				}
 
 				pivot = curr.get_pivot();

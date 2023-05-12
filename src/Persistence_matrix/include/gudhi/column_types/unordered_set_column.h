@@ -47,6 +47,8 @@ public:
 	Unordered_set_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Unordered_set_column(const Unordered_set_column& column);
 	Unordered_set_column(const Unordered_set_column& column, index columnIndex);
+	template<class Row_container_type>
+	Unordered_set_column(const Unordered_set_column& column, index columnIndex, Row_container_type &rowContainer);
 	Unordered_set_column(Unordered_set_column&& column) noexcept;
 	~Unordered_set_column();
 
@@ -56,13 +58,15 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
 	iterator end() noexcept;
 	const_iterator end() const noexcept;
 
-	Unordered_set_column& operator+=(Unordered_set_column const &column);
+	template<class Cell_range>
+	Unordered_set_column& operator+=(Cell_range const &column);
 	friend Unordered_set_column operator+(Unordered_set_column column1, Unordered_set_column const& column2){
 		column1 += column2;
 		return column1;
@@ -78,12 +82,16 @@ public:
 	}
 
 	//this = v * this + column
-	Unordered_set_column& multiply_and_add(const Field_element_type& v, const Unordered_set_column& column);
+	template<class Cell_range>
+	Unordered_set_column& multiply_and_add(const Field_element_type& v, const Cell_range& column);
 	//this = this + column * v
-	Unordered_set_column& multiply_and_add(const Unordered_set_column& column, const Field_element_type& v);
+	template<class Cell_range>
+	Unordered_set_column& multiply_and_add(const Cell_range& column, const Field_element_type& v);
 
 	friend bool operator==(const Unordered_set_column& c1, const Unordered_set_column& c2){
+		if (&c1 == &c2) return true;
 		if (c1.column_.size() != c2.column_.size()) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		std::set<std::pair<unsigned int,unsigned int> > cells1, cells2;
@@ -95,9 +103,11 @@ public:
 		return cells1 == cells2;
 	}
 	friend bool operator<(const Unordered_set_column& c1, const Unordered_set_column& c2){
+		if (&c1 == &c2) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
-		std::set<std::pair<unsigned int,unsigned int> > cells1(c1.column_.size()), cells2(c1.column_.size());
+		std::set<std::pair<unsigned int,unsigned int> > cells1, cells2;
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
 			cells1.emplace(it1->get_row_index(), it1->get_element());
 			cells2.emplace(it2->get_row_index(), it2->get_element());
@@ -121,7 +131,6 @@ protected:
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex);
-	void _clear();
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -199,6 +208,18 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_column(
 		const Unordered_set_column &column, index columnIndex)
 	: Row_access_option(columnIndex, *column.rows_),
+	  dim_(column.dim_)
+{
+	for (const Cell& cell : column.column_){
+		_insert_cell(cell.get_element(), cell.get_row_index());
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_column(
+		const Unordered_set_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
 	  dim_(column.dim_)
 {
 	for (const Cell& cell : column.column_){
@@ -311,9 +332,10 @@ Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::end() cons
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Unordered_set_column const &column)
+template<class Cell_range>
+inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Cell_range const &column)
 {
-	for (const Cell& v : column.column_){
+	for (const Cell& v : column){
 		auto c = column_.find(v);
 		if (c != column_.end()){
 			index r = c->get_row_index();
@@ -367,12 +389,13 @@ inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &Uno
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &
-Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Unordered_set_column& column)
+Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Cell_range& column)
 {
 	if (val == 0u) {
-		_clear();
-		for (const Cell& v : column.column_){
+		clear();
+		for (const Cell& v : column){
 			_insert_cell(v.get_element(), v.get_row_index());
 		}
 		return *this;
@@ -386,14 +409,15 @@ Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_a
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Unordered_set_column<Field_element_type,Cell_type,Row_access_option> &
-Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Unordered_set_column& column, const Field_element_type& val)
+Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Cell_range& column, const Field_element_type& val)
 {
 	if (val == 0u) {
 		return *this;
 	}
 
-	for (const Cell& v : column.column_){
+	for (const Cell& v : column){
 		auto c = column_.find(v);
 		if (c != column_.end()){
 			index r = c->get_row_index();
@@ -441,7 +465,7 @@ inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	if constexpr (Row_access_option::isActive_){
 		for (const Cell& cell : column_)

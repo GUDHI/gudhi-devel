@@ -48,6 +48,8 @@ public:
 	Z2_vector_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_vector_column(const Z2_vector_column& column);
 	Z2_vector_column(const Z2_vector_column& column, index columnIndex);
+	template<class Row_container_type>
+	Z2_vector_column(const Z2_vector_column& column, index columnIndex, Row_container_type &rowContainer);
 	Z2_vector_column(Z2_vector_column&& column) noexcept;
 	~Z2_vector_column();
 
@@ -57,6 +59,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -67,7 +70,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Z2_vector_column& operator+=(Z2_vector_column const &column);
+	template<class Cell_range>
+	Z2_vector_column& operator+=(Cell_range const &column);
 	friend Z2_vector_column operator+(Z2_vector_column column1, Z2_vector_column const &column2){
 		column1 += column2;
 		return column1;
@@ -84,6 +88,7 @@ public:
 	}
 
 	friend bool operator==(const Z2_vector_column& c1, const Z2_vector_column& c2){
+		if (&c1 == &c2) return true;
 		if (c1.column_.size() != c2.column_.size()) return false;
 
 		for (unsigned int i = 0; i < c1.column_.size(); ++i){
@@ -93,6 +98,8 @@ public:
 		return true;
 	}
 	friend bool operator<(const Z2_vector_column& c1, const Z2_vector_column& c2){
+		if (&c1 == &c2) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
@@ -127,7 +134,7 @@ protected:
 template<class Cell_type, class Row_access_option>
 inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column() : dim_(0)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Cell_type, class Row_access_option>
@@ -136,7 +143,7 @@ inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column(const Con
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
 	  column_(nonZeroRowIndices.size())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
 	unsigned int i = 0;
 	for (index id : nonZeroRowIndices){
@@ -150,7 +157,7 @@ inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column(const Con
 	: dim_(dimension),
 	  column_(nonZeroRowIndices.size())
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
 	unsigned int i = 0;
 	for (index id : nonZeroRowIndices){
@@ -217,6 +224,20 @@ inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column(
 }
 
 template<class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column(
+		const Z2_vector_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_),
+	  column_(column.column_.size())
+{
+	unsigned int i = 0;
+	for (const Cell* cell : column.column_){
+		_update_cell(cell->get_row_index(), i++);
+	}
+}
+
+template<class Cell_type, class Row_access_option>
 inline Z2_vector_column<Cell_type,Row_access_option>::Z2_vector_column(Z2_vector_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -237,7 +258,7 @@ inline std::vector<bool> Z2_vector_column<Cell_type,Row_access_option>::get_cont
 	if (columnLength < 0) columnLength = column_.back()->get_row_index() + 1;
 
 	std::vector<bool> container(columnLength, 0);
-	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[(*it)->get_row_index()] = 1;
 	}
 	return container;
@@ -281,6 +302,15 @@ inline void Z2_vector_column<Cell_type,Row_access_option>::reorder(Map_type &val
 		}
 	}
 	std::sort(column_.begin(), column_.end(), [](const Cell* c1, const Cell* c2){return *c1 < *c2;});
+}
+
+template<class Cell_type, class Row_access_option>
+inline void Z2_vector_column<Cell_type,Row_access_option>::clear()
+{
+	for (Cell* cell : column_){
+		_delete_cell(cell);
+	}
+	column_.clear();
 }
 
 template<class Cell_type, class Row_access_option>
@@ -340,27 +370,29 @@ Z2_vector_column<Cell_type,Row_access_option>::rend() const noexcept
 }
 
 template<class Cell_type, class Row_access_option>
-inline Z2_vector_column<Cell_type,Row_access_option> &Z2_vector_column<Cell_type,Row_access_option>::operator+=(const Z2_vector_column &column)
+template<class Cell_range>
+inline Z2_vector_column<Cell_type,Row_access_option> &Z2_vector_column<Cell_type,Row_access_option>::operator+=(const Cell_range &column)
 {
-	if (column.is_empty()) return *this;
+	if (column.begin() == column.end()) return *this;
 	if (column_.empty()){
-		column_.resize(column.column_.size());
-		unsigned int i = 0;
-		for (const Cell* cell : column.column_)
-			_update_cell(cell->get_row_index(), i++);
+//		column_.resize(column.column_.size());
+//		unsigned int i = 0;
+		for (const Cell& cell : column)
+			_insert_cell(cell.get_row_index(), column_);
+//			_update_cell(cell.get_row_index(), i++);
 		return *this;
 	}
 
 	Column_type newColumn;
 
-	real_const_iterator itToAdd = column.column_.begin();
+	auto itToAdd = column.begin();
 	real_iterator itTarget = column_.begin();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
-		const Cell* cellToAdd = *itToAdd;
+		const Cell& cellToAdd = *itToAdd;
 		Cell* cellTarget = *itTarget;
-		unsigned int curRowToAdd = cellToAdd->get_row_index();
+		unsigned int curRowToAdd = cellToAdd.get_row_index();
 		unsigned int curRowTarget = cellTarget->get_row_index();
 
 		if (curRowToAdd == curRowTarget){
@@ -376,8 +408,8 @@ inline Z2_vector_column<Cell_type,Row_access_option> &Z2_vector_column<Cell_type
 		}
 	}
 
-	while (itToAdd != column.column_.end()){
-		_insert_cell((*itToAdd)->get_row_index(), newColumn);
+	while (itToAdd != column.end()){
+		_insert_cell(itToAdd->get_row_index(), newColumn);
 		itToAdd++;
 	}
 
@@ -395,10 +427,7 @@ template<class Cell_type, class Row_access_option>
 inline Z2_vector_column<Cell_type,Row_access_option> &Z2_vector_column<Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
-		for (Cell* cell : column_){
-			_delete_cell(cell);
-		}
-		column_.clear();
+		clear();
 	}
 
 	return *this;

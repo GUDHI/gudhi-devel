@@ -28,6 +28,7 @@ class Z2_heap_boundary_column : public Z2_heap_column
 {
 private:
 	using Base = Z2_heap_column;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -55,6 +56,7 @@ public:
 	iterator begin() noexcept;
 
 	Z2_heap_boundary_column& operator+=(Z2_heap_boundary_column const &column);
+
 	friend Z2_heap_boundary_column operator+(Z2_heap_boundary_column column1, Z2_heap_boundary_column const& column2){
 		column1 += column2;
 		return column1;
@@ -150,8 +152,7 @@ inline int Z2_heap_boundary_column::get_pivot()
 
 inline void Z2_heap_boundary_column::clear()
 {
-	Base::column_.clear();
-	Base::insertsSinceLastPrune_ = 0;
+	Base::clear();
 	erasedValues_.clear();
 }
 

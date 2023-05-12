@@ -26,6 +26,8 @@ class Vector_boundary_column : public Vector_column<Field_element_type,Cell_type
 {
 private:
 	using Base = Vector_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -74,9 +76,9 @@ public:
 	}
 
 	//this = v * this + column
-	Vector_boundary_column& multiply_and_add(const Field_element_type& v, const Vector_boundary_column& column);
+	Vector_boundary_column& multiply_and_add(const Field_element_type& v, Vector_boundary_column& column);
 	//this = this + column * v
-	Vector_boundary_column& multiply_and_add(const Vector_boundary_column& column, const Field_element_type& v);
+	Vector_boundary_column& multiply_and_add(Vector_boundary_column& column, const Field_element_type& v);
 
 	Vector_boundary_column& operator=(Vector_boundary_column other);
 
@@ -209,7 +211,7 @@ inline Field_element_type Vector_boundary_column<Field_element_type,Cell_type,Ro
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
-	Base::_clear();
+	Base::clear();
 	erasedValues_.clear();
 }
 
@@ -271,7 +273,7 @@ Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option> &
-Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& v, const Vector_boundary_column& column)
+Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& v, Vector_boundary_column& column)
 {
 	_clean_values();
 	column._clean_values();
@@ -282,7 +284,7 @@ Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option> &
-Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Vector_boundary_column& column, const Field_element_type& v)
+Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(Vector_boundary_column& column, const Field_element_type& v)
 {
 	_clean_values();
 	column._clean_values();

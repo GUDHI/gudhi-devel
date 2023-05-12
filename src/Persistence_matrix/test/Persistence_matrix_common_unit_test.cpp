@@ -143,6 +143,7 @@ struct opt_b_ra_i_r_p : Default_options<Field_type::get_characteristic() == 2, F
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -153,6 +154,7 @@ struct opt_b_ra_r_p : Default_options<Field_type::get_characteristic() == 2, Fie
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -183,6 +185,7 @@ struct opt_b_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Fie
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -193,6 +196,7 @@ struct opt_b_ra_r : Default_options<Field_type::get_characteristic() == 2, Field
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -279,6 +283,7 @@ struct opt_ra_i_r_p : Default_options<Field_type::get_characteristic() == 2, Fie
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -289,6 +294,7 @@ struct opt_ra_r_p : Default_options<Field_type::get_characteristic() == 2, Field
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -299,6 +305,7 @@ struct opt_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 
@@ -309,6 +316,7 @@ struct opt_ra_r : Default_options<Field_type::get_characteristic() == 2, Field_t
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
 	static const bool has_removable_columns = true;
+	static const bool has_removable_rows = true;
 	static const bool has_column_pairings = true;
 };
 

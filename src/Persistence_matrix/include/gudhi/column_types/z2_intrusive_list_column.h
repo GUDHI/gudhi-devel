@@ -50,6 +50,8 @@ public:
 	Z2_intrusive_list_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_intrusive_list_column(const Z2_intrusive_list_column& column);
 	Z2_intrusive_list_column(const Z2_intrusive_list_column& column, index columnIndex);
+	template<class Row_container_type>
+	Z2_intrusive_list_column(const Z2_intrusive_list_column& column, index columnIndex, Row_container_type &rowContainer);
 	Z2_intrusive_list_column(Z2_intrusive_list_column&& column) noexcept;
 	~Z2_intrusive_list_column();
 
@@ -59,6 +61,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -69,7 +72,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Z2_intrusive_list_column& operator+=(Z2_intrusive_list_column const &column);
+	template<class Cell_range>
+	Z2_intrusive_list_column& operator+=(Cell_range const &column);
 	friend Z2_intrusive_list_column operator+(Z2_intrusive_list_column column1, Z2_intrusive_list_column const& column2){
 		column1 += column2;
 		return column1;
@@ -86,9 +90,11 @@ public:
 	}
 
 	friend bool operator==(const Z2_intrusive_list_column& c1, const Z2_intrusive_list_column& c2){
+		if (&c1 == &c2) return true;
 		return c1.column_ == c2.column_;
 	}
 	friend bool operator<(const Z2_intrusive_list_column& c1, const Z2_intrusive_list_column& c2){
+		if (&c1 == &c2) return false;
 		return c1.column_ < c2.column_;
 	}
 
@@ -127,7 +133,7 @@ private:
 template<class Cell_type, class Row_access_option>
 inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_column() : dim_(0)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 }
 
 template<class Cell_type, class Row_access_option>
@@ -135,7 +141,7 @@ template<class Container_type>
 inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_column(const Container_type &nonZeroRowIndices)
 	: dim_(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
 	for (index id : nonZeroRowIndices){
 		_insert_cell(id, column_.end());
@@ -147,7 +153,7 @@ template<class Container_type>
 inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_column(const Container_type &nonZeroRowIndices, dimension_type dimension)
 	: dim_(dimension)
 {
-	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
+//	static_assert(!Row_access_option::isActive_, "When row access option enabled, a row container has to be provided.");
 
 	for (index id : nonZeroRowIndices){
 		_insert_cell(id, column_.end());
@@ -205,6 +211,18 @@ inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_
 }
 
 template<class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_column(
+		const Z2_intrusive_list_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_)
+{
+	for (const Cell& cell : column.column_){
+		_insert_cell(cell.get_row_index(), column_.end());
+	}
+}
+
+template<class Cell_type, class Row_access_option>
 inline Z2_intrusive_list_column<Cell_type,Row_access_option>::Z2_intrusive_list_column(Z2_intrusive_list_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -225,7 +243,7 @@ inline std::vector<bool> Z2_intrusive_list_column<Cell_type,Row_access_option>::
 	if (columnLength < 0) columnLength = column_.back().get_row_index() + 1;
 
 	std::vector<bool> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[it->get_row_index()] = 1;
 	}
 	return container;
@@ -271,6 +289,15 @@ inline void Z2_intrusive_list_column<Cell_type,Row_access_option>::reorder(Map_t
 		}
 	}
 	column_.sort();
+}
+
+template<class Cell_type, class Row_access_option>
+inline void Z2_intrusive_list_column<Cell_type,Row_access_option>::clear()
+{
+	auto it = column_.begin();
+	while (it != column_.end()){
+		_delete_cell(it);
+	}
 }
 
 template<class Cell_type, class Row_access_option>
@@ -330,14 +357,12 @@ Z2_intrusive_list_column<Cell_type,Row_access_option>::rend() const noexcept
 }
 
 template<class Cell_type, class Row_access_option>
-inline Z2_intrusive_list_column<Cell_type,Row_access_option> &Z2_intrusive_list_column<Cell_type,Row_access_option>::operator+=(Z2_intrusive_list_column const &column)
+template<class Cell_range>
+inline Z2_intrusive_list_column<Cell_type,Row_access_option> &Z2_intrusive_list_column<Cell_type,Row_access_option>::operator+=(Cell_range const &column)
 {
-	Column_type& tc = column_;
-	const Column_type& sc = column.column_;
-
-	auto it1 = tc.begin();
-	auto it2 = sc.begin();
-	while (it1 != tc.end() && it2 != sc.end())
+	auto it1 = column_.begin();
+	auto it2 = column.begin();
+	while (it1 != column_.end() && it2 != column.end())
 	{
 		if (it1->get_row_index() < it2->get_row_index()) {
 			++it1;
@@ -351,8 +376,8 @@ inline Z2_intrusive_list_column<Cell_type,Row_access_option> &Z2_intrusive_list_
 		}
 	}
 
-	while (it2 != sc.end()) {
-		_insert_cell(it2->get_row_index(), tc.end());
+	while (it2 != column.end()) {
+		_insert_cell(it2->get_row_index(), column_.end());
 		++it2;
 	}
 
@@ -363,10 +388,7 @@ template<class Cell_type, class Row_access_option>
 inline Z2_intrusive_list_column<Cell_type,Row_access_option> &Z2_intrusive_list_column<Cell_type,Row_access_option>::operator*=(unsigned int v)
 {
 	if (v % 2 == 0){
-		auto it = column_.begin();
-		while (it != column_.end()){
-			_delete_cell(it);
-		}
+		clear();
 	}
 
 	return *this;

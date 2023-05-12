@@ -47,6 +47,8 @@ public:
 	Set_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Set_column(const Set_column& column);
 	Set_column(const Set_column& column, index columnIndex);
+	template<class Row_container_type>
+	Set_column(const Set_column& column, index columnIndex, Row_container_type &rowContainer);
 	Set_column(Set_column&& column) noexcept;
 	~Set_column();
 
@@ -56,6 +58,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -66,7 +69,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Set_column& operator+=(Set_column const &column);
+	template<class Cell_range>
+	Set_column& operator+=(Cell_range const &column);
 	friend Set_column operator+(Set_column column1, Set_column const& column2){
 		column1 += column2;
 		return column1;
@@ -82,11 +86,15 @@ public:
 	}
 
 	//this = v * this + column
-	Set_column& multiply_and_add(const Field_element_type& v, const Set_column& column);
+	template<class Cell_range>
+	Set_column& multiply_and_add(const Field_element_type& v, const Cell_range& column);
 	//this = this + column * v
-	Set_column& multiply_and_add(const Set_column& column, const Field_element_type& v);
+	template<class Cell_range>
+	Set_column& multiply_and_add(const Cell_range& column, const Field_element_type& v);
 
 	friend bool operator==(const Set_column& c1, const Set_column& c2){
+		if (&c1 == &c2) return true;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		if (c1.column_.size() != c2.column_.size()) return false;
@@ -98,6 +106,8 @@ public:
 		return true;
 	}
 	friend bool operator<(const Set_column& c1, const Set_column& c2){
+		if (&c1 == &c2) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
@@ -125,7 +135,6 @@ protected:
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator &position);
-	void _clear();
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -208,6 +217,18 @@ inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(
+		const Set_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_)
+{
+	for (const Cell& cell : column.column_){
+		_insert_cell(cell.get_element(), cell.get_row_index(), column_.end());
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Set_column<Field_element_type,Cell_type,Row_access_option>::Set_column(Set_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -229,7 +250,7 @@ inline std::vector<Field_element_type> Set_column<Field_element_type,Cell_type,R
 	if (columnLength < 0) columnLength = column_.rbegin()->get_row_index() + 1;
 
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[it->get_row_index()] = it->get_element();
 	}
 	return container;
@@ -339,9 +360,10 @@ Set_column<Field_element_type,Cell_type,Row_access_option>::rend() const noexcep
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Set_column const &column)
+template<class Cell_range>
+inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Cell_range const &column)
 {
-	for (const Cell& v : column.column_){
+	for (const Cell& v : column){
 		auto c = column_.find(v);
 		if (c != column_.end()){
 			index r = c->get_row_index();
@@ -365,19 +387,18 @@ inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Fi
 
 	if (val == Field_element_type::get_multiplicative_identity()) return *this;
 
-	if constexpr (Row_access_option::isActive_){
-		for (const Cell& cell : column_)
-			Row_access_option::unlink(cell);
-	}
-
 	if (val == 0u) {
-		column_.clear();
+		clear();
 		return *this;
 	}
 
 	Column_type newColumn;
 
 	for (const Cell& cell : column_){
+		if constexpr (Row_access_option::isActive_){
+			Row_access_option::unlink(cell);
+		}
+
 		Cell newCell(cell);
 		newCell.get_element() *= val;
 
@@ -395,61 +416,78 @@ inline Set_column<Field_element_type,Cell_type,Row_access_option> &Set_column<Fi
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Set_column<Field_element_type,Cell_type,Row_access_option> &
-Set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Set_column& column)
+Set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Cell_range& column)
 {
 	if (val == 0u) {
-		_clear();
+		clear();
 	}
 
-	const Column_type& sc = column.column_;
+	Column_type newColumn;
+	auto emplace_new_cell = [&](Field_element_type value, index row_index){
+		if constexpr (Row_access_option::isActive_){
+			auto it = newColumn.emplace_hint(newColumn.end(), value, Row_access_option::columnIndex_, row_index);
+			Row_access_option::insert_cell(row_index, *it);
+		} else {
+			newColumn.emplace_hint(newColumn.end(), value, row_index);
+		}
+	};
 
 	auto itTarget = column_.begin();
-	auto itSource = sc.begin();
-	while (itTarget != column_.end() && itSource != sc.end())
+	auto itSource = column.begin();
+	while (itTarget != column_.end() && itSource != column.end())
 	{
 		if (itTarget->get_row_index() < itSource->get_row_index()) {
-			itTarget->get_element() *= val;
+			if constexpr (Row_access_option::isActive_){
+				Row_access_option::unlink(*itTarget);
+			}
+			emplace_new_cell(itTarget->get_element() * val, itTarget->get_row_index());
 			++itTarget;
 		} else if (itTarget->get_row_index() > itSource->get_row_index()) {
-			_insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
+			emplace_new_cell(itSource->get_element(), itSource->get_row_index());
 			++itSource;
 		} else {
-			itTarget->get_element() *= val;
-			itTarget->get_element() += itSource->get_element();
-			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
-				_delete_cell(itTarget);
-			} else {
-				if constexpr (Row_access_option::isActive_)
-						Row_access_option::update_cell(*itTarget);
-				++itTarget;
+			if constexpr (Row_access_option::isActive_){
+				Row_access_option::unlink(*itTarget);
 			}
+			Field_element_type f = itTarget->get_element() * val + itSource->get_element();
+			if (f != Field_element_type::get_additive_identity()){
+				emplace_new_cell(f, itTarget->get_row_index());
+			}
+			++itTarget;
 			++itSource;
 		}
 	}
 
 	while (itTarget != column_.end()){
-		itTarget->get_element() *= val;
+		if constexpr (Row_access_option::isActive_){
+			Row_access_option::unlink(*itTarget);
+		}
+		emplace_new_cell(itTarget->get_element() * val, itTarget->get_row_index());
 		++itTarget;
 	}
 
-	while (itSource != sc.end()) {
-		_insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
+	while (itSource != column.end()) {
+		emplace_new_cell(itSource->get_element(), itSource->get_row_index());
 		++itSource;
 	}
+
+	column_.swap(newColumn);
 
 	return *this;
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Set_column<Field_element_type,Cell_type,Row_access_option> &
-Set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Set_column& column, const Field_element_type& val)
+Set_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Cell_range& column, const Field_element_type& val)
 {
 	if (val == 0u) {
 		return *this;
 	}
 
-	for (const Cell& v : column.column_){
+	for (const Cell& v : column){
 		auto c = column_.find(v);
 		if (c != column_.end()){
 			index r = c->get_row_index();
@@ -496,7 +534,7 @@ inline void Set_column<Field_element_type,Cell_type,Row_access_option>::_insert_
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Set_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+inline void Set_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	if constexpr (Row_access_option::isActive_){
 		for (const Cell& cell : column_)

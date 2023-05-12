@@ -26,6 +26,7 @@ class Z2_list_boundary_column : public Z2_list_column<Cell_type,Row_access_optio
 {
 private:
 	using Base = Z2_list_column<Cell_type,Row_access_option>;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -49,9 +50,10 @@ public:
 	Z2_list_boundary_column(Z2_list_boundary_column&& column) noexcept;
 
 	int get_pivot() const;
-	void clear();
+	using Base::clear;
 	void clear(index rowIndex);
 
+	Z2_list_boundary_column& operator+=(Z2_list_boundary_column const &column);
 	friend Z2_list_boundary_column operator+(Z2_list_boundary_column column1, Z2_list_boundary_column const& column2){
 		column1 += column2;
 		return column1;
@@ -137,21 +139,20 @@ inline int Z2_list_boundary_column<Cell_type,Row_access_option>::get_pivot() con
 }
 
 template<class Cell_type, class Row_access_option>
-inline void Z2_list_boundary_column<Cell_type,Row_access_option>::clear()
-{
-	if constexpr (Row_access_option::isActive_){
-		for (Cell& cell : Base::column_)
-			Row_access_option::unlink(&cell);
-	}
-	Base::column_.clear();
-}
-
-template<class Cell_type, class Row_access_option>
 inline void Z2_list_boundary_column<Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	auto it = Base::column_.begin();
 	while (it != Base::column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != Base::column_.end()) Base::_delete_cell(it);
+}
+
+template<class Cell_type, class Row_access_option>
+inline Z2_list_boundary_column<Cell_type,Row_access_option> &
+Z2_list_boundary_column<Cell_type,Row_access_option>::operator+=(Z2_list_boundary_column const &column)
+{
+	Base::operator+=(column);
+
+	return *this;
 }
 
 template<class Cell_type, class Row_access_option>

@@ -34,12 +34,16 @@ public:
 	Multi_field_element_with_small_characteristics(const Multi_field_element_with_small_characteristics& toCopy);
 	Multi_field_element_with_small_characteristics(Multi_field_element_with_small_characteristics&& toMove) noexcept;
 
-	Multi_field_element_with_small_characteristics& operator+=(Multi_field_element_with_small_characteristics const &f);
+	friend void operator+=(Multi_field_element_with_small_characteristics& f1, Multi_field_element_with_small_characteristics const& f2){
+		f1.element_ = _add(f1.element_, f2.element_);
+	}
 	friend Multi_field_element_with_small_characteristics operator+(Multi_field_element_with_small_characteristics f1, Multi_field_element_with_small_characteristics const& f2){
 		f1 += f2;
 		return f1;
 	}
-	Multi_field_element_with_small_characteristics& operator+=(unsigned int const v);
+	friend void operator+=(Multi_field_element_with_small_characteristics& f, unsigned int const v){
+		f.element_ = _add(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
+	}
 	friend Multi_field_element_with_small_characteristics operator+(Multi_field_element_with_small_characteristics f, unsigned int const v){
 		f += v;
 		return f;
@@ -50,12 +54,16 @@ public:
 		return v;
 	}
 
-	Multi_field_element_with_small_characteristics& operator-=(Multi_field_element_with_small_characteristics const &f);
+	friend void operator-=(Multi_field_element_with_small_characteristics& f1, Multi_field_element_with_small_characteristics const& f2){
+		f1.element_ = _substract(f1.element_, f2.element_);
+	}
 	friend Multi_field_element_with_small_characteristics operator-(Multi_field_element_with_small_characteristics f1, Multi_field_element_with_small_characteristics const& f2){
 		f1 -= f2;
 		return f1;
 	}
-	Multi_field_element_with_small_characteristics& operator-=(unsigned int const v);
+	friend void operator-=(Multi_field_element_with_small_characteristics& f, unsigned int const v){
+		f.element_ = _substract(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
+	}
 	friend Multi_field_element_with_small_characteristics operator-(Multi_field_element_with_small_characteristics f, unsigned int const v){
 		f -= v;
 		return f;
@@ -67,12 +75,16 @@ public:
 		return v;
 	}
 
-	Multi_field_element_with_small_characteristics& operator*=(Multi_field_element_with_small_characteristics const &f);
+	friend void operator*=(Multi_field_element_with_small_characteristics& f1, Multi_field_element_with_small_characteristics const& f2){
+		f1.element_ = _multiply(f1.element_, f2.element_);
+	}
 	friend Multi_field_element_with_small_characteristics operator*(Multi_field_element_with_small_characteristics f1, Multi_field_element_with_small_characteristics const& f2){
 		f1 *= f2;
 		return f1;
 	}
-	Multi_field_element_with_small_characteristics& operator*=(unsigned int const v);
+	friend void operator*=(Multi_field_element_with_small_characteristics& f, unsigned int const v){
+		f.element_ = _multiply(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
+	}
 	friend Multi_field_element_with_small_characteristics operator*(Multi_field_element_with_small_characteristics f, unsigned int const v){
 		f *= v;
 		return f;
@@ -144,6 +156,9 @@ public:
 private:
 	static constexpr bool _is_prime(const int p);
 	static constexpr unsigned int _multiply(unsigned int a, unsigned int b);
+	static constexpr unsigned int _add(unsigned int element, unsigned int v);
+	static constexpr unsigned int _substract(unsigned int element, unsigned int v);
+	static constexpr int _get_inverse(unsigned int element, const unsigned int mod);
 
 	unsigned int element_;
 	static inline const std::vector<unsigned int> primes_ = [](){
@@ -197,10 +212,6 @@ private:
 
 		return res;
 	}();*/
-
-	void _add(unsigned int v);
-	void _substract(unsigned int v);
-	int _get_inverse(const unsigned int mod) const;
 };
 
 template<unsigned int minimum, unsigned int maximum>
@@ -243,47 +254,47 @@ inline Multi_field_element_with_small_characteristics<minimum,maximum>::Multi_fi
 	: element_(std::exchange(toMove.element_, 0))
 {}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator+=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
-{
-	_add(f.element_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator+=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
+//{
+//	_add(f.element_);
+//	return *this;
+//}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator+=(unsigned int const v)
-{
-	_add(v % productOfAllCharacteristics_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator+=(unsigned int const v)
+//{
+//	_add(v % productOfAllCharacteristics_);
+//	return *this;
+//}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator-=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
-{
-	_substract(f.element_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator-=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
+//{
+//	_substract(f.element_);
+//	return *this;
+//}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator-=(unsigned int const v)
-{
-	_substract(v % productOfAllCharacteristics_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator-=(unsigned int const v)
+//{
+//	_substract(v % productOfAllCharacteristics_);
+//	return *this;
+//}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator*=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
-{
-	element_ = _multiply(element_, f.element_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator*=(Multi_field_element_with_small_characteristics<minimum,maximum> const &f)
+//{
+//	element_ = _multiply(element_, f.element_);
+//	return *this;
+//}
 
-template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator*=(unsigned int const v)
-{
-	element_ = _multiply(element_, v % productOfAllCharacteristics_);
-	return *this;
-}
+//template<unsigned int minimum, unsigned int maximum>
+//inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator*=(unsigned int const v)
+//{
+//	element_ = _multiply(element_, v % productOfAllCharacteristics_);
+//	return *this;
+//}
 
 template<unsigned int minimum, unsigned int maximum>
 inline Multi_field_element_with_small_characteristics<minimum,maximum> &Multi_field_element_with_small_characteristics<minimum,maximum>::operator=(Multi_field_element_with_small_characteristics other)
@@ -322,7 +333,7 @@ inline std::pair<Multi_field_element_with_small_characteristics<minimum,maximum>
 	unsigned int QT = productOfCharacteristics / gcd;
 	Multi_field_element_with_small_characteristics res(QT);
 
-	const unsigned int inv_qt = _get_inverse(QT);
+	const unsigned int inv_qt = _get_inverse(element_, QT);
 
 	res = res.get_partial_multiplicative_identity();
 	res *= inv_qt;
@@ -370,26 +381,30 @@ inline unsigned int Multi_field_element_with_small_characteristics<minimum,maxim
 }
 
 template<unsigned int minimum, unsigned int maximum>
-inline void Multi_field_element_with_small_characteristics<minimum,maximum>::_add(unsigned int v)
+inline constexpr unsigned int Multi_field_element_with_small_characteristics<minimum,maximum>::_add(unsigned int element, unsigned int v)
 {
-	if (UINT_MAX - element_ < v) {
+	if (UINT_MAX - element < v) {
 		//automatic unsigned integer overflow behaviour will make it work
-		element_ += v;
-		element_ -= productOfAllCharacteristics_;
-		return;
+		element += v;
+		element -= productOfAllCharacteristics_;
+		return element;
 	}
 
-	element_ += v;
-	if (element_ >= productOfAllCharacteristics_) element_ -= productOfAllCharacteristics_;
+	element += v;
+	if (element >= productOfAllCharacteristics_) element -= productOfAllCharacteristics_;
+
+	return element;
 }
 
 template<unsigned int minimum, unsigned int maximum>
-inline void Multi_field_element_with_small_characteristics<minimum,maximum>::_substract(unsigned int v)
+inline constexpr unsigned int Multi_field_element_with_small_characteristics<minimum,maximum>::_substract(unsigned int element, unsigned int v)
 {
-	if (element_ < v){
-		element_ += productOfAllCharacteristics_;
+	if (element < v){
+		element += productOfAllCharacteristics_;
 	}
-	element_ -= v;
+	element -= v;
+
+	return element;
 }
 
 template<unsigned int minimum, unsigned int maximum>
@@ -419,11 +434,11 @@ inline constexpr unsigned int Multi_field_element_with_small_characteristics<min
 }
 
 template<unsigned int minimum, unsigned int maximum>
-inline int Multi_field_element_with_small_characteristics<minimum,maximum>::_get_inverse(const unsigned int mod) const
+inline constexpr int Multi_field_element_with_small_characteristics<minimum,maximum>::_get_inverse(unsigned int element, const unsigned int mod)
 {
 	//to solve: Ax + My = 1
 	int M = mod;
-	int A = element_;
+	int A = element;
 	int y = 0, x = 1;
 	//extended euclidien division
 	while (A > 1) {

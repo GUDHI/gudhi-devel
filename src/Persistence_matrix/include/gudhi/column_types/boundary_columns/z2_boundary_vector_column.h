@@ -26,6 +26,7 @@ class Z2_vector_boundary_column : public Z2_vector_column<Cell_type,Row_access_o
 {
 private:
 	using Base = Z2_vector_column<Cell_type,Row_access_option>;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -187,10 +188,7 @@ inline int Z2_vector_boundary_column<Cell_type,Row_access_option>::get_pivot()
 template<class Cell_type, class Row_access_option>
 inline void Z2_vector_boundary_column<Cell_type,Row_access_option>::clear()
 {
-	for (Cell* cell : Base::column_){
-		Base::_delete_cell(cell);
-	}
-	Base::column_.clear();
+	Base::clear();
 	erasedValues_.clear();
 }
 

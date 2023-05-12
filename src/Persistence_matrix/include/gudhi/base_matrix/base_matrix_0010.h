@@ -52,9 +52,12 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -103,9 +106,12 @@ template<class Master_matrix>
 template<class Container_type>
 inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(const std::vector<Container_type> &columns)
 	: Master_matrix::Base_swap_option(matrix_, columns.size()),
-	  rows_(columns.size()),
 	  nextInsertIndex_(columns.size())
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(columns.size());
+	}
+
 	matrix_.reserve(columns.size());
 	for (unsigned int i = 0; i < columns.size(); i++){
 		matrix_.emplace_back(i, columns[i], rows_);
@@ -115,20 +121,26 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(c
 template<class Master_matrix>
 inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
-	  rows_(numberOfColumns),
 	  nextInsertIndex_(0)
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(numberOfColumns);
+	}
+
 	matrix_.reserve(numberOfColumns);
 }
 
 template<class Master_matrix>
 inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(const Base_matrix_with_row_access &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
-	  rows_(matrixToCopy.rows_.size()),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
 	if constexpr (swap_opt::isActive_)
 		swap_opt::matrix_ = &matrix_;
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(matrixToCopy.rows_.size());
+	}
+
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	for (const Column_type& col : matrixToCopy.matrix_){
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
@@ -165,7 +177,8 @@ inline void Base_matrix_with_row_access<Master_matrix>::insert_column(const Cont
 		}
 	}
 
-	if (rows_.size() <= nextInsertIndex_) rows_.resize(nextInsertIndex_ + 1);
+	if constexpr (!Master_matrix::Option_list::has_removable_rows)
+			if (rows_.size() <= nextInsertIndex_) rows_.resize(nextInsertIndex_ + 1);
 	matrix_.emplace_back(nextInsertIndex_++, column, rows_);
 }
 
@@ -202,7 +215,11 @@ inline typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base_matri
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
-	return rows_[rowIndex];
+	if constexpr (Master_matrix::Option_list::has_removable_rows) {
+		return rows_[rowIndex];
+	} else {
+		return rows_.at(rowIndex);
+	}
 }
 
 template<class Master_matrix>
@@ -211,7 +228,11 @@ inline const typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
-	return rows_[rowIndex];
+	if constexpr (Master_matrix::Option_list::has_removable_rows) {
+		return rows_[rowIndex];
+	} else {
+		return rows_.at(rowIndex);
+	}
 }
 
 template<class Master_matrix>
@@ -224,8 +245,10 @@ inline void Base_matrix_with_row_access<Master_matrix>::erase_column(index colum
 template<class Master_matrix>
 inline void Base_matrix_with_row_access<Master_matrix>::erase_row(index rowIndex)
 {
-	static_assert(Master_matrix::Option_list::has_removable_columns,
+	static_assert(Master_matrix::Option_list::has_removable_rows,
 			"'erase_row' is not implemented for the chosen options.");
+
+	rows_.erase(rowIndex);
 }
 
 template<class Master_matrix>
@@ -241,19 +264,22 @@ inline void Base_matrix_with_row_access<Master_matrix>::add_to(index sourceColum
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += sourceColumn;
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 }
@@ -292,7 +318,8 @@ template<class Master_matrix>
 inline Base_matrix_with_row_access<Master_matrix> &Base_matrix_with_row_access<Master_matrix>::operator=(const Base_matrix_with_row_access &other)
 {
 	swap_opt::operator=(other);
-	rows_.resize(other.rows_.size());
+	if constexpr (!Master_matrix::Option_list::has_removable_rows)
+			rows_.resize(other.rows_.size());
 	nextInsertIndex_ = other.nextInsertIndex_;
 	matrix_.reserve(other.matrix_.size());
 	for (const Column_type& col : other.matrix_){

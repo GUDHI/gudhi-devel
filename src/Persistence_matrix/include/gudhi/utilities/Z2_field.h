@@ -26,12 +26,16 @@ public:
 	Z2_field_element(const Z2_field_element& toCopy);
 	Z2_field_element(Z2_field_element&& toMove) noexcept;
 
-	Z2_field_element& operator+=(Z2_field_element const &f);
+	friend void operator+=(Z2_field_element& f1, Z2_field_element const& f2){
+		f1.element_ = (f1.element_ != f2.element_);
+	}
 	friend Z2_field_element operator+(Z2_field_element f1, Z2_field_element const& f2){
 		f1 += f2;
 		return f1;
 	}
-	Z2_field_element& operator+=(unsigned int const v);
+	friend void operator+=(Z2_field_element& f, unsigned int const v){
+		f.element_ = (f.element_ != (v % 2));
+	}
 	friend Z2_field_element operator+(Z2_field_element f, unsigned int const v){
 		f += v;
 		return f;
@@ -40,12 +44,16 @@ public:
 		return f.element_ != (v % 2);
 	}
 
-	Z2_field_element& operator-=(Z2_field_element const &f);
+	friend void operator-=(Z2_field_element& f1, Z2_field_element const& f2){
+		f1.element_ = (f1.element_ != f2.element_);
+	}
 	friend Z2_field_element operator-(Z2_field_element f1, Z2_field_element const& f2){
 		f1 -= f2;
 		return f1;
 	}
-	Z2_field_element& operator-=(unsigned int const v);
+	friend void operator-=(Z2_field_element& f, unsigned int const v){
+		f.element_ = (f.element_ != (v % 2));
+	}
 	friend Z2_field_element operator-(Z2_field_element f, unsigned int const v){
 		f -= v;
 		return f;
@@ -54,12 +62,16 @@ public:
 		return f.element_ != (v % 2);
 	}
 
-	Z2_field_element& operator*=(Z2_field_element const &f);
+	friend void operator*=(Z2_field_element& f1, Z2_field_element const& f2){
+		f1.element_ = (f1.element_ && f2.element_);
+	}
 	friend Z2_field_element operator*(Z2_field_element f1, Z2_field_element const& f2){
 		f1 *= f2;
 		return f1;
 	}
-	Z2_field_element& operator*=(unsigned int const v);
+	friend void operator*=(Z2_field_element& f, unsigned int const v){
+		f.element_ = (f.element_ && (v % 2));
+	}
 	friend Z2_field_element operator*(Z2_field_element f, unsigned int const v){
 		f *= v;
 		return f;
@@ -117,11 +129,11 @@ inline Z2_field_element::Z2_field_element()
 {}
 
 inline Z2_field_element::Z2_field_element(unsigned int element)
-	: element_(element % 2)
+	: element_(element & 1U)
 {}
 
 inline Z2_field_element::Z2_field_element(int element)
-	: element_(element % 2)
+	: element_(element & 1U)
 {}
 
 inline Z2_field_element::Z2_field_element(const Z2_field_element &toCopy)
@@ -132,41 +144,41 @@ inline Z2_field_element::Z2_field_element(Z2_field_element &&toMove) noexcept
 	: element_(std::exchange(toMove.element_, 0))
 {}
 
-inline Z2_field_element &Z2_field_element::operator+=(Z2_field_element const &f)
-{
-	element_ = (element_ != f.element_);
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator+=(Z2_field_element const &f)
+//{
+//	element_ = (element_ != f.element_);
+//	return *this;
+//}
 
-inline Z2_field_element &Z2_field_element::operator+=(unsigned int const v)
-{
-	element_ = (element_ != (v % 2));
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator+=(unsigned int const v)
+//{
+//	element_ = (element_ != (v % 2));
+//	return *this;
+//}
 
-inline Z2_field_element &Z2_field_element::operator-=(const Z2_field_element &f)
-{
-	element_ = (element_ != f.element_);
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator-=(const Z2_field_element &f)
+//{
+//	element_ = (element_ != f.element_);
+//	return *this;
+//}
 
-inline Z2_field_element &Z2_field_element::operator-=(unsigned int const v)
-{
-	element_ = (element_ != (v % 2));
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator-=(unsigned int const v)
+//{
+//	element_ = (element_ != (v % 2));
+//	return *this;
+//}
 
-inline Z2_field_element &Z2_field_element::operator*=(const Z2_field_element &f)
-{
-	element_ = (element_ && f.element_);
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator*=(const Z2_field_element &f)
+//{
+//	element_ = (element_ && f.element_);
+//	return *this;
+//}
 
-inline Z2_field_element &Z2_field_element::operator*=(unsigned int const v)
-{
-	element_ = (element_ && (v % 2));
-	return *this;
-}
+//inline Z2_field_element &Z2_field_element::operator*=(unsigned int const v)
+//{
+//	element_ = (element_ && (v % 2));
+//	return *this;
+//}
 
 inline Z2_field_element &Z2_field_element::operator=(Z2_field_element other)
 {
@@ -176,7 +188,7 @@ inline Z2_field_element &Z2_field_element::operator=(Z2_field_element other)
 
 inline Z2_field_element &Z2_field_element::operator=(unsigned int const value)
 {
-	element_ = value % 2;
+	element_ = value & 1U;
 	return *this;
 }
 

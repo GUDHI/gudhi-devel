@@ -27,6 +27,7 @@ class Z2_unordered_set_boundary_column : public Z2_unordered_set_column<Cell_typ
 {
 private:
 	using Base = Z2_unordered_set_column<Cell_type,Row_access_option>;
+	using Base::operator+=;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -180,11 +181,7 @@ inline int Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::get_pi
 template<class Cell_type, class Row_access_option>
 inline void Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::clear()
 {
-	if constexpr (Row_access_option::isActive_){
-		for (const Cell& cell : Base::column_)
-			Row_access_option::unlink(cell);
-	}
-	Base::column_.clear();
+	Base::clear();
 	pivot_ = -1;
 	pivotChanged_ = false;
 }

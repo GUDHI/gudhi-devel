@@ -26,6 +26,8 @@ class List_boundary_column : public List_column<Field_element_type,Cell_type,Row
 {
 private:
 	using Base = List_column<Field_element_type,Cell_type,Row_access_option>;
+	using Base::operator+=;				//kinda ugly, so TODO: organize better
+	using Base::multiply_and_add;		//kinda ugly, so TODO: organize better
 
 public:
 	using Cell = typename Base::Cell;
@@ -50,9 +52,10 @@ public:
 
 	int get_pivot() const;
 	Field_element_type get_pivot_value() const;
-	void clear();
+	using Base::clear;
 	void clear(index rowIndex);
 
+	List_boundary_column& operator+=(List_boundary_column const &column);
 	friend List_boundary_column operator+(List_boundary_column column1, List_boundary_column const& column2){
 		column1 += column2;
 		return column1;
@@ -65,6 +68,11 @@ public:
 		column *= v;
 		return column;
 	}
+
+	//this = v * this + column
+	List_boundary_column& multiply_and_add(const Field_element_type& v, const List_boundary_column& column);
+	//this = this + column * v
+	List_boundary_column& multiply_and_add(const List_boundary_column& column, const Field_element_type& v);
 
 	List_boundary_column& operator=(List_boundary_column other);
 
@@ -146,17 +154,38 @@ inline Field_element_type List_boundary_column<Field_element_type,Cell_type,Row_
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void List_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear()
-{
-	Base::_clear();
-}
-
-template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void List_boundary_column<Field_element_type,Cell_type,Row_access_option>::clear(index rowIndex)
 {
 	auto it = Base::column_.begin();
 	while (it != Base::column_.end() && it->get_row_index() != rowIndex) it++;
 	if (it != Base::column_.end()) Base::_delete_cell(it);
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline List_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+List_boundary_column<Field_element_type,Cell_type,Row_access_option>::operator+=(List_boundary_column const &column)
+{
+	Base::operator+=(column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline List_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+List_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const List_boundary_column& column)
+{
+	Base::multiply_and_add(val, column);
+
+	return *this;
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+inline List_boundary_column<Field_element_type,Cell_type,Row_access_option> &
+List_boundary_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const List_boundary_column& column, const Field_element_type& val)
+{
+	Base::multiply_and_add(column, val);
+
+	return *this;
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

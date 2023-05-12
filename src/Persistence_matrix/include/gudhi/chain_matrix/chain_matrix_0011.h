@@ -55,9 +55,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -160,12 +160,15 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	: Master_matrix::Chain_pairing_option(),
 	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
-	  rows_(orderedBoundaries.size()),
+//	  rows_(orderedBoundaries.size()),
 	  matrix_(orderedBoundaries.size()),
 	  pivotToColumnIndex_(orderedBoundaries.size()),
 	  nextInsertIndex_(0),
 	  maxDim_(-1)
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(orderedBoundaries.size());
+	}
 	for (const Boundary_type &b : orderedBoundaries){
 		insert_boundary(b);
 	}
@@ -177,12 +180,16 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	: Master_matrix::Chain_pairing_option(),
 	  Master_matrix::Chain_vine_swap_option(matrix_),
 	  Master_matrix::Chain_representative_cycles_option(matrix_, pivotToColumnIndex_),
-	  rows_(numberOfColumns),
+//	  rows_(numberOfColumns),
 	  matrix_(numberOfColumns),
 	  pivotToColumnIndex_(numberOfColumns),
 	  nextInsertIndex_(0),
 	  maxDim_(-1)
-{}
+{
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(numberOfColumns);
+	}
+}
 
 template<class Master_matrix>
 inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_with_row_access_with_removals(
@@ -190,13 +197,16 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	: Master_matrix::Chain_pairing_option(matrixToCopy),
 	  Master_matrix::Chain_vine_swap_option(matrixToCopy),
 	  Master_matrix::Chain_representative_cycles_option(matrixToCopy),
-	  rows_(matrixToCopy.rows_.size()),
+//	  rows_(matrixToCopy.rows_.size()),
 	  matrix_(matrixToCopy.matrix_.size()),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
 	  dimensions_(matrixToCopy.dimensions_),
 	  maxDim_(matrixToCopy.maxDim_)
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(matrixToCopy.rows_.size());
+	}
 	if constexpr (rep_opt::isActive_){
 		rep_opt::matrix_ = &matrix_;
 		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
@@ -356,19 +366,19 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex) += sourceColumn;
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
 }

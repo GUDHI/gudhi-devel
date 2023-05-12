@@ -385,10 +385,12 @@ inline void RU_matrix_with_row_access<Master_matrix>::_reduce()
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
 					coef = coef.get_inverse();
 					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
-					curr *= coef;
-					curr += toadd;
-					mirrorMatrixU_.get_column(i) *= coef;
-					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
+					curr.multiply_and_add(coef, toadd);
+//					curr *= coef;
+//					curr += toadd;
+					mirrorMatrixU_.get_column(i).multiply_and_add(coef, mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]));
+//					mirrorMatrixU_.get_column(i) *= coef;
+//					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(pivotToColumnIndex_[pivot]);
 				}
 
 				pivot = curr.get_pivot();

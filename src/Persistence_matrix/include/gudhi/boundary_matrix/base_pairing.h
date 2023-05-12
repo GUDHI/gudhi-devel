@@ -100,8 +100,9 @@ inline void Base_pairing<Master_matrix>::_reduce()
 						typename Master_matrix::Field_type coef = curr.get_pivot_value();
 						coef = coef.get_inverse();
 						coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
-						curr *= coef;
-						curr += toadd;
+						curr.multiply_and_add(coef, toadd);
+//						curr *= coef;
+//						curr += toadd;
 					}
 
 					pivot = curr.get_pivot();

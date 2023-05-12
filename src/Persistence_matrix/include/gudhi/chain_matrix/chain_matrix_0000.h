@@ -56,9 +56,9 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -299,19 +299,19 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index t
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += sourceColumn;
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 }

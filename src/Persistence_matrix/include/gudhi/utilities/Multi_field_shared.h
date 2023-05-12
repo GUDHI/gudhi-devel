@@ -32,12 +32,18 @@ public:
 
 	static void initialize(unsigned int minimum, unsigned int maximum);
 
-	Shared_multi_field_element& operator+=(Shared_multi_field_element const &f);
+	friend void operator+=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2){
+		mpz_add(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+		mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator+(Shared_multi_field_element f1, Shared_multi_field_element const& f2){
 		f1 += f2;
 		return f1;
 	}
-	Shared_multi_field_element& operator+=(mpz_class const v);
+	friend void operator+=(Shared_multi_field_element& f, mpz_class const v){
+		mpz_add(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+		mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator+(Shared_multi_field_element f, mpz_class const v){
 		f += v;
 		return f;
@@ -49,12 +55,18 @@ public:
 		return e;
 	}
 
-	Shared_multi_field_element& operator-=(Shared_multi_field_element const &f);
+	friend void operator-=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2){
+		mpz_sub(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+		mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator-(Shared_multi_field_element f1, Shared_multi_field_element const& f2){
 		f1 -= f2;
 		return f1;
 	}
-	Shared_multi_field_element& operator-=(mpz_class const v);
+	friend void operator-=(Shared_multi_field_element& f, mpz_class const v){
+		mpz_sub(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+		mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator-(Shared_multi_field_element f, mpz_class const v){
 		f -= v;
 		return f;
@@ -69,12 +81,18 @@ public:
 		return e;
 	}
 
-	Shared_multi_field_element& operator*=(Shared_multi_field_element const &f);
+	friend void operator*=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2){
+		mpz_mul(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+		mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator*(Shared_multi_field_element f1, Shared_multi_field_element const& f2){
 		f1 *= f2;
 		return f1;
 	}
-	Shared_multi_field_element& operator*=(mpz_class const v);
+	friend void operator*=(Shared_multi_field_element& f, mpz_class const v){
+		mpz_mul(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+		mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+	}
 	friend Shared_multi_field_element operator*(Shared_multi_field_element f, mpz_class const v){
 		f *= v;
 		return f;
@@ -230,47 +248,47 @@ inline void Shared_multi_field_element::initialize(unsigned int minimum, unsigne
 //	}
 }
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator+=(Shared_multi_field_element const &f)
-{
-	mpz_add(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator+=(Shared_multi_field_element const &f)
+//{
+//	mpz_add(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator+=(mpz_class const v)
-{
-	mpz_add(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator+=(mpz_class const v)
+//{
+//	mpz_add(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator-=(Shared_multi_field_element const &f)
-{
-	mpz_sub(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator-=(Shared_multi_field_element const &f)
+//{
+//	mpz_sub(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator-=(mpz_class const v)
-{
-	mpz_sub(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator-=(mpz_class const v)
+//{
+//	mpz_sub(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator*=(Shared_multi_field_element const &f)
-{
-	mpz_mul(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator*=(Shared_multi_field_element const &f)
+//{
+//	mpz_mul(element_.get_mpz_t(), element_.get_mpz_t(), f.element_.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
-inline Shared_multi_field_element &Shared_multi_field_element::operator*=(mpz_class const v)
-{
-	mpz_mul(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
-	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-	return *this;
-}
+//inline Shared_multi_field_element &Shared_multi_field_element::operator*=(mpz_class const v)
+//{
+//	mpz_mul(element_.get_mpz_t(), element_.get_mpz_t(), v.get_mpz_t());
+//	mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+//	return *this;
+//}
 
 inline Shared_multi_field_element &Shared_multi_field_element::operator=(Shared_multi_field_element other)
 {

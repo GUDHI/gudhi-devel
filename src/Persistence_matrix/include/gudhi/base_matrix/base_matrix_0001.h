@@ -48,9 +48,12 @@ public:
 	unsigned int get_number_of_columns() const;
 
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -207,19 +210,22 @@ inline void Base_matrix_with_removals<Master_matrix>::add_to(index sourceColumnI
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_removals<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex) += sourceColumn;
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_removals<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_removals<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+template<class Cell_range>
+inline void Base_matrix_with_removals<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
 }

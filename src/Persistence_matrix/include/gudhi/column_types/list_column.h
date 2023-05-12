@@ -46,6 +46,8 @@ public:
 	List_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	List_column(const List_column& column);
 	List_column(const List_column& column, index columnIndex);
+	template<class Row_container_type>
+	List_column(const List_column& column, index columnIndex, Row_container_type &rowContainer);
 	List_column(List_column&& column) noexcept;
 	~List_column();
 
@@ -55,6 +57,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -65,7 +68,8 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	List_column& operator+=(List_column const &column);
+	template<class Cell_range>
+	List_column& operator+=(Cell_range const &column);
 	friend List_column operator+(List_column column1, List_column const& column2){
 		column1 += column2;
 		return column1;
@@ -82,11 +86,15 @@ public:
 	}
 
 	//this = v * this + column
-	List_column& multiply_and_add(const Field_element_type& v, const List_column& column);
+	template<class Cell_range>
+	List_column& multiply_and_add(const Field_element_type& v, const Cell_range& column);
 	//this = this + column * v
-	List_column& multiply_and_add(const List_column& column, const Field_element_type& v);
+	template<class Cell_range>
+	List_column& multiply_and_add(const Cell_range& column, const Field_element_type& v);
 
 	friend bool operator==(const List_column& c1, const List_column& c2){
+		if (&c1 == &c2) return true;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		if (c1.column_.size() != c2.column_.size()) return false;
@@ -98,6 +106,8 @@ public:
 		return true;
 	}
 	friend bool operator<(const List_column& c1, const List_column& c2){
+		if (&c1 == &c2) return false;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
@@ -126,7 +136,6 @@ protected:
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator& position);
 	void _update_cell(const Field_element_type& value, index rowIndex, const iterator& position);
-	void _clear();
 };
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -215,6 +224,20 @@ inline List_column<Field_element_type,Cell_type,Row_access_option>::List_column(
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline List_column<Field_element_type,Cell_type,Row_access_option>::List_column(
+		const List_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_),
+	  column_(column.column_.size())
+{
+	auto it = column_.begin();
+	for (const Cell& cell : column.column_){
+		_update_cell(cell.get_element(), cell.get_row_index(), it++);
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
 inline List_column<Field_element_type,Cell_type,Row_access_option>::List_column(List_column &&column) noexcept
 	: Row_access_option(std::move(column)),
 	  dim_(std::exchange(column.dim_, 0)),
@@ -236,7 +259,7 @@ inline std::vector<Field_element_type> List_column<Field_element_type,Cell_type,
 	if (columnLength < 0) columnLength = column_.back().get_row_index() + 1;
 
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[it->get_row_index()] = it->get_element();
 	}
 	return container;
@@ -341,27 +364,29 @@ List_column<Field_element_type,Cell_type,Row_access_option>::rend() const noexce
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline List_column<Field_element_type,Cell_type,Row_access_option> &List_column<Field_element_type,Cell_type,Row_access_option>::operator+=(List_column const &column)
+template<class Cell_range>
+inline List_column<Field_element_type,Cell_type,Row_access_option> &List_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Cell_range const &column)
 {
-	if (column.is_empty()) return *this;
+	if (column.begin() == column.end()) return *this;
 	if (column_.empty()){
 		if constexpr (Row_access_option::isActive_){
-			column_.resize(column.column_.size());
-			auto it = column_.begin();
-			for (const Cell& cell : column.column_)
-				_update_cell(cell.get_element(), cell.get_row_index(), it++);
+//			column_.resize(column.column_.size());
+//			auto it = column_.begin();
+			for (const Cell& cell : column)
+				_insert_cell(cell.get_element(), cell.get_row_index(), column_.end());
+//				_update_cell(cell.get_element(), cell.get_row_index(), it++);
 		} else {
-			std::copy(column.column_.begin(), column.column_.end(), std::back_inserter(column_));
+			std::copy(column.begin(), column.end(), std::back_inserter(column_));
 		}
 		return *this;
 	}
 
-	const_iterator itToAdd = column.column_.begin();
+	const_iterator itToAdd = column.begin();
 	iterator itTarget = column_.begin();
 	index curRowToAdd = itToAdd->get_row_index();
 	index curRowTarget = itTarget->get_row_index();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
 		if (curRowToAdd == curRowTarget){
 			itTarget->get_element() += itToAdd->get_element();
@@ -379,13 +404,13 @@ inline List_column<Field_element_type,Cell_type,Row_access_option> &List_column<
 			itTarget++;
 		}
 
-		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
+		if (itToAdd != column.end()) curRowToAdd = itToAdd->get_row_index();
 		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
-	while (itToAdd != column.column_.end()){
+	while (itToAdd != column.end()){
 		curRowToAdd = itToAdd->get_row_index();
-		if (itToAdd != column.column_.end()){
+		if (itToAdd != column.end()){
 			_insert_cell(itToAdd->get_element(), curRowToAdd, column_.end());
 			itToAdd++;
 		}
@@ -401,7 +426,7 @@ inline List_column<Field_element_type,Cell_type,Row_access_option> &List_column<
 	Field_element_type val(v);
 
 	if (val == 0u) {
-		_clear();
+		clear();
 		return *this;
 	}
 
@@ -417,19 +442,20 @@ inline List_column<Field_element_type,Cell_type,Row_access_option> &List_column<
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline List_column<Field_element_type,Cell_type,Row_access_option> &
-List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const List_column& column)
+List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Cell_range& column)
 {
 	if (val == 0u) {
-		_clear();
+		clear();
 	}
 
-	const_iterator itToAdd = column.column_.begin();
+	const_iterator itToAdd = column.begin();
 	iterator itTarget = column_.begin();
 	index curRowToAdd = itToAdd->get_row_index();
 	index curRowTarget = itTarget->get_row_index();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
 		if (curRowToAdd == curRowTarget){
 			itTarget->get_element() *= val;
@@ -446,21 +472,25 @@ List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(co
 			itToAdd++;
 		} else {
 			itTarget->get_element() *= val;
+			if constexpr (Row_access_option::isActive_)
+					Row_access_option::update_cell(*itTarget);
 			itTarget++;
 		}
 
-		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
+		if (itToAdd != column.end()) curRowToAdd = itToAdd->get_row_index();
 		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
 	while (itTarget != column_.end()){
 		itTarget->get_element() *= val;
+		if constexpr (Row_access_option::isActive_)
+				Row_access_option::update_cell(*itTarget);
 		++itTarget;
 	}
 
-	while (itToAdd != column.column_.end()){
+	while (itToAdd != column.end()){
 		curRowToAdd = itToAdd->get_row_index();
-		if (itToAdd != column.column_.end()){
+		if (itToAdd != column.end()){
 			_insert_cell(itToAdd->get_element(), curRowToAdd, column_.end());
 			itToAdd++;
 		}
@@ -470,19 +500,20 @@ List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(co
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline List_column<Field_element_type,Cell_type,Row_access_option> &
-List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const List_column& column, const Field_element_type& val)
+List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Cell_range& column, const Field_element_type& val)
 {
 	if (val == 0u) {
 		return *this;
 	}
 
-	const_iterator itToAdd = column.column_.begin();
+	const_iterator itToAdd = column.begin();
 	iterator itTarget = column_.begin();
 	index curRowToAdd = itToAdd->get_row_index();
 	index curRowTarget = itTarget->get_row_index();
 
-	while (itToAdd != column.column_.end() && itTarget != column_.end())
+	while (itToAdd != column.end() && itTarget != column_.end())
 	{
 		if (curRowToAdd == curRowTarget){
 			itTarget->get_element() += (itToAdd->get_element() * val);
@@ -501,13 +532,13 @@ List_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(co
 			itTarget++;
 		}
 
-		if (itToAdd != column.column_.end()) curRowToAdd = itToAdd->get_row_index();
+		if (itToAdd != column.end()) curRowToAdd = itToAdd->get_row_index();
 		if (itTarget != column_.end()) curRowTarget = itTarget->get_row_index();
 	}
 
-	while (itToAdd != column.column_.end()){
+	while (itToAdd != column.end()){
 		curRowToAdd = itToAdd->get_row_index();
-		if (itToAdd != column.column_.end()){
+		if (itToAdd != column.end()){
 			_insert_cell(itToAdd->get_element() * val, curRowToAdd, column_.end());
 			itToAdd++;
 		}
@@ -559,7 +590,7 @@ inline void List_column<Field_element_type,Cell_type,Row_access_option>::_update
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void List_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+inline void List_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	if constexpr (Row_access_option::isActive_){
 		for (Cell& cell : column_)

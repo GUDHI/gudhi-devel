@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <boost/intrusive/list.hpp>
+#include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
 #include "cell.h"
@@ -50,6 +51,8 @@ public:
 	Intrusive_list_column(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer);
 	Intrusive_list_column(const Intrusive_list_column& column);
 	Intrusive_list_column(const Intrusive_list_column& column, index columnIndex);
+	template<class Row_container_type>
+	Intrusive_list_column(const Intrusive_list_column& column, index columnIndex, Row_container_type &rowContainer);
 	Intrusive_list_column(Intrusive_list_column&& column) noexcept;
 	~Intrusive_list_column();
 
@@ -59,6 +62,7 @@ public:
 	dimension_type get_dimension() const;
 	template<class Map_type>
 	void reorder(Map_type& valueMap);
+	void clear();
 
 	iterator begin() noexcept;
 	const_iterator begin() const noexcept;
@@ -69,7 +73,9 @@ public:
 	reverse_iterator rend() noexcept;
 	const_reverse_iterator rend() const noexcept;
 
-	Intrusive_list_column& operator+=(Intrusive_list_column const &column);
+	template<class Cell_range>
+	Intrusive_list_column& operator+=(Cell_range const &column);
+//	Intrusive_list_column& operator+=(Intrusive_list_column const &column);
 	friend Intrusive_list_column operator+(Intrusive_list_column column1, Intrusive_list_column const& column2){
 		column1 += column2;
 		return column1;
@@ -86,11 +92,17 @@ public:
 	}
 
 	//this = v * this + column
-	Intrusive_list_column& multiply_and_add(const Field_element_type& v, const Intrusive_list_column& column);
+	template<class Cell_range>
+	Intrusive_list_column& multiply_and_add(const Field_element_type& v, const Cell_range& column);
+//	Intrusive_list_column& multiply_and_add(const Field_element_type& v, const Intrusive_list_column& column);
 	//this = this + column * v
-	Intrusive_list_column& multiply_and_add(const Intrusive_list_column& column, const Field_element_type& v);
+	template<class Cell_range>
+	Intrusive_list_column& multiply_and_add(const Cell_range& column, const Field_element_type& v);
+//	Intrusive_list_column& multiply_and_add(const Intrusive_list_column& column, const Field_element_type& v);
 
 	friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2){
+		if (&c1 == &c2) return true;
+
 		auto it1 = c1.column_.begin();
 		auto it2 = c2.column_.begin();
 		if (c1.column_.size() != c2.column_.size()) return false;
@@ -102,8 +114,10 @@ public:
 		return true;
 	}
 	friend bool operator<(const Intrusive_list_column& c1, const Intrusive_list_column& c2){
-		const auto it1 = c1.column_.begin();
-		const auto it2 = c2.column_.begin();
+		if (&c1 == &c2) return false;
+
+		auto it1 = c1.column_.begin();
+		auto it2 = c2.column_.begin();
 		while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
 			if (it1->get_row_index() != it2->get_row_index())
 				return it1->get_row_index() < it2->get_row_index();
@@ -127,17 +141,21 @@ public:
 protected:
 	dimension_type dim_;
 	Column_type column_;
+//	inline static Simple_object_pool<Column_type> columnPool_;
+	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator& position);
-	void _clear();
 
 private:
 	//Cloner object function for boost intrusive container
 	struct new_cloner
 	{
 		Cell *operator()(const Cell &clone_this)
-		{  return new Cell(clone_this);  }
+		{
+//			return new Cell(clone_this);
+			return cellPool_.construct(clone_this);
+		}
 	};
 
 	//The disposer object function for boost intrusive container
@@ -151,7 +169,8 @@ private:
 		{
 			if constexpr (Row_access_option::isActive_)
 				col_->unlink(delete_this);
-			delete delete_this;
+//			delete delete_this;
+			cellPool_.destroy(delete_this);
 		}
 
 		Intrusive_list_column* col_;
@@ -243,6 +262,18 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::Intrusive_list_column(
+		const Intrusive_list_column &column, index columnIndex, Row_container_type &rowContainer)
+	: Row_access_option(columnIndex, rowContainer),
+	  dim_(column.dim_)
+{
+	for (const Cell& cell : column.column_){
+		_insert_cell(cell.get_element(), cell.get_row_index(), column_.end());
+	}
+}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::Intrusive_list_column(
 		Intrusive_list_column &&column) noexcept
 	: Row_access_option(std::move(column)),
@@ -253,9 +284,10 @@ inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::In
 template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::~Intrusive_list_column()
 {
-	for (iterator c_it = column_.begin(); c_it != column_.end(); ){
-		_delete_cell(c_it);
-	}
+//	for (iterator c_it = column_.begin(); c_it != column_.end(); ){
+//		_delete_cell(c_it);
+//	}
+	clear();
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -264,7 +296,7 @@ inline std::vector<Field_element_type> Intrusive_list_column<Field_element_type,
 	if (columnLength < 0) columnLength = column_.back().get_row_index() + 1;
 
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < columnLength; ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
 		container[it->get_row_index()] = it->get_element();
 	}
 	return container;
@@ -369,14 +401,16 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::rend() co
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
-Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_list_column const &column)
+Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Cell_range const &column)
+//Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_list_column const &column)
 {
-	const Column_type& sc = column.column_;
+//	const Column_type& sc = column.column_;
 
 	auto itTarget = column_.begin();
-	auto itSource = sc.begin();
-	while (itTarget != column_.end() && itSource != sc.end())
+	auto itSource = column.begin();
+	while (itTarget != column_.end() && itSource != column.end())
 	{
 		if (itTarget->get_row_index() < itSource->get_row_index()) {
 			++itTarget;
@@ -396,7 +430,7 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator+
 		}
 	}
 
-	while (itSource != sc.end()) {
+	while (itSource != column.end()) {
 		_insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
 		++itSource;
 	}
@@ -412,7 +446,7 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator*
 	Field_element_type val(v);
 
 	if (val == 0u) {
-		_clear();
+		clear();
 		return *this;
 	}
 
@@ -428,21 +462,22 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::operator*
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
-Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Intrusive_list_column& column)
+Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Field_element_type& val, const Cell_range& column)
 {
 	if (val == 0u) {
-		_clear();
+		clear();
 	}
 
-	const Column_type& sc = column.column_;
-
 	auto itTarget = column_.begin();
-	auto itSource = sc.begin();
-	while (itTarget != column_.end() && itSource != sc.end())
+	auto itSource = column.begin();
+	while (itTarget != column_.end() && itSource != column.end())
 	{
 		if (itTarget->get_row_index() < itSource->get_row_index()) {
 			itTarget->get_element() *= val;
+			if constexpr (Row_access_option::isActive_)
+					Row_access_option::update_cell(*itTarget);
 			++itTarget;
 		} else if (itTarget->get_row_index() > itSource->get_row_index()) {
 			_insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
@@ -463,10 +498,12 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_
 
 	while (itTarget != column_.end()){
 		itTarget->get_element() *= val;
+		if constexpr (Row_access_option::isActive_)
+				Row_access_option::update_cell(*itTarget);
 		itTarget++;
 	}
 
-	while (itSource != sc.end()) {
+	while (itSource != column.end()) {
 		_insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
 		++itSource;
 	}
@@ -475,18 +512,19 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Cell_range>
 inline Intrusive_list_column<Field_element_type,Cell_type,Row_access_option> &
-Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Intrusive_list_column& column, const Field_element_type& val)
+Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Cell_range& column, const Field_element_type& val)
+//Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_and_add(const Intrusive_list_column& column, const Field_element_type& val)
 {
 	if (val == 0u) {
 		return *this;
 	}
 
-	const Column_type& sc = column.column_;
-
+//	const Column_type& sc = column.column_;
 	auto itTarget = column_.begin();
-	auto itSource = sc.begin();
-	while (itTarget != column_.end() && itSource != sc.end())
+	auto itSource = column.begin();
+	while (itTarget != column_.end() && itSource != column.end())
 	{
 		if (itTarget->get_row_index() < itSource->get_row_index()) {
 			++itTarget;
@@ -506,7 +544,7 @@ Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::multiply_
 		}
 	}
 
-	while (itSource != sc.end()) {
+	while (itSource != column.end()) {
 		_insert_cell(itSource->get_element() * val, itSource->get_row_index(), column_.end());
 		++itSource;
 	}
@@ -543,17 +581,19 @@ inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option
 		const Field_element_type &value, index rowIndex, const iterator &position)
 {
 	if constexpr (Row_access_option::isActive_){
-		Cell *new_cell = new Cell(value, Row_access_option::columnIndex_, rowIndex);
+//		Cell *new_cell = new Cell(value, Row_access_option::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(value, Row_access_option::columnIndex_, rowIndex);
 		column_.insert(position, *new_cell);
 		Row_access_option::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = new Cell(value, rowIndex);
+//		Cell *new_cell = new Cell(value, rowIndex);
+		Cell *new_cell = cellPool_.construct(value, rowIndex);
 		column_.insert(position, *new_cell);
 	}
 }
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
-inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::_clear()
+inline void Intrusive_list_column<Field_element_type,Cell_type,Row_access_option>::clear()
 {
 	column_.clear_and_dispose(delete_disposer(this));
 }

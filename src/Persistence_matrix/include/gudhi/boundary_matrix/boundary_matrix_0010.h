@@ -116,11 +116,14 @@ template<class Boundary_type>
 inline Boundary_matrix_with_row_access<Master_matrix>::Boundary_matrix_with_row_access(const std::vector<Boundary_type> &orderedBoundaries)
 	: Master_matrix::Base_swap_option(matrix_, orderedBoundaries.size()),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
-	  rows_(orderedBoundaries.size()),
+//	  rows_(orderedBoundaries.size()),
 	  maxDim_(-1),
 	  nextInsertIndex_(orderedBoundaries.size())
 {
 	matrix_.reserve(orderedBoundaries.size());
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(orderedBoundaries.size());
+	}
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
 		matrix_.emplace_back(i, b, rows_);
@@ -132,21 +135,27 @@ template<class Master_matrix>
 inline Boundary_matrix_with_row_access<Master_matrix>::Boundary_matrix_with_row_access(unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
 	  Master_matrix::Base_pairing_option(matrix_, maxDim_),
-	  rows_(numberOfColumns),
+//	  rows_(numberOfColumns),
 	  maxDim_(-1),
 	  nextInsertIndex_(0)
 {
 	matrix_.reserve(numberOfColumns);
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(numberOfColumns);
+	}
 }
 
 template<class Master_matrix>
 inline Boundary_matrix_with_row_access<Master_matrix>::Boundary_matrix_with_row_access(const Boundary_matrix_with_row_access &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  Master_matrix::Base_pairing_option(matrixToCopy),
-	  rows_(matrixToCopy.rows_.size()),
+//	  rows_(matrixToCopy.rows_.size()),
 	  maxDim_(matrixToCopy.maxDim_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
+	if constexpr (!Master_matrix::Option_list::has_removable_rows){
+		rows_.resize(matrixToCopy.rows_.size());
+	}
 	if constexpr (swap_opt::isActive_)
 		swap_opt::matrix_ = &matrix_;
 	if constexpr (pair_opt::isActive_){
