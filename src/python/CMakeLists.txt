@@ -425,11 +425,6 @@ if(PYTHONINTERP_FOUND)
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/cubical_complex_sklearn_itf.py")
-
-      add_test(NAME rips_complex_sklearn_itf_py_test
-               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-               ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-plot")
     endif()
 
     # Test examples
@@ -550,6 +545,18 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
 
     add_gudhi_py_test(test_rips_complex)
+
+    if(SKLEARN_FOUND)
+      add_gudhi_py_test(test_sklearn_rips_persistence)
+      
+      # Datasets are fetched for these tests 
+      if(WITH_GUDHI_REMOTE_TEST)
+        add_test(NAME rips_complex_sklearn_itf_py_test
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                 COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-plot")
+      endif()
+    endif()
 
     # Simplex tree
     add_test(NAME simplex_tree_example_py_test
