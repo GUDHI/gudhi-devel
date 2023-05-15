@@ -36,6 +36,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self,
         homology_dimensions,
         max_edge_length=float('inf'),
+        input_type='points',
         nb_collapse=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
@@ -49,6 +50,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
             max_edge_length (float): Rips value. Default is +Inf.
+            input_type (str): Can be 'points' when inputs are point clouds, or 'matrices', when inputs are distance
+                matrices (full square or lower triangular). Default is 'points'.
             nb_collapse (int): The number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform on the
                 SimplexTree. Default is -1, which means "automatic" (a relatively good enough number of iterations is
                 choosen).
@@ -59,6 +62,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         """
         self.homology_dimensions = homology_dimensions
         self.max_edge_length = max_edge_length
+        self.input_type = input_type
         self.nb_collapse = nb_collapse
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
@@ -70,14 +74,22 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         """
         return self
 
-    def __get_stree_from_points(self, points, max_dimension):
+    def __transform(self, inputs):
+        max_dimension = max(self.dim_list_) + 1
+
         # nb_collapse "automatic" case management
         if self.nb_collapse < 0:
             nb_collapse = 1
         else:
             nb_collapse = self.nb_collapse
         
-        rips = RipsComplex(points=points, max_edge_length = self.max_edge_length)
+        if self.input_type == 'points':
+            rips = RipsComplex(points=inputs, max_edge_length = self.max_edge_length)
+        elif self.input_type == 'matrices':
+            rips = RipsComplex(distance_matrix=inputs, max_edge_length = self.max_edge_length)
+        else:
+            raise ValueError("Only 'points' and  'matrices' are valid input_type")
+        
         if max_dimension > 1:
             stree = rips.create_simplex_tree(max_dimension=1)
             stree.collapse_edges(nb_iterations = nb_collapse)
@@ -88,17 +100,10 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         stree.compute_persistence(
             homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
         )
-        return stree
 
-    def __transform(self, points):
-        stree = (self.__get_stree_from_points)(points, (max(self.homology_dimensions) + 1))
         return [
-            stree.persistence_intervals_in_dimension(dim) for dim in self.homology_dimensions
+            stree.persistence_intervals_in_dimension(dim) for dim in self.dim_list_
         ]
-
-    def __transform_only_this_dim(self, points):
-        stree = (self.__get_stree_from_points)(points, (self.homology_dimensions + 1))
-        return stree.persistence_intervals_in_dimension(self.homology_dimensions)
 
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
@@ -114,11 +119,15 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         """
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
-            # threads is preferred as Rips construction and persistence computation releases the GIL
-            return Parallel(n_jobs=self.n_jobs, prefer="threads")(
-                delayed(self.__transform_only_this_dim)(points) for points in X
-            )
+            unwrap = True
+            self.dim_list_ = [ self.homology_dimensions ]
         else:
-            # threads is preferred as Rips construction and persistence computation releases the GIL
-            return Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(points) for points in X)
+            unwrap = False
+            self.dim_list_ = self.homology_dimensions
 
+        # threads is preferred as Rips construction and persistence computation releases the GIL
+        res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
+
+        if unwrap:
+            res = [d[0] for d in res]
+        return res
