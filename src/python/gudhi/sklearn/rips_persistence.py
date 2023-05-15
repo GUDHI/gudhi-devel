@@ -40,6 +40,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         nb_collapse=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
+        persistence_dim_max = False,
         n_jobs=None,
     ):
         """
@@ -58,6 +59,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
+            persistence_dim_max (bool): If true, the persistent homology for the maximal dimension in the complex is
+                computed. If false, it is ignored. Default is false.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
         self.homology_dimensions = homology_dimensions
@@ -66,6 +69,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.nb_collapse = nb_collapse
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
+        self.persistence_dim_max = persistence_dim_max
         self.n_jobs = n_jobs
 
     def fit(self, X, Y=None):
@@ -98,7 +102,9 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
         
         stree.compute_persistence(
-            homology_coeff_field=self.homology_coeff_field, min_persistence=self.min_persistence
+            homology_coeff_field=self.homology_coeff_field,
+            min_persistence=self.min_persistence,
+            persistence_dim_max=self.persistence_dim_max
         )
 
         return [
