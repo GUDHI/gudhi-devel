@@ -554,7 +554,7 @@ struct Persistence_on_rectangle {
  * @tparam output_index If false, each argument of the out functors is a filtration value. If true, it is instead the index of this filtration value in the input.
  * @tparam Filtration_value Must be comparable with `operator<`.
  * @tparam Index This is used to index the elements of `input`, so it must be large enough to represent the size of `input`.
- * @param[in] input Pointer to `nrows*n_cols` filtration values for the square cells. Note that the values are assumed to be stored in C order, unlike `Gudhi::cubical_complex::Bitmap_cubical_complex` (you can exchange `n_rows` and `n_cols` for compatibility).
+ * @param[in] input Pointer to `n_rows*n_cols` filtration values for the square cells. Note that the values are assumed to be stored in C order, unlike `Gudhi::cubical_complex::Bitmap_cubical_complex` (you can exchange `n_rows` and `n_cols` for compatibility).
  * @param[in] n_rows number of rows of `input`.
  * @param[in] n_cols number of columns of `input`.
  * @param[out] out0 For each interval (b, d) in the persistence diagram of dimension 0, the function calls `out0(b, d)`.
