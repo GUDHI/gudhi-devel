@@ -5,8 +5,10 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same label in an intrusive list.
+ *      - 2020/09 Clément Maria: Option to link all simplex tree nodes with same label in an intrusive list
+ *      - 2020/09 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -1262,24 +1264,25 @@ class Simplex_tree {
   }
 
   /**
-    * Add a vertex or an edge in a flag complex, as well as all
+    * @brief Adds a vertex or an edge in a flag complex, as well as all
     * simplices of its star, defined to maintain the property
     * of the complex to be a flag complex, truncated at dimension dim_max.
     *
-    * In term of edges in the graph, inserting edge u,v only affects N^+(u).
+    * In term of edges in the graph, inserting edge `[u,v]` only affects
+    * the subtree rooted at @p u.
     *
-    * For a new node with label v, we first do a local expansion for
+    * For a new node with label @p v, we first do a local expansion for
     * computing the children of this new node, and then a standard expansion
     * for its children.
-    * Nodes with label v (and their subtrees) already in the tree
+    * Nodes with label @p v (and their subtrees) already in the tree
     * do not get affected.
     *
-    * Nodes with label u get affected only if a Node with label v is in their same
+    * Nodes with label @p u get affected only if a Node with label @p v is in their same
     * siblings set.
-    * We then try to insert "ponctually" v all over the subtree rooted
-    * at Node(u). Each insertion of a Node with v label induces a local
+    * We then try to insert "ponctually" @p v all over the subtree rooted
+    * at `Node(u)`. Each insertion of a Node with @p v label induces a local
     * expansion at this Node (as explained above) and a sequence of "ponctual"
-    * insertion of Node(v) in the subtree rooted at sibling nodes of the new node,
+    * insertion of `Node(v)` in the subtree rooted at sibling nodes of the new node,
     * on its left.
     *
     * @param[in] u,v              Vertex_handle representing the new edge
@@ -1288,8 +1291,14 @@ class Simplex_tree {
     * @param[in] added_simplices  Contains at the end all new
     *                             simplices induced by the insertion of the edge.
     *
-    * SimplexTreeOptions::link_nodes_by_label must be true.
-    * Simplex_tree::Dictionary must sort Vertex_handles w/ increasing natural order <
+    * @pre `SimplexTreeOptions::link_nodes_by_label` must be true.
+    * @pre `Simplex_tree::Dictionary` must sort `Vertex_handles` w/ increasing natural order `<`
+    * @pre When inserting the edge `[u,v]`, the vertices @p u and @p v have to be
+    * already inserted in the simplex tree.
+    *
+    * @warning If the edges and vertices are not inserted in the order of their
+    * filtration values, the method `make_filtration_non_decreasing()` has to be
+    * called at the end of the insertions to restore the intended filtration.
     */
   void insert_edge_as_flag(  Vertex_handle                   u
                            , Vertex_handle                   v
@@ -1375,15 +1384,14 @@ class Simplex_tree {
   }
 
  private:
-  /*
-   * Insert a Node with label v in the set of siblings sib, and percolate the
+  /** \brief Insert a Node with label @p v in the set of siblings sib, and percolate the
    * expansion on the subtree rooted at sib. Sibling sib must not contain
-   * v.
+   * @p v.
    * The percolation of the expansion is twofold:
-   * 1- the newly inserted Node labeled v in sib has a subtree computed
+   * 1- the newly inserted Node labeled @p v in sib has a subtree computed
    * via create_local_expansion.
-   * 2- All Node in the members of sib, with label x and x < v,
-   * need in turn a local_expansion by v iff N^+(x) contains v.
+   * 2- All Node in the members of sib, with label @p x and @p x < @p v,
+   * need in turn a local_expansion by @p v iff N^+(x) contains @p v.
    */
   void compute_punctual_expansion(  Vertex_handle    v
                                   , Siblings *       sib
@@ -1424,17 +1432,17 @@ class Simplex_tree {
     }
   }
 
-  /* After the insertion of edge {u,v}, expansion of a subtree rooted at v, where the
-   * Node with label v has just been inserted, and its parent is a Node labeled with
-   * u. sh has no children here.
+  /** \brief After the insertion of edge `{u,v}`, expansion of a subtree rooted at @p v, where the
+   * Node with label @p v has just been inserted, and its parent is a Node labeled with
+   * @p u. sh has no children here.
    *
    * k must be > 0
    */
   void create_local_expansion(
-        Simplex_handle   sh_v    //Node with label v which has just been inserted
-      , Siblings       * curr_sib //Siblings containing the node sh_v
-      , Filtration_value fil_uv //Fil value of the edge uv in the zz filtration
-      , int              k //Stopping condition for recursion based on max dim
+        Simplex_handle   sh_v       //Node with label v which has just been inserted
+      , Siblings       * curr_sib   //Siblings containing the node sh_v
+      , Filtration_value fil_uv     //Fil value of the edge uv in the zz filtration
+      , int              k          //Stopping condition for recursion based on max dim
       , std::vector<Simplex_handle> &added_simplices) //range of all new simplices
   { //pick N^+(v)
     //intersect N^+(v) with labels y > v in curr_sib
@@ -1446,9 +1454,9 @@ class Simplex_tree {
   }
   //TODO boost::container::ordered_unique_range_t in the creation of a Siblings
 
-  /* Global expansion of a subtree in the simplex tree.
+  /** \brief Global expansion of a subtree in the simplex tree.
    *
-   * The filtration value is absolute and defined by "Filtration_value fil".
+   * The filtration value is absolute and defined by `Filtration_value fil`.
    * The new Node are also connected appropriately in the coface
    * data structure.
    */
@@ -1489,6 +1497,7 @@ class Simplex_tree {
     }
   }
 
+  /** \brief Recursive expansion of the simplex tree.*/
   template<bool force_filtration_value>
   void create_expansion(Siblings * siblings,
                         Dictionary_it& s_h,
@@ -1522,7 +1531,7 @@ class Simplex_tree {
       inter.clear();
       s_h->second.assign_children(new_sib);
       if constexpr (force_filtration_value){
-        siblings_expansion(new_sib, fil, k - 1, added_simplices);
+        siblings_expansion(new_sib, fil, k - 1, *added_simplices);
       } else {
         siblings_expansion(new_sib, k - 1);
       }

@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
 
   std::string inputFile("simplex_tree_for_unit_test.txt");
   std::ifstream simplex_tree_stream(inputFile.c_str());
+  if (!simplex_tree_stream.is_open()) std::cout << "File not found!\n";
   simplex_tree_stream >> st;
 
   // Display the Simplex_tree
@@ -740,7 +741,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
 
   std::clog << "Printing st - address = " << &st << std::endl;
 
-  // Copy constructor  
+  // Copy constructor
   typeST st_copy = st;
   std::clog << "Printing a copy of st - address = " << &st_copy << std::endl;
 
@@ -749,7 +750,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st != &st_copy);
 
-  // Move constructor  
+  // Move constructor
   typeST st_move = std::move(st);
   std::clog << "Printing a move of st - address = " << &st_move << std::endl;
 
@@ -949,6 +950,200 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(generators, typeST, list_of_tested_variants) {
     st.insert_simplex_and_subfaces({2,5}, 2);
     st.insert_simplex_and_subfaces({1,3}, 9);
     st.expansion(50);
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({0,1,2,5}))==st.find({0,2}));
+    BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
+  }
+}
+
+typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_fast_cofaces> > list_of_variants_with_fast_cofaces;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(flag_expansion, typeST, list_of_variants_with_fast_cofaces) {
+  std::cout << "********************************************************************" << std::endl;
+  std::cout << "TEST FLAG EXPANSION" << std::endl;
+  {
+    typeST st;
+    std::vector<typename typeST::Simplex_handle> added_simplices;
+
+    st.insert_edge_as_flag(0,0,0,6,added_simplices);
+    st.insert_edge_as_flag(1,1,0,6,added_simplices);
+    st.insert_edge_as_flag(2,2,0,6,added_simplices);
+    st.insert_edge_as_flag(3,3,0,6,added_simplices);
+    st.insert_edge_as_flag(4,4,0,6,added_simplices);
+    st.insert_edge_as_flag(5,5,0,6,added_simplices);
+    st.insert_edge_as_flag(6,6,0,6,added_simplices);
+    st.insert_edge_as_flag(0,1,0,6,added_simplices);
+    st.insert_edge_as_flag(0,2,0,6,added_simplices);
+    st.insert_edge_as_flag(0,3,0,6,added_simplices);
+    st.insert_edge_as_flag(0,4,0,6,added_simplices);
+    st.insert_edge_as_flag(0,5,0,6,added_simplices);
+    st.insert_edge_as_flag(0,6,0,6,added_simplices);
+    st.insert_edge_as_flag(1,2,0,6,added_simplices);
+    st.insert_edge_as_flag(1,3,0,6,added_simplices);
+    st.insert_edge_as_flag(1,4,0,6,added_simplices);
+    st.insert_edge_as_flag(1,5,0,6,added_simplices);
+    st.insert_edge_as_flag(1,6,0,6,added_simplices);
+    st.insert_edge_as_flag(2,3,0,6,added_simplices);
+    st.insert_edge_as_flag(2,4,0,6,added_simplices);
+    st.insert_edge_as_flag(2,5,0,6,added_simplices);
+    st.insert_edge_as_flag(2,6,0,6,added_simplices);
+    st.insert_edge_as_flag(3,4,0,6,added_simplices);
+    st.insert_edge_as_flag(3,5,0,6,added_simplices);
+    st.insert_edge_as_flag(3,6,0,6,added_simplices);
+    st.insert_edge_as_flag(4,5,0,6,added_simplices);
+    st.insert_edge_as_flag(4,6,0,6,added_simplices);
+    st.insert_edge_as_flag(5,6,0,6,added_simplices);
+
+    st.assign_filtration(st.find({0,2,4}), 10);
+    st.assign_filtration(st.find({1,5}), 20);
+    st.assign_filtration(st.find({1,2,4}), 30);
+    st.assign_filtration(st.find({3}), 5);
+    st.make_filtration_non_decreasing();
+
+//    std::cout << "Simplextree:\n";
+//    for (auto& sh : st.filtration_simplex_range()){
+//      for (auto v : st.simplex_vertex_range(sh)){
+//        std::cout << v << " ";
+//      }
+//      std::cout << " - " << st.filtration(sh) << "\n";
+//    }
+
+    BOOST_CHECK_EQUAL(added_simplices.size(), 127);
+    BOOST_CHECK(st.filtration(st.find({1,2}))==0);
+    BOOST_CHECK(st.filtration(st.find({0,1,2,3,4}))==30);
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,1,2,3,4,5}))==st.find({1,2,4}));
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,2,3}))==st.find({3}));
+    auto s=st.minimal_simplex_with_same_filtration(st.find({0,2,6}));
+    BOOST_CHECK(s==st.find({0})||s==st.find({2})||s==st.find({6}));
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({2}))==2);
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({1,5}))==st.null_vertex());
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({5,6}))>=5);
+  }
+  {
+    typeST st;
+    std::vector<typename typeST::Simplex_handle> added_simplices;
+
+    st.insert_edge_as_flag(0,0,0,6,added_simplices);
+    st.insert_edge_as_flag(1,1,0,6,added_simplices);
+    st.insert_edge_as_flag(2,2,0,6,added_simplices);
+    st.insert_edge_as_flag(4,4,0,6,added_simplices);
+    st.insert_edge_as_flag(5,5,0,6,added_simplices);
+    st.insert_edge_as_flag(6,6,0,6,added_simplices);
+
+    st.insert_edge_as_flag(0,1,0,6,added_simplices);
+    st.insert_edge_as_flag(0,5,0,6,added_simplices);
+    st.insert_edge_as_flag(0,6,0,6,added_simplices);
+    st.insert_edge_as_flag(1,6,0,6,added_simplices);
+    st.insert_edge_as_flag(2,5,0,6,added_simplices);
+    st.insert_edge_as_flag(2,6,0,6,added_simplices);
+    st.insert_edge_as_flag(4,5,0,6,added_simplices);
+    st.insert_edge_as_flag(4,6,0,6,added_simplices);
+    st.insert_edge_as_flag(5,6,0,6,added_simplices);
+
+    st.insert_edge_as_flag(3,3,5,6,added_simplices);
+    st.insert_edge_as_flag(0,3,5,6,added_simplices);
+    st.insert_edge_as_flag(1,3,5,6,added_simplices);
+    st.insert_edge_as_flag(2,3,5,6,added_simplices);
+    st.insert_edge_as_flag(3,4,5,6,added_simplices);
+    st.insert_edge_as_flag(3,5,5,6,added_simplices);
+    st.insert_edge_as_flag(3,6,5,6,added_simplices);
+
+    st.insert_edge_as_flag(0,2,10,6,added_simplices);
+    st.insert_edge_as_flag(0,4,10,6,added_simplices);
+    st.insert_edge_as_flag(1,5,20,6,added_simplices);
+    st.insert_edge_as_flag(1,2,30,6,added_simplices);
+    st.insert_edge_as_flag(1,4,30,6,added_simplices);
+    st.insert_edge_as_flag(2,4,30,6,added_simplices);
+
+    BOOST_CHECK_EQUAL(added_simplices.size(), 127);
+    BOOST_CHECK(st.filtration(st.find({1,2}))==30);
+    BOOST_CHECK(st.filtration(st.find({0,1,2,3,4}))==30);
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,1,2,3,4,5}))==st.find({1,2}));
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,2,3}))==st.find({0,2}));
+    auto s=st.minimal_simplex_with_same_filtration(st.find({0,2,6}));
+    BOOST_CHECK(s==st.find({0,2}));
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({2}))==2);
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({1,5}))==st.null_vertex());
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({5,6}))>=5);
+  }
+  {
+    typeST st;
+    std::vector<typename typeST::Simplex_handle> added_simplices;
+
+    st.insert_edge_as_flag(0,0,0,6,added_simplices);
+
+    st.insert_edge_as_flag(1,1,0,6,added_simplices);
+    st.insert_edge_as_flag(0,1,0,6,added_simplices);
+
+    st.insert_edge_as_flag(2,2,0,6,added_simplices);
+    st.insert_edge_as_flag(0,2,10,6,added_simplices);
+    st.insert_edge_as_flag(1,2,30,6,added_simplices);
+
+    st.insert_edge_as_flag(3,3,5,6,added_simplices);
+    st.insert_edge_as_flag(0,3,5,6,added_simplices);
+    st.insert_edge_as_flag(1,3,5,6,added_simplices);
+    st.insert_edge_as_flag(2,3,5,6,added_simplices);
+
+    st.insert_edge_as_flag(4,4,0,6,added_simplices);
+    st.insert_edge_as_flag(0,4,10,6,added_simplices);
+    st.insert_edge_as_flag(1,4,30,6,added_simplices);
+    st.insert_edge_as_flag(2,4,30,6,added_simplices);
+    st.insert_edge_as_flag(3,4,5,6,added_simplices);
+
+    st.insert_edge_as_flag(5,5,0,6,added_simplices);
+    st.insert_edge_as_flag(0,5,0,6,added_simplices);
+    st.insert_edge_as_flag(1,5,20,6,added_simplices);
+    st.insert_edge_as_flag(2,5,0,6,added_simplices);
+    st.insert_edge_as_flag(3,5,5,6,added_simplices);
+    st.insert_edge_as_flag(4,5,0,6,added_simplices);
+
+    st.insert_edge_as_flag(6,6,0,6,added_simplices);
+    st.insert_edge_as_flag(0,6,0,6,added_simplices);
+    st.insert_edge_as_flag(1,6,0,6,added_simplices);
+    st.insert_edge_as_flag(2,6,0,6,added_simplices);
+    st.insert_edge_as_flag(3,6,5,6,added_simplices);
+    st.insert_edge_as_flag(4,6,0,6,added_simplices);
+    st.insert_edge_as_flag(5,6,0,6,added_simplices);
+
+    st.make_filtration_non_decreasing();
+
+    BOOST_CHECK_EQUAL(added_simplices.size(), 127);
+    BOOST_CHECK(st.filtration(st.find({1,2}))==30);
+    BOOST_CHECK(st.filtration(st.find({0,1,2,3,4}))==30);
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,1,2,3,4,5}))==st.find({1,2}));
+    BOOST_CHECK(st.minimal_simplex_with_same_filtration(st.find({0,2,3}))==st.find({0,2}));
+    auto s=st.minimal_simplex_with_same_filtration(st.find({0,2,6}));
+    BOOST_CHECK(s==st.find({0,2}));
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({2}))==2);
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({1,5}))==st.null_vertex());
+    BOOST_CHECK(st.vertex_with_same_filtration(st.find({5,6}))>=5);
+  }
+  {
+    typeST st;
+    std::vector<typename typeST::Simplex_handle> added_simplices;
+
+    st.insert_edge_as_flag(2,2,2,50,added_simplices);
+    st.insert_edge_as_flag(5,5,2,50,added_simplices);
+    st.insert_edge_as_flag(2,5,2,50,added_simplices);
+
+    st.insert_edge_as_flag(0,0,3,50,added_simplices);
+    st.insert_edge_as_flag(0,5,3,50,added_simplices);
+
+    st.insert_edge_as_flag(1,1,4,50,added_simplices);
+    st.insert_edge_as_flag(1,5,4,50,added_simplices);
+
+    st.insert_edge_as_flag(1,2,5,50,added_simplices);
+
+    st.insert_edge_as_flag(3,3,6,50,added_simplices);
+    st.insert_edge_as_flag(4,4,6,50,added_simplices);
+    st.insert_edge_as_flag(3,4,6,50,added_simplices);
+
+    st.insert_edge_as_flag(0,1,8,50,added_simplices);
+
+    st.insert_edge_as_flag(1,3,9,50,added_simplices);
+
+    st.insert_edge_as_flag(0,2,10,50,added_simplices);
+
+    BOOST_CHECK_EQUAL(added_simplices.size(), 19);
     BOOST_CHECK(st.edge_with_same_filtration(st.find({0,1,2,5}))==st.find({0,2}));
     BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
   }
