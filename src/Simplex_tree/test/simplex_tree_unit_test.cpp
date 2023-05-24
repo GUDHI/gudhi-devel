@@ -108,7 +108,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
 
   std::string inputFile("simplex_tree_for_unit_test.txt");
   std::ifstream simplex_tree_stream(inputFile.c_str());
-  if (!simplex_tree_stream.is_open()) std::cout << "File not found!\n";
   simplex_tree_stream >> st;
 
   // Display the Simplex_tree
@@ -129,7 +128,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
       (void) vertex;
       size++;
     }
-    BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size))); // Specific test: filtration = 0.1 * simplex_size
+    // Specific test: filtration = 0.1 * simplex_size
+    BOOST_CHECK(AreAlmostTheSame(st.filtration(f_simplex), (0.1 * size)));
     BOOST_CHECK(previous_size <= size); // Check list is sorted (because of sorted filtrations in simplex_tree.txt)
     previous_size = size;
   }
@@ -140,13 +140,19 @@ template<class typeST, class typeSimplex>
 void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos) {
   auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;
 
-  std::clog << "test_simplex_tree_contains - filtration=" << simplexTree.filtration(*f_simplex) << "||" << simplex.second << std::endl;
+  std::clog << "test_simplex_tree_contains - filtration="
+            << simplexTree.filtration(*f_simplex)
+            << "||" << simplex.second
+            << std::endl;
   BOOST_CHECK(AreAlmostTheSame(simplexTree.filtration(*f_simplex), simplex.second));
 
   int simplexIndex = simplex.first.size() - 1;
   std::sort(simplex.first.begin(), simplex.first.end()); // if the simplex wasn't sorted, the next test could fail
   for (auto vertex : simplexTree.simplex_vertex_range(*f_simplex)) {
-    std::clog << "test_simplex_tree_contains - vertex=" << vertex << "||" << simplex.first.at(simplexIndex) << std::endl;
+    std::clog << "test_simplex_tree_contains - vertex="
+              << vertex << "||"
+              << simplex.first.at(simplexIndex)
+              << std::endl;
     BOOST_CHECK(vertex == simplex.first.at(simplexIndex));
     BOOST_CHECK(simplexIndex >= 0);
     simplexIndex--;
@@ -371,7 +377,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::clog << "   - dimension " << st.dimension() << std::endl;
-  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl
+            << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -581,7 +588,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   // Display the Simplex_tree - Can not be done in the middle of 2 inserts
   std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   std::clog << "   - dimension " << st.dimension() << std::endl;
-  std::clog << std::endl << std::endl << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  std::clog << std::endl << std::endl
+            << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -592,7 +600,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 }
 
 template<class typeST, class Vertex_handle>
-void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
+void test_cofaces(typeST& st,
+                  const std::vector<Vertex_handle>& expected,
+                  int dim,
+                  const std::vector<typename typeST::Simplex_handle>& res) {
   if (dim == 0) {
     typename typeST::Star_simplex_range stars = st.star_simplex_range(st.find(expected));
     for (auto simplex = stars.begin(); simplex != stars.end(); ++simplex) {
