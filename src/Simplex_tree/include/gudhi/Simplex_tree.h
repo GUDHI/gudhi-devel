@@ -1899,7 +1899,9 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called after all
   // simplex insertions.
   void update_simplex_tree_after_node_insertion(Simplex_handle sh) {
-    std::cout << "update_simplex_tree_after_node_insertion" << std::endl;
+#ifdef DEBUG_TRACES
+    std::clog << "update_simplex_tree_after_node_insertion" << buffer_byte_size << std::endl;
+#endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       nodes_by_label_.insert(sh);
     }
@@ -1908,7 +1910,9 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called before
   // all simplex removals
   void update_simplex_tree_before_node_removal(Simplex_handle sh) {
-    std::cout << "update_simplex_tree_before_node_removal" << std::endl;
+#ifdef DEBUG_TRACES
+    std::clog << "update_simplex_tree_before_node_removal" << buffer_byte_size << std::endl;
+#endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
     }
