@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   const short vertex5[] = {5};
   st.insert_simplex_and_subfaces(tetra0123, 4.0);
   st.insert_simplex_and_subfaces(edge04, 2.0);
-  st.insert_simplex(edge14, 2.0);
+  st.insert_simplex_and_subfaces(edge14, 2.0);
   st.insert_simplex(vertex5, 1.0);
 
   // Sort the simplices in the order of the filtration
@@ -249,14 +249,14 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(st.filtration(get<0>(persistent_pairs[0])) == 4);
   BOOST_CHECK(get<1>(persistent_pairs[0]) == st.null_simplex());
 
-  // persistent_pairs[1] = 2  0 2 inf
+  // persistent_pairs[1] = 2  0 1 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[1])) == 0);
-  BOOST_CHECK(st.filtration(get<0>(persistent_pairs[1])) == 2);
+  BOOST_CHECK(st.filtration(get<0>(persistent_pairs[1])) == 1);
   BOOST_CHECK(get<1>(persistent_pairs[1]) == st.null_simplex());
 
-  // persistent_pairs[2] = 2  0 1 inf
+  // persistent_pairs[2] = 2  0 2 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[2])) == 0);
-  BOOST_CHECK(st.filtration(get<0>(persistent_pairs[2])) == 1);
+  BOOST_CHECK(st.filtration(get<0>(persistent_pairs[2])) == 2);
   BOOST_CHECK(get<1>(persistent_pairs[2]) == st.null_simplex());
 
   std::clog << "INTERVALS IN DIMENSION" << std::endl;
@@ -267,9 +267,9 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
     std::clog << "intervals_in_dimension_0[" << i << "] = [" << intervals_in_dimension_0[i].first << "," <<
                  intervals_in_dimension_0[i].second << "]" << std::endl;
   BOOST_CHECK(intervals_in_dimension_0.size() == 2);
-  BOOST_CHECK(intervals_in_dimension_0[0].first == 2);
+  BOOST_CHECK(intervals_in_dimension_0[0].first == 1);
   BOOST_CHECK(intervals_in_dimension_0[0].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
-  BOOST_CHECK(intervals_in_dimension_0[1].first == 1);
+  BOOST_CHECK(intervals_in_dimension_0[1].first == 2);
   BOOST_CHECK(intervals_in_dimension_0[1].second == std::numeric_limits<Mini_simplex_tree::Filtration_value>::infinity());
 
   auto intervals_in_dimension_1 = pcoh.intervals_in_dimension(1);

@@ -180,7 +180,8 @@ A complete configuration would be :
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
     Sphinx-paramlinks version 0.5.2 
-    pydata-sphinx-theme version 0.10.1
+    pydata_sphinx_theme version 0.13.1 
+    NetworkX version 3.0 
     Eigen3 version 3.4.0
     Boost version 1.74.0
     CGAL version 5.3
@@ -301,28 +302,6 @@ Hnswlib
 `Hnswlib <https://github.com/nmslib/hnswlib>`_ as a backend if explicitly
 requested, to speed-up queries.
 
-Matplotlib
-----------
-
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
-library which produces publication quality figures in a variety of hardcopy
-formats and interactive environments across platforms.
-
-The following examples require the `Matplotlib <http://matplotlib.org>`_:
-
-.. only:: builder_html
-
-    * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
-    * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
-    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
-    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
-    * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
-    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
-
 LaTeX
 ~~~~~
 
@@ -351,6 +330,35 @@ You can still deactivate LaTeX rendering by saying:
 
     import gudhi as gd
     gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
+
+Matplotlib
+----------
+
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
+module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
+library which produces publication quality figures in a variety of hardcopy
+formats and interactive environments across platforms.
+
+The following examples require the `Matplotlib <http://matplotlib.org>`_:
+
+.. only:: builder_html
+
+    * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
+    * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
+    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
+    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
+    * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+NetworkX
+--------
+
+The :class:`~gudhi.cover_complex.GraphInducedComplex`, :class:`~gudhi.cover_complex.MapperComplex` and
+:class:`~gudhi.cover_complex.NerveComplex` `get_networkx` methods require `NetworkX <https://networkx.org/>`_,
+a Python library for studying and visualizing graphs and networks.
 
 PyKeOps
 -------
