@@ -667,9 +667,12 @@ class Simplex_tree {
   }
 
   /** \brief Returns the children of the node in the simplex tree pointed by sh.
-   * Invalid if sh has no children.
-  */
-  Siblings* children(Simplex_handle sh) const { return sh->second.children(); }
+   * \exception std::invalid_argument In debug mode, if sh has no child.
+   */
+  Siblings* children(Simplex_handle sh) const {
+    GUDHI_CHECK(has_children(sh), std::invalid_argument("Simplex_tree::children - argument has no child"));
+    return sh->second.children();
+  }
 
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
