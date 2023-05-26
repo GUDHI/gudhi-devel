@@ -770,8 +770,8 @@ class Simplex_tree {
     for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-      // update extra data structures in the insertion is successful
       if (res_insert.second) {
+        // Only required when insertion is successful
         update_simplex_tree_after_node_insertion(res_insert.first);
       }
       if (!(has_children(res_insert.first))) {
@@ -791,7 +791,7 @@ class Simplex_tree {
       // if filtration value unchanged
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     } else {
-      // update extra data structures in the insertion is successful
+      // Only required when insertion is successful
       update_simplex_tree_after_node_insertion(res_insert.first);
     }
     // otherwise the insertion has succeeded - size is a size_type
@@ -897,6 +897,7 @@ class Simplex_tree {
     auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
     // update extra data structures in the insertion is successful
     if (insertion_result.second) {
+      // Only required when insertion is successful
       update_simplex_tree_after_node_insertion(insertion_result.first);
     }
 
@@ -1191,7 +1192,6 @@ class Simplex_tree {
     for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end; ++v_it) {
       auto it = (root_.members_.emplace_hint(root_.members_.end(), *v_it,
                                              Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it))));
-      // update extra data structures for new simplex
       update_simplex_tree_after_node_insertion(it);
     }
 
@@ -1219,7 +1219,6 @@ class Simplex_tree {
 
       auto it = sh->second.children()->members().emplace(
                   v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge))).first;
-      // update extra data structures for new simplex
       update_simplex_tree_after_node_insertion(it);
     }
   }
@@ -1402,7 +1401,6 @@ class Simplex_tree {
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
              new_sib_member++) {
-           // update data structures for all new simplices
            update_simplex_tree_after_node_insertion(new_sib_member);
            bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
