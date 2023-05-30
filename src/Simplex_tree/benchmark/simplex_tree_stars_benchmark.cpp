@@ -47,34 +47,36 @@ void benchmark_stars_computation() {
   using Vertex_handle  = typename Stree::Vertex_handle;
   using Simplex_handle = typename Stree::Simplex_handle;
 
-  std::clog << "Simplex_tree construction" << std::endl;
+  std::clog << "... Simplex_tree construction" << std::endl;
 
   Stree st;
-  const Vertex_handle VERTEX_MAX = 100;
+  const Vertex_handle VERTEX_MAX = 5000;
   for (Vertex_handle v=0; v < VERTEX_MAX; v++)
-    st.insert_simplex_and_subfaces(rand_int_range<Vertex_handle>(10, 20, VERTEX_MAX));
-  std::cout << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
-
-  std::clog << "Looking for random existing simplices" << std::endl;
-  const int SH_SIZE = 500;
+    st.insert_simplex_and_subfaces(rand_int_range<Vertex_handle>(2, 5, VERTEX_MAX));
+  std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
+  
+  Gudhi::Clock benchmark_search("... Looking for random existing simplices");
+  const int SH_SIZE = 10000;
   std::vector<Simplex_handle> sh_list;
   sh_list.reserve(SH_SIZE);
 
+  std::uniform_int_distribution<int> dist(0, st.num_simplices());
   // This method is not equivalent but quite faster than iterating randomly on complex_simplex_range
   while (sh_list.size() < SH_SIZE) {
-    Simplex_handle sh = st.find(rand_int_range<Vertex_handle>(5, 10, VERTEX_MAX));
-    if (sh != st.null_simplex())
-      sh_list.push_back(sh);
+    auto simplex = st.complex_simplex_range().begin();
+    // Looking for a random simplex - No operator+ for Complex_simplex_range, loop and increment is required
+    for (int nb_rand = dist(rd); nb_rand > 0; nb_rand--)
+      simplex++;
+    sh_list.push_back(*simplex);
   }
+  std::clog << benchmark_search << std::endl;
 
-  {
-    Gudhi::Clock my_clock("Benchmark the stars search of the random simplices");
-    // Just browse the stars from the list
-    for (auto& sh : sh_list)
-      for ([[maybe_unused]] const auto& simplex : st.star_simplex_range(sh)) { }
+  Gudhi::Clock benchmark_stars("Benchmark the stars search of the random simplices");
+  // Just browse the stars from the list
+  for (auto& sh : sh_list)
+    for ([[maybe_unused]] const auto& simplex : st.star_simplex_range(sh)) { }
 
-    std::clog << my_clock << std::endl;
-  }
+  std::clog << benchmark_stars << std::endl;
 }
 
 int main() {
