@@ -685,9 +685,12 @@ class Simplex_tree {
   }
 
   /** \brief Returns the children of the node in the simplex tree pointed by sh.
-   * Invalid if sh has no children.
-  */
-  Siblings* children(Simplex_handle sh) const { return sh->second.children(); }
+   * \exception std::invalid_argument In debug mode, if sh has no child.
+   */
+  Siblings* children(Simplex_handle sh) const {
+    GUDHI_CHECK(has_children(sh), std::invalid_argument("Simplex_tree::children - argument has no child"));
+    return sh->second.children();
+  }
 
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
@@ -785,8 +788,8 @@ class Simplex_tree {
     for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
       res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-      // update extra data structures in the insertion is successful
       if (res_insert.second) {
+        // Only required when insertion is successful
         update_simplex_tree_after_node_insertion(res_insert.first);
       }
       if (!(has_children(res_insert.first))) {
@@ -806,7 +809,7 @@ class Simplex_tree {
       // if filtration value unchanged
       return std::pair<Simplex_handle, bool>(null_simplex(), false);
     } else {
-      // update extra data structures in the insertion is successful
+      // Only required when insertion is successful
       update_simplex_tree_after_node_insertion(res_insert.first);
     }
     // otherwise the insertion has succeeded - size is a size_type
@@ -912,6 +915,7 @@ class Simplex_tree {
     auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
     // update extra data structures in the insertion is successful
     if (insertion_result.second) {
+      // Only required when insertion is successful
       update_simplex_tree_after_node_insertion(insertion_result.first);
     }
 
@@ -1209,7 +1213,6 @@ class Simplex_tree {
     for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end; ++v_it) {
       auto it = (root_.members_.emplace_hint(root_.members_.end(), *v_it,
                                              Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it))));
-      // update extra data structures for new simplex
       update_simplex_tree_after_node_insertion(it);
     }
 
@@ -1235,10 +1238,8 @@ class Simplex_tree {
         sh->second.assign_children(new Siblings(&root_, sh->first));
       }
 
-      auto it = (sh->second.children()->members().emplace(
-                     v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge))))
-                    .first;
-      // update extra data structures for new simplex
+      auto it = sh->second.children()->members().emplace(
+                  v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge))).first;
       update_simplex_tree_after_node_insertion(it);
     }
   }
@@ -1664,7 +1665,6 @@ class Simplex_tree {
         for (auto new_sib_member = new_sib->members().begin();
              new_sib_member != new_sib->members().end();
              new_sib_member++) {
-           // update data structures for all new simplices
            update_simplex_tree_after_node_insertion(new_sib_member);
            bool blocker_result = block_simplex(new_sib_member);
            // new_sib member has been blocked by the blocker function
@@ -2178,7 +2178,9 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called after all
   // simplex insertions.
   void update_simplex_tree_after_node_insertion(Simplex_handle sh) {
-//    std::cout << "update_simplex_tree_after_node_insertion" << std::endl;
+#ifdef DEBUG_TRACES
+    std::clog << "update_simplex_tree_after_node_insertion" << std::endl;
+#endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       nodes_by_label_.insert(sh);
     }
@@ -2187,7 +2189,9 @@ class Simplex_tree {
   // update all extra data structures in the Simplex_tree. Must be called before
   // all simplex removals
   void update_simplex_tree_before_node_removal(Simplex_handle sh) {
-//    std::cout << "update_simplex_tree_before_node_removal" << std::endl;
+#ifdef DEBUG_TRACES
+    std::clog << "update_simplex_tree_before_node_removal" << std::endl;
+#endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
     }
