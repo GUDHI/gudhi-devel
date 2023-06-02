@@ -20,6 +20,7 @@
 #include <vector>
 #include <queue>
 #include <stdexcept>
+#include <utility>  // for std::move
 
 namespace Gudhi {
 
@@ -70,7 +71,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   class is_coface {
    public:
     is_coface() : cpx_(nullptr) {}
-    is_coface(SimplexTree* cpx, const std::vector<Vertex_handle>& simp) : cpx_(cpx), simp_(simp) {}
+    is_coface(SimplexTree* cpx, std::vector<Vertex_handle>&& simp) : cpx_(cpx), simp_(simp) {}
 
     // Return true iff traversing the Node upwards to the root reads a
     // coface of simp_
@@ -104,8 +105,8 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator() : predicate_(), st_(nullptr) {}
 
   Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator(SimplexTree* cpx,
-                                                                  const std::vector<Vertex_handle>& simp)
-      : predicate_(cpx, simp), st_(cpx) {
+                                                                  std::vector<Vertex_handle>&& simp)
+      : predicate_(cpx, std::move(simp)), st_(cpx) {
     GUDHI_CHECK(!simp.empty(), std::invalid_argument("cannot call for cofaces of an empty simplex"));
     max_v_ = *(simp.begin());
     auto list_ptr = st_->nodes_by_label(max_v_);
@@ -183,8 +184,8 @@ class Simplex_tree_optimized_star_simplex_iterator
   // any end() iterator
   Simplex_tree_optimized_star_simplex_iterator() : st_(nullptr) {}
 
-  Simplex_tree_optimized_star_simplex_iterator(SimplexTree* cpx, const std::vector<Vertex_handle>& simp)
-      : st_(cpx), it_(cpx, simp), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), bfs_queue_() {
+  Simplex_tree_optimized_star_simplex_iterator(SimplexTree* cpx, std::vector<Vertex_handle>&& simp)
+      : st_(cpx), it_(cpx, std::move(simp)), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), bfs_queue_() {
     if (it_ == end_) {
       st_ = nullptr;
       return;

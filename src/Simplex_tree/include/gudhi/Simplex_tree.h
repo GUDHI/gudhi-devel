@@ -40,7 +40,7 @@
 #include <tbb/parallel_sort.h>
 #endif
 
-#include <utility>
+#include <utility>  // for std::move
 #include <vector>
 #include <functional>  // for greater<>
 #include <stdexcept>
@@ -1071,7 +1071,7 @@ class Simplex_tree {
       std::vector<Vertex_handle> simp(rg.begin(), rg.end());
       // must be sorted in decreasing order
       assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
-      return Star_simplex_range(Star_simplex_iterator(this, simp), Star_simplex_iterator());
+      return Star_simplex_range(Star_simplex_iterator(this, std::move(simp)), Star_simplex_iterator());
     } else {
       return cofaces_simplex_range(simplex, 0);
     }
