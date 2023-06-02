@@ -1870,8 +1870,10 @@ class Simplex_tree {
   // basic methods implemented for Nodes, and not Simplex_handle. The hooks in
   // nodes_by_label_ gives access to Nodes.
  public:
-  // set of methods taking Node as input. For internal use only.
-  /** Returns the Siblings containing a simplex.*/
+  // set of methods taking a node and a vertex_handle as input. For internal use only.
+
+  /** \brief Returns the Siblings containing a member element defined by a node and a vertex_handle .
+    *  Node must have label u. */
   static Siblings* self_siblings(Node& node, Vertex_handle v) {
     if (node.children()->parent() == v) {
       return node.children()->oncles();
@@ -1880,17 +1882,19 @@ class Simplex_tree {
     }
   }
 
+  /** \brief Returns a member element (defined by a node and a vertex_handle) dimension .
+    *  Node must have label u. */
   int dimension(Node& node, Vertex_handle u) {
     Siblings* curr_sib = self_siblings(node, u);
-    int dim = 0;
+    int dim {-1};
     while (curr_sib != nullptr) {
       ++dim;
       curr_sib = curr_sib->oncles();
     }
-    return dim - 1;
+    return dim;
   }
-  /* \brief Returns true if the node in the simplex tree pointed by
-   * sh has children. node must have label u*/
+  /** \brief Returns true if a member element (defined by a node and a vertex_handle) sh has children. 
+   *  Node must have label u. */
   bool has_children(Node& node, Vertex_handle u) const { return (node.children()->parent() == u); }
 
  private:
