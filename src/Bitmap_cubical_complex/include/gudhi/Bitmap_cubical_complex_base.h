@@ -61,7 +61,7 @@ class Bitmap_cubical_complex_base {
   /**
    *Default constructor
    **/
-  Bitmap_cubical_complex_base() : total_number_of_cells(0) {}
+  Bitmap_cubical_complex_base() {}
   /**
    * There are a few constructors of a Bitmap_cubical_complex_base class.
    * First one, that takes vector<unsigned>, creates an empty bitmap of a dimension equal
@@ -541,7 +541,7 @@ class Bitmap_cubical_complex_base {
   //****************************************************************************************************************//
   //****************************************************************************************************************//
 
-  inline std::size_t number_cells() const { return this->total_number_of_cells; }
+  inline std::size_t number_cells() const { return this->data.size(); }
 
   //****************************************************************************************************************//
   //****************************************************************************************************************//
@@ -557,7 +557,6 @@ class Bitmap_cubical_complex_base {
   std::vector<unsigned> sizes;
   std::vector<unsigned> multipliers;
   std::vector<T> data;
-  std::size_t total_number_of_cells;
 
   template <class F> void for_each_vertex_rec(F&&f, std::size_t base, int dim);
   void propagate_from_vertices_rec(int special_dim, int current_dim, std::size_t base);
@@ -574,7 +573,6 @@ class Bitmap_cubical_complex_base {
       this->data = std::vector<T>(multiplier, std::numeric_limits<T>::infinity());
     else
       this->data = std::vector<T>(multiplier, -std::numeric_limits<T>::infinity());
-    this->total_number_of_cells = multiplier;
   }
 
   std::size_t compute_position_in_bitmap(const std::vector<unsigned>& counter) {

@@ -8,4 +8,5 @@ Simplex tree reference manual
 
 .. autoclass:: gudhi.SimplexTree
    :members:
+   :special-members: __eq__, __getstate__, __setstate__
    :show-inheritance:

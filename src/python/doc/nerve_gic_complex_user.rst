@@ -2,28 +2,11 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-Cover complexes user manual
-===========================
-Definition
-----------
 
-.. include:: nerve_gic_complex_sum.inc
+:class:`~gudhi.CoverComplex` user manual
+========================================
 
-Visualizations of the simplicial complexes can be done with either
-neato (from `graphviz <http://www.graphviz.org/>`_),
-`geomview <http://www.geomview.org/>`_,
-`KeplerMapper <https://github.com/scikit-tda/kepler-mapper>`_.
-Input point clouds are assumed to be OFF files (cf. `OFF file format <fileformats.html#off-file-format>`_).
-
-Covers
-------
-
-Nerves and Graph Induced Complexes require a cover C of the input point cloud P,
-that is a set of subsets of P whose union is P itself.
-Very often, this cover is obtained from the preimage of a family of intervals covering
-the image of some scalar-valued function f defined on P. This family is parameterized
-by its resolution, which can be either the number or the length of the intervals,
-and its gain, which is the overlap percentage between consecutive intervals (ordered by their first values).
+In the following, we provide examples for the old :class:`~gudhi.CoverComplex` class (see :doc:`cover_complex_sklearn_user` for a general introduction and links to newer alternatives).
 
 Nerves
 ------

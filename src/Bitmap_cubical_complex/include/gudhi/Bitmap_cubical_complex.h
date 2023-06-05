@@ -25,6 +25,7 @@
 #include <vector>
 #include <numeric>  // for iota
 #include <cstddef>
+#include <stdexcept>
 
 namespace Gudhi {
 
@@ -112,7 +113,7 @@ class Bitmap_cubical_complex : public T {
   /**
    * Returns number of all cubes in the complex.
    **/
-  std::size_t num_simplices() const { return this->total_number_of_cells; }
+  std::size_t num_simplices() const { return this->data.size(); }
 
   /**
    * Returns a Simplex_handle to a cube that do not exist in this complex.
@@ -136,12 +137,12 @@ class Bitmap_cubical_complex : public T {
 #ifdef DEBUG_TRACES
     std::clog << "unsigned dimension(const Simplex_handle& sh)\n";
 #endif
-    if (sh != null_simplex()) return this->get_dimension_of_a_cell(sh);
-    return -1;
+    GUDHI_CHECK(sh != null_simplex(), std::logic_error("Only real cells have a dimension"));
+    return this->get_dimension_of_a_cell(sh);
   }
 
   /**
-   * Return the filtration of a cell pointed by the Simplex_handle.
+   * Return the filtration of a cell pointed by the Simplex_handle, or +inf for `null_simplex()`.
    **/
   Filtration_value filtration(Simplex_handle sh) {
 #ifdef DEBUG_TRACES
@@ -273,9 +274,6 @@ class Bitmap_cubical_complex : public T {
     return std::make_pair(bdry[0], bdry[1]);
   }
 
-  /**
-   * Class needed for compatibility with Gudhi. Not useful for other purposes.
-   **/
   class Skeleton_simplex_range;
 
   class Skeleton_simplex_iterator {
@@ -350,7 +348,7 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * @brief Class needed for compatibility with Gudhi. Not useful for other purposes.
+   * @brief A range containing all the cells of dimension at most k.
    **/
   class Skeleton_simplex_range {
     // Range over the simplices of the complex in the order of the filtration.
@@ -383,7 +381,7 @@ class Bitmap_cubical_complex : public T {
   };
 
   /**
-   * Function needed for compatibility with Gudhi. Not useful for other purposes.
+   * Returns a range containing all the cells of dimension at most `dimension`.
    **/
   Skeleton_simplex_range skeleton_simplex_range(unsigned dimension) {
 #ifdef DEBUG_TRACES

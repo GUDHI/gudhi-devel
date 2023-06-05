@@ -67,7 +67,7 @@ with open(args.file, 'r') as f:
     network["meta"] = lens
 
     html_output_filename = args.file.rsplit('.', 1)[0] + '.html'
-    mapper.visualize(network, color_function = color, path_html=html_output_filename, title=dat,
+    mapper.visualize(network, color_function=color, path_html=html_output_filename, title=dat,
     graph_link_distance=30, graph_gravity=0.1, graph_charge=-120, custom_tooltips=custom, width_html=0,
     height_html=0, show_tooltips=True, show_title=True, show_meta=True, res=param[0],gain=param[1], minimum=m,maximum=M)
     message = repr(html_output_filename) + " is generated. You can now use your favorite web browser to visualize it."

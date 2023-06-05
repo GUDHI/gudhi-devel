@@ -31,26 +31,6 @@ def test_simple_constructor_from_top_cells_list():
         np.testing.assert_array_equal(diags[idx], diagsH0H1[idx][0])
 
 
-def test_simple_constructor_from_flattened_cells():
-    cells = datasets.load_digits().images[0]
-    # Not squared (extended) flatten cells
-    flat_cells = np.hstack((cells, np.zeros((cells.shape[0], 2)))).flatten()
-
-    cp = CubicalPersistence(homology_dimensions=0, newshape=[-1, 8, 10])
-    diags = cp.fit_transform([flat_cells])
-
-    np.testing.assert_array_equal(diags[0], CUBICAL_PERSISTENCE_H0_IMG0)
-
-    # Not squared (extended) non-flatten cells
-    cells = np.hstack((cells, np.zeros((cells.shape[0], 2))))
-
-    # The aim of this second part of the test is to resize even if not mandatory
-    cp = CubicalPersistence(homology_dimensions=0, newshape=[-1, 8, 10])
-    diags = cp.fit_transform([cells])
-
-    np.testing.assert_array_equal(diags[0], CUBICAL_PERSISTENCE_H0_IMG0)
-
-
 def test_simple_constructor_from_top_cells_list():
     digits = datasets.load_digits().images[:10]
     cp = CubicalPersistence(homology_dimensions=0, input_type='vertices', n_jobs=-2)

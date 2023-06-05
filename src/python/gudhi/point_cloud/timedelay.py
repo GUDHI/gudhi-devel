@@ -14,15 +14,6 @@ class TimeDelayEmbedding:
     `Takens' Embedding Theorem <https://en.wikipedia.org/wiki/Takens%27s_theorem>`_ and obtains the
     coordinates of each point.
 
-    Parameters
-    ----------
-    dim : int, optional (default=3)
-        `d` of R^d to be embedded.
-    delay : int, optional (default=1)
-        Time-Delay embedding.
-    skip : int, optional (default=1)
-        How often to skip embedded points.
-
     Example
     -------
 
@@ -44,6 +35,14 @@ class TimeDelayEmbedding:
     """
 
     def __init__(self, dim=3, delay=1, skip=1):
+        """
+        Constructor for the TimeDelayEmbedding class.
+
+        Parameters:
+            dim (int): `d` of R^d to be embedded. Optional (default=3).
+            delay (int): Time-Delay embedding. Optional (default=1).
+            skip (int): How often to skip embedded points. Optional (default=1).
+        """
         self._dim = dim
         self._delay = delay
         self._skip = skip
