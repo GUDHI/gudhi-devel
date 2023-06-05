@@ -60,7 +60,9 @@ py::list fun2(py::array_t<double, py::array::c_style | py::array::forcecast> dat
   {
     py::gil_scoped_release release;
     double mini = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(
-        static_cast<double const*>(buf.ptr), buf.shape[0], buf.shape[1],
+        static_cast<double const*>(buf.ptr),
+        static_cast<unsigned>(buf.shape[0]),
+        static_cast<unsigned>(buf.shape[1]),
         [&](double b, double d){ if (d - b > min_persistence) dgm0.push_back({b, d}); },
         [&](double b, double d){ if (d - b > min_persistence) dgm1.push_back({b, d}); });
     dgm0.push_back({mini, std::numeric_limits<double>::infinity()});

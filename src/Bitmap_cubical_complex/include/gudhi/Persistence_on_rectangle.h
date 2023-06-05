@@ -567,7 +567,7 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
   Gudhi::Clock clock;
 #endif
   GUDHI_CHECK(n_rows >= 2 && n_cols >= 2, std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
-  Persistence_on_rectangle<Filtration_value, unsigned, output_index> X;
+  Persistence_on_rectangle<Filtration_value, Index, output_index> X;
   X.init(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
     std::clog << "init: " << clock; clock.begin();
