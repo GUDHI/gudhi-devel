@@ -12,10 +12,10 @@
 #define SIMPLEX_TREE_SIMPLEX_TREE_NODE_EXPLICIT_STORAGE_H_
 
 // Empty base optimization for MSVC - https://learn.microsoft.com/en-us/cpp/cpp/empty-bases
-#if _MSC_VER && !__INTEL_COMPILER
- #define EMPTY_BASE_CLASS_OPTIMIZATION __declspec(empty_bases)
+#if _MSC_VER
+ #define GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION __declspec(empty_bases)
 #else
- #define EMPTY_BASE_CLASS_OPTIMIZATION
+ #define GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION
 #endif
 
 #include <vector>
@@ -33,7 +33,7 @@ namespace Gudhi {
  * It stores explicitly its own filtration value and its own Simplex_key.
  */
 template<class SimplexTree>
-struct EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base,
+struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base,
                                                                           SimplexTree::Key_simplex_base,
                                                                           SimplexTree::Hooks_simplex_base {
   typedef typename SimplexTree::Siblings Siblings;
