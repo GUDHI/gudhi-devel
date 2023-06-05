@@ -24,13 +24,12 @@ namespace Gudhi {
 
   // no hook
   struct Hooks_simplex_base_dummy {};
+
   // todo on Hooks_simplex_base_link_nodes:
   // make the class movable but not copiable
-  // translate the boost macros into C++11 syntax (boost independent)
+  // DONE : translate the boost macros into C++11 syntax (boost independent)
   // update the Node concept and the doc
   struct Hooks_simplex_base_link_nodes {
-   private:
-    BOOST_COPYABLE_AND_MOVABLE(Hooks_simplex_base_link_nodes)
    public:
     Hooks_simplex_base_link_nodes() {}
     // the copy constructor, inherited by the Node class, exchanges hooks,
@@ -41,16 +40,16 @@ namespace Gudhi {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
     }
     // copy assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_COPY_ASSIGN_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes& operator=(const Hooks_simplex_base_link_nodes& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
       return *this;
     }
     // move constructor
-    Hooks_simplex_base_link_nodes(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes(Hooks_simplex_base_link_nodes&& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
     }
     // move assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes& operator=(Hooks_simplex_base_link_nodes&& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
       return *this;
     }
@@ -63,7 +62,7 @@ namespace Gudhi {
 
     mutable Member_hook_t list_max_vertex_hook_;
   };
-  
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_HOOKS_SIMPLEX_BASE_H_
