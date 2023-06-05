@@ -30,13 +30,13 @@ std::vector<Vertex_handle> rand_int_range(int subset_min_size,
 #endif  // DEBUG_TRACES
 
   std::vector<Vertex_handle> range(range_max_value);
-  std::iota(range.begin(), range.end(), 0); // range is { 0, 1, 2, ..., 99 }
+  std::iota(range.begin(), range.end(), 0); // range is { 0, 1, 2, ..., 99 } when range_max_value is 100
 
   std::shuffle(range.begin(), range.end(), std::mt19937 { rd() });
 
   std::uniform_int_distribution<int> dist(subset_min_size, subset_max_size);
-  // Return a subset of shuffled range
-  // {1, 9, 13, 19, 86, 36, 83, 28, 22, 43, 12, 15}, for example
+  // Return a subset, which size is in between [subset_min_size; subset_max_size], of shuffled range
+  // {1, 9, 13, 19, 86, 36}, for example
   return std::vector<Vertex_handle> {range.begin(), range.begin() + dist(rd)};
 }
 
@@ -50,9 +50,9 @@ void benchmark_stars_computation() {
   std::clog << "... Simplex_tree construction" << std::endl;
 
   Stree st;
-  const Vertex_handle VERTEX_MAX = 5000;
-  for (Vertex_handle v=0; v < VERTEX_MAX; v++)
-    st.insert_simplex_and_subfaces(rand_int_range<Vertex_handle>(2, 5, VERTEX_MAX));
+  // Insert 5000 random simplices, of size in between [2; 5] and vertices in between [0; 5000]
+  for (Vertex_handle v=0; v < 5000; v++)
+    st.insert_simplex_and_subfaces(rand_int_range<Vertex_handle>(2, 5, 5000));
   std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
   
   Gudhi::Clock benchmark_search("... Looking for random existing simplices");
