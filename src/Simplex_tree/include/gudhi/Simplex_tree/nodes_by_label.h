@@ -13,7 +13,7 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include <map>
+#include <unordered_map>
 
 namespace Gudhi {
 
@@ -48,8 +48,8 @@ namespace Gudhi {
         return nullptr;
       }
     }
-    // map Vertex_handle v -> pointer to list of all Nodes with label v.
-    std::map<typename SimplexTree::Vertex_handle, typename SimplexTree::List_max_vertex*> nodes_label_to_list_;
+    // unordered_map Vertex_handle v -> pointer to list of all Nodes with label v.
+    std::unordered_map<typename SimplexTree::Vertex_handle, typename SimplexTree::List_max_vertex*> nodes_label_to_list_;
   };
 
 }  // namespace Gudhi
