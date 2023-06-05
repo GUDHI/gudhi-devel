@@ -20,7 +20,6 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::de/serialize_trivial
 #include <gudhi/Simplex_tree/hooks_simplex_base.h>
-#include <gudhi/Simplex_tree/nodes_by_label.h>
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
@@ -50,6 +49,7 @@
 #include <cstdint>  // for std::uint32_t
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
+#include <unordered_map>
 
 namespace Gudhi {
 
@@ -389,6 +389,12 @@ class Simplex_tree {
   /** \brief Destructor; deallocates the whole tree structure. */
   ~Simplex_tree() {
     root_members_recursive_deletion();
+
+    if constexpr (Options::link_nodes_by_label) {
+      for (auto u_list_ptr : nodes_label_to_list_) {
+        delete u_list_ptr.second;
+      }
+    }
   }
 
   /** \brief User-defined copy assignment reproduces the whole tree structure. */
@@ -1842,33 +1848,32 @@ class Simplex_tree {
       List_member_hook_t;
   // auto_unlink in Member_hook_t is incompatible with constant time size
   typedef boost::intrusive::list<Hooks_simplex_base_link_nodes, List_member_hook_t,
-                                 boost::intrusive::constant_time_size<false>>
-      List_max_vertex;
+                                 boost::intrusive::constant_time_size<false>> List_max_vertex;
   // type of hooks stored in each Node, Node inherits from Hooks_simplex_base
   typedef typename std::conditional<Options::link_nodes_by_label, Hooks_simplex_base_link_nodes,
                                     Hooks_simplex_base_dummy>::type Hooks_simplex_base;
   /** Data structure to access all Nodes with a given label u. Can be used for faster
    * computation. */
  private:
-  // if Options::link_nodes_by_label is true, store the lists of Nodes with
-  // same label
-  typedef typename std::conditional<Options::link_nodes_by_label, Nodes_by_label_intrusive_list<Simplex_tree>,
-                                    Nodes_by_label_dummy<Simplex_tree>>::type Nodes_by_label_data_structure;
-
-  /** Only if Options::link_nodes_by_label is true, nodes_with_label_[u] returns a
-   * range of all Nodes in the Simplex_tree with the label u.*/
-  Nodes_by_label_data_structure nodes_by_label_;
+  // if Options::link_nodes_by_label is true, store the lists of Nodes with same label, empty otherwise.
+  // unordered_map Vertex_handle v -> pointer to list of all Nodes with label v.
+  std::unordered_map<Vertex_handle, List_max_vertex*> nodes_label_to_list_;
 
  public:
-  List_max_vertex* nodes_by_label(Vertex_handle u) {
+  List_max_vertex* nodes_by_label(Vertex_handle v) {
     if constexpr (Options::link_nodes_by_label) {
-      return nodes_by_label_.find(u);
+      auto it_v = nodes_label_to_list_.find(v);
+      if (it_v != nodes_label_to_list_.end()) {
+        return it_v->second;
+      } else {
+        return nullptr;
+      }
     }
     return nullptr;
   }
 
-  // basic methods implemented for Nodes, and not Simplex_handle. The hooks in
-  // nodes_by_label_ gives access to Nodes.
+  // basic methods implemented for Nodes, and not Simplex_handle. The hooks in nodes_label_to_list_ gives access to
+  // Nodes.
  public:
   // set of methods taking a node and a vertex_handle as input. For internal use only.
 
@@ -1905,7 +1910,11 @@ class Simplex_tree {
     std::clog << "update_simplex_tree_after_node_insertion" << std::endl;
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
-      nodes_by_label_.insert(sh);
+      auto it = nodes_label_to_list_.find(sh->first);
+      if (it == nodes_label_to_list_.end()) {  // create a new list
+        it = (nodes_label_to_list_.emplace(sh->first, new List_max_vertex())).first;
+      }
+      it->second->push_back(sh->second);  // insert at the end of the list
     }
   }
 
