@@ -1193,11 +1193,13 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph));  // probably useless in most cases
-    typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it, v_it_end;
-    for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end; ++v_it) {
-      auto it = (root_.members_.emplace_hint(root_.members_.end(), *v_it,
-                                             Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it))));
+    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    // This automatically sorts the vertices, the graph concept doesn't guarantee the order in which we iterate.
+
+    for (Dictionary_it it = boost::begin(root_.members_); it != boost::end(root_.members_); it++) {
       update_simplex_tree_after_node_insertion(it);
     }
 
