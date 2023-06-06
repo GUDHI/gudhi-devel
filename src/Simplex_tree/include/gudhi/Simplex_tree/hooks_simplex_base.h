@@ -14,21 +14,17 @@
 #include <boost/intrusive/list.hpp>
 
 namespace Gudhi {
+  /** \brief No hook when SimplexTreeOptions::link_nodes_by_label is false.
+   */
+  struct Hooks_simplex_base_dummy {};
+
   /** \brief Data structure to put all simplex tree nodes with same label into a list.
    *
    * Allows one to access all subtrees of the simplex tree rooted at a node with a given label.
    * Used in particular for fast cofaces location, and fast insertion and deletion of edges in a flag complex.
    *
-   * Only if SimplexTreeOptions::link_nodes_by_label is true, otherwise store nothing.
+   * Only if SimplexTreeOptions::link_nodes_by_label is true.
    */
-
-  // no hook
-  struct Hooks_simplex_base_dummy {};
-
-  // todo on Hooks_simplex_base_link_nodes:
-  // make the class movable but not copiable
-  // DONE : translate the boost macros into C++11 syntax (boost independent)
-  // update the Node concept and the doc
   struct Hooks_simplex_base_link_nodes {
    public:
     Hooks_simplex_base_link_nodes() {}
