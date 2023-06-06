@@ -672,6 +672,9 @@ class Simplex_tree {
     return (sh->second.children()->parent() == sh->first);
   }
 
+ private:
+  friend class Simplex_tree_optimized_star_simplex_iterator<Simplex_tree>;
+
   /** \brief Returns the children of the node in the simplex tree pointed by sh.
    * \exception std::invalid_argument In debug mode, if sh has no child.
    */
@@ -680,6 +683,7 @@ class Simplex_tree {
     return sh->second.children();
   }
 
+ public:
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
    * vertices. Return null_simplex() if the simplex is not in the complex.
