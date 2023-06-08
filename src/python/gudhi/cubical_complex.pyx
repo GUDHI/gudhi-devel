@@ -213,7 +213,8 @@ cdef class CubicalComplex:
         cdef int field = homology_coeff_field
         cdef double minp = min_persistence
         with nogil:
-            self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, 1)
+            # persistence_dim_max can be set to False in non periodic case
+            self.pcohptr = new Cubical_complex_persistence_interface(self.thisptr, False)
             self.pcohptr.compute_persistence(field, minp)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):

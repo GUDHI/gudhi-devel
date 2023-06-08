@@ -224,7 +224,8 @@ cdef class PeriodicCubicalComplex:
         cdef int field = homology_coeff_field
         cdef double minp = min_persistence
         with nogil:
-            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, 1)
+            # persistence_dim_max shall be set to True in periodic case
+            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, True)
             self.pcohptr.compute_persistence(field, minp)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
