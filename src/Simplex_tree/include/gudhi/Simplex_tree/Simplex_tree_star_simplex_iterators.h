@@ -84,10 +84,15 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
         return true;
       }
       while (curr_sib->oncles() != nullptr) {
+        if (curr_sib->parent() < *vertex_it) {
+          // moving to oncles is only going to lower the value of parent, equality will never happen
+          return false;
+        }
         if (curr_sib->parent() == *vertex_it) {
           if (++vertex_it == simp_.end()) {
+            // we found a coface
             return true;
-          }  // we found a coface
+          }
         }
         curr_sib = curr_sib->oncles();
       }
