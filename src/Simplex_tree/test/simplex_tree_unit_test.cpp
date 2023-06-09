@@ -592,6 +592,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 
 template<class typeST, class Vertex_handle>
 void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
+  std::size_t nb_res = 0;
   if (dim == 0) {
     typename typeST::Star_simplex_range stars = st.star_simplex_range(st.find(expected));
     for (auto simplex = stars.begin(); simplex != stars.end(); ++simplex) {
@@ -601,6 +602,7 @@ void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int di
       }
       std::clog << std::endl;
       BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
+      nb_res++;
     }
   } else {
     typename typeST::Cofaces_simplex_range cofaces = st.cofaces_simplex_range(st.find(expected), dim);
@@ -611,8 +613,10 @@ void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int di
       }
       std::clog << std::endl;
       BOOST_CHECK(std::find(res.begin(), res.end(), *simplex) != res.end());
+      nb_res++;
     }
   }
+  BOOST_CHECK(nb_res == res.size());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_variants) {
