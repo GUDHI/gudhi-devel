@@ -68,7 +68,7 @@ void benchmark_stars_computation() {
   Gudhi::Clock benchmark_stars("Benchmark the stars search of the random simplices");
   // Just browse the stars from the random simplices list
   for (auto& sh : sh_list)
-    for ([[maybe_unused]] const auto& simplex : st.star_simplex_range(sh))
+    for (const auto& simplex : st.star_simplex_range(sh))
       [[maybe_unused]] volatile auto _ = simplex;
 
   std::clog << benchmark_stars << std::endl;
