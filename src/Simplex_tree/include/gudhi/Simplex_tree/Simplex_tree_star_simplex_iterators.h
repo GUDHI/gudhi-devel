@@ -21,6 +21,7 @@
 #include <queue>
 #include <stdexcept>
 #include <utility>  // for std::move
+#include <functional>  // for std::greater
 
 namespace Gudhi {
 
@@ -79,24 +80,10 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
       Node& curr_node = static_cast<Node&>(curr_hooks);
       auto vertex_it = simp_.begin();  // largest label is first
       // first Node must always have label simp_.begin(); we assume it is true
-      auto curr_sib = cpx_->self_siblings(curr_node, *vertex_it);
-      if (++vertex_it == simp_.end()) {
-        return true;
-      }
-      while (curr_sib->oncles() != nullptr) {
-        if (curr_sib->parent() < *vertex_it) {
-          // moving to oncles is only going to lower the value of parent, equality will never happen
-          return false;
-        }
-        if (curr_sib->parent() == *vertex_it) {
-          if (++vertex_it == simp_.end()) {
-            // we found a coface
-            return true;
-          }
-        }
-        curr_sib = curr_sib->oncles();
-      }
-      return false;
+      auto sh = cpx_->self_siblings(curr_node, *vertex_it)->find(*vertex_it);
+      // is simp_ a face of the simplex defined by sh ?
+      return std::includes(cpx_->simplex_vertex_range(sh).begin(), cpx_->simplex_vertex_range(sh).end(),
+                           simp_.begin(), simp_.end(), std::greater<Vertex_handle>());
     }
 
    private:
