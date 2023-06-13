@@ -594,7 +594,7 @@ template<class typeST, class Vertex_handle>
 void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
   std::size_t nb_res = 0;
   if (dim == 0) {
-    typename typeST::Star_simplex_range stars = st.star_simplex_range(st.find(expected));
+    typename typeST::Cofaces_simplex_range stars = st.star_simplex_range(st.find(expected));
     for (auto simplex = stars.begin(); simplex != stars.end(); ++simplex) {
       typename typeST::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
       for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {

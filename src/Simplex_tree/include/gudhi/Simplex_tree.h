@@ -205,16 +205,12 @@ class Simplex_tree {
    */
   typedef Simplex_tree_optimized_star_simplex_iterator<Simplex_tree> Optimized_star_simplex_iterator;
 
- public:
   /** \brief Iterator over the star of a simplex.*/
   typedef typename std::conditional<Options::link_nodes_by_label,
                                     Optimized_star_simplex_iterator,  // faster implem
                                     typename Cofaces_simplex_range::iterator>::type Star_simplex_iterator;
-  /** \brief Range over the star of a simplex. */
-  typedef typename std::conditional<Options::link_nodes_by_label,
-                                    boost::iterator_range<Optimized_star_simplex_iterator>,  // faster implem
-                                    Cofaces_simplex_range>::type Star_simplex_range;
 
+ public:
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
    * 'value_type' is Simplex_handle. */
@@ -1075,16 +1071,8 @@ class Simplex_tree {
    * \param simplex represent the simplex of which we search the star
    * \return Vector of Simplex_handle, empty vector if no cofaces found.
    */
-  Star_simplex_range star_simplex_range(const Simplex_handle simplex) {
-    if constexpr (Options::link_nodes_by_label) {  // faster cofaces computation
-      Simplex_vertex_range rg = simplex_vertex_range(simplex);
-      std::vector<Vertex_handle> simp(rg.begin(), rg.end());
-      // must be sorted in decreasing order
-      assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
-      return Star_simplex_range(Star_simplex_iterator(this, std::move(simp)), Star_simplex_iterator());
-    } else {
-      return cofaces_simplex_range(simplex, 0);
-    }
+  Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
+    return cofaces_simplex_range(simplex, 0);
   }
 
   /** \brief Compute the cofaces of a n simplex
@@ -1095,9 +1083,20 @@ class Simplex_tree {
    */
 
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
-    Cofaces_simplex_range cofaces;
     // codimension must be positive or null integer
     assert(codimension >= 0);
+
+    if constexpr (Options::link_nodes_by_label) {
+      // faster cofaces computation only available for codimension = 0
+      if (codimension == 0) {
+        Simplex_vertex_range rg = simplex_vertex_range(simplex);
+        std::vector<Vertex_handle> simp(rg.begin(), rg.end());
+        // must be sorted in decreasing order
+        assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
+        return Cofaces_simplex_range(Star_simplex_iterator(this, std::move(simp)), Star_simplex_iterator());
+      }
+    }
+    Cofaces_simplex_range cofaces;
     Simplex_vertex_range rg = simplex_vertex_range(simplex);
     std::vector<Vertex_handle> copy(rg.begin(), rg.end());
     if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
