@@ -15,10 +15,10 @@
 #include <utility>  // for pair
 #include <vector>
 
-using Simplex_tree = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<Simplex_tree>;
-using Vertex_handle = Simplex_tree::Vertex_handle;
-using Filtration_value = Simplex_tree::Filtration_value;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
+using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
+using Vertex_handle = ST::Vertex_handle;
+using Filtration_value = ST::Filtration_value;
 using interval_filtration = ZP::interval_filtration;
 
 void print_complex(ZP& zp){
@@ -39,6 +39,15 @@ void print_barcode(ZP& zp){
 	}
 }
 
+void print_indices(ZP& zp){
+	std::clog << std::endl << "Current pairs:" << std::endl;
+	for (auto& bar : zp.index_persistence_diagram()){
+		std::clog << bar.birth() << " - ";
+		std::clog << bar.death();
+		std::clog << " (" << bar.dim() << ")\n";
+	}
+}
+
 int main(int argc, char* const argv[]) {
 	ZP zp;
 
@@ -52,12 +61,14 @@ int main(int argc, char* const argv[]) {
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	std::vector<Vertex_handle> simplex{3,4,5};
 	zp.insert_simplex(simplex, 4);
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	simplex[0] = 0;
 	simplex[1] = 1;
@@ -66,6 +77,7 @@ int main(int argc, char* const argv[]) {
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	simplex[0] = 3;
 	simplex[1] = 4;
@@ -74,6 +86,7 @@ int main(int argc, char* const argv[]) {
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	simplices = {{1,4},{0,1,2},{2,4},{3,4,5},{0,4},{0,2,4},{1,2,4},{0,1,4}};
 	fils = {6,6,7,7,7,7,7,7};
@@ -81,22 +94,25 @@ int main(int argc, char* const argv[]) {
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	simplices = {{3,4,5},{3,4},{3,5}};
-	fils = {8,8,8};
+	fils = {8,9,9};
 	zp.remove_simplices_contiguously(simplices, fils);
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	simplex[0] = 0;
 	simplex[1] = 1;
 	simplex[2] = 2;
 	simplex.push_back(4);
-	zp.insert_simplex(simplex, 8);
+	zp.insert_simplex(simplex, 9);
 
 	print_complex(zp);
 	print_barcode(zp);
+	print_indices(zp);
 
 	return 0;
 }

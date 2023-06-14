@@ -18,10 +18,11 @@
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/pool/object_pool.hpp>
 #include <boost/timer/progress_display.hpp>
-#include <cmath>
 
+#include <cmath>
 #include <map>
 #include <list>
+#include <ostream>
 #include <set>
 #include <utility>
 #include <vector>
@@ -294,20 +295,20 @@ public:
 		/** Returns the absolute length of the interval \f$|d-b|\f$. */
 		Filtration_value length() {
 			if(b_ == d_) { return 0; } //otherwise inf - inf would return nan.
-			return abs(b_ - d_);
+			return std::abs(b_ - d_);
 		}
 		/** Returns the absolute length of the log values of birth and death, i.e.  \f$|\log d - \log b|\f$.. */
 		Filtration_value log_length() {//return the log-length
 			if(b_ == d_) { return 0; } //otherwise inf - inf would return nan.
-			return abs(log2((double)b_) - log2((double)d_));
+			return std::abs(log2((double)b_) - log2((double)d_));
 		}
 		/** Returns the dimension of the homological feature corresponding to the
 		 * interval. */
-		int dim() { return dim_; }//return the homological dimension of the interval
+		int dim() const { return dim_; }//return the homological dimension of the interval
 		/** Returns the birth of the interval.*/
-		Filtration_value birth() { return b_; }//return the birth value
+		Filtration_value birth() const { return b_; }//return the birth value
 		/** Returns the death of the interval.*/
-		Filtration_value death() { return d_; }//return the death value
+		Filtration_value death() const { return d_; }//return the death value
 		/** Swaps the values of birth and death.*/
 		void swap_birth_death() { std::swap(b_,d_); }
 
@@ -328,11 +329,11 @@ public:
 		interval_index(int dim, Simplex_key b, Simplex_key d) : dim_(dim), b_(b), d_(d) {}
 		/** Returns the dimension of the homological feature corresponding to the
 		 * interval. */
-		int dim() { return dim_; }//return the homological dimension of the interval
+		int dim() const { return dim_; }//return the homological dimension of the interval
 		/** Returns the birth index of the interval.*/
-		Filtration_value birth() { return b_; }//return the birth value
+		Filtration_value birth() const { return b_; }//return the birth value
 		/** Returns the death index of the interval.*/
-		Filtration_value death() { return d_; }//return the death value
+		Filtration_value death() const { return d_; }//return the death value
 
 	private://note that we don't assume b_ <= d_
 		int              dim_; //homological dimension
@@ -375,16 +376,16 @@ public:
 	 *
 	 * \param[in] cpx   A model of ZigzagFilteredComplex.
 	 * */
-	Zigzag_persistence()
+	Zigzag_persistence(int ignore_cycles_above_dim = -1)
 		: cpx_()
-		, dim_max_(-1)
+		, dim_max_(ignore_cycles_above_dim)
 		, lowidx_to_matidx_()
 		, matrix_()
 		, birth_ordering_()
 		, persistence_diagram_()
 		, num_arrow_(-1)
-		, previous_filtration_value_()
-		, filtration_values_(std::numeric_limits<Filtration_value>::infinity()) {}
+		, previous_filtration_value_(std::numeric_limits<Filtration_value>::infinity())
+		, filtration_values_() {}
 
 private:
 	/* Set c1 <- c1 + c2, assuming canonical order of indices induced by the order in
@@ -585,8 +586,10 @@ public:
 //	}
 
 	template<class VertexRange = std::initializer_list<Vertex_handle>>
-	void insert_simplex(VertexRange& simplex, Filtration_value filtration_value)
+	void insert_simplex(const VertexRange& simplex, Filtration_value filtration_value)
 	{
+		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
+
 		++num_arrow_;
 
 		if (filtration_value != previous_filtration_value_) //check whether the filt value has changed
@@ -602,8 +605,10 @@ public:
 	}
 
 	template<class VertexRange = std::initializer_list<Vertex_handle>>
-	void remove_simplex(VertexRange& simplex, Filtration_value filtration_value)
+	void remove_simplex(const VertexRange& simplex, Filtration_value filtration_value)
 	{
+		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
+
 		++num_arrow_;
 
 		Simplex_handle sh = cpx_.find(simplex);
@@ -621,7 +626,7 @@ public:
 
 	template<class SimplexRange = std::initializer_list<std::initializer_list<Vertex_handle>>,
 			 class FiltrationRange = std::initializer_list<Filtration_value>>
-	void insert_simplices_contiguously(SimplexRange& simplices, FiltrationRange& filtration_values)
+	void insert_simplices_contiguously(const SimplexRange& simplices, const FiltrationRange& filtration_values)
 	{
 		auto simplexIt = simplices.begin();
 		auto filIt = filtration_values.begin();
@@ -632,7 +637,7 @@ public:
 
 	template<class SimplexRange = std::initializer_list<std::initializer_list<Vertex_handle>>,
 			 class FiltrationRange = std::initializer_list<Filtration_value>>
-	void remove_simplices_contiguously(SimplexRange& simplices, FiltrationRange& filtration_values)
+	void remove_simplices_contiguously(const SimplexRange& simplices, const FiltrationRange& filtration_values)
 	{
 		auto simplexIt = simplices.begin();
 		auto filIt = filtration_values.begin();
@@ -643,7 +648,7 @@ public:
 
 	template<class SimplexRangeIterators, class FiltrationRangeIterators>
 	void insert_simplices_contiguously(SimplexRangeIterators simplex_range_start,
-									   SimplexRangeIterators& simplex_range_end,
+									   SimplexRangeIterators simplex_range_end,
 									   FiltrationRangeIterators filtration_range_start)
 	{
 		for (; simplex_range_start != simplex_range_end; ++simplex_range_start, ++filtration_range_start) {
@@ -653,7 +658,7 @@ public:
 
 	template<class SimplexRangeIterators, class FiltrationRangeIterators>
 	void remove_simplices_contiguously(SimplexRangeIterators simplex_range_start,
-									   SimplexRangeIterators& simplex_range_end,
+									   SimplexRangeIterators simplex_range_end,
 									   FiltrationRangeIterators filtration_range_start)
 	{
 		for (; simplex_range_start != simplex_range_end; ++simplex_range_start, ++filtration_range_start) {
@@ -905,7 +910,7 @@ private:
 		//curr_col points to the column to remove by restriction of K to K-{\sigma}
 		if( curr_col->paired_col_ == nullptr ) { // in F
 			int dim_zzsh = cpx_.dimension(zzsh);
-			if(dim_zzsh < dim_max_) { //don't record intervals of max dim
+			if(dim_max_ == -1 || (dim_max_ != -1 && dim_zzsh < dim_max_)) { //don't record intervals of max dim
 				persistence_diagram_.emplace_back( dim_zzsh
 												   , curr_col->birth()
 												   , num_arrow_);// -1);
@@ -1215,6 +1220,7 @@ public:
 	}
 
 	/** \brief Returns the persistence diagram as a vector of real-valued intervals. */
+	//TODO: add infinit bars?
 	std::vector< interval_filtration >
 	persistence_diagram(Filtration_value shortest_interval = 0.)
 	{
@@ -1260,7 +1266,6 @@ private:
 	// meaning that all inserted simplices with key in [i;j-1] have filtration value f
 	//i is the smallest simplex index whose simplex has filtration value f.
 	std::vector< std::pair< Simplex_key, Filtration_value > > filtration_values_;
-
 };//end class Zigzag_persistence
 
 
