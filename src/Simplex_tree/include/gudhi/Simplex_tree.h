@@ -385,12 +385,6 @@ class Simplex_tree {
   /** \brief Destructor; deallocates the whole tree structure. */
   ~Simplex_tree() {
     root_members_recursive_deletion();
-
-    if constexpr (Options::link_nodes_by_label) {
-      for (auto u_list_ptr : nodes_label_to_list_) {
-        delete u_list_ptr.second;
-      }
-    }
   }
 
   /** \brief User-defined copy assignment reproduces the whole tree structure. */
@@ -1862,14 +1856,14 @@ class Simplex_tree {
  private:
   // if Options::link_nodes_by_label is true, store the lists of Nodes with same label, empty otherwise.
   // unordered_map Vertex_handle v -> pointer to list of all Nodes with label v.
-  std::unordered_map<Vertex_handle, List_max_vertex*> nodes_label_to_list_;
+  std::unordered_map<Vertex_handle, List_max_vertex> nodes_label_to_list_;
 
  public:
   List_max_vertex* nodes_by_label(Vertex_handle v) {
     if constexpr (Options::link_nodes_by_label) {
       auto it_v = nodes_label_to_list_.find(v);
       if (it_v != nodes_label_to_list_.end()) {
-        return it_v->second;
+        return &(it_v->second);
       } else {
         return nullptr;
       }
@@ -1917,9 +1911,9 @@ class Simplex_tree {
     if constexpr (Options::link_nodes_by_label) {
       auto it = nodes_label_to_list_.find(sh->first);
       if (it == nodes_label_to_list_.end()) {  // create a new list
-        it = (nodes_label_to_list_.emplace(sh->first, new List_max_vertex())).first;
+        it = (nodes_label_to_list_.emplace(sh->first, List_max_vertex())).first;
       }
-      it->second->push_back(sh->second);  // insert at the end of the list
+      it->second.push_back(sh->second);  // insert at the end of the list
     }
   }
 
