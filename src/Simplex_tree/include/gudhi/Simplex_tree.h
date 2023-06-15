@@ -196,6 +196,12 @@ class Simplex_tree {
   /** \brief Range over the cofaces of a simplex. */
   typedef std::vector<Simplex_handle> Cofaces_simplex_range;
 
+  // 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the biggest
+  // hard-drive.
+  // static_vector still has some overhead compared to a trivial hand-made
+  // version using std::aligned_storage, or compared to making suffix_ static.
+  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
+
  private:
   /** \brief An iterator for an optimized search for the star of a simplex.
    *
@@ -1084,7 +1090,7 @@ class Simplex_tree {
       // faster cofaces computation only available for codimension = 0
       if (codimension == 0) {
         Simplex_vertex_range rg = simplex_vertex_range(simplex);
-        std::vector<Vertex_handle> simp(rg.begin(), rg.end());
+        Static_vertex_vector simp(rg.begin(), rg.end());
         // must be sorted in decreasing order
         assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
         return Cofaces_simplex_range(Star_simplex_iterator(this, std::move(simp)), Star_simplex_iterator());
@@ -1808,7 +1814,7 @@ class Simplex_tree {
     ++vi;
     GUDHI_CHECK(vi != end, "simplex of dimension 0");
     if(std::next(vi) == end) return sh; // shortcut for dimension 1
-    boost::container::static_vector<Vertex_handle, 40> suffix;
+    Static_vertex_vector suffix;
     suffix.push_back(v0);
     auto filt = filtration_(sh);
     do
