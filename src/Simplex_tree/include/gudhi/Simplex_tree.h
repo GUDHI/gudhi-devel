@@ -1931,6 +1931,8 @@ class Simplex_tree {
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
+      if (nodes_label_to_list_[sh->first].empty())
+        nodes_label_to_list_.erase(sh->first);
     }
   }
 

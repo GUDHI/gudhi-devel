@@ -637,11 +637,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
   SimplexVector = {0, 1, 6, 7};
   st.insert_simplex_and_subfaces(SimplexVector);
 
+  SimplexVector = {4, 8};
+  st.insert_simplex_and_subfaces(SimplexVector);
+
   /* Inserted simplex:        */
   /*    1   6                 */
   /*    o---o                 */
-  /*   /X\7/                  */
-  /*  o---o---o---o           */
+  /*   /X\7/          8       */
+  /*  o---o---o---o---o       */
   /*  2   0   3\X/4           */
   /*            o             */
   /*            5             */
@@ -703,15 +706,84 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(coface_on_simplex_tree, typeST, list_of_tested_var
 
   std::clog << "Cofaces with a codimension too high (codimension + vetices > tree.dimension) :" << std::endl;
   test_cofaces(st, vertex, 5, result);
+  vertex.clear();
+  result.clear();
 
-  //std::clog << "Cofaces with an empty codimension" << std::endl;
-  //test_cofaces(st, vertex, -1, result);
-  //    std::clog << "Cofaces in an empty simplex tree" << std::endl;
-  //   typeST empty_tree;
-  //    test_cofaces(empty_tree, vertex, 1, result);
-  //std::clog << "Cofaces of an empty simplex" << std::endl;
-  //vertex.clear();
-  // test_cofaces(st, vertex, 1, result);
+  std::clog << "Star of (4):" << std::endl;
+
+  simplex_result = {4};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {8, 4};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4};
+  result.push_back(st.find(simplex_result));
+  simplex_result.clear();
+
+  vertex = {4};
+  test_cofaces(st, vertex, 0, result);
+  vertex.clear();
+  result.clear();
+
+  std::clog << "Cofaces - codimension = 1 - of (4):" << std::endl;
+
+  simplex_result = {8, 4};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4};
+  result.push_back(st.find(simplex_result));
+  simplex_result.clear();
+
+  vertex = {4};
+  test_cofaces(st, vertex, 1, result);
+  vertex.clear();
+  result.clear();
+
+  st.remove_maximal_simplex(st.find({4, 8}));
+  st.remove_maximal_simplex(st.find({8}));
+  std::clog << "Star of (4) after removal of simplices (8) and (4,8):" << std::endl;
+
+  simplex_result = {4};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4};
+  result.push_back(st.find(simplex_result));
+  simplex_result.clear();
+
+  vertex = {4};
+  test_cofaces(st, vertex, 0, result);
+  vertex.clear();
+  result.clear();
+
+  std::clog << "Cofaces - codimension = 1 - of (4) after removal of simplices (8) and (4,8):" << std::endl;
+
+  simplex_result = {4, 3};
+  result.push_back(st.find(simplex_result));
+
+  simplex_result = {5, 4};
+  result.push_back(st.find(simplex_result));
+  simplex_result.clear();
+
+  vertex = {4};
+  test_cofaces(st, vertex, 1, result);
+  vertex.clear();
+  result.clear();
 
 }
 
