@@ -115,6 +115,7 @@ class Persistent_cohomology {
     }
     Simplex_key idx_fil = 0;
     for (auto sh : cpx_->filtration_simplex_range()) {
+      if (cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
       cpx_->assign_key(sh, idx_fil);
       ++idx_fil;
       dsets_.make_set(cpx_->key(sh));
@@ -175,6 +176,7 @@ class Persistent_cohomology {
     // Compute all finite intervals
     for (auto sh : cpx_->filtration_simplex_range()) {
       int dim_simplex = cpx_->dimension(sh);
+      if (cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
       switch (dim_simplex) {
         case 0:
           break;
@@ -189,6 +191,7 @@ class Persistent_cohomology {
     // Compute infinite intervals of dimension 0
     Simplex_key key;
     for (auto v_sh : cpx_->skeleton_simplex_range(0)) {  // for all 0-dimensional simplices
+    if (cpx_->filtration(v_sh) == std::numeric_limits<Filtration_value>::infinity()) continue;
       key = cpx_->key(v_sh);
 
       if (ds_parent_[key] == key  // root of its tree
