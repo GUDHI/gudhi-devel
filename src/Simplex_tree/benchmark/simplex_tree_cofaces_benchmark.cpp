@@ -71,6 +71,14 @@ void benchmark_stars_computation(int nb_vertices) {
       [[maybe_unused]] volatile auto _ = simplex;
 
   std::clog << benchmark_stars << std::endl;
+
+  Gudhi::Clock benchmark_cofaces("Benchmark the cofaces (codimension=1) search of the random simplices");
+  // Just browse the stars from the random simplices list
+  for (auto& sh : sh_list)
+    for (const auto& simplex : st.cofaces_simplex_range(sh, 1))
+      [[maybe_unused]] volatile auto _ = simplex;
+
+  std::clog << benchmark_cofaces << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -84,10 +92,10 @@ int main(int argc, char *argv[]) {
   if (argc == 2)
     nb_vertices = atoi(argv[1]);
     
-  std::clog << "** Without stars computation optimization" << std::endl;
+  std::clog << "** Without cofaces computation optimization" << std::endl;
   benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(nb_vertices);
 
-  std::clog << "** With stars computation optimization" << std::endl;
+  std::clog << "** With cofaces computation optimization" << std::endl;
   benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_cofaces>>(nb_vertices);
 
   return EXIT_SUCCESS;
