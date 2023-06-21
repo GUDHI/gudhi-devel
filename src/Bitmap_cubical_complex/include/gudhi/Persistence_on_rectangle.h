@@ -546,6 +546,7 @@ struct Persistence_on_rectangle {
 // * for large hard (many intervals) inputs, primal/dual dominate the running time because of the random reads in find_set and input(a/b). The input load would be cheaper if we stored it with parents, but then find_set would be slower.
 // * to increase memory locality, maybe pairing, which is currently arbitrary, could use some heuristic to favor some pairs over others.
 // * try to loosen tight dependency chains, load values several instructions before they are needed. Performing 2 find_set in lock step surprisingly doesn't help.
+// * To handle very big instances, we could remove data_v_ and recompute it on demand as the min of the inputs of i, i+1, i+dy and i+dy+1. On hard instances, it wouldn't save that much memory (and it is a bit slower). On easy instances, if we also remove the calls to reserve(), the saving is less negligible, but we still have ds_parent_*_ that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble for now.
 
 /**
  * @private
