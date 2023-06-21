@@ -221,39 +221,39 @@ struct Persistence_on_rectangle {
     auto mark_edge_critical = [&](Index v1, Index v2) {
       edges.emplace_back(T(f, i), v1, v2);
     };
-    auto  v_ul = [&](){ return i - 1; };
-    auto  v_ur = [&](){ return i; };
-    auto  v_dl = [&](){ return i - dy - 1; };
-    auto  v_dr = [&](){ return i - dy; };
-    auto pair_square_u = [&](){ set_parent_square(i, i + dy); };
-    auto pair_square_d = [&](){ set_parent_square(i, i - dy); };
-    auto pair_square_l = [&](){ set_parent_square(i, i - 1); };
-    auto pair_square_r = [&](){ set_parent_square(i, i + 1); };
+    auto v_up_left    = [&](){ return i - 1; };
+    auto v_up_right   = [&](){ return i; };
+    auto v_down_left  = [&](){ return i - dy - 1; };
+    auto v_down_right = [&](){ return i - dy; };
+    auto pair_square_up    = [&](){ set_parent_square(i, i + dy); };
+    auto pair_square_down  = [&](){ set_parent_square(i, i - dy); };
+    auto pair_square_left  = [&](){ set_parent_square(i, i - 1); };
+    auto pair_square_right = [&](){ set_parent_square(i, i + 1); };
 
     // Mark the corners as critical, it will be overwritten if not
     i = 0; f = input(i);
-    mark_vertex_critical(v_ur());
+    mark_vertex_critical(v_up_right());
     i = size_x; f = input(i);
-    mark_vertex_critical(v_ul());
+    mark_vertex_critical(v_up_left());
     i = dy * size_y; f = input(i);
-    mark_vertex_critical(v_dr());
+    mark_vertex_critical(v_down_right());
     i = size_x + dy * size_y; f = input(i);
-    mark_vertex_critical(v_dl());
+    mark_vertex_critical(v_down_left());
 
     // Boundary nodes, 1st row
     for(Index x = 1; x < size_x; ++x) {
       i = x;
       f = input(x);
       if (has_larger_input(i + dy, i, f)) {
-        auto ul = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i + dy - 1, i, f); };
-        auto ur = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i + dy + 1, i, f); };
-        if (ul()) {
-          set_parent_vertex(v_ul(), v_ur());
-          if (ur()) mark_vertex_critical(v_ur());
-        } else if (ur()) {
-          set_parent_vertex(v_ur(), v_ul());
+        auto up_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i + dy - 1, i, f); };
+        auto up_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i + dy + 1, i, f); };
+        if (up_left()) {
+          set_parent_vertex(v_up_left(), v_up_right());
+          if (up_right()) mark_vertex_critical(v_up_right());
+        } else if (up_right()) {
+          set_parent_vertex(v_up_right(), v_up_left());
         } else {
-          mark_edge_critical(v_ul(), v_ur());
+          mark_edge_critical(v_up_left(), v_up_right());
         }
       }
     }
@@ -264,15 +264,15 @@ struct Persistence_on_rectangle {
         i = y * dy;
         f = input(i);
         if (has_larger_input(i + 1, i, f)) {
-          auto dr = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i + 1 - dy, i, f); };
-          auto ur = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i + 1 + dy, i, f); };
-          if (dr()) {
-            set_parent_vertex(v_dr(), v_ur());
-            if (ur()) mark_vertex_critical(v_ur());
-          } else if (ur()) {
-            set_parent_vertex(v_ur(), v_dr());
+          auto down_right = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i + 1 - dy, i, f); };
+          auto up_right   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i + 1 + dy, i, f); };
+          if (down_right()) {
+            set_parent_vertex(v_down_right(), v_up_right());
+            if (up_right()) mark_vertex_critical(v_up_right());
+          } else if (up_right()) {
+            set_parent_vertex(v_up_right(), v_down_right());
           } else {
-            mark_edge_critical(v_dr(), v_ur());
+            mark_edge_critical(v_down_right(), v_up_right());
           }
         }
       }
@@ -281,173 +281,173 @@ struct Persistence_on_rectangle {
         i = x + dy * y;
         f = input(i);
         // See what part of the boundary shares f
-        auto l = [&]() { return has_larger_input(i - 1, i, f); };
-        auto r = [&]() { return has_larger_input(i + 1, i, f); };
-        auto d = [&]() { return has_larger_input(i - dy, i, f); };
-        auto u = [&]() { return has_larger_input(i + dy, i, f); };
-        auto dl = [&]() { return has_larger_input(i - dy - 1, i, f); };
-        auto ul = [&]() { return has_larger_input(i + dy - 1, i, f); };
-        auto dr = [&]() { return has_larger_input(i - dy + 1, i, f); };
-        auto ur = [&]() { return has_larger_input(i + dy + 1, i, f); };
-        if (u()) { // u
-          if (l()) { // u l
-            if (ul()) { // u l ul
-              set_parent_vertex(v_ul(), v_ur());
-              if (d()) { // U l UL d
-                if (dl()) { // U l UL d dl
-                  set_parent_vertex(v_dl(), v_ul());
-                  if (r()) { // U L UL d DL r
-                    if (dr()) { // U L UL d DL r dr
-                      set_parent_vertex(v_dr(), v_dl());
-                      pair_square_r();
-                      if (ur()) { // U L UL D DL R DR ur - cr
-                        mark_vertex_critical(v_ur());
+        auto left  = [&]() { return has_larger_input(i - 1, i, f); };
+        auto right = [&]() { return has_larger_input(i + 1, i, f); };
+        auto down  = [&]() { return has_larger_input(i - dy, i, f); };
+        auto up    = [&]() { return has_larger_input(i + dy, i, f); };
+        auto down_left  = [&]() { return has_larger_input(i - dy - 1, i, f); };
+        auto up_left    = [&]() { return has_larger_input(i + dy - 1, i, f); };
+        auto down_right = [&]() { return has_larger_input(i - dy + 1, i, f); };
+        auto up_right   = [&]() { return has_larger_input(i + dy + 1, i, f); };
+        if (up()) { // u
+          if (left()) { // u l
+            if (up_left()) { // u l ul
+              set_parent_vertex(v_up_left(), v_up_right());
+              if (down()) { // U l UL d
+                if (down_left()) { // U l UL d dl
+                  set_parent_vertex(v_down_left(), v_up_left());
+                  if (right()) { // U L UL d DL r
+                    if (down_right()) { // U L UL d DL r dr
+                      set_parent_vertex(v_down_right(), v_down_left());
+                      pair_square_right();
+                      if (up_right()) { // U L UL D DL R DR ur - cr
+                        mark_vertex_critical(v_up_right());
                       }
                     } else { // U L UL d DL r !dr
-                      pair_square_d();
-                      if (ur()) { // U L UL D DL r !dr ur - cd
-                        set_parent_vertex(v_ur(), v_dr());
+                      pair_square_down();
+                      if (up_right()) { // U L UL D DL r !dr ur - cd
+                        set_parent_vertex(v_up_right(), v_down_right());
                       } else { // U L UL D DL r !dr !ur - cd
-                        mark_edge_critical(v_dr(), v_ur());
+                        mark_edge_critical(v_down_right(), v_up_right());
                       }
                     }
                   } else { // U L UL d DL !r
-                    pair_square_d();
+                    pair_square_down();
                   }
                 } else { // U l UL d !dl
-                  pair_square_l();
-                  if (r()) { // U L UL d !dl r - cl
-                    if (dr()) { // U L UL d !dl r dr - cl
-                      set_parent_vertex(v_dr(), v_dl());
+                  pair_square_left();
+                  if (right()) { // U L UL d !dl r - cl
+                    if (down_right()) { // U L UL d !dl r dr - cl
+                      set_parent_vertex(v_down_right(), v_down_left());
                     } else { // U L UL d !dl r !dr - cl
-                      mark_edge_critical(v_dl(), v_dr());
+                      mark_edge_critical(v_down_left(), v_down_right());
                     }
-                    if (ur()) { // U L UL D !dl r ur - cl
-                      set_parent_vertex(v_ur(), v_dr());
+                    if (up_right()) { // U L UL D !dl r ur - cl
+                      set_parent_vertex(v_up_right(), v_down_right());
                     } else { // U L UL D !dl r !ur - cl
-                      mark_edge_critical(v_dr(), v_ur());
+                      mark_edge_critical(v_down_right(), v_up_right());
                     }
                   } else { // U L UL d !dl !r - cl
-                    mark_edge_critical(v_dl(), v_dr());
+                    mark_edge_critical(v_down_left(), v_down_right());
                   }
                 }
               } else { // U l UL !d
-                pair_square_l();
-                if (r()) { // U L UL !d r - cl
-                  if (ur()) { // U L UL !d r ur - cl
-                    set_parent_vertex(v_ur(), v_dr());
+                pair_square_left();
+                if (right()) { // U L UL !d r - cl
+                  if (up_right()) { // U L UL !d r ur - cl
+                    set_parent_vertex(v_up_right(), v_down_right());
                   } else { // U L UL !d r !ur - cl
-                    mark_edge_critical(v_dr(), v_ur());
+                    mark_edge_critical(v_down_right(), v_up_right());
                   }
                 } else {} // U L UL !d !r - cl
               }
             } else { // u l !ul
-              pair_square_u();
-              if (d()) { // U l !ul d - cu
-                if (dl()) { // U l !ul d dl - cu
-                  set_parent_vertex(v_dl(), v_ul());
+              pair_square_up();
+              if (down()) { // U l !ul d - cu
+                if (down_left()) { // U l !ul d dl - cu
+                  set_parent_vertex(v_down_left(), v_up_left());
                 } else { // U l !ul d !dl - cu
-                  mark_edge_critical(v_dl(), v_ul());
+                  mark_edge_critical(v_down_left(), v_up_left());
                 }
-                if (r()) { // U L !ul d r - cu
-                  if (dr()) { // U L !ul d r dr - cu
-                    set_parent_vertex(v_dr(), v_dl());
+                if (right()) { // U L !ul d r - cu
+                  if (down_right()) { // U L !ul d r dr - cu
+                    set_parent_vertex(v_down_right(), v_down_left());
                   } else { // U L !ul d r !dr - cu
-                    mark_edge_critical(v_dl(), v_dr());
+                    mark_edge_critical(v_down_left(), v_down_right());
                   }
-                  if (ur()) { // U L !ul D r ur - cu
-                    set_parent_vertex(v_ur(), v_dr());
+                  if (up_right()) { // U L !ul D r ur - cu
+                    set_parent_vertex(v_up_right(), v_down_right());
                   } else { // U L !ul D r !ur - cu
-                    mark_edge_critical(v_dr(), v_ur());
+                    mark_edge_critical(v_down_right(), v_up_right());
                   }
                 } else { // U L !ul d !r - cu
-                  mark_edge_critical(v_dl(), v_dr());
+                  mark_edge_critical(v_down_left(), v_down_right());
                 }
               } else { // U l !ul !d - cu
-                mark_edge_critical(v_dl(), v_ul());
-                if (r()) { // U L !ul !d r - cu
-                  if (ur()) { // U L !ul !d r ur - cu
-                    set_parent_vertex(v_ur(), v_dr());
+                mark_edge_critical(v_down_left(), v_up_left());
+                if (right()) { // U L !ul !d r - cu
+                  if (up_right()) { // U L !ul !d r ur - cu
+                    set_parent_vertex(v_up_right(), v_down_right());
                   } else { // U L !ul !d r !ur - cu
-                    mark_edge_critical(v_dr(), v_ur());
+                    mark_edge_critical(v_down_right(), v_up_right());
                   }
                 } else {} // U L !ul !d !r - cu
               }
             }
           } else { // u !l
-            pair_square_u();
-            if (d()) { // U !l d - cu
-              if (r()) { // U !l d r - cu
-                if (dr()) { // U !l d r dr - cu
-                  set_parent_vertex(v_dr(), v_dl());
+            pair_square_up();
+            if (down()) { // U !l d - cu
+              if (right()) { // U !l d r - cu
+                if (down_right()) { // U !l d r dr - cu
+                  set_parent_vertex(v_down_right(), v_down_left());
                 } else { // U !l d r !dr - cu
-                  mark_edge_critical(v_dl(), v_dr());
+                  mark_edge_critical(v_down_left(), v_down_right());
                 }
-                if (ur()) { // U !l D r ur - cu
-                  set_parent_vertex(v_ur(), v_dr());
+                if (up_right()) { // U !l D r ur - cu
+                  set_parent_vertex(v_up_right(), v_down_right());
                 } else { // U !l D r !ur - cu
-                  mark_edge_critical(v_dr(), v_ur());
+                  mark_edge_critical(v_down_right(), v_up_right());
                 }
               } else { // U !l d !r - cu
-                mark_edge_critical(v_dl(), v_dr());
+                mark_edge_critical(v_down_left(), v_down_right());
               }
             } else { // U !l !d - cu
-              if (r()) { // U !l !d r - cu
-                if (ur()) { // U !l !d r ur - cu
-                  set_parent_vertex(v_ur(), v_dr());
+              if (right()) { // U !l !d r - cu
+                if (up_right()) { // U !l !d r ur - cu
+                  set_parent_vertex(v_up_right(), v_down_right());
                 } else { // U !l !d r !ur - cu
-                  mark_edge_critical(v_dr(), v_ur());
+                  mark_edge_critical(v_down_right(), v_up_right());
                 }
               } else {} // U !l !d !r - cu
             }
           }
         } else { // !u
-          if (l()) { // !u l
-            if (d()) { // !u l d
-              if (dl()) { // !u l d dl
-                set_parent_vertex(v_dl(), v_ul());
-                if (r()) { // !u L d DL r
-                  if (dr()) { // !u L d DL r dr
-                    set_parent_vertex(v_dr(), v_dl());
+          if (left()) { // !u l
+            if (down()) { // !u l d
+              if (down_left()) { // !u l d dl
+                set_parent_vertex(v_down_left(), v_up_left());
+                if (right()) { // !u L d DL r
+                  if (down_right()) { // !u L d DL r dr
+                    set_parent_vertex(v_down_right(), v_down_left());
                   } else { // !u L d DL r !dr
-                    mark_edge_critical(v_dl(), v_dr());
+                    mark_edge_critical(v_down_left(), v_down_right());
                   }
-                  pair_square_r();
+                  pair_square_right();
                 } else { // !u L d DL !r
-                  pair_square_d();
+                  pair_square_down();
                 }
               } else { // !u l d !dl
-                pair_square_l();
-                if (r()) { // !u L d !dl r - cl
-                  if (dr()) { // !u L d !dl r dr - cl
-                    set_parent_vertex(v_dr(), v_dl());
+                pair_square_left();
+                if (right()) { // !u L d !dl r - cl
+                  if (down_right()) { // !u L d !dl r dr - cl
+                    set_parent_vertex(v_down_right(), v_down_left());
                   } else { // !u L d !dl r !dr - cl
-                    mark_edge_critical(v_dl(), v_dr());
+                    mark_edge_critical(v_down_left(), v_down_right());
                   }
-                  mark_edge_critical(v_dr(), v_ur());
+                  mark_edge_critical(v_down_right(), v_up_right());
                 } else { // !u L d !dl !r - cl
-                  mark_edge_critical(v_dl(), v_dr());
+                  mark_edge_critical(v_down_left(), v_down_right());
                 }
               }
             } else { // !u l !d
-              pair_square_l();
-              if (r()) { // !u L !d r - cl
-                mark_edge_critical(v_dr(), v_ur());
+              pair_square_left();
+              if (right()) { // !u L !d r - cl
+                mark_edge_critical(v_down_right(), v_up_right());
               } else {} // !u L !d !r - cl
             }
           } else { // !u !l
-            if (d()) { // !u !l d
-              pair_square_d();
-              if (r()) { // !u !l D r - cd
-                if (dr()) { // !u !l D r dr - cd
-                  set_parent_vertex(v_dr(), v_ur());
+            if (down()) { // !u !l d
+              pair_square_down();
+              if (right()) { // !u !l D r - cd
+                if (down_right()) { // !u !l D r dr - cd
+                  set_parent_vertex(v_down_right(), v_up_right());
                 } else { // !u !l D r !dr - cd
-                  mark_edge_critical(v_dr(), v_ur());
+                  mark_edge_critical(v_down_right(), v_up_right());
                 }
               } else {} // !u !l D !r - cd
             } else { // !u !l !d
-              if (r()) { // !u !l !d r
-                pair_square_r();
+              if (right()) { // !u !l !d r
+                pair_square_right();
               } else { // !u !l !d !r
                 mark_square_critical();
               }
@@ -460,15 +460,15 @@ struct Persistence_on_rectangle {
         i = size_x + dy * y;
         f = input(i);
         if (has_larger_input(i - 1, i, f)) {
-          auto dl = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i - 1 - dy, i, f); };
-          auto ul = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i - 1 + dy, i, f); };
-          if (dl()) {
-            set_parent_vertex(v_dl(), v_ul());
-            if (ul()) mark_vertex_critical(v_ul());
-          } else if (ul()) {
-            set_parent_vertex(v_ul(), v_dl());
+          auto down_left = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i - 1 - dy, i, f); };
+          auto up_left   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i - 1 + dy, i, f); };
+          if (down_left()) {
+            set_parent_vertex(v_down_left(), v_up_left());
+            if (up_left()) mark_vertex_critical(v_up_left());
+          } else if (up_left()) {
+            set_parent_vertex(v_up_left(), v_down_left());
           } else {
-            mark_edge_critical(v_dl(), v_ul());
+            mark_edge_critical(v_down_left(), v_up_left());
           }
         }
       }
@@ -478,15 +478,15 @@ struct Persistence_on_rectangle {
       i = size_y * dy + x;
       f = input(i);
       if (has_larger_input(i - dy, i, f)) {
-        auto dl = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i - dy - 1, i, f); };
-        auto dr = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i - dy + 1, i, f); };
-        if (dl()) {
-          set_parent_vertex(v_dl(), v_dr());
-          if (dr()) mark_vertex_critical(v_dr());
-        } else if (dr()) {
-          set_parent_vertex(v_dr(), v_dl());
+        auto down_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i - dy - 1, i, f); };
+        auto down_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i - dy + 1, i, f); };
+        if (down_left()) {
+          set_parent_vertex(v_down_left(), v_down_right());
+          if (down_right()) mark_vertex_critical(v_down_right());
+        } else if (down_right()) {
+          set_parent_vertex(v_down_right(), v_down_left());
         } else {
-          mark_edge_critical(v_dl(), v_dr());
+          mark_edge_critical(v_down_left(), v_down_right());
         }
       }
     }
