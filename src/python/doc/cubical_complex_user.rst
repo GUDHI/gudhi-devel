@@ -25,7 +25,10 @@ in the following way:
 .. math::
 
     \partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) +
-    \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).
+    \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n)
+
+(when working with a field of characteristic other than 2, the non-zero terms of this sum come with alternating
+signs ±1).
 
 A *cubical complex* :math:`\mathcal{K}` is a collection of cubes closed under operation of taking boundary
 (i.e. boundary of every cube from the collection is in the collection). A cube :math:`C` in cubical complex
