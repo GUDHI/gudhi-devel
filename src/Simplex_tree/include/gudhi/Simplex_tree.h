@@ -32,6 +32,7 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/size.hpp>
 #include <boost/container/static_vector.hpp>
+#include <boost/range/adaptors.hpp>
 
 #include <boost/intrusive/list.hpp>
 
@@ -172,6 +173,22 @@ class Simplex_tree {
     }
   };
 
+ private:
+  /** \brief An iterator for an optimized search for the star of a simplex.
+   *
+   * \details It requires the Options::link_nodes_by_label to be true and store two
+   * extra pointers in each node of the simplex tree. The Nodes of same label are
+   * linked in a list.
+   */
+  using Optimized_star_simplex_iterator = Simplex_tree_optimized_star_simplex_iterator<Simplex_tree>;
+  /** \brief Range for an optimized search for the star of a simplex. */
+  using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
+
+  using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
+  using Filtered_boost_predicate = std::function<bool(Const_boost_iterator)>;
+  std::function<bool(Const_boost_iterator)> select;
+  using Optimized_star_simplex_filtered_range = boost::filtered_range<decltype(select), Optimized_star_simplex_range>;
+
  public:
   /** \name Range and iterator types
    *
@@ -194,7 +211,9 @@ class Simplex_tree {
   /** \brief Range over the vertices of a simplex. */
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
-  typedef std::vector<Simplex_handle> Cofaces_simplex_range;
+  typedef typename std::conditional<Options::link_nodes_by_label,
+                                    Optimized_star_simplex_filtered_range,  // faster implem
+                                    std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
   // 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the biggest
   // hard-drive.
@@ -202,21 +221,6 @@ class Simplex_tree {
   // version using std::aligned_storage, or compared to making suffix_ static.
   using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
 
- private:
-  /** \brief An iterator for an optimized search for the star of a simplex.
-   *
-   * \details It requires the Options::link_nodes_by_label to be true and store two
-   * extra pointers in each node of the simplex tree. The Nodes of same label are
-   * linked in a list.
-   */
-  typedef Simplex_tree_optimized_star_simplex_iterator<Simplex_tree> Optimized_star_simplex_iterator;
-
-  /** \brief Iterator over the star of a simplex.*/
-  typedef typename std::conditional<Options::link_nodes_by_label,
-                                    Optimized_star_simplex_iterator,  // faster implem
-                                    typename Cofaces_simplex_range::iterator>::type Star_simplex_iterator;
-
- public:
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
    * 'value_type' is Simplex_handle. */
@@ -1087,26 +1091,37 @@ class Simplex_tree {
     assert(codimension >= 0);
 
     if constexpr (Options::link_nodes_by_label) {
-      // faster cofaces computation only available for codimension = 0
+      // faster cofaces computation
       if (codimension == 0) {
-        Simplex_vertex_range rg = simplex_vertex_range(simplex);
-        Static_vertex_vector simp(rg.begin(), rg.end());
-        // must be sorted in decreasing order
-        assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
-        return Cofaces_simplex_range(Star_simplex_iterator(this, std::move(simp)), Star_simplex_iterator());
+        // Always true for a star
+        select = [](Const_boost_iterator) { return true; };
+      } else {
+        // Specific coface case
+        select = [this, simplex, codimension](Const_boost_iterator iter) {
+            return ((this->dimension(simplex) + codimension) == this->dimension(iter));
+          };
       }
-    }
-    Cofaces_simplex_range cofaces;
-    Simplex_vertex_range rg = simplex_vertex_range(simplex);
-    std::vector<Vertex_handle> copy(rg.begin(), rg.end());
-    if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
-        (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+      Simplex_vertex_range rg = simplex_vertex_range(simplex);
+      Static_vertex_vector simp(rg.begin(), rg.end());
+      // must be sorted in decreasing order
+      assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
+      auto range = Optimized_star_simplex_range(Optimized_star_simplex_iterator(this, std::move(simp)),
+                                                Optimized_star_simplex_iterator());
+      // Lazy filtered range
+      return boost::adaptors::filter(range, select);
+    } else {
+      Cofaces_simplex_range cofaces;
+      Simplex_vertex_range rg = simplex_vertex_range(simplex);
+      std::vector<Vertex_handle> copy(rg.begin(), rg.end());
+      if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
+          (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+        return cofaces;
+      // must be sorted in decreasing order
+      assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
+      bool star = codimension == 0;
+      rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
       return cofaces;
-    // must be sorted in decreasing order
-    assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
-    bool star = codimension == 0;
-    rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
-    return cofaces;
+    }
   }
 
  private:
