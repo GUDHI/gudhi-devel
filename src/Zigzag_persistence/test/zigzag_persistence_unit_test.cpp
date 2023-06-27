@@ -40,6 +40,8 @@ struct cmp_intervals_by_length {
 
 BOOST_AUTO_TEST_CASE(constructor) {
 	BOOST_CHECK_NO_THROW(ZP zp);
+	BOOST_CHECK_NO_THROW(ZP zp(28));
+	BOOST_CHECK_NO_THROW(ZP zp(28,2));
 	ZP zp;
 	BOOST_CHECK(zp.persistence_diagram(0).empty());
 }
@@ -122,7 +124,7 @@ std::vector<Filtration_value> get_filtration_values()
 }
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
-	ZP zp;
+	ZP zp(28);
 	std::vector<interval_index> realIndices;
 	std::vector<interval_filtration> realBarcode;
 	realIndices.reserve(13);
@@ -182,7 +184,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
 }
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
-	ZP zp(1);
+	ZP zp(28, 1);
 	std::vector<interval_index> realIndices;
 	std::vector<Filtration_value> indexToFil(28);
 	std::vector<interval_filtration> realBarcode;
@@ -300,7 +302,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_batch_with_iterators) {
 }
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_batch_with_iterators_max1) {
-	ZP zp(1);
+	ZP zp(28, 1);
 	std::vector<interval_index> realIndices;
 	std::vector<Filtration_value> indexToFil(28);
 	std::vector<interval_filtration> realBarcode;
@@ -413,7 +415,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_batch) {
 }
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_batch_max1) {
-	ZP zp(1);
+	ZP zp(28, 1);
 	std::vector<interval_index> realIndices;
 	std::vector<Filtration_value> indexToFil(28);
 	std::vector<interval_filtration> realBarcode;

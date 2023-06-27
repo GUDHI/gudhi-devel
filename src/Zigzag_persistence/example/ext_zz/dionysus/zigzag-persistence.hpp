@@ -283,7 +283,7 @@ remove_impl(Index cell)
                 for (auto it  = std::next(rit); it != reducers[i+1]; ++it)
                     add_in_z(it->index(), rit->index(), m, it->element());
 
-                if (i + 1 != reducers.size() - 1)
+                if (static_cast<unsigned int>(i + 1) != reducers.size() - 1)
                 {
                     auto it = reducers[i+1];
                     add_in_z(it->index(), rit->index(), m, it->element());

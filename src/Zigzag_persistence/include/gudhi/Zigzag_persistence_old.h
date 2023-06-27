@@ -594,7 +594,7 @@ public:
 		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
 
 		++num_arrow_;
-
+// std::cout << "add: " << num_arrow_ << "\n";
 		if (filtration_value != previous_filtration_value_) //check whether the filt value has changed
 		{ //consecutive pairs (i,f), (j,f') mean simplices of index k in [i,j-1] have
 			previous_filtration_value_ = filtration_value;                                //filtration value f
@@ -605,6 +605,15 @@ public:
 		GUDHI_CHECK(res.second, "Zigzag_persistence::insert_simplex - insertion of a simplex already in the complex");
 		cpx_.assign_key(res.first, num_arrow_);
 		forward_arrow(res.first);
+
+// if (num_arrow_ > 62 && num_arrow_ < 216){
+// 	const matrix_chain& c = *lowidx_to_matidx_.at(62);
+// 	std::cout << "======= col: " << c.birth_ << "\n";
+// 	for (const auto& cell : c.column_){
+// 		std::cout << cell.key_ << " ";
+// 	}
+// 	std::cout << "\n";
+// }
 	}
 
 	template<class VertexRange = std::initializer_list<Vertex_handle>>
@@ -613,7 +622,7 @@ public:
 		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
 
 		++num_arrow_;
-
+// std::cout << "remove: " << num_arrow_ << "\n";
 		Simplex_handle sh = cpx_.find(simplex);
 		GUDHI_CHECK(sh != cpx_.null_simplex(), "Zigzag_persistence::remove_simplex - removal of a simplex not in the complex");
 
@@ -625,6 +634,15 @@ public:
 
 		backward_arrow(sh);
 		cpx_.remove_maximal_simplex(sh);
+
+// if (num_arrow_ > 62 && num_arrow_ < 216){
+// 	const matrix_chain& c = *lowidx_to_matidx_.at(62);
+// 	std::cout << "======= col: " << c.birth_ << "\n";
+// 	for (const auto& cell : c.column_){
+// 		std::cout << cell.key_ << " ";
+// 	}
+// 	std::cout << "\n";
+// }
 	}
 
 	template<class SimplexRange = std::initializer_list<std::initializer_list<Vertex_handle>>,
@@ -697,7 +715,7 @@ private:
 		{ col_bsh.insert(cpx_.key(b_sh)); }
 
 		//If empty boundary (e.g., when zzsh is a vertex in a simplicial complex)
-		//Add a non-trivial cycle [c = zzsh] to the matrix, make it a creator in F.
+		//Add a non-trivial cycle [c = zzsh] to the matrix, lowidx_to_matidx_make it a creator in F.
 		if(col_bsh.empty()) // -> creator
 		{ //New row and column with a bottom-right non-zero element, at index key(zzsh)
 			//i.e., create a new cycle in F, equal to    *zzsh alone.
@@ -904,11 +922,67 @@ private:
 						  , [](matrix_chain *mc1, matrix_chain *mc2)
 		{ return mc1->lowest_idx_ < mc2->lowest_idx_;} );
 
+// if (num_arrow_ == 179){
+// 	std::cout << "col:\n";
+// 	for (matrix_chain * m : modified_columns){
+// 		std::cout << m->birth_ << ", " << m->lowest_idx_ << ", " << m << "\n";
+// 		for (const auto& cell : m->column()){
+// 			std::cout << cell.key() << " ";
+// 		}
+// 		std::cout << "\n";
+// 	}
+// 	std::cout << "\n";
+// }
+
 		//Modifies the pointer curr_col, not the other one.
 		for(auto other_col_it = modified_columns.begin()+1;
 			other_col_it != modified_columns.end(); ++other_col_it) {
+// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177){
+// 	std::cout << "before1: " << curr_col->birth_ << ", " << curr_col->lowest_idx_ << ", " << curr_col << "\n";
+// 	std::cout << "before2: " << (*other_col_it)->birth_ << ", " << (*other_col_it)->lowest_idx_ << ", " << *other_col_it << "\n";
+// }
+// if (num_arrow_ == 179){
+// 	std::cout << "before\n";
+// 	std::cout << curr_col->birth_ << ", " << curr_col->lowest_idx_ << "\n";
+// 	for (const auto& cell : curr_col->column()){
+// 		std::cout << cell.key() << " ";
+// 	}
+// 	std::cout << "\n";
+// 	std::cout << (*other_col_it)->birth_ << ", " << (*other_col_it)->lowest_idx_ << "\n";
+// 	for (const auto& cell : (*other_col_it)->column()){
+// 		std::cout << cell.key() << " ";
+// 	}
+// 	std::cout << "\n";
+// }
 			curr_col = arrow_transposition_case_study(curr_col, *other_col_it);
+// if (num_arrow_ == 179){
+// 	std::cout << "after\n";
+// 	std::cout << curr_col->birth_ << ", " << curr_col->lowest_idx_ << "\n";
+// 	for (const auto& cell : curr_col->column()){
+// 		std::cout << cell.key() << " ";
+// 	}
+// 	std::cout << "\n";
+// 	std::cout << (*other_col_it)->birth_ << ", " << (*other_col_it)->lowest_idx_ << "\n";
+// 	for (const auto& cell : (*other_col_it)->column()){
+// 		std::cout << cell.key() << " ";
+// 	}
+// 	std::cout << "\n";
+// }
+// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177){
+// 	std::cout << "after1: " << curr_col->birth_ << ", " << curr_col->lowest_idx_ << ", " << curr_col << "\n";
+// 	std::cout << "after2: " << (*other_col_it)->birth_ << ", " << (*other_col_it)->lowest_idx_ << ", " << *other_col_it << "\n";
+// 	std::cout << "\n";
+// }
 		}
+
+// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177){
+// 	std::cout << "col " << curr_col->birth_ << ", " << curr_col->lowest_idx_ << ", " << curr_col << "\n";
+// 	for (const auto& cell : curr_col->column()){
+// 		std::cout << cell.key() << " (" << cell.self_chain_ << ") ";
+// 	}
+// 	std::cout << "\n";
+// 	std::cout << "\n";
+// }
 
 		//curr_col points to the column to remove by restriction of K to K-{\sigma}
 		if( curr_col->paired_col_ == nullptr ) { // in F
@@ -1034,6 +1108,10 @@ private:
 	matrix_chain * arrow_transposition_case_study( matrix_chain * curr_col//c_s
 												   , matrix_chain * other_col )//c_t
 	{ //c_s has low idx s and c_t low idx t
+// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177){
+// 	std::cout << "pairing1: " << curr_col->inF() << ", " << curr_col->inH() << " (" << curr_col->birth() << ")\n";
+// 	std::cout << "pairing2: " << other_col->inF() << ", " << other_col->inH() << " (" << other_col->birth() << ")\n";
+// }
 		if(curr_col->inF())
 		{//case F x *
 			if(other_col->inH()) { //                                    case F x H

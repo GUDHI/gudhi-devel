@@ -174,7 +174,7 @@ std::vector< std::pair<unsigned int, unsigned int> > compute_with_gudhi(
 	const std::vector<std::vector<Vertex_handle> >& simplices,
 	const std::vector<bool>& dirs)
 {
-	ZP zp;
+	ZP zp(simplices.size());
 
 	std::cout << "====================== Gudhi =====================\n";
 
@@ -325,7 +325,7 @@ bool are_equal(const std::vector<std::pair<unsigned int, unsigned int> >& gudhiR
 	if (gudhiRes.size() != fzzRes.size()) return false;
 
 	for (unsigned int i = 0; i < gudhiRes.size(); ++i){
-		if (gudhiRes[i].first != std::get<0>(fzzRes[i]) - 1 || gudhiRes[i].second != std::get<1>(fzzRes[i]))
+		if (static_cast<int>(gudhiRes[i].first) != std::get<0>(fzzRes[i]) - 1 || static_cast<int>(gudhiRes[i].second) != std::get<1>(fzzRes[i]))
 			return false;
 	}
 
@@ -349,6 +349,42 @@ void print(const std::vector<std::tuple<FZZ::Integer, FZZ::Integer, FZZ::Integer
 		std::cout << std::endl;
 	}
 }
+
+void print_differences(const std::vector<std::pair<unsigned int, unsigned int> >& gudhiRes,
+					   const std::vector<std::pair<unsigned int, unsigned int> >& dioRes, 
+					   unsigned int infValue) 
+{
+	for (unsigned int i = 0; i < gudhiRes.size(); ++i){
+		if (gudhiRes[i].first != dioRes[i].first || gudhiRes[i].second != dioRes[i].second){
+			std::string dg = gudhiRes[i].second == infValue ? "inf" : std::to_string(gudhiRes[i].second);
+			std::string dd = dioRes[i].second == infValue ? "inf" : std::to_string(dioRes[i].second);
+			std::cout << "[" << i << "] " 
+					  << gudhiRes[i].first << " - " << dg 
+					  << " / " 
+					  << dioRes[i].first << " - " << dd 
+					  << "\n";
+		}
+	}
+}
+
+void print_differences(const std::vector<std::pair<unsigned int, unsigned int> >& gudhiRes,
+					   const std::vector<std::tuple<FZZ::Integer, FZZ::Integer, FZZ::Integer> >& fzzRes, 
+					   int infValue) 
+{
+	for (unsigned int i = 0; i < gudhiRes.size(); ++i){
+		if (static_cast<int>(gudhiRes[i].first) != std::get<0>(fzzRes[i]) || static_cast<int>(gudhiRes[i].second) != std::get<1>(fzzRes[i])){
+			std::string dg = static_cast<int>(gudhiRes[i].second) == infValue ? "inf" : std::to_string(gudhiRes[i].second);
+			std::string dd = std::get<1>(fzzRes[i]) == infValue ? "inf" : std::to_string(std::get<1>(fzzRes[i]));
+			std::cout << "[" << i << "] " 
+					  << gudhiRes[i].first << " - " << dg 
+					  << " / " 
+					  << std::get<0>(fzzRes[i]) << " - " << dd 
+					  << "\n";
+		}
+	}
+}
+
+
 
 int main(int argc, char* const argv[]) {
 	if (argc < 2 || argc > 3) {
@@ -380,16 +416,21 @@ int main(int argc, char* const argv[]) {
 	bool firstRes = are_equal(gudhiRes, dioRes);
 	if (!firstRes){
 		std::cout << "------------------------ Gudhi and Dionysus results are not equal!\n";
-		print(gudhiRes, numberOfSimplices);
-		print(dioRes, numberOfSimplices);
+		// print(gudhiRes, numberOfSimplices);
+		// std::cout << "------------------------\n";
+		// print(dioRes, numberOfSimplices);
+		print_differences(gudhiRes, dioRes, numberOfSimplices);
 	} else {
 		std::cout << "+++++++++++++++++++++++++ Gudhi and Dionysus results are equal.\n";
 	}
 
 	if (!are_equal(gudhiRes, fzzRes)){
 		std::cout << "------------------------ Gudhi and FZZ results are not equal!\n";
-		if (firstRes) print(gudhiRes, numberOfSimplices);
-		print(fzzRes, numberOfSimplices);
+		// if (firstRes) {
+		// 	print(gudhiRes, numberOfSimplices);
+		// 	std::cout << "------------------------\n";
+		// }
+		// print(fzzRes, numberOfSimplices);
 	} else {
 		std::cout << "+++++++++++++++++++++++++ Gudhi and FZZ results are equal.\n";
 	}
