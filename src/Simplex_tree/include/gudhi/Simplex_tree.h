@@ -186,8 +186,7 @@ class Simplex_tree {
 
   using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
   using Filtered_boost_predicate = std::function<bool(Const_boost_iterator)>;
-  std::function<bool(Const_boost_iterator)> select;
-  using Optimized_star_simplex_filtered_range = boost::filtered_range<decltype(select), Optimized_star_simplex_range>;
+  using Optimized_star_simplex_filtered_range = boost::filtered_range<Filtered_boost_predicate, Optimized_star_simplex_range>;
 
  public:
   /** \name Range and iterator types
@@ -1091,6 +1090,7 @@ class Simplex_tree {
     assert(codimension >= 0);
 
     if constexpr (Options::link_nodes_by_label) {
+      std::function<bool(Const_boost_iterator)> select;
       // faster cofaces computation
       if (codimension == 0) {
         // Always true for a star
