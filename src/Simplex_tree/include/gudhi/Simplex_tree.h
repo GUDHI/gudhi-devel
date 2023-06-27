@@ -1876,7 +1876,7 @@ class Simplex_tree {
    * computation. */
  private:
   // if Options::link_nodes_by_label is true, store the lists of Nodes with same label, empty otherwise.
-  // unordered_map Vertex_handle v -> pointer to list of all Nodes with label v.
+  // unordered_map Vertex_handle v -> list of all Nodes with label v.
   std::unordered_map<Vertex_handle, List_max_vertex> nodes_label_to_list_;
 
  public:
