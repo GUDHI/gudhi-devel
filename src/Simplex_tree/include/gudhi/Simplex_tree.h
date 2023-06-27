@@ -1097,8 +1097,8 @@ class Simplex_tree {
         select = [](Const_boost_iterator) { return true; };
       } else {
         // Specific coface case
-        select = [this, simplex, codimension](Const_boost_iterator iter) {
-            return ((this->dimension(simplex) + codimension) == this->dimension(iter));
+        select = [this, dim=this->dimension(simplex)+codimension](Const_boost_iterator iter) {
+            return dim == this->dimension(iter);
           };
       }
       Simplex_vertex_range rg = simplex_vertex_range(simplex);
