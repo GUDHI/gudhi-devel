@@ -40,7 +40,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         nb_collapse=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
-        persistence_dim_max = False,
+        expand_extra_dimension = True,
         n_jobs=None,
     ):
         """
@@ -59,8 +59,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
-            persistence_dim_max (bool): If true, the persistent homology for the maximal dimension in the complex is
-                computed. If false, it is ignored. Default is false.
+            expand_extra_dimension (bool): :func:`~gudhi.SimplexTree.expansion` is performed at
+                `max(homology_dimensions) + 1` if true, and `max(homology_dimensions)` otherwise. Default is true.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
         self.homology_dimensions = homology_dimensions
@@ -69,7 +69,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.nb_collapse = nb_collapse
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
-        self.persistence_dim_max = persistence_dim_max
+        self.expand_extra_dimension = expand_extra_dimension
         self.n_jobs = n_jobs
 
     def fit(self, X, Y=None):
@@ -79,7 +79,11 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, inputs):
-        max_dimension = max(self.dim_list_) + 1
+        # persistence_dim_max is False by default, but True when expand_extra_dimension is False
+        persistence_dim_max = self.expand_extra_dimension
+        max_dimension = max(self.dim_list_)
+        if self.expand_extra_dimension:
+            max_dimension += 1
 
         # nb_collapse "automatic" case management
         if self.nb_collapse < 0:
@@ -100,11 +104,15 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             stree.expansion(max_dimension)
         else:
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
-        
+
+        # Specific case where, despite expansion(max_dimension), stree has a lower dimension
+        if max_dimension > stree.dimension():
+            persistence_dim_max = True
+
         stree.compute_persistence(
             homology_coeff_field=self.homology_coeff_field,
             min_persistence=self.min_persistence,
-            persistence_dim_max=self.persistence_dim_max
+            persistence_dim_max=persistence_dim_max
         )
 
         return [
