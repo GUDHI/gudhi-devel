@@ -124,6 +124,9 @@ if(PYTHONINTERP_FOUND)
       # Does not have a version number...
       add_gudhi_debug_info("pydata_sphinx_theme version ${PYDATA_SPHINX_THEME_VERSION}")
     endif()
+    if(NETWORKX_FOUND)
+      add_gudhi_debug_info("NetworkX version ${NETWORKX_VERSION}")
+    endif()
 
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
     set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
