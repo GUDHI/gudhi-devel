@@ -186,6 +186,8 @@ class Simplex_tree {
 
   using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
   using Filtered_boost_predicate = std::function<bool(Const_boost_iterator)>;
+  // WARNING: this is safe only because boost::filtered_range is containing a copy of begin and end iterator.
+  // This would not be safe if it was containing a pointer to a range (maybe the case for std::views)
   using Optimized_star_simplex_filtered_range = boost::filtered_range<Filtered_boost_predicate, Optimized_star_simplex_range>;
 
  public:
