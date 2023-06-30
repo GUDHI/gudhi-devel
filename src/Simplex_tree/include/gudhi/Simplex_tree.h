@@ -35,6 +35,7 @@
 #include <boost/range/adaptors.hpp>
 
 #include <boost/intrusive/list.hpp>
+#include <boost/intrusive/parent_from_member.hpp>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -1874,6 +1875,7 @@ class Simplex_tree {
   // type of hooks stored in each Node, Node inherits from Hooks_simplex_base
   typedef typename std::conditional<Options::link_nodes_by_label, Hooks_simplex_base_link_nodes,
                                     Hooks_simplex_base_dummy>::type Hooks_simplex_base;
+
   /** Data structure to access all Nodes with a given label u. Can be used for faster
    * computation. */
  private:
@@ -1893,35 +1895,14 @@ class Simplex_tree {
     return nullptr;
   }
 
-  // basic methods implemented for Nodes, and not Simplex_handle. The hooks in nodes_label_to_list_ gives access to
-  // Nodes.
-  // set of methods taking a node and a vertex_handle as input.
+  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node. */
+  static Simplex_handle simplex_handle_from_node(Node& node) {
+    return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+  }
+
+  // Give access to Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator and keep nodes_by_label and
+  // simplex_handle_from_node private
   friend class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator<Simplex_tree>;
-
-  /** \brief Returns the Siblings containing a member element defined by a node and a vertex_handle .
-    *  Node must have label u. */
-  static Siblings* self_siblings(Node& node, Vertex_handle v) {
-    if (node.children()->parent() == v) {
-      return node.children()->oncles();
-    } else {
-      return node.children();
-    }
-  }
-
-  /** \brief Returns a member element (defined by a node and a vertex_handle) dimension .
-    *  Node must have label u. */
-  int dimension(Node& node, Vertex_handle u) {
-    Siblings* curr_sib = self_siblings(node, u);
-    int dim {-1};
-    while (curr_sib != nullptr) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim;
-  }
-  /** \brief Returns true if a member element (defined by a node and a vertex_handle) sh has children. 
-   *  Node must have label u. */
-  bool has_children(Node& node, Vertex_handle u) const { return (node.children()->parent() == u); }
 
  private:
   // update all extra data structures in the Simplex_tree. Must be called after all

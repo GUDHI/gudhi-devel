@@ -80,7 +80,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
       Node& curr_node = static_cast<Node&>(curr_hooks);
       auto vertex_it = simp_.begin();  // largest label is first
       // first Node must always have label simp_.begin(); we assume it is true
-      auto sh = cpx_->self_siblings(curr_node, *vertex_it)->find(*vertex_it);
+      auto sh = cpx_->self_siblings(cpx_->simplex_handle_from_node(curr_node))->find(*vertex_it);
       // is simp_ a face of the simplex defined by sh ?
       return std::includes(cpx_->simplex_vertex_range(sh).begin(), cpx_->simplex_vertex_range(sh).end(),
                            simp_.begin(), simp_.end(), std::greater<Vertex_handle>());
@@ -107,7 +107,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());
     Node& curr_node = static_cast<Node&>(*it_);
-    auto curr_sib = st_->self_siblings(curr_node, max_v_);
+    auto curr_sib = st_->self_siblings(st_->simplex_handle_from_node(curr_node));
     sh_ = curr_sib->find(max_v_);
   }
 
@@ -133,7 +133,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     }       //== end
     else {  // update sh_
       Node& curr_node = static_cast<Node&>(*it_);
-      auto curr_sib = st_->self_siblings(curr_node, max_v_);
+      auto curr_sib = st_->self_siblings(st_->simplex_handle_from_node(curr_node));
       sh_ = curr_sib->find(max_v_);
     }
   }
