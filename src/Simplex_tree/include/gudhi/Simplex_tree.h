@@ -1881,7 +1881,6 @@ class Simplex_tree {
   // unordered_map Vertex_handle v -> list of all Nodes with label v.
   std::unordered_map<Vertex_handle, List_max_vertex> nodes_label_to_list_;
 
- public:
   List_max_vertex* nodes_by_label(Vertex_handle v) {
     if constexpr (Options::link_nodes_by_label) {
       auto it_v = nodes_label_to_list_.find(v);
@@ -1896,8 +1895,8 @@ class Simplex_tree {
 
   // basic methods implemented for Nodes, and not Simplex_handle. The hooks in nodes_label_to_list_ gives access to
   // Nodes.
- public:
-  // set of methods taking a node and a vertex_handle as input. For internal use only.
+  // set of methods taking a node and a vertex_handle as input.
+  friend class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator<Simplex_tree>;
 
   /** \brief Returns the Siblings containing a member element defined by a node and a vertex_handle .
     *  Node must have label u. */
