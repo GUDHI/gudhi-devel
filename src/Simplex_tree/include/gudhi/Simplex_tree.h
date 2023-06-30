@@ -186,10 +186,26 @@ class Simplex_tree {
   using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
 
   using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
-  using Filtered_boost_predicate = std::function<bool(Const_boost_iterator)>;
+
+  class Fast_cofaces_predicate {
+    Simplex_tree* st_;
+    int codim_;
+    int dim_;
+   public:
+    Fast_cofaces_predicate(Simplex_tree* st, int codim, int dim)
+      : st_(st), codim_(codim), dim_(dim) {}
+    bool operator()( Const_boost_iterator iter ) const {
+      if (codim_ == 0)
+        // Always true for a star
+        return true;
+      // Specific coface case
+      return dim_ + codim_ == st_->dimension(iter);
+    }
+  };
+
   // WARNING: this is safe only because boost::filtered_range is containing a copy of begin and end iterator.
   // This would not be safe if it was containing a pointer to a range (maybe the case for std::views)
-  using Optimized_star_simplex_filtered_range = boost::filtered_range<Filtered_boost_predicate, Optimized_star_simplex_range>;
+  using Optimized_star_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate, Optimized_star_simplex_range>;
 
  public:
   /** \name Range and iterator types
@@ -1087,23 +1103,11 @@ class Simplex_tree {
    * return all cofaces (equivalent of star function)
    * \return Vector of Simplex_handle, empty vector if no cofaces found.
    */
-
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
     // codimension must be positive or null integer
     assert(codimension >= 0);
 
     if constexpr (Options::link_nodes_by_label) {
-      std::function<bool(Const_boost_iterator)> select;
-      // faster cofaces computation
-      if (codimension == 0) {
-        // Always true for a star
-        select = [](Const_boost_iterator) { return true; };
-      } else {
-        // Specific coface case
-        select = [this, dim=this->dimension(simplex)+codimension](Const_boost_iterator iter) {
-            return dim == this->dimension(iter);
-          };
-      }
       Simplex_vertex_range rg = simplex_vertex_range(simplex);
       Static_vertex_vector simp(rg.begin(), rg.end());
       // must be sorted in decreasing order
@@ -1111,6 +1115,7 @@ class Simplex_tree {
       auto range = Optimized_star_simplex_range(Optimized_star_simplex_iterator(this, std::move(simp)),
                                                 Optimized_star_simplex_iterator());
       // Lazy filtered range
+      Fast_cofaces_predicate select(this, codimension, this->dimension(simplex));
       return boost::adaptors::filter(range, select);
     } else {
       Cofaces_simplex_range cofaces;
