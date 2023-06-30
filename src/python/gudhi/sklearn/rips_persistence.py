@@ -122,7 +122,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
 
-        :param X: List of point clouds.
+        :param X: list of point clouds as Euclidean coordinates or distance matrices.
         :type X: list of list of float OR list of numpy.ndarray
 
         :return: Persistence diagrams in the format:
