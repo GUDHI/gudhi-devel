@@ -287,7 +287,7 @@ public:
 		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
 
 		++num_arrow_;
-// std::cout << "add: " << num_arrow_ << "\n";
+
 		if (filtration_value != previous_filtration_value_) //check whether the filt value has changed
 		{ //consecutive pairs (i,f), (j,f') mean simplices of index k in [i,j-1] have
 			previous_filtration_value_ = filtration_value;                                //filtration value f
@@ -298,15 +298,6 @@ public:
 		GUDHI_CHECK(res.second, "Zigzag_persistence::insert_simplex - insertion of a simplex already in the complex");
 		cpx_.assign_key(res.first, num_arrow_);
 		forward_arrow(res.first);
-
-// if (num_arrow_ > 62 && num_arrow_ < 216){
-// 	index c = matrix_.get_column_with_pivot(62);
-// 	std::cout << "======= col: " << c << "\n";
-// 	for (const auto& cell : matrix_.get_column(c)){
-// 		std::cout << cell.get_row_index() << " ";
-// 	}
-// 	std::cout << "\n";
-// }
 	}
 
 	template<class VertexRange = std::initializer_list<Vertex_handle>>
@@ -315,7 +306,7 @@ public:
 		if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
 
 		++num_arrow_;
-// std::cout << "remove: " << num_arrow_ << "\n";
+
 		Simplex_handle sh = cpx_.find(simplex);
 		GUDHI_CHECK(sh != cpx_.null_simplex(), "Zigzag_persistence::remove_simplex - removal of a simplex not in the complex");
 
@@ -327,15 +318,6 @@ public:
 
 		backward_arrow(sh);
 		cpx_.remove_maximal_simplex(sh);
-
-// if (num_arrow_ > 62 && num_arrow_ < 216){
-// 	index c = matrix_.get_column_with_pivot(62);
-// 	std::cout << "======= col: " << c << "\n";
-// 	for (const auto& cell : matrix_.get_column(c)){
-// 		std::cout << cell.get_row_index() << " ";
-// 	}
-// 	std::cout << "\n";
-// }
 	}
 
 	template<class SimplexRange = std::initializer_list<std::initializer_list<Vertex_handle>>,
@@ -412,7 +394,6 @@ private:
 
 		if (!chains_in_F.empty()){
 			births_.emplace(matrix_.get_column_with_pivot(num_arrow_), -2);
-			// std::cout << "surjective_reflection_diamond\n";
 			surjective_reflection_diamond(zzsh, chains_in_F);
 		} else {
 			births_.emplace(matrix_.get_column_with_pivot(num_arrow_), num_arrow_);
@@ -505,32 +486,9 @@ private:
 		//column_iterator& curr_col_it = matrix_.get_column_with_pivot(cpx_.key(zzsh));
 		//corresponding chain
 		index toRemove = matrix_.get_column_with_pivot(cpx_.key(zzsh));
-		// std::cout << "back: " << toRemove << ", " << cpx_.key(zzsh) << "\n";
 		//Record all columns that get affected by the transpositions, i.e., have a coeff
 		const auto& modified_columns = matrix_.get_row(cpx_.key(zzsh));
 
-// for (const auto& r : modified_columns){
-// 	if (r.get_column_index() == 90 || matrix_.get_column(r.get_column_index()).get_pivot() == 116)
-// 		std::cout << "======= num: " << num_arrow_ << "\n";
-// }
-
-		// if (num_arrow_ == 179){
-		// 	std::cout << "[" << cpx_.key(zzsh) << "] modified_columns:\n";
-		// 	for (const auto& r : modified_columns){
-		// 		std::cout << "[" << r.get_column_index() << "] ";
-		// 		for (const auto& c : matrix_.get_column(r.get_column_index())){
-		// 			std::cout << c.get_row_index() << " ";
-		// 		}
-		// 		std::cout << " -- " << births_.at(r.get_column_index()) << "\n";
-		// 	}
-		// 	std::cout << "\n";
-		// 	// std::cout << "\n" << "births:\n";
-		// 	// for (const auto& p : births_){
-		// 	// 	if (p.second == 132 || p.second == 155)
-		// 	// 		std::cout << p.first << " - " << p.second << "\n";
-		// 	// }
-		// }
-// std::cout << "here0\n";
 		index curr_col = toRemove;
 		//Modifies the pointer curr_col, not the other one.
 		for(auto other_col_it = std::next(modified_columns.begin());
@@ -538,56 +496,9 @@ private:
 		{
 			index ci = other_col_it->get_column_index();
 			++other_col_it;	//vine swap unvalidates iterator
-// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177 || cpx_.key(zzsh) == 116){
-// 	std::cout << "pairs: " << curr_col << " (" << matrix_.get_column(curr_col).get_pivot() << "), " << ci  << " (" << matrix_.get_column(ci).get_pivot() << ")\n";
-// 	std::cout << "before1: " << births_.at(curr_col) << "\n";
-// 	std::cout << "before2: " << births_.at(ci) << "\n";
-// }
-// if ((curr_col == 68 && ci == 70) || 
-// 	(curr_col == 70 && ci == 71) || 
-// 	(curr_col == 69 && ci == 71) || 
-// 	(curr_col == 69 && ci == 107)){
-// 	std::cout << "num: " << num_arrow_ << " (" << curr_col << ", " << ci << ")\n";
-// }
-// if (num_arrow_ == 179){
-// 			std::cout << "[" << curr_col << "] before: ";
-// 			for (const auto& c : matrix_.get_column(curr_col)){
-// 				std::cout << c.get_row_index() << " ";
-// 			}
-// 			std::cout << "\n";
-// 			std::cout << "[" << ci << "] before: ";
-// 			for (const auto& c : matrix_.get_column(ci)){
-// 				std::cout << c.get_row_index() << " ";
-// 			}
-// 			std::cout << "\n";
-// }
 			curr_col = matrix_.vine_swap_with_z_eq_1_case(curr_col, ci);
-// if (num_arrow_ == 179){
-// 			std::cout << "[" << curr_col << "] after: ";
-// 			for (const auto& c : matrix_.get_column(curr_col)){
-// 				std::cout << c.get_row_index() << " ";
-// 			}
-// 			std::cout << "\n";
-// 			std::cout << "[" << ci << "] after: ";
-// 			for (const auto& c : matrix_.get_column(ci)){
-// 				std::cout << c.get_row_index() << " ";
-// 			}
-// 			std::cout << "\n";
-// }
-// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177 || cpx_.key(zzsh) == 116){
-// 	std::cout << "pairs: " << curr_col << " (" << matrix_.get_column(curr_col).get_pivot() << "), " << ci  << " (" << matrix_.get_column(ci).get_pivot() << ")\n";
-// 	std::cout << "after1: " << births_.at(curr_col) << "\n";
-// 	std::cout << "after2: " << births_.at(ci) << "\n";
-// 	std::cout << "\n";
-// }
 		}
-// if (num_arrow_ == 178 || num_arrow_ == 176 || num_arrow_ == 177 || cpx_.key(zzsh) == 116){
-// 	std::cout << "res: " << curr_col << ", " << matrix_.get_column(curr_col).get_pivot() << "\n";
-// 	std::cout << "res: " << births_.at(curr_col) << "\n";
-// 	std::cout << "\n";
-// }
 	
-// std::cout << "here1\n";
 		//curr_col points to the column to remove by restriction of K to K-{\sigma}
 		if(!matrix_.get_column(curr_col).is_paired()) { // in F
 			int dim_zzsh = cpx_.dimension(zzsh);
@@ -600,7 +511,7 @@ private:
 		else { //in H    -> paired with c_g, that now belongs to F now
 			births_.at(matrix_.get_column(curr_col).get_paired_chain_index()) = num_arrow_;
 		}
-// std::cout << "here2\n";
+
 		//cannot be in G as the removed simplex is maximal
 		matrix_.remove_maximal_simplex(cpx_.key(zzsh));
 	}
