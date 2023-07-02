@@ -30,7 +30,12 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
     throw std::runtime_error("Input must be 1-dimensional arrays");
   if (bufi.shape[0] != bufj.shape[0] || bufi.shape[0] != buff.shape[0])
     throw std::runtime_error("Input arrays must have the same size");
-  auto& edges = *new Edges();;
+  if (buff.shape[0] == 0) {
+    py::array_t<Index> indices({{ 2, 0 }}, {{ 0, 0 }});
+    py::array_t<Filtr> filtrs;
+    return py::make_tuple(std::move(indices), std::move(filtrs));
+  }
+  auto& edges = *new Edges();
   edges.reserve(bufi.shape[0]);
   Index n_edges = static_cast<Index>(bufi.shape[0]);
   auto strides_i = bufi.strides[0];
@@ -45,7 +50,6 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
   for (int k = 0; k < nb_iterations; ++k) {
     edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const&d){return d;});
   }
-  auto res = py::array(py::cast(std::move(edges)));
   py::capsule owner(&edges, [](void*p){ delete reinterpret_cast<Edges*>(p); });
   const auto offset = reinterpret_cast<char*>(&std::get<1>(edges[0])) - reinterpret_cast<char*>(&std::get<0>(edges[0]));
   py::array_t<Index> indices({{ 2, static_cast<py::ssize_t>(edges.size()) }}, {{ offset, sizeof(Filtered_edge) }}, &std::get<0>(edges[0]), owner);
