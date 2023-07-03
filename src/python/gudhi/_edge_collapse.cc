@@ -36,25 +36,28 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
     return py::make_tuple(std::move(indices), std::move(filtrs));
   }
   auto& edges = *new Edges();
-  edges.reserve(bufi.shape[0]);
-  Index n_edges = static_cast<Index>(bufi.shape[0]);
-  auto strides_i = bufi.strides[0];
-  auto strides_j = bufj.strides[0];
-  auto strides_f = buff.strides[0];
-  for (Index k = 0; k < n_edges; ++k) {
-    Index i = *reinterpret_cast<Index*>(static_cast<char*>(bufi.ptr) + k * strides_i);
-    Index j = *reinterpret_cast<Index*>(static_cast<char*>(bufj.ptr) + k * strides_j);
-    Filtr f = *reinterpret_cast<Filtr*>(static_cast<char*>(buff.ptr) + k * strides_f);
-    edges.emplace_back(i, j, f);
-  }
-  for (int k = 0; k < nb_iterations; ++k) {
-    edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const&d){return d;});
+  {
+    py::gil_scoped_release release;
+    edges.reserve(bufi.shape[0]);
+    Index n_edges = static_cast<Index>(bufi.shape[0]);
+    auto strides_i = bufi.strides[0];
+    auto strides_j = bufj.strides[0];
+    auto strides_f = buff.strides[0];
+    for (Index k = 0; k < n_edges; ++k) {
+      Index i = *reinterpret_cast<Index*>(static_cast<char*>(bufi.ptr) + k * strides_i);
+      Index j = *reinterpret_cast<Index*>(static_cast<char*>(bufj.ptr) + k * strides_j);
+      Filtr f = *reinterpret_cast<Filtr*>(static_cast<char*>(buff.ptr) + k * strides_f);
+      edges.emplace_back(i, j, f);
+    }
+    for (int k = 0; k < nb_iterations; ++k) {
+      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const&d){return d;});
+    }
   }
   py::capsule owner(&edges, [](void*p){ delete reinterpret_cast<Edges*>(p); });
   const auto offset = reinterpret_cast<char*>(&std::get<1>(edges[0])) - reinterpret_cast<char*>(&std::get<0>(edges[0]));
   py::array_t<Index> indices({{ 2, static_cast<py::ssize_t>(edges.size()) }}, {{ offset, sizeof(Filtered_edge) }}, &std::get<0>(edges[0]), owner);
   py::array_t<Filtr> filtrs ({{    static_cast<py::ssize_t>(edges.size()) }}, {{         sizeof(Filtered_edge) }}, &std::get<2>(edges[0]), owner);
-  return py::make_tuple(indices, filtrs);
+  return py::make_tuple(std::move(indices), std::move(filtrs));
 }
 
 PYBIND11_MODULE(_edge_collapse, m) {
