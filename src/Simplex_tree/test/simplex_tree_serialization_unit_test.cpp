@@ -186,6 +186,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   }
   BOOST_CHECK(st_from_buffer == st);
 
+  delete[] buffer;
   delete[] stree_buffer;
 }
 
