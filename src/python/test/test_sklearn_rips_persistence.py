@@ -10,6 +10,7 @@
 
 from gudhi.datasets.generators import points
 from gudhi.sklearn.rips_persistence import RipsPersistence
+import numpy as np
 import random
 import pytest
 
@@ -73,3 +74,14 @@ def test_set_output():
         assert len(diags_pandas.index) == NB_PC
     except ImportError:
         print("Missing pandas, skipping set_output test")
+
+
+def test_big():
+    # A circle + many isolated points
+    n=1000000
+    X=np.zeros((n,2))
+    X[:,0]=np.arange(n)*100
+    X[:24]=points.torus(24,1,'grid')
+    # Ripser cannot handle it, have to fall back to SimplexTree
+    # Computing the full distance matrix would require too much memory -> kd-tree
+    RipsPersistence(range(25), threshold=10).fit_transform([X])
