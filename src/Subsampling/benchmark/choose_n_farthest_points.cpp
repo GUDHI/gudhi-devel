@@ -70,7 +70,7 @@ int main(int argc, char**argv) {
                                                );
 #ifndef PROFIL
   auto time_stop2 = std::chrono::system_clock::now();
-  std::cerr << "Time generic " << std::chrono::duration_cast<std::chrono::milliseconds>((time_stop1 - time_start1)).count()
+  std::cerr << "Time (in msec.) generic " << std::chrono::duration_cast<std::chrono::milliseconds>((time_stop1 - time_start1)).count()
              << " vs metric "  << std::chrono::duration_cast<std::chrono::milliseconds>((time_stop2 - time_start2)).count() << '\n';
   if (dists != dists2 || results != results2) {
     std::cerr << "Results differ\n";
