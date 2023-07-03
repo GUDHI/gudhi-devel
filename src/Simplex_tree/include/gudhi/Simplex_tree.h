@@ -469,6 +469,7 @@ class Simplex_tree {
   void rec_copy(Siblings *sib, Siblings *sib_source) {
     for (auto sh = sib->members().begin(), sh_source = sib_source->members().begin();
          sh != sib->members().end(); ++sh, ++sh_source) {
+      update_simplex_tree_after_node_insertion(sh);
       if (has_children(sh_source)) {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
@@ -486,7 +487,9 @@ class Simplex_tree {
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
     dimension_ = complex_source.dimension_;
-
+    if constexpr (Options::link_nodes_by_label) {
+      nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
+    }
     // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
       if (map_el.second.children() != &(complex_source.root_)) {
