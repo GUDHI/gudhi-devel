@@ -28,13 +28,9 @@ namespace Gudhi {
   struct Hooks_simplex_base_link_nodes {
    public:
     Hooks_simplex_base_link_nodes() {}
-    // the copy constructor, inherited by the Node class, exchanges hooks,
-    // and make the ones of this invalid.
-    // this is used when stored in a map like DS, using copies when
-    // performing insertions and rebalancing of the rbtree
-    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other) {
-      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
-    }
+    // copy constructor, inherited by the Node class, requires to copy hooks
+    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other)
+    : list_max_vertex_hook_(other.list_max_vertex_hook_) { }
     // copy assignment
     Hooks_simplex_base_link_nodes& operator=(const Hooks_simplex_base_link_nodes& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
