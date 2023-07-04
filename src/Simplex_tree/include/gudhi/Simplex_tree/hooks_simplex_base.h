@@ -28,13 +28,14 @@ namespace Gudhi {
   struct Hooks_simplex_base_link_nodes {
    public:
     Hooks_simplex_base_link_nodes() {}
+    // The following 2 functions are conceptually wrong, but when copying a Simplex_tree it is more convenient to have
+    // them (and fix things asap after they are called).
     // copy constructor, inherited by the Node class, requires to copy hooks
-    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other)
-    : list_max_vertex_hook_(other.list_max_vertex_hook_) { }
+    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes&)
+    : list_max_vertex_hook_() { }
     // copy assignment
-    Hooks_simplex_base_link_nodes& operator=(const Hooks_simplex_base_link_nodes& other) {
-      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
-      return *this;
+    Hooks_simplex_base_link_nodes& operator=(const Hooks_simplex_base_link_nodes&) {
+      throw std::logic_error("Should not happen");
     }
     // move constructor
     Hooks_simplex_base_link_nodes(Hooks_simplex_base_link_nodes&& other) {
@@ -52,7 +53,7 @@ namespace Gudhi {
         boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
         Member_hook_t;
 
-    mutable Member_hook_t list_max_vertex_hook_;
+    Member_hook_t list_max_vertex_hook_;
   };
 
 }  // namespace Gudhi
