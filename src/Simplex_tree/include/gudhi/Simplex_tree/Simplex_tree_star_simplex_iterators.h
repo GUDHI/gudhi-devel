@@ -15,9 +15,9 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/version.hpp>
 #include <boost/iterator/filter_iterator.hpp>
+#include <boost/container/static_vector.hpp>
 
 #include <vector>
-#include <queue>
 #include <stdexcept>
 #include <utility>  // for std::move
 #include <functional>  // for std::greater
@@ -187,7 +187,7 @@ class Simplex_tree_optimized_star_simplex_iterator
     sh_ = *it_;                      // sh_ is the root
     sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
     if (st_->has_children(sh_)) {
-      bfs_queue_.push(st_->children(sh_));
+      bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
     }
     return;  // first root of coface subtree
   }
@@ -231,11 +231,11 @@ class Simplex_tree_optimized_star_simplex_iterator
     if (is_root_ || sh_ == sib_->members().end()) {
       is_root_ = false;
       if (!bfs_queue_.empty()) {
-        sib_ = bfs_queue_.front();
-        bfs_queue_.pop();
+        sib_ = bfs_queue_.back();
+        bfs_queue_.pop_back();
         sh_ = sib_->members().begin();  // don't track dimensions
         if (st_->has_children(sh_)) {
-          bfs_queue_.push(st_->children(sh_));
+          bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
         }
       } else {  // bfs_queue == empty, go to root of next coface subtree
         if (++it_ == end_) {
@@ -246,13 +246,13 @@ class Simplex_tree_optimized_star_simplex_iterator
         sh_ = *it_;                      // sh_ is the root
         sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
         if (st_->has_children(sh_)) {
-          bfs_queue_.push(st_->children(sh_));
+          bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
         }
         return;  // next root of coface
       }
     } else {  // sh_ is valid, simply add its children to the queue
       if (st_->has_children(sh_)) {
-        bfs_queue_.push(st_->children(sh_));
+        bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
       }
     }
   }
@@ -272,7 +272,9 @@ class Simplex_tree_optimized_star_simplex_iterator
   // set of siblings containing sh_ in the Simplex_tree
   Siblings* sib_;  //
   // use a bfs search to avoid calling sib_->members().find(.)
-  std::queue<Siblings*> bfs_queue_;
+  // A static_vector is quite faster than a queue
+  // 100 seems a conservative bound on the number of children a Sibling can coutain for now.
+  boost::container::static_vector<Siblings*, 100> bfs_queue_;
   // true iff sh_ points to the root of a coface subtree
   bool is_root_;
 };
