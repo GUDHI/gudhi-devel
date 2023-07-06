@@ -77,9 +77,8 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     // coface of simp_
     bool operator()(typename SimplexTree::Hooks_simplex_base& curr_hooks) {
       Node& curr_node = static_cast<Node&>(curr_hooks);
-      auto vertex_it = simp_.begin();  // largest label is first
+      auto sh = cpx_->simplex_handle_from_node(curr_node);
       // first Node must always have label simp_.begin(); we assume it is true
-      auto sh = cpx_->self_siblings(cpx_->simplex_handle_from_node(curr_node))->find(*vertex_it);
       // is simp_ a face of the simplex defined by sh ?
       return std::includes(cpx_->simplex_vertex_range(sh).begin(), cpx_->simplex_vertex_range(sh).end(),
                            simp_.begin(), simp_.end(), std::greater<Vertex_handle>());
@@ -99,15 +98,13 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
                                                                   Static_vertex_vector&& simp)
       : predicate_(cpx, std::move(simp)), st_(cpx) {
     GUDHI_CHECK(!simp.empty(), std::invalid_argument("cannot call for cofaces of an empty simplex"));
-    max_v_ = *(simp.begin());
-    auto list_ptr = st_->nodes_by_label(max_v_);
+    auto list_ptr = st_->nodes_by_label(simp.front());
     GUDHI_CHECK(list_ptr != nullptr, std::runtime_error("invalid call to cofaces forest"));
 
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());
     Node& curr_node = static_cast<Node&>(*it_);
-    auto curr_sib = st_->self_siblings(st_->simplex_handle_from_node(curr_node));
-    sh_ = curr_sib->find(max_v_);
+    sh_ = st_->simplex_handle_from_node(curr_node);
   }
 
  private:
@@ -132,8 +129,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     }       //== end
     else {  // update sh_
       Node& curr_node = static_cast<Node&>(*it_);
-      auto curr_sib = st_->self_siblings(st_->simplex_handle_from_node(curr_node));
-      sh_ = curr_sib->find(max_v_);
+      sh_ = st_->simplex_handle_from_node(curr_node);
     }
   }
 
@@ -141,11 +137,9 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   // predicate stores the vertices of the simplex whose star we compute.
   is_coface predicate_;
   SimplexTree* st_;
-  // filtered iterators over Nodes of same label max_v_, filtered with predicate_
+  // filtered iterators over Nodes, filtered with predicate_
   Filtered_cofaces_simplex_iterator it_;
   Filtered_cofaces_simplex_iterator end_;
-  // max label of the simplex whose cofaces are computed
-  Vertex_handle max_v_;
   // current Simplex_handle corresponding to Node pointed at by it_
   Simplex_handle sh_;
 };
