@@ -233,10 +233,11 @@ class Simplex_tree {
                                     Optimized_star_simplex_filtered_range,  // faster implem
                                     std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
-  // 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the biggest
-  // hard-drive.
-  // static_vector still has some overhead compared to a trivial hand-made
-  // version using std::aligned_storage, or compared to making suffix_ static.
+  /** \private
+   * \brief 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the
+   * biggest hard-drive.
+   * static_vector still has some overhead compared to a trivial hand-made version using std::aligned_storage, or
+   * compared to making suffix_ static. */
   using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
 
   /** \brief Iterator over the simplices of the boundary of a simplex.
