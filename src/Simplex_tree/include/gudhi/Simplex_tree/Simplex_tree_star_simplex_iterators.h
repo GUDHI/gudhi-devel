@@ -15,7 +15,6 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/version.hpp>
 #include <boost/iterator/filter_iterator.hpp>
-#include <boost/container/static_vector.hpp>
 
 #include <vector>
 #include <stdexcept>
@@ -178,7 +177,7 @@ class Simplex_tree_optimized_star_simplex_iterator
   Simplex_tree_optimized_star_simplex_iterator() : st_(nullptr) {}
 
   Simplex_tree_optimized_star_simplex_iterator(SimplexTree* cpx, Static_vertex_vector&& simp)
-      : st_(cpx), it_(cpx, std::move(simp)), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), bfs_queue_() {
+      : st_(cpx), it_(cpx, std::move(simp)), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), children_stack_() {
     if (it_ == end_) {
       st_ = nullptr;
       return;
@@ -187,7 +186,7 @@ class Simplex_tree_optimized_star_simplex_iterator
     sh_ = *it_;                      // sh_ is the root
     sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
     if (st_->has_children(sh_)) {
-      bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
+      children_stack_.push_back(st_->children(sh_));
     }
     return;  // first root of coface subtree
   }
@@ -230,12 +229,12 @@ class Simplex_tree_optimized_star_simplex_iterator
     // if no more sibling or root of coface tree, go down or to next subtree
     if (is_root_ || sh_ == sib_->members().end()) {
       is_root_ = false;
-      if (!bfs_queue_.empty()) {
-        sib_ = bfs_queue_.back();
-        bfs_queue_.pop_back();
+      if (!children_stack_.empty()) {
+        sib_ = children_stack_.back();
+        children_stack_.pop_back();
         sh_ = sib_->members().begin();  // don't track dimensions
         if (st_->has_children(sh_)) {
-          bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
+          children_stack_.push_back(st_->children(sh_));
         }
       } else {  // bfs_queue == empty, go to root of next coface subtree
         if (++it_ == end_) {
@@ -246,13 +245,13 @@ class Simplex_tree_optimized_star_simplex_iterator
         sh_ = *it_;                      // sh_ is the root
         sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
         if (st_->has_children(sh_)) {
-          bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
+          children_stack_.push_back(st_->children(sh_));
         }
         return;  // next root of coface
       }
     } else {  // sh_ is valid, simply add its children to the queue
       if (st_->has_children(sh_)) {
-        bfs_queue_.insert(bfs_queue_.begin(), st_->children(sh_));
+        children_stack_.push_back(st_->children(sh_));
       }
     }
   }
@@ -271,10 +270,8 @@ class Simplex_tree_optimized_star_simplex_iterator
   Simplex_handle sh_;
   // set of siblings containing sh_ in the Simplex_tree
   Siblings* sib_;  //
-  // use a bfs search to avoid calling sib_->members().find(.)
-  // A static_vector is quite faster than a queue
-  // 100 seems a conservative bound on the number of children a Sibling can coutain for now.
-  boost::container::static_vector<Siblings*, 100> bfs_queue_;
+  // Save children in a list to avoid calling sib_->members().find(.)
+  std::vector<Siblings*> children_stack_;
   // true iff sh_ points to the root of a coface subtree
   bool is_root_;
 };
