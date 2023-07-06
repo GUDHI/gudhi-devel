@@ -23,12 +23,8 @@
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
- * Iterators and range over the star of a simplex in a Simplex_tree.
- * @{
- */
-
-/** \brief Iterator over all the roots of subtrees containing cofaces of all
+/** \private
+ * \brief Iterator over all the roots of subtrees containing cofaces of all
  * dimension of a given simplex.
  *
  * Specifically, consider a simplex \f$\sigma\f$ whose vertices have maximal label
@@ -270,7 +266,6 @@ class Simplex_tree_optimized_star_simplex_iterator
   bool is_root_;
 };
 
-/* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_STAR_SIMPLEX_ITERATORS_H_
