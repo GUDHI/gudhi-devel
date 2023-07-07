@@ -246,6 +246,8 @@ class Simplex_tree_optimized_star_simplex_iterator
     }
   }
 
+  // For cofaces, enumerating all the star and testing which simplices have the right dimension is suboptimal.
+  // This could be optimized later.
   void increment() { increment_all_cofaces(); }
 
   // Let s be the simplex in a complex C whose star is
