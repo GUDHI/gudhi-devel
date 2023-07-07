@@ -193,13 +193,13 @@ class Simplex_tree {
     int dim_;
    public:
     Fast_cofaces_predicate(Simplex_tree* st, int codim, int dim)
-      : st_(st), codim_(codim), dim_(dim) {}
+      : st_(st), codim_(codim), dim_(codim + dim) {}
     bool operator()( Const_boost_iterator iter ) const {
       if (codim_ == 0)
         // Always true for a star
         return true;
       // Specific coface case
-      return dim_ + codim_ == st_->dimension(iter);
+      return dim_ == st_->dimension(iter);
     }
   };
 
