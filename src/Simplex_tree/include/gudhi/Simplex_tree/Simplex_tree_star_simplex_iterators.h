@@ -75,9 +75,12 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
       Node& curr_node = static_cast<Node&>(curr_hooks);
       auto sh = cpx_->simplex_handle_from_node(curr_node);
       // first Node must always have label simp_.begin(); we assume it is true
+      auto&& rng = cpx_->simplex_vertex_range(sh);
+      auto rng_it = rng.begin();
+      GUDHI_CHECK(*rng_it == simp_.front(), std::invalid_argument("first Node must always have label simp_.begin()"));
+      auto simp_it = simp_.begin();
       // is simp_ a face of the simplex defined by sh ?
-      return std::includes(cpx_->simplex_vertex_range(sh).begin(), cpx_->simplex_vertex_range(sh).end(),
-                           simp_.begin(), simp_.end(), std::greater<Vertex_handle>());
+      return std::includes(++rng_it, rng.end(), ++simp_it, simp_.end(), std::greater<Vertex_handle>());
     }
 
    private:
