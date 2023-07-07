@@ -205,7 +205,8 @@ class Simplex_tree {
 
   // WARNING: this is safe only because boost::filtered_range is containing a copy of begin and end iterator.
   // This would not be safe if it was containing a pointer to a range (maybe the case for std::views)
-  using Optimized_star_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate, Optimized_star_simplex_range>;
+  using Optimized_cofaces_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate,
+                                                                         Optimized_star_simplex_range>;
 
  public:
   /** \name Range and iterator types
@@ -230,7 +231,7 @@ class Simplex_tree {
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
   typedef typename std::conditional<Options::link_nodes_by_label,
-                                    Optimized_star_simplex_filtered_range,  // faster implem
+                                    Optimized_cofaces_simplex_filtered_range,  // faster implem
                                     std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
   /** \private
@@ -1095,7 +1096,11 @@ class Simplex_tree {
  public:
   /** \brief Compute the star of a n simplex
    * \param simplex represent the simplex of which we search the star
-   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   * \return Vector of Simplex_tree::Simplex_handle (empty vector if no star found) when
+   * SimplexTreeOptions::link_nodes_by_label is false.
+   * 
+   * Simplex_tree::Simplex_handle range for an optimized search for the star of a simplex when
+   * SimplexTreeOptions::link_nodes_by_label is true.
    */
   Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
     return cofaces_simplex_range(simplex, 0);
@@ -1103,9 +1108,13 @@ class Simplex_tree {
 
   /** \brief Compute the cofaces of a n simplex
    * \param simplex represent the n-simplex of which we search the n+codimension cofaces
-   * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, 
-   * return all cofaces (equivalent of star function)
-   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, return all
+   * cofaces (equivalent of star function)
+   * \return Vector of Simplex_tree::Simplex_handle (empty vector if no cofaces found) when
+   * SimplexTreeOptions::link_nodes_by_label is false.
+   * 
+   * Simplex_tree::Simplex_handle range for an optimized search for the coface of a simplex when
+   * SimplexTreeOptions::link_nodes_by_label is true.
    */
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
     // codimension must be positive or null integer
