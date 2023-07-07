@@ -1139,3 +1139,19 @@ BOOST_AUTO_TEST_CASE(batch_vertices) {
   BOOST_CHECK(st.filtration(st.find({2})) == 0.);
   BOOST_CHECK(st.filtration(st.find({3})) == 1.5);
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST SIMPLEX TREE CLEAR" << std::endl;
+  typeST st;
+  st.insert_simplex_and_subfaces({0, 1}, 1.5);
+  st.initialize_filtration();
+  st.clear();
+  BOOST_CHECK(st.num_vertices() == 0);
+  BOOST_CHECK(st.num_simplices() == 0);
+  BOOST_CHECK(st.upper_bound_dimension() == -1);
+  BOOST_CHECK(st.dimension() == -1);
+  BOOST_CHECK(boost::size(st.filtration_simplex_range()) == 0);
+  st.insert_simplex_and_subfaces({0}, 2.5);
+  BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
+}
