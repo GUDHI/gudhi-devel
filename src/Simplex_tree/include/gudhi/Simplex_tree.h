@@ -1921,11 +1921,8 @@ class Simplex_tree {
     std::clog << "update_simplex_tree_after_node_insertion" << std::endl;
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
-      auto it = nodes_label_to_list_.find(sh->first);
-      if (it == nodes_label_to_list_.end()) {  // create a new list
-        it = (nodes_label_to_list_.emplace(sh->first, List_max_vertex())).first;
-      }
-      it->second.push_back(sh->second);  // insert at the end of the list
+      // Creates an entry with sh->first if not already in the map and insert sh->second at the end of the list
+      nodes_label_to_list_[sh->first].push_back(sh->second);
     }
   }
 
