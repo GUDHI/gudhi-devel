@@ -490,7 +490,7 @@ def plot_persistence_density(
                 birth_min : birth_max : nbins * 1j,
                 death_min : death_max : nbins * 1j,
             ]
-            zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+            zi = k(np.vstack([xi.ravel(), yi.ravel()]))
             # Make the plot
             img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap, shading="auto")
             plot_success = True
