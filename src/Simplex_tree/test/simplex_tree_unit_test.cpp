@@ -43,6 +43,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   BOOST_CHECK(tst.is_empty());
+  BOOST_CHECK(tst.num_simplices_by_dimension() == std::vector<size_t>());
   typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
@@ -330,6 +331,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
+  BOOST_CHECK(st.num_simplices_by_dimension() == std::vector<size_t>({4, 4, 1}));
 
   /* Inserted simplex:        */
   /*    1                     */
