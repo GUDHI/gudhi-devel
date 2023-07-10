@@ -14,21 +14,17 @@
 #include <gudhi/Debug_utils.h>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/version.hpp>
-#include <boost/container/static_vector.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
 #include <vector>
-#include <queue>
 #include <stdexcept>
+#include <utility>  // for std::move
+#include <functional>  // for std::greater
 
 namespace Gudhi {
 
-/* \addtogroup simplex_tree
- * Iterators and range over the star of a simplex in a Simplex_tree.
- * @{
- */
-
-/** \brief Iterator over all the roots of subtrees containing cofaces of all
+/** \private
+ * \brief Iterator over all the roots of subtrees containing cofaces of all
  * dimension of a given simplex.
  *
  * Specifically, consider a simplex \f$\sigma\f$ whose vertices have maximal label
@@ -50,10 +46,11 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     : public boost::iterator_facade<Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator<SimplexTree>,
                                     typename SimplexTree::Simplex_handle const, boost::forward_traversal_tag> {
  public:
-  typedef typename SimplexTree::Simplex_handle Simplex_handle;
-  typedef typename SimplexTree::Siblings Siblings;
-  typedef typename SimplexTree::Vertex_handle Vertex_handle;
-  typedef typename SimplexTree::Node Node;
+  using Simplex_handle = typename SimplexTree::Simplex_handle;
+  using Siblings = typename SimplexTree::Siblings;
+  using Vertex_handle = typename SimplexTree::Vertex_handle;
+  using Node = typename SimplexTree::Node;
+  using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
 
   /** \brief Predicate to check whether an input SimplexTree::Node represents a
    * coface of a simplex simp_, stored as a std::vector of
@@ -70,32 +67,25 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   class is_coface {
    public:
     is_coface() : cpx_(nullptr) {}
-    is_coface(SimplexTree* cpx, const std::vector<Vertex_handle>& simp) : cpx_(cpx), simp_(simp) {}
+    is_coface(SimplexTree* cpx, Static_vertex_vector&& simp) : cpx_(cpx), simp_(simp) {}
 
     // Return true iff traversing the Node upwards to the root reads a
     // coface of simp_
     bool operator()(typename SimplexTree::Hooks_simplex_base& curr_hooks) {
       Node& curr_node = static_cast<Node&>(curr_hooks);
-      auto vertex_it = simp_.begin();  // largest label is first
+      auto sh = cpx_->simplex_handle_from_node(curr_node);
       // first Node must always have label simp_.begin(); we assume it is true
-      auto curr_sib = cpx_->self_siblings(curr_node, *vertex_it);
-      if (++vertex_it == simp_.end()) {
-        return true;
-      }
-      while (curr_sib->oncles() != nullptr) {
-        if (curr_sib->parent() == *vertex_it) {
-          if (++vertex_it == simp_.end()) {
-            return true;
-          }  // we found a coface
-        }
-        curr_sib = curr_sib->oncles();
-      }
-      return false;
+      auto&& rng = cpx_->simplex_vertex_range(sh);
+      auto rng_it = rng.begin();
+      GUDHI_CHECK(*rng_it == simp_.front(), std::invalid_argument("first Node must always have label simp_.begin()"));
+      auto simp_it = simp_.begin();
+      // is simp_ a face of the simplex defined by sh ?
+      return std::includes(++rng_it, rng.end(), ++simp_it, simp_.end(), std::greater<Vertex_handle>());
     }
 
    private:
     SimplexTree* cpx_;
-    std::vector<Vertex_handle> simp_;  // vertices of simplex, in reverse order
+    Static_vertex_vector simp_;  // vertices of simplex, in reverse order
   };
 
   typedef boost::filter_iterator<is_coface, typename SimplexTree::List_max_vertex::iterator>
@@ -104,18 +94,16 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator() : predicate_(), st_(nullptr) {}
 
   Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator(SimplexTree* cpx,
-                                                                  const std::vector<Vertex_handle>& simp)
-      : predicate_(cpx, simp), st_(cpx) {
+                                                                  Static_vertex_vector&& simp)
+      : predicate_(cpx, std::move(simp)), st_(cpx) {
     GUDHI_CHECK(!simp.empty(), std::invalid_argument("cannot call for cofaces of an empty simplex"));
-    max_v_ = *(simp.begin());
-    auto list_ptr = st_->nodes_by_label(max_v_);
+    auto list_ptr = st_->nodes_by_label(simp.front());
     GUDHI_CHECK(list_ptr != nullptr, std::runtime_error("invalid call to cofaces forest"));
 
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());
     Node& curr_node = static_cast<Node&>(*it_);
-    auto curr_sib = st_->self_siblings(curr_node, max_v_);
-    sh_ = curr_sib->find(max_v_);
+    sh_ = st_->simplex_handle_from_node(curr_node);
   }
 
  private:
@@ -140,8 +128,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     }       //== end
     else {  // update sh_
       Node& curr_node = static_cast<Node&>(*it_);
-      auto curr_sib = st_->self_siblings(curr_node, max_v_);
-      sh_ = curr_sib->find(max_v_);
+      sh_ = st_->simplex_handle_from_node(curr_node);
     }
   }
 
@@ -149,11 +136,9 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
   // predicate stores the vertices of the simplex whose star we compute.
   is_coface predicate_;
   SimplexTree* st_;
-  // filtered iterators over Nodes of same label max_v_, filtered with predicate_
+  // filtered iterators over Nodes, filtered with predicate_
   Filtered_cofaces_simplex_iterator it_;
   Filtered_cofaces_simplex_iterator end_;
-  // max label of the simplex whose cofaces are computed
-  Vertex_handle max_v_;
   // current Simplex_handle corresponding to Node pointed at by it_
   Simplex_handle sh_;
 };
@@ -175,16 +160,17 @@ class Simplex_tree_optimized_star_simplex_iterator
     : public boost::iterator_facade<Simplex_tree_optimized_star_simplex_iterator<SimplexTree>,
                                     typename SimplexTree::Simplex_handle const, boost::forward_traversal_tag> {
  public:
-  typedef typename SimplexTree::Simplex_handle Simplex_handle;
-  typedef typename SimplexTree::Siblings Siblings;
-  typedef typename SimplexTree::Vertex_handle Vertex_handle;
-  typedef typename SimplexTree::Node Node;
+  using Simplex_handle = typename SimplexTree::Simplex_handle;
+  using Siblings = typename SimplexTree::Siblings;
+  using Vertex_handle = typename SimplexTree::Vertex_handle;
+  using Node = typename SimplexTree::Node;
+  using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
 
   // any end() iterator
   Simplex_tree_optimized_star_simplex_iterator() : st_(nullptr) {}
 
-  Simplex_tree_optimized_star_simplex_iterator(SimplexTree* cpx, const std::vector<Vertex_handle>& simp)
-      : st_(cpx), it_(cpx, simp), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), bfs_queue_() {
+  Simplex_tree_optimized_star_simplex_iterator(SimplexTree* cpx, Static_vertex_vector&& simp)
+      : st_(cpx), it_(cpx, std::move(simp)), end_(), sh_(*it_), sib_(st_->self_siblings(sh_)), children_stack_() {
     if (it_ == end_) {
       st_ = nullptr;
       return;
@@ -193,7 +179,7 @@ class Simplex_tree_optimized_star_simplex_iterator
     sh_ = *it_;                      // sh_ is the root
     sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
     if (st_->has_children(sh_)) {
-      bfs_queue_.push(st_->children(sh_));
+      children_stack_.push_back(st_->children(sh_));
     }
     return;  // first root of coface subtree
   }
@@ -236,12 +222,12 @@ class Simplex_tree_optimized_star_simplex_iterator
     // if no more sibling or root of coface tree, go down or to next subtree
     if (is_root_ || sh_ == sib_->members().end()) {
       is_root_ = false;
-      if (!bfs_queue_.empty()) {
-        sib_ = bfs_queue_.front();
-        bfs_queue_.pop();
+      if (!children_stack_.empty()) {
+        sib_ = children_stack_.back();
+        children_stack_.pop_back();
         sh_ = sib_->members().begin();  // don't track dimensions
         if (st_->has_children(sh_)) {
-          bfs_queue_.push(st_->children(sh_));
+          children_stack_.push_back(st_->children(sh_));
         }
       } else {  // bfs_queue == empty, go to root of next coface subtree
         if (++it_ == end_) {
@@ -252,17 +238,19 @@ class Simplex_tree_optimized_star_simplex_iterator
         sh_ = *it_;                      // sh_ is the root
         sib_ = st_->self_siblings(sh_);  // Siblings containing sh_
         if (st_->has_children(sh_)) {
-          bfs_queue_.push(st_->children(sh_));
+          children_stack_.push_back(st_->children(sh_));
         }
         return;  // next root of coface
       }
     } else {  // sh_ is valid, simply add its children to the queue
       if (st_->has_children(sh_)) {
-        bfs_queue_.push(st_->children(sh_));
+        children_stack_.push_back(st_->children(sh_));
       }
     }
   }
 
+  // For cofaces, enumerating all the star and testing which simplices have the right dimension is suboptimal.
+  // This could be optimized later.
   void increment() { increment_all_cofaces(); }
 
   // Let s be the simplex in a complex C whose star is
@@ -277,13 +265,12 @@ class Simplex_tree_optimized_star_simplex_iterator
   Simplex_handle sh_;
   // set of siblings containing sh_ in the Simplex_tree
   Siblings* sib_;  //
-  // use a bfs search to avoid calling sib_->members().find(.)
-  std::queue<Siblings*> bfs_queue_;
+  // Save children in a list to avoid calling sib_->members().find(.)
+  std::vector<Siblings*> children_stack_;
   // true iff sh_ points to the root of a coface subtree
   bool is_root_;
 };
 
-/* @} */  // end addtogroup simplex_tree
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_SIMPLEX_TREE_STAR_SIMPLEX_ITERATORS_H_

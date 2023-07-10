@@ -37,7 +37,9 @@ namespace cubical_complex {
  * intervals in the product. A <em>boundary of a cube</em> \f$C=I_1 \times \ldots \times I_n\f$ is a chain obtained
  * in the following way:
  * \f[\partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) +
- * \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).\f]
+ * \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n)\f]
+ * (when working with a field of characteristic other than 2, the non-zero terms of this sum come with alternating signs ±1).
+ *
  * A <em>cubical complex</em> \f$\mathcal{K}\f$ is a collection of cubes closed under operation of taking boundary
  * (i.e. boundary of every cube from the collection is in the collection). A cube \f$C\f$ in cubical complex
  * \f$\mathcal{K}\f$ is <em>maximal</em> if it is not in a boundary of any other cube in \f$\mathcal{K}\f$. A \a

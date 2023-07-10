@@ -14,43 +14,35 @@
 #include <boost/intrusive/list.hpp>
 
 namespace Gudhi {
+  /** \brief No hook when SimplexTreeOptions::link_nodes_by_label is false.
+   */
+  struct Hooks_simplex_base_dummy {};
+
   /** \brief Data structure to put all simplex tree nodes with same label into a list.
    *
    * Allows one to access all subtrees of the simplex tree rooted at a node with a given label.
    * Used in particular for fast cofaces location, and fast insertion and deletion of edges in a flag complex.
    *
-   * Only if SimplexTreeOptions::link_nodes_by_label is true, otherwise store nothing.
+   * Only if SimplexTreeOptions::link_nodes_by_label is true.
    */
-
-  // no hook
-  struct Hooks_simplex_base_dummy {};
-  // todo on Hooks_simplex_base_link_nodes:
-  // make the class movable but not copiable
-  // translate the boost macros into C++11 syntax (boost independent)
-  // update the Node concept and the doc
   struct Hooks_simplex_base_link_nodes {
-   private:
-    BOOST_COPYABLE_AND_MOVABLE(Hooks_simplex_base_link_nodes)
    public:
     Hooks_simplex_base_link_nodes() {}
-    // the copy constructor, inherited by the Node class, exchanges hooks,
-    // and make the ones of this invalid.
-    // this is used when stored in a map like DS, using copies when
-    // performing insertions and rebalancing of the rbtree
-    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes& other) {
-      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
-    }
+    // The following 2 functions are conceptually wrong, but when copying a Simplex_tree it is more convenient to have
+    // them (and fix things asap after they are called).
+    // copy constructor, inherited by the Node class, requires to copy hooks
+    Hooks_simplex_base_link_nodes(const Hooks_simplex_base_link_nodes&)
+    : list_max_vertex_hook_() { }
     // copy assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_COPY_ASSIGN_REF(Hooks_simplex_base_link_nodes) other) {
-      list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
-      return *this;
+    Hooks_simplex_base_link_nodes& operator=(const Hooks_simplex_base_link_nodes&) {
+      throw std::logic_error("Should not happen");
     }
     // move constructor
-    Hooks_simplex_base_link_nodes(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes(Hooks_simplex_base_link_nodes&& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
     }
     // move assignment
-    Hooks_simplex_base_link_nodes& operator=(BOOST_RV_REF(Hooks_simplex_base_link_nodes) other) {
+    Hooks_simplex_base_link_nodes& operator=(Hooks_simplex_base_link_nodes&& other) {
       list_max_vertex_hook_.swap_nodes(other.list_max_vertex_hook_);
       return *this;
     }
@@ -61,9 +53,9 @@ namespace Gudhi {
         boost::intrusive::link_mode<boost::intrusive::auto_unlink>>
         Member_hook_t;
 
-    mutable Member_hook_t list_max_vertex_hook_;
+    Member_hook_t list_max_vertex_hook_;
   };
-  
+
 }  // namespace Gudhi
 
 #endif  // SIMPLEX_TREE_HOOKS_SIMPLEX_BASE_H_

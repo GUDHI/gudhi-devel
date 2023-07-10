@@ -22,7 +22,6 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::de/serialize_trivial
 #include <gudhi/Simplex_tree/hooks_simplex_base.h>
-#include <gudhi/Simplex_tree/nodes_by_label.h>
 
 #include <gudhi/reader_utils.h>
 #include <gudhi/graph_simplicial_complex.h>
@@ -35,14 +34,16 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/size.hpp>
 #include <boost/container/static_vector.hpp>
+#include <boost/range/adaptors.hpp>
 
 #include <boost/intrusive/list.hpp>
+#include <boost/intrusive/parent_from_member.hpp>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
 #endif
 
-#include <utility>
+#include <utility>  // for std::move
 #include <vector>
 #include <functional>  // for greater<>
 #include <stdexcept>
@@ -52,6 +53,7 @@
 #include <cstdint>  // for std::uint32_t
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
+#include <unordered_map>
 
 namespace Gudhi {
 
@@ -179,6 +181,40 @@ class Simplex_tree {
     }
   };
 
+ private:
+  /** \brief An iterator for an optimized search for the star of a simplex.
+   *
+   * \details It requires the Options::link_nodes_by_label to be true and store two
+   * extra pointers in each node of the simplex tree. The Nodes of same label are
+   * linked in a list.
+   */
+  using Optimized_star_simplex_iterator = Simplex_tree_optimized_star_simplex_iterator<Simplex_tree>;
+  /** \brief Range for an optimized search for the star of a simplex. */
+  using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
+
+  using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
+
+  class Fast_cofaces_predicate {
+    Simplex_tree* st_;
+    int codim_;
+    int dim_;
+   public:
+    Fast_cofaces_predicate(Simplex_tree* st, int codim, int dim)
+      : st_(st), codim_(codim), dim_(codim + dim) {}
+    bool operator()( Const_boost_iterator iter ) const {
+      if (codim_ == 0)
+        // Always true for a star
+        return true;
+      // Specific coface case
+      return dim_ == st_->dimension(iter);
+    }
+  };
+
+  // WARNING: this is safe only because boost::filtered_range is containing a copy of begin and end iterator.
+  // This would not be safe if it was containing a pointer to a range (maybe the case for std::views)
+  using Optimized_cofaces_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate,
+                                                                         Optimized_star_simplex_range>;
+
  public:
   /** \name Range and iterator types
    *
@@ -201,26 +237,16 @@ class Simplex_tree {
   /** \brief Range over the vertices of a simplex. */
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
-  typedef std::vector<Simplex_handle> Cofaces_simplex_range;
-
- private:
-  /** \brief An iterator for an optimized search for the star of a simplex.
-   *
-   * \details It requires the Options::link_nodes_by_label to be true and store two
-   * extra pointers in each node of the simplex tree. The Nodes of same label are
-   * linked in a list.
-   */
-  typedef Simplex_tree_optimized_star_simplex_iterator<Simplex_tree> Optimized_star_simplex_iterator;
-
- public:
-  /** \brief Iterator over the star of a simplex.*/
   typedef typename std::conditional<Options::link_nodes_by_label,
-                                    Optimized_star_simplex_iterator,  // faster implem
-                                    typename Cofaces_simplex_range::iterator>::type Star_simplex_iterator;
-  /** \brief Range over the star of a simplex. */
-  typedef typename std::conditional<Options::link_nodes_by_label,
-                                    boost::iterator_range<Optimized_star_simplex_iterator>,  // faster implem
-                                    Cofaces_simplex_range>::type Star_simplex_range;
+                                    Optimized_cofaces_simplex_filtered_range,  // faster implem
+                                    std::vector<Simplex_handle>>::type Cofaces_simplex_range;
+
+  /** \private
+   * \brief 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the
+   * biggest hard-drive.
+   * static_vector still has some overhead compared to a trivial hand-made version using std::aligned_storage, or
+   * compared to making suffix_ static. */
+  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
 
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
@@ -455,6 +481,7 @@ class Simplex_tree {
   void rec_copy(Siblings *sib, Siblings *sib_source) {
     for (auto sh = sib->members().begin(), sh_source = sib_source->members().begin();
          sh != sib->members().end(); ++sh, ++sh_source) {
+      update_simplex_tree_after_node_insertion(sh);
       if (has_children(sh_source)) {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         newsib->members_.reserve(sh_source->second.children()->members().size());
@@ -472,7 +499,9 @@ class Simplex_tree {
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
     dimension_ = complex_source.dimension_;
-
+    if constexpr (Options::link_nodes_by_label) {
+      nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
+    }
     // Need to update root members (children->oncles and children need to point on the new root pointer)
     for (auto& map_el : root_.members()) {
       if (map_el.second.children() != &(complex_source.root_)) {
@@ -684,6 +713,9 @@ class Simplex_tree {
     return (sh->second.children()->parent() == sh->first);
   }
 
+ private:
+  friend class Simplex_tree_optimized_star_simplex_iterator<Simplex_tree>;
+
   /** \brief Returns the children of the node in the simplex tree pointed by sh.
    * \exception std::invalid_argument In debug mode, if sh has no child.
    */
@@ -692,6 +724,7 @@ class Simplex_tree {
     return sh->second.children();
   }
 
+ public:
   /** \brief Given a range of Vertex_handles, returns the Simplex_handle
    * of the simplex in the simplicial complex containing the corresponding
    * vertices. Return null_simplex() if the simplex is not in the complex.
@@ -1083,41 +1116,53 @@ class Simplex_tree {
  public:
   /** \brief Compute the star of a n simplex
    * \param simplex represent the simplex of which we search the star
-   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   * \return Vector of Simplex_tree::Simplex_handle (empty vector if no star found) when
+   * SimplexTreeOptions::link_nodes_by_label is false.
+   * 
+   * Simplex_tree::Simplex_handle range for an optimized search for the star of a simplex when
+   * SimplexTreeOptions::link_nodes_by_label is true.
    */
-  Star_simplex_range star_simplex_range(const Simplex_handle simplex) {
-    if constexpr (Options::link_nodes_by_label) {  // faster cofaces computation
-      Simplex_vertex_range rg = simplex_vertex_range(simplex);
-      std::vector<Vertex_handle> simp(rg.begin(), rg.end());
-      // must be sorted in decreasing order
-      assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
-      return Star_simplex_range(Star_simplex_iterator(this, simp), Star_simplex_iterator());
-    } else {
-      return cofaces_simplex_range(simplex, 0);
-    }
+  Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
+    return cofaces_simplex_range(simplex, 0);
   }
 
   /** \brief Compute the cofaces of a n simplex
    * \param simplex represent the n-simplex of which we search the n+codimension cofaces
-   * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, 
-   * return all cofaces (equivalent of star function)
-   * \return Vector of Simplex_handle, empty vector if no cofaces found.
+   * \param codimension The function returns the n+codimension-cofaces of the n-simplex. If codimension = 0, return all
+   * cofaces (equivalent of star function)
+   * \return Vector of Simplex_tree::Simplex_handle (empty vector if no cofaces found) when
+   * SimplexTreeOptions::link_nodes_by_label is false.
+   * 
+   * Simplex_tree::Simplex_handle range for an optimized search for the coface of a simplex when
+   * SimplexTreeOptions::link_nodes_by_label is true.
    */
-
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
-    Cofaces_simplex_range cofaces;
     // codimension must be positive or null integer
     assert(codimension >= 0);
-    Simplex_vertex_range rg = simplex_vertex_range(simplex);
-    std::vector<Vertex_handle> copy(rg.begin(), rg.end());
-    if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
-        (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+
+    if constexpr (Options::link_nodes_by_label) {
+      Simplex_vertex_range rg = simplex_vertex_range(simplex);
+      Static_vertex_vector simp(rg.begin(), rg.end());
+      // must be sorted in decreasing order
+      assert(std::is_sorted(simp.begin(), simp.end(), std::greater<Vertex_handle>()));
+      auto range = Optimized_star_simplex_range(Optimized_star_simplex_iterator(this, std::move(simp)),
+                                                Optimized_star_simplex_iterator());
+      // Lazy filtered range
+      Fast_cofaces_predicate select(this, codimension, this->dimension(simplex));
+      return boost::adaptors::filter(range, select);
+    } else {
+      Cofaces_simplex_range cofaces;
+      Simplex_vertex_range rg = simplex_vertex_range(simplex);
+      std::vector<Vertex_handle> copy(rg.begin(), rg.end());
+      if (codimension + static_cast<int>(copy.size()) > dimension_ + 1 ||
+          (codimension == 0 && static_cast<int>(copy.size()) > dimension_))  // n+codimension greater than dimension_
+        return cofaces;
+      // must be sorted in decreasing order
+      assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
+      bool star = codimension == 0;
+      rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
       return cofaces;
-    // must be sorted in decreasing order
-    assert(std::is_sorted(copy.begin(), copy.end(), std::greater<Vertex_handle>()));
-    bool star = codimension == 0;
-    rec_coface(copy, &root_, 1, cofaces, star, codimension + static_cast<int>(copy.size()));
-    return cofaces;
+    }
   }
 
  private:
@@ -1208,11 +1253,13 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph));  // probably useless in most cases
-    typename boost::graph_traits<OneSkeletonGraph>::vertex_iterator v_it, v_it_end;
-    for (std::tie(v_it, v_it_end) = vertices(skel_graph); v_it != v_it_end; ++v_it) {
-      auto it = (root_.members_.emplace_hint(root_.members_.end(), *v_it,
-                                             Node(&root_, get(vertex_filtration_t(), skel_graph, *v_it))));
+    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
+        return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
+    root_.members_.insert(boost::begin(verts), boost::end(verts));
+    // This automatically sorts the vertices, the graph concept doesn't guarantee the order in which we iterate.
+
+    for (Dictionary_it it = boost::begin(root_.members_); it != boost::end(root_.members_); it++) {
       update_simplex_tree_after_node_insertion(it);
     }
 
@@ -2080,7 +2127,7 @@ class Simplex_tree {
     ++vi;
     GUDHI_CHECK(vi != end, "simplex of dimension 0");
     if(std::next(vi) == end) return sh; // shortcut for dimension 1
-    boost::container::static_vector<Vertex_handle, 40> suffix;
+    Static_vertex_vector suffix;
     suffix.push_back(v0);
     auto filt = filtration_(sh);
     do
@@ -2123,56 +2170,38 @@ class Simplex_tree {
       List_member_hook_t;
   // auto_unlink in Member_hook_t is incompatible with constant time size
   typedef boost::intrusive::list<Hooks_simplex_base_link_nodes, List_member_hook_t,
-                                 boost::intrusive::constant_time_size<false>>
-      List_max_vertex;
+                                 boost::intrusive::constant_time_size<false>> List_max_vertex;
   // type of hooks stored in each Node, Node inherits from Hooks_simplex_base
   typedef typename std::conditional<Options::link_nodes_by_label, Hooks_simplex_base_link_nodes,
                                     Hooks_simplex_base_dummy>::type Hooks_simplex_base;
+
   /** Data structure to access all Nodes with a given label u. Can be used for faster
    * computation. */
  private:
-  // if Options::link_nodes_by_label is true, store the lists of Nodes with
-  // same label
-  typedef typename std::conditional<Options::link_nodes_by_label, Nodes_by_label_intrusive_list<Simplex_tree>,
-                                    Nodes_by_label_dummy<Simplex_tree>>::type Nodes_by_label_data_structure;
+  // if Options::link_nodes_by_label is true, store the lists of Nodes with same label, empty otherwise.
+  // unordered_map Vertex_handle v -> list of all Nodes with label v.
+  std::unordered_map<Vertex_handle, List_max_vertex> nodes_label_to_list_;
 
-  /** Only if Options::link_nodes_by_label is true, nodes_with_label_[u] returns a
-   * range of all Nodes in the Simplex_tree with the label u.*/
-  Nodes_by_label_data_structure nodes_by_label_;
-
- public:
-  List_max_vertex* nodes_by_label(Vertex_handle u) {
+  List_max_vertex* nodes_by_label(Vertex_handle v) {
     if constexpr (Options::link_nodes_by_label) {
-      return nodes_by_label_.find(u);
+      auto it_v = nodes_label_to_list_.find(v);
+      if (it_v != nodes_label_to_list_.end()) {
+        return &(it_v->second);
+      } else {
+        return nullptr;
+      }
     }
     return nullptr;
   }
 
-  // basic methods implemented for Nodes, and not Simplex_handle. The hooks in
-  // nodes_by_label_ gives access to Nodes.
- public:
-  // set of methods taking Node as input. For internal use only.
-  /** Returns the Siblings containing a simplex.*/
-  static Siblings* self_siblings(Node& node, Vertex_handle v) {
-    if (node.children()->parent() == v) {
-      return node.children()->oncles();
-    } else {
-      return node.children();
-    }
+  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node. */
+  static Simplex_handle simplex_handle_from_node(Node& node) {
+    return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
   }
 
-  int dimension(Node& node, Vertex_handle u) {
-    Siblings* curr_sib = self_siblings(node, u);
-    int dim = 0;
-    while (curr_sib != nullptr) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim - 1;
-  }
-  /* \brief Returns true if the node in the simplex tree pointed by
-   * sh has children. node must have label u*/
-  bool has_children(Node& node, Vertex_handle u) const { return (node.children()->parent() == u); }
+  // Give access to Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator and keep nodes_by_label and
+  // simplex_handle_from_node private
+  friend class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator<Simplex_tree>;
 
  private:
   // update all extra data structures in the Simplex_tree. Must be called after all
@@ -2182,7 +2211,8 @@ class Simplex_tree {
     std::clog << "update_simplex_tree_after_node_insertion" << std::endl;
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
-      nodes_by_label_.insert(sh);
+      // Creates an entry with sh->first if not already in the map and insert sh->second at the end of the list
+      nodes_label_to_list_[sh->first].push_back(sh->second);
     }
   }
 
@@ -2194,6 +2224,8 @@ class Simplex_tree {
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
       sh->second.unlink_hooks();  // remove from lists of same label Nodes
+      if (nodes_label_to_list_[sh->first].empty())
+        nodes_label_to_list_.erase(sh->first);
     }
   }
 
