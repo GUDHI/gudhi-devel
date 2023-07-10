@@ -816,7 +816,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
 
   std::clog << "Printing st - address = " << &st << std::endl;
 
-  // Copy constructor 
+  // Copy constructor  
   typeST st_copy = st;
   std::clog << "Printing a copy of st - address = " << &st_copy << std::endl;
 
@@ -825,7 +825,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st != &st_copy);
 
-  // Move constructor 
+  // Move constructor  
   typeST st_move = std::move(st);
   std::clog << "Printing a move of st - address = " << &st_move << std::endl;
 

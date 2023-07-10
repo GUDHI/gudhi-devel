@@ -2098,8 +2098,7 @@ class Simplex_tree {
   /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.
    *
    * For a lower-star filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which vertex had its filtration value propagated to `sh`.
-   * If several vertices have the same filtration value, the one it returns is arbitrary.
-   */
+   * If several vertices have the same filtration value, the one it returns is arbitrary. */
   Vertex_handle vertex_with_same_filtration(Simplex_handle sh) {
     auto filt = filtration_(sh);
     for(auto v : simplex_vertex_range(sh))
@@ -2146,8 +2145,7 @@ class Simplex_tree {
   /** \brief Returns a minimal face of `sh` that has the same filtration value as `sh`.
    *
    * For a filtration built with `make_filtration_non_decreasing()`, this is a way to invert the process and find out which simplex had its filtration value propagated to `sh`.
-   * If several minimal (for inclusion) simplices have the same filtration value, the one it returns is arbitrary, and it is not guaranteed to be the one with smallest dimension.
-   */
+   * If several minimal (for inclusion) simplices have the same filtration value, the one it returns is arbitrary, and it is not guaranteed to be the one with smallest dimension. */
   Simplex_handle minimal_simplex_with_same_filtration(Simplex_handle sh) {
     auto filt = filtration_(sh);
     // Naive implementation, it can be sped up.
