@@ -92,7 +92,7 @@ inline Base_matrix_with_removals<Master_matrix>::Base_matrix_with_removals(const
 	  nextInsertIndex_(columns.size())
 {
 	for (unsigned int i = 0; i < columns.size(); i++){
-		matrix_.emplace(i, Column_type(columns[i]));
+		matrix_.try_emplace(i, Column_type(columns[i]));
 	}
 }
 
@@ -138,7 +138,7 @@ inline void Base_matrix_with_removals<Master_matrix>::insert_column(const Contai
 		swap_opt::rowToIndex_[id] = id;
 	}
 
-	matrix_.emplace(id, column);
+	matrix_.try_emplace(id, column);
 }
 
 template<class Master_matrix>

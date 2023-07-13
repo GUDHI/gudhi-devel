@@ -21,16 +21,20 @@
 
 #include <gudhi/Zigzag_persistence.h>
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/options.h>
 
 #include "rips-zigzag-dionysus.h"
 
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
+// using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
-using interval_filtration = ZP::interval_filtration;
+// using interval_filtration = ZP::interval_filtration;
 
+using Gudhi::persistence_matrix::Zigzag_options;
+using CT = Gudhi::persistence_matrix::Column_types;
 
+template<class ZP>
 std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsigned int numberOfSimplices){
 	std::set<unsigned int> essentials;
 	std::vector< std::pair<unsigned int, unsigned int> > res;
@@ -52,6 +56,7 @@ std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsig
 	return res;
 }
 
+template<class ZP>
 std::vector< std::pair<unsigned int, unsigned int> > compute_with_gudhi(
 	const std::vector<std::vector<Vertex_handle> >& simplices,
 	const std::vector<bool>& dirs)
@@ -93,8 +98,10 @@ std::vector< std::pair<unsigned int, unsigned int> > compute_with_gudhi(
 	return print_indices(zp, i);
 }
 
-static void Compute_zigzag_with_gudhi(benchmark::State& state) {
-	unsigned int numberOfPoints = state.range(0);;
+static void Compute_zigzag_with_gudhi_intrusive_list(benchmark::State& state) {
+	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::INTRUSIVE_LIST> >;
+
+	unsigned int numberOfPoints = state.range(0);
 	int seed = numberOfPoints;
 	std::vector<std::vector<Vertex_handle> > simplices;
 	std::vector<bool> dirs;
@@ -102,10 +109,90 @@ static void Compute_zigzag_with_gudhi(benchmark::State& state) {
 	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
 
 	for (auto _ : state){
-		compute_with_gudhi(simplices, dirs);
+		compute_with_gudhi<ZP>(simplices, dirs);
 	}
 }
-BENCHMARK(Compute_zigzag_with_gudhi)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1)->MinTime(1);
+BENCHMARK(Compute_zigzag_with_gudhi_intrusive_list)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
+
+static void Compute_zigzag_with_gudhi_intrusive_set(benchmark::State& state) {
+	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::INTRUSIVE_SET> >;
+
+	unsigned int numberOfPoints = state.range(0);
+	int seed = numberOfPoints;
+	std::vector<std::vector<Vertex_handle> > simplices;
+	std::vector<bool> dirs;
+
+	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
+
+	for (auto _ : state){
+		compute_with_gudhi<ZP>(simplices, dirs);
+	}
+}
+BENCHMARK(Compute_zigzag_with_gudhi_intrusive_set)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
+
+static void Compute_zigzag_with_gudhi_list(benchmark::State& state) {
+	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::LIST> >;
+
+	unsigned int numberOfPoints = state.range(0);
+	int seed = numberOfPoints;
+	std::vector<std::vector<Vertex_handle> > simplices;
+	std::vector<bool> dirs;
+
+	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
+
+	for (auto _ : state){
+		compute_with_gudhi<ZP>(simplices, dirs);
+	}
+}
+BENCHMARK(Compute_zigzag_with_gudhi_list)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
+
+// static void Compute_zigzag_with_gudhi_set(benchmark::State& state) {
+// 	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::SET> >;
+
+// 	unsigned int numberOfPoints = state.range(0);
+// 	int seed = numberOfPoints;
+// 	std::vector<std::vector<Vertex_handle> > simplices;
+// 	std::vector<bool> dirs;
+
+// 	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
+
+// 	for (auto _ : state){
+// 		compute_with_gudhi<ZP>(simplices, dirs);
+// 	}
+// }
+// BENCHMARK(Compute_zigzag_with_gudhi_set)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
+
+// static void Compute_zigzag_with_gudhi_unordered_set(benchmark::State& state) {
+// 	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::UNORDERED_SET>>;
+
+// 	unsigned int numberOfPoints = state.range(0);
+// 	int seed = numberOfPoints;
+// 	std::vector<std::vector<Vertex_handle> > simplices;
+// 	std::vector<bool> dirs;
+
+// 	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
+
+// 	for (auto _ : state){
+// 		compute_with_gudhi<ZP>(simplices, dirs);
+// 	}
+// }
+// BENCHMARK(Compute_zigzag_with_gudhi_unordered_set)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
+
+static void Compute_zigzag_with_gudhi_vector(benchmark::State& state) {
+	using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::VECTOR>>;
+
+	unsigned int numberOfPoints = state.range(0);
+	int seed = numberOfPoints;
+	std::vector<std::vector<Vertex_handle> > simplices;
+	std::vector<bool> dirs;
+
+	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
+
+	for (auto _ : state){
+		compute_with_gudhi<ZP>(simplices, dirs);
+	}
+}
+BENCHMARK(Compute_zigzag_with_gudhi_vector)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
 
 BENCHMARK_MAIN();
 

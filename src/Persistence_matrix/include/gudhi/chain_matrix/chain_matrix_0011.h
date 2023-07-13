@@ -14,6 +14,9 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#include <unordered_map>
+
+#include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
 #include "custom_chain_vine_swap.h"
@@ -289,7 +292,7 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 	for (const auto& p : matrixToCopy.matrix_){
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),
@@ -348,7 +351,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 		const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
-		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
+		swap_opt::pivotToPosition_.try_emplace(nextInsertIndex_, nextInsertIndex_);
 	}
 	unsigned int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 	if (maxDim_ < static_cast<int>(dim)) maxDim_ = dim;
@@ -364,7 +367,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 		index simplexIndex, const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
-		swap_opt::pivotToPosition_.emplace(simplexIndex, simplexIndex);
+		swap_opt::pivotToPosition_.try_emplace(simplexIndex, simplexIndex);
 	}
 	unsigned int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 	if (maxDim_ < static_cast<int>(dim)) maxDim_ = dim;
@@ -392,12 +395,12 @@ template<class Master_matrix>
 inline typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Row_type&
 Chain_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_intrusive_rows){
-		rows_.at(rowIndex).sort([this](const Cell& c1, const Cell& c2) { 
-				return get_pivot(c1.get_column_index()) < 
-					   get_pivot(c2.get_column_index());
-			});
-	}
+	// if constexpr (Master_matrix::Option_list::has_intrusive_rows){
+	// 	rows_.at(rowIndex).sort([this](const Cell& c1, const Cell& c2) { 
+	// 			return get_pivot(c1.get_column_index()) < 
+	// 				   get_pivot(c2.get_column_index());
+	// 		});
+	// }
 	return rows_.at(rowIndex);
 }
 
@@ -405,12 +408,12 @@ template<class Master_matrix>
 inline const typename Chain_matrix_with_row_access_with_removals<Master_matrix>::Row_type&
 Chain_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex) const
 {
-	if constexpr (Master_matrix::Option_list::has_intrusive_rows) {
-		rows_.at(rowIndex).sort([this](const Cell& c1, const Cell& c2) { 
-				return get_pivot(c1.get_column_index()) < 
-					   get_pivot(c2.get_column_index());
-			});
-	}
+	// if constexpr (Master_matrix::Option_list::has_intrusive_rows) {
+	// 	rows_.at(rowIndex).sort([this](const Cell& c1, const Cell& c2) { 
+	// 			return get_pivot(c1.get_column_index()) < 
+	// 				   get_pivot(c2.get_column_index());
+	// 		});
+	// }
 	return rows_.at(rowIndex);
 }
 
@@ -448,7 +451,8 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::remove_ma
 	if (c.is_paired()) matrix_.at(c.get_paired_chain_index()).unassign_paired_chain();
 	pivotToColumnIndex_.erase(simplexIndex);
 	matrix_.erase(toErase);
-	rows_.erase(pivot);		//c should have been the only one with an entry in rows_[pivot]
+	if constexpr (Master_matrix::Option_list::has_removable_rows)
+		rows_.erase(pivot);		//c should have been the only one with an entry in rows_[pivot]
 }
 
 template<class Master_matrix>
@@ -552,7 +556,7 @@ Chain_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Chain
 	for (const auto& p : other.matrix_){
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),
@@ -605,7 +609,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.emplace(simplexIndex, 1);
+			column.try_emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -712,7 +716,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_build_fr
 			_add_to(matrix_.at(idx_h), column);
 		}
 	} else {
-		column.emplace(simplexIndex, 1);
+		column.try_emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 		}
@@ -752,14 +756,14 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 	} else {
 		pivot = column.rbegin()->first;
 	}
-	pivotToColumnIndex_.emplace(pivot, nextInsertIndex_);
+	pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
 
-	matrix_.emplace(nextInsertIndex_,
+	matrix_.try_emplace(nextInsertIndex_,
 					Column_type(nextInsertIndex_, column, dimension, rows_, pivotToColumnIndex_));
 
 	if constexpr (_barcode_option_is_active()){
 		_barcode().emplace_back(dimension, pivot, -1);
-		_indexToBar().emplace(pivot, --_barcode().end());
+		_indexToBar().try_emplace(pivot, --_barcode().end());
 	}
 	++nextInsertIndex_;
 }
@@ -774,19 +778,22 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_insert_c
 	} else {
 		pivot = column.rbegin()->first;
 	}
-	pivotToColumnIndex_.emplace(pivot, nextInsertIndex_);
+	pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
 
-	matrix_.emplace(nextInsertIndex_,
+	matrix_.try_emplace(nextInsertIndex_,
 					Column_type(nextInsertIndex_, column, dimension, rows_, pivotToColumnIndex_));
 	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
-	matrix_.at(pair).assign_paired_chain(nextInsertIndex_);
+	auto& p = matrix_.at(pair);
+	p.assign_paired_chain(nextInsertIndex_);
 
 	if constexpr (_barcode_option_is_active() && swap_opt::isActive_){
-		_indexToBar().at(swap_opt::pivotToPosition_[matrix_.at(pair).get_pivot()])->death = pivot;
-		_indexToBar().emplace(pivot, _indexToBar().at(swap_opt::pivotToPosition_[matrix_.at(pair).get_pivot()]));
+		auto barIt = _indexToBar().at(swap_opt::pivotToPosition_[p.get_pivot()]);
+		barIt->death = pivot;
+		_indexToBar().try_emplace(pivot, barIt);
 	} else if constexpr (_barcode_option_is_active()){
-		_indexToBar().at(matrix_.at(pair).get_pivot())->death = pivot;
-		_indexToBar().emplace(pivot, _indexToBar().at(matrix_.at(pair).get_pivot()));
+		auto barIt = _indexToBar().at(p.get_pivot());
+		barIt->death = pivot;
+		_indexToBar().try_emplace(pivot, barIt);
 	}
 	++nextInsertIndex_;
 }

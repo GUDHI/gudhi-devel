@@ -109,7 +109,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
 				}
 
 				if (pivot != -1){
-					pivotsToColumn.emplace(pivot, i);
+					pivotsToColumn.try_emplace(pivot, i);
 					matrix.at(pivot).clear();
 					barcode_.push_back(Bar(d - 1, pivot, i));
 				} else {

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <boost/intrusive/set.hpp>
+#include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
 #include "cell.h"
@@ -110,6 +111,7 @@ public:
 protected:
 	dimension_type dim_;
 	Column_type column_;
+	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(index rowIndex, const iterator& position);
@@ -118,15 +120,28 @@ private:
 	//Cloner object function
 	struct new_cloner
 	{
-	   Cell *operator()(const Cell &clone_this)
-	   {  return new Cell(clone_this);  }
+		Cell *operator()(const Cell &clone_this) { 
+			// return new Cell(clone_this); 
+			return cellPool_.construct(clone_this);
+		}
 	};
 
 	//The disposer object function
 	struct delete_disposer
 	{
-	   void operator()(Cell *delete_this)
-	   {  delete delete_this;  }
+		delete_disposer(){};
+		delete_disposer(Z2_intrusive_set_column* col) : col_(col)
+		{};
+
+		void operator()(Cell *delete_this)
+		{
+			if constexpr (Row_access_option::isActive_)
+				col_->unlink(delete_this);
+			// delete delete_this;
+			cellPool_.destroy(delete_this);
+		}
+
+		Z2_intrusive_set_column* col_;
 	};
 };
 
@@ -278,13 +293,15 @@ inline void Z2_intrusive_set_column<Cell_type,Row_access_option>::reorder(Map_ty
 	Column_type newSet;
 	for (auto it = column_.begin(); it != column_.end(); ) {
 		if constexpr (Row_access_option::isActive_) {
-			Cell *new_cell = new Cell(Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+			// Cell *new_cell = new Cell(Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+			Cell *new_cell = cellPool_.construct(Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
 			newSet.insert(newSet.end(), *new_cell);
 			auto ittemp = it;
 			++it;
 			_delete_cell(ittemp);
 		} else {
-			Cell *new_cell = new Cell(valueMap[it->get_row_index()]);
+			// Cell *new_cell = new Cell(valueMap[it->get_row_index()]);
+			Cell *new_cell = cellPool_.construct(valueMap[it->get_row_index()]);
 			newSet.insert(newSet.end(), *new_cell);
 			++it;
 		}
@@ -402,13 +419,14 @@ inline Z2_intrusive_set_column<Cell_type,Row_access_option> &Z2_intrusive_set_co
 template<class Cell_type, class Row_access_option>
 inline void Z2_intrusive_set_column<Cell_type,Row_access_option>::_delete_cell(iterator &it)
 {
-	iterator tmp_it = it;
-	++it;
-	Cell* tmp_ptr = &(*tmp_it);
-	if constexpr (Row_access_option::isActive_)
-		Row_access_option::unlink(tmp_ptr);
-	column_.erase(tmp_it);
-	delete tmp_ptr;
+	// iterator tmp_it = it;
+	// ++it;
+	// Cell* tmp_ptr = &(*tmp_it);
+	// if constexpr (Row_access_option::isActive_)
+	// 	Row_access_option::unlink(tmp_ptr);
+	// column_.erase(tmp_it);
+	// delete tmp_ptr;
+	it = column_.erase_and_dispose(it, delete_disposer(this));
 }
 
 template<class Cell_type, class Row_access_option>
@@ -416,11 +434,13 @@ inline void Z2_intrusive_set_column<Cell_type,Row_access_option>::_insert_cell(
 		index rowIndex, const iterator &position)
 {
 	if constexpr (Row_access_option::isActive_){
-		Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		// Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(Row_access_option::columnIndex_, rowIndex);
 		column_.insert(position, *new_cell);
 		Row_access_option::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = new Cell(rowIndex);
+		// Cell *new_cell = new Cell(rowIndex);
+		Cell *new_cell = cellPool_.construct(rowIndex);
 		column_.insert(position, *new_cell);
 	}
 }

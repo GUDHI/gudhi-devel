@@ -68,27 +68,15 @@ inline void Row_access<Row_container_type,Cell_type,isIntrusive,hasRemovableRows
 {
 	if (rows_ == nullptr) return;
 
-	if constexpr (hasRemovableRows){
-//		auto res = rows_->try_emplace(rowIndex);
-//		if constexpr (isIntrusive){
-//			res.first->second.push_back(*cell);
-//		} else {
-//			res.first->second.insert(*cell);
-//		}
-		if constexpr (isIntrusive){
-			rows_->operator[](rowIndex).push_back(*cell);
-		} else {
-			rows_->operator[](rowIndex).insert(*cell);
-		}
-	} else {
+	if constexpr (!hasRemovableRows){
 		if (rows_->size() < rowIndex + 1)
 			rows_->resize(rowIndex + 1);
+	}	//if hasRemovableRows op[] should create non existing entry? If not, use try_emplace()
 
-		if constexpr (isIntrusive){
-			rows_->operator[](rowIndex).push_back(*cell);
-		} else {
-			rows_->operator[](rowIndex).insert(*cell);
-		}
+	if constexpr (isIntrusive) {
+		rows_->operator[](rowIndex).push_back(*cell);
+	} else {
+		rows_->operator[](rowIndex).insert(*cell);
 	}
 }
 

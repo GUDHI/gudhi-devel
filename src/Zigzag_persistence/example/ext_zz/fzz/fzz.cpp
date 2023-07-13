@@ -49,7 +49,7 @@ bool VecEqual<ElemType>
 
     if (v1.size() != v2.size()) { return false; }
 
-    for (auto i = 0; i < v1.size(); i ++) {
+    for (unsigned int i = 0; i < v1.size(); i ++) {
         if (v1[i] != v2[i]) {
             return false;
         }
@@ -73,7 +73,7 @@ void getBoundaryChainPhat(const std::vector<SimplexIdMap> &id_maps,
     Simplex bound_simp(simp.begin()+1, simp.end());
     bound_c.push_back(id_maps.at(bound_simp.size() - 1).at(bound_simp));
 
-    for (Integer i = 0; i < simp.size()-1; ++i) {
+    for (unsigned int i = 0; i < simp.size()-1; ++i) {
         bound_simp[i] = simp[i];
         bound_c.push_back(id_maps.at(bound_simp.size() - 1).at(bound_simp));
     }
@@ -96,10 +96,10 @@ void FastZigzag::compute(const std::vector<Simplex> &filt_simp,
 
     simp_num = 0;
     Integer max_dim = 0;
-    for (auto i = 0; i < filt_op.size(); ++i) {
+    for (unsigned int i = 0; i < filt_op.size(); ++i) {
         if (filt_op[i]) { 
             ++simp_num; 
-            if (filt_simp[i].size() - 1 > max_dim) { max_dim = filt_simp[i].size() - 1; }
+            if (static_cast<int>(filt_simp[i].size()) - 1 > max_dim) { max_dim = filt_simp[i].size() - 1; }
         }
     }
 
@@ -124,7 +124,7 @@ void FastZigzag::compute(const std::vector<Simplex> &filt_simp,
     Integer orig_f_id = 0;
     Integer s_id = 1;
 
-    for (auto i = 0; i < filt_simp.size(); ++i) {
+    for (unsigned int i = 0; i < filt_simp.size(); ++i) {
         const Simplex &simp = filt_simp[i];
 
         if (filt_op[i]) {
@@ -197,8 +197,8 @@ void FastZigzag::compute(const std::vector<Simplex> &filt_simp,
             if (d < simp_num) { mapOrdIntv(b, d); } 
             else { mapRelExtIntv(p, b, d); }
 
-            if (b > filt_simp.size()) { continue; }
-            if (d > filt_simp.size()) { d = filt_simp.size(); }
+            if (b > static_cast<int>(filt_simp.size())) { continue; }
+            if (d > static_cast<int>(filt_simp.size())) { d = filt_simp.size(); }
             persistence->emplace_back(b, d, p);
     }
 }

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <boost/intrusive/set.hpp>
+#include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
 #include "cell.h"
@@ -136,6 +137,7 @@ public:
 protected:
 	dimension_type dim_;
 	Column_type column_;
+	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(iterator& it);
 	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator &position);
@@ -145,7 +147,10 @@ private:
 	struct new_cloner
 	{
 		Cell *operator()(const Cell &clone_this)
-		{  return new Cell(clone_this);  }
+		{  
+			// return new Cell(clone_this);  
+			return cellPool_.construct(clone_this);
+		}
 	};
 
 	//The disposer object function
@@ -159,7 +164,8 @@ private:
 		{
 			if constexpr (Row_access_option::isActive_)
 				col_->unlink(delete_this);
-			delete delete_this;
+			// delete delete_this;
+			cellPool_.destroy(delete_this);
 		}
 
 		Intrusive_set_column* col_;
@@ -314,13 +320,15 @@ inline void Intrusive_set_column<Field_element_type,Cell_type,Row_access_option>
 	Column_type newSet;
 	for (auto it = column_.begin(); it != column_.end(); ) {
 		if constexpr (Row_access_option::isActive_) {
-			Cell *new_cell = new Cell(it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+			// Cell *new_cell = new Cell(it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
+			Cell *new_cell = cellPool_.construct(it->get_element(), Row_access_option::columnIndex_, valueMap[it->get_row_index()]);
 			newSet.insert(newSet.end(), *new_cell);
 			auto ittemp = it;
 			++it;
 			_delete_cell(ittemp);
 		} else {
-			Cell *new_cell = new Cell(it->get_element(), valueMap[it->get_row_index()]);
+			// Cell *new_cell = new Cell(it->get_element(), valueMap[it->get_row_index()]);
+			Cell *new_cell = cellPool_.construct(it->get_element(), valueMap[it->get_row_index()]);
 			newSet.insert(newSet.end(), *new_cell);
 			++it;
 		}
@@ -543,11 +551,13 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline void Intrusive_set_column<Field_element_type,Cell_type,Row_access_option>::_insert_cell(const Field_element_type &value, index rowIndex, const iterator &position)
 {
 	if constexpr (Row_access_option::isActive_){
-		Cell *new_cell = new Cell(value, Row_access_option::columnIndex_, rowIndex);
+		// Cell *new_cell = new Cell(value, Row_access_option::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(value, Row_access_option::columnIndex_, rowIndex);
 		column_.insert(position, *new_cell);
 		Row_access_option::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = new Cell(value, rowIndex);
+		// Cell *new_cell = new Cell(value, rowIndex);
+		Cell *new_cell = cellPool_.construct(value, rowIndex);
 		column_.insert(position, *new_cell);
 	}
 }

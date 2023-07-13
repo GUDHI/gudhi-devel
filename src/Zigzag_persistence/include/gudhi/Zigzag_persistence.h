@@ -393,10 +393,10 @@ private:
 		matrix_.insert_boundary(num_arrow_, col_bsh, chains_in_F);
 
 		if (!chains_in_F.empty()){
-			births_.emplace(matrix_.get_column_with_pivot(num_arrow_), -2);
+			births_.try_emplace(matrix_.get_column_with_pivot(num_arrow_), -2);
 			surjective_reflection_diamond(zzsh, chains_in_F);
 		} else {
-			births_.emplace(matrix_.get_column_with_pivot(num_arrow_), num_arrow_);
+			births_.try_emplace(matrix_.get_column_with_pivot(num_arrow_), num_arrow_);
 		}
 	}
 
@@ -485,18 +485,29 @@ private:
 		//column whose key is the one of the removed simplex
 		//column_iterator& curr_col_it = matrix_.get_column_with_pivot(cpx_.key(zzsh));
 		//corresponding chain
-		index toRemove = matrix_.get_column_with_pivot(cpx_.key(zzsh));
+		index curr_col = matrix_.get_column_with_pivot(cpx_.key(zzsh));
 		//Record all columns that get affected by the transpositions, i.e., have a coeff
-		const auto& modified_columns = matrix_.get_row(cpx_.key(zzsh));
+		// const auto& modified_columns = matrix_.get_row(cpx_.key(zzsh));
+		std::vector<index> modified_columns;
+		const auto& row = matrix_.get_row(cpx_.key(zzsh));
+		modified_columns.reserve(row.size());
+		std::transform(row.begin(), 
+					   row.end(),
+					   std::back_inserter(modified_columns),
+					   [](const auto& cell) { return cell.get_column_index(); });
+		//Sort by left-to-right order in the matrix_ (no order maintained in rows)
+		std::stable_sort(modified_columns.begin(),modified_columns.end(), 
+						 [this](index i1, index i2){ 
+							return matrix_.get_pivot(i1) < matrix_.get_pivot(i2);
+						 });
 
-		index curr_col = toRemove;
 		//Modifies the pointer curr_col, not the other one.
 		for(auto other_col_it = std::next(modified_columns.begin());
-			other_col_it != modified_columns.end();) 
+			other_col_it != modified_columns.end(); ++other_col_it) 
 		{
-			index ci = other_col_it->get_column_index();
-			++other_col_it;	//vine swap unvalidates iterator
-			curr_col = matrix_.vine_swap_with_z_eq_1_case(curr_col, ci);
+			// index ci = other_col_it->get_column_index();
+			// ++other_col_it;	//vine swap unvalidates iterator
+			curr_col = matrix_.vine_swap_with_z_eq_1_case(curr_col, *other_col_it);
 		}
 	
 		//curr_col points to the column to remove by restriction of K to K-{\sigma}

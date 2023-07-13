@@ -289,7 +289,7 @@ inline void Chain_matrix_with_removals<Master_matrix>::insert_boundary(
 		const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
-		swap_opt::pivotToPosition_.emplace(nextInsertIndex_, nextInsertIndex_);
+		swap_opt::pivotToPosition_.try_emplace(nextInsertIndex_, nextInsertIndex_);
 	}
 	unsigned int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
@@ -499,7 +499,7 @@ inline void Chain_matrix_with_removals<Master_matrix>::_reduce_boundary(
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.emplace(simplexIndex, 1);
+			column.try_emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -606,7 +606,7 @@ inline void Chain_matrix_with_removals<Master_matrix>::_build_from_H(
 			_add_to(matrix_.at(idx_h), column);
 		}
 	} else {
-		column.emplace(simplexIndex, 1);
+		column.try_emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 		}
@@ -641,17 +641,17 @@ inline void Chain_matrix_with_removals<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
-		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(column.rbegin()->first, nextInsertIndex_);
 	}
 
-	matrix_.emplace(nextInsertIndex_,
+	matrix_.try_emplace(nextInsertIndex_,
 					Column_type(column, dimension, pivotToColumnIndex_));
 
 	if constexpr (_barcode_option_is_active()){
 		_barcode().emplace_back(dimension, nextInsertIndex_, -1);
-		_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
+		_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
 	}
 	++nextInsertIndex_;
 }
@@ -661,19 +661,21 @@ inline void Chain_matrix_with_removals<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension, index pair)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		pivotToColumnIndex_.emplace(*(column.rbegin()), nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(*(column.rbegin()), nextInsertIndex_);
 	} else {
-		pivotToColumnIndex_.emplace(column.rbegin()->first, nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(column.rbegin()->first, nextInsertIndex_);
 	}
 
-	matrix_.emplace(nextInsertIndex_,
+	matrix_.try_emplace(nextInsertIndex_,
 					Column_type(column, dimension, pivotToColumnIndex_));
 	matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
-	matrix_.at(pair).assign_paired_chain(nextInsertIndex_);
+	auto& p = matrix_.at(pair);
+	p.assign_paired_chain(nextInsertIndex_);
 
 	if constexpr (_barcode_option_is_active()){
-		_indexToBar().at(matrix_.at(pair).get_pivot())->death = nextInsertIndex_;
-		_indexToBar().emplace(nextInsertIndex_, _indexToBar().at(matrix_.at(pair).get_pivot()));
+		auto barIt = _indexToBar().at(p.get_pivot());
+		barIt->death = nextInsertIndex_;
+		_indexToBar().try_emplace(nextInsertIndex_, barIt);
 	}
 	++nextInsertIndex_;
 }

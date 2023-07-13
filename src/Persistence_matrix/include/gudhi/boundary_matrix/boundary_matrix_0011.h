@@ -127,7 +127,7 @@ inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_ma
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
 		rows_.try_emplace(i);
-		matrix_.emplace(i, Column_type(i, b, rows_));
+		matrix_.try_emplace(i, Column_type(i, b, rows_));
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -176,7 +176,7 @@ inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_ma
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),
@@ -221,7 +221,7 @@ inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::insert
 	}
 
 	rows_.try_emplace(nextInsertIndex_);
-	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, rows_));
+	matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, rows_));
 	nextInsertIndex_++;
 
 	int dim = (boundary.size() == 0) ? 0 : static_cast<int>(boundary.size()) - 1;
@@ -414,7 +414,7 @@ Boundary_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Bo
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),

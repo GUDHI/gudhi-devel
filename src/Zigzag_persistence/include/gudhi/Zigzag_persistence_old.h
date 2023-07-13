@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/Simple_object_pool.h>
 
 namespace Gudhi {
 namespace zigzag_persistence {
@@ -170,7 +171,8 @@ private:
 		matrix_chain(Simplex_key key)
 			: paired_col_(nullptr), birth_(key), lowest_idx_(key)
 		{
-			Cell *new_cell = new Cell(key, this);
+			// Cell *new_cell = new Cell(key, this);
+			Cell *new_cell = cellPool_.construct(key, this);
 			if constexpr(Options::searchable_column) { column_.insert(*new_cell); }
 			else                                     { column_.push_back(*new_cell); }
 			row_.push_back(*new_cell);
@@ -190,7 +192,8 @@ private:
 		{
 			for(SimplexKeyIterator it = beg; it != end; ++it)
 			{
-				Cell *new_cell = new Cell(*it, this);//create a new cell
+				// Cell *new_cell = new Cell(*it, this);//create a new cell
+				Cell *new_cell = cellPool_.construct(*it, this);
 				//insertion in the column
 				if constexpr(Options::searchable_column) {
 					column_.insert(column_.end(), *new_cell); //ordered range
@@ -200,7 +203,8 @@ private:
 				lowidx_to_matidx[*it]->row_.push_back( *new_cell );
 			}
 			//Add the bottom coefficient for the chain
-			Cell *new_cell = new Cell(key, this);
+			// Cell *new_cell = new Cell(key, this);
+			Cell *new_cell = cellPool_.construct(key, this);
 			//insertion in the column, key is larger than any *it in [beg, end) above.
 			if constexpr(Options::searchable_column) {
 				column_.insert(column_.end(), *new_cell);
@@ -225,7 +229,8 @@ private:
 		{
 			for(SimplexKeyIterator it = beg; it != end; ++it)
 			{
-				Cell * new_cell = new Cell(*it, this);//create a new cell
+				// Cell * new_cell = new Cell(*it, this);//create a new cell
+				Cell *new_cell = cellPool_.construct(*it, this);
 				//insertion in the column
 				if constexpr(Options::searchable_column) {
 					column_.insert(column_.end(), *new_cell); //ordered range
@@ -235,7 +240,8 @@ private:
 				lowidx_to_matidx[*it]->row_.push_back( *new_cell );
 			}
 			//Add the bottom coefficient for the chain
-			Cell * new_cell = new Cell(key, this);
+			// Cell * new_cell = new Cell(key, this);
+			Cell *new_cell = cellPool_.construct(key, this);
 			//insertion in the column, key is larger than any *it in [beg, end) above.
 			if constexpr(Options::searchable_column) {
 				column_.insert(column_.end(), *new_cell);
@@ -254,7 +260,8 @@ private:
 				Cell * tmp_cell = &(*tmp_it);
 				tmp_it->base_hook_matrix_row::unlink(); //rm from row
 				column_.erase(tmp_it);
-				delete tmp_cell;
+				cellPool_.destroy(tmp_cell);
+				// delete tmp_cell;
 			}
 		}
 
@@ -284,6 +291,7 @@ private:
 		matrix_chain    * paired_col_  ; //\in F -> nullptr, \in H -> g, \in G -> h
 		Simplex_key       birth_       ; //\in F -> b, \in H -> -2 \in G -> -1
 		Simplex_key       lowest_idx_  ; //lowest_idx_ = i (upper triangular matrix)
+		inline static Simple_object_pool<Cell> cellPool_;
 	};
 
 public:
@@ -405,10 +413,12 @@ private:
 					Cell * tmp_ptr = &(*it1);
 					it1->base_hook_matrix_row::unlink(); //unlink from row
 					c1.erase(it1); //remove from col
-					delete tmp_ptr;
+					matrix_chain::cellPool_.destroy(tmp_ptr);
+					// delete tmp_ptr;
 				}
 				else {//not there, insert new cell
-					Cell *new_cell = new Cell(cell.key(), self1);
+					// Cell *new_cell = new Cell(cell.key(), self1);
+					Cell *new_cell = matrix_chain::cellPool_.construct(cell.key(), self1);
 					c1.insert(*new_cell);
 					lowidx_to_matidx_[cell.key()]->row_.push_back(*new_cell);//row link,no order
 				}
@@ -421,7 +431,8 @@ private:
 				if(it1->key() < it2->key()) { ++it1; }
 				else {
 					if(it1->key() > it2->key()) {
-						Cell * new_cell = new Cell(it2->key(), self1);
+						// Cell * new_cell = new Cell(it2->key(), self1);
+						Cell *new_cell = matrix_chain::cellPool_.construct(it2->key(), self1);
 						c1.insert(it1, *new_cell); //col link, in order
 						lowidx_to_matidx_[it2->key()]->row_.push_back(*new_cell);//row link,no order
 						++it2;
@@ -431,12 +442,14 @@ private:
 						Cell * tmp_ptr = &(*tmp_it);
 						tmp_it->base_hook_matrix_row::unlink(); //unlink from row
 						c1.erase(tmp_it); //remove from col
-						delete tmp_ptr;
+						matrix_chain::cellPool_.destroy(tmp_ptr);
+						// delete tmp_ptr;
 					}
 				}
 			}
 			while(it2 != c2.end()) {//if it1 reached the end of its column, but not it2
-				Cell * new_cell = new Cell(it2->key(),self1);
+				// Cell * new_cell = new Cell(it2->key(),self1);
+				Cell *new_cell = matrix_chain::cellPool_.construct(it2->key(), self1);
 				lowidx_to_matidx_[it2->key()]->row_.push_back(*new_cell); //row links
 				c1.push_back(*new_cell);
 				++it2;

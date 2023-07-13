@@ -419,18 +419,18 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce()
 			}
 
 			if (pivot != -1){
-				pivotToColumnIndex_.emplace(pivot, i);
+				pivotToColumnIndex_.try_emplace(pivot, i);
 				if constexpr (_barcode_option_is_active()){
 					_indexToBar().at(pivot)->death = i;
-					_indexToBar().emplace(i, _indexToBar().at(pivot));
+					_indexToBar().try_emplace(i, _indexToBar().at(pivot));
 				}
 			} else if constexpr (_barcode_option_is_active()){
 				_barcode().emplace_back(get_column_dimension(i), i, -1);
-				_indexToBar().emplace(i, --_barcode().end());
+				_indexToBar().try_emplace(i, --_barcode().end());
 			}
 		} else if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, i, -1);
-			_indexToBar().emplace(i, --_barcode().end());
+			_indexToBar().try_emplace(i, --_barcode().end());
 		}
 	}
 }
@@ -442,7 +442,7 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce_last
 	if (curr.is_empty()) {
 		if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, nextInsertIndex_, -1);
-			_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
+			_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
 		}
 		return;
 	}
@@ -468,14 +468,14 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce_last
 	}
 
 	if (pivot != -1){
-		pivotToColumnIndex_.emplace(pivot, nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
 		if constexpr (_barcode_option_is_active()){
 			_indexToBar().at(pivot)->death = nextInsertIndex_;
-			_indexToBar().emplace(nextInsertIndex_, _indexToBar().at(pivot));
+			_indexToBar().try_emplace(nextInsertIndex_, _indexToBar().at(pivot));
 		}
 	} else if constexpr (_barcode_option_is_active()){
 		_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);
-		_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
+		_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
 	}
 }
 

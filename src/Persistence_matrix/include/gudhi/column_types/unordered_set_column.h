@@ -18,8 +18,8 @@
 #include <algorithm>
 
 #include "../utilities/utilities.h"
-#include "../utilities/Zp_field.h"
-#include "cell.h"
+// #include "../utilities/Zp_field.h"
+// #include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -457,10 +457,10 @@ inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>
 		const Field_element_type &value, index rowIndex)
 {
 	if constexpr (Row_access_option::isActive_){
-		auto it = column_.emplace(value, Row_access_option::columnIndex_, rowIndex);
+		auto it = column_.try_emplace(value, Row_access_option::columnIndex_, rowIndex);
 		Row_access_option::insert_cell(rowIndex, *it.first);
 	} else {
-		column_.emplace(value, rowIndex);
+		column_.try_emplace(value, rowIndex);
 	}
 }
 

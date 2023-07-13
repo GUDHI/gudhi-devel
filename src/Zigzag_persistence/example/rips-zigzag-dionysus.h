@@ -141,7 +141,7 @@ inline void compute_negative_cofaces(
 	// std::cout << "Total cofaces: " << cofaces.size() << std::endl;
 }
 
-inline void build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls, 
+inline unsigned int build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls, 
 								  std::vector<bool>& dirs, 
 								  unsigned int numberOfPoints, 
 								  int seed = -1,
@@ -149,6 +149,7 @@ inline void build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls,
 								  DistanceType multiplier = 6)
 {
 	// std::cout << "Building filtration" << std::endl;
+	unsigned int numberOfSimplices = 0;
 
 	PointContainer 			points = compute_points(numberOfPoints, seed);
 
@@ -171,6 +172,7 @@ inline void build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls,
 		// Add a vertex
 		simpls.push_back({static_cast<int>(v)});
 		dirs.push_back(true);
+		++numberOfSimplices;
 	}
 
 	// Process vertices
@@ -188,6 +190,7 @@ inline void build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls,
 			// std::cout << "Inserting: " << s << std::endl;
 			simpls.emplace_back(s.begin(), s.end());
 			dirs.push_back(true);
+			++numberOfSimplices;
 		}
 
 		/* Remove the vertex */
@@ -203,5 +206,6 @@ inline void build_rips_zigzag_filtration(std::vector<std::vector<int> > &simpls,
 		++progress;
 	}
 
-	// std::cout << "Finished" << std::endl;
+	std::cout << std::endl;
+	return numberOfSimplices;
 }

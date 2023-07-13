@@ -25,7 +25,9 @@
 #include "rips-zigzag-dionysus.h"
 
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
+using coltype = Gudhi::zigzag_persistence::Zigzag_persistence_collist;
+using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, coltype>;
+// using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
 using interval_filtration = ZP::interval_filtration;
@@ -104,7 +106,7 @@ static void Compute_zigzag_with_gudhi(benchmark::State& state) {
 		compute_with_gudhi(simplices, dirs);
 	}
 }
-BENCHMARK(Compute_zigzag_with_gudhi)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1)->MinTime(1);
+BENCHMARK(Compute_zigzag_with_gudhi)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
 
 BENCHMARK_MAIN();
 

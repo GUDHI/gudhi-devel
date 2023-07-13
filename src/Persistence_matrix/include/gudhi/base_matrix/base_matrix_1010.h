@@ -312,7 +312,7 @@ inline void Base_matrix_with_column_compression_with_row_access<Master_matrix>::
 //	if (rows_.size() <= nextColumnIndex_) rows_.resize(nextColumnIndex_ + 1);
 //	repToColumn_.emplace_back(nextColumnIndex_, column, rows_);
 //	_insert_column(nextColumnIndex_);
-////	auto p = repToColumn_.emplace(nextColumnIndex_, Column_type(nextColumnIndex_, column, rows_));
+////	auto p = repToColumn_.try_emplace(nextColumnIndex_, Column_type(nextColumnIndex_, column, rows_));
 ////	_insert_column(p.first, nextColumnIndex_);
 //	nextColumnIndex_++;
 
@@ -578,7 +578,7 @@ inline void Base_matrix_with_column_compression_with_row_access<Master_matrix>::
 		return;
 	}
 
-//	auto res = columnToRep_.emplace(&col, columnIndex);
+//	auto res = columnToRep_.try_emplace(&col, columnIndex);
 	repToColumn_[columnIndex]->set_rep(columnIndex);
 	auto res = columnToRep_.insert(col);
 //	if (res.first->second != columnIndex){

@@ -12,13 +12,15 @@
 #define Z2_VECTOR_COLUMN_H
 
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <unordered_set>
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
-#include "cell.h"
+// #include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -125,6 +127,7 @@ protected:
 
 	int dim_;
 	Column_type column_;
+	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(Cell* cell);
 	void _insert_cell(index rowIndex, Column_type& column);
@@ -449,18 +452,21 @@ inline void Z2_vector_column<Cell_type,Row_access_option>::_delete_cell(Cell* ce
 	if constexpr (Row_access_option::isActive_){
 		Row_access_option::unlink(cell);
 	}
-	delete cell;
+	// delete cell;
+	cellPool_.destroy(cell);
 }
 
 template<class Cell_type, class Row_access_option>
 inline void Z2_vector_column<Cell_type,Row_access_option>::_insert_cell(index rowIndex, Column_type &column)
 {
 	if constexpr (Row_access_option::isActive_){
-		Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		// Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(Row_access_option::columnIndex_, rowIndex);
 		column.push_back(new_cell);
 		Row_access_option::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = new Cell(rowIndex);
+		// Cell *new_cell = new Cell(rowIndex);
+		Cell *new_cell = cellPool_.construct(rowIndex);
 		column.push_back(new_cell);
 	}
 }
@@ -469,11 +475,13 @@ template<class Cell_type, class Row_access_option>
 inline void Z2_vector_column<Cell_type,Row_access_option>::_update_cell(index rowIndex, index position)
 {
 	if constexpr (Row_access_option::isActive_){
-		Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		// Cell *new_cell = new Cell(Row_access_option::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(Row_access_option::columnIndex_, rowIndex);
 		column_[position] = new_cell;
 		Row_access_option::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = new Cell(rowIndex);
+		// Cell *new_cell = new Cell(rowIndex);
+		Cell *new_cell = cellPool_.construct(rowIndex);
 		column_[position] = new_cell;
 	}
 }

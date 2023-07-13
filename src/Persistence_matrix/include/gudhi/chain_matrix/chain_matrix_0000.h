@@ -466,7 +466,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_boundary(
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.emplace(simplexIndex, 1);
+			column.try_emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -570,7 +570,7 @@ inline void Chain_matrix<Master_matrix>::_build_from_H(
 			_add_to(matrix_[idx_h], column);
 		}
 	} else {
-		column.emplace(simplexIndex, 1);
+		column.try_emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_[idx_h.first], column, idx_h.second);
 		}

@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barc
 	std::set<std::tuple<int,int,int>,BarComp> bars;
 	//bars are not ordered the same for base matrices
 	for (auto it = barcode.begin(); it != barcode.end(); ++it){
-		bars.emplace(it->dim, it->birth, it->death);
+		bars.try_emplace(it->dim, it->birth, it->death);
 	}
 	auto it = bars.begin();
 	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);

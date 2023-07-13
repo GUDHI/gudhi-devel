@@ -31,7 +31,9 @@
 #include "rips-zigzag-dionysus.h"
 
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
+using Gudhi::persistence_matrix::Zigzag_options;
+using CT = Gudhi::persistence_matrix::Column_types;
+using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::VECTOR> >;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
 using interval_filtration = ZP::interval_filtration;
@@ -235,7 +237,7 @@ std::vector< std::pair<unsigned int, unsigned int> > compute_with_dionysus(
 		Simplex c(simplex);
 		DIndex pair;
 		if (dirs[op]) {
-			indices.emplace(c, idx++);
+			indices.try_emplace(c, idx++);
 			// int dim = boost::distance(c.boundary(persistence.field()));
 			// dim = dim == 0 ? 0 : dim -1;
 			// fmt::print("[{}] Adding: {} : {}\n", op, c, dim);
@@ -403,8 +405,7 @@ int main(int argc, char* const argv[]) {
 	if (argc == 3)
 		seed = std::stoi(argv[2]);
 
-	build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
-	unsigned int numberOfSimplices = simplices.size();
+	unsigned int numberOfSimplices = build_rips_zigzag_filtration(simplices, dirs, numberOfPoints, seed);
 	std::cout << "\n" << "numberOfSimplices: " << numberOfSimplices << "\n";
 	
 	auto gudhiRes = compute_with_gudhi(simplices, dirs);

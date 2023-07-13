@@ -199,10 +199,42 @@ template<class Dictionnary_type, class Field_element_type, class Cell_type, clas
 inline Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option> &
 Intrusive_list_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::operator+=(Intrusive_list_chain_column &column)
 {
-	Base::operator+=(column);
+	auto itTarget = Base::column_.begin();
+	auto itSource = column.begin();
+	bool pivotIsZeroed = false;
 
-	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
-	if (!Base::is_non_zero(pivot_)){
+	while (itTarget != Base::column_.end() && itSource != column.end())
+	{
+		index r1 = itTarget->get_row_index();
+		index r2 = itSource->get_row_index();
+
+		if (r1 < r2) {
+			++itTarget;
+		} else if (r1 > r2) {
+			Base::_insert_cell(itSource->get_element(), r2, itTarget);
+			++itSource;
+		} else {
+			itTarget->get_element() += itSource->get_element();
+			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
+				if (static_cast<int>(r1) == pivot_) pivotIsZeroed = true;
+				Base::_delete_cell(itTarget);
+			} else {
+				if constexpr (Row_access_option::isActive_)
+						Row_access_option::update_cell(*itTarget);
+				++itTarget;
+			}
+			++itSource;
+		}
+	}
+
+	while (itSource != column.end()) {
+		Base::_insert_cell(itSource->get_element(), itSource->get_row_index(), Base::column_.end());
+		++itSource;
+	}
+
+	//assumes that the addition never zeros out this column. 
+	//If the use of those columns changes at some point, we should think about it.
+	if (pivotIsZeroed){
 		std::swap(pivotToColumnIndex_->at(pivot_),
 				  pivotToColumnIndex_->at(column.get_pivot()));
 		std::swap(pivot_, column.pivot_);

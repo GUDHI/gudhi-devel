@@ -284,7 +284,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
 template<class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(Column_type &column, index columnIndex)
 {
-	auto res = matrix_.emplace(column, columnIndex);
+	auto res = matrix_.try_emplace(column, columnIndex);
 	repToColumn_[columnIndex] = &(res.first->first);
 	if (!res.second){
 		columnClasses_.merge(columnIndex, res.first->second);

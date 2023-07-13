@@ -58,7 +58,7 @@ std::vector< std::pair<unsigned int, unsigned int> > compute_with_dionysus(
 		Simplex c(simplex);
 		DIndex pair;
 		if (dirs[op]) {
-			indices.emplace(c, idx++);
+			indices.try_emplace(c, idx++);
 			pair = persistence.add(c.boundary(persistence.field()) |
 								   boost::adaptors::transformed([&indices](const DChain& e) {
 										return DIChain(e.element(), indices.find(e.index())->second);
@@ -124,7 +124,7 @@ static void Compute_zigzag_with_dionysus(benchmark::State& state) {
 		compute_with_dionysus(simplices, dirs);
 	}
 }
-BENCHMARK(Compute_zigzag_with_dionysus)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1)->MinTime(1);
+BENCHMARK(Compute_zigzag_with_dionysus)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
 
 static void Compute_zigzag_with_fzz(benchmark::State& state) {
 	unsigned int numberOfPoints = state.range(0);;
@@ -138,7 +138,7 @@ static void Compute_zigzag_with_fzz(benchmark::State& state) {
 		compute_with_fzz(simplices, dirs);
 	}
 }
-BENCHMARK(Compute_zigzag_with_fzz)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1)->MinTime(1);
+BENCHMARK(Compute_zigzag_with_fzz)->RangeMultiplier(2)->Range(100, 1000)->Unit(benchmark::kMillisecond)->MinWarmUpTime(1);
 
 BENCHMARK_MAIN();
 

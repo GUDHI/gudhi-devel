@@ -105,7 +105,7 @@ inline Boundary_matrix_with_removals<Master_matrix>::Boundary_matrix_with_remova
 {
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
-		matrix_.emplace(i, Column_type(b));
+		matrix_.try_emplace(i, Column_type(b));
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -171,7 +171,7 @@ inline void Boundary_matrix_with_removals<Master_matrix>::insert_boundary(const 
 		swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
 	}
 
-	matrix_.emplace(nextInsertIndex_++, boundary);
+	matrix_.try_emplace(nextInsertIndex_++, boundary);
 
 	int dim = (boundary.size() == 0) ? 0 : static_cast<int>(boundary.size()) - 1;
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
