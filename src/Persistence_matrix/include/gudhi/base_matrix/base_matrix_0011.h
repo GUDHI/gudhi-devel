@@ -114,7 +114,7 @@ inline Base_matrix_with_row_access_with_removals<Master_matrix>::Base_matrix_wit
 	}
 	for (unsigned int i = 0; i < columns.size(); i++){
 		rows_.try_emplace(i);
-		matrix_.emplace(i, Column_type(i, columns[i], rows_));
+		matrix_.try_emplace(i, Column_type(i, columns[i], rows_));
 	}
 }
 
@@ -148,7 +148,7 @@ inline Base_matrix_with_row_access_with_removals<Master_matrix>::Base_matrix_wit
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),
@@ -189,7 +189,7 @@ inline void Base_matrix_with_row_access_with_removals<Master_matrix>::insert_col
 	}
 
 	rows_.try_emplace(id);
-	matrix_.emplace(id, Column_type(id, column, rows_));
+	matrix_.try_emplace(id, Column_type(id, column, rows_));
 }
 
 template<class Master_matrix>
@@ -341,7 +341,7 @@ Base_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Base_m
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),

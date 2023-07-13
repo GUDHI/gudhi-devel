@@ -44,6 +44,7 @@ add_gudhi_module(Tangential_complex)
 add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
+add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Persistence_matrix)
 
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
@@ -72,7 +73,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-if (WITH_GUDHI_THIRD_PARTY)
+if (WITH_GUDHI_UI)
   add_subdirectory(GudhUI)
 endif()
 

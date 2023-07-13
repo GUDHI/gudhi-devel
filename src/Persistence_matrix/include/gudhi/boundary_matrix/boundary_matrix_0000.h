@@ -43,7 +43,7 @@ public:
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	Row_type get_row(index rowIndex) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -207,7 +207,7 @@ inline typename Boundary_matrix<Master_matrix>::Row_type Boundary_matrix<Master_
 }
 
 template<class Master_matrix>
-inline void Boundary_matrix<Master_matrix>::erase_last()
+inline void Boundary_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_last' is not implemented for the chosen options.");
@@ -292,6 +292,7 @@ inline index Boundary_matrix<Master_matrix>::get_column_with_pivot(index simplex
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
+	return 0;
 }
 
 template<class Master_matrix>

@@ -30,9 +30,11 @@
 #include "boundary_matrix/base_swap.h"
 #include "boundary_matrix/base_pairing.h"
 #include "boundary_matrix/ru_vine_swap.h"
+#include "boundary_matrix/custom_ru_vine_swap.h"
 #include "boundary_matrix/ru_rep_cycles.h"
 #include "chain_matrix/chain_pairing.h"
 #include "chain_matrix/chain_vine_swap.h"
+#include "chain_matrix/custom_chain_vine_swap.h"
 #include "chain_matrix/chain_rep_cycles.h"
 
 #include "base_matrix/base_matrix_0000.h"
@@ -546,7 +548,11 @@ public:
 
 	using RU_vine_swap_option = typename std::conditional<
 											Options::has_vine_update,
-											RU_vine_swap<Matrix<Options>>,
+											typename std::conditional<
+												Options::has_column_pairings,
+												RU_vine_swap<Matrix<Options>>,
+												Custom_RU_vine_swap<Matrix<Options>>
+											>::type,
 											Dummy_ru_vine_swap
 										>::type;
 
@@ -580,7 +586,11 @@ public:
 
 	using Chain_vine_swap_option = typename std::conditional<
 											Options::has_vine_update,
-											Chain_vine_swap<Matrix<Options>>,
+											typename std::conditional<
+												Options::has_column_pairings,
+												Chain_vine_swap<Matrix<Options>>,
+												Custom_chain_vine_swap<Matrix<Options>>
+											>::type,
 											Dummy_chain_vine_swap
 										>::type;
 
@@ -634,6 +644,14 @@ public:
 	Matrix();
 	Matrix(const boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
+	Matrix(std::function<bool(index,index)> birthComparator, 
+		   std::function<bool(index,index)> deathComparator = _no_G_death_comparator);
+	Matrix(const boundary_matrix& boundaries,
+		   std::function<bool(index,index)> birthComparator, 
+		   std::function<bool(index,index)> deathComparator = _no_G_death_comparator);
+	Matrix(int numberOfColumns,
+		   std::function<bool(index,index)> birthComparator, 
+		   std::function<bool(index,index)> deathComparator = _no_G_death_comparator);
 	Matrix(const Matrix &matrixToCopy);
 	Matrix(Matrix&& other) noexcept;
 
@@ -641,6 +659,15 @@ public:
 	void insert_column(const Container_type& column);
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(index simplexIndex, const Boundary_type& boundary);
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(const Boundary_type& boundary, 
+						 std::vector<index>& currentEssentialCycleIndices);
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(index simplexIndex, 
+						 const Boundary_type& boundary, 
+						 std::vector<index>& currentEssentialCycleIndices);
 	returned_column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	//Warning: the get_column_index() function of the row cells returns not
@@ -649,7 +676,7 @@ public:
 	//column index, independently of the indexing chosen in the options.
 	returned_row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
-	void erase_last();						//for boundary or chain matrix
+	void remove_maximal_simplex(index columnIndex);		//for boundary or chain matrix
 	void erase_column(index columnIndex);	//for basic matrix, where a direct link between column and row is not guaranteed.
 	void erase_row(index rowIndex);			// /!\ assumes row is empty
 
@@ -701,6 +728,10 @@ public:
 	bool vine_swap(index index);												//by column position with ordered columns
 	index vine_swap(index columnIndex1, index columnIndex2);					//by column id with potentielly unordered columns
 
+	const Bar& get_bar_from_pivot(index simplexIndex){
+		return matrix_.get_bar_from_pivot(simplexIndex);
+	}
+
 private:
 	using matrix_type = typename std::conditional<
 							isNonBasic,
@@ -736,12 +767,16 @@ private:
 template<class Options>
 inline Matrix<Options>::Matrix()
 {
+	static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings, 
+					"When no barcode is recorded with vine swaps, comparaison functions for the columns have to be provided.");
 	_assert_options();
 }
 
 template<class Options>
 inline Matrix<Options>::Matrix(const boundary_matrix &boundaries) : matrix_(boundaries)
 {
+	static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings, 
+					"When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns have to be provided.");
 	assert(Field_type::get_characteristic() != 0 &&
 			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
 			"Use a compile-time characteristic initialized field type or use another constructor and call coefficient initializer of the chosen field class.");
@@ -751,6 +786,45 @@ inline Matrix<Options>::Matrix(const boundary_matrix &boundaries) : matrix_(boun
 template<class Options>
 inline Matrix<Options>::Matrix(int numberOfColumns) : matrix_(numberOfColumns)
 {
+	static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings, 
+					"When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns have to be provided.");
+	_assert_options();
+}
+
+template<class Options>
+inline Matrix<Options>::Matrix(
+		std::function<bool(index,index)> birthComparator, 
+		std::function<bool(index,index)> deathComparator)
+{
+	static_assert(!Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings, 
+					"Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
+	_assert_options();
+}
+
+template<class Options>
+inline Matrix<Options>::Matrix(
+		const boundary_matrix &boundaries,
+		std::function<bool(index,index)> birthComparator, 
+		std::function<bool(index,index)> deathComparator)
+	: matrix_(boundaries, birthComparator, deathComparator)
+{
+	static_assert(!Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings, 
+					"Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or use another constructor and call coefficient initializer of the chosen field class.");
+	_assert_options();
+}
+
+template<class Options>
+inline Matrix<Options>::Matrix(
+		int numberOfColumns,
+		std::function<bool(index,index)> birthComparator, 
+		std::function<bool(index,index)> deathComparator) 
+	: matrix_(numberOfColumns, birthComparator, deathComparator)
+{
+	static_assert(!Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings, 
+					"Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
 	_assert_options();
 }
 
@@ -789,6 +863,42 @@ inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary)
 }
 
 template<class Options>
+template<class Boundary_type>
+inline void Matrix<Options>::insert_boundary(index simplexIndex, const Boundary_type &boundary)
+{
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
+	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
+	matrix_.insert_boundary(simplexIndex, boundary);
+}
+
+template<class Options>
+template<class Boundary_type>
+inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary, 
+											 std::vector<index>& currentEssentialCycleIndices)
+{
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
+	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
+	matrix_.insert_boundary(boundary, currentEssentialCycleIndices);
+}
+
+template<class Options>
+template<class Boundary_type>
+inline void Matrix<Options>::insert_boundary(index simplexIndex, 
+											 const Boundary_type &boundary, 
+											 std::vector<index>& currentEssentialCycleIndices)
+{
+	assert(Field_type::get_characteristic() != 0 &&
+			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
+			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
+	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
+	matrix_.insert_boundary(simplexIndex, boundary, currentEssentialCycleIndices);
+}
+
+template<class Options>
 inline typename Matrix<Options>::returned_column_type &Matrix<Options>::get_column(index columnIndex)
 {
 	return matrix_.get_column(columnIndex);
@@ -819,11 +929,11 @@ inline const typename Matrix<Options>::Row_type &Matrix<Options>::get_row(index 
 }
 
 template<class Options>
-inline void Matrix<Options>::erase_last()
+inline void Matrix<Options>::remove_maximal_simplex(index columnIndex)
 {
 	static_assert(Options::has_removable_columns && isNonBasic, "'erase_last' is not available for the chosen options.");
 
-	matrix_.erase_last();
+	matrix_.remove_maximal_simplex(columnIndex);
 }
 
 template<class Options>
@@ -1050,7 +1160,6 @@ template<class Options>
 inline constexpr void Matrix<Options>::_assert_options()
 {
 	static_assert(!Options::has_row_access || (Options::column_type != Column_types::SET && Options::column_type != Column_types::UNORDERED_SET) || !Options::has_intrusive_rows, "Intrusive row access is not compatible with column types storing const elements.");
-	static_assert(!Options::has_vine_update || Options::has_column_pairings, "Vine update requires computation of the barcode (column pairing).");
 	static_assert(!Options::can_retrieve_representative_cycles || Options::has_column_pairings, "Representative cycles requires computation of the barcode (column pairing).");
 	static_assert(!Options::has_vine_update || Options::is_z2, "Vine update currently works only for Z_2 coefficients.");
 	static_assert(Options::column_type != Column_types::HEAP || !Options::has_row_access, "Row access is not possible for heap columns.");

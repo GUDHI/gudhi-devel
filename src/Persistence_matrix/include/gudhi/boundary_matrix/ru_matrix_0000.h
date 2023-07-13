@@ -44,7 +44,7 @@ public:
 	Column_type& get_column(index columnIndex, bool inR = true);
 	const Column_type& get_column(index columnIndex, bool inR = true) const;
 	Row_type get_row(index rowIndex) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -227,7 +227,7 @@ inline typename RU_matrix<Master_matrix>::Row_type RU_matrix<Master_matrix>::get
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::erase_last()
+inline void RU_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_last' is not implemented for the chosen options.");

@@ -181,10 +181,34 @@ template<class Dictionnary_type, class Cell_type, class Row_access_option>
 inline Z2_intrusive_list_chain_column<Dictionnary_type,Cell_type,Row_access_option> &
 Z2_intrusive_list_chain_column<Dictionnary_type,Cell_type,Row_access_option>::operator+=(Z2_intrusive_list_chain_column &column)
 {
-	Base::operator+=(column);
+	auto it1 = Base::column_.begin();
+	auto it2 = column.begin();
+	bool pivotIsZeroed = false;
+
+	while (it1 != Base::column_.end() && it2 != column.end())
+	{
+		index r1 = it1->get_row_index();
+		index r2 = it2->get_row_index();
+		if (r1 < r2) {
+			++it1;
+		} else {
+			if (r1 > r2) {
+				Base::_insert_cell(r2, it1);
+			} else {
+				if (static_cast<int>(r1) == pivot_) pivotIsZeroed = true;
+				Base::_delete_cell(it1);
+			}
+			++it2;
+		}
+	}
+
+	while (it2 != column.end()) {
+		Base::_insert_cell(it2->get_row_index(), Base::column_.end());
+		++it2;
+	}
 
 	//assumes that the addition never zeros out this column. If the use of those columns changes at some point, we should think about it.
-	if (!Base::is_non_zero(pivot_)){
+	if (pivotIsZeroed){
 		std::swap(pivotToColumnIndex_->at(pivot_),
 				  pivotToColumnIndex_->at(column.get_pivot()));
 		std::swap(pivot_, column.pivot_);

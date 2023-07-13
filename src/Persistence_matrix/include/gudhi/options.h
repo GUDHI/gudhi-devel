@@ -54,10 +54,10 @@ struct Default_options{
 	static const bool is_indexed_by_position = true;						//useless if has_vine_update = false, as the two indexing strategies only differ when swaps occur.
 };
 
-template<Column_types column_type = Column_types::INTRUSIVE_SET, bool parallelizable = false>
+template<Column_types column_type = Column_types::INTRUSIVE_LIST, bool parallelizable = false>
 struct Zigzag_options : Default_options<true, Z2_field_element, column_type, parallelizable>{
 	static const bool has_row_access = true;
-	static const bool has_column_pairings = true;
+	static const bool has_column_pairings = false;
 	static const bool has_vine_update = true;
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;

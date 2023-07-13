@@ -366,10 +366,10 @@ inline void Z2_unordered_set_column<Cell_type,Row_access_option>::_insert_cell(
 		index rowIndex)
 {
 	if constexpr (Row_access_option::isActive_){
-		auto it = column_.emplace(Row_access_option::columnIndex_, rowIndex);
+		auto it = column_.try_emplace(Row_access_option::columnIndex_, rowIndex);
 		Row_access_option::insert_cell(rowIndex, *it.first);
 	} else {
-		column_.emplace(rowIndex);
+		column_.try_emplace(rowIndex);
 	}
 }
 

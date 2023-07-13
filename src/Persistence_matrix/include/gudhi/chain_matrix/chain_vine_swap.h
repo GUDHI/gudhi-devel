@@ -13,6 +13,8 @@
 
 #include <utility>
 #include <set>
+#include <cassert>
+#include <cmath>
 
 #include "../utilities/utilities.h"
 #include "chain_pairing.h"
@@ -36,7 +38,6 @@ public:
 
 	Chain_vine_swap& operator=(Chain_vine_swap other);
 	friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2){
-//		std::swap(swap1.matrix_, swap2.matrix_);
 		swap1.pivotToPosition_.swap(swap2.pivotToPosition_);
 		swap(static_cast<Chain_pairing<Master_matrix>&>(swap1),
 			 static_cast<Chain_pairing<Master_matrix>&>(swap2));
@@ -95,6 +96,9 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index co
 	index pivot1 = pivotToPosition_.at(matrix_->at(columnIndex1).get_pivot());
 	index pivot2 = pivotToPosition_.at(matrix_->at(columnIndex2).get_pivot());
 
+	assert(std::abs(static_cast<int>(pivot2) - static_cast<int>(pivot1)) == 1 
+			&& "Columns to be swaped need to be adjacent in the 'real' matrix.");
+
 	if (_is_negative_in_pair(pivot1) && _is_negative_in_pair(pivot2))
 		return _negative_vine_swap(columnIndex1, columnIndex2);
 
@@ -115,10 +119,13 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	index rowIndex1 = pivotToPosition_.at(pivot1);
 	index rowIndex2 = pivotToPosition_.at(pivot2);
 
-	if (_is_negative_in_pair(rowIndex1) && _is_negative_in_pair(rowIndex2)){
+	assert(std::abs(static_cast<int>(rowIndex2) - static_cast<int>(rowIndex1)) == 1 
+			&& "Columns to be swaped need to be adjacent in the 'real' matrix.");
+
+	if (_is_negative_in_pair(rowIndex1) && _is_negative_in_pair(/* pivot2 */rowIndex2)){
 //		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_lowest_simplex_index())){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_pivot())){
-			_negative_transpose(rowIndex1, rowIndex2);
+			_negative_transpose(rowIndex1, /* pivot2 */rowIndex2);
 			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
@@ -127,16 +134,16 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 
 	if (_is_negative_in_pair(rowIndex1)){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_pivot())){
-			_negative_positive_transpose(rowIndex1, rowIndex2);
+			_negative_positive_transpose(rowIndex1, /* pivot2 */rowIndex2);
 			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
 		return _negative_positive_vine_swap(columnIndex1, columnIndex2);
 	}
 
-	if (_is_negative_in_pair(rowIndex2)){
+	if (_is_negative_in_pair(/* pivot2 */rowIndex2)){
 		if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_pivot())){
-			_positive_negative_transpose(rowIndex1, rowIndex2);
+			_positive_negative_transpose(rowIndex1, /* pivot2 */rowIndex2);
 			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 			return columnIndex1;
 		}
@@ -144,7 +151,7 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	}
 
 	if (!matrix_->at(columnIndex2).is_non_zero(matrix_->at(columnIndex1).get_pivot())){
-		_positive_transpose(rowIndex1, rowIndex2);
+		_positive_transpose(rowIndex1, /* pivot2 */rowIndex2);
 		std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 		return columnIndex1;
 	}
@@ -155,7 +162,6 @@ template<class Master_matrix>
 inline Chain_vine_swap<Master_matrix> &Chain_vine_swap<Master_matrix>::operator=(
 		Chain_vine_swap<Master_matrix> other)
 {
-//	std::swap(matrix_, other.matrix_);
 	pivotToPosition_.swap(other.pivotToPosition_);
 	Chain_pairing<Master_matrix>::operator=(other);
 	return *this;
@@ -264,7 +270,6 @@ inline index Chain_vine_swap<Master_matrix>::_negative_vine_swap(index columnInd
 {
 	index pivot1 = pivotToPosition_.at(matrix_->at(columnIndex1).get_pivot());
 	index pivot2 = pivotToPosition_.at(matrix_->at(columnIndex2).get_pivot());
-
 	index pairedIndex1 = matrix_->at(columnIndex1).get_paired_chain_index();
 	index pairedIndex2 = matrix_->at(columnIndex2).get_paired_chain_index();
 

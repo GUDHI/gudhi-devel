@@ -43,7 +43,7 @@ public:
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex, bool inR = true);
 	const Row_type& get_row(index rowIndex, bool inR = true) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -241,23 +241,23 @@ RU_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowIndex, 
 }
 
 template<class Master_matrix>
-inline void RU_matrix_with_row_access_with_removals<Master_matrix>::erase_last()
+inline void RU_matrix_with_row_access_with_removals<Master_matrix>::remove_maximal_simplex(index columnIndex)
 {
-	--nextInsertIndex_;
+	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
 
 	if constexpr (_barcode_option_is_active()){
-		typename barcode_type::iterator bar = _indexToBar().at(nextInsertIndex_);
+		typename barcode_type::iterator bar = _indexToBar().at(columnIndex);
 
 		if (bar->death == -1) _barcode().erase(bar);
 		else bar->death = -1;
 
-		_indexToBar().erase(nextInsertIndex_);
+		_indexToBar().erase(columnIndex);
 	}
 
-	pivotToColumnIndex_.erase(reducedMatrixR_.get_column(nextInsertIndex_).get_pivot());
+	pivotToColumnIndex_.erase(reducedMatrixR_.get_column(columnIndex).get_pivot());
 
-	reducedMatrixR_.erase_last();
-	mirrorMatrixU_.erase_last();
+	reducedMatrixR_.remove_maximal_simplex(columnIndex);
+	mirrorMatrixU_.remove_maximal_simplex(columnIndex);
 }
 
 template<class Master_matrix>
@@ -419,18 +419,18 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce()
 			}
 
 			if (pivot != -1){
-				pivotToColumnIndex_.emplace(pivot, i);
+				pivotToColumnIndex_.try_emplace(pivot, i);
 				if constexpr (_barcode_option_is_active()){
 					_indexToBar().at(pivot)->death = i;
-					_indexToBar().emplace(i, _indexToBar().at(pivot));
+					_indexToBar().try_emplace(i, _indexToBar().at(pivot));
 				}
 			} else if constexpr (_barcode_option_is_active()){
 				_barcode().emplace_back(get_column_dimension(i), i, -1);
-				_indexToBar().emplace(i, --_barcode().end());
+				_indexToBar().try_emplace(i, --_barcode().end());
 			}
 		} else if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, i, -1);
-			_indexToBar().emplace(i, --_barcode().end());
+			_indexToBar().try_emplace(i, --_barcode().end());
 		}
 	}
 }
@@ -442,7 +442,7 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce_last
 	if (curr.is_empty()) {
 		if constexpr (_barcode_option_is_active()){
 			_barcode().emplace_back(0, nextInsertIndex_, -1);
-			_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
+			_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
 		}
 		return;
 	}
@@ -468,14 +468,14 @@ inline void RU_matrix_with_row_access_with_removals<Master_matrix>::_reduce_last
 	}
 
 	if (pivot != -1){
-		pivotToColumnIndex_.emplace(pivot, nextInsertIndex_);
+		pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
 		if constexpr (_barcode_option_is_active()){
 			_indexToBar().at(pivot)->death = nextInsertIndex_;
-			_indexToBar().emplace(nextInsertIndex_, _indexToBar().at(pivot));
+			_indexToBar().try_emplace(nextInsertIndex_, _indexToBar().at(pivot));
 		}
 	} else if constexpr (_barcode_option_is_active()){
 		_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);
-		_indexToBar().emplace(nextInsertIndex_, --_barcode().end());
+		_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
 	}
 }
 

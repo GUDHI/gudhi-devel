@@ -46,7 +46,7 @@ public:
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -248,7 +248,7 @@ inline const typename Boundary_matrix_with_row_access<Master_matrix>::Row_type& 
 }
 
 template<class Master_matrix>
-inline void Boundary_matrix_with_row_access<Master_matrix>::erase_last()
+inline void Boundary_matrix_with_row_access<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_last' is not implemented for the chosen options.");
@@ -333,6 +333,7 @@ inline index Boundary_matrix_with_row_access<Master_matrix>::get_column_with_piv
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
+	return 0;
 }
 
 template<class Master_matrix>

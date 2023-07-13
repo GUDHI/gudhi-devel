@@ -43,7 +43,7 @@ public:
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex, bool inR = true);
 	const Row_type& get_row(index rowIndex, bool inR = true) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -237,6 +237,14 @@ RU_matrix_with_row_access<Master_matrix>::get_row(index rowIndex, bool inR) cons
 	}
 	return mirrorMatrixU_.get_row(rowIndex);
 }
+
+template<class Master_matrix>
+inline void RU_matrix_with_row_access<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
+{
+	static_assert(Master_matrix::Option_list::has_row_access,
+			"'erase_last' is not implemented for the chosen options.");
+}
+
 
 template<class Master_matrix>
 inline dimension_type RU_matrix_with_row_access<Master_matrix>::get_max_dimension() const

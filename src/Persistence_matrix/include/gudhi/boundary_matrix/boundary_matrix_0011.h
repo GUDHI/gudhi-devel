@@ -41,7 +41,7 @@ public:
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
-	void erase_last();		//does not update barcode
+	void remove_maximal_simplex(index columnIndex);		//does not update barcode
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -127,7 +127,7 @@ inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_ma
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
 		rows_.try_emplace(i);
-		matrix_.emplace(i, Column_type(i, b, rows_));
+		matrix_.try_emplace(i, Column_type(i, b, rows_));
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -176,7 +176,7 @@ inline Boundary_matrix_with_row_access_with_removals<Master_matrix>::Boundary_ma
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),
@@ -221,7 +221,7 @@ inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::insert
 	}
 
 	rows_.try_emplace(nextInsertIndex_);
-	matrix_.emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, rows_));
+	matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, rows_));
 	nextInsertIndex_++;
 
 	int dim = (boundary.size() == 0) ? 0 : static_cast<int>(boundary.size()) - 1;
@@ -273,32 +273,32 @@ Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_row(index rowI
 }
 
 template<class Master_matrix>
-inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::erase_last()
+inline void Boundary_matrix_with_row_access_with_removals<Master_matrix>::remove_maximal_simplex(index columnIndex)
 {
-	--nextInsertIndex_;
+	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
 
-	int dim = matrix_.at(nextInsertIndex_).get_dimension();
+	int dim = matrix_.at(columnIndex).get_dimension();
 	--(dimensions_[dim]);
 	while (dimensions_.back() == 0)
 		dimensions_.pop_back();
 	maxDim_ = dimensions_.size() - 1;
 
-	matrix_.erase(nextInsertIndex_);
-	rows_.erase(nextInsertIndex_);
+	matrix_.erase(columnIndex);
+	rows_.erase(columnIndex);
 
 	if constexpr (swap_opt::isActive_){
-		auto it = swap_opt::indexToRow_.find(nextInsertIndex_);
+		auto it = swap_opt::indexToRow_.find(columnIndex);
 		swap_opt::rowToIndex_.erase(it->second);
 		swap_opt::indexToRow_.erase(it);
 	}
 	if constexpr (pair_opt::isActive_){
 		if (pair_opt::isReduced_){
-			auto bar = pair_opt::indexToBar_.at(nextInsertIndex_);
+			auto bar = pair_opt::indexToBar_.at(columnIndex);
 
 			if (bar->death == -1) pair_opt::barcode_.erase(bar);
 			else bar->death = -1;
 
-			pair_opt::indexToBar_.erase(nextInsertIndex_);
+			pair_opt::indexToBar_.erase(columnIndex);
 		}
 	}
 }
@@ -389,6 +389,7 @@ inline index Boundary_matrix_with_row_access_with_removals<Master_matrix>::get_c
 {
 	static_assert(!Master_matrix::Option_list::has_removable_columns,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
+	return 0;
 }
 
 template<class Master_matrix>
@@ -413,7 +414,7 @@ Boundary_matrix_with_row_access_with_removals<Master_matrix>::operator=(const Bo
 		const Column_type& col = p.second;
 		std::vector<cell_rep_type> tmp(col.begin(), col.end());
 		rows_.try_emplace(p.first);
-		matrix_.emplace(p.first,
+		matrix_.try_emplace(p.first,
 						Column_type(col.get_column_index(),
 									tmp,
 									col.get_dimension(),

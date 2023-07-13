@@ -255,10 +255,10 @@ inline void Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::_inse
 		index rowIndex, Column_type &column)
 {
 	if constexpr (Row_access_option::isActive_){
-		auto it = column.emplace(Row_access_option::columnIndex_, rowIndex);
+		auto it = column.try_emplace(Row_access_option::columnIndex_, rowIndex);
 		Row_access_option::insert_cell(rowIndex, *it.first);
 	} else {
-		column.emplace(rowIndex);
+		column.try_emplace(rowIndex);
 	}
 }
 

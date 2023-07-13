@@ -42,7 +42,7 @@ public:
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	Row_type get_row(index rowIndex) const;
-	void erase_last();		//does not update barcode
+	void remove_maximal_simplex(index columnIndex);		//does not update barcode!
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -105,7 +105,7 @@ inline Boundary_matrix_with_removals<Master_matrix>::Boundary_matrix_with_remova
 {
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		const Boundary_type& b = orderedBoundaries[i];
-		matrix_.emplace(i, Column_type(b));
+		matrix_.try_emplace(i, Column_type(b));
 
 		int dim = (b.size() == 0) ? 0 : static_cast<int>(b.size()) - 1;
 		if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -171,7 +171,7 @@ inline void Boundary_matrix_with_removals<Master_matrix>::insert_boundary(const 
 		swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
 	}
 
-	matrix_.emplace(nextInsertIndex_++, boundary);
+	matrix_.try_emplace(nextInsertIndex_++, boundary);
 
 	int dim = (boundary.size() == 0) ? 0 : static_cast<int>(boundary.size()) - 1;
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
@@ -207,31 +207,31 @@ inline typename Boundary_matrix_with_removals<Master_matrix>::Row_type Boundary_
 }
 
 template<class Master_matrix>
-inline void Boundary_matrix_with_removals<Master_matrix>::erase_last()
+inline void Boundary_matrix_with_removals<Master_matrix>::remove_maximal_simplex(index columnIndex)
 {
-	--nextInsertIndex_;
+	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
 
-	int dim = matrix_.at(nextInsertIndex_).get_dimension();
+	int dim = matrix_.at(columnIndex).get_dimension();
 	--(dimensions_[dim]);
 	while (dimensions_.back() == 0)
 		dimensions_.pop_back();
 	maxDim_ = dimensions_.size() - 1;
 
-	matrix_.erase(nextInsertIndex_);
+	matrix_.erase(columnIndex);
 
 	if constexpr (swap_opt::isActive_){
-		auto it = swap_opt::indexToRow_.find(nextInsertIndex_);
+		auto it = swap_opt::indexToRow_.find(columnIndex);
 		swap_opt::rowToIndex_.erase(it->second);
 		swap_opt::indexToRow_.erase(it);
 	}
 	if constexpr (pair_opt::isActive_){
 		if (pair_opt::isReduced_){
-			auto bar = pair_opt::indexToBar_.at(nextInsertIndex_);
+			auto bar = pair_opt::indexToBar_.at(columnIndex);
 
 			if (bar->death == -1) pair_opt::barcode_.erase(bar);
 			else bar->death = -1;
 
-			pair_opt::indexToBar_.erase(nextInsertIndex_);
+			pair_opt::indexToBar_.erase(columnIndex);
 		}
 	}
 }
@@ -315,6 +315,7 @@ inline index Boundary_matrix_with_removals<Master_matrix>::get_column_with_pivot
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_column_with_pivot' is not implemented for the chosen options.");
+	return 0;
 }
 
 template<class Master_matrix>
