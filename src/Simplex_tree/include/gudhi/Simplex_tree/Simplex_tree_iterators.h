@@ -15,7 +15,6 @@
 #include <gudhi/Debug_utils.h>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/container/static_vector.hpp>
 
 #include <vector>
 #include <utility>  // for std::pair
@@ -82,9 +81,10 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     Simplex_tree_boundary_simplex_iterator<SimplexTree>,
     typename SimplexTree::Simplex_handle const, boost::forward_traversal_tag> {
  public:
-  typedef typename SimplexTree::Simplex_handle Simplex_handle;
-  typedef typename SimplexTree::Vertex_handle Vertex_handle;
-  typedef typename SimplexTree::Siblings Siblings;
+  using Simplex_handle = typename SimplexTree::Simplex_handle;
+  using Vertex_handle = typename SimplexTree::Vertex_handle;
+  using Siblings = typename SimplexTree::Siblings;
+  using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
 
   // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is overwritten.
   Simplex_tree_boundary_simplex_iterator()
@@ -171,11 +171,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   // Most of the storage should be moved to the range, iterators should be light.
   Vertex_handle last_;  // last vertex of the simplex
   Vertex_handle next_;  // next vertex to push in suffix_
-  // 40 seems a conservative bound on the dimension of a Simplex_tree for now,
-  // as it would not fit on the biggest hard-drive.
-  boost::container::static_vector<Vertex_handle, 40> suffix_;
-  // static_vector still has some overhead compared to a trivial hand-made
-  // version using std::aligned_storage, or compared to making suffix_ static.
+  Static_vertex_vector suffix_;
   Siblings * sib_;  // where the next search will start from
   Simplex_handle sh_;  // current Simplex_handle in the boundary
   SimplexTree * st_;  // simplex containing the simplicial complex
@@ -192,6 +188,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   using Simplex_handle = typename SimplexTree::Simplex_handle;
   using Vertex_handle = typename SimplexTree::Vertex_handle;
   using Siblings = typename SimplexTree::Siblings;
+  using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
 
   // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is
   // overwritten.
@@ -280,11 +277,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   // Most of the storage should be moved to the range, iterators should be light.
   Vertex_handle last_;  // last vertex of the simplex
   Vertex_handle next_;  // next vertex to push in suffix_
-  // 40 seems a conservative bound on the dimension of a Simplex_tree for now,
-  // as it would not fit on the biggest hard-drive.
-  boost::container::static_vector<Vertex_handle, 40> suffix_;
-  // static_vector still has some overhead compared to a trivial hand-made
-  // version using std::aligned_storage, or compared to making suffix_ static.
+  Static_vertex_vector suffix_;
   Siblings * sib_;  // where the next search will start from
   std::pair<Simplex_handle, Vertex_handle> baov_;  // a pair containing the current Simplex_handle in the boundary and its opposite vertex
   SimplexTree * st_;  // simplex containing the simplicial complex
