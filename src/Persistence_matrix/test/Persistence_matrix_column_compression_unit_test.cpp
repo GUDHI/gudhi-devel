@@ -25,20 +25,20 @@
 #include "gudhi/options.h"
 #include "gudhi/utilities/Z2_field.h"
 #include "gudhi/utilities/Zp_field.h"
-#include "gudhi/utilities/utilities.h"
+// #include "gudhi/utilities/utilities.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;
 using Gudhi::persistence_matrix::Matrix;
-using Gudhi::persistence_matrix::Representative_cycles_options;
+// using Gudhi::persistence_matrix::Representative_cycles_options;
 using Gudhi::persistence_matrix::Default_options;
-using Gudhi::persistence_matrix::Zigzag_options;
-using Gudhi::persistence_matrix::Multi_persistence_options;
-using Gudhi::persistence_matrix::Cohomology_persistence_options;
+// using Gudhi::persistence_matrix::Zigzag_options;
+// using Gudhi::persistence_matrix::Multi_persistence_options;
+// using Gudhi::persistence_matrix::Cohomology_persistence_options;
 using Gudhi::persistence_matrix::Column_types;
 
 using Z5 = Zp_field_element<5>;
-using Z2 = Zp_field_element<2>;
+using Z2 = Z2_field_element;
 
 template<class Field_type, Column_types column_type>
 struct opt_ra_i_r : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{

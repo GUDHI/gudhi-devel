@@ -464,7 +464,7 @@ inline dimension_type Chain_matrix_with_row_access_with_removals<Master_matrix>:
 template<class Master_matrix>
 inline unsigned int Chain_matrix_with_row_access_with_removals<Master_matrix>::get_number_of_columns() const
 {
-	return nextInsertIndex_;
+	return matrix_.size();
 }
 
 template<class Master_matrix>
@@ -609,7 +609,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.try_emplace(simplexIndex, 1);
+			column.emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -716,7 +716,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_build_fr
 			_add_to(matrix_.at(idx_h), column);
 		}
 	} else {
-		column.try_emplace(simplexIndex, 1);
+		column.emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 		}

@@ -16,8 +16,8 @@
 #include <set>
 
 #include "../utilities/utilities.h"
-#include "../utilities/Zp_field.h"
-#include "cell.h"
+// #include "../utilities/Zp_field.h"
+// #include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

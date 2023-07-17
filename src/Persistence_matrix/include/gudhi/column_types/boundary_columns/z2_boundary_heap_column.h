@@ -240,10 +240,12 @@ inline void Z2_heap_boundary_column::_prune()
 
 inline int Z2_heap_boundary_column::_pop_pivot()
 {
-	unsigned int pivot = Base::_pop_pivot();
+	int pivot = Base::_pop_pivot();
 
 	if (erasedValues_.find(pivot) != erasedValues_.end())
 		pivot = _pop_pivot();
+
+	if (pivot == -1) clear();
 
 	return pivot;
 }

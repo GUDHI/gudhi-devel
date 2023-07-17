@@ -322,6 +322,15 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(
 template<class Master_matrix>
 template<class Boundary_type>
 inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(
+		index simplexIndex, const Boundary_type &boundary)
+{
+	std::vector<index> chains_in_F;
+	insert_boundary(simplexIndex, boundary, chains_in_F);
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(
 		const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if (pivotToColumnIndex_.size() <= nextInsertIndex_){
@@ -335,7 +344,26 @@ inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(
 	int dim = boundary.size() - 1;
 	if (maxDim_ < dim) maxDim_ = dim;
 
-	_reduce_boundary(boundary, currentEssentialCycleIndices);
+	_reduce_boundary(nextInsertIndex_, boundary, currentEssentialCycleIndices);
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Chain_matrix_with_row_access<Master_matrix>::insert_boundary(
+		index simplexIndex, const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
+{
+	if (pivotToColumnIndex_.size() <= simplexIndex){
+		pivotToColumnIndex_.resize(simplexIndex * 2, -1);
+	}
+	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
+		if (swap_opt::pivotToPosition_.size() <= simplexIndex)
+			swap_opt::pivotToPosition_.resize(pivotToColumnIndex_.size());
+		swap_opt::pivotToPosition_[simplexIndex] = simplexIndex;
+	}
+	int dim = boundary.size() - 1;
+	if (maxDim_ < dim) maxDim_ = dim;
+
+	_reduce_boundary(simplexIndex, boundary, currentEssentialCycleIndices);
 }
 
 template<class Master_matrix>
@@ -370,7 +398,7 @@ template<class Master_matrix>
 inline void Chain_matrix_with_row_access<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index simplexIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
-			"'erase_last' is not implemented for the chosen options.");
+			"'remove_maximal_simplex' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
@@ -517,7 +545,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::_reduce_boundary(
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.try_emplace(simplexIndex, 1);
+			column.emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -621,7 +649,7 @@ inline void Chain_matrix_with_row_access<Master_matrix>::_build_from_H(
 			_add_to(matrix_[idx_h], column);
 		}
 	} else {
-		column.try_emplace(simplexIndex, 1);
+		column.emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_[idx_h.first], column, idx_h.second);
 		}

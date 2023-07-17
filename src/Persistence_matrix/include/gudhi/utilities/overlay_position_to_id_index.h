@@ -32,7 +32,7 @@ public:
 	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -158,9 +158,9 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::erase_last()
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::remove_maximal_simplex(index columnIndex)
 {
-	matrix_.erase_last();
+	matrix_.remove_maximal_simplex(columnIndex);
 	--nextIndex_;
 	if (columnPositionToID_.size() > nextIndex_ * 2)
 		columnPositionToID_.resize(nextIndex_ + 1);

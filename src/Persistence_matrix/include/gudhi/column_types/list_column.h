@@ -573,7 +573,7 @@ inline void List_column<Field_element_type,Cell_type,Row_access_option>::_insert
 		auto it = column_.insert(position, Cell(value, Row_access_option::columnIndex_, rowIndex));
 		Row_access_option::insert_cell(rowIndex, &(*it));
 	} else {
-		column_.try_emplace(position, value, rowIndex);
+		column_.emplace(position, value, rowIndex);
 	}
 }
 

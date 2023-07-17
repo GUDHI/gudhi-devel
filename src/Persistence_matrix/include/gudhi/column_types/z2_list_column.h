@@ -420,7 +420,7 @@ inline void Z2_list_column<Cell_type,Row_access_option>::_insert_cell(
 		auto it = column_.insert(position, Cell(Row_access_option::columnIndex_, rowIndex));
 		Row_access_option::insert_cell(rowIndex, &(*it));
 	} else {
-		column_.try_emplace(position, rowIndex);
+		column_.emplace(position, rowIndex);
 	}
 }
 

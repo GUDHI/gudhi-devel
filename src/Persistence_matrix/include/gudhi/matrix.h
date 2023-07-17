@@ -931,7 +931,7 @@ inline const typename Matrix<Options>::Row_type &Matrix<Options>::get_row(index 
 template<class Options>
 inline void Matrix<Options>::remove_maximal_simplex(index columnIndex)
 {
-	static_assert(Options::has_removable_columns && isNonBasic, "'erase_last' is not available for the chosen options.");
+	static_assert(Options::has_removable_columns && isNonBasic, "'remove_maximal_simplex' is not available for the chosen options.");
 
 	matrix_.remove_maximal_simplex(columnIndex);
 }

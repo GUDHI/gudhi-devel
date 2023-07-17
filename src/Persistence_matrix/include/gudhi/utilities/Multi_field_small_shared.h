@@ -156,9 +156,9 @@ public:
 
 private:
 	static constexpr bool _is_prime(const int p);
-	static constexpr unsigned int _multiply(unsigned int a, unsigned int b);
-	static constexpr unsigned int _add(unsigned int element, unsigned int v);
-	static constexpr unsigned int _substract(unsigned int element, unsigned int v);
+	static unsigned int _multiply(unsigned int a, unsigned int b);
+	static unsigned int _add(unsigned int element, unsigned int v);
+	static unsigned int _substract(unsigned int element, unsigned int v);
 	static constexpr int _get_inverse(unsigned int element, const unsigned int mod);
 
 	unsigned int element_;
@@ -343,7 +343,7 @@ inline unsigned int Shared_multi_field_element_with_small_characteristics::get_v
 	return element_;
 }
 
-inline constexpr unsigned int Shared_multi_field_element_with_small_characteristics::_add(unsigned int element, unsigned int v)
+inline unsigned int Shared_multi_field_element_with_small_characteristics::_add(unsigned int element, unsigned int v)
 {
 	if (UINT_MAX - element < v) {
 		//automatic unsigned integer overflow behaviour will make it work
@@ -358,7 +358,7 @@ inline constexpr unsigned int Shared_multi_field_element_with_small_characterist
 	return element;
 }
 
-inline constexpr unsigned int Shared_multi_field_element_with_small_characteristics::_substract(unsigned int element, unsigned int v)
+inline unsigned int Shared_multi_field_element_with_small_characteristics::_substract(unsigned int element, unsigned int v)
 {
 	if (element < v){
 		element += productOfAllCharacteristics_;
@@ -368,7 +368,7 @@ inline constexpr unsigned int Shared_multi_field_element_with_small_characterist
 	return element;
 }
 
-inline constexpr unsigned int Shared_multi_field_element_with_small_characteristics::_multiply(unsigned int a, unsigned int b)
+inline unsigned int Shared_multi_field_element_with_small_characteristics::_multiply(unsigned int a, unsigned int b)
 {
 	unsigned int res = 0;
 	unsigned int temp_b = 0;

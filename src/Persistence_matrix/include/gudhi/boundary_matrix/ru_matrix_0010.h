@@ -242,7 +242,7 @@ template<class Master_matrix>
 inline void RU_matrix_with_row_access<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
-			"'erase_last' is not implemented for the chosen options.");
+			"'remove_maximal_simplex' is not implemented for the chosen options.");
 }
 
 

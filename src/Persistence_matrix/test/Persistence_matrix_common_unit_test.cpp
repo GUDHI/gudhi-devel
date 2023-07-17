@@ -25,20 +25,20 @@
 #include "gudhi/options.h"
 #include "gudhi/utilities/Z2_field.h"
 #include "gudhi/utilities/Zp_field.h"
-#include "gudhi/utilities/utilities.h"
+// #include "gudhi/utilities/utilities.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;
 using Gudhi::persistence_matrix::Matrix;
-using Gudhi::persistence_matrix::Representative_cycles_options;
+// using Gudhi::persistence_matrix::Representative_cycles_options;
 using Gudhi::persistence_matrix::Default_options;
-using Gudhi::persistence_matrix::Zigzag_options;
-using Gudhi::persistence_matrix::Multi_persistence_options;
-using Gudhi::persistence_matrix::Cohomology_persistence_options;
+// using Gudhi::persistence_matrix::Zigzag_options;
+// using Gudhi::persistence_matrix::Multi_persistence_options;
+// using Gudhi::persistence_matrix::Cohomology_persistence_options;
 using Gudhi::persistence_matrix::Column_types;
 
 using Z5 = Zp_field_element<5>;
-using Z2 = Zp_field_element<2>;
+using Z2 = Z2_field_element;
 
 template<class Field_type, Column_types column_type>
 struct opt_b_p : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
@@ -1277,7 +1277,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Removable_columns_options, Matrix, list_of_options
 		BOOST_CHECK_EQUAL(barcode.back().death, 6);
 	}
 	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
-	mb.erase_last();
+	mb.remove_maximal_simplex(6);
 	BOOST_CHECK_EQUAL(mb.get_max_dimension(), 1);
 	if constexpr (Matrix::Option_list::has_vine_update){
 		const auto& barcode2 = mb.get_current_barcode();

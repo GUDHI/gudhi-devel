@@ -286,17 +286,42 @@ inline void Chain_matrix_with_removals<Master_matrix>::insert_boundary(
 template<class Master_matrix>
 template<class Boundary_type>
 inline void Chain_matrix_with_removals<Master_matrix>::insert_boundary(
+		index simplexIndex, const Boundary_type &boundary)
+{
+	std::vector<index> chains_in_F;
+	insert_boundary(simplexIndex, boundary, chains_in_F);
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Chain_matrix_with_removals<Master_matrix>::insert_boundary(
 		const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
 		swap_opt::pivotToPosition_.try_emplace(nextInsertIndex_, nextInsertIndex_);
 	}
 	unsigned int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
-	if (maxDim_ < dim) maxDim_ = dim;
+	if (maxDim_ < static_cast<int>(dim)) maxDim_ = dim;
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 	++(dimensions_[dim]);
 
-	_reduce_boundary(boundary, currentEssentialCycleIndices);
+	_reduce_boundary(nextInsertIndex_, boundary, currentEssentialCycleIndices);
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Chain_matrix_with_removals<Master_matrix>::insert_boundary(
+		index simplexIndex, const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
+{
+	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
+		swap_opt::pivotToPosition_.try_emplace(simplexIndex, simplexIndex);
+	}
+	unsigned int dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+	if (maxDim_ < static_cast<int>(dim)) maxDim_ = dim;
+	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
+	++(dimensions_[dim]);
+
+	_reduce_boundary(simplexIndex, boundary, currentEssentialCycleIndices);
 }
 
 template<class Master_matrix>
@@ -373,7 +398,7 @@ inline dimension_type Chain_matrix_with_removals<Master_matrix>::get_max_dimensi
 template<class Master_matrix>
 inline unsigned int Chain_matrix_with_removals<Master_matrix>::get_number_of_columns() const
 {
-	return nextInsertIndex_;
+	return matrix_.size();
 }
 
 template<class Master_matrix>
@@ -499,7 +524,7 @@ inline void Chain_matrix_with_removals<Master_matrix>::_reduce_boundary(
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);
 		else
-			column.try_emplace(simplexIndex, 1);
+			column.emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
 		return;
 	}
@@ -606,7 +631,7 @@ inline void Chain_matrix_with_removals<Master_matrix>::_build_from_H(
 			_add_to(matrix_.at(idx_h), column);
 		}
 	} else {
-		column.try_emplace(simplexIndex, 1);
+		column.emplace(simplexIndex, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(matrix_.at(idx_h.first), column, idx_h.second);
 		}

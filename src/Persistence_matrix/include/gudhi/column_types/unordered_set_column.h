@@ -250,7 +250,7 @@ inline std::vector<Field_element_type> Unordered_set_column<Field_element_type,C
 
 	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end(); ++it){
-		if (it->get_row_index() < columnLength)
+		if (it->get_row_index() < static_cast<unsigned int>(columnLength))
 			container[it->get_row_index()] = it->get_element();
 	}
 	return container;
@@ -457,10 +457,10 @@ inline void Unordered_set_column<Field_element_type,Cell_type,Row_access_option>
 		const Field_element_type &value, index rowIndex)
 {
 	if constexpr (Row_access_option::isActive_){
-		auto it = column_.try_emplace(value, Row_access_option::columnIndex_, rowIndex);
+		auto it = column_.emplace(value, Row_access_option::columnIndex_, rowIndex);
 		Row_access_option::insert_cell(rowIndex, *it.first);
 	} else {
-		column_.try_emplace(value, rowIndex);
+		column_.emplace(value, rowIndex);
 	}
 }
 

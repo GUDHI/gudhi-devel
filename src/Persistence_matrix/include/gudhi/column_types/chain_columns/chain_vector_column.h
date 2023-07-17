@@ -163,7 +163,7 @@ inline Field_element_type Vector_chain_column<Dictionnary_type,Field_element_typ
 	if (pivot_ == -1) return Field_element_type();
 
 	for (const Cell* cell : Base::column_){
-		if (cell->get_row_index() == pivot_) return cell->get_element();
+		if (cell->get_row_index() == static_cast<unsigned int>(pivot_)) return cell->get_element();
 	}
 
 	return Field_element_type();	//should never happen if chain column is used properly

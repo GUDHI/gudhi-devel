@@ -2,6 +2,7 @@
 #define ID_TO_POS_TRANSLATION_H
 
 #include <vector>
+#include <cassert>
 
 #include "utilities.h"  //type definitions
 
@@ -32,7 +33,7 @@ public:
 	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
-	void erase_last();
+	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
 	unsigned int get_number_of_columns() const;
@@ -168,9 +169,9 @@ Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::erase_last()
+inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::remove_maximal_simplex(index columnIndex)
 {
-	matrix_.erase_last();
+	matrix_.remove_maximal_simplex(columnIndex);
 	columnIDToPosition_.erase(lastID_);
 	if constexpr (Master_matrix_type::Option_list::has_removable_columns){
 		auto it = columnIDToPosition_.begin();

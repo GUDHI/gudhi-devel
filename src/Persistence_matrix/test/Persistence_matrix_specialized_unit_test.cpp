@@ -25,20 +25,20 @@
 #include "gudhi/options.h"
 #include "gudhi/utilities/Z2_field.h"
 #include "gudhi/utilities/Zp_field.h"
-#include "gudhi/utilities/utilities.h"
+// #include "gudhi/utilities/utilities.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;
 using Gudhi::persistence_matrix::Matrix;
-using Gudhi::persistence_matrix::Representative_cycles_options;
+// using Gudhi::persistence_matrix::Representative_cycles_options;
 using Gudhi::persistence_matrix::Default_options;
-using Gudhi::persistence_matrix::Zigzag_options;
-using Gudhi::persistence_matrix::Multi_persistence_options;
-using Gudhi::persistence_matrix::Cohomology_persistence_options;
+// using Gudhi::persistence_matrix::Zigzag_options;
+// using Gudhi::persistence_matrix::Multi_persistence_options;
+// using Gudhi::persistence_matrix::Cohomology_persistence_options;
 using Gudhi::persistence_matrix::Column_types;
 
 using Z5 = Zp_field_element<5>;
-using Z2 = Zp_field_element<2>;
+using Z2 = Z2_field_element;
 
 template<class Field_type, Column_types column_type>
 struct opt_bar_b : Default_options<Field_type::get_characteristic() == 2, Field_type, column_type, false>{
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barc
 	std::set<std::tuple<int,int,int>,BarComp> bars;
 	//bars are not ordered the same for base matrices
 	for (auto it = barcode.begin(); it != barcode.end(); ++it){
-		bars.try_emplace(it->dim, it->birth, it->death);
+		bars.emplace(it->dim, it->birth, it->death);
 	}
 	auto it = bars.begin();
 	BOOST_CHECK_EQUAL(std::get<0>(*it), 0);

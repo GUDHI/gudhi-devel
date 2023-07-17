@@ -176,7 +176,7 @@ inline void Boundary_matrix<Master_matrix>::insert_boundary(const Boundary_type 
 	}
 
 	matrix_[nextInsertIndex_++] = Column_type(boundary);
-	if (maxDim_ < boundary.size() - 1) maxDim_ = boundary.size() - 1;
+	if (maxDim_ < static_cast<int>(boundary.size()) - 1) maxDim_ = boundary.size() - 1;
 }
 
 template<class Master_matrix>
@@ -210,7 +210,7 @@ template<class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
-			"'erase_last' is not implemented for the chosen options.");
+			"'remove_maximal_simplex' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
