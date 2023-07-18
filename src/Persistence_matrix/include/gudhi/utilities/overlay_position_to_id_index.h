@@ -18,6 +18,7 @@ public:
 	using Row_type = typename Master_matrix_type::Row_type;
 	using barcode_type = typename Master_matrix_type::barcode_type;
 	using cycle_type = typename Master_matrix_type::cycle_type;
+	using cell_rep_type = typename Master_matrix_type::cell_rep_type;
 
 	Position_to_id_indexation_overlay();
 	template<class Boundary_type = boundary_type>
@@ -27,7 +28,7 @@ public:
 	Position_to_id_indexation_overlay(Position_to_id_indexation_overlay&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);
+	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
@@ -120,13 +121,15 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type &boundary)
+inline std::vector<typename Master_matrix_type::cell_rep_type> 
+Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type &boundary)
 {
-	matrix_.insert_boundary(boundary);
 	if (columnPositionToID_.size() <= nextIndex_) {
 		columnPositionToID_.resize(nextIndex_ * 2 + 1);
 	}
 	columnPositionToID_[nextIndex_++] = nextID_++;
+
+	return matrix_.insert_boundary(boundary);
 }
 
 template<class Matrix_type, class Master_matrix_type>

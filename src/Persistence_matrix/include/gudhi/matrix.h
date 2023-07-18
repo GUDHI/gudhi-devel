@@ -182,6 +182,12 @@ public:
 								>::type
 							>::type;
 
+	using cell_rep_type = typename std::conditional<
+								Options::is_z2,
+								index,
+								std::pair<index,Field_type>
+							>::type;
+
 	template<class Cell_type>
 	struct RowCellComp {
 		bool operator()(const Cell_type& c1, const Cell_type& c2) const
@@ -641,6 +647,12 @@ public:
 									Row_type
 								>::type;
 
+	using insertion_return_type = typename std::conditional<
+									Options::is_of_boundary_type || !isNonBasic,
+									void,
+									std::vector<cell_rep_type>
+								>::type;
+
 	Matrix();
 	Matrix(const boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
@@ -658,16 +670,9 @@ public:
 	template<class Container_type>
 	void insert_column(const Container_type& column);
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);
+	insertion_return_type insert_boundary(const Boundary_type& boundary);
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(index simplexIndex, const Boundary_type& boundary);
-	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary, 
-						 std::vector<index>& currentEssentialCycleIndices);
-	template<class Boundary_type = boundary_type>
-	void insert_boundary(index simplexIndex, 
-						 const Boundary_type& boundary, 
-						 std::vector<index>& currentEssentialCycleIndices);
+	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary);
 	returned_column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	//Warning: the get_column_index() function of the row cells returns not
@@ -854,48 +859,23 @@ inline void Matrix<Options>::insert_column(const Container_type& column)
 
 template<class Options>
 template<class Boundary_type>
-inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary)
+inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(const Boundary_type &boundary)
 {
 	assert(Field_type::get_characteristic() != 0 &&
 			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
 			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
-	matrix_.insert_boundary(boundary);
+	return matrix_.insert_boundary(boundary);
 }
 
 template<class Options>
 template<class Boundary_type>
-inline void Matrix<Options>::insert_boundary(index simplexIndex, const Boundary_type &boundary)
+inline std::vector<typename Matrix<Options>::cell_rep_type> Matrix<Options>::insert_boundary(index simplexIndex, const Boundary_type &boundary)
 {
 	assert(Field_type::get_characteristic() != 0 &&
 			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
 			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
 	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
-	matrix_.insert_boundary(simplexIndex, boundary);
-}
-
-template<class Options>
-template<class Boundary_type>
-inline void Matrix<Options>::insert_boundary(const Boundary_type &boundary, 
-											 std::vector<index>& currentEssentialCycleIndices)
-{
-	assert(Field_type::get_characteristic() != 0 &&
-			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
-			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
-	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
-	matrix_.insert_boundary(boundary, currentEssentialCycleIndices);
-}
-
-template<class Options>
-template<class Boundary_type>
-inline void Matrix<Options>::insert_boundary(index simplexIndex, 
-											 const Boundary_type &boundary, 
-											 std::vector<index>& currentEssentialCycleIndices)
-{
-	assert(Field_type::get_characteristic() != 0 &&
-			"Columns cannot be initialized if the coefficient field characteristic is not specified. "
-			"Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field class.");
-	static_assert(!Options::is_of_boundary_type, "Only enabled for chain matrices.");
-	matrix_.insert_boundary(simplexIndex, boundary, currentEssentialCycleIndices);
+	return matrix_.insert_boundary(simplexIndex, boundary);
 }
 
 template<class Options>

@@ -36,6 +36,7 @@ public:
 	using Row_type = typename Master_matrix::Row_type;
 	using Cell = typename Master_matrix::Cell_type;
 	using boundary_type = typename Master_matrix::boundary_type;
+	using cell_rep_type = typename Master_matrix::cell_rep_type;
 
 	Chain_matrix_with_row_access_with_removals();
 	template<class Boundary_type = boundary_type>
@@ -57,13 +58,9 @@ public:
 	Chain_matrix_with_row_access_with_removals(Chain_matrix_with_row_access_with_removals&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);
+	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary);
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(index simplexIndex, const Boundary_type& boundary);
-	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
-	template<class Boundary_type = boundary_type>
-	void insert_boundary(index simplexIndex, const Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
+	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	Row_type& get_row(index rowIndex);
@@ -124,11 +121,6 @@ private:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-	using cell_rep_type = typename std::conditional<
-								Master_matrix::Option_list::is_z2,
-								index,
-								std::pair<index,Field_element_type>
-							>::type;
 	using tmp_column_type = typename std::conditional<
 								Master_matrix::Option_list::is_z2,
 								std::set<index>,
@@ -144,19 +136,17 @@ private:
 	dimension_type maxDim_;
 
 	template<class Boundary_type>
-	void _reduce_boundary(index simplexIndex, const Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices);
+	std::vector<cell_rep_type> _reduce_boundary(index simplexIndex, const Boundary_type& boundary);
 	void _reduce_by_G(tmp_column_type& column,
 					  std::vector<cell_rep_type>& chainsInH,
 					  index currentPivot);
 	void _reduce_by_F(tmp_column_type& column,
 					  std::vector<cell_rep_type>& chainsInF,
-					  index currentPivot,
-					  std::vector<index>& currentEssentialCycleIndices);
+					  index currentPivot);
 	void _build_from_H(index simplexIndex, 
 					   tmp_column_type& column,
 					   std::vector<cell_rep_type>& chainsInH);
-	template<class Chain_type>
-	void _update_largest_death_in_F(Chain_type& chainsInF, index toUpdate);
+	void _update_largest_death_in_F(const std::vector<cell_rep_type>& chainsInF);
 	void _insert_chain(const tmp_column_type& column, dimension_type dimension);
 	void _insert_chain(const tmp_column_type& column, dimension_type dimension, index pair);
 	void _add_to(const Column_type& column, tmp_column_type& set, unsigned int coef = 1u);
@@ -329,26 +319,9 @@ inline Chain_matrix_with_row_access_with_removals<Master_matrix>::Chain_matrix_w
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
+inline std::vector<typename Master_matrix::cell_rep_type> 
+Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
 		const Boundary_type &boundary)
-{
-	std::vector<index> chains_in_F;
-	insert_boundary(boundary, chains_in_F);
-}
-
-template<class Master_matrix>
-template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
-		index simplexIndex, const Boundary_type &boundary)
-{
-	std::vector<index> chains_in_F;
-	insert_boundary(simplexIndex, boundary, chains_in_F);
-}
-
-template<class Master_matrix>
-template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
-		const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
 		swap_opt::pivotToPosition_.try_emplace(nextInsertIndex_, nextInsertIndex_);
@@ -358,13 +331,14 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 	++(dimensions_[dim]);
 
-	_reduce_boundary(nextInsertIndex_, boundary, currentEssentialCycleIndices);
+	return _reduce_boundary(nextInsertIndex_, boundary);
 }
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
-		index simplexIndex, const Boundary_type &boundary, std::vector<index>& currentEssentialCycleIndices)
+inline std::vector<typename Master_matrix::cell_rep_type> 
+Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_boundary(
+		index simplexIndex, const Boundary_type &boundary)
 {
 	if constexpr (swap_opt::isActive_ && _barcode_option_is_active()){
 		swap_opt::pivotToPosition_.try_emplace(simplexIndex, simplexIndex);
@@ -374,7 +348,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::insert_bo
 	if (dimensions_.size() <= dim) dimensions_.resize(dim + 1);
 	++(dimensions_[dim]);
 
-	_reduce_boundary(simplexIndex, boundary, currentEssentialCycleIndices);
+	return _reduce_boundary(simplexIndex, boundary);
 }
 
 template<class Master_matrix>
@@ -591,11 +565,14 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::print() c
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_boundary(
-		index simplexIndex, const Boundary_type& boundary, std::vector<index>& currentEssentialCycleIndices)
+inline std::vector<typename Master_matrix::cell_rep_type> 
+Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_boundary(
+		index simplexIndex, const Boundary_type& boundary)
 {
 	tmp_column_type column(boundary.begin(), boundary.end());
 	int dim = boundary.empty() ? 0 : boundary.size() - 1;
+	std::vector<cell_rep_type> chainsInH; //for corresponding indices in H (paired columns)
+	std::vector<cell_rep_type> chainsInF; //for corresponding indices in F (unpaired, essential columns)
 
 	auto get_last = [&column](){
 		if constexpr (Master_matrix::Option_list::is_z2)
@@ -611,12 +588,10 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 		else
 			column.emplace(simplexIndex, 1);
 		_insert_chain(column, dim);
-		return;
+		return chainsInF;
 	}
 
 	index currentPivot = pivotToColumnIndex_.at(get_last());
-	std::vector<cell_rep_type> chainsInH; //for corresponding indices in H (paired columns)
-	std::vector<cell_rep_type> chainsInF; //for corresponding indices in F (unpaired, essential columns)
 
 	while (matrix_.at(currentPivot).is_paired())
 	{
@@ -627,7 +602,7 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 			_build_from_H(simplexIndex, column, chainsInH);
 			//create a new cycle (in F) sigma - \sum col_h
 			_insert_chain(column, dim);
-			return;
+			return chainsInF;
 		}
 
 		currentPivot = pivotToColumnIndex_.at(get_last());
@@ -639,24 +614,24 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 
 		if (!matrix_.at(currentPivot).is_paired()) {
 			//only fills currentEssentialCycleIndices if Z2 coefficients, so chainsInF remains empty
-			_reduce_by_F(column, chainsInF, currentPivot, currentEssentialCycleIndices);
+			_reduce_by_F(column, chainsInF, currentPivot);
 		} else {
 			_reduce_by_G(column, chainsInH, currentPivot);
 		}
 	}
 
-	index chain_fp = currentEssentialCycleIndices.front(); //col_fp, with largest death <d index.
-
-	if constexpr (Master_matrix::Option_list::is_z2)
-		_update_largest_death_in_F(currentEssentialCycleIndices, chain_fp);
-	else
-		_update_largest_death_in_F(chainsInF, chain_fp);
+	_update_largest_death_in_F(chainsInF);
 
 	//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
 	_build_from_H(simplexIndex, column, chainsInH);
 
 	//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
-	_insert_chain(column, dim, chain_fp);
+	if constexpr (Master_matrix::Option_list::is_z2)
+		_insert_chain(column, dim, chainsInF[0]);
+	else
+		_insert_chain(column, dim, chainsInF[0].first);
+
+	return chainsInF;
 }
 
 template<class Master_matrix>
@@ -683,14 +658,13 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 template<class Master_matrix>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_by_F(
 		tmp_column_type& column,
-		[[maybe_unused]] std::vector<cell_rep_type>& chainsInF,
-		index currentPivot,
-		std::vector<index>& currentEssentialCycleIndices)
+		std::vector<cell_rep_type>& chainsInF,
+		index currentPivot)
 {
 	Column_type& col = matrix_.at(currentPivot);
 	if constexpr (Master_matrix::Option_list::is_z2){
 		_add_to(col, column);	//Reduce with the column col_g
-		currentEssentialCycleIndices.push_back(currentPivot);
+		chainsInF.push_back(currentPivot);
 	} else {
 		Field_element_type coef = col.get_pivot_value();
 		coef = coef.get_inverse();
@@ -698,7 +672,6 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_reduce_b
 				 - static_cast<unsigned int>(column.rbegin()->second));
 
 		_add_to(col, column, coef);	//Reduce with the column col_g
-		currentEssentialCycleIndices.push_back(currentPivot);
 		chainsInF.emplace_back(currentPivot,
 							   Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(coef));
 	}
@@ -724,19 +697,20 @@ inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_build_fr
 }
 
 template<class Master_matrix>
-template<class Chain_type>
 inline void Chain_matrix_with_row_access_with_removals<Master_matrix>::_update_largest_death_in_F(
-		Chain_type& chainsInF, index toUpdate)
+		const std::vector<cell_rep_type>& chainsInF)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (std::vector<index>::iterator other_col_it = chainsInF.begin() + 1;
+		index toUpdate = chainsInF[0];
+		for (auto other_col_it = chainsInF.begin() + 1;
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
 		{
 			add_to(*other_col_it, toUpdate);
 		}
 	} else {
-		matrix_.at(toUpdate) *= chainsInF.begin()->second;
+		index toUpdate = chainsInF[0].first;
+		matrix_.at(toUpdate) *= chainsInF[0].second;
 		for (auto other_col_it = chainsInF.begin() + 1;
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
