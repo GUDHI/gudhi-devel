@@ -59,7 +59,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
 endforeach()
 
 if (WITH_GUDHI_THIRD_PARTY)
-    add_subdirectory(src/GudhUI)
+  add_subdirectory(src/GudhUI)
 endif()
 
 if (WITH_GUDHI_PYTHON)
