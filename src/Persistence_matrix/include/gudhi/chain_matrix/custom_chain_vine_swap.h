@@ -61,7 +61,7 @@ private:
 	index _negative_positive_vine_swap(index columnIndex1, index columnIndex2);
 	index _negative_vine_swap(index columnIndex1, index columnIndex2);
 
-	std::function<bool(index,index)> birthComp_;	// for F x F & H x H
+	std::function<bool(index,index)> birthComp_;	// for F x F
 	std::function<bool(index,index)> deathComp_;	// for G x G
 };
 

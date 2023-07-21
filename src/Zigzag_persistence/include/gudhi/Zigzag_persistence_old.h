@@ -300,9 +300,9 @@ public:
 	 * \details By convention, interval \f$[b;d]\f$ are
 	 * closed for finite indices b and d, and open for left-infinite and/or
 	 * right-infinite endpoints.*/
-	struct interval_filtration {
-		interval_filtration() {}
-		interval_filtration(int dim, Filtration_value b, Filtration_value d) : dim_(dim), b_(b), d_(d) {}
+	struct fil_interval {
+		fil_interval() {}
+		fil_interval(int dim, Filtration_value b, Filtration_value d) : dim_(dim), b_(b), d_(d) {}
 		/** Returns the absolute length of the interval \f$|d-b|\f$. */
 		Filtration_value length() {
 			if(b_ == d_) { return 0; } //otherwise inf - inf would return nan.
@@ -359,7 +359,7 @@ private:
 	 */
 	struct cmp_intervals_by_log_length {
 		cmp_intervals_by_log_length(){}
-		bool operator()( interval_filtration p, interval_filtration q)
+		bool operator()( fil_interval p, fil_interval q)
 		{
 			if(p.dim() != q.dim()) {return p.dim() < q.dim();}//lower dimension first
 			if(p.log_length() != q.log_length()) {return p.log_length() > q.log_length();}
@@ -373,7 +373,7 @@ private:
 	 */
 	struct cmp_intervals_by_length {
 		cmp_intervals_by_length(){}
-		bool operator()( interval_filtration p, interval_filtration q)
+		bool operator()( fil_interval p, fil_interval q)
 		{
 			if(p.length() != q.length()) { return p.length() > q.length(); }//longest 1st
 			if(p.dim() != q.dim()) {return p.dim() < q.dim();}//lower dimension first
@@ -617,7 +617,7 @@ public:
 		std::pair<Simplex_handle, bool> res = cpx_.insert_simplex(simplex, filtration_value);
 		GUDHI_CHECK(res.second, "Zigzag_persistence::insert_simplex - insertion of a simplex already in the complex");
 		cpx_.assign_key(res.first, num_arrow_);
-		forward_arrow(res.first);
+		_process_forward_arrow(res.first);
 	}
 
 	template<class VertexRange = std::initializer_list<Vertex_handle>>
@@ -636,7 +636,7 @@ public:
 			filtration_values_.emplace_back(num_arrow_, previous_filtration_value_);
 		}
 
-		backward_arrow(sh);
+		_process_backward_arrow(sh);
 		cpx_.remove_maximal_simplex(sh);
 	}
 
@@ -699,7 +699,7 @@ private:
 	 * i.e., columns with (F \cup G)-indices, and then apply a surjective diamond to
 	 * the zigzag module.
 	 */
-	void forward_arrow( Simplex_handle zzsh )
+	void _process_forward_arrow( Simplex_handle zzsh )
 	{ //maintain the <=b order
 		birth_ordering_.add_birth_forward(num_arrow_);
 
@@ -899,7 +899,7 @@ private:
 	}
 
 	//cpx_.key(zzsh) is the key of the simplex we remove, not a new one
-	void backward_arrow( Simplex_handle zzsh )
+	void _process_backward_arrow( Simplex_handle zzsh )
 	{
 		//maintain the <=b order
 		birth_ordering_.add_birth_backward(num_arrow_);
@@ -1117,7 +1117,7 @@ private:
 
 public:
 	/** \brief Returns the index persistence diagram as an std::list of intervals.*/
-	const std::list< interval_index > & index_persistence_diagram() const
+	const std::list< interval_index > & get_index_persistence_diagram() const
 	{ 
 		return persistence_diagram_; 
 	}
@@ -1137,7 +1137,7 @@ public:
 	 *
 	 * @param[out] std::pair A pair of real values \f$(f(b),f(d))\f$.
 	 */
-	std::pair<Filtration_value,Filtration_value> index_to_filtration(
+	std::pair<Filtration_value,Filtration_value> map_index_to_filtration_value(
 			Simplex_key b_key, Simplex_key d_key) {
 		// filtration_values_ must be sorted by increasing keys.
 		auto it_b = //lower_bound(x) returns leftmost y s.t. x <= y
@@ -1215,12 +1215,12 @@ public:
 		{ return p1.first < p2.first; }
 		);
 
-		std::vector< interval_filtration > tmp_diag;
+		std::vector< fil_interval > tmp_diag;
 		tmp_diag.reserve(persistence_diagram_.size());
 		for(auto bar : persistence_diagram_)
 		{
 			Filtration_value birth,death;
-			std::tie(birth,death) = index_to_filtration(bar.birth(), bar.death());
+			std::tie(birth,death) = map_index_to_filtration_value(bar.birth(), bar.death());
 
 			if( std::abs(birth - death) > shortest_interval ) {
 				tmp_diag.emplace_back(bar.dim(), birth, death );
@@ -1238,8 +1238,8 @@ public:
 	}
 
 	/** \brief Returns the persistence diagram as a vector of real-valued intervals. */
-	std::vector< interval_filtration >
-	persistence_diagram(Filtration_value shortest_interval = 0., bool include_infinit_bars = false)
+	std::vector< fil_interval >
+	get_persistence_diagram(Filtration_value shortest_interval = 0., bool include_infinit_bars = false)
 	{
 		std::stable_sort(filtration_values_.begin(), filtration_values_.end(),
 						 []( std::pair< Simplex_key, Filtration_value > p1
@@ -1247,12 +1247,12 @@ public:
 		{ return p1.first < p2.first; }
 		);
 
-		std::vector< interval_filtration > diag;
+		std::vector< fil_interval > diag;
 		diag.reserve(persistence_diagram_.size());
 		for(auto bar : persistence_diagram_)
 		{
 			Filtration_value birth,death;
-			std::tie(birth,death) = index_to_filtration(bar.birth(), bar.death());
+			std::tie(birth,death) = map_index_to_filtration_value(bar.birth(), bar.death());
 
 			if( std::abs(birth - death) > shortest_interval ) {
 				diag.emplace_back(bar.dim(), birth, death );

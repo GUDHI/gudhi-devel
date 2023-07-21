@@ -30,7 +30,7 @@ using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, coltype>;
 // using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
-using interval_filtration = ZP::interval_filtration;
+using interval_filtration = ZP::fil_interval;
 
 std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsigned int numberOfSimplices){
 	std::set<unsigned int> essentials;
@@ -40,7 +40,7 @@ std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsig
 		essentials.insert(essentials.end(), i);
 	}
 
-	for (auto& bar : zp.index_persistence_diagram()){
+	for (auto& bar : zp.get_index_persistence_diagram()){
 		res.emplace_back(bar.birth(), bar.death());
 		essentials.erase(bar.birth());
 		essentials.erase(bar.death());

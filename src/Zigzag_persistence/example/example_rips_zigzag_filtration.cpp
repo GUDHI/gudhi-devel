@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2014 Inria
+ *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -34,7 +34,7 @@ using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, Zigzag_options<CT::
 // using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST, coltype>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
-using interval_filtration = ZP::interval_filtration;
+using interval_filtration = ZP::filtration_value_interval;
 
 std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsigned int numberOfSimplices){
 	std::set<unsigned int> essentials;
@@ -44,7 +44,7 @@ std::vector< std::pair<unsigned int, unsigned int> > print_indices(ZP& zp, unsig
 		essentials.insert(essentials.end(), i);
 	}
 
-	for (auto& bar : zp.index_persistence_diagram()){
+	for (auto& bar : zp.get_index_persistence_diagram()){
 		res.emplace_back(bar.birth(), bar.death());
 		essentials.erase(bar.birth());
 		essentials.erase(bar.death());
