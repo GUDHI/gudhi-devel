@@ -50,6 +50,8 @@ namespace zigzag_persistence {
  * \brief Class computating the zigzag persistent homology of a zigzag
  * filtration. Algorithm based on \cite zigzag_reflection.
  *
+ * \ingroup zigzag_persistence
+ *
  * \details The type ZigzagFilteredComplex::Simplex_key counts the number of
  * insertions and
  * deletions of simplices, which may be large in zigzag persistence and require
