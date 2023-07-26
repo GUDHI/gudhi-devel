@@ -676,13 +676,7 @@ class Simplex_tree {
    *
    * Must be different from null_simplex().*/
   int dimension(Simplex_handle sh) {
-    Siblings * curr_sib = self_siblings(sh);
-    int dim = 0;
-    while (curr_sib != nullptr) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim - 1;
+    return dimension(self_siblings(sh));
   }
 
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
@@ -1417,7 +1411,7 @@ class Simplex_tree {
     for (auto hook_u_it = ptr_list_u->begin(); hook_u_it != ptr_list_u->end(); ++hook_u_it)
     {
       Node & node_u = static_cast<Node&>(*hook_u_it); //corresponding node
-      Siblings * sib_u = self_siblings(node_u, u);    //Siblings containing node
+      Siblings * sib_u = self_siblings(simplex_handle_from_node(node_u));
       if (sib_u->members().find(v) != sib_u->members().end()) {
         int curr_dim = dimension(sib_u);
         if (curr_dim < dim_max){
@@ -1436,14 +1430,6 @@ class Simplex_tree {
   }
 
  private:
-  /** Returns the Siblings containing a simplex.*/
-  static Siblings* self_siblings(Node& node, Vertex_handle v) {
-    if (node.children()->parent() == v) {
-      return node.children()->oncles();
-    } else {
-      return node.children();
-    }
-  }
 
   int dimension(Siblings* curr_sib) {
     int dim = 0;
