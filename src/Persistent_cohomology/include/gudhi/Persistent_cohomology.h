@@ -690,6 +690,20 @@ class Persistent_cohomology {
     return result;
   }
 
+  /** @brief Returns persistence intervals for each dimension.
+   * @return A vector of diagrams, one per dimension starting from 0, where each diagram is a vector of persistence intervals (birth and death).
+   */
+  std::vector<std::vector<std::pair<Filtration_value, Filtration_value>>>
+  intervals_by_dimension() {
+    std::vector<std::vector<std::pair<Filtration_value, Filtration_value>>> result;
+    result.resize(dim_max_);
+    for (auto && pair : persistent_pairs_) {
+      auto b = get<0>(pair);
+      result[cpx_->dimension(b)].emplace_back(cpx_->filtration(b), cpx_->filtration(get<1>(pair)));
+    }
+    return result;
+  }
+
  private:
   /*
    * Structure representing a cocycle.
