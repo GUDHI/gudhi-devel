@@ -113,13 +113,6 @@ class Persistent_cohomology {
       // num_simplices must be strictly lower than the limit, because a value is reserved for null_key.
       throw std::out_of_range("The number of simplices is more than Simplex_key type numeric limit.");
     }
-    Simplex_key idx_fil = 0;
-    for (auto sh : cpx_->filtration_simplex_range()) {
-      if (cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
-      cpx_->assign_key(sh, idx_fil);
-      ++idx_fil;
-      dsets_.make_set(cpx_->key(sh));
-    }
     if (persistence_dim_max) {
       ++dim_max_;
     }
@@ -173,12 +166,17 @@ class Persistent_cohomology {
    * valid. Undefined behavior otherwise. */
   void compute_persistent_cohomology(Filtration_value min_interval_length = 0) {
     interval_length_policy.set_length(min_interval_length);
+    Simplex_key idx_fil = -1;
+    std::vector<Simplex_key> vertices; // so we can check the connected components at the end
     // Compute all finite intervals
     for (auto sh : cpx_->filtration_simplex_range()) {
+      cpx_->assign_key(sh, ++idx_fil);
+      dsets_.make_set(cpx_->key(sh));
       int dim_simplex = cpx_->dimension(sh);
       if (cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
       switch (dim_simplex) {
         case 0:
+          vertices.push_back(idx_fil);
           break;
         case 1:
           update_cohomology_groups_edge(sh);
@@ -189,11 +187,7 @@ class Persistent_cohomology {
       }
     }
     // Compute infinite intervals of dimension 0
-    Simplex_key key;
-    for (auto v_sh : cpx_->skeleton_simplex_range(0)) {  // for all 0-dimensional simplices
-    if (cpx_->filtration(v_sh) == std::numeric_limits<Filtration_value>::infinity()) continue;
-      key = cpx_->key(v_sh);
-
+    for (Simplex_key key : vertices) {  // for all 0-dimensional simplices
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
         persistent_pairs_.emplace_back(
