@@ -1323,7 +1323,8 @@ class Simplex_tree {
     *
     * @param[in] u,v              Vertex_handle representing the new edge
     * @param[in] fil              Filtration value of the edge
-    * @param[in] dim_max          Maximal dimension of the expansion
+    * @param[in] dim_max          Maximal dimension of the expansion.
+    *                             If set to -1, the expansion goes as far as possible.
     * @param[in] added_simplices  Contains at the end all new
     *                             simplices induced by the insertion of the edge.
     *
@@ -1398,7 +1399,7 @@ class Simplex_tree {
     }
 
     //upper bound on dimension
-    dimension_ = dim_max;
+    dimension_ = dim_max == -1 ? num_vertices() : dim_max;
     dimension_to_be_lowered_ = true;
 
     //for all siblings containing a Node labeled with u (including the root), run
@@ -1414,7 +1415,7 @@ class Simplex_tree {
       Siblings * sib_u = self_siblings(simplex_handle_from_node(node_u));
       if (sib_u->members().find(v) != sib_u->members().end()) {
         int curr_dim = dimension(sib_u);
-        if (curr_dim < dim_max){
+        if (dim_max == -1 || curr_dim < dim_max){
           if (node_u.children()->parent() != u) { //now has a new child Node labeled v
             node_u.assign_children(new Siblings(sib_u, u));
           }
@@ -1422,7 +1423,7 @@ class Simplex_tree {
                 v,
                 node_u.children(),
                 fil,
-                dim_max - curr_dim - 1, //>= 0
+                dim_max - curr_dim - 1, //>= 0 if dim_max >= 0, <0 otherwise
                 added_simplices );      //u on top
         }
       }
@@ -1459,7 +1460,7 @@ class Simplex_tree {
     added_simplices.push_back(res_ins_v.first); //no more insertion in sib
     update_simplex_tree_after_node_insertion(res_ins_v.first);
 
-    if (k == 0) { return; } //reached the maximal dimension
+    if (k == 0) { return; } //reached the maximal dimension. if max_dim == -1, k is never equal to 0.
 
     //create the subtree of new Node(v)
     create_local_expansion(  res_ins_v.first
@@ -1536,7 +1537,7 @@ class Simplex_tree {
   /** \brief Recursive expansion of the simplex tree.*/
   void siblings_expansion(Siblings * siblings,  // must contain elements
                           int k) {
-    if (dimension_ > k) {
+    if (k >= 0 && dimension_ > k) {
       dimension_ = k;
     }
     if (k == 0)
