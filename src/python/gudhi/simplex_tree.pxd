@@ -48,7 +48,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_interface_full_featured() nogil
         Simplex_tree_interface_full_featured(Simplex_tree_interface_full_featured&) nogil
         double simplex_filtration(vector[int] simplex) nogil
-        void assign_simplex_filtration(vector[int] simplex, double filtration) nogil except +
+        void assign_simplex_filtration(vector[int] simplex, double filtration) except + nogil
         void initialize_filtration() nogil
         int num_vertices() nogil
         int num_simplices() nogil
@@ -58,17 +58,17 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         int upper_bound_dimension() nogil
         bool find_simplex(vector[int] simplex) nogil
         bool insert(vector[int] simplex, double filtration) nogil
-        void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) nogil except +
-        void insert_batch_vertices(vector[int] v, double f) nogil except +
+        void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) except + nogil
+        void insert_batch_vertices(vector[int] v, double f) except + nogil
         vector[pair[vector[int], double]] get_star(vector[int] simplex) nogil
         vector[pair[vector[int], double]] get_cofaces(vector[int] simplex, int dimension) nogil
-        void expansion(int max_dim) nogil except +
+        void expansion(int max_dim) except + nogil
         void remove_maximal_simplex(vector[int] simplex) nogil
         bool prune_above_filtration(double filtration) nogil
         bool prune_above_dimension(int dimension) nogil
         bool make_filtration_non_decreasing() nogil
         void compute_extended_filtration() nogil
-        Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil except +
+        Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) except + nogil
         void reset_filtration(double filtration, int dimension) nogil
         bint operator==(Simplex_tree_interface_full_featured) nogil
         # Iterators over Simplex tree
@@ -79,23 +79,23 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         vector[Simplex_tree_simplex_handle].const_iterator get_filtration_iterator_end() nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_begin(int dimension) nogil
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
-        pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] get_boundary_iterators(vector[int] simplex) nogil except +
+        pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] get_boundary_iterators(vector[int] simplex) except + nogil
         # Expansion with blockers
-        ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
-        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
-        void serialize(char* buffer, const size_t buffer_size) nogil except +
-        void deserialize(const char* buffer, const size_t buffer_size) nogil except +
+        ctypedef bool (*blocker_func_t)(vector[int], void *user_data) except +
+        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) except +
+        void serialize(char* buffer, const size_t buffer_size) except + nogil
+        void deserialize(const char* buffer, const size_t buffer_size) except + nogil
         size_t get_serialization_size() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":
         Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
+        void compute_persistence(int homology_coeff_field, double min_persistence) except + nogil
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
         vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
-        void write_output_diagram(string diagram_file_name) nogil except +
+        void write_output_diagram(string diagram_file_name) except + nogil
         vector[pair[vector[int], vector[int]]] persistence_pairs() nogil
         pair[vector[vector[int]], vector[vector[int]]] lower_star_generators() nogil
         pair[vector[vector[int]], vector[vector[int]]] flag_generators() nogil

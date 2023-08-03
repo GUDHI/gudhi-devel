@@ -19,8 +19,8 @@ __license__ = "MIT"
 
 def test_insertion():
     st = SimplexTree()
-    assert st.__is_defined() == True
-    assert st.__is_persistence_defined() == False
+    assert st._is_defined() == True
+    assert st._is_persistence_defined() == False
     assert st.is_empty()
 
     # insert test
@@ -99,7 +99,7 @@ def test_insertion():
         (1, (4.0, float("inf"))),
         (0, (0.0, float("inf"))),
     ]
-    assert st.__is_persistence_defined() == True
+    assert st._is_persistence_defined() == True
 
     assert st.betti_numbers() == [1, 1]
     assert st.persistent_betti_numbers(-0.1, 10000.0) == [0, 0]
@@ -118,8 +118,8 @@ def test_insertion():
 
 def test_expansion():
     st = SimplexTree()
-    assert st.__is_defined() == True
-    assert st.__is_persistence_defined() == False
+    assert st._is_defined() == True
+    assert st._is_persistence_defined() == False
 
     # insert test
     assert st.insert([3, 2], 0.1) == True
@@ -188,8 +188,8 @@ def test_expansion():
 
 def test_automatic_dimension():
     st = SimplexTree()
-    assert st.__is_defined() == True
-    assert st.__is_persistence_defined() == False
+    assert st._is_defined() == True
+    assert st._is_persistence_defined() == False
 
     # insert test
     assert st.insert([0, 1, 3], filtration=0.5) == True
@@ -216,8 +216,8 @@ def test_automatic_dimension():
 
 def test_make_filtration_non_decreasing():
     st = SimplexTree()
-    assert st.__is_defined() == True
-    assert st.__is_persistence_defined() == False
+    assert st._is_defined() == True
+    assert st._is_persistence_defined() == False
 
     # Inserted simplex:
     #    1
@@ -487,8 +487,8 @@ def test_simplex_tree_deep_copy():
     st_filt_list = list(st.get_filtration())
 
     # check persistence is not copied
-    assert st.__is_persistence_defined() == True
-    assert st_copy.__is_persistence_defined() == False
+    assert st._is_persistence_defined() == True
+    assert st_copy._is_persistence_defined() == False
 
     # remove something in the copy and check the copy is included in the original
     st_copy.remove_maximal_simplex([1, 2, 3])
@@ -514,8 +514,8 @@ def test_simplex_tree_deep_copy_constructor():
     st_filt_list = list(st.get_filtration())
 
     # check persistence is not copied
-    assert st.__is_persistence_defined() == True
-    assert st_copy.__is_persistence_defined() == False
+    assert st._is_persistence_defined() == True
+    assert st_copy._is_persistence_defined() == False
 
     # remove something in the copy and check the copy is included in the original
     st_copy.remove_maximal_simplex([1, 2, 3])

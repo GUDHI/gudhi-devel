@@ -28,7 +28,7 @@ __license__ = "MIT"
 _gudhi_matplotlib_use_tex = True
 
 
-def __min_birth_max_death(persistence, band=0.0):
+def _min_birth_max_death(persistence, band=0.0):
     """This function returns (min_birth, max_death) from the persistence.
 
     :param persistence: The persistence to plot.
@@ -180,7 +180,7 @@ def plot_persistence_barcode(
             persistence = _limit_to_max_intervals(
                 persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
             )
-            (min_birth, max_death) = __min_birth_max_death(persistence)
+            (min_birth, max_death) = _min_birth_max_death(persistence)
             persistence = sorted(persistence, key=lambda birth: birth[1][0])
         except IndexError:
             min_birth, max_death = 0.0, 1.0
@@ -307,7 +307,7 @@ def plot_persistence_diagram(
             persistence = _limit_to_max_intervals(
                 persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
             )
-            min_birth, max_death = __min_birth_max_death(persistence, band)
+            min_birth, max_death = _min_birth_max_death(persistence, band)
         except IndexError:
             min_birth, max_death = 0.0, 1.0
             pass
