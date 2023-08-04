@@ -194,11 +194,6 @@ class Simplex_tree {
   /** \brief Range for an optimized search for the star of a simplex. */
   using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
 
-//   using Const_boost_iterator =
-//       typename std::conditional<Options::simplex_handle_strong_validity, const Simplex_handle,
-//                                 const boost::container::vec_iterator<std::pair<int, Node>*, false>>::type;
-  using Const_boost_iterator = const Simplex_handle;
-
   class Fast_cofaces_predicate {
     Simplex_tree* st_;
     int codim_;
@@ -206,7 +201,7 @@ class Simplex_tree {
    public:
     Fast_cofaces_predicate(Simplex_tree* st, int codim, int dim)
       : st_(st), codim_(codim), dim_(codim + dim) {}
-    bool operator()( Const_boost_iterator iter ) const {
+    bool operator()( const Simplex_handle iter ) const {
       if (codim_ == 0)
         // Always true for a star
         return true;
@@ -1944,13 +1939,16 @@ class Simplex_tree {
     return nullptr;
   }
 
-  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node. */
+  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
+   * Not optimal, if Options::simplex_handle_strong_validity == true. Requires that the node is not a copy.
+   */
   static Simplex_handle simplex_handle_from_node(Node& node) {
     if constexpr (Options::simplex_handle_strong_validity) {
       Siblings* children = node.children();
       //verifies if node is a leaf
       for (auto it = children->members().begin(); it != children->members().end(); ++it){
-        // TODO: does not work if nodes were copied.
+        // WARNING: does not work if nodes were copied, but I don't see another way to verify if two leaf nodes are
+        // equal. And I guess that `get_parent_from_member` needs a real pointer to the flat_map element too anyway?
         if (&(it->second) == &node) return it;
       }
       return children->oncles()->find(children->parent());
