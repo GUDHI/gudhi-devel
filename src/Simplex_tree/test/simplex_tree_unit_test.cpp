@@ -33,7 +33,8 @@ using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_oscillating_rips> > list_of_tested_variants;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
@@ -88,7 +89,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_when_empty, typeST, list_of_tested_va
   typeVectorVertex simplexVectorEmpty;
   BOOST_CHECK(simplexVectorEmpty.empty() == true);
   typePairSimplexBool returnEmptyValue = st.insert_simplex(simplexVectorEmpty, 0.0);
-  BOOST_CHECK(returnEmptyValue.first == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(returnEmptyValue.first == typeST::null_simplex());
   BOOST_CHECK(returnEmptyValue.second == true);
 
   test_empty_simplex_tree(st);
@@ -157,7 +158,7 @@ void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValu
   BOOST_CHECK(returnValue.second == true);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   typename typeST::Simplex_handle shReturned = returnValue.first;
-  BOOST_CHECK(shReturned != typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned != typeST::null_simplex());
 }
 
 // Global variables
@@ -312,7 +313,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(returnValue.second == false);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   typename typeST::Simplex_handle shReturned = returnValue.first;
-  BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned == typeST::null_simplex());
   std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
@@ -327,7 +328,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(returnValue.second == false);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   shReturned = returnValue.first;
-  BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned == typeST::null_simplex());
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
 

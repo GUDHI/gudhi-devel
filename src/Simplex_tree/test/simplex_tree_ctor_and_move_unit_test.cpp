@@ -27,7 +27,8 @@ using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_oscillating_rips> > list_of_tested_variants;
 
 template<typename Simplex_tree>
 void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
