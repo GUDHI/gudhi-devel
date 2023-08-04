@@ -28,8 +28,8 @@ np.import_array()
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_interface "Gudhi::Cubical_complex::Periodic_cubical_complex_interface":
-        Periodic_cubical_complex_interface(vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells) except + nogil
-        Periodic_cubical_complex_interface(const char* perseus_file) except + nogil
+        Periodic_cubical_complex_interface(vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells) nogil except +
+        Periodic_cubical_complex_interface(const char* perseus_file) nogil except +
         int num_simplices() nogil
         int dimension() nogil
         vector[unsigned] shape() nogil
@@ -39,7 +39,7 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Periodic_cubical_complex_interface>":
         Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_interface * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) except + nogil
+        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
         vector[vector[int]] vertices_of_cubical_persistence_pairs() nogil

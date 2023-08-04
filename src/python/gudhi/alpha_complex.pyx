@@ -28,9 +28,9 @@ __license__ = "GPL v3"
 
 cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) except + nogil
-        vector[double] get_point(int vertex) except + nogil
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) except + nogil
+        Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
+        vector[double] get_point(int vertex) nogil except +
+        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
         @staticmethod
         void set_float_relative_precision(double precision) nogil
         @staticmethod
