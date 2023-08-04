@@ -14,6 +14,8 @@
 #include <cmath>
 #include <cstddef>
 #include <vector>
+#include <algorithm>
+#include <tuple>
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -31,7 +33,7 @@ namespace zigzag_persistence {
 template <typename Filtration_value>
 class Zigzag_edge {
  public:
-  Zigzag_edge(size_t u, size_t v, Filtration_value fil, bool direction)
+  Zigzag_edge(int u, int v, Filtration_value fil, bool direction)
       : u_(u), v_(v), fil_(fil), direction_(direction) {
         if (u > v) std::swap(u_, v_);
       }
@@ -39,15 +41,15 @@ class Zigzag_edge {
   Zigzag_edge() : u_(0), v_(0), fil_(0), direction_(true) {}
 
   /* Returns vertex with smaller label. */
-  size_t get_smallest_vertex() const { return u_; }
+  int get_smallest_vertex() const { return u_; }
   /* Returns vertex with bigger label. */
-  size_t get_biggest_vertex() const { return v_; }
+  int get_biggest_vertex() const { return v_; }
   /* Returns the filtration value of the edge. */
   Filtration_value get_filtration_value() const { return fil_; }
   /* Returns true if insertion of the edge, false if removal. */
   bool get_direction() const { return direction_; }
 
-  void set(size_t u, size_t v, Filtration_value fil, bool direction){
+  void set(int u, int v, Filtration_value fil, bool direction){
     u_ = u;
     v_ = v;
     fil_ = fil;
@@ -58,11 +60,16 @@ class Zigzag_edge {
     return ((e.u_ == u_) && (e.v_ == v_) && (e.fil_ == fil_) && (e.direction_ == direction_));
   }
 
-  void assign_filtration(Filtration_value fil) { fil_ = fil; }
+//   bool operator<(const Zigzag_edge& e) const {
+//     if (e.fil_ != fil_) return fil_ < e.fil_;
+//     if (e.direction_ != direction_) return direction_;
+//     if (e.u_ != u_) return u_ < e.u_;
+//     return v_ < e.v_;
+//   }
 
  private:
-  size_t u_;
-  size_t v_;
+  int u_;
+  int v_;
   Filtration_value fil_;
   bool direction_;
 };
@@ -88,27 +95,254 @@ class Square_root_edge_modifier {
   Square_root_edge_modifier() {}
 };
 
+//assumes that eps_n-1 == 0
 template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier<Filtration_value> >
 class Oscillating_rips_edge_range {
- private:
-  class Oscillating_rips_edge_iterator;
-
  public:
   enum Order_policy { ALREADY_ORDERED, FARTHEST_POINT_ORDERING, RANDOM_POINT_ORDERING };
 
+  class Oscillating_rips_edge_iterator
+      : public boost::iterator_facade<Oscillating_rips_edge_iterator, 
+                                      const Zigzag_edge<Filtration_value>&,
+                                      boost::forward_traversal_tag> {
+   public:
+    template <typename PointRange, typename DistanceFunction>
+    Oscillating_rips_edge_iterator(Filtration_value nu, 
+                                   Filtration_value mu, 
+                                   const PointRange& points,
+                                   DistanceFunction&& distance, 
+                                   Order_policy orderPolicy)
+        : nu_(nu),
+          mu_(mu),
+          currentEdge_(0, 0, std::numeric_limits<Filtration_value>::infinity(), true),
+          epsilonIndex_(0),
+          rowIndex_(1),
+          inPositiveDirection_(true),
+          insertVertex_(true) 
+    {
+      _initialize(nu_, mu_, epsilonValues_, distanceMatrix_, points, distance, orderPolicy);
+      auto it =
+          std::upper_bound(distanceMatrix_[1].begin(), distanceMatrix_[1].end(),
+                           std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsilonIndex_]),
+                           Point_distance_comp());
+      columnIndex_ = it - distanceMatrix_[1].begin();
+    }
+
+    template <typename PointRange, typename DistanceFunction>
+    Oscillating_rips_edge_iterator(Filtration_value nu, 
+                                   Filtration_value mu, 
+                                   const PointRange& orderedPoints,
+                                   DistanceFunction&& distance, 
+                                   const std::vector<Filtration_value>& epsilonValues)
+        : epsilonValues_(epsilonValues),
+          nu_(nu),
+          mu_(mu),
+          currentEdge_(0, 0, std::numeric_limits<Filtration_value>::infinity(), true),
+          epsilonIndex_(0),
+          rowIndex_(1),
+          inPositiveDirection_(true),
+          insertVertex_(true)
+    {
+      GUDHI_CHECK(orderedPoints.size() == epsilonValues.size(),
+                  "The number of points and the number of epsilon values should match.");
+      GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
+
+      if constexpr (EdgeModifier::isActive_) {
+        nu_ = EdgeModifier::apply_inverse_modifier(nu);
+        mu_ = EdgeModifier::apply_inverse_modifier(mu);
+      }
+
+      // compute the distance matrix
+      distanceMatrix_ = _compute_distance_matrix(orderedPoints, distance);
+
+      auto it =
+          std::upper_bound(distanceMatrix_[1].begin(), distanceMatrix_[1].end(),
+                           std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsilonIndex_]),
+                           Point_distance_comp());
+      columnIndex_ = it - distanceMatrix_[1].begin();
+    }
+
+    Oscillating_rips_edge_iterator()
+        : nu_(0),
+          mu_(0),
+          currentEdge_(0, 0, 0, true),
+          epsilonIndex_(0),
+          rowIndex_(0),
+          columnIndex_(0),
+          inPositiveDirection_(true),
+          insertVertex_(true) {}
+
+   private:
+    friend class boost::iterator_core_access;
+
+    std::vector<Filtration_value> epsilonValues_;
+    std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_;
+    Filtration_value nu_;
+    Filtration_value mu_;
+    Zigzag_edge<Filtration_value> currentEdge_;
+    size_t epsilonIndex_, rowIndex_, columnIndex_;
+    bool inPositiveDirection_, insertVertex_;
+
+    bool equal(Oscillating_rips_edge_iterator const& other) const {
+      return rowIndex_ == other.rowIndex_ && currentEdge_ == other.currentEdge_;
+    }
+
+    const Zigzag_edge<Filtration_value>& dereference() const { return currentEdge_; }
+
+    void increment() {
+      if (epsilonIndex_ < distanceMatrix_.size() - 1) {
+        if (insertVertex_) {
+          _update_edge_as_positive_vertex();
+          insertVertex_ = false;
+          return;
+        }
+
+        if (inPositiveDirection_ && _positive_col_index_is_not_valid()) {
+          while (_positive_col_index_is_not_valid() && rowIndex_ <= epsilonIndex_) {
+            ++rowIndex_;
+            _initialize_positive_col_index();
+          }
+          if (_positive_col_index_is_not_valid()) {
+            _initialize_negative_col_index();
+            inPositiveDirection_ = false;
+          }
+        }
+
+        if (!inPositiveDirection_ && _negative_col_index_is_not_valid()) {
+          while (_negative_col_index_is_not_valid() && rowIndex_ > 1) {
+            --rowIndex_;
+            _initialize_negative_col_index();
+          }
+          if (_negative_col_index_is_not_valid()) {
+            _initialize_positive_col_index();
+            ++epsilonIndex_;
+            inPositiveDirection_ = true;
+            if (epsilonIndex_ == distanceMatrix_.size() - 1) {
+              //   _set_end();
+              rowIndex_ = distanceMatrix_.size();
+              _update_edge_as_negative_vertex();
+              return;
+            }
+            _update_edge_as_positive_vertex();
+            return;
+          }
+        }
+
+        if (inPositiveDirection_) {
+          --columnIndex_;
+          _update_edge(epsilonIndex_, true);
+          while (_positive_col_index_is_not_valid() && rowIndex_ <= epsilonIndex_) {
+            ++rowIndex_;
+            _initialize_positive_col_index();
+          }
+          if (_positive_col_index_is_not_valid()) {
+            ++rowIndex_;
+          }
+          if (rowIndex_ == epsilonIndex_ + 2) {
+            inPositiveDirection_ = false;
+            --rowIndex_;
+            _initialize_negative_col_index();
+          }
+          return;
+        }
+
+        _update_edge(epsilonIndex_, false);
+        ++columnIndex_;
+        while (_negative_col_index_is_not_valid() && rowIndex_ > 1) {
+            --rowIndex_;
+            _initialize_negative_col_index();
+        }
+        if (_negative_col_index_is_not_valid()) {
+            --rowIndex_;
+        }
+        if (rowIndex_ == 0) {
+          ++epsilonIndex_;
+          if (epsilonIndex_ == distanceMatrix_.size() - 1) {
+            rowIndex_ = distanceMatrix_.size() + 1;
+            return;
+          }
+          insertVertex_ = true;
+          inPositiveDirection_ = true;
+          ++rowIndex_;
+          _initialize_positive_col_index();
+        }
+        return;
+      } if (rowIndex_ > 1){
+        --rowIndex_;
+        _update_edge_as_negative_vertex();
+        return;
+      }
+
+      _set_end();
+    }
+
+    void _set_end(){
+        rowIndex_ = 0;
+        currentEdge_ = Zigzag_edge<Filtration_value>();
+    }
+
+    void _initialize_positive_col_index() {
+      auto it =
+          std::upper_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
+                           std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsilonIndex_]),
+                           Point_distance_comp());
+      columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
+    }
+
+    void _initialize_negative_col_index() {
+      auto it =
+          std::lower_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
+                           std::pair<int, Filtration_value>(0, nu_ * epsilonValues_[epsilonIndex_ + 1]),
+                           Point_distance_comp());
+      while (it != distanceMatrix_[rowIndex_].end() && it->second == nu_ * epsilonValues_[epsilonIndex_ + 1]) ++it;
+      columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
+    }
+
+    bool _positive_col_index_is_not_valid() {
+        return columnIndex_ == 0 ||
+               (rowIndex_ != (epsilonIndex_ + 1) &&
+                distanceMatrix_[rowIndex_][columnIndex_ - 1].second <= nu_ * epsilonValues_[epsilonIndex_]);
+    }
+
+    bool _negative_col_index_is_not_valid() {
+        return columnIndex_ == distanceMatrix_[rowIndex_].size() ||
+               distanceMatrix_[rowIndex_][columnIndex_].second > mu_ * epsilonValues_[epsilonIndex_];
+    }
+
+    void _update_edge(size_t i, bool direction) {
+        if constexpr (EdgeModifier::isActive_)
+            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_,
+                             EdgeModifier::apply_modifier(epsilonValues_[i]), direction);
+        else
+            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, epsilonValues_[i], direction);
+    }
+
+    void _update_edge_as_positive_vertex() {
+        if constexpr (EdgeModifier::isActive_)
+            currentEdge_.set(epsilonIndex_ + 1, epsilonIndex_ + 1,
+                             EdgeModifier::apply_modifier(epsilonValues_[epsilonIndex_]), true);
+        else
+            currentEdge_.set(epsilonIndex_ + 1, epsilonIndex_ + 1, epsilonValues_[epsilonIndex_], true);
+    }
+
+    void _update_edge_as_negative_vertex() {
+        currentEdge_.set(rowIndex_ - 1, rowIndex_ - 1, -std::numeric_limits<Filtration_value>::infinity(), false);
+    }
+  };
+
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<Zigzag_edge<Filtration_value> > compute_oscillating_rips_edges(Filtration_value nu,
-                                                                                    Filtration_value mu,
-                                                                                    const PointRange& points,
-                                                                                    DistanceFunction&& distance,
-                                                                                    Order_policy orderPolicy) 
+  static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(Filtration_value nu, 
+                                                                          Filtration_value mu,
+                                                                          const PointRange& points,
+                                                                          DistanceFunction&& distance,
+                                                                          Order_policy orderPolicy)
   {
     std::vector<Zigzag_edge<Filtration_value> > edgeFiltration;
     std::vector<Filtration_value> epsilonValues;
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix;
     auto n = points.size();
 
-    initialize_(nu, mu, epsilonValues, distanceMatrix, points, distance, orderPolicy);
+    _initialize(nu, mu, epsilonValues, distanceMatrix, points, distance, orderPolicy);
 
     // edgesAdded[i] (resp. edgesRemoved[i]) == list of edges (i,j), with j<i, added (resp. removed) at eps_i
     // we also put there (later) vertices that are added. Note that vertices are removed
@@ -119,7 +353,7 @@ class Oscillating_rips_edge_range {
     //                              std::pair<int, Filtration_value>(distanceMatrix.size(), mu * epsilonValues[0]),
     //                              Point_distance_comp());
     // std::cout << "start vect colind: " << (it - distanceMatrix[1].begin()) << ", (" << it->first << ", " << it->second << "), (" << distanceMatrix[1].begin()->first << ", " << distanceMatrix[1].begin()->second << ")\n";
-    size_t number_of_arrows = compute_edges_(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
+    size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
 
     // Now, sort edges according to lengths, and put everything in edgeFiltration
     edgeFiltration.clear();
@@ -130,53 +364,63 @@ class Oscillating_rips_edge_range {
                                 std::numeric_limits<Filtration_value>::infinity(), true);
     // epsilonValues[0], true);
 
-    if constexpr (EdgeModifier::isActive_) {
-      for (size_t i = 0; i < n - 1; ++i) {                                  // all ascending arrows eps_i
-        edgeFiltration.emplace_back(i + 1, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);  // add p_{i+1},eps_i
-        for (auto edg_it = edgesAdded[i].begin(); edg_it != edgesAdded[i].end(); ++edg_it) {
-          edgeFiltration.push_back(*edg_it);
-        }
-        for (auto edg_it = edgesRemoved[i].rbegin();  // longest first
-             edg_it != edgesRemoved[i].rend(); ++edg_it) {
-          edgeFiltration.push_back(*edg_it);
-        }
-      }
-    } else {
-      for (size_t i = 0; i < n - 1; ++i) {                                  // all ascending arrows eps_i
+    for (size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
+      if constexpr (EdgeModifier::isActive_) {
+        edgeFiltration.emplace_back(i + 1, i + 1, 
+                                    EdgeModifier::apply_modifier(epsilonValues[i]),
+                                    true);  // add p_{i+1},eps_i
+      } else {
         edgeFiltration.emplace_back(i + 1, i + 1, epsilonValues[i], true);  // add p_{i+1},eps_i
-        for (auto edg_it = edgesAdded[i].begin(); edg_it != edgesAdded[i].end(); ++edg_it) {
-          edgeFiltration.push_back(*edg_it);
-        }
-        for (auto edg_it = edgesRemoved[i].rbegin();  // longest first
-             edg_it != edgesRemoved[i].rend(); ++edg_it) {
-          edgeFiltration.push_back(*edg_it);
-        }
+      }
+      for (auto edg_it = edgesAdded[i].begin(); edg_it != edgesAdded[i].end(); ++edg_it) {
+        edgeFiltration.push_back(*edg_it);
+      }
+      for (auto edg_it = edgesRemoved[i].rbegin();  // longest first
+           edg_it != edgesRemoved[i].rend(); ++edg_it) {
+        edgeFiltration.push_back(*edg_it);
       }
     }
+    for (int i = n - 1; i >= 0; --i) {
+      edgeFiltration.emplace_back(i, i, -std::numeric_limits<Filtration_value>::infinity(), false);
+    }
 
-    // what remains is removed in the zigzag iterator with -infinity values. If eps_n-1
-    //== 0, which is the usual case, the remaining simplices in the filtration are
-    // the n vertices.
-    // cannot inforce this here.
+    _canonically_sort_edges(edgeFiltration);
 
     return edgeFiltration;
   }
 
   template <typename PointRange, typename DistanceFunction>
-  static boost::iterator_range<Oscillating_rips_edge_iterator> compute_oscillating_rips_edges_as_iterator(
+  static boost::iterator_range<Oscillating_rips_edge_iterator> get_iterator_range(
       Filtration_value nu, 
       Filtration_value mu, 
       const PointRange& points, 
       DistanceFunction&& distance,
       Order_policy orderPolicy) 
   {
-    auto start = Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy);
-    auto end = Oscillating_rips_edge_iterator();
     return boost::iterator_range<Oscillating_rips_edge_iterator>(
-        start, end);
+        Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy), Oscillating_rips_edge_iterator());
+  }
+
+  //as Oscillating_rips_edge_iterator is a heavy iterator to copy, it should not be used as a usual iterator
+  template <typename PointRange, typename DistanceFunction>
+  static Oscillating_rips_edge_iterator begin(
+      Filtration_value nu, 
+      Filtration_value mu, 
+      const PointRange& points, 
+      DistanceFunction&& distance,
+      Order_policy orderPolicy) 
+  {
+    return Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy);
+  }
+
+  static Oscillating_rips_edge_iterator end() 
+  {
+    return Oscillating_rips_edge_iterator();
   }
 
  private:
+  Oscillating_rips_edge_range(){};
+
   /* The two input types std::pair<int, Filtration_value> encode pairs
    * (j, d(p_i,p_j)) and (k, d(p_i,p_k)) for some fixed point p_i.
    * The operator() orders edges by length. By convention, if lengths are equal,
@@ -193,214 +437,8 @@ class Oscillating_rips_edge_range {
     }
   };
 
-  class Oscillating_rips_edge_iterator
-      : public boost::iterator_facade<Oscillating_rips_edge_iterator, 
-                                      const Zigzag_edge<Filtration_value>&,
-                                      boost::forward_traversal_tag> {
-   public:
-    template <typename PointRange, typename DistanceFunction>
-    Oscillating_rips_edge_iterator(Filtration_value nu, 
-                                   Filtration_value mu, 
-                                   const PointRange& points,
-                                   DistanceFunction&& distance, 
-                                   Order_policy orderPolicy)
-        : nu_(nu), mu_(mu), currentEdge_(0, 0, std::numeric_limits<Filtration_value>::infinity(), true), isEnd_(false), epsValIndex_(0), rowIndex_(1), inPosEd_(true), insertVertex_(true)
-    {
-      initialize_(nu_, mu_, epsilonValues_, distanceMatrix_, points, distance, orderPolicy);
-      auto it = std::upper_bound(distanceMatrix_[1].begin(), distanceMatrix_[1].end(),
-                                 std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsValIndex_]),
-                                 Point_distance_comp());
-      columnIndex_ = it - distanceMatrix_[1].begin();
-    //   std::cout << "start colind: " << columnIndex_ << ", (" << it->first << ", " << it->second << "), (" << distanceMatrix_[1].begin()->first << ", " << distanceMatrix_[1].begin()->second << ")\n";
-    }
-
-    template <typename PointRange, typename DistanceFunction>
-    Oscillating_rips_edge_iterator(Filtration_value nu, Filtration_value mu, const PointRange& orderedPoints,
-                                   DistanceFunction&& distance, const std::vector<Filtration_value>& epsilonValues)
-        : epsilonValues_(epsilonValues),
-          nu_(nu),
-          mu_(mu),
-          currentEdge_(0, 0, std::numeric_limits<Filtration_value>::infinity(), true),
-          isEnd_(false), epsValIndex_(0), rowIndex_(1), inPosEd_(true), insertVertex_(true) {
-      GUDHI_CHECK(orderedPoints.size() == epsilonValues.size(),
-                  "The number of points and the number of epsilon values should match.");
-      GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
-
-      if constexpr (EdgeModifier::isActive_) {
-        nu_ = EdgeModifier::apply_inverse_modifier(nu);
-        mu_ = EdgeModifier::apply_inverse_modifier(mu);
-      }
-
-      // compute the distance matrix
-      distanceMatrix_ = compute_distance_matrix_(orderedPoints, distance);
-
-      auto it = std::upper_bound(distanceMatrix_[1].begin(), distanceMatrix_[1].end(),
-                                 std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsValIndex_]),
-                                 Point_distance_comp());
-      columnIndex_ = it - distanceMatrix_[1].begin();
-    }
-
-    Oscillating_rips_edge_iterator() : nu_(0), mu_(0), currentEdge_(0, 0, 0, true), isEnd_(true),  epsValIndex_(0), rowIndex_(1), columnIndex_(0), inPosEd_(true), insertVertex_(true) {}
-
-   private:
-    friend class boost::iterator_core_access;
-
-    std::vector<Filtration_value> epsilonValues_;
-    std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_;
-    Filtration_value nu_;
-    Filtration_value mu_;
-    Zigzag_edge<Filtration_value> currentEdge_;
-    bool isEnd_;    //to replace
-    size_t epsValIndex_, rowIndex_, columnIndex_;
-    bool inPosEd_, insertVertex_;   //to replace
-
-    bool equal(Oscillating_rips_edge_iterator const& other) const { return isEnd_ == other.isEnd_ && currentEdge_ == other.currentEdge_; }
-
-    const Zigzag_edge<Filtration_value>& dereference() const { return currentEdge_; }
-
-    void increment() {
-      if (epsValIndex_ < distanceMatrix_.size() - 1) {
-        if (insertVertex_) {
-          currentEdge_.set(epsValIndex_ + 1, epsValIndex_ + 1, epsilonValues_[epsValIndex_], true);
-          insertVertex_ = false;
-          return;
-        }
-
-        while ((epsValIndex_ < distanceMatrix_.size() - 1 && inPosEd_ && col_index_is_not_valid_pos()) ||
-               (epsValIndex_ < distanceMatrix_.size() - 1 && !inPosEd_ && col_index_is_not_valid_neg())) {
-          if (inPosEd_) {
-            ini_col_index_pos();
-          } else {
-            ini_col_index_neg();
-            if (epsValIndex_ == distanceMatrix_.size() - 1) {
-                set_end_();
-                return;
-            }
-            if (insertVertex_) {
-              currentEdge_.set(epsValIndex_ + 1, epsValIndex_ + 1, epsilonValues_[epsValIndex_], true);
-              insertVertex_ = false;
-              return;
-            }
-          }
-        }
-
-        if (inPosEd_) {
-          up_edge_pos(epsValIndex_);
-          if (rowIndex_ == epsValIndex_ + 2) {
-            inPosEd_ = false;
-            --rowIndex_;
-            ini_col_index_low();
-          }
-          return;
-        }
-
-        up_edge_neg(epsValIndex_);
-        if (rowIndex_ == 0) {
-          ++epsValIndex_;
-          if (epsValIndex_ == distanceMatrix_.size() - 1) return;
-          insertVertex_ = true;
-          inPosEd_ = true;
-          ++rowIndex_;
-          ini_col_index_up();
-        }
-        return;
-      }
-
-      set_end_();
-    }
-
-    void set_end_(){
-        isEnd_ = true;
-        currentEdge_ = Zigzag_edge<Filtration_value>();
-    }
-
-    void ini_col_index_up() {
-      auto it =
-          std::upper_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
-                           std::pair<int, Filtration_value>(distanceMatrix_.size(), mu_ * epsilonValues_[epsValIndex_]),
-                           Point_distance_comp());
-      columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
-    }
-
-    void ini_col_index_low() {
-      auto it =
-          std::lower_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
-                           std::pair<int, Filtration_value>(0, nu_ * epsilonValues_[epsValIndex_ + 1]),
-                           Point_distance_comp());
-      while (it != distanceMatrix_[rowIndex_].end() && it->second == nu_ * epsilonValues_[epsValIndex_ + 1]) ++it;
-      columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
-    }
-
-    void ini_col_index_pos(){
-        while (col_index_is_not_valid_pos() && rowIndex_ <= epsValIndex_) {
-            ++rowIndex_;
-            ini_col_index_up();
-        }
-        if (col_index_is_not_valid_pos()){
-            ini_col_index_low();
-            inPosEd_ = false;
-        }
-    }
-
-    void ini_col_index_neg(){
-        while (col_index_is_not_valid_neg() && rowIndex_ > 1) {
-            --rowIndex_;
-            ini_col_index_low();
-        }
-        if (col_index_is_not_valid_neg()){
-            ini_col_index_up();
-            ++epsValIndex_;
-            insertVertex_ = true;
-            inPosEd_ = true;
-        }
-    }
-
-    bool col_index_is_not_valid_pos() {
-        return columnIndex_ == 0 ||
-               (rowIndex_ != (epsValIndex_ + 1) &&
-                distanceMatrix_[rowIndex_][columnIndex_ - 1].second <= nu_ * epsilonValues_[epsValIndex_]);
-    }
-
-    bool col_index_is_not_valid_neg() {
-        return columnIndex_ == distanceMatrix_[rowIndex_].size() ||
-               distanceMatrix_[rowIndex_][columnIndex_].second > mu_ * epsilonValues_[epsValIndex_];
-    }
-
-    void up_edge_pos(size_t i) {
-        --columnIndex_;
-        if constexpr (EdgeModifier::isActive_)
-            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, EdgeModifier::apply_modifier(epsilonValues_[i]), true);
-        else 
-            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, epsilonValues_[i], true);
-        // std::cout << "pos: " << rowIndex_ << ", " << columnIndex_ << ", " << distanceMatrix_[rowIndex_][columnIndex_].first << "\n";
-        while (col_index_is_not_valid_pos() && rowIndex_ <= i) {
-            ++rowIndex_;
-            ini_col_index_up();
-        }
-        if (col_index_is_not_valid_pos()) {
-            ++rowIndex_;
-        }
-    }
-
-    void up_edge_neg(size_t i) {
-        if constexpr (EdgeModifier::isActive_)
-            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, EdgeModifier::apply_modifier(epsilonValues_[i]), false);
-        else 
-            currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, epsilonValues_[i], false);
-        // std::cout << "neg: " << rowIndex_ << ", " << columnIndex_ << ", " << distanceMatrix_[rowIndex_][columnIndex_].first << "\n";
-        ++columnIndex_;
-        while (col_index_is_not_valid_neg() && rowIndex_ > 1) {
-            --rowIndex_;
-            ini_col_index_low();
-        }
-        if (col_index_is_not_valid_neg()) {
-            --rowIndex_;
-        }
-    }
-  };
-
   template <typename PointRange, typename DistanceFunction>
-  static void initialize_(Filtration_value& nu, Filtration_value& mu, std::vector<Filtration_value>& epsilonValues,
+  static void _initialize(Filtration_value& nu, Filtration_value& mu, std::vector<Filtration_value>& epsilonValues,
                           std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
                           const PointRange& points, DistanceFunction&& distance, Order_policy orderPolicy) {
     GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
@@ -417,7 +455,7 @@ class Oscillating_rips_edge_range {
     // compute epsilon values
     if (orderPolicy == Order_policy::ALREADY_ORDERED) {
       sortedPoints.assign(points.begin(), points.end());
-      epsilonValues = compute_epsilon_values_(sortedPoints, distance);
+      epsilonValues = _compute_epsilon_values(sortedPoints, distance);
     } else if (orderPolicy == Order_policy::FARTHEST_POINT_ORDERING) {
       epsilonValues.reserve(n);
       Gudhi::subsampling::choose_n_farthest_points(distance, points,
@@ -432,11 +470,11 @@ class Oscillating_rips_edge_range {
       epsilonValues[n - 1] = 0;
     } else {
       Gudhi::subsampling::pick_n_random_points(points, n, std::back_inserter(sortedPoints));
-      epsilonValues = compute_epsilon_values_(sortedPoints, distance);
+      epsilonValues = _compute_epsilon_values(sortedPoints, distance);
     }
 
     // compute the distance matrix
-    distanceMatrix = compute_distance_matrix_(sortedPoints, distance);
+    distanceMatrix = _compute_distance_matrix(sortedPoints, distance);
   }
 
   /** \brief Compute the epsilon values for an ordered set of points, measuring the
@@ -457,7 +495,7 @@ class Oscillating_rips_edge_range {
    *                        The range must be of same size as the number of points.
    */
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<Filtration_value> compute_epsilon_values_(const PointRange& points, DistanceFunction&& distance) {
+  static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& points, DistanceFunction&& distance) {
     size_t n = points.size();
     std::vector<Filtration_value> eps_range(n, std::numeric_limits<double>::infinity());
 
@@ -501,7 +539,7 @@ class Oscillating_rips_edge_range {
   }
 
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<std::vector<std::pair<int, Filtration_value> > > compute_distance_matrix_(
+  static std::vector<std::vector<std::pair<int, Filtration_value> > > _compute_distance_matrix(
       const PointRange& sortedPoints, DistanceFunction&& distance) {
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix(sortedPoints.size());
 #ifdef GUDHI_USE_TBB
@@ -529,7 +567,7 @@ class Oscillating_rips_edge_range {
     return distanceMatrix;
   }
 
-  static size_t compute_edges_(Filtration_value nu, Filtration_value mu,
+  static size_t _compute_edges(Filtration_value nu, Filtration_value mu,
                                const std::vector<Filtration_value>& epsilonValues,
                                std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
                                std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesAdded,
@@ -710,6 +748,274 @@ class Oscillating_rips_edge_range {
 
     return number_of_arrows;
   }
+
+  static void _canonically_sort_edges(std::vector<Zigzag_edge<Filtration_value> >& edges) {
+    // canonical sort of the edges: as much as possible, edges should be removed in
+    // the reverse order of their insertion. We decide to insert shorted edges first,
+    // with increasing lexicographical order, and remove larger edges first, with
+    // decreasing lexicographic order.
+
+    // filtration then dimension, then lex order for insertion
+    auto edge_cmp = [](const Zigzag_edge<Filtration_value>& e1, const Zigzag_edge<Filtration_value>& e2) {
+      if (e1.get_filtration_value() != e2.get_filtration_value()) {
+        return e1.get_filtration_value() < e2.get_filtration_value();
+      }  // lower fil first
+
+      if (e1.get_smallest_vertex() == e1.get_biggest_vertex()) {  // e1 is a vertex, -> put vertices first
+        if (e2.get_smallest_vertex() == e2.get_biggest_vertex()) {
+          return e1.get_smallest_vertex() < e2.get_smallest_vertex();
+        }  //-> vertex of lower label
+        else {
+          return true;
+        }  //-> always vertices before edges
+      }
+      // e1 is an edge
+      if (e2.get_smallest_vertex() == e2.get_biggest_vertex()) {
+        return false;
+      }       // e2 vertex, -> put it first
+      // both are edges, lexigraphic compare
+      if (e1.get_smallest_vertex() != e2.get_smallest_vertex()) {
+        return e1.get_smallest_vertex() < e2.get_smallest_vertex();
+      }  // lex order
+      if (e1.get_biggest_vertex() != e2.get_biggest_vertex()) {
+        return e1.get_biggest_vertex() < e2.get_biggest_vertex();
+      }
+      return false;  // equality
+    };
+    // the inverse ordering for deletions
+    auto inv_edge_cmp = [&](const Zigzag_edge<Filtration_value>& e1, const Zigzag_edge<Filtration_value>& e2) {
+      if (e1.get_smallest_vertex() == e2.get_smallest_vertex() && e1.get_biggest_vertex() == e2.get_biggest_vertex()) {
+        return false;
+      }                            //== => false
+      return !(edge_cmp(e1, e2));  // reverse order
+    };
+    // sort sequences of inclusions of same filtration with edge_cmp
+    // sort sequences of removals of same filtration with inv_edge_cmp
+    auto beg = edges.begin();
+    auto end = edges.begin();
+    auto curr_fil = beg->get_filtration_value();
+    auto curr_type = beg->get_direction();
+    while (beg != edges.end()) {
+      while (end != edges.end() && end->get_filtration_value() == curr_fil && end->get_direction() == curr_type) {
+        ++end;
+      }
+      if (curr_type) {
+#ifdef GUDHI_USE_TBB
+        tbb::parallel_sort(beg, end, edge_cmp);
+#else
+        std::sort(beg, end, edge_cmp);
+#endif
+      }  // sequence of insertions
+      else {
+#ifdef GUDHI_USE_TBB
+        tbb::parallel_sort(beg, end, inv_edge_cmp);
+#else
+        std::sort(beg, end, inv_edge_cmp);
+#endif
+      }  // sequence of removals
+      beg = end;
+      curr_fil = beg->get_filtration_value();
+      curr_type = beg->get_direction();
+    }
+  }
+};
+
+//needs Filtered_complex to have stable simplex handles
+template <class Filtered_complex, typename EdgeRangeIterator>
+class Oscillating_rips_simplex_range {
+ public:
+  class Oscillating_rips_iterator
+      : public boost::iterator_facade<Oscillating_rips_iterator,
+                                      const std::tuple<typename Filtered_complex::Simplex_handle,typename Filtered_complex::Filtration_value,bool>&,
+                                      boost::forward_traversal_tag> {
+   public:
+    using Filtration_value = typename Filtered_complex::Filtration_value;
+    using Simplex_handle = typename Filtered_complex::Simplex_handle;
+    using Simplex_key = typename Filtered_complex::Simplex_key;
+
+    // edges and complex are not copied, so do not modifiy outside as long as iterator != end.
+    // TODO: move constructor for iterator?
+    Oscillating_rips_iterator(EdgeRangeIterator& edgeStartIterator, EdgeRangeIterator& edgeEndIterator,
+                              Filtered_complex& complex, int maxDimension = -1)
+        : complex_(&complex),
+          currentSimplexIndex_(0),
+          currentEdgeIt_(std::move(edgeStartIterator)),
+          endEdgeIt_(std::move(edgeEndIterator)),
+          currentDirection_(true),
+          maxDimension_(maxDimension),
+          currentArrowNumber_(0)
+    {
+      if (currentEdgeIt_ == endEdgeIt_) {
+        _set_end();
+        return;
+      }
+
+      // first simplex is the vertex (0,0) which is the only one with its filtration value.
+      complex_->insert_edge_as_flag(currentEdgeIt_->get_smallest_vertex(), currentEdgeIt_->get_biggest_vertex(),
+                                    currentEdgeIt_->get_filtration_value(), maxDimension_, currentSimplices_);
+      ++currentEdgeIt_;
+
+      std::get<0>(currentArrow_) = currentSimplices_[currentSimplexIndex_];
+      std::get<1>(currentArrow_) = complex_->filtration(currentSimplices_[currentSimplexIndex_]);
+      std::get<2>(currentArrow_) = currentDirection_;
+    }
+
+    Oscillating_rips_iterator() : complex_(nullptr), currentSimplexIndex_(0), maxDimension_(0) {}
+
+   private:
+    friend class boost::iterator_core_access;
+
+    struct reverse_lexicographic_order {
+      explicit reverse_lexicographic_order(Filtered_complex* st) : st_(st) {}
+
+      bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
+        auto rg1 = st_->simplex_vertex_range(sh1);
+        auto rg2 = st_->simplex_vertex_range(sh2);
+        auto it1 = rg1.begin();
+        auto it2 = rg2.begin();
+        while (it1 != rg1.end() && it2 != rg2.end()) {
+          if (*it1 == *it2) {
+            ++it1;
+            ++it2;
+          } else {
+            return *it1 < *it2;
+          }
+        }
+        return ((it1 == rg1.end()) && (it2 != rg2.end()));
+      }
+      Filtered_complex* st_;
+    };
+
+    std::vector<Simplex_handle> currentSimplices_;
+    Filtered_complex* complex_;
+    size_t currentSimplexIndex_;
+    EdgeRangeIterator currentEdgeIt_;
+    EdgeRangeIterator endEdgeIt_;
+    bool currentDirection_;
+    const int maxDimension_;
+    //   bool isEnd_;
+    std::tuple<Simplex_handle, Filtration_value, bool> currentArrow_;
+    Simplex_key currentArrowNumber_;
+
+    bool equal(Oscillating_rips_iterator const& other) const {
+      if (complex_ == nullptr) return other.complex_ == nullptr;
+
+      return complex_ == other.complex_ && currentEdgeIt_ == other.currentEdgeIt_ &&
+             currentSimplexIndex_ == other.currentSimplexIndex_;
+    }
+
+    const std::tuple<Simplex_handle, Filtration_value, bool>& dereference() const {
+        return currentArrow_;
+    }
+
+    void increment() {
+      ++currentSimplexIndex_;
+      ++currentArrowNumber_;
+
+      if (currentSimplexIndex_ == currentSimplices_.size()) {
+        if (currentEdgeIt_ == endEdgeIt_) {
+          _set_end();
+          return;
+        }
+
+        if (!currentDirection_) {
+          for (auto& sh : currentSimplices_) complex_->remove_maximal_simplex(sh);
+        }
+        currentSimplices_.clear();
+
+        auto fil = currentEdgeIt_->get_filtration_value();
+        currentDirection_ = currentEdgeIt_->get_direction();
+
+        if (currentDirection_) {
+          _update_positive_current_simplices(fil);
+        } else {
+          _update_negative_current_simplices(fil);
+        }
+        currentSimplexIndex_ = 0;
+      }
+
+      std::get<0>(currentArrow_) = currentSimplices_[currentSimplexIndex_];
+      std::get<1>(currentArrow_) = complex_->filtration(currentSimplices_[currentSimplexIndex_]);
+      std::get<2>(currentArrow_) = currentDirection_;
+      if (currentDirection_) complex_->assign_key(currentSimplices_[currentSimplexIndex_], currentArrowNumber_);
+    }
+
+    void _set_end() { complex_ = nullptr; }
+
+    void _update_positive_current_simplices(Filtration_value fil) {
+      while (currentEdgeIt_ != endEdgeIt_ && currentEdgeIt_->get_direction() &&
+             currentEdgeIt_->get_filtration_value() == fil) 
+      {
+        complex_->insert_edge_as_flag(currentEdgeIt_->get_smallest_vertex(), currentEdgeIt_->get_biggest_vertex(),
+                                      currentEdgeIt_->get_filtration_value(), maxDimension_, currentSimplices_);
+        // std::cout << "add edge: " << currentEdgeIt_->get_smallest_vertex() << " " << currentEdgeIt_->get_biggest_vertex() << " - " << currentEdgeIt_->get_filtration_value() << "\n";
+        // std::cout << "current:\n";
+        // for (auto sh : currentSimplices_){
+        //     for (auto v : complex_->simplex_vertex_range(sh)) std::cout << v << " ";
+        //     std::cout << "\n";
+        // }
+        ++currentEdgeIt_;
+      }
+#ifdef GUDHI_USE_TBB
+      tbb::parallel_sort(currentSimplices_.begin(), currentSimplices_.end(),
+                         reverse_lexicographic_order(complex_));
+#else
+      std::sort(currentSimplices_.begin(), currentSimplices_.end(),
+                reverse_lexicographic_order(complex_));
+#endif
+    }
+
+    void _update_negative_current_simplices(Filtration_value fil) {
+      unsigned int count = 0;
+      while (currentEdgeIt_ != endEdgeIt_ && !currentEdgeIt_->get_direction() &&
+             currentEdgeIt_->get_filtration_value() == fil) 
+      {
+        Simplex_handle sh = complex_->find({currentEdgeIt_->get_smallest_vertex()});
+        if (currentEdgeIt_->get_smallest_vertex() != currentEdgeIt_->get_biggest_vertex()) {
+          sh = sh->second.children()->members().find(currentEdgeIt_->get_biggest_vertex());
+        }
+        auto toRemove = complex_->star_simplex_range(sh);
+        currentSimplices_.insert(currentSimplices_.end(), toRemove.begin(), toRemove.end());
+        ++currentEdgeIt_;
+        ++count;
+      }
+#ifdef GUDHI_USE_TBB
+      tbb::parallel_sort(
+          currentSimplices_.begin(), currentSimplices_.end(),
+          [&](Simplex_handle sh1, Simplex_handle sh2) -> bool { return complex_->key(sh1) > complex_->key(sh2); });
+#else
+      std::sort(
+          currentSimplices_.begin(), currentSimplices_.end(),
+          [&](Simplex_handle sh1, Simplex_handle sh2) -> bool { return complex_->key(sh1) > complex_->key(sh2); });
+#endif
+      if (count > 1) {  // more than 1 edge inserted: cofaces can be duplicated
+        auto last = std::unique(currentSimplices_.begin(), currentSimplices_.end(),
+                                [&](Simplex_handle sh1, Simplex_handle sh2) -> bool {
+                                  return complex_->key(sh1) == complex_->key(sh2);
+                                });                              // equal simplex handles means equal key
+        currentSimplices_.erase(last, currentSimplices_.end());  // remove duplicated cofaces
+      }
+    }
+  };
+
+  static boost::iterator_range<Oscillating_rips_iterator> get_iterator_range(EdgeRangeIterator& edgeStartIterator,
+                                                                             EdgeRangeIterator& edgeEndIterator,
+                                                                             Filtered_complex& complex,
+                                                                             int maxDimension = -1) {
+    return boost::iterator_range<Oscillating_rips_iterator>(
+        Oscillating_rips_iterator(edgeStartIterator, edgeEndIterator, complex, maxDimension),
+        Oscillating_rips_iterator());
+  }
+
+  static Oscillating_rips_iterator begin(EdgeRangeIterator& edgeStartIterator, EdgeRangeIterator& edgeEndIterator,
+                                         Filtered_complex& complex, int maxDimension = -1) {
+    return Oscillating_rips_iterator(edgeStartIterator, edgeEndIterator, complex, maxDimension);
+  }
+
+  static Oscillating_rips_iterator end() { return Oscillating_rips_iterator(); }
+
+ private:
+  Oscillating_rips_simplex_range(){};
 };
 
 }  // namespace zigzag_persistence
