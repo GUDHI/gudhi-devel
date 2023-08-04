@@ -25,6 +25,7 @@
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/Debug_utils.h>
 
+#include <boost/container/map.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -52,6 +53,7 @@
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
 #include <unordered_map>
+#include <iterator>
 
 namespace Gudhi {
 
@@ -112,7 +114,13 @@ class Simplex_tree {
   // Note: this wastes space when Vertex_handle is 32 bits and Node is aligned on 64 bits. It would be better to use a
   // flat_set (with our own comparator) where we can control the layout of the struct (put Vertex_handle and
   // Simplex_key next to each other).
-  typedef typename boost::container::flat_map<Vertex_handle, Node> Dictionary;
+  typedef typename boost::container::flat_map<Vertex_handle, Node> flat_map;
+  //Dictionary::iterator remain valid under insertions and deletions,
+  //necessary when computing zigzag filtration
+  typedef typename boost::container::map<Vertex_handle, Node> map;
+  typedef typename std::conditional<Options::simplex_handle_strong_validity,
+                                    map,
+                                    flat_map>::type Dictionary;
 
   /** \brief Set of nodes sharing a same parent in the simplex tree. */
   typedef Simplex_tree_siblings<Simplex_tree, Dictionary> Siblings;
@@ -161,7 +169,8 @@ class Simplex_tree {
    * by the simplex tree.
    *
    * They are essentially pointers into internal vectors, and any insertion or removal
-   * of a simplex may invalidate any other Simplex_handle in the complex. */
+   * of a simplex may invalidate any other Simplex_handle in the complex,
+   * unless Options::simplex_handle_strong_validity == true. */
   typedef typename Dictionary::iterator Simplex_handle;
 
  private:
@@ -185,7 +194,10 @@ class Simplex_tree {
   /** \brief Range for an optimized search for the star of a simplex. */
   using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
 
-  using Const_boost_iterator = const boost::container::vec_iterator<std::pair<int, Node >*, false>;
+//   using Const_boost_iterator =
+//       typename std::conditional<Options::simplex_handle_strong_validity, const Simplex_handle,
+//                                 const boost::container::vec_iterator<std::pair<int, Node>*, false>>::type;
+  using Const_boost_iterator = const Simplex_handle;
 
   class Fast_cofaces_predicate {
     Simplex_tree* st_;
@@ -474,7 +486,9 @@ class Simplex_tree {
       update_simplex_tree_after_node_insertion(sh);
       if (has_children(sh_source)) {
         Siblings * newsib = new Siblings(sib, sh_source->first);
-        newsib->members_.reserve(sh_source->second.children()->members().size());
+        if constexpr (!Options::simplex_handle_strong_validity) {
+          newsib->members_.reserve(sh_source->second.children()->members().size());
+        }
         for (auto & child : sh_source->second.children()->members())
           newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
         rec_copy(newsib, sh_source->second.children());
@@ -614,7 +628,11 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    return Dictionary_it(nullptr);
+    if constexpr (Options::simplex_handle_strong_validity) {
+      return Dictionary_it();
+    } else {
+      return Dictionary_it(nullptr);
+    }
   }
 
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
@@ -649,7 +667,12 @@ class Simplex_tree {
   size_t num_simplices(Siblings * sib) {
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
-    size_t simplices_number = sib_end - sib_begin;
+    size_t simplices_number;
+    if constexpr (Options::simplex_handle_strong_validity){
+        simplices_number = std::distance(sib_begin, sib_end);
+    } else {
+        simplices_number = sib_end - sib_begin;
+    }
     for (auto sh = sib_begin; sh != sib_end; ++sh) {
       if (has_children(sh)) {
         simplices_number += num_simplices(sh->second.children());
@@ -740,7 +763,11 @@ class Simplex_tree {
       Vertex_handle v = *vi++;
       if(v < 0 || v >= static_cast<Vertex_handle>(root_.members_.size()))
         return null_simplex();
-      tmp_dit = root_.members_.begin() + v;
+      if constexpr (Options::simplex_handle_strong_validity){
+        tmp_dit = std::next(root_.members_.begin(), v);
+      } else {
+        tmp_dit = root_.members_.begin() + v;
+      }
       if (vi == simplex.end())
         return tmp_dit;
       if (!has_children(tmp_dit))
@@ -764,7 +791,11 @@ class Simplex_tree {
   Simplex_handle find_vertex(Vertex_handle v) {
     if (Options::contiguous_vertices) {
       assert(contiguous_vertices());
-      return root_.members_.begin() + v;
+      if constexpr (Options::simplex_handle_strong_validity){
+        return std::next(root_.members_.begin(), v);;
+      } else {
+        return root_.members_.begin() + v;
+      }
     } else {
       return root_.members_.find(v);
     }
@@ -891,7 +922,7 @@ class Simplex_tree {
    */
   template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
-				    Filtration_value filtration = 0) {
+                    Filtration_value filtration = 0) {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
 
@@ -918,9 +949,9 @@ class Simplex_tree {
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
   template<class ForwardVertexIterator>
   std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
-  	                                                                     ForwardVertexIterator first,
-  	                                                                     ForwardVertexIterator last,
-  	                                                                     Filtration_value filt) {
+                                                                           ForwardVertexIterator first,
+                                                                           ForwardVertexIterator last,
+                                                                           Filtration_value filt) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
@@ -1419,7 +1450,7 @@ class Simplex_tree {
     if (siblings->members().size() < 2)
       return;
     // Reverse loop starting before the last one for 'next' to be the last one
-    for (auto simplex = siblings->members().rbegin() + 1; simplex != siblings->members().rend(); simplex++) {
+    for (auto simplex = std::next(siblings->members().rbegin()); simplex != siblings->members().rend(); simplex++) {
       std::vector<std::pair<Vertex_handle, Node> > intersection;
       for(auto next = siblings->members().rbegin(); next != simplex; next++) {
         bool to_be_inserted = true;
@@ -1915,7 +1946,17 @@ class Simplex_tree {
 
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node. */
   static Simplex_handle simplex_handle_from_node(Node& node) {
-    return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+    if constexpr (Options::simplex_handle_strong_validity) {
+      Siblings* children = node.children();
+      //verifies if node is a leaf
+      for (auto it = children->members().begin(); it != children->members().end(); ++it){
+        // TODO: does not work if nodes were copied.
+        if (&(it->second) == &node) return it;
+      }
+      return children->oncles()->find(children->parent());
+    } else {
+      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+    }
   }
 
   // Give access to Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator and keep nodes_by_label and
@@ -2092,7 +2133,7 @@ class Simplex_tree {
   const char* rec_deserialize(Siblings *sib, Vertex_handle members_size, const char* ptr, int dim) {
     // In case buffer is just a 0 char
     if (members_size > 0) {
-      sib->members_.reserve(members_size);
+      if constexpr (!Options::simplex_handle_strong_validity) sib->members_.reserve(members_size);
       Vertex_handle vertex;
       Filtration_value filtration;
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
@@ -2183,6 +2224,41 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = false;
+};
+
+/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
+ *  but the possibility of much bigger keys and in particular of negative keys.
+ *
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
+ * (way enough simplices). */
+struct Simplex_tree_options_wide_indexation {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int64_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = false;
+};
+
+/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
+ *  but with the possibility of negative keys.
+ *
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
+ * (about 2 billions of simplices). */
+struct Simplex_tree_options_negative_indexation {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2200,6 +2276,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = false;
 };
 
 /** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
@@ -2216,6 +2293,44 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
+  static const bool simplex_handle_strong_validity = false;
+};
+
+/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
+ *  but the simplex handles remain valid under insertion and removal of simplices.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = true;
+};
+
+/** Model of SimplexTreeOptions, as expected from @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_range.
+ * The values of `simplex_handle_strong_validity`, `store_key` and `store_filtration` are mandatory.
+ * `Simplex_key` has to be a signed integer type if @ref Gudhi::zigzag_persistence::Zigzag_persistence is used 
+ * for the range. Otherwise, the options can be readapted.
+ *
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
+ * (way enough simplices). If less are needed, just inherit from this structure and redefine
+ * the type `Simplex_key`. */
+struct Simplex_tree_options_oscillating_rips {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int64_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+  static const bool link_nodes_by_label = true;
+  static const bool simplex_handle_strong_validity = true;
 };
 
 /** @}*/  // end addtogroup simplex_tree

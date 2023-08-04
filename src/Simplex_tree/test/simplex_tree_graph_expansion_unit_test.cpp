@@ -23,7 +23,8 @@ using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_oscillating_rips> > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_all_is_blocked, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************\n";
