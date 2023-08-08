@@ -8,6 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+ /**
+ * @file oscillating_rips_iterators.h
+ * @author Clément Maria, Hannah Schreiber
+ * @brief Contains the implementation of the @ref Gudhi::zigzag_persistence::Zigzag_edge class, 
+ * @ref Gudhi::zigzag_persistence::Identity_edge_modifier class, 
+ * @ref Gudhi::zigzag_persistence::Square_root_edge_modifier class, 
+ * @ref Gudhi::zigzag_persistence::Oscillating_rips_edge_range class and 
+ * @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_range class.
+ */
+
 #ifndef ZIGZAG_OSCILLATING_RIPS_ITERATORS_H_
 #define ZIGZAG_OSCILLATING_RIPS_ITERATORS_H_
 
@@ -331,12 +341,12 @@ class Oscillating_rips_edge_range {
   };
 
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(Filtration_value nu, 
-                                                                          Filtration_value mu,
-                                                                          const PointRange& points,
-                                                                          DistanceFunction&& distance,
-                                                                          Order_policy orderPolicy)
-  {
+  static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(
+      Filtration_value nu, 
+      Filtration_value mu, 
+      const PointRange& points, 
+      DistanceFunction&& distance,
+      Order_policy orderPolicy = Order_policy::FARTHEST_POINT_ORDERING) {
     std::vector<Zigzag_edge<Filtration_value> > edgeFiltration;
     std::vector<Filtration_value> epsilonValues;
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix;
@@ -395,7 +405,7 @@ class Oscillating_rips_edge_range {
       Filtration_value mu, 
       const PointRange& points, 
       DistanceFunction&& distance,
-      Order_policy orderPolicy) 
+      Order_policy orderPolicy = Order_policy::FARTHEST_POINT_ORDERING) 
   {
     return boost::iterator_range<Oscillating_rips_edge_iterator>(
         Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy), Oscillating_rips_edge_iterator());
@@ -408,7 +418,7 @@ class Oscillating_rips_edge_range {
       Filtration_value mu, 
       const PointRange& points, 
       DistanceFunction&& distance,
-      Order_policy orderPolicy) 
+      Order_policy orderPolicy = Order_policy::FARTHEST_POINT_ORDERING) 
   {
     return Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy);
   }
@@ -858,9 +868,16 @@ class Oscillating_rips_simplex_range {
       std::get<0>(currentArrow_) = currentSimplices_[currentSimplexIndex_];
       std::get<1>(currentArrow_) = complex_->filtration(currentSimplices_[currentSimplexIndex_]);
       std::get<2>(currentArrow_) = currentDirection_;
+
+      complex_->assign_key(currentSimplices_[currentSimplexIndex_], 0);
     }
 
-    Oscillating_rips_iterator() : complex_(nullptr), currentSimplexIndex_(0), maxDimension_(0) {}
+    Oscillating_rips_iterator()
+        : complex_(nullptr),
+          currentSimplexIndex_(0),
+          currentDirection_(true),
+          maxDimension_(0),
+          currentArrowNumber_(0) {}
 
    private:
     friend class boost::iterator_core_access;
@@ -909,6 +926,8 @@ class Oscillating_rips_simplex_range {
     }
 
     void increment() {
+      if (!currentDirection_) complex_->remove_maximal_simplex(currentSimplices_[currentSimplexIndex_]);
+
       ++currentSimplexIndex_;
       ++currentArrowNumber_;
 
@@ -918,13 +937,16 @@ class Oscillating_rips_simplex_range {
           return;
         }
 
-        if (!currentDirection_) {
-          for (auto& sh : currentSimplices_) complex_->remove_maximal_simplex(sh);
-        }
+        // if (!currentDirection_) {
+        //   for (auto& sh : currentSimplices_) complex_->remove_maximal_simplex(sh);
+        // }
         currentSimplices_.clear();
 
         auto fil = currentEdgeIt_->get_filtration_value();
         currentDirection_ = currentEdgeIt_->get_direction();
+
+        std::get<1>(currentArrow_) = fil;
+        std::get<2>(currentArrow_) = currentDirection_;
 
         if (currentDirection_) {
           _update_positive_current_simplices(fil);
@@ -935,8 +957,6 @@ class Oscillating_rips_simplex_range {
       }
 
       std::get<0>(currentArrow_) = currentSimplices_[currentSimplexIndex_];
-      std::get<1>(currentArrow_) = complex_->filtration(currentSimplices_[currentSimplexIndex_]);
-      std::get<2>(currentArrow_) = currentDirection_;
       if (currentDirection_) complex_->assign_key(currentSimplices_[currentSimplexIndex_], currentArrowNumber_);
     }
 

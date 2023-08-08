@@ -19,13 +19,6 @@
 #ifndef ZIGZAG_PERSISTENCE_H_
 #define ZIGZAG_PERSISTENCE_H_
 
-#include <boost/tuple/tuple.hpp>
-#include <boost/intrusive/list.hpp>
-#include <boost/intrusive/set.hpp>
-#include <boost/pending/disjoint_sets.hpp>
-#include <boost/pool/object_pool.hpp>
-#include <boost/timer/progress_display.hpp>
-
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -33,7 +26,6 @@
 #include <list>
 #include <ostream>
 #include <set>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <functional>
@@ -399,6 +391,62 @@ class Zigzag_persistence
   }
 
   /**
+   * @brief Updates the zigzag persistence diagram after the given simplex was ``manually'' inserted in the complex 
+   * obtained with @ref get_complex.
+   * 
+   * @param simplex Simplex handle of the simplex having been inserted. A filtration value and a key must be assigned
+   * to it. The key must correspond to the ``arrow number'' inserting the simplex, i.e., its position in the filtration.
+   *
+   * @warning Other simplices can have been inserted in the complex before calling this method, there will simply not 
+   * be token into account as long as the method is not called for them. It it just important that a key was assigned 
+   * to the given simplex handle which corresponds to the position of the simplex in the filtration and 
+   * that this method is called in order. 
+   * @warning No simplex given to this method should be removed before calling @ref remove_simplex_handle.
+   * @warning Do not modify the key even after calling this method, not before calling @ref remove_simplex_handle.
+   */
+  void insert_simplex_handle(Simplex_handle simplex) {
+    if (dim_max_ != -1 && cpx_.dimension(simplex) > dim_max_) return;
+
+    ++num_arrow_;
+    Filtration_value filtration_value = cpx_.filtration(simplex);
+
+    if (filtration_value != previous_filtration_value_)  // check whether the filt value has changed
+    {  // consecutive pairs (i,f), (j,f') mean simplices of index k in [i,j-1] have
+      previous_filtration_value_ = filtration_value;  // filtration value f
+      filtration_values_.emplace_back(num_arrow_, previous_filtration_value_);
+    }
+
+    _process_forward_arrow(simplex);
+  }
+
+  /**
+   * @brief Updates the zigzag persistence diagram with the intention that the given simplex will be removed 
+   * by the caller afterwards from the complex obtained with @ref get_complex.
+   * 
+   * @param simplex Simplex handle of the simplex that will be removed.
+   * @param filtration_value Filtration value corresponding to the removal of the given simplex. The filtration value
+   * stored inside the handle does not need to be updated.
+   *
+   * @warning Do not remove simplices before calling this method on them (at least if those were token into account 
+   * with @ref insert_simplex_handle or @ref insert_simplex).
+   * @warning The associated key should not have been modified since calling @ref insert_simplex_handle
+   * or @ref insert_simplex.
+   */
+  void remove_simplex_handle(Simplex_handle simplex, Filtration_value filtration_value) {
+    if (dim_max_ != -1 && cpx_.dimension(simplex) > dim_max_) return;
+
+    ++num_arrow_;
+
+    if (filtration_value != previous_filtration_value_)  // check whether the filt value has changed
+    {  // consecutive pairs (i,f), (j,f') mean simplices of index k in [i,j-1] have
+      previous_filtration_value_ = filtration_value;  // filtration value f
+      filtration_values_.emplace_back(num_arrow_, previous_filtration_value_);
+    }
+
+    _process_backward_arrow(simplex);
+  }
+
+  /**
    * @brief Returns the ``index persistence diagram'' of the current filtration, that is, the pairs of atomic arrow 
    * numbers corresponding to a birth-death pair. Does not contain points at infinity, only the cycle classes which 
    * already died are represented.
@@ -492,11 +540,12 @@ class Zigzag_persistence
   /**
    * @brief Returns a reference to the complex storing the simplices. 
    * A simplex is added in a call of @ref insert_simplex and is removed in a call of @ref remove_simplex.
-   * @warning The complex is not const for now for technical reasons, but DO NOT modify it.
+   * The complex is allowed to be modified by the caller only under certain restrictions. 
+   * See @ref insert_simplex_handle and @ref remove_simplex_handle.
    *
    * @return Reference to the complex.
    */
-  ZigzagFilteredComplex& get_complex() const{
+  ZigzagFilteredComplex& get_complex(){
     return cpx_;
   }
 

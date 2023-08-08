@@ -23,13 +23,15 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Clock.h>
+#include <gudhi/Oscillating_rips_persistence.h>
 
 using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips>;
 using Filtration_value = ST::Filtration_value;
+using Simplex_handle = ST::Simplex_handle;
 using Square = Gudhi::zigzag_persistence::Square_root_edge_modifier<Filtration_value>;
 using ZE = Gudhi::zigzag_persistence::Zigzag_edge<Filtration_value>;
 using ORE = Gudhi::zigzag_persistence::Oscillating_rips_edge_range<Filtration_value>;
-using ORi = Gudhi::zigzag_persistence::Oscillating_rips_simplex_range<ST,ORE::Oscillating_rips_edge_iterator>;
+using OR = Gudhi::zigzag_persistence::Oscillating_rips_simplex_range<ST,ORE::Oscillating_rips_edge_iterator>;
 using ORv = Gudhi::zigzag_persistence::Oscillating_rips_simplex_range<ST,std::vector<ZE>::iterator>;
 using Point = std::vector<double>;
 
@@ -39,6 +41,11 @@ void print_points(const std::vector<Point>& points) {
     std::cout << "(" << p[0] << ", " << p[1] << ")\n";
   }
   std::cout << "\n";
+}
+
+void print_res(const std::tuple<Simplex_handle,Filtration_value,bool>& t, ST& st){
+    for (auto v : st.simplex_vertex_range(std::get<0>(t))) std::cout << v << " ";
+    std::cout << " -- " << std::get<1>(t) << ", " << std::get<2>(t) << "\n";
 }
 
 std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed) {
@@ -220,9 +227,9 @@ void test_edges_timings(const std::vector<Point>& points, double nu, double mu, 
 }
 
 void test_edges(const std::vector<Point>& points, double nu, double mu) {
-  // ORE::Order_policy p = ORE::Order_policy::FARTHEST_POINT_ORDERING;
+  ORE::Order_policy p = ORE::Order_policy::FARTHEST_POINT_ORDERING;
   // ORE::Order_policy p = ORE::Order_policy::ALREADY_ORDERED;
-  ORE::Order_policy p = ORE::Order_policy::RANDOM_POINT_ORDERING;
+//   ORE::Order_policy p = ORE::Order_policy::RANDOM_POINT_ORDERING;
 
   // test_edges_comp(points, nu, mu, p);
   // test_edges_canonical_sort(points, nu, mu, p);
@@ -235,14 +242,14 @@ void test_simplices_print(const std::vector<Point>& points, double nu, double mu
 
   auto start = ORE::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
   auto end = ORE::end();
-  for (auto& t : ORi::get_iterator_range(start, end, st, maxDim)) {
-    for (auto v : st.simplex_vertex_range(std::get<0>(t))) std::cout << v << " ";
-    std::cout << " -- " << std::get<1>(t) << ", " << std::get<2>(t) << "\n";
+  for (auto& t : OR::get_iterator_range(start, end, st, maxDim)) {
+    print_res(t, st);
   }
 }
 
-void test_simplices_comp(const std::vector<Point>& points, double nu, double mu, int maxDim, ORE::Order_policy p){
-  ST st;
+void test_simplices_comp(const std::vector<Point>& points, double nu, double mu, int maxDim, ORE::Order_policy p) {
+  ST stIt;
+  ST stVec;
 
   auto startEIt = ORE::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
   auto endEIt = ORE::end();
@@ -250,25 +257,109 @@ void test_simplices_comp(const std::vector<Point>& points, double nu, double mu,
   auto startEVec = vec.begin();
   auto endEVec = vec.end();
 
-  auto startIt = ORi::begin(startEIt, endEIt, st, maxDim);
-  auto endIt = ORi::end();
-  auto rangeVec = ORv::get_iterator_range(startEVec, endEVec, st, maxDim);
+  auto startIt = OR::begin(startEIt, endEIt, stIt, maxDim);
+  auto endIt = OR::end();
+  auto rangeVec = ORv::get_iterator_range(startEVec, endEVec, stVec, maxDim);
   auto startVec = rangeVec.begin();
   auto endVec = rangeVec.end();
-  for (; startIt != endIt && startVec != endVec; ++startIt,++startVec) {
-    if ()
-    for (auto v : st.simplex_vertex_range(std::get<0>(t))) std::cout << v << " ";
-    std::cout << " -- " << std::get<1>(t) << ", " << std::get<2>(t) << "\n";
+  unsigned int i = 0;
+  for (; startIt != endIt && startVec != endVec; ++startIt, ++startVec) {
+    const auto& tIt = *startIt;
+    const auto& tVec = *startVec;
+    if (std::get<1>(tIt) != std::get<1>(tVec) || std::get<2>(tIt) != std::get<2>(tVec)) {
+      std::cout << "[" << i << "] Different:\n";
+      print_res(tIt, stIt);
+      print_res(tVec, stVec);
+      return;
+    }
+    auto verIt = stIt.simplex_vertex_range(std::get<0>(tIt));
+    auto verVec = stVec.simplex_vertex_range(std::get<0>(tVec));
+    auto itIt = verIt.begin();
+    auto itVec = verVec.begin();
+    while (itIt != verIt.end() && itVec != verVec.end()) {
+      if (*itIt != *itVec) {
+        std::cout << "[" << i << "] Different:\n";
+        print_res(tIt, stIt);
+        print_res(tVec, stVec);
+        return;
+      }
+      ++itIt;
+      ++itVec;
+    }
+    if (itIt != verIt.end() || itVec != verVec.end()) {
+      std::cout << "[" << i << "] Different:\n";
+      print_res(tIt, stIt);
+      print_res(tVec, stVec);
+      return;
+    }
+    ++i;
   }
+}
+
+void test_simplices_timings(const std::vector<Point>& points, double nu, double mu, int maxDim, ORE::Order_policy p) {
+//   bool dir = false;
+  {
+    Gudhi::Clock time1("Vector version");
+    ST st;
+    unsigned int i = 0;
+    auto vec = ORE::compute_vector_range(nu, mu, points, Gudhi::Euclidean_distance(), p);
+    // std::cout << vec.size() << "\n";
+    auto start = vec.begin();
+    auto end = vec.end();
+    for ([[maybe_unused]] const auto& t : ORv::get_iterator_range(start, end, st, maxDim)) {
+    //   if (dir != std::get<2>(t)){
+    //     dir = !dir;
+    //     std::cout << st.num_simplices() << "\n";
+    //   }
+      ++i;
+    }
+    std::cout << "Number of iterations: " << i << "\n";
+    time1.end();
+    std::cout << time1;
+  }
+
+  {
+    Gudhi::Clock time2("Iterator version");
+    ST st;
+    unsigned int i = 0;
+    auto start = ORE::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
+    auto end = ORE::end();
+    for ([[maybe_unused]] const auto& t : OR::get_iterator_range(start, end, st, maxDim)) {
+    //   if (dir != std::get<2>(t)){
+    //     dir = !dir;
+    //     std::cout << st.num_simplices() << "\n";
+    //   }
+      ++i;
+    }
+    std::cout << "Number of iterations: " << i << "\n";
+    time2.end();
+    std::cout << time2;
+  }
+
+//   {
+//     Gudhi::Clock time1("Vector version");
+//     ST st;
+//     unsigned int i = 0;
+//     auto vec = ORE::compute_vector_range(nu, mu, points, Gudhi::Euclidean_distance(), p);
+//     auto start = vec.begin();
+//     auto end = vec.end();
+//     for ([[maybe_unused]] const auto& t : ORv::get_iterator_range(start, end, st, maxDim)) {
+//       ++i;
+//     }
+//     std::cout << i << "\n";
+//     time1.end();
+//     std::cout << time1;
+//   }
 }
 
 void test_simplices(const std::vector<Point>& points, double nu, double mu, int maxDim) {
   ORE::Order_policy p = ORE::Order_policy::FARTHEST_POINT_ORDERING;
   // ORE::Order_policy p = ORE::Order_policy::ALREADY_ORDERED;
-  // ORE::Order_policy p = ORE::Order_policy::RANDOM_POINT_ORDERING;
+//   ORE::Order_policy p = ORE::Order_policy::RANDOM_POINT_ORDERING;
   
 //   test_simplices_print(points, nu, mu, maxDim, p);
-  test_simplices_comp(points, nu, mu, maxDim, p);
+//   test_simplices_comp(points, nu, mu, maxDim, p);
+  test_simplices_timings(points, nu, mu, maxDim, p);
 }
 
 int main(int argc, char* const argv[]) {
@@ -286,13 +377,16 @@ int main(int argc, char* const argv[]) {
   if (argc == 6) seed = std::stoi(argv[5]);
 
   std::cout << "nu, mu: " << nu << ", " << mu << "\n";
+  std::cout << "max dimension: " << maxDim << "\n";
   std::cout << "number of points: " << numberOfPoints << "\n";
   std::cout << "seed: " << seed << "\n";
 
   std::vector<Point> points = build_point_cloud(numberOfPoints, seed);
 
 //   test_edges(points, nu, mu);
-  test_simplices(points, nu, mu, maxDim);
+//   test_simplices(points, nu, mu, maxDim);
+
+  Gudhi::zigzag_persistence::compute_oscillating_rips_persistence(points, nu, mu, maxDim);
 
   return 0;
 }
