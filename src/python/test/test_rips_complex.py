@@ -26,8 +26,8 @@ def test_rips_from_points():
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
 
-    assert simplex_tree.__is_defined() == True
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_defined() == True
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
@@ -64,8 +64,8 @@ def test_filtered_rips_from_points():
 
     simplex_tree = filtered_rips.create_simplex_tree(max_dimension=1)
 
-    assert simplex_tree.__is_defined() == True
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_defined() == True
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
@@ -77,8 +77,8 @@ def test_sparse_filtered_rips_from_points():
 
     simplex_tree = filtered_rips.create_simplex_tree(max_dimension=1)
 
-    assert simplex_tree.__is_defined() == True
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_defined() == True
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
@@ -90,8 +90,8 @@ def test_rips_from_distance_matrix():
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
 
-    assert simplex_tree.__is_defined() == True
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_defined() == True
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 10
     assert simplex_tree.num_vertices() == 4
@@ -128,8 +128,8 @@ def test_filtered_rips_from_distance_matrix():
 
     simplex_tree = filtered_rips.create_simplex_tree(max_dimension=1)
 
-    assert simplex_tree.__is_defined() == True
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_defined() == True
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
