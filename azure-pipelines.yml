@@ -67,9 +67,12 @@ jobs:
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         conan profile detect
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         conan install . --output-folder=build --build=missing
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd build
-        conanbuild.bat
+        call conanbuild.bat
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeConanFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
