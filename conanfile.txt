@@ -1,0 +1,10 @@
+[requires]
+onetbb/2021.9.0
+cgal/5.5.3
+
+[tool_requires]
+cmake/3.22.6
+
+[generators]
+CMakeDeps
+CMakeToolchain
