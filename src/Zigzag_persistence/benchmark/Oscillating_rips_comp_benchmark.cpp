@@ -45,6 +45,23 @@ using DIndex = typename DZZ::Index;
 using DChain = dionysus::ChainEntry<DField, typename DFiltration::Cell>;
 using DIChain = dionysus::ChainEntry<DField, DIndex>;
 
+struct Simplex_tree_options_test {
+  typedef Gudhi::linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+  static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = false;
+};
+
+// using ST_std = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_negative_indexation>;
+using ST_std = Gudhi::Simplex_tree<Simplex_tree_options_test>;
+using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST_std>;
+using Barcode = std::vector<typename ZP::filtration_value_interval>;
+
 std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed) {
   std::vector<Point> finalPoints;
   std::set<Point> points;
@@ -148,6 +165,24 @@ std::vector<std::tuple<FZZ::Integer, FZZ::Integer, FZZ::Integer> > compute_with_
   return persistence;
 }
 
+Barcode compute_with_gudhi_v2(const std::vector<Point>& points, double nu, double mu, int maxDim) {
+  ZP zp;
+  ST st;
+
+  auto start = ORE::begin(nu, mu, points, Gudhi::Euclidean_distance(), ORE::Order_policy::FARTHEST_POINT_ORDERING);
+  auto end = ORE::end();
+  for (const auto& t : OR::get_iterator_range(start, end, st, maxDim)) {
+    auto r = st.simplex_vertex_range(std::get<0>(t));
+    std::vector<Vertex_handle> simplex(r.begin(), r.end());
+    if (std::get<2>(t))
+      zp.insert_simplex(simplex, std::get<1>(t));
+    else
+      zp.remove_simplex(simplex, std::get<1>(t));
+  }
+
+  return zp.get_persistence_diagram();
+}
+
 static void ORP_with_gudhi(benchmark::State& state) {
   double nu = state.range(0);
   double mu = state.range(1);
@@ -179,6 +214,38 @@ BENCHMARK(ORP_with_gudhi)
 //                    benchmark::CreateRange(4, 50, 4),
 //                    benchmark::CreateRange(256, 500, 4)})
 //     ->Unit(benchmark::kMillisecond);
+
+// static void ORP_with_gudhi_v2(benchmark::State& state) {
+//   double nu = state.range(0);
+//   double mu = state.range(1);
+//   int maxDim = state.range(2);
+//   unsigned int numberOfPoints = state.range(3);
+//   int seed = 0;
+
+//   std::vector<Point> points = build_point_cloud(numberOfPoints, seed);
+
+//   for (auto _ : state) {
+//     auto res = compute_with_gudhi_v2(points, nu, mu, maxDim);
+//   }
+// }
+// BENCHMARK(ORP_with_gudhi_v2)
+//     ->ArgsProduct({benchmark::CreateDenseRange(0, 2, 1), 
+//                    benchmark::CreateDenseRange(3, 5, 1),
+//                    benchmark::CreateRange(2, 5, 4),
+//                    benchmark::CreateRange(5, 5, 4)})
+//     ->Unit(benchmark::kMicrosecond);
+// BENCHMARK(ORP_with_gudhi_v2)
+//     ->ArgsProduct({benchmark::CreateDenseRange(0, 2, 1), 
+//                    benchmark::CreateDenseRange(3, 5, 1),
+//                    benchmark::CreateRange(4, 50, 4),
+//                    benchmark::CreateRange(20, 64, 4)})
+//     ->Unit(benchmark::kMillisecond);
+// // BENCHMARK(ORP_with_gudhi_v2)
+// //     ->ArgsProduct({benchmark::CreateDenseRange(1, 2, 1), 
+// //                    benchmark::CreateDenseRange(3, 4, 1),
+// //                    benchmark::CreateRange(4, 50, 4),
+// //                    benchmark::CreateRange(256, 500, 4)})
+// //     ->Unit(benchmark::kMillisecond);
 
 static void ORP_with_dionysus(benchmark::State& state) {
   double nu = state.range(0);

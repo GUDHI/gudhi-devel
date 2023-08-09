@@ -40,23 +40,62 @@
 namespace Gudhi {
 namespace zigzag_persistence {
 
+/**
+ * @class Zigzag_edge oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+ * @brief Edge structure for the oscilliating Rips filtration.
+ * 
+ * @ingroup zigzag_persistence
+ *
+ * @details The edges of the filtration are computed first and the remaining simplices are deduced from them. 
+ * Is also used to represent the vertices for technical reasons, by giving both vertices the same value.
+ * 
+ * @tparam Filtration_value Type of the filtration value.
+ */
 template <typename Filtration_value>
 class Zigzag_edge {
  public:
+  /**
+   * @brief Constructor.
+   * 
+   * @param u First boundary vertex ID
+   * @param v Second boundary vertex ID. If same than @p u, the edge is considered a vertex.
+   * @param fil Filtration value
+   * @param direction If true, forwards. If false, backwards.
+   */
   Zigzag_edge(int u, int v, Filtration_value fil, bool direction)
       : u_(u), v_(v), fil_(fil), direction_(direction) {
         if (u > v) std::swap(u_, v_);
       }
 
+  /**
+   * @brief Default constructor. Initialize everything to zero and the direction to true.
+   */
   Zigzag_edge() : u_(0), v_(0), fil_(0), direction_(true) {}
 
-  /* Returns vertex with smaller label. */
+  /**
+   * @brief Returns vertex with smaller ID.
+   * 
+   * @return Smallest ID among the boundary vertices.
+   */
   int get_smallest_vertex() const { return u_; }
-  /* Returns vertex with bigger label. */
+  /**
+   * @brief Returns vertex with bigger ID.
+   * 
+   * @return Biggest ID among the boundary vertices.
+   */
   int get_biggest_vertex() const { return v_; }
-  /* Returns the filtration value of the edge. */
+  /**
+   * @brief Returns the filtration value of the edge.
+   * 
+   * @return Filtration value of the edge.
+   */
   Filtration_value get_filtration_value() const { return fil_; }
-  /* Returns true if insertion of the edge, false if removal. */
+  /**
+   * @brief Gives the direction of the arrow corresponding to the edge.
+   * 
+   * @return True, if forward, i.e., an insertion.
+   * @return False, if backward, i.e., a removal.
+   */
   bool get_direction() const { return direction_; }
 
   void set(int u, int v, Filtration_value fil, bool direction){
@@ -66,56 +105,139 @@ class Zigzag_edge {
     direction_ = direction;
   }
 
+  /**
+   * @brief Equality test
+   * 
+   * @param e Edge to compare.
+   * @return True, if both edges are equal.
+   * @return False, if both edges are not equal.
+   */
   bool operator==(const Zigzag_edge& e) const {
     return ((e.u_ == u_) && (e.v_ == v_) && (e.fil_ == fil_) && (e.direction_ == direction_));
   }
 
-//   bool operator<(const Zigzag_edge& e) const {
-//     if (e.fil_ != fil_) return fil_ < e.fil_;
-//     if (e.direction_ != direction_) return direction_;
-//     if (e.u_ != u_) return u_ < e.u_;
-//     return v_ < e.v_;
-//   }
-
  private:
-  int u_;
-  int v_;
-  Filtration_value fil_;
-  bool direction_;
+  int u_;                   /**< Smaller vertex. */
+  int v_;                   /**< Bigger vertex. */
+  Filtration_value fil_;    /**< Filtration value. */
+  bool direction_;          /**< Direction. True = forward, false = backward. */
 };
 
-template <typename Filtration_value>
+/**
+ * @class Identity_edge_modifier oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+ * @brief Identity modifier, i.e., does nothing.
+ *
+ * @ingroup zigzag_persistence
+ */
 class Identity_edge_modifier {
  public:
-  static constexpr bool isActive_ = false;
+  static constexpr bool isActive_ = false;  /**< Indicates that the modifier should be ignored. */
 
  private:
+  /**
+   * @brief Default constructor. Should not be called and therefore private.
+   */
   Identity_edge_modifier() {}
 };
 
+/**
+ * @class Square_root_edge_modifier oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+ * @brief Modifier that square roots the filtration value of an edge.
+ * 
+ * @ingroup zigzag_persistence
+ *
+ * @details Useful in particular when geometric computations (edge length, etc) are 
+ * run with squared Euclidean distance for performance.
+ *
+ * @tparam Filtration_value Filtration value type.
+ */
 template <typename Filtration_value>
 class Square_root_edge_modifier {
  public:
+  /**
+   * @brief Returns the square root of the given value. The parameter it-self is not modified.
+   * 
+   * @param f Value to modify.
+   * @return The modified value of @p f.
+   */
   static Filtration_value apply_modifier(Filtration_value f) { return std::sqrt(f); }
+  /**
+   * @brief Returns the square of the given value. The parameter it-self is not modified.
+   * 
+   * @param f Value to modify.
+   * @return The modified value of @p f.
+   */
   static Filtration_value apply_inverse_modifier(Filtration_value f) { return f * f; }
 
-  static constexpr bool isActive_ = true;
+  static constexpr bool isActive_ = true;   /**< Indicates that the modifier should not be ignored. */
 
  private:
+  /**
+   * @brief Default constructor. Should not be called and therefore private.
+   */
   Square_root_edge_modifier() {}
 };
 
-//assumes that eps_n-1 == 0
-template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier<Filtration_value> >
+/**
+ * @class Oscillating_rips_edge_range oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+ * @brief Gives access and computes different edge range types for an oscilliating Rips filtration.
+ *
+ * @ingroup zigzag_persistence
+ *
+ * @details There are two different kind of ranges: a vector range containing all computed edges and
+ * a Boost range made from a custom iterator computing an edge on the fly at each incrementation.
+ * The custom iterator is therefore only a forward iterator and can only be incremented.
+ *
+ * @tparam Filtration_value Filtration value type
+ * @tparam EdgeModifier Modifier for the edge filtration values. If no modifications are wanted, 
+ * use @ref Identity_edge_modifier. Default value: @ref Identity_edge_modifier.
+ *
+ * @warning As the custom iterator used for the Boost ranges stores possibly large ranges, avoid copying it. 
+ * Use @ref get_iterator_range, @ref begin and @ref end wisely. If one needs to do something else than to simply 
+ * iterate over the edges in order, then the vector range is for sure the better option.
+ */
+template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier>
 class Oscillating_rips_edge_range {
  public:
-  enum Order_policy { ALREADY_ORDERED, FARTHEST_POINT_ORDERING, RANDOM_POINT_ORDERING };
+  /**
+   * @brief Order policy for the points.
+   */
+  enum Order_policy { 
+    ALREADY_ORDERED,            /**< The given range of points is considered ordered. */
+    FARTHEST_POINT_ORDERING,    /**< The points are reordered using @ref Gudhi::subsampling::choose_n_farthest_points.*/
+    RANDOM_POINT_ORDERING       /**< The points are shuffled randomly. */
+  };
 
+  /**
+   * @class Oscillating_rips_edge_iterator oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+   * @brief Custom iterator over the edges of an oscillating rips filtration.
+   * 
+   * It inherits from boost::iterator_facade.
+   * 
+   * The iterator stores the distance matrix and epsilon values to compute the current edge on the fly
+   * at each incrementation.
+   *
+   * @warning As the iterator stores possibly large ranges, avoid copying it.
+   */
   class Oscillating_rips_edge_iterator
       : public boost::iterator_facade<Oscillating_rips_edge_iterator, 
                                       const Zigzag_edge<Filtration_value>&,
                                       boost::forward_traversal_tag> {
    public:
+    /**
+     * @brief Constructor. Computes the distance matrix and the epsilon values it-self from the given parameters.
+     *
+     * @tparam PointRange Point range type.
+     * @tparam DistanceFunction Type of the distance function.
+     * @param nu Lower multiplicator.
+     * @param mu Upper multiplicator.
+     * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+     * distance function.
+     * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+     * and return the distance between those points.
+     * @param orderPolicy Order policy for the points. Can be either @ref Order_policy::FARTHEST_POINT_ORDERING,
+     * @ref Order_policy::ALREADY_ORDERED or @ref Order_policy::RANDOM_POINT_ORDERING.
+     */
     template <typename PointRange, typename DistanceFunction>
     Oscillating_rips_edge_iterator(Filtration_value nu, 
                                    Filtration_value mu, 
@@ -138,6 +260,22 @@ class Oscillating_rips_edge_range {
       columnIndex_ = it - distanceMatrix_[1].begin();
     }
 
+    /**
+     * @brief Constructor. Takes already computed epsilon values as input, but assumes that the points are 
+     * already ordered accordingly. Assumes also that the last epsilon value is 0.
+     * 
+     * @tparam PointRange Point range type.
+     * @tparam DistanceFunction Type of the distance function.
+     * @param nu Lower multiplicator.
+     * @param mu Upper multiplicator.
+     * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input 
+     * format of the distance function. The order of the points should be in correspondence with the order of 
+     * the epsilon values.
+     * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+     * and return the distance between those points.
+     * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
+     * And the last value should be 0.
+     */
     template <typename PointRange, typename DistanceFunction>
     Oscillating_rips_edge_iterator(Filtration_value nu, 
                                    Filtration_value mu, 
@@ -172,6 +310,9 @@ class Oscillating_rips_edge_range {
       columnIndex_ = it - distanceMatrix_[1].begin();
     }
 
+    /**
+     * @brief Default constructor. Corresponds to the end iterator.
+     */
     Oscillating_rips_edge_iterator()
         : nu_(0),
           mu_(0),
@@ -183,22 +324,39 @@ class Oscillating_rips_edge_range {
           insertVertex_(true) {}
 
    private:
+    //mandatory for the boost::iterator_facade inheritance.
     friend class boost::iterator_core_access;
 
-    std::vector<Filtration_value> epsilonValues_;
-    std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_;
-    Filtration_value nu_;
-    Filtration_value mu_;
-    Zigzag_edge<Filtration_value> currentEdge_;
-    size_t epsilonIndex_, rowIndex_, columnIndex_;
-    bool inPositiveDirection_, insertVertex_;
+    std::vector<Filtration_value> epsilonValues_;   /**< Epsilon values. */
+    std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_;   /**< Distance matrix. */
+    Filtration_value nu_;                           /**< Lower multiplicator. */
+    Filtration_value mu_;                           /**< Upper multiplicator. */
+    Zigzag_edge<Filtration_value> currentEdge_;     /**< Stores the current edge in the range. */
+    size_t epsilonIndex_, rowIndex_, columnIndex_;  /**< Indices indicating the next position in the range. */
+    bool inPositiveDirection_, insertVertex_;       /**< Next direction and indicates if next ``edge'' is a vertex. */
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if to iterators are equal.
+     * 
+     * @param other Iterator to compare.
+     * @return True, the iterators are pointing to the same position.
+     * @return False, otherwise.
+     */
     bool equal(Oscillating_rips_edge_iterator const& other) const {
       return rowIndex_ == other.rowIndex_ && currentEdge_ == other.currentEdge_;
     }
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Returns the value of the dereferenced iterator.
+     * 
+     * @return Current edge.
+     */
     const Zigzag_edge<Filtration_value>& dereference() const { return currentEdge_; }
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Increments the iterator.
+     * 
+     */
     void increment() {
       if (epsilonIndex_ < distanceMatrix_.size() - 1) {
         if (insertVertex_) {
@@ -286,11 +444,17 @@ class Oscillating_rips_edge_range {
       _set_end();
     }
 
+    /**
+     * @brief Set the iterator as the end iterator.
+     */
     void _set_end(){
         rowIndex_ = 0;
         currentEdge_ = Zigzag_edge<Filtration_value>();
     }
 
+    /**
+     * @brief Initialize the column index for a new sequence of positive edges.
+     */
     void _initialize_positive_col_index() {
       auto it =
           std::upper_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
@@ -299,6 +463,9 @@ class Oscillating_rips_edge_range {
       columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
     }
 
+    /**
+     * @brief Initialize the column index for a new sequence of negative edges.
+     */
     void _initialize_negative_col_index() {
       auto it =
           std::lower_bound(distanceMatrix_[rowIndex_].begin(), distanceMatrix_[rowIndex_].end(),
@@ -308,17 +475,29 @@ class Oscillating_rips_edge_range {
       columnIndex_ = it - distanceMatrix_[rowIndex_].begin();
     }
 
+    /**
+     * @brief Indicates if the column index needs to be initialized or not.
+     */
     bool _positive_col_index_is_not_valid() {
         return columnIndex_ == 0 ||
                (rowIndex_ != (epsilonIndex_ + 1) &&
                 distanceMatrix_[rowIndex_][columnIndex_ - 1].second <= nu_ * epsilonValues_[epsilonIndex_]);
     }
 
+    /**
+     * @brief Indicates if the column index needs to be initialized or not.
+     */
     bool _negative_col_index_is_not_valid() {
         return columnIndex_ == distanceMatrix_[rowIndex_].size() ||
                distanceMatrix_[rowIndex_][columnIndex_].second > mu_ * epsilonValues_[epsilonIndex_];
     }
 
+    /**
+     * @brief Updates the current edge.
+     * 
+     * @param i Epsilon value index.
+     * @param direction Direction.
+     */
     void _update_edge(size_t i, bool direction) {
         if constexpr (EdgeModifier::isActive_)
             currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_,
@@ -327,6 +506,9 @@ class Oscillating_rips_edge_range {
             currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, epsilonValues_[i], direction);
     }
 
+    /**
+     * @brief Update the current edge as a vertex to insert.
+     */
     void _update_edge_as_positive_vertex() {
         if constexpr (EdgeModifier::isActive_)
             currentEdge_.set(epsilonIndex_ + 1, epsilonIndex_ + 1,
@@ -335,11 +517,30 @@ class Oscillating_rips_edge_range {
             currentEdge_.set(epsilonIndex_ + 1, epsilonIndex_ + 1, epsilonValues_[epsilonIndex_], true);
     }
 
+    /**
+     * @brief Update the current edge as a vertex to remove.
+     */
     void _update_edge_as_negative_vertex() {
         currentEdge_.set(rowIndex_ - 1, rowIndex_ - 1, -std::numeric_limits<Filtration_value>::infinity(), false);
     }
   };
 
+  /**
+   * @brief Computes and return a vector with all edges in order of the oscillating Rips filtration.
+   *
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplicator.
+   * @param mu Upper multiplicator.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param orderPolicy Order policy for the points. Can be either @ref Order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Order_policy::ALREADY_ORDERED or @ref Order_policy::RANDOM_POINT_ORDERING.
+   *
+   * @return Vector of @ref Zigzag_edge.
+   */
   template <typename PointRange, typename DistanceFunction>
   static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(
       Filtration_value nu, 
@@ -399,6 +600,26 @@ class Oscillating_rips_edge_range {
     return edgeFiltration;
   }
 
+  /**
+   * @brief Returns a boost::iterator_range from @ref Oscillating_rips_edge_iterator. The edges are computed 
+   * on the fly at each incrementation. The iterator is a forward iterator only.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplicator.
+   * @param mu Upper multiplicator.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param orderPolicy Order policy for the points. Can be either @ref Order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Order_policy::ALREADY_ORDERED or @ref Order_policy::RANDOM_POINT_ORDERING.
+   *
+   * @return boost::iterator_range of @ref Oscillating_rips_edge_iterator.
+   * 
+   * @warning Avoid copying the iterators as they are heavier than usual iterators. If begin and end iterators 
+   * are needed but not the structure of the range, use @ref begin and @ref end instead.
+   */
   template <typename PointRange, typename DistanceFunction>
   static boost::iterator_range<Oscillating_rips_edge_iterator> get_iterator_range(
       Filtration_value nu, 
@@ -411,7 +632,59 @@ class Oscillating_rips_edge_range {
         Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy), Oscillating_rips_edge_iterator());
   }
 
-  //as Oscillating_rips_edge_iterator is a heavy iterator to copy, it should not be used as a usual iterator
+  /**
+   * @brief Returns a boost::iterator_range from @ref Oscillating_rips_edge_iterator. The edges are computed
+   * on the fly at each incrementation. The iterator is a forward iterator only.
+   * Takes already computed epsilon values as input, but assumes that the points are already ordered accordingly. 
+   * Assumes also that the last epsilon value is 0.
+   *
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplicator.
+   * @param mu Upper multiplicator.
+   * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
+   * format of the distance function. The order of the points should be in correspondence with the order of
+   * the epsilon values.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
+   * And the last value should be 0.
+   *
+   * @return boost::iterator_range of @ref Oscillating_rips_edge_iterator.
+   * 
+   * @warning Avoid copying the iterators as they are heavier than usual iterators. If begin and end iterators 
+   * are needed but not the structure of the range, use @ref begin and @ref end instead.
+   */
+  template <typename PointRange, typename DistanceFunction>
+  static boost::iterator_range<Oscillating_rips_edge_iterator> get_iterator_range(
+      Filtration_value nu, 
+      Filtration_value mu, 
+      const PointRange& orderedPoints,
+      DistanceFunction&& distance, 
+      const std::vector<Filtration_value>& epsilonValues) 
+  {
+    return boost::iterator_range<Oscillating_rips_edge_iterator>(
+        Oscillating_rips_edge_iterator(nu, mu, orderedPoints, distance, epsilonValues), Oscillating_rips_edge_iterator());
+  }
+
+  /**
+   * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplicator.
+   * @param mu Upper multiplicator.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param orderPolicy Order policy for the points. Can be either @ref Order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Order_policy::ALREADY_ORDERED or @ref Order_policy::RANDOM_POINT_ORDERING.
+   *
+   * @return Instianciation of @ref Oscillating_rips_edge_iterator.
+   *
+   * @warning Avoid copying the iterator as it is heavier than usual iterators.
+   */
   template <typename PointRange, typename DistanceFunction>
   static Oscillating_rips_edge_iterator begin(
       Filtration_value nu, 
@@ -423,19 +696,60 @@ class Oscillating_rips_edge_range {
     return Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy);
   }
 
+  /**
+   * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
+   * Takes already computed epsilon values as input, but assumes that the points are already ordered accordingly. 
+   * Assumes also that the last epsilon value is 0.
+   *
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplicator.
+   * @param mu Upper multiplicator.
+   * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
+   * format of the distance function. The order of the points should be in correspondence with the order of
+   * the epsilon values.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
+   * And the last value should be 0.
+   *
+   * @return Instianciation of @ref Oscillating_rips_edge_iterator.
+   *
+   * @warning Avoid copying the iterator as it is heavier than usual iterators.
+   */
+  template <typename PointRange, typename DistanceFunction>
+  static Oscillating_rips_edge_iterator begin(
+      Filtration_value nu, 
+      Filtration_value mu, 
+      const PointRange& orderedPoints,
+      DistanceFunction&& distance, 
+      const std::vector<Filtration_value>& epsilonValues) 
+  {
+    return Oscillating_rips_edge_iterator(nu, mu, orderedPoints, distance, epsilonValues);
+  }
+
+  /**
+   * @brief Returns the end iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
+   * 
+   * @return Default instianciation of @ref Oscillating_rips_edge_iterator.
+   */
   static Oscillating_rips_edge_iterator end() 
   {
     return Oscillating_rips_edge_iterator();
   }
 
  private:
+  /**
+   * @brief Default constructor. Should not be called and therfore private. Use as a ``static'' class only.
+   */
   Oscillating_rips_edge_range(){};
 
-  /* The two input types std::pair<int, Filtration_value> encode pairs
-   * (j, d(p_i,p_j)) and (k, d(p_i,p_k)) for some fixed point p_i.
+  /**
+  * @brief The two input types std::pair<int, Filtration_value> encode pairs
+   * @f$(j, d(p_i,p_j))@f$ and @f$(k, d(p_i,p_k))@f$ for some fixed point @f$p_i@f$.
    * The operator() orders edges by length. By convention, if lengths are equal,
-   * it orders pairs by taking the smaller vertex label between j and k.
-   */
+   * it orders pairs by taking the smaller vertex label between @f$j@f$ and @f$k@f$.
+  */
   struct Point_distance_comp {
     bool operator()(const std::pair<int, Filtration_value>& p1, const std::pair<int, Filtration_value>& p2) const {
       {
@@ -447,6 +761,23 @@ class Oscillating_rips_edge_range {
     }
   };
 
+  /**
+   * @brief Initialize the distance function and epsilon values. Updates also the multiplicators if
+   * the edge modifier is active.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param[out] nu Lower multiplicator.
+   * @param[out] mu Upper multiplicator.
+   * @param[out] epsilonValues Container for the epsilon values.
+   * @param[out] distanceMatrix Container for the distance matrices.
+   * @param[in] points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param[in] distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param[in] orderPolicy Order policy for the points. Can be either @ref Order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Order_policy::ALREADY_ORDERED or @ref Order_policy::RANDOM_POINT_ORDERING.
+   */
   template <typename PointRange, typename DistanceFunction>
   static void _initialize(Filtration_value& nu, Filtration_value& mu, std::vector<Filtration_value>& epsilonValues,
                           std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
@@ -487,26 +818,28 @@ class Oscillating_rips_edge_range {
     distanceMatrix = _compute_distance_matrix(sortedPoints, distance);
   }
 
-  /** \brief Compute the epsilon values for an ordered set of points, measuring the
+  /**
+   * @brief Compute the epsilon values for an ordered set of points, measuring the
    * sparsity of the ordering.
    *
-   * \details Let \f$P = \{p_0, \ldots, p_{n-1}\f$ be the ordered set of points. Then
+   * @details Let \f$P = \{p_0, \ldots, p_{n-1}\f$ be the ordered set of points. Then
    * the method sets <CODE>eps_range[i]<\CODE> with the value \$f\varepsilon_i\$f,
    * defined as \f$\varpesilon_i = d_H(P_i,P)\f$, the Hausdorff between the points
    * \f$P_i= \{p_0, \ldots, p_{i}\}\f$ and the entire point cloud
    * \f$P = \{p_0, \ldots, p_{n-1}\}\f$.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param sortedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
+   * format of the distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
    *
-   * @param[in] points Range of points.
-   * @param[in] distance Distance function that can be called on two points.
-   * @param[in] eps_range   Vector in which the epsilon values are written,
-   *                        <CODE>eps_range[i]<\CODE> is \$f\varepsilon_i\$f.
-   *                        Satisfyies <CODE>epsilonValues[i] >=
-   *                        epsilonValues[j] >= 0<\CODE> whenever <CODE>i>=j<\CODE>.
-   *                        The range must be of same size as the number of points.
+   * @return Vector of decreasing epsilon values ending with 0.
    */
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& points, DistanceFunction&& distance) {
-    size_t n = points.size();
+  static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& sortedPoints, DistanceFunction&& distance) {
+    size_t n = sortedPoints.size();
     std::vector<Filtration_value> eps_range(n, std::numeric_limits<double>::infinity());
 
     // compute all \f$\varepsilon_i\f$ values, such that eps_range[i] ==
@@ -518,7 +851,7 @@ class Oscillating_rips_edge_range {
       tbb::parallel_for(size_t(i + 1), n, [&](size_t k) {
         // set eps_range[k] <- d(p_k, P_i) ==
         //                            min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
-        double dist_i_k = distance(points[i], points[k]);
+        double dist_i_k = distance(sortedPoints[i], sortedPoints[k]);
         if (dist_i_k < eps_range[k]) {
           eps_range[k] = dist_i_k;
         }
@@ -548,6 +881,20 @@ class Oscillating_rips_edge_range {
     return eps_range;
   }
 
+  /**
+   * @brief Returns the sparse distance matrix. A cell is represented as a pair of its row index and its value, 
+   * i.e., @f$(j, d(p_i,p_j))@f$ is stored in column @f$i@f$ to indicate that the distance of the @f$i^{th}@f$ 
+   * point has distance @f$d(p_i,p_j)@f$ from the @f$j^{th}@f$ point.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param sortedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
+   * format of the distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   *
+   * @return A vector of vectors of pairs of row indices and distances.
+   */
   template <typename PointRange, typename DistanceFunction>
   static std::vector<std::vector<std::pair<int, Filtration_value> > > _compute_distance_matrix(
       const PointRange& sortedPoints, DistanceFunction&& distance) {
@@ -577,6 +924,19 @@ class Oscillating_rips_edge_range {
     return distanceMatrix;
   }
 
+  /**
+   * @brief Computes the edges that are added and the edges that are removed and stores them in two separate containers.
+   * The edge container @f$e@f$ stores the @f$i^{th}@f$ edge induced by vertex @f$j@f$ at @f$e[j][i]@f$.
+   * 
+   * @param[in] nu Lower multiplicator.
+   * @param[in] mu Upper multiplicator.
+   * @param[in] epsilonValues Epsilon values in decreasing order finishing with 0.
+   * @param[in] distanceMatrix Spare distance matrix.
+   * @param[out] edgesAdded Container for positive edges.
+   * @param[out] edgesRemoved Container for negative edges.
+   *
+   * @return Total number of edges.
+   */
   static size_t _compute_edges(Filtration_value nu, Filtration_value mu,
                                const std::vector<Filtration_value>& epsilonValues,
                                std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
@@ -759,46 +1119,50 @@ class Oscillating_rips_edge_range {
     return number_of_arrows;
   }
 
+  /**
+   * @brief Sorts canonically the edges: as much as possible, edges should be removed in
+   * the reverse order of their insertion. We decide to insert shorted edges first,
+   * with increasing lexicographical order, and remove larger edges first, with
+   * decreasing lexicographic order.
+   *
+   * @param edges Edges to sort.
+   */
   static void _canonically_sort_edges(std::vector<Zigzag_edge<Filtration_value> >& edges) {
-    // canonical sort of the edges: as much as possible, edges should be removed in
-    // the reverse order of their insertion. We decide to insert shorted edges first,
-    // with increasing lexicographical order, and remove larger edges first, with
-    // decreasing lexicographic order.
-
     // filtration then dimension, then lex order for insertion
     auto edge_cmp = [](const Zigzag_edge<Filtration_value>& e1, const Zigzag_edge<Filtration_value>& e2) {
       if (e1.get_filtration_value() != e2.get_filtration_value()) {
-        return e1.get_filtration_value() < e2.get_filtration_value();
-      }  // lower fil first
+        return e1.get_filtration_value() < e2.get_filtration_value();   // lower fil first
+      }
 
-      if (e1.get_smallest_vertex() == e1.get_biggest_vertex()) {  // e1 is a vertex, -> put vertices first
+      if (e1.get_smallest_vertex() == e1.get_biggest_vertex()) {    // e1 is a vertex, -> put vertices first
         if (e2.get_smallest_vertex() == e2.get_biggest_vertex()) {
-          return e1.get_smallest_vertex() < e2.get_smallest_vertex();
-        }  //-> vertex of lower label
-        else {
-          return true;
-        }  //-> always vertices before edges
+          return e1.get_smallest_vertex() < e2.get_smallest_vertex();   //-> vertex of lower label
+        } else {
+          return true;  //-> always vertices before edges
+        }
       }
       // e1 is an edge
       if (e2.get_smallest_vertex() == e2.get_biggest_vertex()) {
-        return false;
-      }       // e2 vertex, -> put it first
+        return false;   // e2 vertex, -> put it first
+      }
       // both are edges, lexigraphic compare
       if (e1.get_smallest_vertex() != e2.get_smallest_vertex()) {
-        return e1.get_smallest_vertex() < e2.get_smallest_vertex();
-      }  // lex order
+        return e1.get_smallest_vertex() < e2.get_smallest_vertex(); // lex order
+      }
       if (e1.get_biggest_vertex() != e2.get_biggest_vertex()) {
         return e1.get_biggest_vertex() < e2.get_biggest_vertex();
       }
-      return false;  // equality
+      return false;     // equality
     };
+
     // the inverse ordering for deletions
     auto inv_edge_cmp = [&](const Zigzag_edge<Filtration_value>& e1, const Zigzag_edge<Filtration_value>& e2) {
       if (e1.get_smallest_vertex() == e2.get_smallest_vertex() && e1.get_biggest_vertex() == e2.get_biggest_vertex()) {
-        return false;
-      }                            //== => false
-      return !(edge_cmp(e1, e2));  // reverse order
+        return false;               //equality => false
+      }
+      return !(edge_cmp(e1, e2));   // reverse order
     };
+
     // sort sequences of inclusions of same filtration with edge_cmp
     // sort sequences of removals of same filtration with inv_edge_cmp
     auto beg = edges.begin();
@@ -809,20 +1173,19 @@ class Oscillating_rips_edge_range {
       while (end != edges.end() && end->get_filtration_value() == curr_fil && end->get_direction() == curr_type) {
         ++end;
       }
-      if (curr_type) {
+      if (curr_type) {  // sequence of insertions
 #ifdef GUDHI_USE_TBB
         tbb::parallel_sort(beg, end, edge_cmp);
 #else
         std::sort(beg, end, edge_cmp);
 #endif
-      }  // sequence of insertions
-      else {
+      } else {          // sequence of removals
 #ifdef GUDHI_USE_TBB
         tbb::parallel_sort(beg, end, inv_edge_cmp);
 #else
         std::sort(beg, end, inv_edge_cmp);
 #endif
-      }  // sequence of removals
+      }
       beg = end;
       curr_fil = beg->get_filtration_value();
       curr_type = beg->get_direction();
@@ -830,26 +1193,81 @@ class Oscillating_rips_edge_range {
   }
 };
 
-//needs Filtered_complex to have stable simplex handles
-template <class Filtered_complex, typename EdgeRangeIterator>
+/**
+ * @class Oscillating_rips_simplex_range oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+ * @brief Gives access to a range of the ordered simplices in an oscilliating Rips filtration.
+ *
+ * @ingroup zigzag_persistence
+ *
+ * @details The simplices are returned as tuples of three elements: 
+ * the first is the simplex handle of the simplex in the given complex,
+ * the second is the filtration value of the corresponding arrow,
+ * the third is the direction of the arrow, i.e., indicates if the simplex is inserted or removed.
+ * For more information, see @ref Oscillating_rips_iterator.
+ * 
+ * @tparam StableFilteredComplex Filtered complex structure that has stable simplex handles, 
+ * that is, they do not invalidates after an insertion or a removal (except for the removed simplices).
+ * @tparam EdgeRangeIterator Type of the edge range iterator. 
+ *
+ * @warning As the custom iterator stores a possibly large range, avoid copying it. 
+ * Use @ref get_iterator_range, @ref begin and @ref end wisely.
+ */
+template <class StableFilteredComplex, typename EdgeRangeIterator>
 class Oscillating_rips_simplex_range {
  public:
+  /**
+   * @class Oscillating_rips_iterator oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
+   * @brief Custom iterator over the simplices of an oscillating rips filtration. Is a forward iterator only.
+   *
+   * It inherits from boost::iterator_facade.
+   *
+   * For each positive edge given by the edge range iterator, the given complex computes and adds all possible
+   * cofaces and they respective simplex handle are stored. For each negative edge, the given complex computes
+   * the simplex handles of all cofaces and they are stored.
+   * The simplex handles induced by an edge are stored only the time needed and are removed when reaching the next edge.
+   * That is, we start by storing the possible cofaces of an edge, then at each incrementation,
+   * the next element within the stored simplex handles is retrieved and once the end is reached,
+   * the simplex handles are erased and replaced by the possible cofaces of the next edge and so on...
+   * If the edge is negative, then a simplex is removed from the complex at the next incrementation.
+   * So, the maximum size of the complex corresponds to the maximum size of a complex in the zigzag filtration.
+   *
+   * The simplices are returned by the iterator as tuples of three elements:
+   * the first is the simplex handle of the simplex in the given complex,
+   * the second is the filtration value of the corresponding arrow,
+   * the third is the direction of the arrow, i.e., indicates if the simplex is inserted or removed.
+   *
+   * @warning As the iterator stores possibly a large range, avoid copying it.
+   */
   class Oscillating_rips_iterator
       : public boost::iterator_facade<Oscillating_rips_iterator,
-                                      const std::tuple<typename Filtered_complex::Simplex_handle,typename Filtered_complex::Filtration_value,bool>&,
-                                      boost::forward_traversal_tag> {
+                                      const std::tuple<typename StableFilteredComplex::Simplex_handle,
+                                                       typename StableFilteredComplex::Filtration_value, bool>&,
+                                      boost::forward_traversal_tag> 
+  {
    public:
-    using Filtration_value = typename Filtered_complex::Filtration_value;
-    using Simplex_handle = typename Filtered_complex::Simplex_handle;
-    using Simplex_key = typename Filtered_complex::Simplex_key;
+    using Filtration_value = typename StableFilteredComplex::Filtration_value;  /**< Filtration value type. */
+    using Simplex_handle = typename StableFilteredComplex::Simplex_handle;      /**< Simplex handle type. */
+    using Simplex_key = typename StableFilteredComplex::Simplex_key;            /**< Key type. */
 
-    // edges and complex are not copied, so do not modifiy outside as long as iterator != end.
-    // TODO: move constructor for iterator?
+    /**
+     * @brief Constructor. The edge iterators and the complex are not copied, so do not modifiy or invalidate 
+     * them outside as long as this iterator is different from the end iterator.
+     * 
+     * @param edgeStartIterator Begin iterator of the oscilliating Rips edge range. 
+     * Is moved, so the original iterator will probably be invalidated.
+     * @param edgeEndIterator End iterator of the oscilliating Rips edge range.
+     * Is moved, so the original iterator will probably be invalidated.
+     * @param complex Empty complex which will be used to store current simplices. 
+     * Only the address of the complex is stored, so the state of the complex can be 
+     * consulted between each incrementation.
+     * @param maxDimension Maximal dimension to which to expand the complex. If set to -1, there is no limit.
+     * Default value: -1.
+     */
     Oscillating_rips_iterator(EdgeRangeIterator& edgeStartIterator, EdgeRangeIterator& edgeEndIterator,
-                              Filtered_complex& complex, int maxDimension = -1)
+                              StableFilteredComplex& complex, int maxDimension = -1)
         : complex_(&complex),
           currentSimplexIndex_(0),
-          currentEdgeIt_(std::move(edgeStartIterator)),
+          currentEdgeIt_(std::move(edgeStartIterator)),     // TODO: move constructor for custom iterator?
           endEdgeIt_(std::move(edgeEndIterator)),
           currentDirection_(true),
           maxDimension_(maxDimension),
@@ -872,6 +1290,9 @@ class Oscillating_rips_simplex_range {
       complex_->assign_key(currentSimplices_[currentSimplexIndex_], 0);
     }
 
+    /**
+     * @brief Default constructor. Corresponds to the end iterator.
+     */
     Oscillating_rips_iterator()
         : complex_(nullptr),
           currentSimplexIndex_(0),
@@ -880,10 +1301,14 @@ class Oscillating_rips_simplex_range {
           currentArrowNumber_(0) {}
 
    private:
+    //mandatory for the boost::iterator_facade inheritance.
     friend class boost::iterator_core_access;
 
+    /**
+     * @brief Reverse lexicographical order for the simplex handles.
+     */
     struct reverse_lexicographic_order {
-      explicit reverse_lexicographic_order(Filtered_complex* st) : st_(st) {}
+      explicit reverse_lexicographic_order(StableFilteredComplex* st) : st_(st) {}
 
       bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
         auto rg1 = st_->simplex_vertex_range(sh1);
@@ -900,20 +1325,26 @@ class Oscillating_rips_simplex_range {
         }
         return ((it1 == rg1.end()) && (it2 != rg2.end()));
       }
-      Filtered_complex* st_;
+      StableFilteredComplex* st_;
     };
 
-    std::vector<Simplex_handle> currentSimplices_;
-    Filtered_complex* complex_;
-    size_t currentSimplexIndex_;
-    EdgeRangeIterator currentEdgeIt_;
-    EdgeRangeIterator endEdgeIt_;
-    bool currentDirection_;
-    const int maxDimension_;
-    //   bool isEnd_;
-    std::tuple<Simplex_handle, Filtration_value, bool> currentArrow_;
-    Simplex_key currentArrowNumber_;
+    std::vector<Simplex_handle> currentSimplices_;  /**< Stores current simplex handles. */
+    StableFilteredComplex* complex_;                /**< Pointer to the complex. */
+    size_t currentSimplexIndex_;                    /**< Index to current position in currentSimplices_. */
+    EdgeRangeIterator currentEdgeIt_;               /**< Iterator pointing to the next edge. */
+    EdgeRangeIterator endEdgeIt_;                   /**< End edge iterator. */
+    bool currentDirection_;                         /**< Current direction. */
+    const int maxDimension_;                        /**< Maximal dimension of expansion. */
+    std::tuple<Simplex_handle,Filtration_value,bool> currentArrow_;     /**< Current return element. */
+    Simplex_key currentArrowNumber_;                /**< Number of incrementations. */
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if two iterators are equal.
+     * 
+     * @param other Iterator to compare.
+     * @return True, if the two iterators point to the same position.
+     * @return False, otherwise.
+     */
     bool equal(Oscillating_rips_iterator const& other) const {
       if (complex_ == nullptr) return other.complex_ == nullptr;
 
@@ -921,10 +1352,18 @@ class Oscillating_rips_simplex_range {
              currentSimplexIndex_ == other.currentSimplexIndex_;
     }
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Dereference the iterator.
+     * 
+     * @return Value of the current return element.
+     */
     const std::tuple<Simplex_handle, Filtration_value, bool>& dereference() const {
         return currentArrow_;
     }
 
+    /**
+     * @brief Mandatory for the boost::iterator_facade inheritance. Increments the iterator.
+     */
     void increment() {
       if (!currentDirection_) complex_->remove_maximal_simplex(currentSimplices_[currentSimplexIndex_]);
 
@@ -937,9 +1376,6 @@ class Oscillating_rips_simplex_range {
           return;
         }
 
-        // if (!currentDirection_) {
-        //   for (auto& sh : currentSimplices_) complex_->remove_maximal_simplex(sh);
-        // }
         currentSimplices_.clear();
 
         auto fil = currentEdgeIt_->get_filtration_value();
@@ -960,20 +1396,22 @@ class Oscillating_rips_simplex_range {
       if (currentDirection_) complex_->assign_key(currentSimplices_[currentSimplexIndex_], currentArrowNumber_);
     }
 
+    /**
+     * @brief Sets the iterator as the end iterator.
+     */
     void _set_end() { complex_ = nullptr; }
 
+    /**
+     * @brief Updates @p currentSimplices_ for insertions.
+     * 
+     * @param fil Current filtration value.
+     */
     void _update_positive_current_simplices(Filtration_value fil) {
       while (currentEdgeIt_ != endEdgeIt_ && currentEdgeIt_->get_direction() &&
              currentEdgeIt_->get_filtration_value() == fil) 
       {
         complex_->insert_edge_as_flag(currentEdgeIt_->get_smallest_vertex(), currentEdgeIt_->get_biggest_vertex(),
                                       currentEdgeIt_->get_filtration_value(), maxDimension_, currentSimplices_);
-        // std::cout << "add edge: " << currentEdgeIt_->get_smallest_vertex() << " " << currentEdgeIt_->get_biggest_vertex() << " - " << currentEdgeIt_->get_filtration_value() << "\n";
-        // std::cout << "current:\n";
-        // for (auto sh : currentSimplices_){
-        //     for (auto v : complex_->simplex_vertex_range(sh)) std::cout << v << " ";
-        //     std::cout << "\n";
-        // }
         ++currentEdgeIt_;
       }
 #ifdef GUDHI_USE_TBB
@@ -985,6 +1423,11 @@ class Oscillating_rips_simplex_range {
 #endif
     }
 
+    /**
+     * @brief Updates @p currentSimplices_ for removals.
+     * 
+     * @param fil Current filtration value.
+     */
     void _update_negative_current_simplices(Filtration_value fil) {
       unsigned int count = 0;
       while (currentEdgeIt_ != endEdgeIt_ && !currentEdgeIt_->get_direction() &&
@@ -1018,23 +1461,67 @@ class Oscillating_rips_simplex_range {
     }
   };
 
+  /**
+   * @brief Returns a boost::iterator_range from @ref Oscillating_rips_iterator.
+   * The iterator is a forward iterator only.
+   *
+   * @param edgeStartIterator Begin iterator of the oscilliating Rips edge range.
+   * Is moved, so the original iterator will probably be invalidated.
+   * @param edgeEndIterator End iterator of the oscilliating Rips edge range.
+   * Is moved, so the original iterator will probably be invalidated.
+   * @param complex Empty complex which will be used to store current simplices.
+   * Only the address of the complex is stored, so the state of the complex can be
+   * consulted between each incrementation.
+   * @param maxDimension Maximal dimension to which to expand the complex. If set to -1, there is no limit.
+   * Default value: -1.
+   *
+   * @return boost::iterator_range of @ref Oscillating_rips_iterator.
+   * 
+   * @warning Avoid copying the iterators as they are heavier than usual iterators. If begin and end iterators 
+   * are needed but not the structure of the range, use @ref begin and @ref end instead.
+   */
   static boost::iterator_range<Oscillating_rips_iterator> get_iterator_range(EdgeRangeIterator& edgeStartIterator,
                                                                              EdgeRangeIterator& edgeEndIterator,
-                                                                             Filtered_complex& complex,
+                                                                             StableFilteredComplex& complex,
                                                                              int maxDimension = -1) {
     return boost::iterator_range<Oscillating_rips_iterator>(
         Oscillating_rips_iterator(edgeStartIterator, edgeEndIterator, complex, maxDimension),
         Oscillating_rips_iterator());
   }
 
+  /**
+   * @brief Returns the begin iterator of a the range of simplices based on @ref Oscillating_rips_iterator.
+   * 
+   * @param edgeStartIterator Begin iterator of the oscilliating Rips edge range.
+   * Is moved, so the original iterator will probably be invalidated.
+   * @param edgeEndIterator End iterator of the oscilliating Rips edge range.
+   * Is moved, so the original iterator will probably be invalidated.
+   * @param complex Empty complex which will be used to store current simplices.
+   * Only the address of the complex is stored, so the state of the complex can be
+   * consulted between each incrementation.
+   * @param maxDimension Maximal dimension to which to expand the complex. If set to -1, there is no limit.
+   * Default value: -1.
+   *
+   * @return Instianciation of @ref Oscillating_rips_iterator.
+   *
+   * @warning Avoid copying the iterator as it is heavier than usual iterators.
+   */
   static Oscillating_rips_iterator begin(EdgeRangeIterator& edgeStartIterator, EdgeRangeIterator& edgeEndIterator,
-                                         Filtered_complex& complex, int maxDimension = -1) {
+                                         StableFilteredComplex& complex, int maxDimension = -1) {
     return Oscillating_rips_iterator(edgeStartIterator, edgeEndIterator, complex, maxDimension);
   }
 
+  /**
+   * @brief Returns the end iterator of a the range of simplices based on @ref Oscillating_rips_iterator.
+   * 
+   * @return Default instianciation of @ref Oscillating_rips_iterator.
+   */
   static Oscillating_rips_iterator end() { return Oscillating_rips_iterator(); }
 
  private:
+  /**
+   * @brief Default constructor. Should not be called and therfore private. Use as a ``static'' class only.
+   */
   Oscillating_rips_simplex_range(){};
 };
 

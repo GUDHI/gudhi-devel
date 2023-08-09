@@ -18,19 +18,57 @@
 #ifndef OSCILLATING_RIPS_PERSISTENCE_H_
 #define OSCILLATING_RIPS_PERSISTENCE_H_
 
-#include <gudhi/Debug_utils.h>
 #include <gudhi/Zigzag_persistence/oscillating_rips_iterators.h>
 #include <gudhi/Zigzag_persistence.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/options.h>
 #include <gudhi/distance_functions.h>
-#include <type_traits>
 
 namespace Gudhi {
 namespace zigzag_persistence {
 
-enum Edge_range_type { VECTOR, BOOST_RANGE };
+/**
+ * @brief Determines the type of the oscillanting Rips edge range.
+ *
+ * The two options are usually quite equivalent, as the base algorithm behind them is the same.
+ * They mostly differ by their memory managment, so it can be worth it to try both out.
+ */
+enum Edge_range_type {
+  VECTOR,     /**< The edges are computed all at once and stored in a vector. */
+  BOOST_RANGE /**< The edges are computed one by one at each incrementation of
+               * the range iterator and therefore not stored. */
+};
 
+/**
+ * @brief Computes the oscillating Rips filtration based on the given parameters and computes the 
+ * corresponding zigzag barcode.
+ *
+ * @ingroup zigzag_persistence
+ *
+ * @details It is thought to be a helper function to easily compute oscillating Rips persistence with the 
+ * possibility to switch out a few common options. But additional options exists for the iterators 
+ * (e.g. replacing the Euclidian distance by another one, or using your own epsilon values; see
+ * the documention of @ref Oscillating_rips_edge_range and @ref Oscillating_rips_simplex_range for
+ * more information). You can easily create your own method based on this one.
+ * 
+ * @tparam PointRange Range containing the point cloud.
+ * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR. 
+ * Default value: Edge_range_type::BOOST_RANGE.
+ * @tparam OscillatingRipsSimplexRange Type of the oscilliating Rips simplex range. 
+ * Default value: Oscillating_rips_simplex_range with templates depending on @p edge_range_type.
+ * @tparam ZigzagPersistenceOptions Options for the matrix used by the zigzag persistence algorithm.
+ * Default value: @ref Gudhi::persistence_matrix::Zigzag_options<>.
+ * @param points Point cloud.
+ * @param nu Lower multiplicator.
+ * @param mu Upper multiplicator.
+ * @param maxDim Maximum dimension to which to expand the Rips complex. If set to -1, there is no limit.
+ * @param p Order policy for the points. 
+ * Can be either @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING, 
+ * @ref Oscillating_rips_edge_range::Order_policy::ALREADY_ORDERED or 
+ * @ref Oscillating_rips_edge_range::Order_policy::RANDOM_POINT_ORDERING. 
+ * Default value: @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING.
+ * @return The persistence diagram of the oscillating Rips filtration.
+ */
 template <typename PointRange, Edge_range_type edge_range_type = Edge_range_type::BOOST_RANGE,
           class OscillatingRipsSimplexRange = Oscillating_rips_simplex_range<
               Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips>,
@@ -61,11 +99,6 @@ compute_oscillating_rips_persistence(
     auto start = EdgeRange::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
     auto end = EdgeRange::end();
     for (const auto& t : OscillatingRipsSimplexRange::get_iterator_range(start, end, st, maxDim)) {
-    //   std::cout << (std::get<2>(t) ? "in" : "out") << ": ";
-    //   for (auto v : st.simplex_vertex_range(std::get<0>(t))) std::cout << v << " ";
-    //   std::cout << " - ";
-    //   for (auto sh : st.boundary_simplex_range(std::get<0>(t))) std::cout << st.key(sh) << " ";
-    //   std::cout << "\n";
       if (std::get<2>(t))
         zp.insert_simplex_handle(std::get<0>(t));
       else
