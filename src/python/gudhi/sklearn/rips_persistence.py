@@ -130,7 +130,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
 
               - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
               - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
-        :rtype: list of (,2) array_like or list of list of (,2) array_like
+        :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)
         """
         # Depends on homology_dimensions is an integer or a list of integer (else case)
         if isinstance(self.homology_dimensions, int):
