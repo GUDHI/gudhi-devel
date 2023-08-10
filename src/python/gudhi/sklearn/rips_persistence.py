@@ -36,7 +36,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self,
         homology_dimensions,
         max_edge_length=float('inf'),
-        input_type='points',
+        input_type='point cloud',
         nb_collapse=-1,
         homology_coeff_field=11,
         min_persistence=0.0,
@@ -51,8 +51,9 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
             max_edge_length (float): Rips value. Default is +Inf.
-            input_type (str): Can be 'points' when inputs are point clouds, or 'matrices', when inputs are distance
-                matrices (full square or lower triangular). Default is 'points'.
+            input_type (str): Can be 'point cloud' when inputs are point clouds, or 'lower distance matrix', when
+                inputs are lower triangular distance matrix (can be full square, but the upper part of the distance
+                matrix will not be considered). Default is 'point cloud'.
             nb_collapse (int): The number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform on the
                 SimplexTree. Default is -1, which means "automatic" (a relatively good enough number of iterations is
                 choosen).
@@ -91,12 +92,12 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         else:
             nb_collapse = self.nb_collapse
         
-        if self.input_type == 'points':
+        if self.input_type == 'point cloud':
             rips = RipsComplex(points=inputs, max_edge_length = self.max_edge_length)
-        elif self.input_type == 'matrices':
+        elif self.input_type == 'lower distance matrix':
             rips = RipsComplex(distance_matrix=inputs, max_edge_length = self.max_edge_length)
         else:
-            raise ValueError("Only 'points' and  'matrices' are valid input_type")
+            raise ValueError("Only 'point cloud' and  'lower distance matrix' are valid input_type")
         
         if max_dimension > 1:
             stree = rips.create_simplex_tree(max_dimension=1)

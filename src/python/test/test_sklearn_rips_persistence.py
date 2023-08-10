@@ -47,7 +47,7 @@ def test_distance_matrix_rips_persistence_of_points_on_a_circle():
         from scipy.spatial.distance import cdist
         pts = points.sphere(n_samples = 100, ambient_dim = 2)
         distance_matrix = cdist(pts, pts)
-        rips = RipsPersistence(homology_dimensions=1, input_type='matrices')
+        rips = RipsPersistence(homology_dimensions=1, input_type='lower distance matrix')
         diags = rips.fit_transform([distance_matrix])[0]
         assert len(diags) == 1
         assert 0. < diags[0][0] < 0.5
