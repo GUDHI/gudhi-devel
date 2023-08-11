@@ -1,7 +1,11 @@
+# This file is required to install dependencies with conan
+# Notice that onetbb is not mandatory
 [requires]
 onetbb/2021.9.0
 cgal/5.5.3
 
+# If your CMake version is not compatible with CMakePresets (<3.23) call cmake like:
+# 'cmake <path> -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW'
 [tool_requires]
 cmake/3.22.6
 
