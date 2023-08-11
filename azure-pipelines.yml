@@ -44,7 +44,10 @@ jobs:
       vmImage: windows-latest
     variables:
       pythonVersion: '3.8'
-      cmakeConanFlags: -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+      # If your CMake version is not compatible with CMakePresets (<3.23) call cmake like: 'cmake <path> -G
+      # "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE=C:\Users\User\gudhi-devel\conan-build\conan_toolchain.cmake
+      # -DCMAKE_POLICY_DEFAULT_CMP0091=NEW'
+      cmakeConanFlags: -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW
       cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
 
     steps:
@@ -71,11 +74,11 @@ jobs:
         conan install . --output-folder=build --build=missing
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd build
-        call conanbuild.bat
+        conanbuild.bat
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeConanFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        MSBuild GUDHIdev.sln /m /p:Configuration=Release /p:Platform=x64
+        cmake --build . --config Release
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
@@ -90,4 +93,57 @@ jobs:
         ctest --output-on-failure -C Release
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         deactivate_conanbuild.bat
+      displayName: 'Build and test'
+
+  - job: 'WindowsVcpkg'
+    displayName: "Build and test Windows with vcpkg"
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 60
+    pool:
+      vmImage: windows-latest
+    variables:
+      pythonVersion: '3.7'
+      cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
+      cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+
+    steps:
+    # Use a specific Python version
+    - task: UsePythonVersion@0
+      displayName: Use Python $(pythonVersion)
+      inputs:
+        versionSpec: $(pythonVersion)
+        addToPath: true
+        architecture: 'x64'
+
+    - script: |
+        git submodule update --init
+        python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+        # No PyKeOps on windows, let's workaround this one.
+        for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
+        vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
+        choco install -y ninja --force --force-dependencies
+      displayName: 'Install build dependencies'
+    - script: |
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        ninja
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        ctest --output-on-failure -C Release -E diff_files
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        cd src\python
+        copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
+        copy "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
+        copy "C:\vcpkg\installed\x64-windows\bin\tbb*.dll" ".\gudhi\"
+        python setup.py build_ext --inplace
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
+        SET PYTHONPATH=%CD%;%PYTHONPATH%
+        echo %PYTHONPATH%
+        ctest --output-on-failure -C Release
+        IF %errorlevel% NEQ 0 exit /b %errorlevel%
       displayName: 'Build and test'

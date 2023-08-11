@@ -1,10 +1,10 @@
 project(Tangential_complex_examples)
 
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   add_executable( Tangential_complex_example_basic example_basic.cpp )
-  target_link_libraries(Tangential_complex_example_basic ${CGAL_LIBRARY})
+  target_link_libraries(Tangential_complex_example_basic CGAL::CGAL)
   add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
-  target_link_libraries(Tangential_complex_example_with_perturb ${CGAL_LIBRARY})
+  target_link_libraries(Tangential_complex_example_with_perturb CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(Tangential_complex_example_basic TBB::tbb)
     target_link_libraries(Tangential_complex_example_with_perturb TBB::tbb)
@@ -15,4 +15,4 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_test(NAME Tangential_complex_example_with_perturb
       COMMAND $<TARGET_FILE:Tangential_complex_example_with_perturb>)
 
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
