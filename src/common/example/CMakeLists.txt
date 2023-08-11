@@ -14,14 +14,14 @@ if (DIFF_PATH)
   set_tests_properties(Common_example_vector_double_off_reader_diff_files PROPERTIES DEPENDS Common_example_vector_double_off_reader) 
 endif()
 
-if(TARGET CGAL::CGAL)
+if(CGAL_FOUND)
   add_executable ( cgal_3D_off_reader example_CGAL_3D_points_off_reader.cpp )
   target_link_libraries(cgal_3D_off_reader CGAL::CGAL)
   add_test(NAME Common_example_vector_cgal_3D_off_reader COMMAND $<TARGET_FILE:cgal_3D_off_reader>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off")
 endif()
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
   target_link_libraries(cgal_off_reader CGAL::CGAL)
   add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>

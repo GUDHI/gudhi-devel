@@ -9,7 +9,7 @@ if (OPENGL_FOUND)
     find_package(QGLViewer QUIET)
     if ( QGLVIEWER_FOUND)
 
-      if (TARGET CGAL::CGAL)
+      if (CGAL_FOUND)
         set(CMAKE_AUTOMOC ON)
         set(CMAKE_AUTOUIC ON)
         set(CMAKE_INCLUDE_CURRENT_DIR ON)

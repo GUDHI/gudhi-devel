@@ -8,7 +8,7 @@ add_test(NAME Witness_complex_example_nearest_landmark_table
     COMMAND $<TARGET_FILE:Witness_complex_example_nearest_landmark_table>)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable( Witness_complex_example_off example_witness_complex_off.cpp )
   add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
   add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
@@ -30,4 +30,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
       COMMAND $<TARGET_FILE:Witness_complex_example_strong_off>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "20" "1.0" "3")
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

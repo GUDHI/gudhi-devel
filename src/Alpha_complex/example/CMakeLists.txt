@@ -1,6 +1,6 @@
 project(Alpha_complex_examples)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( Alpha_complex_example_from_points Alpha_complex_from_points.cpp )
   target_link_libraries(Alpha_complex_example_from_points CGAL::CGAL)
   add_executable ( Alpha_complex_example_from_off Alpha_complex_from_off.cpp )
@@ -46,7 +46,7 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   endif()
 endif()
 
-if (TARGET CGAL::CGAL)
+if (CGAL_FOUND)
   add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
   target_link_libraries(Alpha_complex_example_weighted_3d_from_points CGAL::CGAL)
   if(TARGET TBB::tbb)
@@ -63,14 +63,14 @@ if (TARGET CGAL::CGAL)
   add_test(NAME Alpha_complex_example_3d_from_points
           COMMAND $<TARGET_FILE:Alpha_complex_example_3d_from_points>)
 
-endif(TARGET CGAL::CGAL)
+endif(CGAL_FOUND)
 
 # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
   add_executable ( Weighted_alpha_complex_example_from_points Weighted_alpha_complex_from_points.cpp )
   target_link_libraries(Weighted_alpha_complex_example_from_points CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(Weighted_alpha_complex_example_from_points TBB::tbb)
   endif()
   add_test(NAME Weighted_alpha_complex_example_from_points COMMAND $<TARGET_FILE:Weighted_alpha_complex_example_from_points>)
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+endif(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)

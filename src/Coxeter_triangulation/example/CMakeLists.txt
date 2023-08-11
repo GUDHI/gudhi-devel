@@ -2,7 +2,7 @@ project(Coxeter_triangulation_example)
 
 if (EIGEN3_FOUND)
   # because of random_orthogonal_matrix inclusion
-  if (TARGET CGAL::CGAL)
+  if (CGAL_FOUND)
     add_executable ( Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example manifold_tracing_flat_torus_with_boundary.cpp )
     target_link_libraries(Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example CGAL::CGAL)
     add_test(NAME Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example

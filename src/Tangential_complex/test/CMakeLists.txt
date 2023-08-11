@@ -1,6 +1,6 @@
 project(Tangential_complex_tests)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   include(GUDHI_boost_test)
 
   add_executable( Tangential_complex_test_TC test_tangential_complex.cpp )
@@ -10,4 +10,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   endif()
 
   gudhi_add_boost_test(Tangential_complex_test_TC)
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

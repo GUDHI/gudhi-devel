@@ -1,6 +1,6 @@
 project(Bottleneck_distance_tests)
 
-if(TARGET CGAL::CGAL)
+if(CGAL_FOUND)
   include(GUDHI_boost_test)
 
   add_executable ( Bottleneck_distance_test_unit bottleneck_unit_test.cpp )
@@ -11,4 +11,4 @@ if(TARGET CGAL::CGAL)
 
   gudhi_add_boost_test(Bottleneck_distance_test_unit)
 
-endif(TARGET CGAL::CGAL)
+endif(CGAL_FOUND)

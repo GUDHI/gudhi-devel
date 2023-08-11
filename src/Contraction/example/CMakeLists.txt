@@ -1,6 +1,6 @@
 project(Contraction_examples)
 
-if(TARGET CGAL::CGAL)
+if(CGAL_FOUND)
   add_executable(RipsContraction Rips_contraction.cpp)
   add_executable(GarlandHeckbert Garland_heckbert.cpp)
 
@@ -10,4 +10,4 @@ if(TARGET CGAL::CGAL)
   add_test(NAME Contraction_example_tore3D_0.2 COMMAND $<TARGET_FILE:RipsContraction>
     "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "0.2")
 
-endif(TARGET CGAL::CGAL)
+endif(CGAL_FOUND)

@@ -1,6 +1,6 @@
 project(Bottleneck_distance_utilities)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable (bottleneck_distance bottleneck_distance.cpp)
   target_link_libraries(bottleneck_distance CGAL::CGAL)
   if(TARGET TBB::tbb)
@@ -13,4 +13,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
 
   install(TARGETS bottleneck_distance DESTINATION bin)
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

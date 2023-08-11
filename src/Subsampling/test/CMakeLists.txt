@@ -1,6 +1,6 @@
 project(Subsampling_tests)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   include(GUDHI_boost_test)
 
   add_executable( Subsampling_test_pick_n_random_points test_pick_n_random_points.cpp )
@@ -15,4 +15,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   gudhi_add_boost_test(Subsampling_test_pick_n_random_points)
   gudhi_add_boost_test(Subsampling_test_choose_n_farthest_points)
   gudhi_add_boost_test(Subsampling_test_sparsify_point_set)
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

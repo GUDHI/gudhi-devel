@@ -1,6 +1,6 @@
 project(off_file_from_shape_generator)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( off_file_from_shape_generator off_file_from_shape_generator.cpp )
   target_link_libraries(off_file_from_shape_generator CGAL::CGAL)
   add_test(NAME off_file_from_shape_generator_on_sphere_1000_3_15.2 COMMAND $<TARGET_FILE:off_file_from_shape_generator>
@@ -14,4 +14,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
 
   install(TARGETS off_file_from_shape_generator DESTINATION bin)
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

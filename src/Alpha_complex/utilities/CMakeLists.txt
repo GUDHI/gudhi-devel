@@ -1,7 +1,7 @@
 project(Alpha_complex_utilities)
 
 # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
   add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
   target_link_libraries(alpha_complex_persistence CGAL::CGAL Boost::program_options)
 
@@ -27,9 +27,9 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT 
   endif()
 
   install(TARGETS alpha_complex_persistence DESTINATION bin)
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+endif(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
 
-if(TARGET CGAL::CGAL AND TARGET Boost::program_options)
+if(CGAL_FOUND AND TARGET Boost::program_options)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)
   target_link_libraries(alpha_complex_3d_persistence CGAL::CGAL Boost::program_options)
   if(TARGET TBB::tbb)
@@ -76,4 +76,4 @@ if(TARGET CGAL::CGAL AND TARGET Boost::program_options)
       "-p" "2" "-m" "0" "-e")
   
   install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
-endif(TARGET CGAL::CGAL AND TARGET Boost::program_options)
+endif(CGAL_FOUND AND TARGET Boost::program_options)

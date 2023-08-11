@@ -1,6 +1,6 @@
 project(Tangential_complex_examples)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable( Tangential_complex_example_basic example_basic.cpp )
   target_link_libraries(Tangential_complex_example_basic CGAL::CGAL)
   add_executable( Tangential_complex_example_with_perturb example_with_perturb.cpp )
@@ -15,4 +15,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   add_test(NAME Tangential_complex_example_with_perturb
       COMMAND $<TARGET_FILE:Tangential_complex_example_with_perturb>)
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

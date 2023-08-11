@@ -1,6 +1,6 @@
 project(Spatial_searching_tests)
 
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   include(GUDHI_boost_test)
   add_executable( Spatial_searching_test_Kd_tree_search test_Kd_tree_search.cpp )
   target_link_libraries(Spatial_searching_test_Kd_tree_search CGAL::CGAL)

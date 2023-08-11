@@ -1,5 +1,5 @@
 # Cech complex requires CGAL >= 5.0.1
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.0.1)
+if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.0.1)
   project(Cech_complex_utilities)
 
   add_executable(cech_persistence cech_persistence.cpp)

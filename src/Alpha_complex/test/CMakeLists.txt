@@ -1,7 +1,7 @@
 project(Alpha_complex_tests)
 
 include(GUDHI_boost_test)
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+if(CGAL_FOUND AND EIGEN3_FOUND)
 
   # Do not forget to copy test files in current binary dir
   file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -34,9 +34,9 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND)
   gudhi_add_boost_test(Delaunay_complex_Epick_dynamic_test_unit)
   gudhi_add_boost_test(Delaunay_complex_Epick_static_test_unit)
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND)
+endif(CGAL_FOUND AND EIGEN3_FOUND)
 
-if(TARGET CGAL::CGAL)
+if(CGAL_FOUND)
 
   add_executable ( Alpha_complex_3d_test_unit Alpha_complex_3d_unit_test.cpp )
   target_link_libraries(Alpha_complex_3d_test_unit CGAL::CGAL)
@@ -58,10 +58,10 @@ if(TARGET CGAL::CGAL)
   gudhi_add_boost_test(Periodic_alpha_complex_3d_test_unit)
   gudhi_add_boost_test(Weighted_periodic_alpha_complex_3d_test_unit)
 
-endif(TARGET CGAL::CGAL)
+endif(CGAL_FOUND)
 
 # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
   add_executable ( Alpha_kernel_d_test_unit Alpha_kernel_d_unit_test.cpp )
   target_link_libraries(Alpha_kernel_d_test_unit CGAL::CGAL)
   if(TARGET TBB::tbb)
@@ -94,4 +94,4 @@ if(TARGET CGAL::CGAL AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
   gudhi_add_boost_test(Zero_weighted_alpha_complex_dynamic_test_unit)
   gudhi_add_boost_test(Zero_weighted_alpha_complex_static_test_unit)
 
-endif(TARGET CGAL::CGAL AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+endif(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
