@@ -1152,6 +1152,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(st.upper_bound_dimension() == -1);
   BOOST_CHECK(st.dimension() == -1);
   BOOST_CHECK(boost::size(st.filtration_simplex_range()) == 0);
+  typeST st_empty;
+  BOOST_CHECK(st == st_empty);
   st.insert_simplex_and_subfaces({0}, 2.5);
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
 }
