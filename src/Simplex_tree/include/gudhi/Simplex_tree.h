@@ -1567,6 +1567,16 @@ class Simplex_tree {
   }
 
  public:
+  /** \brief Remove all the simplices, leaving an empty complex. */
+  void clear() {
+    root_members_recursive_deletion();
+    clear_filtration();
+    dimension_ = -1;
+    dimension_to_be_lowered_ = false;
+    if constexpr (Options::link_nodes_by_label)
+      nodes_label_to_list_.clear();
+  }
+
   /** \brief Prune above filtration value given as parameter.
    * @param[in] filtration Maximum threshold value.
    * @return True if any simplex was removed, false if all simplices already had a value below the threshold.
