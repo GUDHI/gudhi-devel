@@ -37,6 +37,7 @@ for module in cython_modules:
         'gudhi.' + module,
         sources = [source_dir + module + '.pyx',],
         language = 'c++',
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
         libraries=libraries,

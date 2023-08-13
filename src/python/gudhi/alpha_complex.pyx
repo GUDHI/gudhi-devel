@@ -103,7 +103,7 @@ cdef class AlphaComplex:
         if self.this_ptr != NULL:
             del self.this_ptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
         return self.this_ptr != NULL
