@@ -89,7 +89,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
             Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
             image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
 
-            Xfit.append(image.flatten()[np.newaxis,:])
+            Xfit.append(image.reshape(1,-1))
 
         Xfit = np.concatenate(Xfit, 0)
 
@@ -355,7 +355,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                events = np.unique(np.concatenate([pd.flatten() for pd in X] + [[-np.inf]], axis=0))
+                events = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0))
                 self.grid_ = np.array(events)
             else:
                 _grid_from_sample_range(self, X)
@@ -383,7 +383,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         
         N = len(X)
 
-        events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
+        events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
         sorting = np.argsort(events)
         offsets = np.zeros(1 + N, dtype=int)
         for i in range(0, N):
@@ -416,7 +416,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
             N = len(X)
 
-            events = np.concatenate([pd.flatten(order="F") for pd in X], axis=0)
+            events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
             sorting = np.argsort(events)
             offsets = np.zeros(1 + N, dtype=int)
             for i in range(0, N):
