@@ -1799,8 +1799,10 @@ class Simplex_tree {
       scale = 1 / scale;
 
     // For each simplex
+    std::vector<Vertex_handle> vr;
     for (auto sh_copy : st_copy.complex_simplex_range()) {
-      std::vector<Vertex_handle> vr(st_copy.simplex_vertex_range(sh_copy).begin(), st_copy.simplex_vertex_range(sh_copy).end());
+      auto&& simplex_range = st_copy.simplex_vertex_range(sh_copy);
+      vr.assign(simplex_range.begin(), simplex_range.end());
       auto sh = this->find(vr);
 
       // Create cone on simplex
