@@ -166,9 +166,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_extend_filtration, Stree, list_
   BOOST_CHECK(est == Gudhi::Extended_simplex_type::EXTRA);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_extend_filtration_exception, Stree, list_of_tested_variants) {
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_extend_same_filtration, Stree, list_of_tested_variants) {
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "BASIC SIMPLEX TREE EXTEND FILTRATION EXCEPTION" << std::endl;
+  std::clog << "BASIC SIMPLEX TREE EXTEND WITH THE SAME FILTRATION LIMIT CASE" << std::endl;
   Stree st;
   
   // some vertices with the same filtration values
@@ -179,5 +179,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_extend_filtration_exception, Stree, l
   st.insert_simplex({4}, 1.0);
   st.insert_simplex({5}, 1.0);
 
-  BOOST_CHECK_THROW(st.extend_filtration(), std::invalid_argument);
+  auto efd = st.extend_filtration();
+
+  using Filtration_value = typename Stree::Filtration_value;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({0})), Filtration_value(-2.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({1})), Filtration_value(-2.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({2})), Filtration_value(-2.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({3})), Filtration_value(-2.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({4})), Filtration_value(-2.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({5})), Filtration_value(-2.0));
+  // Check additional point for coning the simplicial complex
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(st.find({6})), Filtration_value(-3.0));
+
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(efd.minval, Filtration_value(1.0));
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(efd.maxval, Filtration_value(1.0));
 }

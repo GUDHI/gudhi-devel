@@ -1766,8 +1766,6 @@ class Simplex_tree {
    * \post Note that after calling this function, the filtration 
    * values are actually modified. The function `decode_extended_filtration()` 
    * retrieves the original values and outputs the extended simplex type.
-   * @exception std::invalid_argument If all the vertices have the same filtration value, as this method makes a
-   * projection of vertices filtration values in the interval [0,1].
    * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest
    * Vertex_handle, as this method requires to create an extra vertex internally.
    * @return A data structure containing the maximum and minimum values of the original filtration.
@@ -1788,9 +1786,6 @@ class Simplex_tree {
       maxvert = std::max(sh->first, maxvert);
     }
     
-    if (std::fabs(maxval - minval) <= std::numeric_limits<Filtration_value>::epsilon())
-      throw std::invalid_argument("Unable to extend filtration when all the vertices have the same filtration value");
-    
     GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
     maxvert++;
 
@@ -1798,6 +1793,10 @@ class Simplex_tree {
 
     // Add point for coning the simplicial complex
     this->insert_simplex_raw({maxvert}, -3);
+
+    Filtration_value scale = maxval-minval;
+    if (std::fabs(maxval - minval) > std::numeric_limits<Filtration_value>::epsilon())
+      scale = 1 / scale;
 
     // For each simplex
     for (auto sh_copy : st_copy.complex_simplex_range()) {
@@ -1808,7 +1807,7 @@ class Simplex_tree {
       vr.push_back(maxvert);
       if (this->dimension(sh) == 0) {
         Filtration_value v = this->filtration(sh);
-        Filtration_value scaled_v = (v-minval)/(maxval-minval);
+        Filtration_value scaled_v = (v - minval) * scale;
         // Assign ascending value between -2 and -1 to vertex
         this->assign_filtration(sh, -2 + scaled_v);
         // Assign descending value between 1 and 2 to cone on vertex
