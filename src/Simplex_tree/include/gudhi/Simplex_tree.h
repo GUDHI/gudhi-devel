@@ -1795,7 +1795,7 @@ class Simplex_tree {
     this->insert_simplex_raw({maxvert}, -3);
 
     Filtration_value scale = maxval-minval;
-    if (std::fabs(maxval - minval) > std::numeric_limits<Filtration_value>::epsilon())
+    if (scale != 0)
       scale = 1 / scale;
 
     // For each simplex
