@@ -178,6 +178,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_extend_same_filtration, Stree, list_o
   st.insert_simplex({3}, 1.0);
   st.insert_simplex({4}, 1.0);
   st.insert_simplex({5}, 1.0);
+  Stree copy(st);
 
   auto efd = st.extend_filtration();
 
@@ -193,4 +194,53 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_extend_same_filtration, Stree, list_o
 
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(efd.minval, Filtration_value(1.0));
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(efd.maxval, Filtration_value(1.0));
+
+  Filtration_value epsilon = 2 * std::numeric_limits<Filtration_value>::epsilon();
+  Filtration_value filt;
+  Gudhi::Extended_simplex_type est = Gudhi::Extended_simplex_type::EXTRA;
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({0})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({0})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({1})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({1})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({2})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({2})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({3})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({3})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({4})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({4})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({5})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt, copy.filtration(copy.find({5})), epsilon);
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::UP);
+
+  std::tie(filt, est) = st.decode_extended_filtration(st.filtration(st.find({6})), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  BOOST_CHECK(std::isnan(filt));
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::EXTRA);
+
+  // Test to the limit - Intervals are [-2., -1.] and [1., 2.]
+  std::tie(filt, est) = st.decode_extended_filtration(Filtration_value(-0.9), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  BOOST_CHECK(std::isnan(filt));
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::EXTRA);
+
+  std::tie(filt, est) = st.decode_extended_filtration(Filtration_value(0.9), efd);
+  std::clog << filt << " - " << static_cast<int>(est) << std::endl;
+  BOOST_CHECK(std::isnan(filt));
+  BOOST_CHECK(est == Gudhi::Extended_simplex_type::EXTRA);
 }
