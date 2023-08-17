@@ -17,9 +17,9 @@ file(COPY "${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/test/simplex_tree_file_
 gudhi_add_boost_test(Persistent_cohomology_test_unit)
 gudhi_add_boost_test(Persistent_cohomology_test_betti_numbers)
 
-if(GMPXX_FOUND AND GMP_FOUND)
+if(TARGET gmp::gmpxx AND TARGET gmp::gmp)
   add_executable ( Persistent_cohomology_test_unit_multi_field persistent_cohomology_unit_test_multi_field.cpp )
-  target_link_libraries(Persistent_cohomology_test_unit_multi_field ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
+  target_link_libraries(Persistent_cohomology_test_unit_multi_field gmp::gmpxx gmp::gmp )
   if(TARGET TBB::tbb)
     target_link_libraries(Persistent_cohomology_test_unit_multi_field TBB::tbb)
   endif()

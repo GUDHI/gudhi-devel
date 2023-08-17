@@ -1,8 +1,16 @@
 # This file is required to install dependencies with conan
 # Notice that onetbb is not mandatory
 [requires]
+boost/1.82.0
+gmp/6.2.1
+mpfr/4.1.0
 onetbb/2021.9.0
 cgal/5.5.3
+
+[options]
+boost/1.82.0:shared=True
+gmp/6.2.1:shared=True
+mpfr/4.1.0:shared=True
 
 # If your CMake version is not compatible with CMakePresets (<3.23) call cmake like:
 # 'cmake <path> -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW'

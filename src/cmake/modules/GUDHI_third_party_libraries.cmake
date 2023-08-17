@@ -28,10 +28,10 @@ if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
   add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
 endif()
 
-find_package(CGAL 4.12.0)
+find_package(CGAL 4.12.0 QUIET)
 # find_package(CGAL 4.12.0) fails for CGAL versions 5.* - workaround, cf. https://github.com/CGAL/cgal/issues/7645
 if(NOT CGAL_FOUND)
-  find_package(CGAL 5.0.0)
+  find_package(CGAL 5.0.0 QUIET)
 endif()
 
 if(CGAL_FOUND)
