@@ -28,15 +28,10 @@ if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
   add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
 endif()
 
-find_package(CGAL)
-# find_package(CGAL 4.12.0) fails, the following lines is a workaround
-
-# Only CGAL versions > 4.12.0 supports what Gudhi uses from CGAL
-# cf. https://github.com/CGAL/cgal/wiki/How-to-use-CGAL-with-CMake-or-your-own-build-system
-if(CGAL_FOUND AND CGAL_VERSION VERSION_LESS 4.12.0)
-  message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
-  unset(CGAL_FOUND)
-  unset(CGAL_VERSION)
+find_package(CGAL 4.12.0)
+# find_package(CGAL 4.12.0) fails for CGAL versions 5.* - workaround, cf. https://github.com/CGAL/cgal/issues/7645
+if(NOT CGAL_FOUND)
+  find_package(CGAL 5.0.0)
 endif()
 
 if(CGAL_FOUND)
