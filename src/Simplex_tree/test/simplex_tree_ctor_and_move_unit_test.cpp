@@ -151,7 +151,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st8);
   BOOST_CHECK(st7 == st);
 
+#if __GNUC__ >= 13
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
   st = std::move(st);
+#if __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   print_simplex_filtration(st, "Third self move assignment from the default Simplex_tree");
 
   BOOST_CHECK(st7 == st);
