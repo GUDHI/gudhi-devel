@@ -44,30 +44,26 @@ namespace zigzag_persistence {
  *
  * \ingroup zigzag_persistence
  *
- * \details The type ZigzagFilteredComplex::Simplex_key counts the number of
- * insertions and
- * deletions of simplices, which may be large in zigzag persistence and require
+ * \details The type ZigzagComplex::Simplex_key counts the number of
+ * insertions and deletions of simplices, which may be large in zigzag persistence and require
  * more than 32 bits of storage. The type used (int, long, etc) should be chosen in
  * consequence. Simplex_key must be signed.
  *
- * Over all insertions, the Simplex_key must be positive and strictly increasing
- * when forward iterating along the zigzag filtration.
- *
- * \tparam ZigzagFilteredComplex Complex storing the current simplices.
+ * \tparam ZigzagComplex Complex storing the current simplices.
  * \tparam ZigzagPersistenceOptions Options for the matrix used to compute the persistence.
  */
-template <typename ZigzagFilteredComplex,
+template <typename ZigzagComplex,
           typename ZigzagPersistenceOptions = Gudhi::persistence_matrix::Zigzag_options<> >
 class Zigzag_persistence 
 {
  public:
-  using Complex = ZigzagFilteredComplex;						/**< Complex type. */
-  using Options = ZigzagPersistenceOptions;						/**< Matrix options */
+  using Complex = ZigzagComplex;                                /**< Complex type. */
+  using Options = ZigzagPersistenceOptions;                     /**< Matrix options */
   /*** Types defined in the complex ***/
-  using Simplex_key = typename Complex::Simplex_key;			/**< Key type, must be signed. */
-  using Simplex_handle = typename Complex::Simplex_handle;		/**< Simplex ID type in the complex. */
-  using Vertex_handle = typename Complex::Vertex_handle;		/**< Vertex ID type in the complex. */
-  using Filtration_value = typename Complex::Filtration_value;	/**< Filtration value type. */
+  using Simplex_key = typename Complex::Simplex_key;            /**< Key type, must be signed. */
+  using Simplex_handle = typename Complex::Simplex_handle;      /**< Simplex ID type in the complex. */
+  using Vertex_handle = typename Complex::Vertex_handle;        /**< Vertex ID type in the complex. */
+  using Filtration_value = typename Complex::Filtration_value;  /**< Filtration value type. */
 
   /** \brief Structure to store persistence intervals by their index values.
    *
@@ -268,7 +264,7 @@ class Zigzag_persistence
       filtration_values_.emplace_back(num_arrow_, previous_filtration_value_);
     }
 
-    std::pair<Simplex_handle, bool> res = cpx_.insert_simplex(simplex, filtration_value);
+    std::pair<Simplex_handle, bool> res = cpx_.insert_simplex(simplex);
     GUDHI_CHECK(res.second, "Zigzag_persistence::insert_simplex - insertion of a simplex already in the complex");
     cpx_.assign_key(res.first, num_arrow_);
     _process_forward_arrow(res.first);
@@ -533,7 +529,7 @@ class Zigzag_persistence
    *
    * @return Const reference to the complex.
    */
-//   const ZigzagFilteredComplex& get_complex() const{
+//   const ZigzagComplex& get_complex() const{
 //     return cpx_;
 //   }
 
@@ -545,7 +541,7 @@ class Zigzag_persistence
    *
    * @return Reference to the complex.
    */
-  ZigzagFilteredComplex& get_complex(){
+  ZigzagComplex& get_complex() {
     return cpx_;
   }
 

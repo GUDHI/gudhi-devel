@@ -78,8 +78,6 @@ namespace Gudhi {
 enum class Extended_simplex_type {UP, DOWN, EXTRA};
 
 struct Simplex_tree_options_full_featured;
-struct Simplex_tree_options_fast_persistence;
-struct Simplex_tree_options_fast_cofaces;
 
 /**
  * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
@@ -556,7 +554,8 @@ class Simplex_tree {
   }
 
   /** \brief Checks if two simplex trees are different. */
-  bool operator!=(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator!=(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     return (!(*this == st2));
   }
 
@@ -1715,10 +1714,9 @@ class Simplex_tree {
       }
       if (intersection.size() != 0) {
         // Reverse the order to insert
-        Siblings * new_sib = new Siblings(
-              siblings,                                 // oncles
-              simplex->first,                           // parent
-              boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
+        Siblings * new_sib = new Siblings(siblings,  // oncles
+                                          simplex->first,  // parent
+                                          boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
         simplex->second.assign_children(new_sib);
         std::vector<Vertex_handle> blocked_new_sib_vertex_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
@@ -1844,6 +1842,16 @@ class Simplex_tree {
   }
 
  public:
+  /** \brief Remove all the simplices, leaving an empty complex. */
+  void clear() {
+    root_members_recursive_deletion();
+    clear_filtration();
+    dimension_ = -1;
+    dimension_to_be_lowered_ = false;
+    if constexpr (Options::link_nodes_by_label)
+      nodes_label_to_list_.clear();
+  }
+
   /** \brief Prune above filtration value given as parameter.
    * @param[in] filtration Maximum threshold value.
    * @return True if any simplex was removed, false if all simplices already had a value below the threshold.
@@ -2016,13 +2024,11 @@ class Simplex_tree {
     std::pair<Filtration_value, Extended_simplex_type> p;
     Filtration_value minval = efd.minval;
     Filtration_value maxval = efd.maxval;
-    if (f >= -2 && f <= -1){
+    if (f >= -2 && f <= -1) {
       p.first = minval + (maxval-minval)*(f + 2); p.second = Extended_simplex_type::UP;
-    }
-    else if (f >= 1 && f <= 2){
+    } else if (f >= 1 && f <= 2) {
       p.first = minval - (maxval-minval)*(f - 2); p.second = Extended_simplex_type::DOWN;
-    }
-    else{
+    } else {
       p.first = std::numeric_limits<Filtration_value>::quiet_NaN(); p.second = Extended_simplex_type::EXTRA;
     }
     return p;
@@ -2035,8 +2041,8 @@ class Simplex_tree {
    * \post Note that after calling this function, the filtration 
    * values are actually modified. The function `decode_extended_filtration()` 
    * retrieves the original values and outputs the extended simplex type.
-   * \pre Note that this code creates an extra vertex internally, so you should make sure that
-   * the Simplex tree does not contain a vertex with the largest Vertex_handle.
+   * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest
+   * Vertex_handle, as this method requires to create an extra vertex internally.
    * @return A data structure containing the maximum and minimum values of the original filtration.
    * It is meant to be provided as input to `decode_extended_filtration()` in order to retrieve
    * the original filtration values for each simplex.
@@ -2048,7 +2054,7 @@ class Simplex_tree {
     Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
     Filtration_value minval = std::numeric_limits<Filtration_value>::infinity();
     Filtration_value maxval = -std::numeric_limits<Filtration_value>::infinity();
-    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh){
+    for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       Filtration_value f = this->filtration(sh);
       minval = std::min(minval, f);
       maxval = std::max(maxval, f);
@@ -2056,35 +2062,34 @@ class Simplex_tree {
     }
     
     GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
-    maxvert += 1;
+    maxvert++;
 
     Simplex_tree st_copy = *this;
 
     // Add point for coning the simplicial complex
     this->insert_simplex_raw({maxvert}, -3);
 
+    Filtration_value scale = maxval-minval;
+    if (scale != 0)
+      scale = 1 / scale;
+
     // For each simplex
     std::vector<Vertex_handle> vr;
-    for (auto sh_copy : st_copy.complex_simplex_range()){
-
-      // Locate simplex
-      vr.clear();
-      for (auto vh : st_copy.simplex_vertex_range(sh_copy)){
-        vr.push_back(vh);
-      }
+    for (auto sh_copy : st_copy.complex_simplex_range()) {
+      auto&& simplex_range = st_copy.simplex_vertex_range(sh_copy);
+      vr.assign(simplex_range.begin(), simplex_range.end());
       auto sh = this->find(vr);
 
       // Create cone on simplex
       vr.push_back(maxvert);
-      if (this->dimension(sh) == 0){
+      if (this->dimension(sh) == 0) {
         Filtration_value v = this->filtration(sh);
-        Filtration_value scaled_v = (v-minval)/(maxval-minval);
+        Filtration_value scaled_v = (v - minval) * scale;
         // Assign ascending value between -2 and -1 to vertex
         this->assign_filtration(sh, -2 + scaled_v);
         // Assign descending value between 1 and 2 to cone on vertex
         this->insert_simplex(vr, 2 - scaled_v);
-      }
-      else{
+      } else {
         // Assign value -3 to simplex and cone on simplex
         this->assign_filtration(sh, -3);
         this->insert_simplex(vr, -3);
@@ -2095,8 +2100,7 @@ class Simplex_tree {
     this->make_filtration_non_decreasing();
 
     // Return the filtration data 
-    Extended_filtration_data efd(minval, maxval);
-    return efd;
+    return Extended_filtration_data(minval, maxval);
   }
 
   /** \brief Returns a vertex of `sh` that has the same filtration value as `sh` if it exists, and `null_vertex()` otherwise.
@@ -2476,40 +2480,6 @@ struct Simplex_tree_options_full_featured {
   static const bool simplex_handle_strong_validity = false;
 };
 
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but the possibility of much bigger keys and in particular of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
- * (way enough simplices). */
-struct Simplex_tree_options_wide_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int64_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
-};
-
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but with the possibility of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
- * (about 2 billions of simplices). */
-struct Simplex_tree_options_negative_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
-};
-
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
  * `contiguous_vertices` option.
  * 
@@ -2545,21 +2515,21 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool simplex_handle_strong_validity = false;
 };
 
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but the simplex handles remain valid under insertion and removal of simplices.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_stable_simplex_handles {
+/** Model of SimplexTreeOptions, fitting the requirement of the @ref Gudhi::zigzag_persistence::ZigzagComplex concept.
+ *
+ * Maximum number of arrows in the filtration is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
+ * (about 2 billions of arrows). If more arrows are needed, just inherit from this structure and redefine
+ * the type `Simplex_key`, for example as `std::int64_t`.*/
+struct Simplex_tree_options_zigzag_persistence {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
+  typedef std::int32_t Simplex_key;
   static const bool store_key = true;
-  static const bool store_filtration = true;
+  static const bool store_filtration = false;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = true;
+  static const bool simplex_handle_strong_validity = false;
 };
 
 /** Model of SimplexTreeOptions, as expected from @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_range.
