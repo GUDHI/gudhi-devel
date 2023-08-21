@@ -5,8 +5,10 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same label in an intrusive list.
+ *      - 2020/09 Clément Maria: Option to link all simplex tree nodes with same label in an intrusive list
+ *      - 2020/09 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -534,32 +536,37 @@ class Simplex_tree {
   template<typename> friend class Simplex_tree;
 
   /** \brief Checks if two simplex trees are equal. */
-  bool operator==(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator==(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
         (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
-    return rec_equal(&root_, &st2.root_);
+    return rec_equal<OtherSimplexTreeOptions>(&root_, &st2.root_);
   }
 
   /** \brief Checks if two simplex trees are different. */
-  bool operator!=(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator!=(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     return (!(*this == st2));
   }
 
  private:
   /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
-  bool rec_equal(Siblings* s1, Siblings* s2) {
+  template<class OtherSimplexTreeOptions>
+  bool rec_equal(Siblings* s1, typename Simplex_tree<OtherSimplexTreeOptions>::Siblings* s2) {
     if (s1->members().size() != s2->members().size())
       return false;
-    for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin();
-         (sh1 != s1->members().end() && sh2 != s2->members().end()); ++sh1, ++sh2) {
+    auto sh2 = s2->members().begin();
+    for (auto sh1 = s1->members().begin();
+         (sh1 != s1->members().end() && sh2 != s2->members().end());
+         ++sh1, ++sh2) {
       if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
         return false;
       if (has_children(sh1) != has_children(sh2))
         return false;
       // Recursivity on children only if both have children
       else if (has_children(sh1))
-        if (!rec_equal(sh1->second.children(), sh2->second.children()))
+        if (!rec_equal<OtherSimplexTreeOptions>(sh1->second.children(), sh2->second.children()))
           return false;
     }
     return true;
@@ -1539,38 +1546,60 @@ class Simplex_tree {
 
     thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
-         s_h != siblings->members().end(); ++s_h, ++next) {
-      Simplex_handle root_sh = find_vertex(s_h->first);
-      if (has_children(root_sh)) {
-        intersection(
-                     inter,  // output intersection
-                     next,  // begin
-                     siblings->members().end(),  // end
-                     root_sh->second.children()->members().begin(),
-                     root_sh->second.children()->members().end(),
-                     s_h->second.filtration());
-        if (inter.size() != 0) {
-          Siblings * new_sib = new Siblings(siblings,  // oncles
-                                            s_h->first,  // parent
-                                            inter);  // boost::container::ordered_unique_range_t
-          for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
-            update_simplex_tree_after_node_insertion(it);
-          }
+         s_h != siblings->members().end(); ++s_h, ++next)
+    {
+      create_expansion<false>(siblings, s_h, inter, next, s_h->second.filtration(), k);
+    }
+  }
 
-          inter.clear();
-          s_h->second.assign_children(new_sib);
-          siblings_expansion(new_sib, k - 1);
-        } else {
-          // ensure the children property
-          s_h->second.assign_children(siblings);
-          inter.clear();
+  /** \brief Recursive expansion of the simplex tree.*/
+  template<bool force_filtration_value>
+  void create_expansion(Siblings * siblings,
+                        Dictionary_it& s_h,
+                        std::vector<std::pair<Vertex_handle, Node> >& inter,
+                        Dictionary_it& next,
+                        Filtration_value fil,
+                        int k,
+                        std::vector<Simplex_handle>* added_simplices = nullptr)
+  {
+    Simplex_handle root_sh = find_vertex(s_h->first);
+
+    if (!has_children(root_sh)) return;
+
+    intersection<force_filtration_value>(
+          inter,  // output intersection
+          next,   // begin
+          siblings->members().end(),  // end
+          root_sh->second.children()->members().begin(),
+          root_sh->second.children()->members().end(),
+          fil);
+    if (inter.size() != 0) {
+      Siblings * new_sib = new Siblings(siblings,   // oncles
+                                        s_h->first, // parent
+                                        inter);     // boost::container::ordered_unique_range_t
+      for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
+        update_simplex_tree_after_node_insertion(it);
+        if constexpr (force_filtration_value){
+          added_simplices->push_back(it);
         }
       }
+      inter.clear();
+      s_h->second.assign_children(new_sib);
+      if constexpr (force_filtration_value){
+        siblings_expansion(new_sib, fil, k - 1, *added_simplices);
+      } else {
+        siblings_expansion(new_sib, k - 1);
+      }
+    } else {
+      // ensure the children property
+      s_h->second.assign_children(siblings);
+      inter.clear();
     }
   }
 
   /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
    * and assigns the maximal possible Filtration_value to the Nodes. */
+  template<bool force_filtration_value = false>
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
@@ -1579,8 +1608,12 @@ class Simplex_tree {
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
-        intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        if constexpr (force_filtration_value){
+          intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
+        } else {
+          Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+          intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        }
         if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
       } else if (begin1->first < begin2->first) {
