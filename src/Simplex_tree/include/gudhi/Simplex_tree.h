@@ -547,7 +547,8 @@ class Simplex_tree {
   }
 
   /** \brief Checks if two simplex trees are different. */
-  bool operator!=(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator!=(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     return (!(*this == st2));
   }
 
