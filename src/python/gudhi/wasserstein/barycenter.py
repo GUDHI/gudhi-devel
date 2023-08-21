@@ -11,6 +11,7 @@
 import ot
 import numpy as np
 import scipy.spatial.distance as sc
+import warnings
 
 from gudhi.wasserstein import wasserstein_distance
 
@@ -56,7 +57,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
     X = pdiagset  # to shorten notations, not a copy
     m = len(X)  # number of diagrams we are averaging
     if m == 0:
-        print("Warning: computing barycenter of empty diag set. Returns None")
+        warnings.warn("Computing barycenter of empty diag set. Returns None.")
         return None
 
     # store the number of off-diagonal point for each of the X_i

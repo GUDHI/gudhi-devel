@@ -80,7 +80,7 @@ cdef class TangentialComplex:
         if self.thisptr != NULL:
             del self.thisptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if TangentialComplex pointer is not NULL.
          """
         return self.thisptr != NULL
