@@ -29,10 +29,15 @@ struct MyOptions : Simplex_tree_options_full_featured {
   typedef short Vertex_handle;
 };
 
+struct MyStableOptions : Simplex_tree_options_full_featured {
+  //disabled by default.
+  static const bool simplex_handle_strong_validity = true;
+};
+
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
                          Simplex_tree<Simplex_tree_options_fast_cofaces>,
-                         Simplex_tree<Simplex_tree_options_oscillating_rips> > list_of_tested_variants;
+                         Simplex_tree<MyStableOptions> > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_variants) {
   std::clog << "********************************************************************" << std::endl;

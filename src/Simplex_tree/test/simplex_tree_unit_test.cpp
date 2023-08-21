@@ -31,10 +31,22 @@
 
 using namespace Gudhi;
 
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool simplex_handle_strong_validity = true;
+};
+
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
                          Simplex_tree<Simplex_tree_options_fast_cofaces>,
-                         Simplex_tree<Simplex_tree_options_oscillating_rips> > list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {

@@ -7,6 +7,7 @@
  *    Modification(s):
  *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same label in an intrusive list.
  *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -623,11 +624,7 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    if constexpr (Options::simplex_handle_strong_validity) {
-      return Dictionary_it();
-    } else {
-      return Dictionary_it(nullptr);
-    }
+    return Dictionary_it();
   }
 
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
@@ -662,12 +659,7 @@ class Simplex_tree {
   size_t num_simplices(Siblings * sib) {
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
-    size_t simplices_number;
-    if constexpr (Options::simplex_handle_strong_validity){
-        simplices_number = std::distance(sib_begin, sib_end);
-    } else {
-        simplices_number = sib_end - sib_begin;
-    }
+    size_t simplices_number = sib->members().size();
     for (auto sh = sib_begin; sh != sib_end; ++sh) {
       if (has_children(sh)) {
         simplices_number += num_simplices(sh->second.children());
@@ -752,17 +744,13 @@ class Simplex_tree {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
     auto vi = simplex.begin();
-    if (Options::contiguous_vertices) {
+    if constexpr (Options::contiguous_vertices && !Options::simplex_handle_strong_validity) {
       // Equivalent to the first iteration of the normal loop
       GUDHI_CHECK(contiguous_vertices(), "non-contiguous vertices");
       Vertex_handle v = *vi++;
       if(v < 0 || v >= static_cast<Vertex_handle>(root_.members_.size()))
         return null_simplex();
-      if constexpr (Options::simplex_handle_strong_validity){
-        tmp_dit = std::next(root_.members_.begin(), v);
-      } else {
-        tmp_dit = root_.members_.begin() + v;
-      }
+      tmp_dit = root_.members_.begin() + v;
       if (vi == simplex.end())
         return tmp_dit;
       if (!has_children(tmp_dit))
@@ -2225,40 +2213,6 @@ struct Simplex_tree_options_full_featured {
   static const bool simplex_handle_strong_validity = false;
 };
 
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but the possibility of much bigger keys and in particular of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
- * (way enough simplices). */
-struct Simplex_tree_options_wide_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int64_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
-};
-
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but with the possibility of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
- * (about 2 billions of simplices). */
-struct Simplex_tree_options_negative_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
-};
-
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
  * `contiguous_vertices` option.
  * 
@@ -2292,43 +2246,6 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool simplex_handle_strong_validity = false;
-};
-
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but the simplex handles remain valid under insertion and removal of simplices.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_stable_simplex_handles {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = true;
-};
-
-/** Model of SimplexTreeOptions, as expected from @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_range.
- * The values of `simplex_handle_strong_validity`, `store_key` and `store_filtration` are mandatory.
- * `Simplex_key` has to be a signed integer type if @ref Gudhi::zigzag_persistence::Zigzag_persistence is used 
- * for the range. Otherwise, the options can be readapted.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
- * (way enough simplices). If less are needed, just inherit from this structure and redefine
- * the type `Simplex_key`. */
-struct Simplex_tree_options_oscillating_rips {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int64_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = true;
-  static const bool link_nodes_by_label = true;
-  static const bool simplex_handle_strong_validity = true;
 };
 
 /** @}*/  // end addtogroup simplex_tree
