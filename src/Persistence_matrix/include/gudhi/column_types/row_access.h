@@ -15,7 +15,7 @@
 #include <cassert>
 
 #include "../utilities/utilities.h"
-#include "cell.h"
+#include "cell.h"					//to recognize the alias "base_hook_matrix_row"
 
 namespace Gudhi {
 namespace persistence_matrix {

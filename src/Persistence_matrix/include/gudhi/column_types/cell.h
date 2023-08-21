@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef CELL_H
-#define CELL_H
+#ifndef PERS_MATRIX_CELL_H
+#define PERS_MATRIX_CELL_H
 
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/set.hpp>
@@ -125,8 +125,6 @@ struct Z2_intrusive_row_cell : public Z2_row_cell, public base_hook_matrix_row
 		Z2_row_cell::operator=(other);
 		return *this;
 	};
-
-	// using base_hook_matrix_row = base_hook_matrix_row;		//why ?????
 };
 
 template<class Field_element_type>
@@ -225,8 +223,6 @@ struct Intrusive_row_cell : public Row_cell<Field_element_type>, public base_hoo
 		Row_cell<Field_element_type>::operator=(other);
 		return *this;
 	};
-
-	// using base_hook_matrix_row = base_hook_matrix_row;		//why ?????
 };
 
 struct Z2_intrusive_list_cell : public Z2_base_cell, public base_hook_matrix_list_column
@@ -346,4 +342,4 @@ struct std::hash<Gudhi::persistence_matrix::Row_cell<Field_element_type> >
 	}
 };
 
-#endif // CELL_H
+#endif // PERS_MATRIX_CELL_H
