@@ -149,12 +149,12 @@ cdef class PeriodicCubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if PeriodicCubicalComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
-    def __is_persistence_defined(self):
+    def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
@@ -220,7 +220,7 @@ cdef class PeriodicCubicalComplex:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        assert self.__is_defined()
+        assert self._is_defined()
         cdef int field = homology_coeff_field
         cdef double minp = min_persistence
         with nogil:
