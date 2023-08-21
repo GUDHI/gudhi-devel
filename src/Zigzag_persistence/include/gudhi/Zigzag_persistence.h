@@ -65,13 +65,13 @@ template <typename ZigzagComplex,
 class Zigzag_persistence 
 {
  public:
-  using Complex = ZigzagComplex;						/**< Complex type. */
-  using Options = ZigzagPersistenceOptions;						/**< Matrix options */
+  using Complex = ZigzagComplex;                                /**< Complex type. */
+  using Options = ZigzagPersistenceOptions;                     /**< Matrix options */
   /*** Types defined in the complex ***/
-  using Simplex_key = typename Complex::Simplex_key;			/**< Key type, must be signed. */
-  using Simplex_handle = typename Complex::Simplex_handle;		/**< Simplex ID type in the complex. */
-  using Vertex_handle = typename Complex::Vertex_handle;		/**< Vertex ID type in the complex. */
-  using Filtration_value = typename Complex::Filtration_value;	/**< Filtration value type. */
+  using Simplex_key = typename Complex::Simplex_key;            /**< Key type, must be signed. */
+  using Simplex_handle = typename Complex::Simplex_handle;      /**< Simplex ID type in the complex. */
+  using Vertex_handle = typename Complex::Vertex_handle;        /**< Vertex ID type in the complex. */
+  using Filtration_value = typename Complex::Filtration_value;  /**< Filtration value type. */
 
   /** \brief Structure to store persistence intervals by their index values.
    *

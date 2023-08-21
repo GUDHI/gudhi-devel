@@ -15,7 +15,7 @@
 #include <gudhi/Zigzag_persistence.h>
 #include <gudhi/Simplex_tree.h>
 
-using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence_long>;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;
