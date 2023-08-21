@@ -130,7 +130,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
     :rtype: List[List[float]]
     """
     if not GUDHI_SUBSAMPLING_USE_CGAL:
-        raise NotImplementedError("subsampling sparsify_point_set is only available for CGAL >= 4.11")
+        raise NotImplementedError("subsampling sparsify_point_set is only available with CGAL >= 4.11 and Eigen3")
     
     if off_file:
         if os.path.isfile(off_file):
