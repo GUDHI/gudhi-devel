@@ -11,8 +11,8 @@
 #ifndef CONCEPT_ZZ_COMPLEX_TYPE_H_
 #define CONCEPT_ZZ_COMPLEX_TYPE_H_
 
-/** @file ZigzagFilteredComplex.h
- * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagFilteredComplex concept.
+/** @file ZigzagComplex.h
+ * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagComplex concept.
  */
 
 namespace Gudhi {
@@ -21,7 +21,7 @@ namespace zigzag_persistence {
 /**
  * @brief Data structure storing the simplices in the current complex.
  */
-class ZigzagFilteredComplex {
+class ZigzagComplex {
  public:
   /**
    * @brief Signed integer type that needs to be long enough to store the numbers of arrows in the zigzag filtration.
@@ -51,20 +51,19 @@ class ZigzagFilteredComplex {
   /**
    * @brief Constructor
    */
-  ZigzagFilteredComplex();
+  ZigzagComplex();
 
   /**
    * @brief Inserts the given simplex in the complex.
    * 
    * @tparam VertexRange Range over the vertices of a simplex.
    * @param simplex Simplex to insert represented by its vertices.
-   * @param filtration Filtration value at the insertion.
    * @return A pair of a simplex handle and a boolean. 
    * The simplex handle represents the inserted simplex and 
    * the boolean if simplex was already contained in the complex or not.
    */
   template <class VertexRange>
-  std::pair<Simplex_handle, bool> insert_simplex(const VertexRange& simplex, Filtration_value filtration);
+  std::pair<Simplex_handle, bool> insert_simplex(const VertexRange& simplex);
 
   /**
    * @brief Removes the given simplex. Assumes that the simplex is maximal and can be safely removed.

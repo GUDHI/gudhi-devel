@@ -2458,38 +2458,6 @@ struct Simplex_tree_options_full_featured {
   static const bool link_nodes_by_label = false;
 };
 
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but the possibility of much bigger keys and in particular of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
- * (way enough simplices). */
-struct Simplex_tree_options_wide_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int64_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-};
-
-/** Model of SimplexTreeOptions, same as `Simplex_tree_options_full_featured`
- *  but with the possibility of negative keys.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
- * (about 2 billions of simplices). */
-struct Simplex_tree_options_negative_indexation {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-};
-
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
  * `contiguous_vertices` option.
  * 
@@ -2521,6 +2489,36 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
+};
+
+/** Model of SimplexTreeOptions, fitting the requirement of the @ref ZigzagComplex concept.
+ *
+ * Maximum number of arrows in the filtration is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
+ * (about 2 billions of arrows). */
+struct Simplex_tree_options_zigzag_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+};
+
+/** Model of SimplexTreeOptions, same as `Simplex_tree_options_zigzag_persistence`
+ *  but with much bigger keys for particularly long filtrations.
+ *
+ * Maximum number of arrows is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>. */
+struct Simplex_tree_options_zigzag_persistence_long {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int64_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree

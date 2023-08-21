@@ -23,7 +23,7 @@
 
 using namespace Gudhi;
 using namespace boost::unit_test;
-using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_wide_indexation>;
+using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence_long>;
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;

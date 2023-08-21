@@ -15,7 +15,7 @@
 #include <cassert>
 
 #include "../utilities/utilities.h"
-//#include "cell.h"	//why??
+#include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
