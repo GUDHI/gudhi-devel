@@ -2497,7 +2497,7 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool link_nodes_by_label = true;
 };
 
-/** Model of SimplexTreeOptions, fitting the requirement of the @ref ZigzagComplex concept.
+/** Model of SimplexTreeOptions, fitting the requirement of the @ref Gudhi::zigzag_persistence::ZigzagComplex concept.
  *
  * Maximum number of arrows in the filtration is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
  * (about 2 billions of arrows). */
