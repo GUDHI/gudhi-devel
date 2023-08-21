@@ -210,7 +210,7 @@ class Vector_distances_in_diagram {
   template <typename Operation_type>
   friend Vector_distances_in_diagram operation_on_pair_of_vectors(const Vector_distances_in_diagram& first,
                                                                   const Vector_distances_in_diagram& second,
-                                                                  Operation_type opertion) {
+                                                                  Operation_type operation) {
     Vector_distances_in_diagram result;
     // Operation_type operation;
     result.sorted_vector_of_distances.reserve(
@@ -218,18 +218,18 @@ class Vector_distances_in_diagram {
     for (size_t i = 0; i != std::min(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size());
          ++i) {
       result.sorted_vector_of_distances.push_back(
-          opertion(first.sorted_vector_of_distances[i], second.sorted_vector_of_distances[i]));
+          operation(first.sorted_vector_of_distances[i], second.sorted_vector_of_distances[i]));
     }
     if (first.sorted_vector_of_distances.size() ==
         std::min(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size())) {
       for (size_t i = std::min(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size());
            i != std::max(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size()); ++i) {
-        result.sorted_vector_of_distances.push_back(opertion(0, second.sorted_vector_of_distances[i]));
+        result.sorted_vector_of_distances.push_back(operation(0, second.sorted_vector_of_distances[i]));
       }
     } else {
       for (size_t i = std::min(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size());
            i != std::max(first.sorted_vector_of_distances.size(), second.sorted_vector_of_distances.size()); ++i) {
-        result.sorted_vector_of_distances.push_back(opertion(first.sorted_vector_of_distances[i], 0));
+        result.sorted_vector_of_distances.push_back(operation(first.sorted_vector_of_distances[i], 0));
       }
     }
     return result;
