@@ -49,7 +49,7 @@ enum Edge_range_type {
  * possibility to switch out a few common options. But additional options exists for the iterators 
  * (e.g. replacing the Euclidian distance by another one, or using your own epsilon values; see
  * the documention of @ref Oscillating_rips_edge_range and @ref Oscillating_rips_simplex_range for
- * more information). You can easily create your own method based on this one.
+ * more information). One can easily create their own method based on this one.
  * 
  * @tparam PointRange Range containing the point cloud.
  * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR. 

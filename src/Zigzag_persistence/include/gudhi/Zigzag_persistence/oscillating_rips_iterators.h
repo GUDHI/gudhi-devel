@@ -1207,7 +1207,8 @@ class Oscillating_rips_edge_range {
  * 
  * @tparam StableFilteredComplex Filtered complex structure that has stable simplex handles, 
  * that is, they do not invalidates after an insertion or a removal (except for the removed simplices).
- * @tparam EdgeRangeIterator Type of the edge range iterator. 
+ * @tparam EdgeRangeIterator Type of the edge range iterator. Each element of the range is assumed to have
+ * type @ref Zigzag_edge or at least to be a class with the same public methods than @ref Zigzag_edge.
  *
  * @warning As the custom iterator stores a possibly large range, avoid copying it. 
  * Use @ref get_iterator_range, @ref begin and @ref end wisely.

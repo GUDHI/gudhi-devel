@@ -256,7 +256,7 @@ class Zigzag_persistence
    * @param filtration_value Filtration value associated to the simplex. 
    * Assumed to be larger or equal to previously used filtration values.
    */
-  template <class VertexRange = std::initializer_list<Vertex_handle>>
+  template <class VertexRange = std::initializer_list<Vertex_handle> >
   void insert_simplex(const VertexRange& simplex, Filtration_value filtration_value) {
     if (dim_max_ != -1 && simplex.size() > static_cast<unsigned int>(dim_max_) + 1) return;
 
@@ -333,7 +333,7 @@ class Zigzag_persistence
    * are removed in the filtration and ``contiguous'' in the filtration, that is, no other simplex
    * which is not in the range is inserted or removed between two simplices in the range.
    * @param filtration_values Filtration values associated to the removal of the given simplices. Has therefore the 
-   * same size as @a simplices. The order has to correspond to the order in @a simplices. Their values have to 
+   * same size as @p simplices. The order has to correspond to the order in @p simplices. Their values have to 
    * ascending in this order and they are assumed to be larger or equal to previously used filtration values.
    */
   template <class SimplexRange = std::initializer_list<std::initializer_list<Vertex_handle>>,
