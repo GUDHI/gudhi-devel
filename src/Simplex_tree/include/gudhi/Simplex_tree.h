@@ -773,11 +773,7 @@ class Simplex_tree {
   Simplex_handle find_vertex(Vertex_handle v) {
     if constexpr (Options::contiguous_vertices && !Options::simplex_handle_strong_validity) {
       assert(contiguous_vertices());
-      if constexpr (Options::simplex_handle_strong_validity){
-        return std::next(root_.members_.begin(), v);;
-      } else {
-        return root_.members_.begin() + v;
-      }
+      return root_.members_.begin() + v;
     } else {
       return root_.members_.find(v);
     }
