@@ -46,14 +46,14 @@ ComplexType> {
       : Skeleton_blocker_link_complex<ComplexType>(true) { }
 
   Skeleton_blocker_link_superior(const ComplexType & parent_complex,
-                                 Simplex& alpha_parent_adress)
+                                 Simplex& alpha_parent_address)
       : Skeleton_blocker_link_complex<ComplexType>(parent_complex,
-                                                   alpha_parent_adress, true) { }
+                                                   alpha_parent_address, true) { }
 
   Skeleton_blocker_link_superior(const ComplexType & parent_complex,
-                                 Vertex_handle a_parent_adress)
+                                 Vertex_handle a_parent_address)
       : Skeleton_blocker_link_complex<ComplexType>(parent_complex,
-                                                   a_parent_adress, true) { }
+                                                   a_parent_address, true) { }
 };
 
 }  // namespace skeleton_blocker
