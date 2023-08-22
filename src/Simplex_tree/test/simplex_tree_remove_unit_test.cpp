@@ -436,6 +436,52 @@ BOOST_AUTO_TEST_CASE(mini_prune_above_filtration) {
 
 }
 
+BOOST_AUTO_TEST_CASE(prune_above_filtration_limits) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "PRUNE ABOVE FILTRATION TEST TO THE LIMITS" << std::endl;
+
+  Stree st;
+
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
+
+  st.insert_simplex_and_subfaces({3, 0}, std::numeric_limits<Stree::Filtration_value>::quiet_NaN());
+  st.insert_simplex_and_subfaces({2, 1, 0}, 4.0);
+
+  // st:
+  //    1   6
+  //    o---o
+  //   /X\7/
+  //  o---o---o---o
+  //  2   0   3\X/4
+  //            o
+  //            5
+  st.initialize_filtration();
+
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  std::clog << " - dimension " << st.dimension() << std::endl;
+  std::clog << "Iterator on Simplices in the filtration, with [filtration value]:" << std::endl;
+  for (auto f_simplex : st.filtration_simplex_range()) {
+    std::clog << "   " << "[" << st.filtration(f_simplex) << "] ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << (int) vertex << " ";
+    }
+    std::clog << std::endl;
+  }
+  BOOST_CHECK(st.num_simplices() == 27);
+
+  // Test case to the limit
+  bool simplex_is_changed = st.prune_above_filtration(std::numeric_limits<Stree::Filtration_value>::infinity());
+  BOOST_CHECK(simplex_is_changed == false);
+
+  // Another test case to the limit
+  simplex_is_changed = st.prune_above_filtration(std::numeric_limits<Stree::Filtration_value>::quiet_NaN());
+  BOOST_CHECK(simplex_is_changed == false);
+
+  std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
+  BOOST_CHECK(st.num_simplices() == 27);
+}
+
 BOOST_AUTO_TEST_CASE(mini_prune_above_dimension) {
   std::clog << "********************************************************************" << std::endl;
   std::clog << "MINI PRUNE ABOVE DIMENSION" << std::endl;
