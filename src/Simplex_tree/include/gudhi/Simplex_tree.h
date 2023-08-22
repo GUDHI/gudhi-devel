@@ -54,7 +54,6 @@
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
 #include <unordered_map>
-#include <iterator>
 
 namespace Gudhi {
 
@@ -772,7 +771,7 @@ class Simplex_tree {
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
    * representing the vertex with Vertex_handle v. */
   Simplex_handle find_vertex(Vertex_handle v) {
-    if (Options::contiguous_vertices) {
+    if constexpr (Options::contiguous_vertices && !Options::simplex_handle_strong_validity) {
       assert(contiguous_vertices());
       if constexpr (Options::simplex_handle_strong_validity){
         return std::next(root_.members_.begin(), v);;
