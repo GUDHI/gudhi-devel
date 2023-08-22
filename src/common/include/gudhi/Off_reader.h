@@ -49,8 +49,8 @@ class Off_reader {
    */
   template<typename OffVisitor>
   bool read(OffVisitor& off_visitor) {
-    bool success_read_off_preambule = read_off_preambule(off_visitor);
-    if (!success_read_off_preambule) {
+    bool success_read_off_preamble = read_off_preamble(off_visitor);
+    if (!success_read_off_preamble) {
       std::cerr << "could not read off preambule\n";
       return false;
     }
@@ -68,7 +68,7 @@ class Off_reader {
     }
 
     off_visitor.done();
-    return success_read_off_preambule && success_read_off_points && success_read_off_faces;
+    return success_read_off_preamble && success_read_off_points && success_read_off_faces;
   }
 
  private:
@@ -84,7 +84,7 @@ class Off_reader {
   Off_info off_info_;
 
   template<typename OffVisitor>
-  bool read_off_preambule(OffVisitor& off_visitor) {
+  bool read_off_preamble(OffVisitor& off_visitor) {
     std::string line;
     if (!goto_next_uncomment_line(line)) return false;
 
