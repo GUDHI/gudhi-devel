@@ -58,7 +58,9 @@ class Rips_complex {
   /** \brief Rips_complex constructor from a list of points.
    *
    * @param[in] points Range of points.
-   * @param[in] threshold Rips value.
+   * @param[in] threshold Maximal edge length. All edges of the graph strictly greater than `threshold` are not
+   * inserted in the graph.
+   * 
    * @param[in] distance distance function that returns a `Filtration_value` from 2 given points.
    * 
    * \tparam ForwardPointRange must be a range for which `std::begin` and `std::end` return input iterators on a
@@ -75,7 +77,8 @@ class Rips_complex {
   /** \brief Rips_complex constructor from a distance matrix.
    *
    * @param[in] distance_matrix Range of distances.
-   * @param[in] threshold Rips value.
+   * @param[in] threshold Maximal edge length. All edges of the graph strictly greater than `threshold` are not
+   * inserted in the graph.
    * 
    * \tparam DistanceMatrix must have a `size()` method and on which `distance_matrix[i][j]` returns
    * the distance between points \f$i\f$ and \f$j\f$ as long as \f$ 0 \leqslant j < i \leqslant
