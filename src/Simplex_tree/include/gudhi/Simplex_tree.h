@@ -1929,7 +1929,6 @@ class Simplex_tree {
   }
 
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
-   * Requires that the node is not a copy.
    */
   static Simplex_handle simplex_handle_from_node(Node& node) {
     static_assert(!Options::simplex_handle_strong_validity, "A label of the node is needed.");
@@ -1938,7 +1937,6 @@ class Simplex_tree {
   }
 
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
-   * Requires that the node is not a copy.
    */
   static Simplex_handle simplex_handle_from_node(Node& node, Vertex_handle label) {
     Siblings* children = node.children();
