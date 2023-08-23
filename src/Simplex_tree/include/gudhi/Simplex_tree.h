@@ -1943,7 +1943,7 @@ class Simplex_tree {
   static Simplex_handle simplex_handle_from_node(Node& node, Vertex_handle label) {
     Siblings* children = node.children();
     auto it = children->members().find(label);
-    if (it != children->members().end() && &(it->second) == &node) {  // verifies if node is a leaf
+    if (it != children->members().end()) {  // verifies if node is a leaf
       return it;
     }
     return children->oncles()->find(label);
