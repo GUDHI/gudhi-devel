@@ -1929,21 +1929,24 @@ class Simplex_tree {
   }
 
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
-   * Not optimal, if Options::simplex_handle_strong_validity == true. Requires that the node is not a copy.
+   * Requires that the node is not a copy.
    */
   static Simplex_handle simplex_handle_from_node(Node& node) {
-    if constexpr (Options::simplex_handle_strong_validity) {
-      Siblings* children = node.children();
-      //verifies if node is a leaf
-      for (auto it = children->members().begin(); it != children->members().end(); ++it){
-        // WARNING: does not work if nodes were copied, but I don't see another way to verify if two leaf nodes are
-        // equal. And I guess that `get_parent_from_member` needs a real pointer to the flat_map element too anyway?
-        if (&(it->second) == &node) return it;
-      }
-      return children->oncles()->find(children->parent());
-    } else {
-      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+    static_assert(!Options::simplex_handle_strong_validity, "A label of the node is needed.");
+
+    return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+  }
+
+  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
+   * Requires that the node is not a copy.
+   */
+  static Simplex_handle simplex_handle_from_node(Node& node, Vertex_handle label) {
+    Siblings* children = node.children();
+    auto it = children->members().find(label);
+    if (it != children->members().end() && &(it->second) == &node) {  // verifies if node is a leaf
+      return it;
     }
+    return children->oncles()->find(label);
   }
 
   // Give access to Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator and keep nodes_by_label and

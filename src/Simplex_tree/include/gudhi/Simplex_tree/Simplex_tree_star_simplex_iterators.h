@@ -73,7 +73,12 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     // coface of simp_
     bool operator()(typename SimplexTree::Hooks_simplex_base& curr_hooks) {
       Node& curr_node = static_cast<Node&>(curr_hooks);
-      auto sh = cpx_->simplex_handle_from_node(curr_node);
+      Simplex_handle sh;
+      if constexpr (SimplexTree::Options::link_nodes_by_label){
+        sh = cpx_->simplex_handle_from_node(curr_node, simp_.front());
+      } else {
+        sh = cpx_->simplex_handle_from_node(curr_node);
+      }
       // first Node must always have label simp_.begin(); we assume it is true
       auto&& rng = cpx_->simplex_vertex_range(sh);
       auto rng_it = rng.begin();
@@ -82,6 +87,8 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
       // is simp_ a face of the simplex defined by sh ?
       return std::includes(++rng_it, rng.end(), ++simp_it, simp_.end(), std::greater<Vertex_handle>());
     }
+
+    Vertex_handle get_label() const { return simp_.front(); }
 
    private:
     SimplexTree* cpx_;
@@ -103,7 +110,11 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());
     Node& curr_node = static_cast<Node&>(*it_);
-    sh_ = st_->simplex_handle_from_node(curr_node);
+    if constexpr (SimplexTree::Options::link_nodes_by_label) {
+      sh_ = st_->simplex_handle_from_node(curr_node, simp.front());
+    } else {
+      sh_ = st_->simplex_handle_from_node(curr_node);
+    }
   }
 
  private:
@@ -128,7 +139,11 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     }       //== end
     else {  // update sh_
       Node& curr_node = static_cast<Node&>(*it_);
+      if constexpr (SimplexTree::Options::link_nodes_by_label) {
+      sh_ = st_->simplex_handle_from_node(curr_node, predicate_.get_label());
+    } else {
       sh_ = st_->simplex_handle_from_node(curr_node);
+    }
     }
   }
 
