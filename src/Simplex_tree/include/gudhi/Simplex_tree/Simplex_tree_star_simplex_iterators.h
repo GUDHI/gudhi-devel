@@ -74,7 +74,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     bool operator()(typename SimplexTree::Hooks_simplex_base& curr_hooks) {
       Node& curr_node = static_cast<Node&>(curr_hooks);
       Simplex_handle sh;
-      if constexpr (SimplexTree::Options::link_nodes_by_label){
+      if constexpr (SimplexTree::Options::simplex_handle_strong_validity){
         sh = cpx_->simplex_handle_from_node(curr_node, simp_.front());
       } else {
         sh = cpx_->simplex_handle_from_node(curr_node);
@@ -110,7 +110,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     it_ = boost::make_filter_iterator(predicate_, list_ptr->begin(), list_ptr->end());
     end_ = boost::make_filter_iterator(predicate_, list_ptr->end(), list_ptr->end());
     Node& curr_node = static_cast<Node&>(*it_);
-    if constexpr (SimplexTree::Options::link_nodes_by_label) {
+    if constexpr (SimplexTree::Options::simplex_handle_strong_validity) {
       sh_ = st_->simplex_handle_from_node(curr_node, simp.front());
     } else {
       sh_ = st_->simplex_handle_from_node(curr_node);
@@ -139,7 +139,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     }       //== end
     else {  // update sh_
       Node& curr_node = static_cast<Node&>(*it_);
-      if constexpr (SimplexTree::Options::link_nodes_by_label) {
+      if constexpr (SimplexTree::Options::simplex_handle_strong_validity) {
       sh_ = st_->simplex_handle_from_node(curr_node, predicate_.get_label());
     } else {
       sh_ = st_->simplex_handle_from_node(curr_node);
