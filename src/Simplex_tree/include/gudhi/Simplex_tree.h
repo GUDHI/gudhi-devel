@@ -5,9 +5,9 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - 2020/09 Clément Maria: Option to link all simplex tree nodes with same label in an intrusive list
- *      - 2020/09 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2023/07 Clément Maria: Option to link all simplex tree nodes with same label in an intrusive list
+ *      - 2023/05 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - YYYY/MM Author: Description of the modification
  */
@@ -76,8 +76,6 @@ namespace Gudhi {
 enum class Extended_simplex_type {UP, DOWN, EXTRA};
 
 struct Simplex_tree_options_full_featured;
-struct Simplex_tree_options_fast_persistence;
-struct Simplex_tree_options_fast_cofaces;
 
 /**
  * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
@@ -532,9 +530,6 @@ class Simplex_tree {
   }
 
  public:
-//   friend Simplex_tree<Simplex_tree_options_full_featured>;
-//   friend Simplex_tree<Simplex_tree_options_fast_persistence>;
-//   friend Simplex_tree<Simplex_tree_options_fast_cofaces>;
   template<typename> friend class Simplex_tree;
 
   /** \brief Checks if two simplex trees are equal. */
@@ -543,7 +538,7 @@ class Simplex_tree {
     if ((null_vertex_ != st2.null_vertex_) ||
         (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
-    return rec_equal<OtherSimplexTreeOptions>(&root_, &st2.root_);
+    return rec_equal(&root_, &st2.root_);
   }
 
   /** \brief Checks if two simplex trees are different. */
@@ -554,8 +549,8 @@ class Simplex_tree {
 
  private:
   /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
-  template<class OtherSimplexTreeOptions>
-  bool rec_equal(Siblings* s1, typename Simplex_tree<OtherSimplexTreeOptions>::Siblings* s2) {
+  template<class OtherSiblings>
+  bool rec_equal(Siblings* s1, OtherSiblings* s2) {
     if (s1->members().size() != s2->members().size())
       return false;
     auto sh2 = s2->members().begin();
@@ -568,7 +563,7 @@ class Simplex_tree {
         return false;
       // Recursivity on children only if both have children
       else if (has_children(sh1))
-        if (!rec_equal<OtherSimplexTreeOptions>(sh1->second.children(), sh2->second.children()))
+        if (!rec_equal(sh1->second.children(), sh2->second.children()))
           return false;
     }
     return true;
@@ -670,6 +665,21 @@ class Simplex_tree {
       }
     }
     return simplices_number;
+  }
+
+  /**
+   * @brief Returns the dimension of the given sibling simplices.
+   * 
+   * @param curr_sib Pointer to the sibling container.
+   * @return Height of the siblings in the tree (root counts as zero to make the height correspond to the dimension).
+   */
+  int dimension(Siblings* curr_sib) {
+    int dim = 0;
+    while (curr_sib != nullptr) {
+      ++dim;
+      curr_sib = curr_sib->oncles();
+    }
+    return dim - 1;
   }
 
  public:
@@ -1326,8 +1336,10 @@ class Simplex_tree {
     * @param[in] fil              Filtration value of the edge
     * @param[in] dim_max          Maximal dimension of the expansion.
     *                             If set to -1, the expansion goes as far as possible.
-    * @param[in] added_simplices  Contains at the end all new
+    * @param[out] added_simplices Contains at the end all new
     *                             simplices induced by the insertion of the edge.
+    *                             The container is not emptied and new simplices are
+    *                             appended at the end.
     *
     * @pre `SimplexTreeOptions::link_nodes_by_label` must be true.
     * @pre When inserting the edge `[u,v]`, the vertices @p u and @p v have to be
@@ -1432,16 +1444,6 @@ class Simplex_tree {
   }
 
  private:
-
-  int dimension(Siblings* curr_sib) {
-    int dim = 0;
-    while (curr_sib != nullptr) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim - 1;
-  }
-
   /** \brief Insert a Node with label @p v in the set of siblings sib, and percolate the
    * expansion on the subtree rooted at sib. Sibling sib must not contain
    * @p v.
