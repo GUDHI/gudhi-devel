@@ -153,7 +153,7 @@ void build_rips(ComplexType& complex, double offset){
 int main (int argc, char *argv[])
 {
 	if (argc!=3){
-		std::cerr << "Usage "<<argv[0]<<" ../../data/SO3_10000.off 0.3 to load the file ../../data/SO3_10000.off and contract the Rips complex built with parameter 0.3.\n";
+		std::cerr << "Usage "<<argv[0]<<" ../../data/points/tore3D_1307.off 0.3 to load the file ../../data/points/tore3D_1307.off and contract the Rips complex built with parameter 0.3.\n";
 		return -1;
 	}
 
@@ -199,7 +199,7 @@ int main (int argc, char *argv[])
   \endcode
 
 \verbatim
-./example/Contraction/RipsContraction ../../data/SO3_10000.off 0.3
+./example/Contraction/RipsContraction /path/to/gudhi-data/points/SO3/SO3_10000.off 0.3
 [ 50%] [100%] Built target SkeletonBlockerIteration
 Built target RipsContraction
 Build the Rips complex
@@ -209,6 +209,8 @@ Final complex has 15 vertices, 101 edges, 165 blockers and 714 simplices
 Time to simplify and enumerate simplices:
  3.166621s wall, 3.150000s user + 0.010000s system = 3.160000s CPU (99.8%)
 \endverbatim
+
+The SO3 dataset used here can be found in <a target="_blank" href="https://github.com/GUDHI/gudhi-data">gudhi-data</a> repository.
 
 */
 /** @} */  // end defgroup

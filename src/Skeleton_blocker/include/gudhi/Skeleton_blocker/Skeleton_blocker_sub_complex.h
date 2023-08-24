@@ -32,7 +32,7 @@ namespace skeleton_blocker {
  *
  * One vertex of K may exists in L but with a different address.
  * To be able to locate the vertices in K from vertices of L, the class
- * stores a map 'adresses' between vertices of K and vertices of L.
+ * stores a map 'addresses' between vertices of K and vertices of L.
  *
  * Note that the type for handle of vertices of L is 'Vertex_handle' and
  * the type for handle of vertices of K is 'Root_vertex_handle'.
@@ -71,7 +71,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
   typedef typename IdAddressMap::value_type AddressPair;
   typedef typename IdAddressMap::iterator IdAddressMapIterator;
   typedef typename IdAddressMap::const_iterator IdAddressMapConstIterator;
-  std::map<Root_vertex_handle, Vertex_handle> adresses;
+  std::map<Root_vertex_handle, Vertex_handle> addresses;
 
  public:
   /**
@@ -87,7 +87,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
     this->num_vertices_++;
     (*this)[address].activate();
     (*this)[address].set_id(global);
-    adresses.insert(AddressPair(global, address));
+    addresses.insert(AddressPair(global, address));
     this->degree_.push_back(0);
     return address;
   }
@@ -154,7 +154,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
   }
 
   void clear() {
-    adresses.clear();
+    addresses.clear();
     ComplexType::clear();
   }
 
@@ -164,8 +164,8 @@ class Skeleton_blocker_sub_complex : public ComplexType {
    */
   boost::optional<Vertex_handle> get_address(Root_vertex_handle global) const {
     boost::optional < Vertex_handle > res;
-    IdAddressMapConstIterator it = adresses.find(global);
-    if (it == adresses.end())
+    IdAddressMapConstIterator it = addresses.find(global);
+    if (it == addresses.end())
       res.reset();
     else
       res = (*it).second;
@@ -223,7 +223,7 @@ bool proper_face_in_union(
   return vertices_sigma_are_in_link && link.contains(sigma_in_link);
 }
 
-// Remark: this function should be friend in order to leave get_adresses private
+// Remark: this function should be friend in order to leave get_addresses private
 // however doing so seems currently not possible due to a visual studio bug c2668
 // "the compiler does not support partial ordering of template functions as specified in the C++ Standard"
 // http://www.serkey.com/error-c2668-ambiguous-call-to-overloaded-function-bb45ft.html

@@ -38,8 +38,8 @@ void build_rips(ComplexType& complex, double offset) {
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-    std::cerr << "Usage " << argv[0] << " ../../../data/meshes/SO3_10000.off 0.3 to load the file " <<
-        "../../data/SO3_10000.off and contract the Rips complex built with parameter 0.3.\n";
+    std::cerr << "Usage " << argv[0] << " ../../data/points/tore3D_1307.off 0.3 to load the file " <<
+        "../../data/points/tore3D_1307.off and contract the Rips complex built with parameter 0.3.\n";
     return -1;
   }
 
