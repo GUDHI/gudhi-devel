@@ -46,13 +46,13 @@ def _compute_persistence_diagram_projections(X, num_directions):
     This is a function for projecting the points of a list of persistence diagrams (as well as their diagonal projections) onto a fixed number of lines sampled uniformly on [-pi/2, pi/2]. This function can be used as a preprocessing step in order to speed up the running time for computing all pairwise sliced Wasserstein distances / kernel values on a list of persistence diagrams. 
 
     Parameters:
-        X (list of n numpy arrays of shape (numx2)): list of persistence diagrams. 
+        X (list of n numpy arrays of shape (num,2)): list of persistence diagrams.
         num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
 
     Returns: 
-        list of n numpy arrays of shape (2*numxnum_directions): list of projected persistence diagrams.
+        list of n numpy arrays of shape (2*num,num_directions): list of projected persistence diagrams.
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
     XX = [np.vstack([np.matmul(D, lines), np.matmul(np.matmul(D, .5 * np.ones((2,2))), lines)]) for D in X]
     return XX
