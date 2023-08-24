@@ -1931,20 +1931,45 @@ class Simplex_tree {
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
    */
   static Simplex_handle simplex_handle_from_node(Node& node) {
-    static_assert(!Options::simplex_handle_strong_validity, "A label of the node is needed.");
+    if constexpr (Options::simplex_handle_strong_validity){
+      //relies on the Dictionnary type to be boost::container::map<Vertex_handle, Node>.
+      //If the type changes or boost fondamentally changes something on the structure of their map,
+      //a safer/more general but much slower version is:
+      //   if (node.children()->parent() == label) {  // verifies if node is a leaf
+      //     return children->oncles()->find(label);
+      //   } else {
+      //     return children->members().find(label);
+      //   }
+      //Requires an additional parameter "Vertex_handle label" which is the label of the node.
 
-    return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
-  }
+      Dictionary_it testIt = node.children()->members().begin();
+      Node* testNode = &testIt->second;
+      auto testIIt = testIt.get();
+      auto testPtr = testIIt.pointed_node();
+      //distance between node and pointer to map pair in memory
+      auto shift = (const char*)(testNode) - (const char*)(testPtr);
 
-  /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
-   */
-  static Simplex_handle simplex_handle_from_node(Node& node, Vertex_handle label) {
-    Siblings* children = node.children();
-    auto it = children->members().find(label);
-    if (it != children->members().end()) {  // verifies if node is a leaf
-      return it;
+      //decltype(testPtr) = boost::intrusive::compact_rbtree_node<void*>*
+      decltype(testPtr) sh_ptr = decltype(testPtr)((const char*)(&node) - shift);   //shifts from node to pointer
+      //decltype(testIIt) = 
+      //boost::intrusive::tree_iterator<
+      //  boost::intrusive::bhtraits<
+      //    boost::container::base_node<
+      //      std::pair<const int, Simplex_tree_node_explicit_storage<Simplex_tree>>,
+      //      boost::container::dtl::intrusive_tree_hook<void*, boost::container::red_black_tree, true>, true>,
+      //    boost::intrusive::rbtree_node_traits<void*, true>, 
+      //    boost::intrusive::normal_link, 
+      //    boost::intrusive::dft_tag,
+      //    3>,
+      //  false>
+      decltype(testIIt) sh_ii;
+      sh_ii = sh_ptr;           //creates ``subiterator'' from pointer
+      Dictionary_it sh(sh_ii);  //creates iterator from subiterator
+
+      return sh;
+    } else {
+      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
     }
-    return children->oncles()->find(label);
   }
 
   // Give access to Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator and keep nodes_by_label and

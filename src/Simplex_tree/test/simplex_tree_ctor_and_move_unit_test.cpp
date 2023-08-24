@@ -33,7 +33,7 @@ struct Simplex_tree_options_stable_simplex_handles {
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
+  static const bool link_nodes_by_label = true;
   static const bool simplex_handle_strong_validity = true;
 };
 
