@@ -52,7 +52,6 @@
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
 #include <unordered_map>
-#include <cmath>  // for std::isfinite
 
 namespace Gudhi {
 
@@ -1577,8 +1576,6 @@ class Simplex_tree {
    */
   bool prune_above_filtration(Filtration_value filtration) {
     if (std::numeric_limits<Filtration_value>::has_infinity && filtration == std::numeric_limits<Filtration_value>::infinity())
-      return false;  // ---->>
-    if (std::numeric_limits<Filtration_value>::has_quiet_NaN && std::isnan(filtration))
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
     if(modified)

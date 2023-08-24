@@ -445,6 +445,8 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration_limits) {
   st.insert_simplex_and_subfaces({0, 1, 6, 7}, 1.0);
   st.insert_simplex_and_subfaces({3, 4, 5}, 2.0);
 
+  // As NaN is not yet managed in prune_above_filtration, this simplex would be removed if the Simplex tree is browsed
+  // when prune_above_filtration(+Inf)
   st.insert_simplex_and_subfaces({3, 0}, std::numeric_limits<Stree::Filtration_value>::quiet_NaN());
   st.insert_simplex_and_subfaces({2, 1, 0}, 4.0);
 
@@ -474,9 +476,7 @@ BOOST_AUTO_TEST_CASE(prune_above_filtration_limits) {
   bool simplex_is_changed = st.prune_above_filtration(std::numeric_limits<Stree::Filtration_value>::infinity());
   BOOST_CHECK(simplex_is_changed == false);
 
-  // Another test case to the limit
-  simplex_is_changed = st.prune_above_filtration(std::numeric_limits<Stree::Filtration_value>::quiet_NaN());
-  BOOST_CHECK(simplex_is_changed == false);
+  // Here we cannot test with a copy, because NaN != NaN
 
   std::clog << "The complex contains " << st.num_simplices() << " simplices" << std::endl;
   BOOST_CHECK(st.num_simplices() == 27);
