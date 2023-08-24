@@ -101,7 +101,8 @@ cdef class PeriodicCubicalComplex:
 
         Or
 
-        :param perseus_file: A Perseus-style file name.
+        :param perseus_file: A `Perseus-style <fileformats.html#perseus>`_ file name, giving the filtration values
+            of top-dimensional cells and the periodicity.
         :type perseus_file: string
         """
 
