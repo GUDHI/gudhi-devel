@@ -30,7 +30,7 @@ def _sliced_wasserstein_distance(D1, D2, num_directions):
     Returns: 
         float: the sliced Wasserstein distance between persistence diagrams. 
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
     approx1 = np.matmul(D1, lines)
     approx_diag1 = np.matmul(np.broadcast_to(D1.sum(-1,keepdims=True)/2,(len(D1),2)), lines)
