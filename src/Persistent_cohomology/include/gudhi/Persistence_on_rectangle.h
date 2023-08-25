@@ -190,7 +190,7 @@ struct Persistence_on_rectangle {
 
   bool has_larger_input(Index a, Index b, Filtration_value fb) const {
     // Is passing fb useful, or would the compiler notice that it already has it available?
-    GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
+    GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi: comparing a cell to itself"));
     Filtration_value fa = input(a);
     if (fb < fa) return true;
     if (fa < fb) return false;
