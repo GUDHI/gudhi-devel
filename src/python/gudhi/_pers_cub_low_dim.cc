@@ -32,7 +32,7 @@ PYBIND11_MAKE_OPAQUE(Vf);
 PYBIND11_MAKE_OPAQUE(Vd);
 
 template<class T>
-py::array fun1(py::array_t<T> data) {
+py::array wrap_persistence_1d(py::array_t<T> data) {
   py::buffer_info buf = data.request();
   if(buf.ndim!=1)
     throw std::runtime_error("Data must be a 1-dimensional array");
@@ -49,7 +49,7 @@ py::array fun1(py::array_t<T> data) {
   return py::array(py::cast(std::move(dgm)));
 }
 
-py::list fun2(py::array_t<double, py::array::c_style | py::array::forcecast> data, double min_persistence) {
+py::list wrap_persistence_2d(py::array_t<double, py::array::c_style | py::array::forcecast> data, double min_persistence) {
   py::buffer_info buf = data.request();
   if(buf.ndim!=2)
     throw std::runtime_error("Data must be a 2-dimensional array");
@@ -76,7 +76,7 @@ py::list fun2(py::array_t<double, py::array::c_style | py::array::forcecast> dat
 PYBIND11_MODULE(_pers_cub_low_dim, m) {
   py::bind_vector<Vf>(m, "VectorPairFloat" , py::buffer_protocol());
   py::bind_vector<Vd>(m, "VectorPairDouble", py::buffer_protocol());
-  m.def("_persistence_on_a_line", fun1<float>, py::arg().noconvert());
-  m.def("_persistence_on_a_line", fun1<double>);
-  m.def("_persistence_on_rectangle_from_top_cells", fun2);
+  m.def("_persistence_on_a_line", wrap_persistence_1d<float>, py::arg().noconvert());
+  m.def("_persistence_on_a_line", wrap_persistence_1d<double>);
+  m.def("_persistence_on_rectangle_from_top_cells", wrap_persistence_2d);
 }
