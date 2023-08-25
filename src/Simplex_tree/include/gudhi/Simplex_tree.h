@@ -643,11 +643,24 @@ class Simplex_tree {
    *
    * This function takes time linear in the number of simplices. */
   size_t num_simplices() {
-    std::size_t res = 0;
-    for_each_simplex_with_dim([&res](auto,auto){++res;});
-    return res;
+    return num_simplices(root());
   }
 
+ private:
+  /** \brief returns the number of simplices in the simplex_tree. */
+  size_t num_simplices(Siblings * sib) {
+    auto sib_begin = sib->members().begin();
+    auto sib_end = sib->members().end();
+    size_t simplices_number = sib_end - sib_begin;
+    for (auto sh = sib_begin; sh != sib_end; ++sh) {
+      if (has_children(sh)) {
+        simplices_number += num_simplices(sh->second.children());
+      }
+    }
+    return simplices_number;
+  }
+
+ public:
   /** \brief returns the number of simplices of each dimension in the simplex tree. */
   std::vector<size_t> num_simplices_by_dimension() {
     if (is_empty()) return {};
