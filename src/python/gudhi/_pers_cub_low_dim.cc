@@ -73,7 +73,7 @@ py::list fun2(py::array_t<double, py::array::c_style | py::array::forcecast> dat
   return ret;
 }
 
-PYBIND11_MODULE(_pers_cub_lowdim, m) {
+PYBIND11_MODULE(_pers_cub_low_dim, m) {
   py::bind_vector<Vf>(m, "VectorPairFloat" , py::buffer_protocol());
   py::bind_vector<Vd>(m, "VectorPairDouble", py::buffer_protocol());
   m.def("_persistence_on_a_line", fun1<float>, py::arg().noconvert());

@@ -8,7 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from .. import CubicalComplex
-from .._pers_cub_lowdim import _persistence_on_a_line, _persistence_on_rectangle_from_top_cells
+from .._pers_cub_low_dim import _persistence_on_a_line, _persistence_on_rectangle_from_top_cells
 from sklearn.base import BaseEstimator, TransformerMixin
 
 import numpy as np
