@@ -49,8 +49,8 @@ def test_min_birth_max_death():
         (0, (0.0, 0.107535)),
         (0, (0.0, 0.106382)),
     ]
-    assert gd.persistence_graphical_tools.__min_birth_max_death(diags) == (0.0, 1.0)
-    assert gd.persistence_graphical_tools.__min_birth_max_death(diags, band=4.0) == (0.0, 5.0)
+    assert gd.persistence_graphical_tools._min_birth_max_death(diags) == (0.0, 1.0)
+    assert gd.persistence_graphical_tools._min_birth_max_death(diags, band=4.0) == (0.0, 5.0)
 
 
 def test_limit_min_birth_max_death():
@@ -58,8 +58,8 @@ def test_limit_min_birth_max_death():
         (0, (2.0, float("inf"))),
         (0, (2.0, float("inf"))),
     ]
-    assert gd.persistence_graphical_tools.__min_birth_max_death(diags) == (2.0, 3.0)
-    assert gd.persistence_graphical_tools.__min_birth_max_death(diags, band=4.0) == (2.0, 6.0)
+    assert gd.persistence_graphical_tools._min_birth_max_death(diags) == (2.0, 3.0)
+    assert gd.persistence_graphical_tools._min_birth_max_death(diags, band=4.0) == (2.0, 6.0)
 
 
 def test_limit_to_max_intervals():

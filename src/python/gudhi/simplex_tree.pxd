@@ -81,8 +81,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
         pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] get_boundary_iterators(vector[int] simplex) nogil except +
         # Expansion with blockers
-        ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
-        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
+        ctypedef bool (*blocker_func_t)(vector[int], void *user_data) except +
+        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) except +
         void serialize(char* buffer, const size_t buffer_size) nogil except +
         void deserialize(const char* buffer, const size_t buffer_size) nogil except +
         size_t get_serialization_size() nogil

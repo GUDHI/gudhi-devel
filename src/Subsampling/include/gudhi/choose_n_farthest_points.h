@@ -12,9 +12,14 @@
 #ifndef CHOOSE_N_FARTHEST_POINTS_H_
 #define CHOOSE_N_FARTHEST_POINTS_H_
 
+#include <boost/version.hpp>
 #include <boost/range.hpp>
 #include <boost/heap/d_ary_heap.hpp>
-#include <boost/unordered_set.hpp> // preferably with boost 1.79+ for Fibonacci hashing
+#if BOOST_VERSION >= 108100
+ #include <boost/unordered/unordered_flat_set.hpp>
+#else
+ #include <boost/unordered_set.hpp> // preferably with boost 1.79+ for speed
+#endif
 
 #include <gudhi/Null_output_iterator.h>
 
@@ -182,7 +187,7 @@ bool Compare_landmark_radius<FT>::operator()(std::size_t a, std::size_t b)const{
  *  This computes the same thing as `choose_n_farthest_points()`, but relies on the triangle
  *  inequality to reduce the amount of computation when the doubling dimension and spread are small.
  *  In the worst case, this can be much slower than `choose_n_farthest_points()` though.
- *  See \cite sheehy20onehop and its references for details about this algorithm.
+ *  See \cite chubet_et_al:LIPIcs.SoCG.2023.64 and its associated video for details about this algorithm.
  *  \tparam Distance must provide an operator() that takes 2 points (value type of the range)
  *  and returns their distance as a `double`. It must be a true metric (\a not squared Euclidean),
  *  the algorithm relies on the triangle inequality.
@@ -266,7 +271,12 @@ void choose_n_farthest_points_metric(Distance dist_,
   }
   // outside the loop to recycle the allocation
   std::vector<std::size_t> modified_neighbors;
-  boost::unordered_set<std::size_t> l_neighbors; // Should we use an allocator?
+#if BOOST_VERSION >= 108100
+  boost::unordered_flat_set<std::size_t>
+#else
+  boost::unordered_set<std::size_t>
+#endif
+    l_neighbors; // Should we use an allocator?
   for (std::size_t current_number_of_landmarks = 1; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
     std::size_t l_parent = radius_priority.top();
     auto& parent_info = landmarks[l_parent];
