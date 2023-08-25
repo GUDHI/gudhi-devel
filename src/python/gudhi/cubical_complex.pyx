@@ -94,7 +94,7 @@ cdef class CubicalComplex:
 
         Or
 
-        :param perseus_file: A Perseus-style file name, giving the filtration values
+        :param perseus_file: A `Perseus-style <fileformats.html#perseus>`_ file name, giving the filtration values
             of top-dimensional cells.
         :type perseus_file: str
         """
