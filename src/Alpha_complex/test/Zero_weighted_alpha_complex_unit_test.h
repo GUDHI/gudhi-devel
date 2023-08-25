@@ -8,11 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "zero_weighted_alpha_complex"
-#include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
-
 #include <CGAL/Epeck_d.h>
 
 #include <vector>
@@ -23,11 +18,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
 
-using list_of_exact_kernel_variants = boost::mpl::list<CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >,
-                                                       CGAL::Epeck_d< CGAL::Dimension_tag<4> >
-                                                       > ;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Zero_weighted_alpha_complex, Kernel, list_of_exact_kernel_variants) {
+template<class Kernel>
+void do_test() {
   // Check that in exact mode for static dimension 4 the code for dD unweighted and for dD weighted with all weights
   // 0 give exactly the same simplex tree (simplices and filtration values).
 

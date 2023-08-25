@@ -19,7 +19,7 @@
 // Default value is undefined
 #define _GUDHI_SUBSAMPLING_USE_CGAL 0
 
-#if __has_include(<CGAL/version.h>)
+#if __has_include(<CGAL/version.h>) && __has_include(<Eigen/Jacobi>)
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 #if CGAL_VERSION_NR >= 1041101000
 #undef _GUDHI_SUBSAMPLING_USE_CGAL  // To remove warning

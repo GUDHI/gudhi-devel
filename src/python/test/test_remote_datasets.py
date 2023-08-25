@@ -6,7 +6,7 @@
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
-#   - 2022/09 Vincent Rouvreau: Factorize _capture_license_output to be useable by activities
+#   - 2022/09 Vincent Rouvreau: Factorize _capture_license_output to be usable by activities
 #                               Test fetch activities (except pandas file) and its license file
 
 from gudhi.datasets import remote
