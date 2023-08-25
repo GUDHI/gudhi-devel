@@ -53,7 +53,9 @@ struct Persistence_on_rectangle {
     Filtration_value first; Index second;
     T_with_index() = default;
     T_with_index(Filtration_value f, Index i) : first(f), second(i) {}
-    bool operator<(T_with_index const& other) const { return std::tie(first, second) < std::tie(other.first, other.second); }
+    bool operator<(T_with_index const& other) const {
+      return std::tie(first, second) < std::tie(other.first, other.second);
+    }
     Index out() const { return second; }
   };
   // Don't store the index if we don't want to output it.
@@ -184,8 +186,10 @@ struct Persistence_on_rectangle {
     // The unique_ptr could be std::vector, but the initialization is useless.
     data_v_.reset(new T[input_size - dy - 1]); // 1 row/column less for vertices than squares
     ds_parent_v_.reset(new Index[input_size - dy - 1]);
-    ds_parent_s_.resize(input_size); // Initializing the boundary squares to 0 is important, it represents the infinite exterior cell.
-    edges.reserve(input_size / 2); // What is a good estimate here? For a random 1000x1000 input, we get ~311k edges. For a checkerboard, ~498k.
+    // Initializing the boundary squares to 0 is important, it represents the infinite exterior cell.
+    ds_parent_s_.resize(input_size);
+    // What is a good estimate here? For a random 1000x1000 input, we get ~311k edges. For a checkerboard, ~498k.
+    edges.reserve(input_size / 2);
   }
 
   bool has_larger_input(Index a, Index b, Filtration_value fb) const {
@@ -543,31 +547,48 @@ struct Persistence_on_rectangle {
   }
 };
 // Ideas for improvement:
-// * for large hard (many intervals) inputs, primal/dual dominate the running time because of the random reads in find_set and input(a/b). The input load would be cheaper if we stored it with parents, but then find_set would be slower.
-// * to increase memory locality, maybe pairing, which is currently arbitrary, could use some heuristic to favor some pairs over others.
-// * try to loosen tight dependency chains, load values several instructions before they are needed. Performing 2 find_set in lock step surprisingly doesn't help.
-// * To handle very big instances, we could remove data_v_ and recompute it on demand as the min of the inputs of i, i+1, i+dy and i+dy+1. On hard instances, it wouldn't save that much memory (and it is a bit slower). On easy instances, if we also remove the calls to reserve(), the saving is less negligible, but we still have ds_parent_*_ that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble for now.
+// * for large hard (many intervals) inputs, primal/dual dominate the running time because of the random reads in
+//   find_set and input(a/b). The input load would be cheaper if we stored it with parents, but then find_set would
+//   be slower.
+// * to increase memory locality, maybe pairing, which is currently arbitrary, could use some heuristic to favor
+//   some pairs over others.
+// * try to loosen tight dependency chains, load values several instructions before they are needed. Performing 2
+//   find_set in lock step surprisingly doesn't help.
+// * To handle very big instances, we could remove data_v_ and recompute it on demand as the min of the inputs of i,
+//   i+1, i+dy and i+dy+1. On hard instances, it wouldn't save that much memory (and it is a bit slower). On easy
+//   instances, if we also remove the calls to reserve(), the saving is less negligible, but we still have ds_parent_*_
+//   that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and
+//   export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble
+//   for now.
 
 /**
  * @private
- * Compute the persistence diagram of a function on a 2d cubical complex, defined as a lower-star filtration of the values at the top-dimensional cells.
+ * Compute the persistence diagram of a function on a 2d cubical complex, defined as a lower-star filtration of the
+ * values at the top-dimensional cells.
  *
- * @tparam output_index If false, each argument of the out functors is a filtration value. If true, it is instead the index of this filtration value in the input.
+ * @tparam output_index If false, each argument of the out functors is a filtration value. If true, it is instead the
+ *   index of this filtration value in the input.
  * @tparam Filtration_value Must be comparable with `operator<`.
- * @tparam Index This is used to index the elements of `input`, so it must be large enough to represent the size of `input`.
- * @param[in] input Pointer to `n_rows*n_cols` filtration values for the square cells. Note that the values are assumed to be stored in C order, unlike `Gudhi::cubical_complex::Bitmap_cubical_complex` (you can exchange `n_rows` and `n_cols` for compatibility).
+ * @tparam Index This is used to index the elements of `input`, so it must be large enough to represent the size
+ *   of `input`.
+ * @param[in] input Pointer to `n_rows*n_cols` filtration values for the square cells. Note that the values are assumed
+ *   to be stored in C order, unlike `Gudhi::cubical_complex::Bitmap_cubical_complex` (you can exchange `n_rows` and
+ *   `n_cols` for compatibility).
  * @param[in] n_rows number of rows of `input`.
  * @param[in] n_cols number of columns of `input`.
  * @param[out] out0 For each interval (b, d) in the persistence diagram of dimension 0, the function calls `out0(b, d)`.
  * @param[out] out1 Same as `out0` for persistence in dimension 1.
- * @returns The global minimum, which is not paired and is thus the birth of an infinite persistence interval of dimension 0.
+ * @returns The global minimum, which is not paired and is thus the birth of an infinite persistence interval of
+ *   dimension 0.
  */
 template <bool output_index = false, typename Filtration_value, typename Index, typename Out0, typename Out1>
-auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Index n_rows, Index n_cols, Out0&&out0, Out1&&out1){
+auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Index n_rows, Index n_cols,
+                                             Out0&&out0, Out1&&out1){
 #ifdef GUDHI_DETAILED_TIMES
   Gudhi::Clock clock;
 #endif
-  GUDHI_CHECK(n_rows >= 2 && n_cols >= 2, std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
+  GUDHI_CHECK(n_rows >= 2 && n_cols >= 2,
+      std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
   Persistence_on_rectangle<Filtration_value, Index, output_index> X;
   X.init(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
