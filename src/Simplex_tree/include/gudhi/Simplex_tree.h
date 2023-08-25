@@ -666,7 +666,7 @@ class Simplex_tree {
     if (is_empty()) return {};
     std::vector<size_t> res(std::min(upper_bound_dimension()+1, 40)); // in case the upper bound got crazy
     auto fun = [&res](Simplex_handle, int dim) { ++res[dim]; };
-    for_each_simplex_with_dim(fun);
+    for_each_simplex(fun);
     if (dimension_to_be_lowered_) {
       GUDHI_CHECK(res.front() != 0, std::logic_error("Bug in Gudhi"));
       while (res.back() == 0) res.pop_back();
@@ -1542,7 +1542,7 @@ class Simplex_tree {
    * the children of this simplex (a subset of the cofaces).
    */
   template<class Fun>
-  void for_each_simplex_with_dim(Fun&& fun) {
+  void for_each_simplex(Fun&& fun) {
     auto f=[&fun](Simplex_handle sh, int dim){
       if constexpr (std::is_same_v<void, decltype(fun(sh, dim))>) {
         fun(sh, dim);
@@ -1552,16 +1552,16 @@ class Simplex_tree {
       }
     };
     if (!is_empty())
-      for_each_simplex_with_dim(root(), 0, f);
+      for_each_simplex(root(), 0, f);
   }
 
  private:
   template<class Fun>
-  void for_each_simplex_with_dim(Siblings* sib, int dim, Fun&& fun) {
+  void for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
     for (auto& simplex : boost::adaptors::reverse(sib->members())) {
       Simplex_handle sh(&simplex);
       if (!fun(sh, dim) && has_children(sh)) {
-        for_each_simplex_with_dim(sh->second.children(), dim+1, fun);
+        for_each_simplex(sh->second.children(), dim+1, fun);
       }
       // We could skip checking has_children for the first element of the iteration, we know it returns false.
     }
@@ -1595,7 +1595,7 @@ class Simplex_tree {
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for_each_simplex_with_dim(fun);
+    for_each_simplex(fun);
 
     if(modified)
       clear_filtration(); // Drop the cache.
