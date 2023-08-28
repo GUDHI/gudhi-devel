@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <utility>
+#include <stdexcept>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -38,8 +39,8 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
   auto& edges = *new Edges();
   {
     py::gil_scoped_release release;
-    edges.reserve(bufi.shape[0]);
     Index n_edges = static_cast<Index>(bufi.shape[0]);
+    edges.reserve(n_edges);
     auto strides_i = bufi.strides[0];
     auto strides_j = bufj.strides[0];
     auto strides_f = buff.strides[0];

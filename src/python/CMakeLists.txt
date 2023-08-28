@@ -563,7 +563,9 @@ if(PYTHONINTERP_FOUND)
     add_gudhi_py_test(test_simplex_tree_serialization)
 
     # Edge collapse
-    add_gudhi_py_test(test_collapse_edges)
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_collapse_edges)
+    endif()
 
     # Subsampling
     add_gudhi_py_test(test_subsampling)
