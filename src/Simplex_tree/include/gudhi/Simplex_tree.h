@@ -639,7 +639,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief returns the number of simplices in the simplex_tree.
+  /** \brief Returns the number of simplices in the simplex_tree.
    *
    * This function takes time linear in the number of simplices. */
   size_t num_simplices() {
@@ -647,7 +647,7 @@ class Simplex_tree {
   }
 
  private:
-  /** \brief returns the number of simplices in the simplex_tree. */
+  /** \brief Returns the number of simplices in the simplex_tree. */
   size_t num_simplices(Siblings * sib) {
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
@@ -661,7 +661,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief returns the number of simplices of each dimension in the simplex tree. */
+  /** \brief Returns the number of simplices of each dimension in the simplex tree. */
   std::vector<size_t> num_simplices_by_dimension() {
     if (is_empty()) return {};
     std::vector<size_t> res(std::min(upper_bound_dimension()+1, 40)); // in case the upper bound got crazy
@@ -1533,7 +1533,7 @@ class Simplex_tree {
   }
 
  public:
-  /** Call a function on each simplex. The order ensures that faces are visited before cofaces.
+  /** Calls a function on each simplex. The order ensures that faces are visited before cofaces.
    * While it is fine to modify the data of a simplex (filtration, key) in the function, modifying
    * the structure itself (insertion, removal) is not supported.
    *
