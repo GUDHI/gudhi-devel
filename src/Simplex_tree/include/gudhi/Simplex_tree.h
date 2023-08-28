@@ -208,6 +208,10 @@ class Simplex_tree {
   using Optimized_cofaces_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate,
                                                                          Optimized_star_simplex_range>;
 
+
+  /** The largest dimension supported for simplex trees.
+   * 40 seems a conservative bound for now, as 2^41 simplices would not fit on the biggest hard-drive. */
+  static constexpr int max_dimension() { return 40; }
  public:
   /** \name Range and iterator types
    *
@@ -235,11 +239,9 @@ class Simplex_tree {
                                     std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
   /** \private
-   * \brief 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the
-   * biggest hard-drive.
    * static_vector still has some overhead compared to a trivial hand-made version using std::aligned_storage, or
-   * compared to making suffix_ static. */
-  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
+   * compared to reusing a static object. */
+  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, max_dimension()>;
 
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
@@ -664,7 +666,8 @@ class Simplex_tree {
   /** \brief Returns the number of simplices of each dimension in the simplex tree. */
   std::vector<size_t> num_simplices_by_dimension() {
     if (is_empty()) return {};
-    std::vector<size_t> res(std::min(upper_bound_dimension()+1, 40)); // in case the upper bound got crazy
+    // std::min in case the upper bound got crazy
+    std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
     auto fun = [&res](Simplex_handle, int dim) { ++res[dim]; };
     for_each_simplex(fun);
     if (dimension_to_be_lowered_) {
