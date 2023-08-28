@@ -109,15 +109,9 @@ class Persistent_cohomology {
         interval_length_policy(&cpx, 0),
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
-    if (cpx_->num_simplices() > std::numeric_limits<Simplex_key>::max()) {
+    if (num_simplices_ > std::numeric_limits<Simplex_key>::max()) {
       // num_simplices must be strictly lower than the limit, because a value is reserved for null_key.
       throw std::out_of_range("The number of simplices is more than Simplex_key type numeric limit.");
-    }
-    Simplex_key idx_fil = 0;
-    for (auto sh : cpx_->filtration_simplex_range()) {
-      cpx_->assign_key(sh, idx_fil);
-      ++idx_fil;
-      dsets_.make_set(cpx_->key(sh));
     }
     if (persistence_dim_max) {
       ++dim_max_;
@@ -172,11 +166,16 @@ class Persistent_cohomology {
    * valid. Undefined behavior otherwise. */
   void compute_persistent_cohomology(Filtration_value min_interval_length = 0) {
     interval_length_policy.set_length(min_interval_length);
+    Simplex_key idx_fil = -1;
+    std::vector<Simplex_key> vertices; // so we can check the connected components at the end
     // Compute all finite intervals
     for (auto sh : cpx_->filtration_simplex_range()) {
+      cpx_->assign_key(sh, ++idx_fil);
+      dsets_.make_set(cpx_->key(sh));
       int dim_simplex = cpx_->dimension(sh);
       switch (dim_simplex) {
         case 0:
+          vertices.push_back(idx_fil);
           break;
         case 1:
           update_cohomology_groups_edge(sh);
@@ -187,10 +186,7 @@ class Persistent_cohomology {
       }
     }
     // Compute infinite intervals of dimension 0
-    Simplex_key key;
-    for (auto v_sh : cpx_->skeleton_simplex_range(0)) {  // for all 0-dimensional simplices
-      key = cpx_->key(v_sh);
-
+    for (Simplex_key key : vertices) {  // for all 0-dimensional simplices
       if (ds_parent_[key] == key  // root of its tree
       && zero_cocycles_.find(key) == zero_cocycles_.end()) {
         persistent_pairs_.emplace_back(
@@ -585,10 +581,9 @@ class Persistent_cohomology {
    * @return A vector of Betti numbers.
    */
   std::vector<int> betti_numbers() const {
-    // Don't allocate a vector of negative size for an empty complex
-    int siz = std::max(dim_max_, 0);
-    // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(siz);
+    // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
+    // size for an empty complex
+    std::vector<int> betti_numbers(std::max(dim_max_, 0));
 
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
@@ -626,10 +621,9 @@ class Persistent_cohomology {
    * @return A vector of persistent Betti numbers.
    */
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
-    // Don't allocate a vector of negative size for an empty complex
-    int siz = std::max(dim_max_, 0);
-    // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(siz);
+    // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
+    // size for an empty complex
+    std::vector<int> betti_numbers(std::max(dim_max_, 0));
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will

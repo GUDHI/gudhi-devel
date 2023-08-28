@@ -163,8 +163,8 @@ public boost::iterator_facade < Simplex_around_vertex_iterator<SkeletonBlockerCo
 
     nodes_to_be_seen.pop_front();
 
-    for (auto childs : first_node->childs) {
-      nodes_to_be_seen.push_back(childs.get());
+    for (auto child : first_node->children) {
+      nodes_to_be_seen.push_back(child.get());
     }
   }
 
