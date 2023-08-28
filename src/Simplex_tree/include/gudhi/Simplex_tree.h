@@ -1594,6 +1594,8 @@ class Simplex_tree {
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(Filtration_value filtration) {
+    if (std::numeric_limits<Filtration_value>::has_infinity && filtration == std::numeric_limits<Filtration_value>::infinity())
+      return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
     if(modified)
       clear_filtration(); // Drop the cache.
