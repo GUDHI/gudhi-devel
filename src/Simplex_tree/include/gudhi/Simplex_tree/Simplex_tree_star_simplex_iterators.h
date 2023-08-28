@@ -73,8 +73,7 @@ class Simplex_tree_optimized_cofaces_rooted_subtrees_simplex_iterator
     // coface of simp_
     bool operator()(typename SimplexTree::Hooks_simplex_base& curr_hooks) {
       Node& curr_node = static_cast<Node&>(curr_hooks);
-      Simplex_handle sh;
-      sh = cpx_->simplex_handle_from_node(curr_node);
+      Simplex_handle sh = cpx_->simplex_handle_from_node(curr_node);
       // first Node must always have label simp_.begin(); we assume it is true
       auto&& rng = cpx_->simplex_vertex_range(sh);
       auto rng_it = rng.begin();
