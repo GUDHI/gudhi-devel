@@ -185,7 +185,7 @@ if(PYTHONINTERP_FOUND)
     if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
-    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_persline', ")
+    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_edge_collapse', ")
 
     # from windows vcpkg eigen 3.4.0#2 : build fails with
