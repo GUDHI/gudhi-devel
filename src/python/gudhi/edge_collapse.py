@@ -31,5 +31,5 @@ def collapse_edges(input_edges, nb_iterations=1):
     """
     from scipy.sparse import coo_matrix
 
-    r = _collapse_edges(input_edges.row, input_edges.col, input_edges.data)
+    r = _collapse_edges(input_edges.row, input_edges.col, input_edges.data, nb_iterations)
     return coo_matrix((r[1], (r[0][0], r[0][1])), input_edges.shape)
