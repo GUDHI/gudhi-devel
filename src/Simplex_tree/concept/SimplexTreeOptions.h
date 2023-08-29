@@ -30,6 +30,6 @@ struct SimplexTreeOptions {
   /// If true, the lists of `Node` with same label are stored to enhance cofaces and stars access.
   static const bool link_nodes_by_label;
   /// If true, Simplex_handle will not be invalidated after insertions or removals.
-  static const bool simplex_handle_strong_validity;
+  static const bool stable_simplex_handles;
 };
 

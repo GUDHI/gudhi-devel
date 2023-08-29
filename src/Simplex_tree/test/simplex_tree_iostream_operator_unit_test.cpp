@@ -31,7 +31,7 @@ struct MyOptions : Simplex_tree_options_full_featured {
 
 struct MyStableOptions : Simplex_tree_options_full_featured {
   //disabled by default.
-  static const bool simplex_handle_strong_validity = true;
+  static const bool stable_simplex_handles = true;
 };
 
 typedef boost::mpl::list<Simplex_tree<>,

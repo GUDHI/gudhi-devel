@@ -118,7 +118,7 @@ class Simplex_tree {
   //Dictionary::iterator remain valid under insertions and deletions,
   //necessary e.g. when computing oscillating rips zigzag filtrations.
   typedef typename boost::container::map<Vertex_handle, Node> map;
-  typedef typename std::conditional<Options::simplex_handle_strong_validity,
+  typedef typename std::conditional<Options::stable_simplex_handles,
                                     map,
                                     flat_map>::type Dictionary;
 
@@ -170,7 +170,7 @@ class Simplex_tree {
    *
    * They are essentially pointers into internal vectors, and any insertion or removal
    * of a simplex may invalidate any other Simplex_handle in the complex,
-   * unless Options::simplex_handle_strong_validity == true. */
+   * unless Options::stable_simplex_handles == true. */
   typedef typename Dictionary::iterator Simplex_handle;
 
  private:
@@ -481,7 +481,7 @@ class Simplex_tree {
       update_simplex_tree_after_node_insertion(sh);
       if (has_children(sh_source)) {
         Siblings * newsib = new Siblings(sib, sh_source->first);
-        if constexpr (!Options::simplex_handle_strong_validity) {
+        if constexpr (!Options::stable_simplex_handles) {
           newsib->members_.reserve(sh_source->second.children()->members().size());
         }
         for (auto & child : sh_source->second.children()->members())
@@ -743,7 +743,7 @@ class Simplex_tree {
     Siblings * tmp_sib = &root_;
     Dictionary_it tmp_dit;
     auto vi = simplex.begin();
-    if constexpr (Options::contiguous_vertices && !Options::simplex_handle_strong_validity) {
+    if constexpr (Options::contiguous_vertices && !Options::stable_simplex_handles) {
       // Equivalent to the first iteration of the normal loop
       GUDHI_CHECK(contiguous_vertices(), "non-contiguous vertices");
       Vertex_handle v = *vi++;
@@ -771,7 +771,7 @@ class Simplex_tree {
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
    * representing the vertex with Vertex_handle v. */
   Simplex_handle find_vertex(Vertex_handle v) {
-    if constexpr (Options::contiguous_vertices && !Options::simplex_handle_strong_validity) {
+    if constexpr (Options::contiguous_vertices && !Options::stable_simplex_handles) {
       assert(contiguous_vertices());
       return root_.members_.begin() + v;
     } else {
@@ -1933,7 +1933,7 @@ class Simplex_tree {
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
    */
   static Simplex_handle simplex_handle_from_node(Node& node) {
-    if constexpr (Options::simplex_handle_strong_validity){
+    if constexpr (Options::stable_simplex_handles){
       //Relies on the Dictionary type to be boost::container::map<Vertex_handle, Node>.
       //If the type changes or boost fondamentally changes something on the structure of their map,
       //a safer/more general but much slower version is:
@@ -2148,7 +2148,7 @@ class Simplex_tree {
   const char* rec_deserialize(Siblings *sib, Vertex_handle members_size, const char* ptr, int dim) {
     // In case buffer is just a 0 char
     if (members_size > 0) {
-      if constexpr (!Options::simplex_handle_strong_validity) sib->members_.reserve(members_size);
+      if constexpr (!Options::stable_simplex_handles) sib->members_.reserve(members_size);
       Vertex_handle vertex;
       Filtration_value filtration;
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
@@ -2239,7 +2239,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
+  static const bool stable_simplex_handles = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2257,7 +2257,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
+  static const bool stable_simplex_handles = false;
 };
 
 /** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
@@ -2274,7 +2274,7 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
-  static const bool simplex_handle_strong_validity = false;
+  static const bool stable_simplex_handles = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree

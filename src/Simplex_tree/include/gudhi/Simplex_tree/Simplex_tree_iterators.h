@@ -116,7 +116,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     sib_ = sib->oncles();
     if (sib_ != nullptr) {
       if constexpr (SimplexTree::Options::contiguous_vertices &&
-                    !SimplexTree::Options::simplex_handle_strong_validity)
+                    !SimplexTree::Options::stable_simplex_handles)
       {
         if (sib_->oncles() == nullptr)  // Only relevant for edges
           sh_ = sib_->members_.begin() + next_;
@@ -149,7 +149,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     Siblings * for_sib = sib_;
     Siblings * new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
-    if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::simplex_handle_strong_validity) {
+    if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::stable_simplex_handles) {
       if (new_sib == nullptr) {
         // We reached the root, use a short-cut to find a vertex.
         if (rit == suffix_.rend()) {
@@ -229,7 +229,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
     sib_ = sib->oncles();
     if (sib_ != nullptr) {
       if constexpr (SimplexTree::Options::contiguous_vertices &&
-                    !SimplexTree::Options::simplex_handle_strong_validity) {
+                    !SimplexTree::Options::stable_simplex_handles) {
         if (sib_->oncles() == nullptr)
           // Only relevant for edges
           baov_.first = sib_->members_.begin() + next_;
@@ -261,7 +261,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
     Siblings * for_sib = sib_;
     Siblings * new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
-    if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::simplex_handle_strong_validity) {
+    if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::stable_simplex_handles) {
       if (new_sib == nullptr) {
         // We reached the root, use a short-cut to find a vertex.
         if (rit == suffix_.rend()) {

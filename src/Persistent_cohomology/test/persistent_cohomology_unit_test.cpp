@@ -176,7 +176,7 @@ struct MiniSTOptions {
   static const bool store_filtration = false;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
-  static const bool simplex_handle_strong_validity = false;
+  static const bool stable_simplex_handles = false;
 };
 
 using Mini_simplex_tree = Gudhi::Simplex_tree<MiniSTOptions>;
