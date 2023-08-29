@@ -31,7 +31,7 @@ def subsample(array):
     return sub
 
 # Constant for plot_average_landscape
-landscape_resolution = 500
+landscape_resolution = 600
 # Nothing interesting after 0.4, you can set this filter to 1 (number of landscapes) if you want to check
 filter = int(0.4 * landscape_resolution)
 
