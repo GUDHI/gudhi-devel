@@ -1934,7 +1934,7 @@ class Simplex_tree {
    */
   static Simplex_handle simplex_handle_from_node(Node& node) {
     if constexpr (Options::simplex_handle_strong_validity){
-      //Relies on the Dictionnary type to be boost::container::map<Vertex_handle, Node>.
+      //Relies on the Dictionary type to be boost::container::map<Vertex_handle, Node>.
       //If the type changes or boost fondamentally changes something on the structure of their map,
       //a safer/more general but much slower version is:
       //   if (node.children()->parent() == label) {  // verifies if node is a leaf
