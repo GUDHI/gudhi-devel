@@ -1407,44 +1407,64 @@ class Simplex_tree {
     if (has_children(sh_u) &&
         sh_u->second.children()->members().find(v) != sh_u->second.children()->members().end())
     {
-      GUDHI_CHECK(false,"Simplex_tree::insert_edge_as_flag - insert an edge already in the complex");
       return;
     }
 
-    //upper bound on dimension
-    dimension_ = dim_max == -1 ? num_vertices() : dim_max;
-    dimension_to_be_lowered_ = true;
+    // //upper bound on dimension
+    // //TODO: avoid setting dimension_to_be_lowered_ to true by testing dimension of added simplices.
+    if (dimension_ < dim_max) {
+      dimension_ = dim_max;
+      dimension_to_be_lowered_ = true;
+    } else if (dim_max == -1 && !dimension_to_be_lowered_) {
+      ++dimension_;
+      dimension_to_be_lowered_ = true;
+    }
+    // const auto tmp_dim = dimension_;
+    // auto tmp_max_dim = dimension_;
 
     //for all siblings containing a Node labeled with u (including the root), run
     //compute_punctual_expansion
     //todo parallelise
-    auto ptr_list_u = nodes_by_label(u);//all Nodes with u label
+    List_max_vertex* nodes_with_label_u = nodes_by_label(u);//all Nodes with u label
 
-    GUDHI_CHECK(ptr_list_u != nullptr,"Simplex_tree::insert_edge_as_flag - cannot find the list of Nodes with label u");
+    GUDHI_CHECK(nodes_with_label_u != nullptr,
+                "Simplex_tree::insert_edge_as_flag - cannot find the list of Nodes with label u");
 
-    for (auto hook_u_it = ptr_list_u->begin(); hook_u_it != ptr_list_u->end(); ++hook_u_it)
+    for (auto node_as_hook : *nodes_with_label_u)
     {
-      Node & node_u = static_cast<Node&>(*hook_u_it); //corresponding node
-      Siblings * sib_u = self_siblings(simplex_handle_from_node(node_u));
-      if (sib_u->members().find(v) != sib_u->members().end()) {
+      Node& node_u = static_cast<Node&>(node_as_hook); //corresponding node, has label u
+      Simplex_handle sh_u = simplex_handle_from_node(node_u);
+      Siblings * sib_u = self_siblings(sh_u);
+      if (sib_u->members().find(v) != sib_u->members().end()) { //v is the label of a sibling of node_u
         int curr_dim = dimension(sib_u);
         if (dim_max == -1 || curr_dim < dim_max){
-          if (node_u.children()->parent() != u) { //now has a new child Node labeled v
+          if (!has_children(sh_u)) {
+            //then node_u was a leaf and now has a new child Node labeled v
+            //the child v is created in compute_punctual_expansion
             node_u.assign_children(new Siblings(sib_u, u));
           }
+          //   dimension_ = dim_max - curr_dim - 1;
           compute_punctual_expansion(
                 v,
                 node_u.children(),
                 fil,
                 dim_max - curr_dim - 1, //>= 0 if dim_max >= 0, <0 otherwise
-                added_simplices );      //u on top
+                added_simplices );
+          //   dimension_ = dim_max - dimension_;
+          //   if (dimension_ > tmp_max_dim) tmp_max_dim = dimension_;
         }
       }
     }
+    // if (tmp_dim <= tmp_max_dim){
+    //     dimension_ = tmp_max_dim;
+    //     dimension_to_be_lowered_ = false;
+    // } else {
+    //     dimension_ = tmp_dim;
+    // }
   }
 
  private:
-  /** \brief Insert a Node with label @p v in the set of siblings sib, and percolate the
+  /** \brief Inserts a Node with label @p v in the set of siblings sib, and percolate the
    * expansion on the subtree rooted at sib. Sibling sib must not contain
    * @p v.
    * The percolation of the expansion is twofold:
@@ -1519,25 +1539,31 @@ class Simplex_tree {
    * The filtration value is absolute and defined by `Filtration_value fil`.
    * The new Node are also connected appropriately in the coface
    * data structure.
+   *
+   * Only called in the case of `void insert_edge_as_flag(...)`.
    */
   void siblings_expansion(
         Siblings       * siblings  // must contain elements
       , Filtration_value fil
-      , int              k         //==max_dim expansion - dimension curr siblings
+      , int              k         // == max_dim expansion - dimension curr siblings
       , std::vector<Simplex_handle> & added_simplices )
   {
+    // if (dimension_ > k) {
+    //   dimension_ = k;   //to keep track of the max height of the recursion tree
+    // }
     if (k == 0) { return; } //max dimension
     Dictionary_it next = ++(siblings->members().begin());
 
     thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
-    for( Dictionary_it s_h = siblings->members().begin();
+    for (Dictionary_it s_h = siblings->members().begin();
          next != siblings->members().end(); ++s_h, ++next)
     { //find N^+(s_h)
       create_expansion<true>(siblings, s_h, inter, next, fil, k, &added_simplices);
     }
   }
 
-  /** \brief Recursive expansion of the simplex tree.*/
+  /** \brief Recursive expansion of the simplex tree.
+   * Only called in the case of `void expansion(int max_dim)`. */
   void siblings_expansion(Siblings * siblings,  // must contain elements
                           int k) {
     if (k >= 0 && dimension_ > k) {
@@ -1556,7 +1582,10 @@ class Simplex_tree {
     }
   }
 
-  /** \brief Recursive expansion of the simplex tree.*/
+  /** \brief Recursive expansion of the simplex tree.
+   * The method is used with `force_filtration_value == true` by `void insert_edge_as_flag(...)` and with
+   * `force_filtration_value == false` by `void expansion(int max_dim)`. Therefore, `added_simplices` is assumed
+   * to bon non-null in the first case and null in the second.*/
   template<bool force_filtration_value>
   void create_expansion(Siblings * siblings,
                         Dictionary_it& s_h,
@@ -1584,6 +1613,7 @@ class Simplex_tree {
       for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
         update_simplex_tree_after_node_insertion(it);
         if constexpr (force_filtration_value){
+          //the way create_expansion is used, added_simplices != nullptr when force_filtration_value == true
           added_simplices->push_back(it);
         }
       }
