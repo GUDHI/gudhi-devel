@@ -1241,7 +1241,8 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    if constexpr (!Options::stable_simplex_handles)
+      root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
     auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
         return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
