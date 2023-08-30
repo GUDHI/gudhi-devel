@@ -25,9 +25,22 @@
 
 using namespace Gudhi;
 
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 using Point = std::vector<double>;
 
@@ -50,6 +63,57 @@ std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed){
   return finalPoints;
 }
 
+template<class ST_type, typename St_options>
+void test_insert_as_flag(ST_type& simplex_tree, int maxDim = -1) {
+  Simplex_tree<St_options> st_to_test;
+  std::vector<typename Simplex_tree<St_options>::Simplex_handle> added_simplices;
+
+  for (auto& sh : simplex_tree.filtration_simplex_range()) {
+    if (simplex_tree.dimension(sh) == 0) {
+      auto u = *simplex_tree.simplex_vertex_range(sh).begin();
+      st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), maxDim, added_simplices);
+    } else if (simplex_tree.dimension(sh) == 1) {
+      auto it = simplex_tree.simplex_vertex_range(sh).begin();
+      auto u = *it;
+      auto v = *(++it);
+      st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), maxDim, added_simplices);
+    }
+  }
+
+  BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
+  BOOST_CHECK(st_to_test.dimension() == simplex_tree.dimension());
+  BOOST_CHECK(st_to_test == simplex_tree);
+}
+
+template <class ST_type, typename St_options>
+void test_unordered_insert_as_flag(ST_type& simplex_tree, int maxDim = -1) {
+  Simplex_tree<St_options> st_to_test;
+  std::vector<typename Simplex_tree<St_options>::Simplex_handle> added_simplices;
+
+  // complex_simplex_range gives a lexicographical order where the word "12" is shorter than "1",
+  // so vertices have to be inserted separately
+  for (auto& sh : simplex_tree.skeleton_simplex_range(0)) {
+    auto u = *simplex_tree.simplex_vertex_range(sh).begin();
+    st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), maxDim, added_simplices);
+  }
+
+  for (auto& sh : simplex_tree.complex_simplex_range()) {
+    if (simplex_tree.dimension(sh) == 1) {
+      auto it = simplex_tree.simplex_vertex_range(sh).begin();
+      auto u = *it;
+      auto v = *(++it);
+      st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), maxDim, added_simplices);
+    }
+  }
+  // as the insertions are not in the order of the filtration,
+  // the filtration values for higher dimensional simplices has to be restored
+  st_to_test.make_filtration_non_decreasing();
+
+  BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
+  BOOST_CHECK(st_to_test.dimension() == simplex_tree.dimension());
+  BOOST_CHECK(st_to_test == simplex_tree);
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion1, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************\n";
   std::clog << "simplex_tree_random_rips_expansion\n";
@@ -64,30 +128,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion1, typeST, list_
     Rips_complex rips_complex(build_point_cloud(i, -1), 3, Gudhi::Euclidean_distance());
     rips_complex.create_complex(simplex_tree, 100);
 
-    Simplex_tree<Simplex_tree_options_fast_cofaces> st_to_test;
-    std::vector<Simplex_tree<Simplex_tree_options_fast_cofaces>::Simplex_handle> added_simplices;
-
-    for (auto& sh : simplex_tree.filtration_simplex_range()){
-      if (simplex_tree.dimension(sh) == 0){
-        auto u = *simplex_tree.simplex_vertex_range(sh).begin();
-        st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), -1, added_simplices);
-      } else if (simplex_tree.dimension(sh) == 1){
-        auto it = simplex_tree.simplex_vertex_range(sh).begin();
-        auto u = *it;
-        auto v = *(++it);
-        st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), -1, added_simplices);
-      }
-    }
-
-    BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
-    BOOST_CHECK(st_to_test == simplex_tree);
+    test_insert_as_flag<typeST,Simplex_tree_options_fast_cofaces>(simplex_tree);
+    test_insert_as_flag<typeST,Simplex_tree_options_stable_simplex_handles>(simplex_tree);
   }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion2, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************\n";
   std::clog << "simplex_tree_random_rips_expansion\n";
-  std::clog << "Test tree 2: insertion by lexicographical order\n";
+  std::clog << "Test tree 2: insertion by lexicographical order\n"; //equivalent to random order
   std::clog << "********************************************************************\n";
 
   using Filtration_value = typename typeST::Filtration_value;
@@ -98,30 +147,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion2, typeST, list_
     Rips_complex rips_complex(build_point_cloud(i, -1), 3, Gudhi::Euclidean_distance());
     rips_complex.create_complex(simplex_tree, 100);
 
-    Simplex_tree<Simplex_tree_options_fast_cofaces> st_to_test;
-    std::vector<Simplex_tree<Simplex_tree_options_fast_cofaces>::Simplex_handle> added_simplices;
-
-    // complex_simplex_range gives a lexicographical order where the word "12" is shorter than "1",
-    // so vertices have to be inserted separately
-    for (auto& sh : simplex_tree.skeleton_simplex_range(0)){
-      auto u = *simplex_tree.simplex_vertex_range(sh).begin();
-      st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), -1, added_simplices);
-    }
-
-    for (auto& sh : simplex_tree.complex_simplex_range()){
-      if (simplex_tree.dimension(sh) == 1){
-        auto it = simplex_tree.simplex_vertex_range(sh).begin();
-        auto u = *it;
-        auto v = *(++it);
-        st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), -1, added_simplices);
-      }
-    }
-    // as the insertions are not in the order of the filtration,
-    // the filtration values for higher dimensional simplices has to be restored
-    st_to_test.make_filtration_non_decreasing();
-
-    BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
-    BOOST_CHECK(st_to_test == simplex_tree);
+    test_unordered_insert_as_flag<typeST,Simplex_tree_options_fast_cofaces>(simplex_tree);
+    test_unordered_insert_as_flag<typeST,Simplex_tree_options_stable_simplex_handles>(simplex_tree);
   }
 }
 
@@ -140,30 +167,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion1_with_max_dim, 
     Rips_complex rips_complex(build_point_cloud(i, -1), 3, Gudhi::Euclidean_distance());
     rips_complex.create_complex(simplex_tree, maxDim);
 
-    Simplex_tree<Simplex_tree_options_fast_cofaces> st_to_test;
-    std::vector<Simplex_tree<Simplex_tree_options_fast_cofaces>::Simplex_handle> added_simplices;
-
-    for (auto& sh : simplex_tree.filtration_simplex_range()){
-      if (simplex_tree.dimension(sh) == 0){
-        auto u = *simplex_tree.simplex_vertex_range(sh).begin();
-        st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), maxDim, added_simplices);
-      } else if (simplex_tree.dimension(sh) == 1){
-        auto it = simplex_tree.simplex_vertex_range(sh).begin();
-        auto u = *it;
-        auto v = *(++it);
-        st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), maxDim, added_simplices);
-      }
-    }
-
-    BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
-    BOOST_CHECK(st_to_test == simplex_tree);
+    test_insert_as_flag<typeST,Simplex_tree_options_fast_cofaces>(simplex_tree, maxDim);
+    test_insert_as_flag<typeST,Simplex_tree_options_stable_simplex_handles>(simplex_tree, maxDim);
   }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion2_with_max_dim, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************\n";
   std::clog << "simplex_tree_random_rips_expansion\n";
-  std::clog << "Test tree 4: insertion by lexicographical order and max dimension\n";
+  std::clog << "Test tree 4: insertion by lexicographical order and max dimension\n";   //equivalent to random order
   std::clog << "********************************************************************\n";
 
   using Filtration_value = typename typeST::Filtration_value;
@@ -175,30 +187,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_random_rips_expansion2_with_max_dim, 
     Rips_complex rips_complex(build_point_cloud(i, -1), 3, Gudhi::Euclidean_distance());
     rips_complex.create_complex(simplex_tree, maxDim);
 
-    Simplex_tree<Simplex_tree_options_fast_cofaces> st_to_test;
-    std::vector<Simplex_tree<Simplex_tree_options_fast_cofaces>::Simplex_handle> added_simplices;
-
-    // complex_simplex_range gives a lexicographical order where the word "12" is shorter than "1",
-    // so vertices have to be inserted separately
-    for (auto& sh : simplex_tree.skeleton_simplex_range(0)){
-      auto u = *simplex_tree.simplex_vertex_range(sh).begin();
-      st_to_test.insert_edge_as_flag(u, u, simplex_tree.filtration(sh), maxDim, added_simplices);
-    }
-
-    for (auto& sh : simplex_tree.complex_simplex_range()){
-      if (simplex_tree.dimension(sh) == 1){
-        auto it = simplex_tree.simplex_vertex_range(sh).begin();
-        auto u = *it;
-        auto v = *(++it);
-        st_to_test.insert_edge_as_flag(u, v, simplex_tree.filtration(sh), maxDim, added_simplices);
-      }
-    }
-    // as the insertions are not in the order of the filtration,
-    // the filtration values for higher dimensional simplices has to be restored
-    st_to_test.make_filtration_non_decreasing();
-
-    BOOST_CHECK(added_simplices.size() == simplex_tree.num_simplices());
-    BOOST_CHECK(st_to_test == simplex_tree);
+    test_unordered_insert_as_flag<typeST,Simplex_tree_options_fast_cofaces>(simplex_tree, maxDim);
+    test_unordered_insert_as_flag<typeST,Simplex_tree_options_stable_simplex_handles>(simplex_tree, maxDim);
   }
 }
 

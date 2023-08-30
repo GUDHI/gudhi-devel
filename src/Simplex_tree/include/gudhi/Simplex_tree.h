@@ -40,6 +40,7 @@
 
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/parent_from_member.hpp>
+#include <cstddef>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
@@ -1259,7 +1260,8 @@ class Simplex_tree {
       dimension_ = 1;
     }
 
-    root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
+    if constexpr (!Options::stable_simplex_handles)
+      root_.members_.reserve(num_vertices(skel_graph)); // probably useless in most cases
     auto verts = vertices(skel_graph) | boost::adaptors::transformed([&](auto v){
         return Dit_value_t(v, Node(&root_, get(vertex_filtration_t(), skel_graph, v))); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
@@ -1393,6 +1395,7 @@ class Simplex_tree {
       if (res_ins.second) { //if the vertex is not in the complex, insert it
         added_simplices.push_back(res_ins.first); //no more insert in root_.members()
         update_simplex_tree_after_node_insertion(res_ins.first);
+        if (dimension_ == -1) dimension_ = 0;
       }
       return; //because the vertex is isolated, no more insertions.
     }
@@ -1419,17 +1422,9 @@ class Simplex_tree {
       return;
     }
 
-    // //upper bound on dimension
-    // //TODO: avoid setting dimension_to_be_lowered_ to true by testing dimension of added simplices.
-    if (dimension_ < dim_max) {
-      dimension_ = dim_max;
-      dimension_to_be_lowered_ = true;
-    } else if (dim_max == -1 && !dimension_to_be_lowered_) {
-      ++dimension_;
-      dimension_to_be_lowered_ = true;
-    }
-    // const auto tmp_dim = dimension_;
-    // auto tmp_max_dim = dimension_;
+    // to update dimension
+    const auto tmp_dim = dimension_;
+    auto tmp_max_dim = dimension_;
 
     //for all siblings containing a Node labeled with u (including the root), run
     //compute_punctual_expansion
@@ -1452,24 +1447,24 @@ class Simplex_tree {
             //the child v is created in compute_punctual_expansion
             node_u.assign_children(new Siblings(sib_u, u));
           }
-          //   dimension_ = dim_max - curr_dim - 1;
+          dimension_ = dim_max - curr_dim - 1;
           compute_punctual_expansion(
                 v,
                 node_u.children(),
                 fil,
                 dim_max - curr_dim - 1, //>= 0 if dim_max >= 0, <0 otherwise
                 added_simplices );
-          //   dimension_ = dim_max - dimension_;
-          //   if (dimension_ > tmp_max_dim) tmp_max_dim = dimension_;
+          dimension_ = dim_max - dimension_;
+          if (dimension_ > tmp_max_dim) tmp_max_dim = dimension_;
         }
       }
     }
-    // if (tmp_dim <= tmp_max_dim){
-    //     dimension_ = tmp_max_dim;
-    //     dimension_to_be_lowered_ = false;
-    // } else {
-    //     dimension_ = tmp_dim;
-    // }
+    if (tmp_dim <= tmp_max_dim){
+        dimension_ = tmp_max_dim;
+        dimension_to_be_lowered_ = false;
+    } else {
+        dimension_ = tmp_dim;
+    }
   }
 
  private:
@@ -1492,7 +1487,10 @@ class Simplex_tree {
     added_simplices.push_back(res_ins_v.first); //no more insertion in sib
     update_simplex_tree_after_node_insertion(res_ins_v.first);
 
-    if (k == 0) { return; } //reached the maximal dimension. if max_dim == -1, k is never equal to 0.
+    if (k == 0) {   // reached the maximal dimension. if max_dim == -1, k is never equal to 0.
+      dimension_ = 0;  // to keep track of the max height of the recursion tree
+      return;
+    }
 
     //create the subtree of new Node(v)
     create_local_expansion(  res_ins_v.first
@@ -1538,6 +1536,9 @@ class Simplex_tree {
     Simplex_handle next_it = sh_v;
     ++next_it;
     thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
+    if (dimension_ > k) {
+      dimension_ = k;   //to keep track of the max height of the recursion tree
+    }
 
     create_expansion<true>(curr_sib, sh_v, inter, next_it, fil_uv, k, &added_simplices);
   }
@@ -1557,9 +1558,9 @@ class Simplex_tree {
       , int              k         // == max_dim expansion - dimension curr siblings
       , std::vector<Simplex_handle> & added_simplices )
   {
-    // if (dimension_ > k) {
-    //   dimension_ = k;   //to keep track of the max height of the recursion tree
-    // }
+    if (dimension_ > k) {
+      dimension_ = k;   //to keep track of the max height of the recursion tree
+    }
     if (k == 0) { return; } //max dimension
     Dictionary_it next = ++(siblings->members().begin());
 
