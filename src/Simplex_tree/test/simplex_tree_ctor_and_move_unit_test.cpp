@@ -25,9 +25,22 @@
 
 using namespace Gudhi;
 
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<typename Simplex_tree>
 void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
@@ -151,7 +164,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st8);
   BOOST_CHECK(st7 == st);
 
+#if __GNUC__ >= 13
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
   st = std::move(st);
+#if __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   print_simplex_filtration(st, "Third self move assignment from the default Simplex_tree");
 
   BOOST_CHECK(st7 == st);

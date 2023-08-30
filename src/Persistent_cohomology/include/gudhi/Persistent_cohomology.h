@@ -109,7 +109,7 @@ class Persistent_cohomology {
         interval_length_policy(&cpx, 0),
         column_pool_(),  // memory pools for the CAM
         cell_pool_() {
-    if (cpx_->num_simplices() > std::numeric_limits<Simplex_key>::max()) {
+    if (num_simplices_ > std::numeric_limits<Simplex_key>::max()) {
       // num_simplices must be strictly lower than the limit, because a value is reserved for null_key.
       throw std::out_of_range("The number of simplices is more than Simplex_key type numeric limit.");
     }
@@ -583,10 +583,9 @@ class Persistent_cohomology {
    * @return A vector of Betti numbers.
    */
   std::vector<int> betti_numbers() const {
-    // Don't allocate a vector of negative size for an empty complex
-    int siz = std::max(dim_max_, 0);
-    // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(siz);
+    // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
+    // size for an empty complex
+    std::vector<int> betti_numbers(std::max(dim_max_, 0));
 
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
@@ -624,10 +623,9 @@ class Persistent_cohomology {
    * @return A vector of persistent Betti numbers.
    */
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
-    // Don't allocate a vector of negative size for an empty complex
-    int siz = std::max(dim_max_, 0);
-    // Init Betti numbers vector with zeros until Simplicial complex dimension
-    std::vector<int> betti_numbers(siz);
+    // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
+    // size for an empty complex
+    std::vector<int> betti_numbers(std::max(dim_max_, 0));
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will

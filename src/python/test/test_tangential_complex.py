@@ -18,7 +18,7 @@ __license__ = "MIT"
 def test_tangential():
     point_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
     tc = TangentialComplex(intrisic_dim=1, points=point_list)
-    assert tc.__is_defined() == True
+    assert tc._is_defined() == True
     assert tc.num_vertices() == 4
     assert tc.num_simplices() == 0
     assert tc.num_inconsistent_simplices() == 0
@@ -31,8 +31,8 @@ def test_tangential():
     assert tc.num_inconsistent_stars() == 0
 
     st = tc.create_simplex_tree()
-    assert st.__is_defined() == True
-    assert st.__is_persistence_defined() == False
+    assert st._is_defined() == True
+    assert st._is_persistence_defined() == False
 
     assert st.num_simplices() == 6
     assert st.num_vertices() == 4

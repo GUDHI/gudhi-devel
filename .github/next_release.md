@@ -12,6 +12,13 @@ Below is a list of changes made since GUDHI 3.8.0:
 - [Module](link)
      - **...**
 
+- [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
+     - Much faster implementation for the 2d case with input from top-dimensional cells.
+
+- Installation
+     - Boost &ge; 1.71.0 is now required (was &ge; 1.66.0).
+     - cython >= 3.0.0 is now supported.
+
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.8.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.9.0+is%3Aclosed) is available on GitHub.
 
