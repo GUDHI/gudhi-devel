@@ -1439,9 +1439,9 @@ class Simplex_tree {
     GUDHI_CHECK(nodes_with_label_u != nullptr,
                 "Simplex_tree::insert_edge_as_flag - cannot find the list of Nodes with label u");
 
-    for (auto node_as_hook : *nodes_with_label_u)
+    for (auto hook_u_it = nodes_with_label_u->begin(); hook_u_it != nodes_with_label_u->end(); ++hook_u_it)
     {
-      Node& node_u = static_cast<Node&>(node_as_hook); //corresponding node, has label u
+      Node& node_u = static_cast<Node&>(*hook_u_it); //corresponding node, has label u
       Simplex_handle sh_u = simplex_handle_from_node(node_u);
       Siblings * sib_u = self_siblings(sh_u);
       if (sib_u->members().find(v) != sib_u->members().end()) { //v is the label of a sibling of node_u
