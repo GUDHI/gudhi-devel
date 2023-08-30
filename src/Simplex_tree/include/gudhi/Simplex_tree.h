@@ -1012,7 +1012,7 @@ class Simplex_tree {
    *
    * Any insertion, deletion or change of filtration value invalidates this cache,
    * which can be cleared with clear_filtration().  */
-  void initialize_filtration(bool ignore_infinite_values = true) {
+  void initialize_filtration(bool ignore_infinite_values = false) {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
     for (Simplex_handle sh : complex_simplex_range()) {
