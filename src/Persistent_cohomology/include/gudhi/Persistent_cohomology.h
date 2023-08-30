@@ -173,7 +173,8 @@ class Persistent_cohomology {
       cpx_->assign_key(sh, ++idx_fil);
       dsets_.make_set(cpx_->key(sh));
       int dim_simplex = cpx_->dimension(sh);
-      if (cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
+      if (std::numeric_limits<Filtration_value>::has_infinity &&
+          cpx_->filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) break;
       switch (dim_simplex) {
         case 0:
           vertices.push_back(idx_fil);

@@ -1006,8 +1006,10 @@ class Simplex_tree {
   void initialize_filtration(bool ignore_infinite_values = true) {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
-    for (Simplex_handle sh : complex_simplex_range()){
-      if (ignore_infinite_values && filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) continue;
+    for (Simplex_handle sh : complex_simplex_range()) {
+      if (ignore_infinite_values &&
+          std::numeric_limits<Filtration_value>::has_infinity &&
+          filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) continue;
       filtration_vect_.push_back(sh);
     }
 
