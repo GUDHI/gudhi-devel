@@ -668,15 +668,16 @@ class Simplex_tree {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy
     std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
-    auto fun = [&res](Simplex_handle, int dim) { ++res[dim]; };
+    auto fun = [&res](Simplex_handle, int dim) -> void { ++res[dim]; };
     for_each_simplex(fun);
     if (dimension_to_be_lowered_) {
-      GUDHI_CHECK(res.front() != 0, std::logic_error("Bug in Gudhi"));
+      GUDHI_CHECK(res.front() != 0, std::logic_error("Bug in Gudhi: non-empty complex has no vertex"));
       while (res.back() == 0) res.pop_back();
       dimension_ = static_cast<int>(res.size()) - 1;
       dimension_to_be_lowered_ = false;
     } else {
-      GUDHI_CHECK(res.back() != 0, std::logic_error("Bug in Gudhi"));
+      GUDHI_CHECK(res.back() != 0,
+          std::logic_error("Bug in Gudhi: there is no simplex of dimension the dimension of the complex"));
     }
     return res;
   }
@@ -1546,7 +1547,8 @@ class Simplex_tree {
    */
   template<class Fun>
   void for_each_simplex(Fun&& fun) {
-    auto f=[&fun](Simplex_handle sh, int dim){
+    // Wrap callback so it always returns bool
+    auto f = [&fun](Simplex_handle sh, int dim) -> bool {
       if constexpr (std::is_same_v<void, decltype(fun(sh, dim))>) {
         fun(sh, dim);
         return false;
@@ -1555,16 +1557,16 @@ class Simplex_tree {
       }
     };
     if (!is_empty())
-      for_each_simplex(root(), 0, f);
+      rec_for_each_simplex(root(), 0, f);
   }
 
  private:
   template<class Fun>
-  void for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
+  void rec_for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
     for (auto& simplex : boost::adaptors::reverse(sib->members())) {
       Simplex_handle sh(&simplex);
       if (!fun(sh, dim) && has_children(sh)) {
-        for_each_simplex(sh->second.children(), dim+1, fun);
+        rec_for_each_simplex(sh->second.children(), dim+1, fun);
       }
       // We could skip checking has_children for the first element of the iteration, we know it returns false.
     }
@@ -1579,7 +1581,7 @@ class Simplex_tree {
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
-    auto fun = [&modified, this](Simplex_handle sh, int dim) {
+    auto fun = [&modified, this](Simplex_handle sh, int dim) -> void {
       if (dim == 0) return;
       // Find the maximum filtration value in the border
       Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
