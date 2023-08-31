@@ -931,6 +931,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st1.insert_graph(g);
   BOOST_CHECK(st1.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst1;
+  sst1.insert_graph(g);
+  BOOST_CHECK(sst1.num_simplices() == 6);
+
   // edges can have multiplicity in the graph unless we replace the first vecS with (hash_)setS
   add_edge(1, 0, 1.1, g);
   add_edge(1, 2, 3.3, g);
@@ -942,13 +946,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st2.insert_graph(g);
   BOOST_CHECK(st2.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst2;
+  sst2.insert_graph(g);
+  BOOST_CHECK(sst2.num_simplices() == 6);
+
   std::clog << "st1 is" << std::endl;
   std::clog << st1 << std::endl;
 
   std::clog << "st2 is" << std::endl;
   std::clog << st2 << std::endl;
 
+  std::clog << "sst1 is" << std::endl;
+  std::clog << sst1 << std::endl;
+
+  std::clog << "sst2 is" << std::endl;
+  std::clog << sst2 << std::endl;
+
   BOOST_CHECK(st1 == st2);
+  BOOST_CHECK(sst1 == sst2);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested_variants) {

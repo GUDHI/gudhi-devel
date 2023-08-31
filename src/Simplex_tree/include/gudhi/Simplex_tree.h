@@ -1275,8 +1275,8 @@ class Simplex_tree {
       }
 
       auto it = sh->second.children()->members().emplace(
-                  v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge))).first;
-      update_simplex_tree_after_node_insertion(it);
+                  v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge)));
+      if (it.second) update_simplex_tree_after_node_insertion(it.first);
     }
   }
 
