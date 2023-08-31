@@ -304,7 +304,7 @@ class Zigzag_persistence
    * @tparam SimplexRange Range type needing begin and end members.
    * @tparam FiltrationRange Range type needing begin and end members.
    * @param simplices Simplices which are inserted, represented by their vertices. They have to be in the order they 
-   * are inserted in the filtration and ``contiguous'' in the filtration, that is, no other simplex 
+   * are inserted in the filtration and ''contiguous'' in the filtration, that is, no other simplex 
    * which is not in the range is inserted or removed between two simplices in the range.
    * @param filtration_values Filtration values associated to the insertion of the given simplices. 
    * The order has to correspond to the order in @a simplices. Their values have to ascending in this order and 
@@ -326,7 +326,7 @@ class Zigzag_persistence
    * @tparam SimplexRange Range type needing begin and end members.
    * @tparam FiltrationRange Range type needing begin and end members.
    * @param simplices Simplices which are removed, represented by their vertices. They have to be in the order they
-   * are removed in the filtration and ``contiguous'' in the filtration, that is, no other simplex
+   * are removed in the filtration and ''contiguous'' in the filtration, that is, no other simplex
    * which is not in the range is inserted or removed between two simplices in the range.
    * @param filtration_values Filtration values associated to the removal of the given simplices. Has therefore the 
    * same size as @p simplices. The order has to correspond to the order in @p simplices. Their values have to 
@@ -349,7 +349,7 @@ class Zigzag_persistence
    * @tparam FiltrationRangeIterators Forward iterator of a range.
    * @param simplex_range_start Iterator pointing to the begining of the range of simplices to insert.
    * The simplices should be represented by their vertices. They have to be in the order they 
-   * are inserted in the filtration and ``contiguous'' in the filtration, that is, no other simplex 
+   * are inserted in the filtration and ''contiguous'' in the filtration, that is, no other simplex 
    * which is not in the range is inserted or removed between two simplices in the range.
    * @param simplex_range_end Iterator pointing to the end of the range of simplices to insert.
    * @param filtration_range_start Iterator pointing to the begining of the range of filtration values. The range is
@@ -371,7 +371,7 @@ class Zigzag_persistence
    * @tparam FiltrationRangeIterators Forward iterator of a range.
    * @param simplex_range_start Iterator pointing to the begining of the range of simplices to remove.
    * The simplices should be represented by their vertices. They have to be in the order they 
-   * are removed in the filtration and ``contiguous'' in the filtration, that is, no other simplex 
+   * are removed in the filtration and ''contiguous'' in the filtration, that is, no other simplex 
    * which is not in the range is inserted or removed between two simplices in the range.
    * @param simplex_range_end Iterator pointing to the end of the range of simplices to remove.
    * @param filtration_range_start Iterator pointing to the begining of the range of filtration values. The range is
@@ -387,11 +387,11 @@ class Zigzag_persistence
   }
 
   /**
-   * @brief Updates the zigzag persistence diagram after the given simplex was ``manually'' inserted in the complex 
+   * @brief Updates the zigzag persistence diagram after the given simplex was ''manually'' inserted in the complex 
    * obtained with @ref get_complex.
    * 
    * @param simplex Simplex handle of the simplex having been inserted. A filtration value and a key must be assigned
-   * to it. The key must correspond to the ``arrow number'' inserting the simplex, i.e., its position in the filtration.
+   * to it. The key must correspond to the ''arrow number'' inserting the simplex, i.e., its position in the filtration.
    *
    * @warning Other simplices can have been inserted in the complex before calling this method, there will simply not 
    * be token into account as long as the method is not called for them. It it just important that a key was assigned 
@@ -443,7 +443,7 @@ class Zigzag_persistence
   }
 
   /**
-   * @brief Returns the ``index persistence diagram'' of the current filtration, that is, the pairs of atomic arrow 
+   * @brief Returns the ''index persistence diagram'' of the current filtration, that is, the pairs of atomic arrow 
    * numbers corresponding to a birth-death pair. Does not contain points at infinity, only the cycle classes which 
    * already died are represented.
    *

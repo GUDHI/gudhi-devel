@@ -333,7 +333,7 @@ class Oscillating_rips_edge_range {
     Filtration_value mu_;                           /**< Upper multiplicator. */
     Zigzag_edge<Filtration_value> currentEdge_;     /**< Stores the current edge in the range. */
     size_t epsilonIndex_, rowIndex_, columnIndex_;  /**< Indices indicating the next position in the range. */
-    bool inPositiveDirection_, insertVertex_;       /**< Next direction and indicates if next ``edge'' is a vertex. */
+    bool inPositiveDirection_, insertVertex_;       /**< Next direction and indicates if next ''edge'' is a vertex. */
 
     /**
      * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if to iterators are equal.
@@ -547,7 +547,8 @@ class Oscillating_rips_edge_range {
       Filtration_value mu, 
       const PointRange& points, 
       DistanceFunction&& distance,
-      Order_policy orderPolicy = Order_policy::FARTHEST_POINT_ORDERING) {
+      Order_policy orderPolicy = Order_policy::FARTHEST_POINT_ORDERING) 
+  {
     std::vector<Zigzag_edge<Filtration_value> > edgeFiltration;
     std::vector<Filtration_value> epsilonValues;
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix;
@@ -560,10 +561,6 @@ class Oscillating_rips_edge_range {
     // only at the very last step of the oRzz filtration.
     std::vector<std::vector<Zigzag_edge<Filtration_value> > > edgesAdded, edgesRemoved;
 
-    // auto it = std::upper_bound(distanceMatrix[1].begin(), distanceMatrix[1].end(),
-    //                              std::pair<int, Filtration_value>(distanceMatrix.size(), mu * epsilonValues[0]),
-    //                              Point_distance_comp());
-    // std::cout << "start vect colind: " << (it - distanceMatrix[1].begin()) << ", (" << it->first << ", " << it->second << "), (" << distanceMatrix[1].begin()->first << ", " << distanceMatrix[1].begin()->second << ")\n";
     size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
 
     // Now, sort edges according to lengths, and put everything in edgeFiltration
@@ -740,7 +737,7 @@ class Oscillating_rips_edge_range {
 
  private:
   /**
-   * @brief Default constructor. Should not be called and therfore private. Use as a ``static'' class only.
+   * @brief Default constructor. Should not be called and therfore private. Use as a ''static'' class only.
    */
   Oscillating_rips_edge_range(){};
 
@@ -838,7 +835,8 @@ class Oscillating_rips_edge_range {
    * @return Vector of decreasing epsilon values ending with 0.
    */
   template <typename PointRange, typename DistanceFunction>
-  static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& sortedPoints, DistanceFunction&& distance) {
+  static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& sortedPoints,
+                                                               DistanceFunction&& distance) {
     size_t n = sortedPoints.size();
     std::vector<Filtration_value> eps_range(n, std::numeric_limits<double>::infinity());
 
@@ -897,7 +895,8 @@ class Oscillating_rips_edge_range {
    */
   template <typename PointRange, typename DistanceFunction>
   static std::vector<std::vector<std::pair<int, Filtration_value> > > _compute_distance_matrix(
-      const PointRange& sortedPoints, DistanceFunction&& distance) {
+      const PointRange& sortedPoints, DistanceFunction&& distance) 
+  {
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix(sortedPoints.size());
 #ifdef GUDHI_USE_TBB
     tbb::parallel_for(size_t(0), sortedPoints.size(), [&](size_t i) {
@@ -982,7 +981,6 @@ class Oscillating_rips_edge_range {
           } else {
             edgesAdded[i].emplace_back(it->first, j, epsilonValues[i], true);
           }
-        //   std::cout << j << ", " << (it - distanceMatrix[j].begin()) << ", " << it->first << "\n";
           ++number_of_arrows;
         }
       }
@@ -1001,7 +999,6 @@ class Oscillating_rips_edge_range {
         } else {
           edgesAdded[i].emplace_back(it->first, i + 1, epsilonValues[i], true);
         }
-        // std::cout << (i + 1) << ", " << (it - distanceMatrix[i+1].begin()) << ", " << it->first << "\n";
         ++number_of_arrows;
       }
 
@@ -1023,13 +1020,11 @@ class Oscillating_rips_edge_range {
           if (it->second <= nu * epsilonValues[i + 1]) {
             break;
           }
-          // edgesRemoved[i].emplace_back(it->first, j, epsilonValues[i+1], false);
           if constexpr (EdgeModifier::isActive_){
             edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
           } else {
             edgesRemoved[i].emplace_back(it->first, j, epsilonValues[i], false);
           }
-        //   std::cout << j << ", " << (it - distanceMatrix[j].begin()) << ", " << it->first << "\n";
           ++number_of_arrows;
         }
       }
@@ -1072,16 +1067,12 @@ class Oscillating_rips_edge_range {
       // first striclty longer edge
       it = std::upper_bound(distanceMatrix[i + 1].begin(), distanceMatrix[i + 1].end(),
                             std::pair<int, Filtration_value>(n, mu * epsilonValues[i]), Point_distance_comp());
-// if (i == 0){
-//     std::cout << "start vect colind2: " << (it - distanceMatrix[1].begin()) << ", (" << it->first << ", " << it->second << "), (" << distanceMatrix[1].begin()->first << ", " << distanceMatrix[1].begin()->second << ")\n";
-// }
       while (it != distanceMatrix[i + 1].begin()) {
         --it;
         if constexpr (EdgeModifier::isActive_) {
           edgesAdded[i].emplace_back(it->first, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
         } else {
           edgesAdded[i].emplace_back(it->first, i + 1, epsilonValues[i], true);
-        //   if (i==0) std::cout << "added: " << it->first << ", " << (i + 1) << ", " << epsilonValues[i] << "\n";
         }
         ++number_of_arrows;
       }
@@ -1104,7 +1095,6 @@ class Oscillating_rips_edge_range {
           if (it->second <= nu * epsilonValues[i + 1]) {
             break;
           }
-          // edgesRemoved[i].emplace_back(it->first, j, epsilonValues[i+1], false);
           if constexpr (EdgeModifier::isActive_){
             edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
           } else {
@@ -1121,7 +1111,7 @@ class Oscillating_rips_edge_range {
 
   /**
    * @brief Sorts canonically the edges: as much as possible, edges should be removed in
-   * the reverse order of their insertion. We decide to insert shorted edges first,
+   * the reverse order of their insertion. We decide to insert shortest edges first,
    * with increasing lexicographical order, and remove larger edges first, with
    * decreasing lexicographic order.
    *
@@ -1521,7 +1511,7 @@ class Oscillating_rips_simplex_range {
 
  private:
   /**
-   * @brief Default constructor. Should not be called and therfore private. Use as a ``static'' class only.
+   * @brief Default constructor. Should not be called and therfore private. Use as a ''static'' class only.
    */
   Oscillating_rips_simplex_range(){};
 };

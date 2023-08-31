@@ -132,5 +132,6 @@
  * \section Zigzag_persistence_example_section Zigzag_persistence
  * @example example_simple_zigzag_filtration.cpp
  * @example example_zzfiltration_from_file.cpp
+ * @example example_oscillating_rips_persistence.cpp
  */
  

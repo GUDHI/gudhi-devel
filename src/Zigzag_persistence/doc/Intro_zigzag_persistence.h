@@ -34,6 +34,12 @@ namespace zigzag_persistence {
  * which can be processed without overreaching memory space. For this purpose, it is possible to feed the module with
  * information about the filtration "on the fly" to avoid loading the whole filtration at once. Information about the
  * current complex and current barcode can be retrieved between any steps.
+ *
+ * \subsection zigzagrips Oscillating Rips
+ * 
+ * A typical example of zigzag filtrations are oscillating rips filtrations. Similar to standart Rips filtrations, they 
+ * completely depend on their edges. But here we look at neighborhoods ''oscillating'' in size around the points, so 
+ * edges are added but also removed. We refer for example to \cite osc_zz.
  * 
  * \subsection zigzagexamples Examples
  * 
@@ -43,6 +49,9 @@ namespace zigzag_persistence {
  *
  * \li \gudhi_example_link{Zigzag_persistence,example_zzfiltration_from_file.cpp} - An example of a "stream-like" usage
  * by reading of the filtration from a file.
+ *
+ * \li \gudhi_example_link{Zigzag_persistence,example_oscillating_rips_persistence.cpp} - An example of a how to
+ * compute the persistence of an oscillating rips filtration.
  * 
  * @}
  */
