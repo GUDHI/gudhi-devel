@@ -19,10 +19,6 @@ if(TARGET TBB::tbb)
 endif()
 add_test(NAME Zigzag_persistence_example_oscillating_rips_persistence COMMAND $<TARGET_FILE:Zigzag_persistence_example_oscillating_rips_persistence> "2" "3" "5" "10")
 
-add_executable ( comp comparison_for_tests.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(comp TBB::tbb)
-endif()
 
 
 
