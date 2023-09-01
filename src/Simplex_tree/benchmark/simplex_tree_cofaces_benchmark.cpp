@@ -81,6 +81,18 @@ void benchmark_stars_computation(int nb_vertices) {
   std::clog << benchmark_cofaces << std::endl;
 }
 
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef Gudhi::linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
 int main(int argc, char *argv[]) {
   int nb_vertices = 5000;
   if (argc > 2) {
@@ -99,7 +111,7 @@ int main(int argc, char *argv[]) {
   benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_cofaces>>(nb_vertices);
 
   std::clog << "** With cofaces computation optimization and stable simplex handles" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips> >(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Simplex_tree_options_stable_simplex_handles> >(nb_vertices);
 
   return EXIT_SUCCESS;
 }
