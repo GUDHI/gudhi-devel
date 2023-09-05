@@ -1,25 +1,26 @@
-We are pleased to announce the release 3.8.0 of the GUDHI library.
+We are pleased to announce the release 3.9.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers Perslay, a Tensorflow model for the representations module.
+As a major new feature, the GUDHI library now offers ...
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since GUDHI 3.7.1:
-
-- [Perslay](https://gudhi.inria.fr/python/latest/representations_tflow_itf_ref.html)
-     - a TensorFlow layer for persistence diagrams representations
-
-- [Hera version of Wasserstein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera)
-     - now provides matching in its interface
-
-- [Subsampling](https://gudhi.inria.fr/doc/latest/group__subsampling.html)
-     - New `choose_n_farthest_points_metric` as a faster alternative of `choose_n_farthest_points`.
+Below is a list of changes made since GUDHI 3.8.0:
 
 - [Module](link)
      - **...**
 
+- [Module](link)
+     - **...**
+
+- [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
+     - Much faster implementation for the 2d case with input from top-dimensional cells.
+
+- Installation
+     - Boost &ge; 1.71.0 is now required (was &ge; 1.66.0).
+     - cython >= 3.0.0 is now supported.
+
 - Miscellaneous
-     - The [list of bugs that were solved since GUDHI-3.7.1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.8.0+is%3Aclosed) is available on GitHub.
+     - The [list of bugs that were solved since GUDHI-3.8.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.9.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -34,5 +35,5 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-- @MathieuCarriere
+- **...**
 - **...**

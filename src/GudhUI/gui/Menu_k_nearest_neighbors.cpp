@@ -32,7 +32,7 @@ void Menu_k_nearest_neighbors::connectActions(QMainWindow* parent) {
 }
 
 void Menu_k_nearest_neighbors::send_compute_k_nearest_neighbors() {
-  emit(compute_k_nearest_neighbors((unsigned) spinBoxK->value()));
+  /*emit*/ compute_k_nearest_neighbors((unsigned) spinBoxK->value());
 }
 
 void Menu_k_nearest_neighbors::accept() {
@@ -41,7 +41,7 @@ void Menu_k_nearest_neighbors::accept() {
 
 void Menu_k_nearest_neighbors::update_k(int new_k_value) {
   if (checkBoxAutoUpdate->isChecked())
-    emit(compute_k_nearest_neighbors((unsigned) spinBoxK->value()));
+    /*emit*/ compute_k_nearest_neighbors((unsigned) spinBoxK->value());
 }
 
 #include "Menu_k_nearest_neighbors.moc"

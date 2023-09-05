@@ -37,6 +37,7 @@ for module in cython_modules:
         'gudhi.' + module,
         sources = [source_dir + module + '.pyx',],
         language = 'c++',
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
         libraries=libraries,
@@ -60,15 +61,10 @@ for module in pybind11_modules:
         runtime_library_dirs=runtime_library_dirs,
         ))
 
-# read the contents of introduction.rst
-with open("introduction.rst", "r") as fh:
-    long_description = fh.read()
-
 setup(
     name = 'gudhi',
     packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
-    author='GUDHI Editorial Board',
-    author_email='gudhi-contact@inria.fr',
+    author='GUDHI Editorial Board <https://gudhi.inria.fr/contact/>',
     version='@GUDHI_VERSION@',
     url='https://gudhi.inria.fr/',
     project_urls={
@@ -79,9 +75,8 @@ setup(
         },
     description='The Gudhi library is an open source library for ' \
         'Computational Topology and Topological Data Analysis (TDA).',
-    data_files=[('.', ['./introduction.rst'])],
     long_description_content_type='text/x-rst',
-    long_description=long_description,
+    long_description='@GUDHI_LONG_DESCRIPTION@',
     ext_modules = ext_modules,
     python_requires='>=3.5.0',
     install_requires = ['numpy >= 1.15.0',],

@@ -28,7 +28,7 @@ __license__ = "MIT"
 _gudhi_matplotlib_use_tex = True
 
 
-def __min_birth_max_death(persistence, band=0.0):
+def _min_birth_max_death(persistence, band=0.0):
     """This function returns (min_birth, max_death) from the persistence.
 
     :param persistence: The persistence to plot.
@@ -180,7 +180,7 @@ def plot_persistence_barcode(
             persistence = _limit_to_max_intervals(
                 persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
             )
-            (min_birth, max_death) = __min_birth_max_death(persistence)
+            (min_birth, max_death) = _min_birth_max_death(persistence)
             persistence = sorted(persistence, key=lambda birth: birth[1][0])
         except IndexError:
             min_birth, max_death = 0.0, 1.0
@@ -192,9 +192,9 @@ def plot_persistence_barcode(
         infinity = max_death + delta
         axis_start = min_birth - delta
 
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
-        if colormap == None:
+        if colormap is None:
             colormap = plt.cm.Set1.colors
 
         x = [birth for (dim, (birth, death)) in persistence]
@@ -307,7 +307,7 @@ def plot_persistence_diagram(
             persistence = _limit_to_max_intervals(
                 persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
             )
-            min_birth, max_death = __min_birth_max_death(persistence, band)
+            min_birth, max_death = _min_birth_max_death(persistence, band)
         except IndexError:
             min_birth, max_death = 0.0, 1.0
             pass
@@ -319,9 +319,9 @@ def plot_persistence_diagram(
         axis_end = max_death + delta / 2
         axis_start = min_birth - delta
 
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
-        if colormap == None:
+        if colormap is None:
             colormap = plt.cm.Set1.colors
         # bootstrap band
         if band > 0.0:
@@ -456,7 +456,7 @@ def plot_persistence_density(
         # default cmap value cannot be done at argument definition level as matplotlib is not yet defined.
         if cmap is None:
             cmap = plt.cm.hot_r
-        if axes == None:
+        if axes is None:
             _, axes = plt.subplots(1, 1)
 
         try:
@@ -490,7 +490,7 @@ def plot_persistence_density(
                 birth_min : birth_max : nbins * 1j,
                 death_min : death_max : nbins * 1j,
             ]
-            zi = k(np.vstack([xi.flatten(), yi.flatten()]))
+            zi = k(np.vstack([xi.ravel(), yi.ravel()]))
             # Make the plot
             img = axes.pcolormesh(xi, yi, zi.reshape(xi.shape), cmap=cmap, shading="auto")
             plot_success = True

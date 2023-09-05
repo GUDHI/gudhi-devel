@@ -21,7 +21,22 @@
 
 using namespace Gudhi;
 
-typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>> list_of_tested_variants;
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = true;
+};
+
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_expansion_all_is_blocked, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************\n";

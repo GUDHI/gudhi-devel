@@ -87,14 +87,14 @@ cdef class AlphaComplex:
             points = read_points_from_off_file(off_file = off_file)
 
         # weights are set but is inconsistent with the number of points
-        if weights != None and len(weights) != len(points):
+        if weights is not None and len(weights) != len(points):
             raise ValueError("Inconsistency between the number of points and weights")
 
         # need to copy the points to use them without the gil
         cdef vector[vector[double]] pts
         cdef vector[double] wgts
         pts = points
-        if weights != None:
+        if weights is not None:
             wgts = weights
         with nogil:
             self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
@@ -103,7 +103,7 @@ cdef class AlphaComplex:
         if self.this_ptr != NULL:
             del self.this_ptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if AlphaComplex pointer is not NULL.
          """
         return self.this_ptr != NULL

@@ -120,7 +120,7 @@ MainWindow::init_view() const {
 
 void
 MainWindow::update_view() const {
-  emit(sceneChanged());
+  /*emit*/ sceneChanged();
 }
 
 /**

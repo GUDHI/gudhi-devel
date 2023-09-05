@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 def test_empty_euclidean_witness_complex():
     euclidean_witness = gudhi.EuclideanWitnessComplex()
-    assert euclidean_witness.__is_defined() == False
+    assert euclidean_witness._is_defined() == False
 
 
 def test_witness_complex():
@@ -53,7 +53,7 @@ def test_witness_complex():
 
 def test_empty_euclidean_strong_witness_complex():
     euclidean_strong_witness = gudhi.EuclideanStrongWitnessComplex()
-    assert euclidean_strong_witness.__is_defined() == False
+    assert euclidean_strong_witness._is_defined() == False
 
 
 def test_strong_witness_complex():

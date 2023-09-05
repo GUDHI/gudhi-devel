@@ -83,12 +83,12 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             del self.pcohptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if SimplexTree pointer is not NULL.
          """
         return self.get_ptr() != NULL
 
-    def __is_persistence_defined(self):
+    def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
@@ -811,16 +811,13 @@ cdef class SimplexTree:
             del ptr
 
     def __eq__(self, other:SimplexTree):
-        """Test for structural equality
-        :returns: True if the 2 simplex trees are equal, False otherwise.
+        """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
     
     def __getstate__(self):
-        """Pickle the SimplexTree data structure as a Python Byte Array
-        :raises MemoryError: In the case the serialization allocates a too large block of memory.
-        :returns: Serialized SimplexTree data structure
+        """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
         :rtype: numpy.array of shape (n,)
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
@@ -834,7 +831,9 @@ cdef class SimplexTree:
         return np_buffer
 
     def __setstate__(self, state):
-        """Construct the SimplexTree data structure from a Python Byte Array
+        """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
+        in order to unpickle a SimplexTree.
+        
         :param state: Serialized SimplexTree data structure
         :type state: numpy.array of shape (n,)
         """

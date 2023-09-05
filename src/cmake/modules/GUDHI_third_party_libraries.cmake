@@ -1,6 +1,6 @@
 # This files manage third party libraries required by GUDHI
 
-find_package(Boost 1.66.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framework program_options)
+find_package(Boost 1.71.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framework program_options)
 
 # Boost_FOUND is not reliable
 if(NOT Boost_VERSION)
@@ -191,6 +191,7 @@ if (WITH_GUDHI_PYTHON)
     find_python_module("tensorflow")
     find_python_module("sphinx_paramlinks")
     find_python_module("pydata_sphinx_theme")
+    find_python_module("networkx")
   endif()
   
   if(NOT GUDHI_PYTHON_PATH)

@@ -40,7 +40,16 @@ struct Low_options : Gudhi::Simplex_tree_options_full_featured {
   typedef std::uint8_t Simplex_key;
 };
 
-typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>, Simplex_tree<Low_options>> list_of_tested_variants;
+struct Stable_options : Gudhi::Simplex_tree_options_full_featured {
+  //disabled by default.
+  static const bool stable_simplex_handles = true;
+};
+
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_persistence>,
+                         Simplex_tree<Low_options>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Stable_options> > list_of_tested_variants;
 
 template<class Filtration_type>
 Filtration_type random_filtration(Filtration_type lower_bound = 0, Filtration_type upper_bound = 1) {
@@ -186,6 +195,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   }
   BOOST_CHECK(st_from_buffer == st);
 
+  delete[] buffer;
   delete[] stree_buffer;
 }
 

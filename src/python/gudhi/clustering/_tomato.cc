@@ -179,7 +179,7 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
       children.push_back({ds_bas[j].name, ds_bas[k].name});
       ds.make_set(i);
       ds.link(i, j);
-      ds.link(i, k);
+      ds.link(ds.find_set(i), k);
       ds_bas[ds.find_set(i)].name = i;
       ++i;
     }
@@ -229,7 +229,7 @@ auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_inde
     assert(j != k);
     ds.make_set(i);
     ds.link(i, j);
-    ds.link(i, k);
+    ds.link(ds.find_set(i), k);
     ++i;
   }
   Cluster_index next_cluster_name = 0;

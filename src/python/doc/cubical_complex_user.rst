@@ -25,7 +25,10 @@ in the following way:
 .. math::
 
     \partial C = (\partial I_1 \times \ldots \times I_n) + (I_1 \times \partial I_2 \times \ldots \times I_n) +
-    \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n).
+    \ldots + (I_1 \times I_2 \times \ldots \times \partial I_n)
+
+(when working with a field of characteristic other than 2, the non-zero terms of this sum come with alternating
+signs ±1).
 
 A *cubical complex* :math:`\mathcal{K}` is a collection of cubes closed under operation of taking boundary
 (i.e. boundary of every cube from the collection is in the collection). A cube :math:`C` in cubical complex
@@ -70,30 +73,22 @@ Knowing the sizes of the bitmap, by a series of modulo operation, we can determi
 present in the product that gives the cube :math:`C`. In a similar way, we can compute boundary and the coboundary of
 each cube. Further details can be found in the literature.
 
-Input Format
+Construction
 ------------
 
-In the current implantation, filtration is given at the maximal cubes, and it is then extended by the lower star
-filtration to all cubes. There are a number of constructors that can be used to construct cubical complex by users
+In the current implantation, filtration is given either at the maximal cubes or at the vertices, and it is then
+extended by the lower star filtration to all cubes.
+There are a number of constructors that can be used to construct cubical complex by users
 who want to use the code directly. They can be found in the :doc:`cubical_complex_ref`.
-Currently one input from a text file is used. It uses a format inspired from the Perseus software
-`Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.
-
-.. note::
-    While Perseus assume the filtration of all maximal cubes to be non-negative, over here we do not enforce this and
-    we allow any filtration values. As a consequence one cannot use ``-1``'s to indicate missing cubes. If you have
-    missing cubes in your complex, please set their filtration to :math:`+\infty` (aka. ``inf`` in the file).
-
-The file format is described in details in `Perseus file format <fileformats.html#perseus>`_ section.
 
 .. testcode::
 
-    import gudhi
-    cubical_complex = gudhi.CubicalComplex(perseus_file=gudhi.__root_source_dir__ + \
-        '/data/bitmap/cubicalcomplexdoc.txt')
-    result_str = 'Cubical complex is of dimension ' + repr(cubical_complex.dimension()) + ' - ' + \
-        repr(cubical_complex.num_simplices()) + ' simplices.'
-    print(result_str)
+    from gudhi import CubicalComplex
+    import numpy as np
+    cc = CubicalComplex(top_dimensional_cells=np.array([[ 1.,  8.,  7.],
+                                                        [ 4., 20.,  6.],
+                                                        [ 6.,  4.,  5.]]))
+    print(f"Cubical complex is of dimension {cc.dimension()} - {cc.num_simplices()} simplices.")
 
 the program output is:
 
@@ -113,33 +108,14 @@ conditions are imposed in all directions, then complex :math:`\mathcal{K}` becam
 various constructors from the file Bitmap_cubical_complex_periodic_boundary_conditions_base.h to construct cubical
 complex with periodic boundary conditions.
 
-One can also use Perseus style input files (see `Perseus file format <fileformats.html#perseus>`_) for the specific periodic case:
+It can be defined as follows:
 
 .. testcode::
 
-    import gudhi
-    periodic_cc = gudhi.PeriodicCubicalComplex(perseus_file=gudhi.__root_source_dir__ + \
-        '/data/bitmap/periodiccubicalcomplexdoc.txt')
-    result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
-        repr(periodic_cc.num_simplices()) + ' simplices.'
-    print(result_str)
-
-the program output is:
-
-.. testoutput::
-    
-    Periodic cubical complex is of dimension 2 - 42 simplices.
-
-Or it can be defined as follows:
-
-.. testcode::
-
-    from gudhi import PeriodicCubicalComplex as pcc
-    periodic_cc = pcc(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
-         periodic_dimensions=[True, False])
-    result_str = 'Periodic cubical complex is of dimension ' + repr(periodic_cc.dimension()) + ' - ' + \
-        repr(periodic_cc.num_simplices()) + ' simplices.'
-    print(result_str)
+    from gudhi import PeriodicCubicalComplex as PCC
+    pcc = PCC(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+              periodic_dimensions=[True, False])
+    print(f"Periodic cubical complex is of dimension {pcc.dimension()} - {pcc.num_simplices()} simplices.")
 
 the program output is:
 

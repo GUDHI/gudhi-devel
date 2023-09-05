@@ -27,5 +27,9 @@ struct SimplexTreeOptions {
   static const bool store_filtration;
   /// If true, the list of vertices present in the complex must always be 0, ..., num_vertices-1, without any hole.
   static constexpr bool contiguous_vertices;
+  /// If true, the lists of `Node` with same label are stored to enhance cofaces and stars access.
+  static const bool link_nodes_by_label;
+  /// If true, Simplex_handle will not be invalidated after insertions or removals.
+  static const bool stable_simplex_handles;
 };
 

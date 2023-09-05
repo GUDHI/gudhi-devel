@@ -10,5 +10,3 @@ Euclidean witness complex reference manual
    :members:
    :undoc-members:
    :show-inheritance:
-
-   .. automethod:: gudhi.EuclideanWitnessComplex.__init__
