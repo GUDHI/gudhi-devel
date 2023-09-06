@@ -38,6 +38,8 @@ public:
 	static const bool store_key = true;
 	static const bool store_filtration = true;
 	static const bool contiguous_vertices = false;
+	static const bool link_nodes_by_label = true;
+	static const bool stable_simplex_handles = false;
 	static const bool is_multi_parameter = true;
 };
 
@@ -45,86 +47,120 @@ public:
 
 using options_multi = Simplex_tree_options_multidimensional_filtration;
 using options_std = Simplex_tree_options_full_featured;
+using simplextree_std = Simplex_tree<options_std>;
+using simplextree_multi = Simplex_tree<options_multi>;
+
 using multi_filtration_type = std::vector<options_multi::value_type>;
 using multi_filtration_grid = std::vector<multi_filtration_type>;
 
 
-template<class options>
-Simplex_tree<options>& get_simplextree_from_pointer(const uintptr_t splxptr){ //DANGER
-	Simplex_tree<options> &st = *(Gudhi::Simplex_tree<options>*)(splxptr); 
+template<class simplextreeinterface>
+simplextreeinterface& get_simplextree_from_pointer(const uintptr_t splxptr){ //DANGER
+	simplextreeinterface &st = *(simplextreeinterface*)(splxptr); 
 	return st;
 }
-template<class _options_std, class _options_multi>
-void multify(Simplex_tree<_options_std> &st, Simplex_tree<_options_multi> &st_multi, const int dimension){
-	if (dimension <= 0)
+template<class simplextree_std, class simplextree_multi>
+void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_parameters, const typename simplextree_multi::Options::Filtration_value& default_values={}){
+	if (num_parameters <= 0)
 		{std::cerr << "Empty filtration\n"; throw ;}
-	typename _options_multi::Filtration_value f(dimension);
+	// if (default_values.size() -1 > num_parameters)
+	// 	{std::cerr << "default values too large !\n"; throw ;}
+	typename simplextree_multi::Options::Filtration_value f(num_parameters);
+	for (auto i = 0u; i<std::min(static_cast<unsigned int>(default_values.size()), static_cast<unsigned int>(num_parameters-1));i++)
+		f[i+1] = default_values[i];
+	std::vector<int> simplex;
+	simplex.reserve(st.dimension()+1);
 	for (auto &simplex_handle : st.complex_simplex_range()){
-		std::vector<int> simplex;
+		simplex.clear();
 		for (auto vertex : st.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
 		f[0] = st.filtration(simplex_handle);
+		// std::cout << "Inserting " << f << "\n";
 		st_multi.insert_simplex(simplex,f);
+		
 	}
 }
 
-void multify(const uintptr_t splxptr, const uintptr_t newsplxptr, const int dimension){ //for python
-	auto &st = get_simplextree_from_pointer<options_std>(splxptr);
-	auto &st_multi = get_simplextree_from_pointer<options_multi>(newsplxptr);
-	multify(st, st_multi, dimension);
-}
 
-template<class _options_std, class _options_multi>
-void flatten(Simplex_tree<_options_std> &st, Simplex_tree<_options_multi> &st_multi, const int dimension = 0){
+
+
+template<class simplextree_std, class simplextree_multi>
+void flatten(simplextree_std &st, simplextree_multi &st_multi, const int dimension = 0){
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
-		typename _options_multi::value_type f = dimension >= 0 ? st_multi.filtration(simplex_handle)[dimension] : 0;
+		typename simplextree_multi::Options::value_type f = dimension >= 0 ? st_multi.filtration(simplex_handle)[dimension] : 0;
 		st.insert_simplex(simplex,f);
 	}
 }
-void flatten(const uintptr_t splxptr, const uintptr_t newsplxptr, const int dimension = 0){ // for python 
-	auto &st = get_simplextree_from_pointer<options_std>(newsplxptr);
-	auto &st_multi = get_simplextree_from_pointer<options_multi>(splxptr);
-	flatten(st, st_multi, dimension);
-}
 
-template<class _options_std, class _options_multi>
-void flatten_diag(Simplex_tree<_options_std> &st, Simplex_tree<_options_multi> &st_multi, const std::vector<typename _options_multi::value_type> basepoint, int dimension){
-	Gudhi::multi_filtrations::Line<typename _options_multi::value_type> l(basepoint);
+template<class simplextree_std, class simplextree_multi>
+void linear_projection(simplextree_std &st, simplextree_multi &st_multi, const std::vector<typename simplextree_multi::Options::value_type>& linear_form){
+	auto sh = st.complex_simplex_range().begin();
+	auto sh_multi = st_multi.complex_simplex_range().begin();
+	auto end = st.complex_simplex_range().end();
+	typename simplextree_multi::Options::Filtration_value multi_filtration;
+	for (; sh != end; ++sh, ++sh_multi){
+		multi_filtration = st_multi.filtration(*sh_multi);
+		auto projected_filtration = multi_filtration.linear_projection(linear_form);
+		st.assign_filtration(*sh, projected_filtration);
+	}
+}
+// For python interface. Do not use.
+
+
+
+template<class simplextree_std, class simplextree_multi>
+void flatten_diag(simplextree_std &st, simplextree_multi &st_multi, const std::vector<typename simplextree_multi::Options::value_type> basepoint, int dimension){
+	Gudhi::multi_filtrations::Line<typename simplextree_multi::Options::value_type> l(basepoint);
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
 		
-		std::vector<typename _options_multi::value_type> f = st_multi.filtration(simplex_handle);
+		std::vector<typename simplextree_multi::Options::value_type> f = st_multi.filtration(simplex_handle);
 		if (dimension <0)	 dimension = 0;
-		typename _options_multi::value_type new_filtration = l.push_forward(f)[dimension];
+		typename simplextree_multi::Options::value_type new_filtration = l.push_forward(f)[dimension];
 		st.insert_simplex(simplex,new_filtration);
 	}
 }
 
-void flatten_diag(const uintptr_t splxptr, const uintptr_t newsplxptr, const std::vector<options_multi::value_type> basepoint, int dimension){ // for python
-	auto &st = get_simplextree_from_pointer<options_std>(newsplxptr);
-	auto &st_multi = get_simplextree_from_pointer<options_multi>(splxptr);
-	flatten_diag(st,st_multi,basepoint, dimension);
-}
 
 
 
+
+/// @brief projects the point x on the grid
+/// @tparam out_type 
+/// @param x 
+/// @param grid 
+/// @return 
 template<typename out_type=int>
 std::vector<out_type> find_coordinates(const std::vector<options_multi::value_type> &x, const multi_filtration_grid &grid){
 	// TODO: optimize with, e.g., dichotomy
 	std::vector<out_type> coordinates(grid.size());
-	for (int parameter = 0; parameter< (int)grid.size(); parameter++){
-		const auto& filtration = grid[parameter];
-		const auto& to_project = x[parameter];
-		std::vector<options_multi::value_type> distance_vector(filtration.size());
-		for (int i = 0; i < (int)filtration.size(); i++){
-			distance_vector[i] = std::abs(to_project - filtration[i]);
+	for (int parameter = 0; parameter < (int)grid.size(); parameter++){
+		const auto& filtration = grid[parameter]; // assumes its sorted
+		const auto to_project = x[parameter];
+		unsigned int i = 0;
+		// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
+		while (to_project > filtration[i] && i<filtration.size()) {
+			i++;
+			// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
 		}
-		coordinates[parameter] = std::distance(distance_vector.begin(), std::min_element(distance_vector.begin(), distance_vector.end()));
+		if (i==0)
+			coordinates[parameter] = 0;
+		else if (i < filtration.size()){
+			options_multi::value_type d1,d2;
+			d1 = std::abs(filtration[i-1] - to_project);
+			d2 = std::abs(filtration[i] - to_project);
+			coordinates[parameter] = d1<d2 ? i-1 : i;
+		}
+		// std::vector<options_multi::value_type> distance_vector(filtration.size());
+		// for (int i = 0; i < (int)filtration.size(); i++){
+		// 	distance_vector[i] = std::abs(to_project - filtration[i]);
+		// }
+		// coordinates[parameter] = std::distance(distance_vector.begin(), std::min_element(distance_vector.begin(), distance_vector.end()));
 	}
 	return coordinates;
 }

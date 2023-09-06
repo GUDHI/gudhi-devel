@@ -7,18 +7,21 @@
 
 namespace Gudhi::multi_filtrations{
 
-template<typename T>
+template<typename T=float>
 class Finitely_critical_multi_filtration : public std::vector<T> {
 	// Class to prevent doing illegal stuff with the standard library, e.g., compare two vectors
 public:
 	// explicit Finitely_critical_multi_filtration(std::vector<T>& v) : ptr_(&v) {
 	// }; // Conversion
+	// using std::vector<T>::vector;
 	Finitely_critical_multi_filtration() : std::vector<T>() {};
 	Finitely_critical_multi_filtration(int n) : std::vector<T>(n, -std::numeric_limits<T>::infinity()) {}; // minus infinity by default
 	Finitely_critical_multi_filtration(int n, T value) : std::vector<T>(n,value) {};
 	Finitely_critical_multi_filtration(std::initializer_list<T> init) : std::vector<T>(init) {};
 	Finitely_critical_multi_filtration(const std::vector<T>& v) : std::vector<T>(v) {};
-	
+	Finitely_critical_multi_filtration(typename std::vector<T>::iterator it_begin,typename std::vector<T>::iterator it_end) : std::vector<T>(it_begin, it_end) {};
+	Finitely_critical_multi_filtration(typename std::vector<T>::const_iterator it_begin,typename std::vector<T>::const_iterator it_end) : std::vector<T>(it_begin, it_end) {};
+
 
 	operator std::vector<T>&() const {
 		return *this;
@@ -26,6 +29,8 @@ public:
 	std::vector<T> get_vector() const{
 		return static_cast<std::vector<T>>(*this);
 	}
+
+
 
 	//TODO : multicritical -> iterator over filtrations
 
@@ -95,6 +100,7 @@ public:
 
 
 
+
 	friend Finitely_critical_multi_filtration& operator-=(Finitely_critical_multi_filtration &result, const Finitely_critical_multi_filtration &to_substract){
 		std::transform(result.begin(), result.end(), to_substract.begin(),result.begin(), std::minus<T>());
 		return result;
@@ -119,9 +125,9 @@ public:
 	}
 
 	static std::vector<std::vector<T>> to_python(const std::vector<Finitely_critical_multi_filtration<T>>& to_convert){
-
 		return std::vector<std::vector<T>>(to_convert.begin(), to_convert.end());
 	}
+	
 
 	static std::vector<Finitely_critical_multi_filtration<T>> from_python(const std::vector<std::vector<T>>& to_convert){
 		return std::vector<Finitely_critical_multi_filtration<T>>(to_convert.begin(), to_convert.end());;
@@ -138,6 +144,28 @@ public:
 			this->end(), std::move_iterator(to_concatenate.begin()), std::move_iterator(to_concatenate.end())
 		);
 	}
+
+	T linear_projection(const std::vector<T>& x){
+		T projection=0;
+		unsigned int size = std::min(x.size(), this->size());
+		for (auto i =0u; i<size;i++)
+			projection += x[i]*this->at(i);
+		return projection;
+	}
+
+	// easy debug 
+    friend std::ostream& operator<<(std::ostream& stream, const Finitely_critical_multi_filtration<T>& truc){
+        stream << "[";
+        for(unsigned int i = 0; i < truc.size()-1; i++){
+            stream << truc[i] << ", ";
+        }
+        if(!truc.empty()) stream << truc.back();
+        stream << "]";
+        return stream;
+    }
+
+
+
 
 };
 

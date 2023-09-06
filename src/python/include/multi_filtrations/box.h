@@ -52,6 +52,12 @@ public:
 	bool contains(const point_type& point) const;
 	void infer_from_filters(const std::vector<point_type> &Filters_list);
     bool is_trivial() const ;
+	std::pair<const point_type&,const point_type&> get_pair() const{
+		return {bottomCorner_,upperCorner_};
+	}
+	std::pair<point_type&,point_type&> get_pair(){
+		return {bottomCorner_,upperCorner_};
+	}
 
 private:
 	point_type bottomCorner_;
