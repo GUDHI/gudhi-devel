@@ -16,3 +16,6 @@ data/points/human.off_sc.txt
 # IDE specific
 # CLion
 .idea/
+
+# OS specific cache files
+.DS_Store
