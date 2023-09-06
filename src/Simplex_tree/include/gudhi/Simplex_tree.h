@@ -1573,13 +1573,16 @@ class Simplex_tree {
  private:
   template<class Fun>
   void rec_for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
-    for (auto& simplex : boost::adaptors::reverse(sib->members())) {
-      Simplex_handle sh(&simplex);
+    Simplex_handle sh = sib->members().end();
+    GUDHI_CHECK(sh != sib->members().begin(), "Bug in Gudhi: only the root siblings may be empty");
+    do {
+      --sh;
       if (!fun(sh, dim) && has_children(sh)) {
         rec_for_each_simplex(sh->second.children(), dim+1, fun);
       }
       // We could skip checking has_children for the first element of the iteration, we know it returns false.
     }
+    while(sh != sib->members().begin());
   }
 
  public:
