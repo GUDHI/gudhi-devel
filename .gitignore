@@ -17,5 +17,5 @@ data/points/human.off_sc.txt
 # CLion
 .idea/
 
-# OS specific cache files
+# macOS metadata
 .DS_Store
