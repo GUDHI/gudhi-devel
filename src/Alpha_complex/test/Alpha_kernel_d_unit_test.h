@@ -8,13 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "alpha_kernel_d"
 #include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
 
-#include <CGAL/Epick_d.h>
-#include <CGAL/Epeck_d.h>
 #include <CGAL/NT_converter.h>
 
 #include <iostream>
@@ -24,40 +19,31 @@
 #include <gudhi/Alpha_complex/Alpha_kernel_d.h>
 #include <gudhi/Unitary_tests_utils.h>
 
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epeck_d< CGAL::Dimension_tag<4> > Exact_kernel_s;
-// Use dynamic_dimension_tag for the user to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Inexact_kernel_d;
-// Use static dimension_tag for the user not to be able to set dimension
-typedef CGAL::Epick_d< CGAL::Dimension_tag<4> > Inexact_kernel_s;
-// The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
-typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_dimension, TestedKernel, list_of_kernel_variants) {
+template<class CGAL_kernel>
+void test_alpha_kernel_d_dimension() {
   // Test for a point (weighted or not) in 4d, that the dimension is 4.
 
-  Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, false> kernel;
+  Gudhi::alpha_complex::Alpha_kernel_d<CGAL_kernel, false> kernel;
   std::vector<double> p0 {0., 1., 2., 3.};
-  typename TestedKernel::Point_d p0_d(p0.begin(), p0.end());
+  typename CGAL_kernel::Point_d p0_d(p0.begin(), p0.end());
 
   std::clog << "Dimension is " << kernel.get_dimension(p0_d) << std::endl;
   BOOST_CHECK(kernel.get_dimension(p0_d) == 4);
 
-  Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, true> w_kernel;
-  typename TestedKernel::Weighted_point_d w_p0_d(p0_d, 10.);
+  Gudhi::alpha_complex::Alpha_kernel_d<CGAL_kernel, true> w_kernel;
+  typename CGAL_kernel::Weighted_point_d w_p0_d(p0_d, 10.);
 
   std::clog << "Dimension is " << w_kernel.get_dimension(w_p0_d) << std::endl;
   BOOST_CHECK(w_kernel.get_dimension(w_p0_d) == 4);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kernel_variants) {
+template<class CGAL_kernel>
+void test_alpha_kernel_d_get_sphere() {
   // Test with 5 points on a 3-sphere, that get_sphere returns the same center and squared radius
   // for dD unweighted and for dD weighted with all weights at 0.
 
-  using Unweighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, false>;
+  using Unweighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<CGAL_kernel, false>;
   // Sphere: (x-1)² + (y-1)² + z² + t² = 1
   // At least 5 points for a 3-sphere
   std::vector<double> p0 {1., 0., 0., 0.};
@@ -79,7 +65,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_kernel_d_sphere, TestedKernel, list_of_kerne
 
   std::clog << "Center is " << unw_sphere.first << " - squared radius is " << unw_sphere.second << std::endl;
 
-  using Weighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<TestedKernel, true>;
+  using Weighted_kernel = Gudhi::alpha_complex::Alpha_kernel_d<CGAL_kernel, true>;
 
   using Weighted_point_d = typename Weighted_kernel::Weighted_point_d;
   using Bare_point_d = typename Weighted_kernel::Bare_point_d;
