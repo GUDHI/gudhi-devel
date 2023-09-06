@@ -1,12 +1,11 @@
 import numpy as np
 from gudhi.simplex_tree import SimplexTree ## Small hack for typing
-from multipers.multiparameter_module_approximation import PyModule
 from typing import Iterable
 from tqdm import tqdm
 
 
 # SimplexTree python interface
-def class SimplexTreeMulti:
+class SimplexTreeMulti:
 	"""The simplex tree is an efficient and flexible data structure for
 	representing general (filtered) simplicial complexes. The data structure
 	is described in Jean-Daniel Boissonnat and Clément Maria. The Simplex
