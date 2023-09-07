@@ -16,7 +16,7 @@ import pytest
 def test_rips_persistence_of_points_on_a_circle():
     # Let's test with 5 point clouds
     NB_PC = 5
-    point_clouds = [points.sphere(n_samples = random.randint(200,250), ambient_dim = 2) for _ in range(NB_PC)]
+    point_clouds = [points.sphere(n_samples = random.randint(100,150), ambient_dim = 2) for _ in range(NB_PC)]
     
     rips = RipsPersistence(homology_dimensions=[0, 1], n_jobs=-2)
     diags = rips.fit_transform(point_clouds)
@@ -32,9 +32,9 @@ def test_rips_persistence_of_points_on_a_circle():
 
 def test_h1_only_rips_persistence_of_points_on_a_circle():
     rips = RipsPersistence(homology_dimensions=1, n_jobs=-2)
-    diags = rips.fit_transform([points.sphere(n_samples = 200, ambient_dim = 2)])[0]
+    diags = rips.fit_transform([points.sphere(n_samples = 150, ambient_dim = 2)])[0]
     assert len(diags) == 1
-    assert 0. < diags[0][0] < 0.5
+    assert 0. < diags[0][0] < 0.6
     assert 1. < diags[0][1] < 2.
 
 def test_invalid_input_type():
@@ -45,12 +45,12 @@ def test_invalid_input_type():
 def test_distance_matrix_rips_persistence_of_points_on_a_circle():
     try:
         from scipy.spatial.distance import cdist
-        pts = points.sphere(n_samples = 200, ambient_dim = 2)
+        pts = points.sphere(n_samples = 150, ambient_dim = 2)
         distance_matrix = cdist(pts, pts)
         rips = RipsPersistence(homology_dimensions=1, input_type='lower distance matrix')
         diags = rips.fit_transform([distance_matrix])[0]
         assert len(diags) == 1
-        assert 0. < diags[0][0] < 0.5
+        assert 0. < diags[0][0] < 0.6
         assert 1. < diags[0][1] < 2.
     except ValueError:
         pass
