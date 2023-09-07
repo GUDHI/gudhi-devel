@@ -253,6 +253,17 @@ if(PYTHONINTERP_FOUND)
       endif(MPFR_FOUND)
     endif(CGAL_FOUND)
 
+    message("++ CMAKE_CXX_FLAGS= ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+    if(CMAKE_BUILD_TYPE MATCHES Release)
+      message("++ LINK_FLAGS= ${LINK_FLAGS_RELEASE}")
+    endif()
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+      message("++ LINK_FLAGS= ${LINK_FLAGS_DEBUG}")
+    endif()
+    message("++ CMAKE_EXE_LINKER_FLAGS= ${CMAKE_EXE_LINKER_FLAGS}")
+    message("++ CMAKE_SHARED_LINKER_FLAGS= ${CMAKE_SHARED_LINKER_FLAGS}")
+    message("++ CMAKE_MODULE_LINKER_FLAGS_RELEASE= ${CMAKE_MODULE_LINKER_FLAGS_RELEASE}")
+
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       message("-- OSX -- ${CMAKE_OSX_DEPLOYMENT_TARGET} -- ${CMAKE_OSX_ARCHITECTURES}")
