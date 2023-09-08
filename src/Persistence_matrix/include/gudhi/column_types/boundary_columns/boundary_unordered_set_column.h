@@ -49,6 +49,8 @@ public:
 	Unordered_set_boundary_column(index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer);
 	Unordered_set_boundary_column(const Unordered_set_boundary_column& column);
 	Unordered_set_boundary_column(const Unordered_set_boundary_column& column, index columnIndex);
+	template<class Row_container_type>
+	Unordered_set_boundary_column(const Unordered_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer);
 	Unordered_set_boundary_column(Unordered_set_boundary_column&& column) noexcept;
 
 	int get_pivot();
@@ -103,7 +105,7 @@ template<class Boundary_type>
 inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary)
 	: Base(boundary),
 	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+	  pivot_(boundary.begin() == boundary.end() ? Cell() : Cell(std::prev(boundary.end())->second, std::prev(boundary.end())->first))
 {}
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -111,7 +113,7 @@ template<class Boundary_type>
 inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(const Boundary_type &boundary, dimension_type dimension)
 	: Base(boundary, dimension),
 	  pivotChanged_(false),
-	  pivot_(boundary.empty() ? Cell() : Cell(boundary.rbegin()->second, boundary.rbegin()->first))
+	  pivot_(boundary.begin() == boundary.end() ? Cell() : Cell(std::prev(boundary.end())->second, std::prev(boundary.end())->first))
 {}
 
 template<class Field_element_type, class Cell_type, class Row_access_option>
@@ -128,11 +130,11 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_opt
 	: Base(columnIndex, boundary, rowContainer),
 	  pivotChanged_(false)
 {
-	if (!boundary.empty()){
+	if (boundary.begin() != boundary.end()){
 		if constexpr (Row_access_option::isActive_){
-			pivot_ = Cell(boundary.rbegin()->second, columnIndex, boundary.rbegin()->first);
+			pivot_ = Cell(std::prev(boundary.end())->second, columnIndex, std::prev(boundary.end())->first);
 		} else {
-			pivot_ = Cell(boundary.rbegin()->second, boundary.rbegin()->first);
+			pivot_ = Cell(std::prev(boundary.end())->second, std::prev(boundary.end())->first);
 		}
 	}
 }
@@ -144,11 +146,11 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_opt
 	: Base(columnIndex, boundary, dimension, rowContainer),
 	  pivotChanged_(false)
 {
-	if (!boundary.empty()){
+	if (boundary.begin() != boundary.end()){
 		if constexpr (Row_access_option::isActive_){
-			pivot_ = Cell(boundary.rbegin()->second, columnIndex, boundary.rbegin()->first);
+			pivot_ = Cell(std::prev(boundary.end())->second, columnIndex, std::prev(boundary.end())->first);
 		} else {
-			pivot_ = Cell(boundary.rbegin()->second, boundary.rbegin()->first);
+			pivot_ = Cell(std::prev(boundary.end())->second, std::prev(boundary.end())->first);
 		}
 	}
 }
@@ -173,6 +175,13 @@ inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_opt
 	: Base(std::move(static_cast<Base&&>(column))),
 	  pivotChanged_(std::exchange(column.pivotChanged_, 0)),
 	  pivot_(std::move(column.pivot_))
+{}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Unordered_set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Unordered_set_boundary_column(
+		const Unordered_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer)
 {}
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

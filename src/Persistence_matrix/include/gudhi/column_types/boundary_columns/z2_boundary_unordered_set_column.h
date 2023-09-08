@@ -48,6 +48,8 @@ public:
 	Z2_unordered_set_boundary_column(index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_unordered_set_boundary_column(const Z2_unordered_set_boundary_column& column);
 	Z2_unordered_set_boundary_column(const Z2_unordered_set_boundary_column& column, index columnIndex);
+	template<class Row_container_type>
+	Z2_unordered_set_boundary_column(const Z2_unordered_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer);
 	Z2_unordered_set_boundary_column(Z2_unordered_set_boundary_column&& column) noexcept;
 
 	int get_pivot();
@@ -100,7 +102,7 @@ template<class Boundary_type>
 inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unordered_set_boundary_column(const Boundary_type &boundary)
 	: Base(boundary),
 	  pivotChanged_(false),
-	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+	  pivot_(boundary.begin() == boundary.end() ? -1 : *std::prev(boundary.end()))
 {}
 
 template<class Cell_type, class Row_access_option>
@@ -108,7 +110,7 @@ template<class Boundary_type>
 inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unordered_set_boundary_column(const Boundary_type &boundary, dimension_type dimension)
 	: Base(boundary, dimension),
 	  pivotChanged_(false),
-	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+	  pivot_(boundary.begin() == boundary.end() ? -1 : *std::prev(boundary.end()))
 {}
 
 template<class Cell_type, class Row_access_option>
@@ -124,7 +126,7 @@ inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unorder
 		index columnIndex, const Boundary_type &boundary, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, rowContainer),
 	  pivotChanged_(false),
-	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+	  pivot_(boundary.begin() == boundary.end() ? -1 : *std::prev(boundary.end()))
 {}
 
 template<class Cell_type, class Row_access_option>
@@ -133,7 +135,7 @@ inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unorder
 		index columnIndex, const Boundary_type &boundary, dimension_type dimension, Row_container_type &rowContainer)
 	: Base(columnIndex, boundary, dimension, rowContainer),
 	  pivotChanged_(false),
-	  pivot_(boundary.size() == 0 ? -1 : *(boundary.rbegin()))
+	  pivot_(boundary.begin() == boundary.end() ? -1 : *std::prev(boundary.end()))
 {}
 
 template<class Cell_type, class Row_access_option>
@@ -148,6 +150,15 @@ template<class Cell_type, class Row_access_option>
 inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unordered_set_boundary_column(
 		const Z2_unordered_set_boundary_column &column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
+	  pivotChanged_(column.pivotChanged_),
+	  pivot_(column.pivot_)
+{}
+
+template<class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_unordered_set_boundary_column<Cell_type,Row_access_option>::Z2_unordered_set_boundary_column(
+		const Z2_unordered_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer),
 	  pivotChanged_(column.pivotChanged_),
 	  pivot_(column.pivot_)
 {}

@@ -54,6 +54,7 @@ protected:
 	static constexpr bool isActive_ = true;
 
 	void _reduce();
+	void _remove_maximal(index columnIndex);
 };
 
 template<class Master_matrix>
@@ -78,6 +79,14 @@ inline Base_pairing<Master_matrix>::Base_pairing(Base_pairing<Master_matrix> &&o
 	  indexToBar_(std::move(other.indexToBar_)),
 	  isReduced_(std::move(other.isReduced_))
 {}
+
+template<class Master_matrix>
+inline const typename Base_pairing<Master_matrix>::barcode_type &
+Base_pairing<Master_matrix>::get_current_barcode()
+{
+	if (!isReduced_) _reduce();
+	return barcode_;
+}
 
 template<class Master_matrix>
 inline void Base_pairing<Master_matrix>::_reduce()
@@ -129,11 +138,15 @@ inline void Base_pairing<Master_matrix>::_reduce()
 }
 
 template<class Master_matrix>
-inline const typename Base_pairing<Master_matrix>::barcode_type &
-Base_pairing<Master_matrix>::get_current_barcode()
-{
-	if (!isReduced_) _reduce();
-	return barcode_;
+inline void Base_pairing<Master_matrix>::_remove_maximal(index columnIndex){
+	if (isReduced_){
+		auto bar = indexToBar_.at(columnIndex);
+
+		if (bar->death == -1) barcode_.erase(bar);
+		else bar->death = -1;
+
+		indexToBar_.erase(columnIndex);
+	}
 }
 
 template<class Master_matrix>

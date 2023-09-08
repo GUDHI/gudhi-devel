@@ -13,6 +13,7 @@
 
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 #include "../utilities/utilities.h"  //type definitions
 #include "../options.h"

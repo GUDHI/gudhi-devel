@@ -47,6 +47,8 @@ public:
 	Z2_set_boundary_column(index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer);
 	Z2_set_boundary_column(const Z2_set_boundary_column& column);
 	Z2_set_boundary_column(const Z2_set_boundary_column& column, index columnIndex);
+	template<class Row_container_type>
+	Z2_set_boundary_column(const Z2_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer);
 	Z2_set_boundary_column(Z2_set_boundary_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -125,6 +127,13 @@ template<class Cell_type, class Row_access_option>
 inline Z2_set_boundary_column<Cell_type,Row_access_option>::Z2_set_boundary_column(
 		const Z2_set_boundary_column &column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex)
+{}
+
+template<class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_set_boundary_column<Cell_type,Row_access_option>::Z2_set_boundary_column(
+		const Z2_set_boundary_column& column, index columnIndex, Row_container_type &rowContainer)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer)
 {}
 
 template<class Cell_type, class Row_access_option>

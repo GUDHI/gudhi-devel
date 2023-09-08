@@ -48,6 +48,8 @@ public:
 	Vector_boundary_column(index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer);
 	Vector_boundary_column(const Vector_boundary_column& column);
 	Vector_boundary_column(const Vector_boundary_column& column, index columnIndex);
+	template<class Row_container_type>
+	Vector_boundary_column(const Vector_boundary_column& column, index columnIndex, Row_container_type &rowContainer);
 	Vector_boundary_column(Vector_boundary_column&& column) noexcept;
 
 	std::vector<Field_element_type> get_content(int columnLength = -1);
@@ -141,6 +143,14 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::Vector_boundary_column(
 		const Vector_boundary_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
+	  erasedValues_(column.erasedValues_)
+{}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Vector_boundary_column<Field_element_type,Cell_type,Row_access_option>::Vector_boundary_column(
+		const Vector_boundary_column& column, index columnIndex, Row_container_type &rowContainer)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer),
 	  erasedValues_(column.erasedValues_)
 {}
 

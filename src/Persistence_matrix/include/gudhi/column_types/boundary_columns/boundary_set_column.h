@@ -48,6 +48,8 @@ public:
 	Set_boundary_column(index columnIndex, const Boundary_type& boundary, dimension_type dimension, Row_container_type &rowContainer);
 	Set_boundary_column(const Set_boundary_column& column);
 	Set_boundary_column(const Set_boundary_column& column, index columnIndex);
+	template<class Row_container_type>
+	Set_boundary_column(const Set_boundary_column& column, index columnIndex, Row_container_type &rowContainer);
 	Set_boundary_column(Set_boundary_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -132,6 +134,13 @@ template<class Field_element_type, class Cell_type, class Row_access_option>
 inline Set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Set_boundary_column(
 		const Set_boundary_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex)
+{}
+
+template<class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Set_boundary_column<Field_element_type,Cell_type,Row_access_option>::Set_boundary_column(
+		const Set_boundary_column& column, index columnIndex, Row_container_type &rowContainer)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer)
 {}
 
 template<class Field_element_type, class Cell_type, class Row_access_option>

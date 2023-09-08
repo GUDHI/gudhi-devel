@@ -452,7 +452,7 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 		index simplexIndex, const Boundary_type& boundary)
 {
 	tmp_column_type column(boundary.begin(), boundary.end());
-	int dim = boundary.empty() ? 0 : boundary.size() - 1;
+	int dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
 	std::vector<cell_rep_type> chainsInH; //for corresponding indices in H (paired columns)
 	std::vector<cell_rep_type> chainsInF; //for corresponding indices in F (unpaired, essential columns)
 
@@ -463,7 +463,7 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 			return column.rbegin()->first;
 	};
 
-	if (boundary.empty())
+	if (boundary.begin() == boundary.end())
 	{
 		if constexpr (Master_matrix::Option_list::is_z2)
 			column.insert(simplexIndex);

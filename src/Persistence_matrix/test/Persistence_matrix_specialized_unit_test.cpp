@@ -169,12 +169,12 @@ void build_boundary_matrix(std::vector<std::vector<unsigned int> >& boundaries)
 	boundaries.emplace_back();
 	boundaries.emplace_back();
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<unsigned int>{0,1});
-	boundaries.push_back(std::vector<unsigned int>{1,2});
-	boundaries.push_back(std::vector<unsigned int>{0,2});
-	boundaries.push_back(std::vector<unsigned int>{3,4,5});
+	boundaries.push_back({0,1});
+	boundaries.push_back({1,2});
+	boundaries.push_back({0,2});
+	boundaries.push_back({3,4,5});
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<unsigned int>{1,7});
+	boundaries.push_back({1,7});
 }
 
 template<typename Field_type>
@@ -183,12 +183,12 @@ void build_boundary_matrix(std::vector<std::vector<std::pair<unsigned int,Field_
 	boundaries.emplace_back();
 	boundaries.emplace_back();
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{1,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{2,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{2,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(4)}});
+	boundaries.push_back({{0,Field_type(1)},{1,Field_type(4)}});
+	boundaries.push_back({{1,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back({{0,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back({{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(4)}});
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{7,Field_type(4)}});
+	boundaries.push_back({{1,Field_type(1)},{7,Field_type(4)}});
 }
 
 typedef boost::mpl::list<Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
@@ -244,7 +244,12 @@ typedef boost::mpl::list<Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_barcode_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barcode_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
+	
 	struct BarComp {
 		bool operator()(const std::tuple<int,int,int>& c1, const std::tuple<int,int,int>& c2) const
 		{
@@ -359,7 +364,11 @@ typedef boost::mpl::list<Matrix<opt_rep_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_rep_cycles;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_options, Matrix, list_of_options_with_rep_cycles) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -439,7 +448,7 @@ typedef boost::mpl::list<Matrix<opt_vine_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_vine_and_position_index;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_position_indexing, Matrix, list_of_options_with_vine_and_position_index) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -765,7 +774,7 @@ typedef boost::mpl::list<Matrix<opt_vine_b_ii<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_vine_and_id_index;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing, Matrix, list_of_options_with_vine_and_id_index) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1404,7 +1413,7 @@ typedef boost::mpl::list<Matrix<opt_ra_bar_b<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_barcode_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_options, Matrix, list_of_options_with_barcode_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1423,7 +1432,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_options, Matrix, list_of_op
 		rows.push_back({{6,Z5(4)}});
 		rows.push_back({});
 		rows.push_back({{8,Z5(4)}});
-		rows.push_back({});
 	} else {
 		rows.push_back({{0,Z5(1)},{1,Z5(1)},{2,Z5(1)},{7,Z5(1)}});
 		rows.push_back({{1,Z5(4)}});
@@ -1439,19 +1447,23 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_options, Matrix, list_of_op
 	//rows are unordered
 	std::vector<std::set<std::pair<unsigned int,Z5> > > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(itRow->first, itChain->first);
-			BOOST_CHECK_EQUAL(itRow->second, itChain->second);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(itRow->first, itChain->first);
+				BOOST_CHECK_EQUAL(itRow->second, itChain->second);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }
@@ -1483,7 +1495,7 @@ typedef boost::mpl::list<Matrix<opt_ra_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_z2_options_with_barcode_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_z2_options, Matrix, list_of_z2_options_with_barcode_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1502,7 +1514,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_z2_options, Matrix, list_of
 		rows.push_back({6});
 		rows.push_back({});
 		rows.push_back({8});
-		rows.push_back({});
 	} else {
 		rows.push_back({0,1,2,7});
 		rows.push_back({1});
@@ -1518,18 +1529,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_and_row_access_z2_options, Matrix, list_of
 	//rows are unordered
 	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert(cell.get_column_index());
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert(cell.get_column_index());
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(*itRow, *itChain);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(*itRow, *itChain);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }
@@ -1561,7 +1576,7 @@ typedef boost::mpl::list<Matrix<opt_ra_rep_b<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_rep_cycles_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_options, Matrix, list_of_options_with_rep_cycles_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1581,7 +1596,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_options, Matri
 		rows.push_back({{6,Z5(4)}});
 		rows.push_back({});
 		rows.push_back({{8,Z5(4)}});
-		rows.push_back({});
 	} else {
 		rows.push_back({{0,Z5(1)},{1,Z5(1)},{2,Z5(1)},{7,Z5(1)}});
 		rows.push_back({{1,Z5(4)}});
@@ -1597,19 +1611,23 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_options, Matri
 	//rows are unordered
 	std::vector<std::set<std::pair<unsigned int,Z5> > > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert({cell.get_column_index(), cell.get_element()});
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(itRow->first, itChain->first);
-			BOOST_CHECK_EQUAL(itRow->second, itChain->second);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(itRow->first, itChain->first);
+				BOOST_CHECK_EQUAL(itRow->second, itChain->second);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }
@@ -1641,7 +1659,7 @@ typedef boost::mpl::list<Matrix<opt_ra_rep_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_z2_options_with_rep_cycles_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_z2_options, Matrix, list_of_z2_options_with_rep_cycles_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1661,7 +1679,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_z2_options, Ma
 		rows.push_back({6});
 		rows.push_back({});
 		rows.push_back({8});
-		rows.push_back({});
 	} else {
 		rows.push_back({0,1,2,7});
 		rows.push_back({1});
@@ -1677,18 +1694,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_and_row_access_z2_options, Ma
 	//rows are unordered
 	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert(cell.get_column_index());
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert(cell.get_column_index());
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(*itRow, *itChain);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(*itRow, *itChain);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }
@@ -1720,7 +1741,7 @@ typedef boost::mpl::list<Matrix<opt_ra_vine_b<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_vine_and_position_index_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_position_indexing_and_row_access, Matrix, list_of_options_with_vine_and_position_index_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1756,7 +1777,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_position_indexing_and_row_access,
 		rows.push_back({6});
 		rows.push_back({});
 		rows.push_back({6});
-		rows.push_back({});
 	} else {
 		rows.push_back({0,1,2});
 		rows.push_back({1,7});
@@ -1772,18 +1792,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_position_indexing_and_row_access,
 	//rows are unordered
 	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (const auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert(cell.get_column_index());
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert(cell.get_column_index());
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(*itRow, *itChain);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(*itRow, *itChain);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }
@@ -1815,7 +1839,7 @@ typedef boost::mpl::list<Matrix<opt_ra_vine_b_ii<Z2,Column_types::INTRUSIVE_SET>
 						> list_of_options_with_vine_and_id_index_and_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing_and_row_access, Matrix, list_of_options_with_vine_and_id_index_and_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1843,7 +1867,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing_and_row_access, Matri
 		rows.push_back({6});
 		rows.push_back({});
 		rows.push_back({8});
-		rows.push_back({});
 	} else {
 		mb.vine_swap_with_z_eq_1_case(5, 8);	//use of internal chain id =/= initial simplex id
 
@@ -1861,18 +1884,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Vine_option_with_id_indexing_and_row_access, Matri
 	//rows are unordered
 	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		for (auto& cell : mb.get_row(i)){
-			ordered_rows[i].insert(cell.get_column_index());
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			for (auto& cell : mb.get_row(i)){
+				ordered_rows[i].insert(cell.get_column_index());
+			}
 		}
 	}
 	for (unsigned int i = 0; i < rows.size(); ++i){
-		auto& row = ordered_rows[i];
-		BOOST_CHECK_EQUAL(row.size(), rows[i].size());
-		auto itRow = row.begin();
-		auto itChain = rows[i].begin();
-		while (itChain != rows[i].end()){
-			BOOST_CHECK_EQUAL(*itRow, *itChain);
-			++itRow; ++itChain;
+		if (!Matrix::Option_list::is_of_boundary_type || !Matrix::Option_list::has_removable_rows || i != 6){
+			auto& row = ordered_rows[i];
+			BOOST_CHECK_EQUAL(row.size(), rows[i].size());
+			auto itRow = row.begin();
+			auto itChain = rows[i].begin();
+			while (itChain != rows[i].end()){
+				BOOST_CHECK_EQUAL(*itRow, *itChain);
+				++itRow; ++itChain;
+			}
 		}
 	}
 }

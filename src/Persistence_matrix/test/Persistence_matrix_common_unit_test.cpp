@@ -325,10 +325,10 @@ void build_boundary_matrix(std::vector<std::vector<unsigned int> >& boundaries)
 	boundaries.emplace_back();
 	boundaries.emplace_back();
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<unsigned int>{0,1});
-	boundaries.push_back(std::vector<unsigned int>{1,2});
-	boundaries.push_back(std::vector<unsigned int>{0,2});
-	boundaries.push_back(std::vector<unsigned int>{3,4,5});
+	boundaries.push_back({0,1});
+	boundaries.push_back({1,2});
+	boundaries.push_back({0,2});
+	boundaries.push_back({3,4,5});
 }
 
 template<typename Field_type>
@@ -337,10 +337,10 @@ void build_boundary_matrix(std::vector<std::vector<std::pair<unsigned int,Field_
 	boundaries.emplace_back();
 	boundaries.emplace_back();
 	boundaries.emplace_back();
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{1,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{1,Field_type(1)},{2,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{0,Field_type(1)},{2,Field_type(4)}});
-	boundaries.push_back(std::vector<std::pair<unsigned int,Field_type> >{{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(4)}});
+	boundaries.push_back({{0,Field_type(1)},{1,Field_type(4)}});
+	boundaries.push_back({{1,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back({{0,Field_type(1)},{2,Field_type(4)}});
+	boundaries.push_back({{3,Field_type(1)},{4,Field_type(1)},{5,Field_type(4)}});
 }
 
 typedef boost::mpl::list</*Matrix<opt_ra_i_p<Z5,Column_types::LIST> >,
@@ -447,7 +447,11 @@ typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
 
 template<class Matrix>
 void test_constructors(){
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -459,6 +463,7 @@ void test_constructors(){
 
 	//constructor from given boundary matrix
 	Matrix mb(ordered_boundaries);
+
 	BOOST_CHECK_EQUAL(mb.get_max_dimension(), 2);
 	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
 	BOOST_CHECK_EQUAL(mb.get_column_dimension(2), 0);
@@ -534,14 +539,17 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_base_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_methods, Matrix, list_of_base_matrix_types) {
-	using boundary_type = typename Matrix::boundary_type;
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
-	boundary_type boundary2 = ordered_boundaries.back();
+	auto boundary2 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
-	boundary_type boundary1 = ordered_boundaries.back();
+	auto boundary1 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
 
 	Matrix m(ordered_boundaries);
@@ -601,14 +609,17 @@ typedef boost::mpl::list<Matrix<opt_b_p_nb<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_boundary_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_methods, Matrix, list_of_boundary_matrix_types) {
-	using boundary_type = typename Matrix::boundary_type;
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
-	boundary_type boundary2 = ordered_boundaries.back();
+	auto boundary2 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
-	boundary_type boundary1 = ordered_boundaries.back();
+	auto boundary1 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
 
 	Matrix m(ordered_boundaries);
@@ -687,14 +698,17 @@ typedef boost::mpl::list<Matrix<opt_p<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_chain_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_methods, Matrix, list_of_chain_matrix_types) {
-	using boundary_type = typename Matrix::boundary_type;
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
-	boundary_type boundary2 = ordered_boundaries.back();
+	auto boundary2 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
-	boundary_type boundary1 = ordered_boundaries.back();
+	auto boundary1 = ordered_boundaries.back();
 	ordered_boundaries.pop_back();
 
 	Matrix m(ordered_boundaries);
@@ -1058,7 +1072,7 @@ typedef boost::mpl::list<Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_z5_chain_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_row_access_columns_options, Matrix, list_of_z5_chain_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<std::pair<unsigned int,Z5> > >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1105,7 +1119,7 @@ typedef boost::mpl::list<Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_SET> >,
 						> list_of_z2_chain_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_row_access_columns_options, Matrix, list_of_z2_chain_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1151,7 +1165,7 @@ typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
 						> list_of_z5_base_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z5_base_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<std::pair<unsigned int,Z5> > >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1165,7 +1179,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	rows.push_back({{6,Z5(1)}});
 	rows.push_back({{6,Z5(1)}});
 	rows.push_back({{6,Z5(4)}});
-	rows.push_back({});
 
 	//rows are unordered
 	std::vector<std::set<std::pair<unsigned int,Z5> > > ordered_rows(rows.size());
@@ -1198,7 +1211,7 @@ typedef boost::mpl::list<Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
 						> list_of_z2_base_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_of_z2_base_options_with_row_access) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = std::vector<std::vector<unsigned int> >;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);
@@ -1212,7 +1225,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_o
 	rows.push_back({6});
 	rows.push_back({6});
 	rows.push_back({6});
-	rows.push_back({});
 
 	//rows are unordered
 	std::vector<std::set<unsigned int> > ordered_rows(rows.size());
@@ -1264,7 +1276,11 @@ typedef boost::mpl::list<Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_SET> >,
 						> list_of_options_with_remove;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Removable_columns_options, Matrix, list_of_options_with_remove) {
-	using boundary_matrix = typename Matrix::boundary_matrix;
+	using boundary_matrix = typename std::conditional<
+								Matrix::Option_list::is_z2,
+								std::vector<std::vector<unsigned int> >,
+								std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > >
+							>::type;
 
 	boundary_matrix ordered_boundaries;
 	build_boundary_matrix(ordered_boundaries);

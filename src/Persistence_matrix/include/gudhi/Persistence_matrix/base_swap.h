@@ -2,16 +2,17 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022 Inria
+ *    Copyright (C) 2022-23 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef BASE_SWAP_H
-#define BASE_SWAP_H
+#ifndef PM_BASE_SWAP_H
+#define PM_BASE_SWAP_H
 
 #include <utility>
+#include <vector>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -34,7 +35,6 @@ public:
 
 	Base_swap& operator=(Base_swap other);
 	friend void swap(Base_swap& base1, Base_swap& base2){
-//		std::swap(base1.matrix_, base2.matrix_);
 		base1.indexToRow_.swap(base2.indexToRow_);
 		base1.rowToIndex_.swap(base2.rowToIndex_);
 		std::swap(base1.rowSwapped_, base2.rowSwapped_);
@@ -111,7 +111,6 @@ inline void Base_swap<Master_matrix>::swap_at_indices(index index1, index index2
 template<class Master_matrix>
 inline Base_swap<Master_matrix> &Base_swap<Master_matrix>::operator=(Base_swap<Master_matrix> other)
 {
-//	std::swap(matrix_, other.matrix_);
 	indexToRow_.swap(other.indexToRow_);
 	rowToIndex_.swap(other.rowToIndex_);
 	std::swap(rowSwapped_, other.rowSwapped_);
@@ -134,4 +133,4 @@ inline void Base_swap<Master_matrix>::_orderRows()
 } //namespace persistence_matrix
 } //namespace Gudhi
 
-#endif // BASE_SWAP_H
+#endif // PM_BASE_SWAP_H

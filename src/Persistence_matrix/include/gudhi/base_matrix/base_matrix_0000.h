@@ -20,7 +20,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix
+class Base_matrix_with_column_compression
 		: public Master_matrix::Base_swap_option
 {
 public:
@@ -28,12 +28,12 @@ public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = void;
 
-	Base_matrix();
+	Base_matrix_with_column_compression();
 	template<class Container_type>
-	Base_matrix(const std::vector<Container_type>& columns);
-	Base_matrix(unsigned int numberOfColumns);
-	Base_matrix(const Base_matrix& matrixToCopy);
-	Base_matrix(Base_matrix&& other) noexcept;
+	Base_matrix_with_column_compression(const std::vector<Container_type>& columns);
+	Base_matrix_with_column_compression(unsigned int numberOfColumns);
+	Base_matrix_with_column_compression(const Base_matrix_with_column_compression& matrixToCopy);
+	Base_matrix_with_column_compression(Base_matrix_with_column_compression&& other) noexcept;
 
 	template<class Container_type>
 	void insert_column(const Container_type& column);
@@ -60,8 +60,8 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	Base_matrix& operator=(Base_matrix other);
-	friend void swap(Base_matrix& matrix1, Base_matrix& matrix2){
+	Base_matrix_with_column_compression& operator=(Base_matrix_with_column_compression other);
+	friend void swap(Base_matrix_with_column_compression& matrix1, Base_matrix_with_column_compression& matrix2){
 		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
@@ -78,14 +78,14 @@ private:
 };
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix()
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression()
 	: Master_matrix::Base_swap_option(matrix_),
 	  nextInsertIndex_(0)
 {}
 
 template<class Master_matrix>
 template<class Container_type>
-inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type> &columns)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const std::vector<Container_type> &columns)
 	: Master_matrix::Base_swap_option(matrix_, columns.size()),
 	  matrix_(columns.size()),
 	  nextInsertIndex_(columns.size())
@@ -96,14 +96,14 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
 	  matrix_(numberOfColumns),
 	  nextInsertIndex_(0)
 {}
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const Base_matrix_with_column_compression &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  matrix_(matrixToCopy.matrix_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
@@ -113,7 +113,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(Base_matrix_with_column_compression &&other) noexcept
 	: Master_matrix::Base_swap_option(std::move(other)),
 	  matrix_(std::move(other.matrix_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
@@ -124,7 +124,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
 
 template<class Master_matrix>
 template<class Container_type>
-inline void Base_matrix<Master_matrix>::insert_column(const Container_type &column)
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(const Container_type &column)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -146,13 +146,13 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type &colu
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	insert_column(boundary);
 }
 
 template<class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matrix>::get_column(index columnIndex)
+inline typename Base_matrix_with_column_compression<Master_matrix>::Column_type &Base_matrix_with_column_compression<Master_matrix>::get_column(index columnIndex)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -162,7 +162,7 @@ inline typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matr
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Master_matrix>::get_column(index columnIndex) const
+inline const typename Base_matrix_with_column_compression<Master_matrix>::Column_type &Base_matrix_with_column_compression<Master_matrix>::get_column(index columnIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -172,75 +172,75 @@ inline const typename Base_matrix<Master_matrix>::Column_type &Base_matrix<Maste
 }
 
 template<class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Row_type Base_matrix<Master_matrix>::get_row(index rowIndex) const
+inline typename Base_matrix_with_column_compression<Master_matrix>::Row_type Base_matrix_with_column_compression<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::erase_column(index columnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::erase_column(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_column' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::erase_row(index rowIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::erase_row(index rowIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'erase_row' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline unsigned int Base_matrix<Master_matrix>::get_number_of_columns() const
+inline unsigned int Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() const
 {
 	return nextInsertIndex_;
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += sourceColumn;
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::zero_column(index columnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::zero_column(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'zero_column' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
+inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
@@ -250,13 +250,13 @@ inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index ro
 }
 
 template<class Master_matrix>
-inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex)
+inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_column(index columnIndex)
 {
 	return matrix_[columnIndex].is_empty();
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(Base_matrix other)
+inline Base_matrix_with_column_compression<Master_matrix> &Base_matrix_with_column_compression<Master_matrix>::operator=(Base_matrix_with_column_compression other)
 {
 	swap_opt::operator=(other);
 	matrix_.swap(other.matrix_);
@@ -265,7 +265,7 @@ inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(Base_ma
 }
 
 template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::print()
+inline void Base_matrix_with_column_compression<Master_matrix>::print()
 {
 	std::cout << "Base_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){

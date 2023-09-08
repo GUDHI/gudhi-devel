@@ -11,12 +11,14 @@
 #ifndef MASTER_MATRIX_H
 #define MASTER_MATRIX_H
 
+#include <cstddef>
 #include <type_traits>
 #include <vector>
 #include <unordered_map>
 #include <map>
 #include <functional>
 #include <assert.h>
+#include <initializer_list>
 
 #include <boost/intrusive/list.hpp>
 
@@ -27,7 +29,9 @@
 #include "column_types/cell.h"
 #include "column_types/row_access.h"
 
-#include "boundary_matrix/base_swap.h"
+#include "Persistence_matrix/matrix_dimension_holders.h"
+// #include "boundary_matrix/base_swap.h"
+#include "Persistence_matrix/base_swap.h"
 #include "boundary_matrix/base_pairing.h"
 #include "boundary_matrix/ru_vine_swap.h"
 #include "boundary_matrix/custom_ru_vine_swap.h"
@@ -37,16 +41,20 @@
 #include "chain_matrix/custom_chain_vine_swap.h"
 #include "chain_matrix/chain_rep_cycles.h"
 
-#include "base_matrix/base_matrix_0000.h"
-#include "base_matrix/base_matrix_0001.h"
-#include "base_matrix/base_matrix_0010.h"
-#include "base_matrix/base_matrix_0011.h"
-#include "base_matrix/base_matrix_1000.h"
-#include "base_matrix/base_matrix_1010.h"
-#include "boundary_matrix/boundary_matrix_0000.h"
-#include "boundary_matrix/boundary_matrix_0001.h"
-#include "boundary_matrix/boundary_matrix_0010.h"
-#include "boundary_matrix/boundary_matrix_0011.h"
+// #include "base_matrix/base_matrix_0000.h"
+// #include "base_matrix/base_matrix_0001.h"
+// #include "base_matrix/base_matrix_0010.h"
+// #include "base_matrix/base_matrix_0011.h"
+#include "Persistence_matrix/base_matrix_row_access.h"
+#include "Persistence_matrix/base_matrix.h"
+#include "Persistence_matrix/base_matrix_with_column_compression.h"
+#include "Persistence_matrix/boundary_matrix.h"
+// #include "base_matrix/base_matrix_1000.h"
+// #include "base_matrix/base_matrix_1010.h"
+// #include "boundary_matrix/boundary_matrix_0000.h"
+// #include "boundary_matrix/boundary_matrix_0001.h"
+// #include "boundary_matrix/boundary_matrix_0010.h"
+// #include "boundary_matrix/boundary_matrix_0011.h"
 #include "boundary_matrix/ru_matrix_0000.h"
 #include "boundary_matrix/ru_matrix_0001.h"
 #include "boundary_matrix/ru_matrix_0010.h"
@@ -105,6 +113,8 @@ class Matrix
 public:
 	using Option_list = Options;
 	using Field_type = typename Options::field_coeff_type;
+	using index = unsigned int;
+	using dimension_type = int;
 
 	using Non_intrusive_cell_type = typename std::conditional<
 								Options::is_z2,
@@ -214,14 +224,25 @@ public:
 
 		Dummy_row_access(){}
 		Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
-
+		
 		static constexpr bool isActive_ = false;
+	};
+
+	struct Dummy_matrix_row_access{
+		Dummy_matrix_row_access(){};
+		Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfColumns){};
 	};
 
 	using Row_access_option = typename std::conditional<
 											Options::has_row_access,
 											Row_access<row_container_type, Cell_type, Options::has_intrusive_rows, Options::has_removable_rows>,
 											Dummy_row_access
+										>::type;
+
+	using Matrix_row_access_option = typename std::conditional<
+											Options::has_row_access,
+											Base_matrix_row_access<Row_type, row_container_type, Options::has_removable_rows, index>,
+											Dummy_matrix_row_access
 										>::type;
 
 	template<typename value_type>
@@ -420,46 +441,35 @@ public:
 
 	using boundary_type = typename std::conditional<
 									Options::is_z2,
-									std::vector<index>,
-									std::vector<std::pair<index,Field_type> >
+									std::initializer_list<index>,
+									std::initializer_list<std::pair<index,Field_type> >
 								>::type;
-	using boundary_matrix = std::vector<boundary_type>;
+
+	struct Dummy_matrix_dimension_holder{
+		Dummy_matrix_dimension_holder([[maybe_unused]] dimension_type maximalDimension){};
+
+		// friend void swap([[maybe_unused]] Dummy_matrix_dimension_holder& d1, [[maybe_unused]] Dummy_matrix_dimension_holder& d2){}
+	};
+
+	static const bool dimensionIsNeeded = Options::has_column_pairings && !Options::has_vine_update && !Options::can_retrieve_representative_cycles;
+
+	using Matrix_dimension_option = typename std::conditional<
+											Options::has_dimension_access || dimensionIsNeeded,
+											typename std::conditional<
+												Options::has_removable_columns,
+												Matrix_all_dimension_holder<dimension_type>,
+												Matrix_max_dimension_holder<dimension_type>
+											>::type,
+											Dummy_matrix_dimension_holder
+										>::type;
 
 	using Base_matrix_type = typename std::conditional<
-											Options::has_removable_columns,
-											typename std::conditional<
-												Options::has_row_access,
-												Base_matrix_with_row_access_with_removals<Matrix<Options> >,
-												Base_matrix_with_removals<Matrix<Options> >
-											>::type,
-											typename std::conditional<
 												Options::has_column_compression,
-												typename std::conditional<
-													Options::has_row_access,
-													Base_matrix_with_column_compression_with_row_access<Matrix<Options> >,
-													Base_matrix_with_column_compression<Matrix<Options> >
-												>::type,
-												typename std::conditional<
-													Options::has_row_access,
-													Base_matrix_with_row_access<Matrix<Options> >,
-													Base_matrix<Matrix<Options> >
-												>::type
-											>::type
-										>::type;
+												Base_matrix_with_column_compression<Matrix<Options> >,
+												Base_matrix<Matrix<Options> >
+											>::type;
 
-	using Boundary_matrix_type = typename std::conditional<
-											Options::has_removable_columns,
-											typename std::conditional<
-												Options::has_row_access,
-												Boundary_matrix_with_row_access_with_removals<Matrix<Options> >,
-												Boundary_matrix_with_removals<Matrix<Options> >
-											>::type,
-											typename std::conditional<
-												Options::has_row_access,
-												Boundary_matrix_with_row_access<Matrix<Options> >,
-												Boundary_matrix<Matrix<Options> >
-											>::type
-										>::type;
+	using Boundary_matrix_type = Boundary_matrix<Matrix<Options> >;
 
 	using RU_matrix_type = typename std::conditional<
 											Options::has_removable_columns,
@@ -502,7 +512,7 @@ public:
 	};
 
 	using Base_swap_option = typename std::conditional<
-											Options::has_vine_update,
+											Options::has_vine_update || Options::has_column_and_row_swaps,
 											Base_swap<Matrix<Options> >,
 											Dummy_base_swap
 										>::type;
@@ -545,8 +555,9 @@ public:
 		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
 
-		Dummy_ru_vine_swap([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Boundary_matrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
-		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
+		template<class Submatrix_type>
+		Dummy_ru_vine_swap([[maybe_unused]] Submatrix_type &matrixR, [[maybe_unused]] Submatrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
+		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCisActive_opy){}
 		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
 
 		static constexpr bool isActive_ = false;
@@ -654,11 +665,13 @@ public:
 								>::type;
 
 	Matrix();
-	Matrix(const boundary_matrix& boundaries);	//simplex indices have to start at 0 and be consecutifs
+	template<class Boundary_type = boundary_type>
+	Matrix(const std::vector<Boundary_type>& boundaries);	//simplex indices have to start at 0 and be consecutifs
 	Matrix(int numberOfColumns);
 	Matrix(std::function<bool(index,index)> birthComparator, 
 		   std::function<bool(index,index)> deathComparator = _no_G_death_comparator);
-	Matrix(const boundary_matrix& boundaries,
+	template<class Boundary_type = boundary_type>
+	Matrix(const std::vector<Boundary_type>& boundaries,
 		   std::function<bool(index,index)> birthComparator, 
 		   std::function<bool(index,index)> deathComparator = _no_G_death_comparator);
 	Matrix(int numberOfColumns,
@@ -778,7 +791,8 @@ inline Matrix<Options>::Matrix()
 }
 
 template<class Options>
-inline Matrix<Options>::Matrix(const boundary_matrix &boundaries) : matrix_(boundaries)
+template<class Boundary_type>
+inline Matrix<Options>::Matrix(const std::vector<Boundary_type> &boundaries) : matrix_(boundaries)
 {
 	static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings, 
 					"When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns have to be provided.");
@@ -807,8 +821,9 @@ inline Matrix<Options>::Matrix(
 }
 
 template<class Options>
+template<class Boundary_type>
 inline Matrix<Options>::Matrix(
-		const boundary_matrix &boundaries,
+		const std::vector<Boundary_type> &boundaries,
 		std::function<bool(index,index)> birthComparator, 
 		std::function<bool(index,index)> deathComparator)
 	: matrix_(boundaries, birthComparator, deathComparator)
@@ -1048,18 +1063,19 @@ inline bool Matrix<Options>::is_zero_column(index columnIndex)
 }
 
 template<class Options>
-inline index Matrix<Options>::get_column_with_pivot(index simplexIndex) const
+inline typename Matrix<Options>::index Matrix<Options>::get_column_with_pivot(index simplexIndex) const
 {
-	static_assert(!Options::is_of_boundary_type
+	static_assert(isNonBasic && 
+			(!Options::is_of_boundary_type
 			|| Options::has_vine_update
-			|| Options::can_retrieve_representative_cycles,
+			|| Options::can_retrieve_representative_cycles),
 			"'get_pivot' is not available for the chosen options.");
 
 	return matrix_.get_column_with_pivot(simplexIndex);
 }
 
 template<class Options>
-inline index Matrix<Options>::get_pivot(index columnIndex)
+inline typename Matrix<Options>::index Matrix<Options>::get_pivot(index columnIndex)
 {
 	static_assert(!Options::is_of_boundary_type || isNonBasic, "'get_pivot' is not available for the chosen options.");
 
@@ -1116,7 +1132,7 @@ inline bool Matrix<Options>::vine_swap_with_z_eq_1_case(index index)
 }
 
 template<class Options>
-inline index Matrix<Options>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
+inline typename Matrix<Options>::index Matrix<Options>::vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2)
 {
 	static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
 	return matrix_.vine_swap_with_z_eq_1_case(columnIndex1, columnIndex2);
@@ -1130,7 +1146,7 @@ inline bool Matrix<Options>::vine_swap(index index)
 }
 
 template<class Options>
-inline index Matrix<Options>::vine_swap(index columnIndex1, index columnIndex2)
+inline typename Matrix<Options>::index Matrix<Options>::vine_swap(index columnIndex1, index columnIndex2)
 {
 	static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
 	return matrix_.vine_swap(columnIndex1, columnIndex2);

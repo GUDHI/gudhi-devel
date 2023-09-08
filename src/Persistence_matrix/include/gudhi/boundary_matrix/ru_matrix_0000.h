@@ -12,7 +12,8 @@
 #define RU_MATRIX_0000_H
 
 #include "../utilities/utilities.h"
-#include "boundary_matrix_0000.h"
+// #include "../Persistence_matrix/boundary_matrix.h"
+// #include "boundary_matrix_0000.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -87,9 +88,10 @@ private:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+	using matrix_type = typename Master_matrix::Boundary_matrix_type;
 
-	Boundary_matrix<Master_matrix> reducedMatrixR_;
-	Boundary_matrix<Master_matrix> mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
+	matrix_type reducedMatrixR_;
+	matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
 	index nextInsertIndex_;
 
@@ -120,7 +122,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &ord
 	  mirrorMatrixU_(orderedBoundaries.size()),
 	  pivotToColumnIndex_(orderedBoundaries.size(), -1),
 	  nextInsertIndex_(orderedBoundaries.size())
-{
+{	
 	_initialize_U();
 	_reduce();
 }
@@ -184,14 +186,11 @@ inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &bound
 {
 	reducedMatrixR_.insert_boundary(boundary);
 
-	boundary_type id(1);
 	if constexpr (Master_matrix::Option_list::is_z2) {
-		id[0] = nextInsertIndex_;
+		mirrorMatrixU_.insert_boundary({nextInsertIndex_});
 	} else {
-		id[0].first = nextInsertIndex_;
-		id[0].second = 1;
+		mirrorMatrixU_.insert_boundary({{nextInsertIndex_, 1}});
 	}
-	mirrorMatrixU_.insert_boundary(id);
 
 	while (pivotToColumnIndex_.size() <= nextInsertIndex_)
 		pivotToColumnIndex_.resize(pivotToColumnIndex_.size()*2, -1);
@@ -348,13 +347,13 @@ inline void RU_matrix<Master_matrix>::print()
 template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::_initialize_U()
 {
-	boundary_type id(1);
-	if constexpr (Master_matrix::Field_type::get_characteristic() != 2) id[0].second = 1;
+	typename std::conditional<Master_matrix::Option_list::is_z2, index, std::pair<index,Field_element_type> >::type id;
+	if constexpr (!Master_matrix::Option_list::is_z2) id.second = 1;
 
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
-		if constexpr (Master_matrix::Option_list::is_z2) id[0] = i;
-		else id[0].first = i;
-		mirrorMatrixU_.insert_boundary(id);
+		if constexpr (Master_matrix::Option_list::is_z2) id = i;
+		else id.first = i;
+		mirrorMatrixU_.insert_boundary({id});
 	}
 }
 

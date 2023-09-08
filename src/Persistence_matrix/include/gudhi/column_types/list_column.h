@@ -11,8 +11,10 @@
 #ifndef LIST_COLUMN_H
 #define LIST_COLUMN_H
 
+#include <initializer_list>
 #include <iostream>
 #include <list>
+#include <utility>
 #include <vector>
 
 #include "../utilities/utilities.h"

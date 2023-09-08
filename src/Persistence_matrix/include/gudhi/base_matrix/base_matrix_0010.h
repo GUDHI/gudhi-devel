@@ -22,7 +22,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class Base_matrix_with_row_access
+class Base_matrix_row_access
 		: public Master_matrix::Base_swap_option
 {
 public:
@@ -30,12 +30,12 @@ public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 
-	Base_matrix_with_row_access();
+	Base_matrix_row_access();
 	template<class Container_type>
-	Base_matrix_with_row_access(const std::vector<Container_type>& columns);
-	Base_matrix_with_row_access(unsigned int numberOfColumns);
-	Base_matrix_with_row_access(const Base_matrix_with_row_access& matrixToCopy);
-	Base_matrix_with_row_access(Base_matrix_with_row_access&& other) noexcept;
+	Base_matrix_row_access(const std::vector<Container_type>& columns);
+	Base_matrix_row_access(unsigned int numberOfColumns);
+	Base_matrix_row_access(const Base_matrix_row_access& matrixToCopy);
+	Base_matrix_row_access(Base_matrix_row_access&& other) noexcept;
 
 	template<class Container_type>
 	void insert_column(const Container_type& column);
@@ -64,8 +64,8 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	Base_matrix_with_row_access& operator=(const Base_matrix_with_row_access& other);
-	friend void swap(Base_matrix_with_row_access& matrix1, Base_matrix_with_row_access& matrix2){
+	Base_matrix_row_access& operator=(const Base_matrix_row_access& other);
+	friend void swap(Base_matrix_row_access& matrix1, Base_matrix_row_access& matrix2){
 		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
 		matrix1.rows_.swap(matrix2.rows_);
@@ -97,14 +97,14 @@ private:
 };
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access()
+inline Base_matrix_row_access<Master_matrix>::Base_matrix_row_access()
 	: Master_matrix::Base_swap_option(matrix_),
 	  nextInsertIndex_(0)
 {}
 
 template<class Master_matrix>
 template<class Container_type>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(const std::vector<Container_type> &columns)
+inline Base_matrix_row_access<Master_matrix>::Base_matrix_row_access(const std::vector<Container_type> &columns)
 	: Master_matrix::Base_swap_option(matrix_, columns.size()),
 	  nextInsertIndex_(columns.size())
 {
@@ -119,7 +119,7 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(c
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(unsigned int numberOfColumns)
+inline Base_matrix_row_access<Master_matrix>::Base_matrix_row_access(unsigned int numberOfColumns)
 	: Master_matrix::Base_swap_option(matrix_, numberOfColumns),
 	  nextInsertIndex_(0)
 {
@@ -131,7 +131,7 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(u
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(const Base_matrix_with_row_access &matrixToCopy)
+inline Base_matrix_row_access<Master_matrix>::Base_matrix_row_access(const Base_matrix_row_access &matrixToCopy)
 	: Master_matrix::Base_swap_option(matrixToCopy),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
@@ -149,7 +149,7 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(c
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(Base_matrix_with_row_access &&other) noexcept
+inline Base_matrix_row_access<Master_matrix>::Base_matrix_row_access(Base_matrix_row_access &&other) noexcept
 	: Master_matrix::Base_swap_option(std::move(other)),
 	  rows_(std::move(other.rows_)),
 	  matrix_(std::move(other.matrix_)),
@@ -164,7 +164,7 @@ inline Base_matrix_with_row_access<Master_matrix>::Base_matrix_with_row_access(B
 
 template<class Master_matrix>
 template<class Container_type>
-inline void Base_matrix_with_row_access<Master_matrix>::insert_column(const Container_type &column)
+inline void Base_matrix_row_access<Master_matrix>::insert_column(const Container_type &column)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -184,13 +184,13 @@ inline void Base_matrix_with_row_access<Master_matrix>::insert_column(const Cont
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix_with_row_access<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void Base_matrix_row_access<Master_matrix>::insert_boundary(const Boundary_type &boundary)
 {
 	insert_column(boundary);
 }
 
 template<class Master_matrix>
-inline typename Base_matrix_with_row_access<Master_matrix>::Column_type &Base_matrix_with_row_access<Master_matrix>::get_column(index columnIndex)
+inline typename Base_matrix_row_access<Master_matrix>::Column_type &Base_matrix_row_access<Master_matrix>::get_column(index columnIndex)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -200,7 +200,7 @@ inline typename Base_matrix_with_row_access<Master_matrix>::Column_type &Base_ma
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix_with_row_access<Master_matrix>::Column_type &Base_matrix_with_row_access<Master_matrix>::get_column(index columnIndex) const
+inline const typename Base_matrix_row_access<Master_matrix>::Column_type &Base_matrix_row_access<Master_matrix>::get_column(index columnIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -210,7 +210,7 @@ inline const typename Base_matrix_with_row_access<Master_matrix>::Column_type &B
 }
 
 template<class Master_matrix>
-inline typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base_matrix_with_row_access<Master_matrix>::get_row(index rowIndex)
+inline typename Base_matrix_row_access<Master_matrix>::Row_type& Base_matrix_row_access<Master_matrix>::get_row(index rowIndex)
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -223,7 +223,7 @@ inline typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base_matri
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base_matrix_with_row_access<Master_matrix>::get_row(index rowIndex) const
+inline const typename Base_matrix_row_access<Master_matrix>::Row_type& Base_matrix_row_access<Master_matrix>::get_row(index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
@@ -236,14 +236,14 @@ inline const typename Base_matrix_with_row_access<Master_matrix>::Row_type& Base
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::erase_column(index columnIndex)
+inline void Base_matrix_row_access<Master_matrix>::erase_column(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'erase_column' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::erase_row(index rowIndex)
+inline void Base_matrix_row_access<Master_matrix>::erase_row(index rowIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_rows,
 			"'erase_row' is not implemented for the chosen options.");
@@ -252,54 +252,54 @@ inline void Base_matrix_with_row_access<Master_matrix>::erase_row(index rowIndex
 }
 
 template<class Master_matrix>
-inline unsigned int Base_matrix_with_row_access<Master_matrix>::get_number_of_columns() const
+inline unsigned int Base_matrix_row_access<Master_matrix>::get_number_of_columns() const
 {
 	return nextInsertIndex_;
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
+inline void Base_matrix_row_access<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+inline void Base_matrix_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex] += sourceColumn;
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Base_matrix_row_access<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
 }
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix_with_row_access<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
+inline void Base_matrix_row_access<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
+inline void Base_matrix_row_access<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'zero_cell' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::zero_column(index columnIndex)
+inline void Base_matrix_row_access<Master_matrix>::zero_column(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'zero_column' is not implemented for the chosen options.");
 }
 
 template<class Master_matrix>
-inline bool Base_matrix_with_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
+inline bool Base_matrix_row_access<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (swap_opt::isActive_){
 		return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
@@ -309,13 +309,13 @@ inline bool Base_matrix_with_row_access<Master_matrix>::is_zero_cell(index colum
 }
 
 template<class Master_matrix>
-inline bool Base_matrix_with_row_access<Master_matrix>::is_zero_column(index columnIndex)
+inline bool Base_matrix_row_access<Master_matrix>::is_zero_column(index columnIndex)
 {
 	return matrix_[columnIndex].is_empty();
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_row_access<Master_matrix> &Base_matrix_with_row_access<Master_matrix>::operator=(const Base_matrix_with_row_access &other)
+inline Base_matrix_row_access<Master_matrix> &Base_matrix_row_access<Master_matrix>::operator=(const Base_matrix_row_access &other)
 {
 	swap_opt::operator=(other);
 	if constexpr (!Master_matrix::Option_list::has_removable_rows)
@@ -330,7 +330,7 @@ inline Base_matrix_with_row_access<Master_matrix> &Base_matrix_with_row_access<M
 }
 
 template<class Master_matrix>
-inline void Base_matrix_with_row_access<Master_matrix>::print()
+inline void Base_matrix_row_access<Master_matrix>::print()
 {
 	std::cout << "Base_matrix_with_row_access:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
