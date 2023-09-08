@@ -36,10 +36,9 @@ landscape_resolution = 600
 filter = int(0.4 * landscape_resolution)
 
 def plot_average_landscape(landscapes, color, label):
-    print(f"min = {np.min(landscapes)} - max = {np.max(landscapes)}")
     landscapes = landscapes[:,:filter]
     rng = np.random.default_rng()
-    res = bootstrap((np.transpose(landscapes),), np.std, axis=-1, confidence_level=0.95, random_state=rng)
+    res = bootstrap((np.transpose(landscapes),), np.std, method='basic', axis=-1, confidence_level=0.95, random_state=rng)
     ci_l, ci_u = res.confidence_interval
     plt.fill_between(np.arange(0,filter,1), ci_l, ci_u, alpha=.3, color=color, label=label)
 
