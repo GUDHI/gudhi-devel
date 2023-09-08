@@ -255,7 +255,8 @@ if(PYTHONINTERP_FOUND)
 
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      # if MACOSX_DEPLOYMENT_TARGET environment variable is set
+      # CMAKE_OSX_DEPLOYMENT_TARGET is always set on OSx
+      # but it can be modified by the user by setting MACOSX_DEPLOYMENT_TARGET environment variable
       if(CMAKE_OSX_DEPLOYMENT_TARGET)
         set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
         set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
