@@ -20,7 +20,6 @@ jobs:
         architecture: 'x64'
 
     - bash: |
-        echo $(Build.SourceVersionMessage)
         git submodule update --init
         python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
         python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
@@ -28,7 +27,6 @@ jobs:
         brew update || true
         brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal || true
       displayName: 'Install build dependencies'
-      condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
     - bash: |
         mkdir build
         cd build
@@ -37,7 +35,6 @@ jobs:
         ninja doxygen
         ctest --output-on-failure
       displayName: 'Build, test and documentation generation'
-      condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
 
   - job: 'Windows'
     displayName: "Build and test Windows"
@@ -67,7 +64,6 @@ jobs:
         vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
-      condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
     - script: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
@@ -92,4 +88,3 @@ jobs:
         ctest --output-on-failure -C Release
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
       displayName: 'Build and test'
-      condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
