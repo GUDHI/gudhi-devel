@@ -48,7 +48,6 @@ protected:
 	row_dictionnary_type rowToIndex_;
 	bool rowSwapped_;
 	matrix_type *matrix_;
-	static constexpr bool isActive_ = true;
 
 	void _orderRows();
 };

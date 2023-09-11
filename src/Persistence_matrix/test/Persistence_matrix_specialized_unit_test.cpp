@@ -376,6 +376,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_options, Matrix, list_of_opti
 	Matrix mb(ordered_boundaries);
 
 	mb.update_representative_cycles();
+
 	const auto& cycles = mb.get_representative_cycles();
 	const auto& barcode = mb.get_current_barcode();
 	auto it = barcode.begin();

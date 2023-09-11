@@ -13,8 +13,9 @@
 
 #include <utility>
 #include <vector>
+#include <algorithm>
 
-#include "../utilities/utilities.h"  //type definitions
+// #include "../utilities/utilities.h"  //type definitions
 #include "../options.h"
 
 namespace Gudhi {
@@ -24,6 +25,8 @@ template<class Master_matrix>
 class Chain_representative_cycles
 {
 public:
+	using index = typename Master_matrix::index;
+	using Bar = typename Master_matrix::Bar;
 	using cycle_type = std::vector<index>;	//TODO: add coefficients
 	using matrix_type = typename Master_matrix::column_container_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;

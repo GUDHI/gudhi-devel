@@ -22,7 +22,7 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include "utilities/utilities.h"
+// #include "utilities/utilities.h"
 #include "utilities/overlay_id_to_position_index.h"
 #include "utilities/overlay_position_to_id_index.h"
 #include "options.h"
@@ -30,12 +30,16 @@
 #include "column_types/row_access.h"
 
 #include "Persistence_matrix/matrix_dimension_holders.h"
+#include "Persistence_matrix/base_matrix_row_access.h"
 // #include "boundary_matrix/base_swap.h"
+// #include "boundary_matrix/base_pairing.h"
+// #include "boundary_matrix/ru_vine_swap.h"
+// #include "boundary_matrix/custom_ru_vine_swap.h"
+// #include "boundary_matrix/ru_rep_cycles.h"
 #include "Persistence_matrix/base_swap.h"
-#include "boundary_matrix/base_pairing.h"
-#include "boundary_matrix/ru_vine_swap.h"
-#include "boundary_matrix/custom_ru_vine_swap.h"
-#include "boundary_matrix/ru_rep_cycles.h"
+#include "Persistence_matrix/base_pairing.h"
+#include "Persistence_matrix/ru_vine_swap.h"
+#include "Persistence_matrix/ru_rep_cycles.h"
 #include "chain_matrix/chain_pairing.h"
 #include "chain_matrix/chain_vine_swap.h"
 #include "chain_matrix/custom_chain_vine_swap.h"
@@ -45,20 +49,20 @@
 // #include "base_matrix/base_matrix_0001.h"
 // #include "base_matrix/base_matrix_0010.h"
 // #include "base_matrix/base_matrix_0011.h"
-#include "Persistence_matrix/base_matrix_row_access.h"
 #include "Persistence_matrix/base_matrix.h"
-#include "Persistence_matrix/base_matrix_with_column_compression.h"
-#include "Persistence_matrix/boundary_matrix.h"
 // #include "base_matrix/base_matrix_1000.h"
 // #include "base_matrix/base_matrix_1010.h"
+#include "Persistence_matrix/base_matrix_with_column_compression.h"
 // #include "boundary_matrix/boundary_matrix_0000.h"
 // #include "boundary_matrix/boundary_matrix_0001.h"
 // #include "boundary_matrix/boundary_matrix_0010.h"
 // #include "boundary_matrix/boundary_matrix_0011.h"
-#include "boundary_matrix/ru_matrix_0000.h"
-#include "boundary_matrix/ru_matrix_0001.h"
-#include "boundary_matrix/ru_matrix_0010.h"
-#include "boundary_matrix/ru_matrix_0011.h"
+#include "Persistence_matrix/boundary_matrix.h"
+// #include "boundary_matrix/ru_matrix_0000.h"
+// #include "boundary_matrix/ru_matrix_0001.h"
+// #include "boundary_matrix/ru_matrix_0010.h"
+// #include "boundary_matrix/ru_matrix_0011.h"
+#include "Persistence_matrix/ru_matrix.h"
 #include "chain_matrix/chain_matrix_0000.h"
 #include "chain_matrix/chain_matrix_0001.h"
 #include "chain_matrix/chain_matrix_0010.h"
@@ -115,6 +119,19 @@ public:
 	using Field_type = typename Options::field_coeff_type;
 	using index = unsigned int;
 	using dimension_type = int;
+
+	struct Bar{
+		Bar() : dim(-1), birth(-1), death(-1)
+		{}
+
+		Bar(dimension_type dim, int birth, int death)
+			: dim(dim), birth(birth), death(death)
+		{}
+
+		dimension_type dim;
+		int birth;
+		int death;
+	};
 
 	using Non_intrusive_cell_type = typename std::conditional<
 								Options::is_z2,
@@ -471,19 +488,7 @@ public:
 
 	using Boundary_matrix_type = Boundary_matrix<Matrix<Options> >;
 
-	using RU_matrix_type = typename std::conditional<
-											Options::has_removable_columns,
-											typename std::conditional<
-												Options::has_row_access,
-												RU_matrix_with_row_access_with_removals<Matrix<Options> >,
-												RU_matrix_with_removals<Matrix<Options> >
-											>::type,
-											typename std::conditional<
-												Options::has_row_access,
-												RU_matrix_with_row_access<Matrix<Options> >,
-												RU_matrix<Matrix<Options> >
-											>::type
-										>::type;
+	using RU_matrix_type = RU_matrix<Matrix<Options> >;
 
 	using Chain_matrix_type = typename std::conditional<
 											Options::has_removable_columns,
@@ -507,8 +512,6 @@ public:
 		Dummy_base_swap([[maybe_unused]] column_container_type &matrix, [[maybe_unused]] unsigned int numberOfColumns){}
 		Dummy_base_swap([[maybe_unused]] const Dummy_base_swap& matrixToCopy){}
 		Dummy_base_swap([[maybe_unused]] Dummy_base_swap&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using Base_swap_option = typename std::conditional<
@@ -524,8 +527,6 @@ public:
 		Dummy_base_pairing([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dimension_type& maxDim){}
 		Dummy_base_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
 		Dummy_base_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using Base_pairing_option = typename std::conditional<
@@ -541,8 +542,6 @@ public:
 		Dummy_ru_pairing(){}
 		Dummy_ru_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
 		Dummy_ru_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using RU_pairing_option = typename std::conditional<
@@ -557,19 +556,13 @@ public:
 
 		template<class Submatrix_type>
 		Dummy_ru_vine_swap([[maybe_unused]] Submatrix_type &matrixR, [[maybe_unused]] Submatrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
-		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCisActive_opy){}
+		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using RU_vine_swap_option = typename std::conditional<
 											Options::has_vine_update,
-											typename std::conditional<
-												Options::has_column_pairings,
-												RU_vine_swap<Matrix<Options>>,
-												Custom_RU_vine_swap<Matrix<Options>>
-											>::type,
+											RU_vine_swap<Matrix<Options> >,
 											Dummy_ru_vine_swap
 										>::type;
 
@@ -618,8 +611,6 @@ public:
 		Dummy_ru_representative_cycles([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Boundary_matrix_type &matrixU){}
 		Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
 		Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using RU_representative_cycles_option = typename std::conditional<
@@ -704,20 +695,26 @@ public:
 	dimension_type get_column_dimension(index columnIndex) const;
 
 	//targetColumn += sourceColumn
-	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	// void add_to(index sourceColumnIndex, index targetColumnIndex);
+	// void add_to(int sourceColumnIndex, int targetColumnIndex);
+	template<typename Index_type>
+	std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
 
 	//targetColumn += sourceColumn
 	void add_to(Column_type& sourceColumn, index targetColumnIndex);
-//	template<class Cell_range>
-//	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range>
+	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
 
 	//targetColumn = targetColumn * coefficient + sourceColumn
 	void add_to(Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
+	void add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
 	template<class Cell_range>
 	void add_to(const Cell_range& sourceColumn, const Field_type& coefficient, index targetColumnIndex);
 
 	//targetColumn += (coefficient * sourceColumn)
 	void add_to(const Field_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 	template<class Cell_range>
 	void add_to(const Field_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
 
@@ -969,8 +966,21 @@ inline dimension_type Matrix<Options>::get_column_dimension(index columnIndex) c
 	return matrix_.get_column_dimension(columnIndex);
 }
 
+// template<class Options>
+// inline void Matrix<Options>::add_to(index sourceColumnIndex, index targetColumnIndex)
+// {
+// 	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
+// }
+
+// template<class Options>
+// inline void Matrix<Options>::add_to(int sourceColumnIndex, int targetColumnIndex)
+// {
+// 	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
+// }
+
 template<class Options>
-inline void Matrix<Options>::add_to(index sourceColumnIndex, index targetColumnIndex)
+template<typename Index_type>
+inline std::enable_if_t<std::is_integral_v<Index_type> > Matrix<Options>::add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex)
 {
 	return matrix_.add_to(sourceColumnIndex, targetColumnIndex);
 }
@@ -981,19 +991,36 @@ inline void Matrix<Options>::add_to(Column_type& sourceColumn, index targetColum
 	return matrix_.add_to(sourceColumn, targetColumnIndex);
 }
 
-//template<class Options>
-//template<class Cell_range>
-//inline void Matrix<Options>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
-//{
-//	static_assert(!isNonBasic, "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain algebraic consistency.");
+template<class Options>
+inline void Matrix<Options>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+{
+	static_assert(Options::column_type != Column_types::VECTOR && (!isNonBasic || Options::is_of_boundary_type), "Addition non constant for chain or vector source columns");
+	
+	return matrix_.add_to(sourceColumn, targetColumnIndex);
+}
 
-//	return matrix_.add_to(sourceColumn, targetColumnIndex);
-//}
+template<class Options>
+template<class Cell_range>
+inline void Matrix<Options>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+{
+	static_assert(!isNonBasic, "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain algebraic consistency.");
+
+	return matrix_.add_to(sourceColumn, targetColumnIndex);
+}
 
 template<class Options>
 inline void Matrix<Options>::add_to(Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
 {
 	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+
+	return matrix_.add_to(sourceColumn, coefficient, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Column_type& sourceColumn, const Field_type& coefficient, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+	static_assert(Options::column_type != Column_types::VECTOR && (!isNonBasic || Options::is_of_boundary_type), "Addition non constant for chain or vector source columns");
 
 	return matrix_.add_to(sourceColumn, coefficient, targetColumnIndex);
 }
@@ -1012,6 +1039,15 @@ template<class Options>
 inline void Matrix<Options>::add_to(const Field_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
 {
 	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+
+	return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
+}
+
+template<class Options>
+inline void Matrix<Options>::add_to(const Field_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
+{
+	static_assert(!Options::is_z2, "addition with a coefficient multiplication is not available for the chosen options.");
+	static_assert(Options::column_type != Column_types::VECTOR && (!isNonBasic || Options::is_of_boundary_type), "Addition non constant for chain or vector source columns");
 
 	return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
 }

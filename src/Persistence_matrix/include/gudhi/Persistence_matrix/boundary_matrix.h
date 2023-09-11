@@ -56,6 +56,9 @@ public:
 	//avoid calling with pairing option or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
 	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
 	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
@@ -402,6 +405,36 @@ inline void Boundary_matrix<Master_matrix>::add_to(index sourceColumnIndex, inde
 		matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
 	} else {
 		matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
+	}
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		matrix_.at(targetColumnIndex) += sourceColumn;
+	} else {
+		matrix_[targetColumnIndex] += sourceColumn;
+	}
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+	} else {
+		matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
+	}
+}
+
+template<class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
+{
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+	} else {
+		matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
 	}
 }
 
