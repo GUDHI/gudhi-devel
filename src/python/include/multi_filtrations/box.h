@@ -31,7 +31,7 @@
  * @brief Holds the square box on which to compute.
  */
 
-namespace Gudhi::multi_filtrations{
+namespace Gudhi::multiparameter::multi_filtrations{
 
 template<typename T>
 class Box

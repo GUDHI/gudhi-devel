@@ -19,7 +19,7 @@
 #include "box.h"
 #include "finitely_critical_filtrations.h"
 
-namespace Gudhi::multi_filtrations{
+namespace Gudhi::multiparameter::multi_filtrations{
 
 	
 	template<typename T>

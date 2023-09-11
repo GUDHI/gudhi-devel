@@ -50,7 +50,7 @@ from tqdm import tqdm
 from warnings import warn
 
 
-cdef extern from "Simplex_tree_multi.h" namespace "Gudhi":
+cdef extern from "Simplex_tree_multi.h" namespace "Gudhi::multiparameter":
 	void multify_from_ptr(const uintptr_t, const uintptr_t, const unsigned int, const vector[value_type]&)  except + nogil
 	void flatten_from_ptr(const uintptr_t, const uintptr_t, const unsigned int) nogil
 	void linear_projection_from_ptr(const uintptr_t, const uintptr_t, const vector[value_type]&) nogil
@@ -691,7 +691,7 @@ cdef class SimplexTreeMulti:
 	#     """
 	#     self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
 	#     return self.pcohptr.get_persistence()
-		
+				
 		
 ## This function is only meant for the edge collapse interface.
 	def get_edge_list(self):
@@ -737,7 +737,7 @@ cdef class SimplexTreeMulti:
 
 		# Retrieves the edge list, and send it to filration_domination
 		edges = self.get_edge_list()
-		from multipers.edge_collapse import _collapse_edge_list
+		from gudhi.multiparameter_edge_collapse import _collapse_edge_list
 		edges = _collapse_edge_list(edges, num=num, full=full, strong=strong, progress=progress)
 		# Retrieves the collapsed simplicial complex
 		self._reconstruct_from_edge_list(edges, swap=True, expand_dimension=max_dimension)
@@ -1023,7 +1023,7 @@ cdef class SimplexTreeMulti:
 	
 	
 
-	def grid_squeeze(self, filtration_grid:np.ndarray|list|None=None, coordinate_values:bool=True, force=False, **filtration_grid_kwargs)->SimplexTreeMulti:
+	def grid_squeeze(self, filtration_grid:np.ndarray|list|None=None, bool coordinate_values=True, force=False, **filtration_grid_kwargs)->SimplexTreeMulti:
 		"""
 		Fit the filtration of the simplextree to a grid.
 		
@@ -1038,10 +1038,10 @@ cdef class SimplexTreeMulti:
 		if filtration_grid is None:	filtration_grid = self.get_filtration_grid(**filtration_grid_kwargs)
 		cdef vector[vector[value_type]] c_filtration_grid = filtration_grid
 		cdef intptr_t ptr = self.thisptr
-		cdef bool c_coordinate_values = coordinate_values
-		self.filtration_grid = c_filtration_grid
+		if coordinate_values:
+			self.filtration_grid = c_filtration_grid
 		with nogil:
-			squeeze_filtration(ptr, c_filtration_grid, c_coordinate_values)
+			squeeze_filtration(ptr, c_filtration_grid, coordinate_values)
 		return self
 
 	@property
@@ -1170,31 +1170,6 @@ cdef class SimplexTreeMulti:
 		"""
 		return dereference(self.get_ptr()) == dereference(other.get_ptr())
 	
-# 	def euler_char(self, points:np.ndarray|list) -> np.ndarray:
-# 		""" Computes the Euler Characteristic of the filtered complex at given (multiparameter) time
-
-# 		Parameters
-# 		----------
-# 		points: 2-dimensional array.
-# 			List of filtration values on which to compute the euler characteristic.
-
-# 		Returns
-# 		-------
-# 		The list of euler characteristic values
-# 		"""
-# 		# TODO : muticritical, compute it from a coordinate simplextree, tbb.
-# #		if len(points) == 0:
-# #			return cnp.empty()
-# #		if type(points[0]) is float:
-# #			points = cnp.array([points])
-# #		if type(points) is cnp.ndarray:
-# #			assert len(points.shape) in [1,2]
-# #			if len(points.shape) == 1:
-# #				points = [points]
-# 		c_points = np.asarray(points)
-# 		assert c_points.shape[1] == self.num_parameters
-# 		return np.asarray(self.get_ptr().euler_char(<filtration_type>c_points))
-
 cdef intptr_t _get_copy_intptr(SimplexTreeMulti stree) nogil:
 	return <intptr_t>(new Simplex_tree_multi_interface(dereference(stree.get_ptr())))
 

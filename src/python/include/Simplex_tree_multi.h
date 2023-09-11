@@ -21,7 +21,7 @@
 
 
 
-namespace Gudhi {
+namespace Gudhi::multiparameter {
 /** Model of SimplexTreeOptions.
  *
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
@@ -33,7 +33,7 @@ public:
 	typedef linear_indexing_tag Indexing_tag;
 	typedef int Vertex_handle;
 	typedef float value_type;
-	using Filtration_value = Gudhi::multi_filtrations::Finitely_critical_multi_filtration<value_type>;
+	using Filtration_value = multi_filtrations::Finitely_critical_multi_filtration<value_type>;
 	typedef std::uint32_t Simplex_key;
 	static const bool store_key = true;
 	static const bool store_filtration = true;
@@ -113,7 +113,7 @@ void linear_projection(simplextree_std &st, simplextree_multi &st_multi, const s
 
 template<class simplextree_std, class simplextree_multi>
 void flatten_diag(simplextree_std &st, simplextree_multi &st_multi, const std::vector<typename simplextree_multi::Options::value_type> basepoint, int dimension){
-	Gudhi::multi_filtrations::Line<typename simplextree_multi::Options::value_type> l(basepoint);
+	multi_filtrations::Line<typename simplextree_multi::Options::value_type> l(basepoint);
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
 		std::vector<int> simplex;
 		for (auto vertex : st_multi.simplex_vertex_range(simplex_handle))
@@ -217,16 +217,16 @@ std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr
 namespace std {
 
 template<>
-class numeric_limits<Gudhi::multi_filtration_type>
+class numeric_limits<Gudhi::multiparameter::multi_filtration_type>
 {
 public:
-	static Gudhi::multi_filtration_type infinity() throw(){
-		return Gudhi::multi_filtration_type(1, std::numeric_limits<Gudhi::Simplex_tree_options_multidimensional_filtration::value_type>::infinity());
+	static Gudhi::multiparameter::multi_filtration_type infinity() throw(){
+		return Gudhi::multiparameter::multi_filtration_type(1, std::numeric_limits<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration::value_type>::infinity());
 	};
 
 
-	static Gudhi::multi_filtration_type quiet_NaN() throw(){
-		return Gudhi::multi_filtration_type(1, numeric_limits<Gudhi::Simplex_tree_options_multidimensional_filtration::value_type>::quiet_NaN());
+	static Gudhi::multiparameter::multi_filtration_type quiet_NaN() throw(){
+		return Gudhi::multiparameter::multi_filtration_type(1, numeric_limits<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration::value_type>::quiet_NaN());
 	};
 
 };

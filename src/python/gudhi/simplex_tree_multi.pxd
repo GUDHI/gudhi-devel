@@ -31,8 +31,8 @@ ctypedef pair[simplex_type, value_type*] simplex_filtration_type
 
 
 
-cdef extern from "multi_filtrations/finitely_critical_filtrations.h" namespace "Gudhi::multi_filtrations":
-	cdef cppclass Finitely_critical_multi_filtration "Gudhi::multi_filtrations::Finitely_critical_multi_filtration<Gudhi::Simplex_tree_options_multidimensional_filtration::value_type>":
+cdef extern from "multi_filtrations/finitely_critical_filtrations.h" namespace "Gudhi::multiparameter::multi_filtrations":
+	cdef cppclass Finitely_critical_multi_filtration "Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration::value_type>":
 		Finitely_critical_multi_filtration()  except + nogil
 		Finitely_critical_multi_filtration(vector[value_type]) except +
 		Finitely_critical_multi_filtration& operator=(const Finitely_critical_multi_filtration&)
@@ -44,33 +44,33 @@ cdef extern from "multi_filtrations/finitely_critical_filtrations.h" namespace "
 		
 
 
-cdef extern from "Simplex_tree_interface_multi.h" namespace "Gudhi":
+cdef extern from "Simplex_tree_interface_multi.h" namespace "Gudhi::multiparameter":
 	cdef cppclass Simplex_tree_options_multidimensional_filtration:
 		pass
 
-	cdef cppclass Simplex_tree_multi_simplex_handle "Gudhi::Simplex_tree_interface_multi<Gudhi::Simplex_tree_options_multidimensional_filtration>::Simplex_handle":
+	cdef cppclass Simplex_tree_multi_simplex_handle "Gudhi::multiparameter::Simplex_tree_interface_multi<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration>::Simplex_handle":
 		pass
 
-	cdef cppclass Simplex_tree_multi_simplices_iterator "Gudhi::Simplex_tree_interface_multi<Gudhi::Simplex_tree_options_multidimensional_filtration>::Complex_simplex_iterator":
+	cdef cppclass Simplex_tree_multi_simplices_iterator "Gudhi::multiparameter::Simplex_tree_interface_multi<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration>::Complex_simplex_iterator":
 		Simplex_tree_multi_simplices_iterator() nogil
 		Simplex_tree_multi_simplex_handle& operator*() nogil
 		Simplex_tree_multi_simplices_iterator operator++() nogil
 		bint operator!=(Simplex_tree_multi_simplices_iterator) nogil
 
-	cdef cppclass Simplex_tree_multi_skeleton_iterator "Gudhi::Simplex_tree_interface_multi<Gudhi::Simplex_tree_options_multidimensional_filtration>::Skeleton_simplex_iterator":
+	cdef cppclass Simplex_tree_multi_skeleton_iterator "Gudhi::multiparameter::Simplex_tree_interface_multi<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration>::Skeleton_simplex_iterator":
 		Simplex_tree_multi_skeleton_iterator() nogil
 		Simplex_tree_multi_simplex_handle& operator*() nogil
 		Simplex_tree_multi_skeleton_iterator operator++() nogil
 		bint operator!=(Simplex_tree_multi_skeleton_iterator) nogil
 
-	cdef cppclass Simplex_tree_multi_boundary_iterator "Gudhi::Simplex_tree_interface_multi<Gudhi::Simplex_tree_options_multidimensional_filtration>::Boundary_simplex_iterator":
+	cdef cppclass Simplex_tree_multi_boundary_iterator "Gudhi::multiparameter::Simplex_tree_interface_multi<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration>::Boundary_simplex_iterator":
 		Simplex_tree_multi_boundary_iterator() nogil
 		Simplex_tree_multi_simplex_handle& operator*() nogil
 		Simplex_tree_multi_boundary_iterator operator++() nogil
 		bint operator!=(Simplex_tree_multi_boundary_iterator) nogil
 
 
-	cdef cppclass Simplex_tree_multi_interface "Gudhi::Simplex_tree_interface_multi<Gudhi::Simplex_tree_options_multidimensional_filtration>":
+	cdef cppclass Simplex_tree_multi_interface "Gudhi::multiparameter::Simplex_tree_interface_multi<Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration>":
 		Simplex_tree_multi_interface() nogil
 		Simplex_tree_multi_interface(Simplex_tree_multi_interface&) nogil
 		value_type* simplex_filtration(const vector[int]& simplex) nogil

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace Gudhi::multi_filtrations{
+namespace Gudhi::multiparameter::multi_filtrations{
 
 template<typename T=float>
 class Finitely_critical_multi_filtration : public std::vector<T> {

@@ -31,5 +31,7 @@ struct SimplexTreeOptions {
   static const bool link_nodes_by_label;
   /// If true, Simplex_handle will not be invalidated after insertions or removals.
   static const bool stable_simplex_handles;
+
+  static const bool is_multi_parameter;
 };
 

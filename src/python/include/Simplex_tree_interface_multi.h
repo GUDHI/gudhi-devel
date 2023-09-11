@@ -11,13 +11,9 @@
 
 #pragma once
 
-//#include <gudhi/graph_simplicial_complex.h>
-//#include <gudhi/distance_functions.h>
-//#include <gudhi/Points_off_io.h>
-//#include <gudhi/Flag_complex_edge_collapser.h>
+
 #include "Simplex_tree_interface.h"
 #include "Simplex_tree_multi.h"
-// #include <omp.h>
 #include "multi_filtrations/finitely_critical_filtrations.h"
 
 #include <iostream>
@@ -27,7 +23,7 @@
 #include <iterator>  // for std::distance
 #include <span>
 
-namespace Gudhi {
+namespace Gudhi::multiparameter {
 
 template<typename SimplexTreeOptions = Simplex_tree_options_multidimensional_filtration>
 class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_options_multidimensional_filtration> {

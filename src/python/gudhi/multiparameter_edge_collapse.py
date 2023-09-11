@@ -1,10 +1,10 @@
 from tqdm import tqdm
+from filtration_domination import remove_strongly_filtration_dominated, remove_filtration_dominated
 
 def _collapse_edge_list(edges, num:int=0, full:bool=False, strong:bool=False, progress:bool=False):
 	"""
 	Given an edge list defining a 1 critical 2 parameter 1 dimensional simplicial complex, simplificates this filtered simplicial complex, using filtration-domination's edge collapser.
 	"""
-	from filtration_domination import remove_strongly_filtration_dominated, remove_filtration_dominated
 	n = len(edges)
 	if full:
 		num = 100
