@@ -185,7 +185,7 @@ if(PYTHONINTERP_FOUND)
     if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
-    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_persline', ")
+    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
 
     # from windows vcpkg eigen 3.4.0#2 : build fails with
     # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -257,8 +257,12 @@ if(PYTHONINTERP_FOUND)
 
     # Specific for Mac
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=10.14', ")
-        set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=10.14', ")
+      # CMAKE_OSX_DEPLOYMENT_TARGET is always set on OSx
+      # but it can be modified by the user by setting MACOSX_DEPLOYMENT_TARGET environment variable
+      if(CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
+        set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
+      endif()
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     # Strip dynamic libraries in release mode for smaller pip packages under linux

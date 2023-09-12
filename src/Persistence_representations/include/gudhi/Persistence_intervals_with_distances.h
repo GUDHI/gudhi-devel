@@ -31,7 +31,7 @@ class Persistence_intervals_with_distances : public Persistence_intervals {
    * which is infinity Wasserstein distance. Therefore any power which is not the default std::numeric_limits< double
    *>::max() will be ignored and an
    * exception will be thrown.
-   * The last parameter, tolerance, it is an additiv error of the approimation, set by default to zero.
+   * The last parameter, tolerance, it is an additive error of the approximation, set by default to zero.
   **/
   double distance(const Persistence_intervals_with_distances& second, double power = std::numeric_limits<double>::max(),
                   double tolerance = (std::numeric_limits<double>::min)()) const {

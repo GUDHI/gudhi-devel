@@ -31,9 +31,22 @@
 
 using namespace Gudhi;
 
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>> list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
@@ -88,7 +101,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_when_empty, typeST, list_of_tested_va
   typeVectorVertex simplexVectorEmpty;
   BOOST_CHECK(simplexVectorEmpty.empty() == true);
   typePairSimplexBool returnEmptyValue = st.insert_simplex(simplexVectorEmpty, 0.0);
-  BOOST_CHECK(returnEmptyValue.first == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(returnEmptyValue.first == typeST::null_simplex());
   BOOST_CHECK(returnEmptyValue.second == true);
 
   test_empty_simplex_tree(st);
@@ -157,7 +170,7 @@ void test_simplex_tree_insert_returns_true(const typePairSimplexBool& returnValu
   BOOST_CHECK(returnValue.second == true);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   typename typeST::Simplex_handle shReturned = returnValue.first;
-  BOOST_CHECK(shReturned != typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned != typeST::null_simplex());
 }
 
 // Global variables
@@ -312,7 +325,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(returnValue.second == false);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   typename typeST::Simplex_handle shReturned = returnValue.first;
-  BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned == typeST::null_simplex());
   std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
@@ -327,7 +340,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(returnValue.second == false);
   // Simplex_handle = boost::container::flat_map< typeST::Vertex_handle, Node >::iterator
   shReturned = returnValue.first;
-  BOOST_CHECK(shReturned == typename typeST::Simplex_handle(nullptr));
+  BOOST_CHECK(shReturned == typeST::null_simplex());
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
 
@@ -918,6 +931,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st1.insert_graph(g);
   BOOST_CHECK(st1.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst1;
+  sst1.insert_graph(g);
+  BOOST_CHECK(sst1.num_simplices() == 6);
+
   // edges can have multiplicity in the graph unless we replace the first vecS with (hash_)setS
   add_edge(1, 0, 1.1, g);
   add_edge(1, 2, 3.3, g);
@@ -929,13 +946,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st2.insert_graph(g);
   BOOST_CHECK(st2.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst2;
+  sst2.insert_graph(g);
+  BOOST_CHECK(sst2.num_simplices() == 6);
+
   std::clog << "st1 is" << std::endl;
   std::clog << st1 << std::endl;
 
   std::clog << "st2 is" << std::endl;
   std::clog << st2 << std::endl;
 
+  std::clog << "sst1 is" << std::endl;
+  std::clog << sst1 << std::endl;
+
+  std::clog << "sst2 is" << std::endl;
+  std::clog << sst2 << std::endl;
+
   BOOST_CHECK(st1 == st2);
+  BOOST_CHECK(sst1 == sst2);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested_variants) {
