@@ -30,5 +30,5 @@ if(TARGET gmp::gmpxx AND TARGET gmp::gmp)
   # Unitary tests
   gudhi_add_boost_test(Persistent_cohomology_test_unit_multi_field)
 
-endif(GMPXX_FOUND AND GMP_FOUND)
+endif()
 

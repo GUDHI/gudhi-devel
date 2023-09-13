@@ -81,6 +81,12 @@ if(WITH_GUDHI_USE_TBB)
 endif()
 
 find_package(Eigen3 3.1.0)
+if (TARGET Eigen3::Eigen)
+  message("++ TARGET Eigen3::Eigen found")
+else()
+  message("++ TARGET Eigen3::Eigen NOT found")
+endif ()
+
 if (EIGEN3_FOUND)
   include( ${EIGEN3_USE_FILE} )
 endif (EIGEN3_FOUND)

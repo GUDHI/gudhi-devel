@@ -71,9 +71,10 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         conan profile detect
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        conan install . --output-folder=build --build=missing
+        conan install . --output-folder=conan-build --build=missing --options=boost/1.82.0:shared=True  --options=mpfr/4.1.0:shared=True
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd build
+        type conan_toolchain.cmake
         call "conanbuild.bat"
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeConanFlags) $(cmakeFlags) ..
