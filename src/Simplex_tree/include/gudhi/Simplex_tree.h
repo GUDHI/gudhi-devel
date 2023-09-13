@@ -973,7 +973,7 @@ class Simplex_tree {
             // assign_filtration(simplex_one, new_filtration);
           }
         }
-        else{
+        else{ // non-multiparameter
           assign_filtration(simplex_one, filt);
         }
         
@@ -1586,7 +1586,7 @@ class Simplex_tree {
     for (auto& simplex : boost::adaptors::reverse(sib->members())) {
       // Find the maximum filtration value in the border
       Boundary_simplex_range boundary = boundary_simplex_range(&simplex);
-      typename SimplexTreeOptions::Filtration_value max_filt_border_value {};
+      typename SimplexTreeOptions::Filtration_value max_filt_border_value;
       if constexpr (SimplexTreeOptions::is_multi_parameter){
         // in that case, we assume that Filtration_value has a `push_to` member to handle this.
         max_filt_border_value = typename SimplexTreeOptions::Filtration_value(this->number_of_parameters_);
