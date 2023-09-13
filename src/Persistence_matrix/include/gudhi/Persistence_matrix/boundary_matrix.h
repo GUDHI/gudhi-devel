@@ -73,12 +73,12 @@ public:
 
 	Boundary_matrix& operator=(const Boundary_matrix& other);
 	friend void swap(Boundary_matrix& matrix1, Boundary_matrix& matrix2){
+		swap(static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix1),
+			 static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix2));
 		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
 		swap(static_cast<typename Master_matrix::Base_pairing_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
-		swap(static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix1),
-			 static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
 		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 
@@ -126,7 +126,6 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix()
 	  swap_opt(matrix_),
 	  pair_opt(matrix_, dim_opt::maxDim_),
 	  ra_opt(),
-	  matrix_(), 
 	  nextInsertIndex_(0)
 {}
 
@@ -137,11 +136,9 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 	  swap_opt(matrix_, orderedBoundaries.size()),
 	  pair_opt(matrix_, dim_opt::maxDim_),
 	  ra_opt(orderedBoundaries.size()),
-	  matrix_(/* !Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_row_access ? 0 : orderedBoundaries.size() */),
 	  nextInsertIndex_(orderedBoundaries.size())
 {
-	// if constexpr (!Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_row_access)
-		matrix_.reserve(orderedBoundaries.size());
+	matrix_.reserve(orderedBoundaries.size());
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); i++){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
@@ -157,7 +154,6 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 			if constexpr (Master_matrix::Option_list::has_row_access){
 				matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_);
 			} else {
-				// matrix_[i] = Column_type(orderedBoundaries[i]);
 				matrix_.emplace_back(orderedBoundaries[i]);
 			}
 			if constexpr (activeDimOption){
@@ -186,7 +182,6 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &ma
 	  swap_opt(matrixToCopy),
 	  pair_opt(matrixToCopy),
 	  ra_opt(matrixToCopy),
-	  matrix_(),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
 	if constexpr (activeSwapOption)

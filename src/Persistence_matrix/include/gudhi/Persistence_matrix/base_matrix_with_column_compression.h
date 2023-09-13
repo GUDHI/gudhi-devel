@@ -154,14 +154,6 @@ public:
 	void print();  //for debug
 
 private:
-	template<class Field_element_type>
-	struct CellPairComparator {
-		bool operator()(const std::pair<index,Field_element_type>& p1, const std::pair<index,Field_element_type>& p2) const
-		{
-			return p1.first < p2.first;
-		};
-	};
-
 	//The disposer object function for boost intrusive container
 	struct delete_disposer
 	{
@@ -179,7 +171,7 @@ private:
 	using tmp_column_type = typename std::conditional<
 								Master_matrix::Option_list::is_z2,
 								std::set<index>,
-								std::set<std::pair<index,Field_element_type>,CellPairComparator<Field_element_type> >
+								std::set<std::pair<index,Field_element_type>,typename Master_matrix::CellPairComparator>
 							>::type;
 	using col_dict_type = boost::intrusive::set<Column_type, boost::intrusive::constant_time_size<false> >;
 

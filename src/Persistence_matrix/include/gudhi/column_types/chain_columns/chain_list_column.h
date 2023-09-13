@@ -44,6 +44,9 @@ public:
 	List_chain_column(index columnIndex, const Chain_type& chain, dimension_type dimension, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	List_chain_column(const List_chain_column& column);
 	List_chain_column(const List_chain_column& column, index columnIndex);
+	List_chain_column(const List_chain_column& column, Dictionnary_type& pivotToColumnIndex);
+	template<class Row_container_type>
+	List_chain_column(const List_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	List_chain_column(List_chain_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -69,6 +72,10 @@ public:
 
 	List_chain_column& multiply_and_add(const Field_element_type& v, List_chain_column& column);
 	List_chain_column& multiply_and_add(List_chain_column& column, const Field_element_type& v);
+
+	void set_pivot_to_column_map(Dictionnary_type* pivotToColumnIndex){
+		pivotToColumnIndex_ = pivotToColumnIndex;
+	};
 
 	List_chain_column& operator=(List_chain_column other);
 
@@ -138,6 +145,25 @@ inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_acces
 		const List_chain_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
+		const List_chain_column& column, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column)),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline List_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::List_chain_column(
+		const List_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
 	  pivot_(column.pivot_),
 	  pairedColumn_(column.pairedColumn_)
 {}

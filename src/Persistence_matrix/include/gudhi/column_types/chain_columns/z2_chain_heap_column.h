@@ -41,6 +41,7 @@ public:
 	template<class Chain_type>
 	Z2_heap_chain_column(const Chain_type& chain, dimension_type dimension, Dictionnary_type& pivotToColumnIndex);
 	Z2_heap_chain_column(const Z2_heap_chain_column& column);
+	Z2_heap_chain_column(const Z2_heap_chain_column& column, Dictionnary_type& pivotToColumnIndex);
 	Z2_heap_chain_column(Z2_heap_chain_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -62,6 +63,10 @@ public:
 		column *= v;
 		return column;
 	}
+
+	void set_pivot_to_column_map(Dictionnary_type* pivotToColumnIndex){
+		pivotToColumnIndex_ = pivotToColumnIndex;
+	};
 
 	Z2_heap_chain_column& operator=(Z2_heap_chain_column other);
 
@@ -102,6 +107,15 @@ inline Z2_heap_chain_column<Dictionnary_type>::Z2_heap_chain_column(
 		const Z2_heap_chain_column& column)
 	: Base(static_cast<const Base&>(column)),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type>
+inline Z2_heap_chain_column<Dictionnary_type>::Z2_heap_chain_column(
+		const Z2_heap_chain_column& column, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column)),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
 	  pivot_(column.pivot_),
 	  pairedColumn_(column.pairedColumn_)
 {}

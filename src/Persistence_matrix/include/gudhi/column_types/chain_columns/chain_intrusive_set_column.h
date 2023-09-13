@@ -45,6 +45,9 @@ public:
 	Intrusive_set_chain_column(index columnIndex, const Chain_type& chain, dimension_type dimension, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	Intrusive_set_chain_column(const Intrusive_set_chain_column& column);
 	Intrusive_set_chain_column(const Intrusive_set_chain_column& column, index columnIndex);
+	Intrusive_set_chain_column(const Intrusive_set_chain_column& column, Dictionnary_type& pivotToColumnIndex);
+	template<class Row_container_type>
+	Intrusive_set_chain_column(const Intrusive_set_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	Intrusive_set_chain_column(Intrusive_set_chain_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -70,6 +73,10 @@ public:
 
 	Intrusive_set_chain_column& multiply_and_add(const Field_element_type& v, Intrusive_set_chain_column& column);
 	Intrusive_set_chain_column& multiply_and_add(Intrusive_set_chain_column& column, const Field_element_type& v);
+
+	void set_pivot_to_column_map(Dictionnary_type* pivotToColumnIndex){
+		pivotToColumnIndex_ = pivotToColumnIndex;
+	};
 
 	Intrusive_set_chain_column& operator=(const Intrusive_set_chain_column& other);
 
@@ -139,6 +146,25 @@ inline Intrusive_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,
 		const Intrusive_set_chain_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+inline Intrusive_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::Intrusive_set_chain_column(
+		const Intrusive_set_chain_column& column, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column)),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Field_element_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Intrusive_set_chain_column<Dictionnary_type,Field_element_type,Cell_type,Row_access_option>::Intrusive_set_chain_column(
+		const Intrusive_set_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
 	  pivot_(column.pivot_),
 	  pairedColumn_(column.pairedColumn_)
 {}

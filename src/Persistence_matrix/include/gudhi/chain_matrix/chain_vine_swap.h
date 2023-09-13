@@ -119,6 +119,24 @@ inline index Chain_vine_swap<Master_matrix>::vine_swap(index columnIndex1, index
 	index rowIndex1 = pivotToPosition_.at(pivot1);
 	index rowIndex2 = pivotToPosition_.at(pivot2);
 
+	std::cout << "#1\n";
+	std::cout << columnIndex1 << "\n";
+	std::cout << pivot1 << "\n";
+	std::cout << rowIndex1 << "\n";
+	std::cout << _is_negative_in_pair(rowIndex1) << "\n";
+	std::cout << (_death(pivot1) != -1) << "\n";
+	std::cout << "#2\n";
+	std::cout << columnIndex2 << "\n";
+	std::cout << pivot2 << "\n";
+	std::cout << rowIndex2 << "\n";
+	std::cout << _is_negative_in_pair(rowIndex2) << "\n";
+	std::cout << (_death(pivot2) != -1) << "\n";
+	std::cout << "birth: " << (_birth(pivot1) < _birth(pivot2)) << "\n";
+	std::cout << "death: " << (_death(pivot1) < _death(pivot2)) << "\n";
+	if (_is_negative_in_pair(rowIndex1) && _is_negative_in_pair(rowIndex2))
+		std::cout << "pivots: " << (matrix_->at(matrix_->at(columnIndex1).get_paired_chain_index()).get_pivot() < matrix_->at(matrix_->at(columnIndex2).get_paired_chain_index()).get_pivot()) << "\n";
+	std::cout << "\n";
+
 	assert(std::abs(static_cast<int>(rowIndex2) - static_cast<int>(rowIndex1)) == 1 
 			&& "Columns to be swaped need to be adjacent in the 'real' matrix.");
 

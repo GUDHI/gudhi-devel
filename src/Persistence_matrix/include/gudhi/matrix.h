@@ -33,17 +33,21 @@
 #include "Persistence_matrix/base_matrix_row_access.h"
 // #include "boundary_matrix/base_swap.h"
 // #include "boundary_matrix/base_pairing.h"
+#include "Persistence_matrix/base_swap.h"
+#include "Persistence_matrix/base_pairing.h"
 // #include "boundary_matrix/ru_vine_swap.h"
 // #include "boundary_matrix/custom_ru_vine_swap.h"
 // #include "boundary_matrix/ru_rep_cycles.h"
-#include "Persistence_matrix/base_swap.h"
-#include "Persistence_matrix/base_pairing.h"
+#include "Persistence_matrix/ru_pairing.h"
 #include "Persistence_matrix/ru_vine_swap.h"
 #include "Persistence_matrix/ru_rep_cycles.h"
-#include "chain_matrix/chain_pairing.h"
-#include "chain_matrix/chain_vine_swap.h"
-#include "chain_matrix/custom_chain_vine_swap.h"
-#include "chain_matrix/chain_rep_cycles.h"
+// #include "chain_matrix/chain_pairing.h"
+// #include "chain_matrix/chain_vine_swap.h"
+// #include "chain_matrix/custom_chain_vine_swap.h"
+// #include "chain_matrix/chain_rep_cycles.h"
+#include "Persistence_matrix/chain_pairing.h"
+#include "Persistence_matrix/chain_vine_swap.h"
+#include "Persistence_matrix/chain_rep_cycles.h"
 
 // #include "base_matrix/base_matrix_0000.h"
 // #include "base_matrix/base_matrix_0001.h"
@@ -63,10 +67,11 @@
 // #include "boundary_matrix/ru_matrix_0010.h"
 // #include "boundary_matrix/ru_matrix_0011.h"
 #include "Persistence_matrix/ru_matrix.h"
-#include "chain_matrix/chain_matrix_0000.h"
-#include "chain_matrix/chain_matrix_0001.h"
-#include "chain_matrix/chain_matrix_0010.h"
-#include "chain_matrix/chain_matrix_0011.h"
+// #include "chain_matrix/chain_matrix_0000.h"
+// #include "chain_matrix/chain_matrix_0001.h"
+// #include "chain_matrix/chain_matrix_0010.h"
+// #include "chain_matrix/chain_matrix_0011.h"
+#include "Persistence_matrix/chain_matrix.h"
 
 #include "gudhi/column_types/list_column.h"
 #include "gudhi/column_types/set_column.h"
@@ -131,6 +136,13 @@ public:
 		dimension_type dim;
 		int birth;
 		int death;
+	};
+
+	struct CellPairComparator {
+		bool operator()(const std::pair<index,Field_type>& p1, const std::pair<index,Field_type>& p2) const
+		{
+			return p1.first < p2.first;
+		};
 	};
 
 	using Non_intrusive_cell_type = typename std::conditional<
@@ -490,19 +502,7 @@ public:
 
 	using RU_matrix_type = RU_matrix<Matrix<Options> >;
 
-	using Chain_matrix_type = typename std::conditional<
-											Options::has_removable_columns,
-											typename std::conditional<
-												Options::has_row_access,
-												Chain_matrix_with_row_access_with_removals<Matrix<Options> >,
-												Chain_matrix_with_removals<Matrix<Options> >
-											>::type,
-											typename std::conditional<
-												Options::has_row_access,
-												Chain_matrix_with_row_access<Matrix<Options> >,
-												Chain_matrix<Matrix<Options> >
-											>::type
-										>::type;
+	using Chain_matrix_type = Chain_matrix<Matrix<Options> >;
 
 	struct Dummy_base_swap{
 		Dummy_base_swap& operator=([[maybe_unused]] Dummy_base_swap other){return *this;}
@@ -573,8 +573,6 @@ public:
 		Dummy_chain_pairing(){}
 		Dummy_chain_pairing([[maybe_unused]] const Dummy_chain_pairing& matrixToCopy){}
 		Dummy_chain_pairing([[maybe_unused]] Dummy_chain_pairing&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_pairing_option = typename std::conditional<
@@ -590,17 +588,11 @@ public:
 		Dummy_chain_vine_swap([[maybe_unused]] column_container_type& matrix){}
 		Dummy_chain_vine_swap([[maybe_unused]] const Dummy_chain_vine_swap& matrixToCopy){}
 		Dummy_chain_vine_swap([[maybe_unused]] Dummy_chain_vine_swap&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_vine_swap_option = typename std::conditional<
 											Options::has_vine_update,
-											typename std::conditional<
-												Options::has_column_pairings,
-												Chain_vine_swap<Matrix<Options>>,
-												Custom_chain_vine_swap<Matrix<Options>>
-											>::type,
+											Chain_vine_swap<Matrix<Options> >,
 											Dummy_chain_vine_swap
 										>::type;
 
@@ -626,8 +618,6 @@ public:
 		Dummy_chain_representative_cycles([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dictionnary_type<index>& pivotToPosition){}
 		Dummy_chain_representative_cycles([[maybe_unused]] const Dummy_chain_representative_cycles& matrixToCopy){}
 		Dummy_chain_representative_cycles([[maybe_unused]] Dummy_chain_representative_cycles&& other) noexcept{}
-
-		static constexpr bool isActive_ = false;
 	};
 
 	using Chain_representative_cycles_option = typename std::conditional<

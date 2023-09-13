@@ -43,6 +43,9 @@ public:
 	Z2_set_chain_column(index columnIndex, const Chain_type& chain, dimension_type dimension, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	Z2_set_chain_column(const Z2_set_chain_column& column);
 	Z2_set_chain_column(const Z2_set_chain_column& column, index columnIndex);
+	Z2_set_chain_column(const Z2_set_chain_column& column, Dictionnary_type& pivotToColumnIndex);
+	template<class Row_container_type>
+	Z2_set_chain_column(const Z2_set_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex);
 	Z2_set_chain_column(Z2_set_chain_column&& column) noexcept;
 
 	int get_pivot() const;
@@ -64,6 +67,10 @@ public:
 		column *= v;
 		return column;
 	}
+
+	void set_pivot_to_column_map(Dictionnary_type* pivotToColumnIndex){
+		pivotToColumnIndex_ = pivotToColumnIndex;
+	};
 
 	Z2_set_chain_column& operator=(Z2_set_chain_column other);
 
@@ -133,6 +140,25 @@ inline Z2_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_set
 		const Z2_set_chain_column& column, index columnIndex)
 	: Base(static_cast<const Base&>(column), columnIndex),
 	  pivotToColumnIndex_(column.pivotToColumnIndex_),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+inline Z2_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_set_chain_column(
+		const Z2_set_chain_column& column, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column)),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
+	  pivot_(column.pivot_),
+	  pairedColumn_(column.pairedColumn_)
+{}
+
+template<class Dictionnary_type, class Cell_type, class Row_access_option>
+template<class Row_container_type>
+inline Z2_set_chain_column<Dictionnary_type,Cell_type,Row_access_option>::Z2_set_chain_column(
+		const Z2_set_chain_column& column, index columnIndex, Row_container_type &rowContainer, Dictionnary_type& pivotToColumnIndex)
+	: Base(static_cast<const Base&>(column), columnIndex, rowContainer),
+	  pivotToColumnIndex_(&pivotToColumnIndex),
 	  pivot_(column.pivot_),
 	  pairedColumn_(column.pairedColumn_)
 {}
