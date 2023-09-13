@@ -1359,7 +1359,7 @@ class Simplex_tree {
     * @warning If the edges and vertices are not inserted in the order of their
     * filtration values, the method `make_filtration_non_decreasing()` has to be
     * called at the end of the insertions to restore the intended filtration.
-    * @warning Different from other insertion methods, if a vertex or an edges
+    * @warning Different from other insertion methods, if a vertex or an edge
     * was already inserted in the simplex, it will be ignored and the filtration
     * values will not change.
     */
