@@ -103,7 +103,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	return (result.second);
   }
    typename SimplexTreeOptions::value_type* simplex_filtration(const Simplex& simplex) {
-	auto& filtration = Base::filtration(Base::find(simplex));
+	auto& filtration = Base::filtration_mutable(Base::find(simplex));
 	return &filtration[0];
   }
 
@@ -116,7 +116,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	auto it = Base::simplex_vertex_range(f_simplex);
 	Simplex simplex(it.begin(), it.end());
 	std::reverse(simplex.begin(), simplex.end());
-	return std::make_pair(std::move(simplex), &Base::filtration(f_simplex)[0]);
+	return std::make_pair(std::move(simplex), &Base::filtration_mutable(f_simplex)[0]);
   }
 
   Filtered_simplices get_star(const Simplex& simplex) {
@@ -126,7 +126,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	  for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
 		simplex_star.insert(simplex_star.begin(), vertex);
 	  }
-	  star.push_back(std::make_pair(simplex_star, &Base::filtration(f_simplex)[0]));
+	  star.push_back(std::make_pair(simplex_star, &Base::filtration_mutable(f_simplex)[0]));
 	}
 	return star;
   }
@@ -138,7 +138,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	  for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
 		simplex_coface.insert(simplex_coface.begin(), vertex);
 	  }
-	  cofaces.push_back(std::make_pair(simplex_coface, &Base::filtration(f_simplex)[0]));
+	  cofaces.push_back(std::make_pair(simplex_coface, &Base::filtration_mutable(f_simplex)[0]));
 	}
 	return cofaces;
   }
@@ -171,13 +171,13 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
   void fill_lowerstar(const std::vector<options_multi::value_type>& filtration, int axis){
 	using value_type=options_multi::value_type;
 	for (auto &SimplexHandle : Base::complex_simplex_range()){
-		std::vector<value_type> current_birth = Base::filtration(SimplexHandle);
+		std::vector<value_type>& current_birth = Base::filtration_mutable(SimplexHandle);
 		value_type to_assign = -1*std::numeric_limits<value_type>::infinity();
 		for (auto vertex : Base::simplex_vertex_range(SimplexHandle)){
 			to_assign = std::max(filtration[vertex], to_assign);
 		}
 		current_birth[axis] = to_assign;
-		Base::assign_filtration(SimplexHandle, current_birth);
+		// Base::assign_filtration(SimplexHandle, current_birth);
 	}
   }
   using simplices_list = std::vector<std::vector<int>>;
@@ -205,7 +205,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 			std::pair<int,int> simplex;
 			auto it = Base::simplex_vertex_range(simplexHandle).begin();
 			simplex = {*it, *(++it)};
-			auto f = Base::filtration(simplexHandle);
+			const auto& f = Base::filtration(simplexHandle);
 			simplex_list.push_back({simplex, {f[0], f[1]}});
 		}
 	}
@@ -249,9 +249,10 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	void resize_all_filtrations(int num){ //TODO : that is for 1 critical filtrations
 		if (num < 0)	return;
 		for(const auto &SimplexHandle : Base::complex_simplex_range()){
-			std::vector<options_multi::value_type> new_filtration_value = Base::filtration(SimplexHandle);
-			new_filtration_value.resize(num);
-			Base::assign_filtration(SimplexHandle, new_filtration_value);
+			// std::vector<options_multi::value_type> new_filtration_value = Base::filtration(SimplexHandle);
+			// new_filtration_value.resize(num);
+			// Base::assign_filtration(SimplexHandle, new_filtration_value);
+			Base::filtration_mutable(SimplexHandle).resize(num);;
 		}
 	}
 

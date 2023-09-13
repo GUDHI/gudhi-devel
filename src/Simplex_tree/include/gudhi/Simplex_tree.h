@@ -153,6 +153,7 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_{} {}
     void assign_filtration(const Filtration_value& f) { filt_ = f; }
     // Filtration_value filtration() const { return filt_; }
+    const Filtration_value& filtration() const { return filt_; }
     Filtration_value& filtration() { return filt_; }
    private:
     Filtration_value filt_;
@@ -160,7 +161,7 @@ class Simplex_tree {
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
     void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) { GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them"); }
-    Filtration_value& filtration()  { return inf_; }
+    const Filtration_value& filtration() const  { return {}; }
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
     Filtration_simplex_base_dummy>::type Filtration_simplex_base;
@@ -602,7 +603,14 @@ class Simplex_tree {
    * Called on the null_simplex, it returns infinity.
    * If SimplexTreeOptions::store_filtration is false, returns 0.
    */
-  static Filtration_value& filtration(Simplex_handle sh){
+  static const Filtration_value& filtration(Simplex_handle sh){
+    if (sh != null_simplex()) {
+      return sh->second.filtration();
+    } else {
+      return inf_;
+    }
+  }
+  static Filtration_value& filtration_mutable(Simplex_handle sh){
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
