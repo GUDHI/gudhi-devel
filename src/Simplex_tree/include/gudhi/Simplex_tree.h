@@ -54,6 +54,7 @@
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
 #include <unordered_map>
+#include <iterator>  // for std::prev
 
 namespace Gudhi {
 
