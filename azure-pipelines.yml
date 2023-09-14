@@ -71,9 +71,10 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         conan profile detect
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        conan install . --output-folder=conan-build --build=missing --options=boost/1.82.0:shared=True  --options=mpfr/4.1.0:shared=True
+        conan install . --output-folder=build --build=missing --options=boost/1.82.0:shared=True  --options=mpfr/4.1.0:shared=True
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd build
+        dir
         type conan_toolchain.cmake
         call "conanbuild.bat"
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
