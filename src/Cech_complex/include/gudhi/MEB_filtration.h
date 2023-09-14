@@ -82,7 +82,7 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       cache_.emplace_back(std::move(c), std::move(r));
     }
   };
-  complex.for_each_simplex_with_dim(fun);
+  complex.for_each_simplex(fun);
   // TODO: when !exact, how do we ensure that the value is indeed larger
   // than for the faces? Cech_complex also looks at the max of the faces,
   // given by expansion. We would need to do compute this max as well, and
