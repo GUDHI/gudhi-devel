@@ -1012,11 +1012,15 @@ class Simplex_tree {
    *
    * Any insertion, deletion or change of filtration value invalidates this cache,
    * which can be cleared with clear_filtration().  */
-  void initialize_filtration() {
+  void initialize_filtration(bool ignore_infinite_values = false) {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
-    for (Simplex_handle sh : complex_simplex_range())
+    for (Simplex_handle sh : complex_simplex_range()) {
+      if (ignore_infinite_values &&
+          std::numeric_limits<Filtration_value>::has_infinity &&
+          filtration(sh) == std::numeric_limits<Filtration_value>::infinity()) continue;
       filtration_vect_.push_back(sh);
+    }
 
     /* We use stable_sort here because with libstdc++ it is faster than sort.
      * is_before_in_filtration is now a total order, but we used to call
