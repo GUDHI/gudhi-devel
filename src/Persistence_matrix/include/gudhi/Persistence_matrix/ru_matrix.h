@@ -12,7 +12,7 @@
 #define PM_RU_MATRIX_H
 
 #include <vector>
-#include <utility>	//std::exchange
+#include <utility>	//std::swap, std::move & std::exchange
 #include <iostream>	//print() only
 
 namespace Gudhi {

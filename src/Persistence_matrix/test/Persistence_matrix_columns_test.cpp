@@ -23,9 +23,10 @@
 
 #include "gudhi/utilities/Zp_field.h"
 #include "gudhi/utilities/utilities.h"
-#include "gudhi/column_types/row_access.h"
+// #include "gudhi/column_types/row_access.h"
 // #include "gudhi/column_types/cell.h"
 #include "gudhi/Persistence_matrix/columns/cell_types.h"
+#include "gudhi/Persistence_matrix/columns/row_access.h"
 
 #include "gudhi/column_types/list_column.h"
 #include "gudhi/column_types/set_column.h"
@@ -143,6 +144,7 @@ struct z2_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = false;
 	static const bool has_intrusive_rows = false;
+	static const bool has_removable_rows = false;
 };
 
 template<Column_types col_type>
@@ -152,6 +154,7 @@ struct z2_ra_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
+	static const bool has_removable_rows = false;
 };
 
 template<Column_types col_type>
@@ -161,6 +164,7 @@ struct z2_ra_i_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
+	static const bool has_removable_rows = false;
 };
 
 template<Column_types col_type>
@@ -170,6 +174,7 @@ struct z5_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = false;
 	static const bool has_intrusive_rows = false;
+	static const bool has_removable_rows = false;
 };
 
 template<Column_types col_type>
@@ -179,6 +184,7 @@ struct z5_ra_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = false;
+	static const bool has_removable_rows = false;
 };
 
 template<Column_types col_type>
@@ -188,6 +194,7 @@ struct z5_ra_i_options{
 	static const Column_types column_type = col_type;
 	static const bool has_row_access = true;
 	static const bool has_intrusive_rows = true;
+	static const bool has_removable_rows = false;
 };
 
 template<class Options>
@@ -285,7 +292,7 @@ struct Mini_matrix{
 
 	using Row_access_option = typename std::conditional<
 											Options::has_row_access,
-											Row_access<row_container_type, Cell_type, Options::has_intrusive_rows, false>,
+											Row_access<Mini_matrix<Options> >,
 											Dummy_row_access
 										>::type;
 };
@@ -731,7 +738,7 @@ void common_5_test_with_rows(Rows &rows){
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_5_non_intr, Column, list_of_5_columns_with_row) {
-	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type rows;	//defined here to ensure it is destroyed after the columns
 	common_5_test_with_rows<Column>(rows);
 }
 
@@ -751,7 +758,7 @@ void common_5_chain_test_with_rows(Rows &rows){
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_5_non_intr, Column, list_of_5_chain_columns_with_row) {
-	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type rows;	//defined here to ensure it is destroyed after the columns
 	common_5_chain_test_with_rows<Column>(rows);
 }
 
@@ -985,7 +992,7 @@ void common_2_test_with_rows(Rows &rows){
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_2_non_intr, Column, list_of_2_columns_with_row) {
-	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type rows;	//defined here to ensure it is destroyed after the columns
 	common_2_test_with_rows<Column>(rows);
 }
 
@@ -1005,7 +1012,7 @@ void common_2_chain_test_with_rows(Rows &rows){
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_2_non_intr, Column, list_of_2_chain_columns_with_row) {
-	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type rows;	//defined here to ensure it is destroyed after the columns
 	common_2_chain_test_with_rows<Column>(rows);
 }
 
@@ -1291,7 +1298,7 @@ void row_methods_test(Row_container_type& row_cont) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_methods_non_intr, Column, list_of_5_columns_with_row) {
-	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type row_cont;	//defined here to ensure it is destroyed after the columns
 	row_methods_test<Column>(row_cont);
 }
 
@@ -1318,7 +1325,7 @@ void chain_row_methods_test(Row_container_type& row_cont) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_methods_non_intr, Column, list_of_5_chain_columns_with_row) {
-	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type row_cont;	//defined here to ensure it is destroyed after the columns
 	chain_row_methods_test<Column>(row_cont);
 }
 
@@ -1391,7 +1398,7 @@ void z2_row_methods_test(Row_container_type& row_cont) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_methods_non_intr, Column, list_of_2_columns_with_row) {
-	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type row_cont;	//defined here to ensure it is destroyed after the columns
 	z2_row_methods_test<Column>(row_cont);
 }
 
@@ -1418,7 +1425,7 @@ void z2_chain_row_methods_test(Row_container_type& row_cont) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_methods_non_intr, Column, list_of_2_chain_columns_with_row) {
-	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
+	typename Column::Row_access::Row_container_type row_cont;	//defined here to ensure it is destroyed after the columns
 	z2_chain_row_methods_test<Column>(row_cont);
 }
 
@@ -1472,7 +1479,7 @@ void pairing_test_with_chain_rows(Rows &rows){
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_non_intr, Column, list_of_pairing_chain_columns_with_row) {
-	typename Column::Row_access::row_container rows;
+	typename Column::Row_access::Row_container_type rows;
 	pairing_test_with_chain_rows<Column>(rows);
 }
 

@@ -28,7 +28,8 @@
 #include "options.h"
 // #include "column_types/cell.h"
 #include "Persistence_matrix/columns/cell_types.h"
-#include "column_types/row_access.h"
+// #include "column_types/row_access.h"
+#include "Persistence_matrix/columns/row_access.h"
 
 #include "Persistence_matrix/matrix_dimension_holders.h"
 #include "Persistence_matrix/base_matrix_row_access.h"
@@ -191,82 +192,6 @@ public:
 										Dummy_cell_field_element_mixin,
 										Cell_field_element<Field_type>
 									>::type;
-
-	// using Non_intrusive_cell_type = typename std::conditional<
-	// 							Options::is_z2,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Z2_intrusive_row_cell,
-	// 									Z2_row_cell
-	// 								>::type,
-	// 								Z2_base_cell
-	// 							>::type,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Intrusive_row_cell<Field_type>,
-	// 									Row_cell<Field_type>
-	// 								>::type,
-	// 								Base_cell<Field_type>
-	// 							>::type
-	// 						>::type;
-
-	// using Intrusive_list_cell_type = typename std::conditional<
-	// 							Options::is_z2,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>,
-	// 									Z2_intrusive_list_row_cell<Z2_row_cell>
-	// 								>::type,
-	// 								Z2_intrusive_list_cell
-	// 							>::type,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Intrusive_list_row_cell<Intrusive_row_cell<Field_type> >,
-	// 									Intrusive_list_row_cell<Row_cell<Field_type> >
-	// 								>::type,
-	// 								Intrusive_list_cell<Field_type>
-	// 							>::type
-	// 						>::type;
-
-	// using Intrusive_set_cell_type = typename std::conditional<
-	// 							Options::is_z2,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>,
-	// 									Z2_intrusive_set_row_cell<Z2_row_cell>
-	// 								>::type,
-	// 								Z2_intrusive_set_cell
-	// 							>::type,
-	// 							typename std::conditional<
-	// 								Options::has_row_access,
-	// 								typename std::conditional<
-	// 									Options::has_intrusive_rows,
-	// 									Intrusive_set_row_cell<Intrusive_row_cell<Field_type> >,
-	// 									Intrusive_set_row_cell<Row_cell<Field_type> >
-	// 								>::type,
-	// 								Intrusive_set_cell<Field_type>
-	// 							>::type
-	// 						>::type;
-
-	// using Cell_type = typename std::conditional<
-	// 							Options::column_type == Column_types::INTRUSIVE_LIST,
-	// 							Intrusive_list_cell_type,
-	// 							typename std::conditional<
-	// 								Options::column_type == Column_types::INTRUSIVE_SET,
-	// 								Intrusive_set_cell_type,
-	// 								Non_intrusive_cell_type
-	// 							>::type
-	// 						>::type;
 	using Cell_type = Cell<Matrix<Options> >;
 
 	using cell_rep_type = typename std::conditional<
@@ -319,7 +244,7 @@ public:
 
 	using Row_access_option = typename std::conditional<
 											Options::has_row_access,
-											Row_access<row_container_type, Cell_type, Options::has_intrusive_rows, Options::has_removable_rows>,
+											Row_access<Matrix<Options> >,
 											Dummy_row_access
 										>::type;
 

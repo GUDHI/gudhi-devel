@@ -13,7 +13,7 @@
 
 #include <iostream>	//print() only
 #include <vector>
-#include <utility>	//std::exchange
+#include <utility>	//std::swap, std::move & std::exchange
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -202,11 +202,11 @@ inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (auto& p : matrix_){
-				p.second.set_rows(ra_opt::get_rows_pointer());
+				p.second.set_rows(&this->rows_);
 			}
 		} else {
 			for (auto& col : matrix_){
-				col.set_rows(ra_opt::get_rows_pointer());
+				col.set_rows(&this->rows_);
 			}
 		}
 	}

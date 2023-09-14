@@ -11,7 +11,7 @@
 #ifndef PM_RU_PAIRING_H
 #define PM_RU_PAIRING_H
 
-#include <utility>
+#include <utility>	//std::move
 
 namespace Gudhi {
 namespace persistence_matrix {

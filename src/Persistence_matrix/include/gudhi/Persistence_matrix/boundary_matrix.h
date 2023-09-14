@@ -13,7 +13,7 @@
 
 #include <iostream>	//print() only
 #include <vector>
-#include <utility>	//std::exchange
+#include <utility>	//std::swap, std::move & std::exchange
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -188,7 +188,7 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &ma
 		swap_opt::matrix_ = &matrix_;
 	if constexpr (activePairingOption){
 		pair_opt::matrix_ = &matrix_;
-		pair_opt::maxDim_ = dim_opt::get_max_dim_pointer();
+		pair_opt::maxDim_ = &this->dim_opt::maxDim_;
 	}
 
 	if constexpr (Master_matrix::Option_list::has_row_access){
@@ -221,17 +221,17 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(Boundary_matrix &&other) 
 		swap_opt::matrix_ = &matrix_;
 	if constexpr (activePairingOption){
 		pair_opt::matrix_ = &matrix_;
-		pair_opt::maxDim_ = dim_opt::get_max_dim_pointer();
+		pair_opt::maxDim_ = &this->dim_opt::maxDim_;
 	}
 
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (auto& p : matrix_){
-				p.second.set_rows(ra_opt::get_rows_pointer());
+				p.second.set_rows(&this->rows_);
 			}
 		} else {
 			for (auto& col : matrix_){
-				col.set_rows(ra_opt::get_rows_pointer());
+				col.set_rows(&this->rows_);
 			}
 		}
 	}

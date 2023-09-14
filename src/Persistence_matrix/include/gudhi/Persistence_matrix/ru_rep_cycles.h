@@ -11,9 +11,9 @@
 #ifndef PM_RU_REP_CYCLES_H
 #define PM_RU_REP_CYCLES_H
 
-#include <utility>
+#include <utility>		//std::move
+#include <algorithm>	//std::sort
 #include <vector>
-#include <algorithm>
 
 #include "../options.h"		//Column_types
 

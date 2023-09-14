@@ -37,8 +37,6 @@ public:
 
 protected:
 	Row_container_type rows_;	//has to be destroyed after matrix_, therefore has to be inherited.
-
-	Row_container_type* get_rows_pointer(){return &rows_;};
 };
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>

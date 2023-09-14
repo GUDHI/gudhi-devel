@@ -11,7 +11,7 @@
 #ifndef PM_BASE_PAIRING_H
 #define PM_BASE_PAIRING_H
 
-#include <utility>
+#include <utility>	//std::swap & std::move
 #include <unordered_map>
 
 namespace Gudhi {

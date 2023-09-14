@@ -11,7 +11,8 @@
 #ifndef PM_RU_VINE_SWAP_H
 #define PM_RU_VINE_SWAP_H
 
-#include <utility>
+#include <utility>	//std::move
+#include <cassert>
 
 #include "ru_pairing.h"
 

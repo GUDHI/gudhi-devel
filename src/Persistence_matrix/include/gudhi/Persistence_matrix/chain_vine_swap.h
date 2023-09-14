@@ -11,11 +11,10 @@
 #ifndef PM_CHAIN_VINE_SWAP_H
 #define PM_CHAIN_VINE_SWAP_H
 
-#include <cstddef>
-#include <utility>
-#include <set>
-#include <cmath>
+#include <utility>	//std::swap & std::move
+#include <cmath>	//std::abs
 #include <cassert>
+#include <set>
 
 #include <iostream> 	//for debug
 

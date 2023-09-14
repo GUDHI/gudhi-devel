@@ -11,7 +11,7 @@
 #ifndef PM_MATRIX_DIM_HOLDER_H
 #define PM_MATRIX_DIM_HOLDER_H
 
-#include <utility>	//std::move && std::exchange
+#include <utility>	//std::swap, std::move & std::exchange
 #include <vector>
 
 namespace Gudhi {
@@ -43,8 +43,6 @@ protected:
 	void update_up(dimension_type dimension){
 		if (maxDim_ < dimension) maxDim_ = dimension;
 	};
-
-	dimension_type* get_max_dim_pointer(){ return &maxDim_; };	//necessary to pass to other mixins as maxDim_ is protected.
 };
 
 template<typename dimension_type>
@@ -86,8 +84,6 @@ protected:
 			dimensions_.pop_back();
 		maxDim_ = dimensions_.size() - 1;
 	};
-
-	dimension_type* get_max_dim_pointer(){ return &maxDim_; };	//necessary to pass to other mixins as maxDim_ is protected.
 };
 
 } //namespace persistence_matrix

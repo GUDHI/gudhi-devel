@@ -340,14 +340,14 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		for (auto& p : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				p.second.set_rows(ra_opt::get_rows_pointer());
+				p.second.set_rows(&this->rows_);
 			}
 			p.second.set_pivot_to_column_map(&pivotToColumnIndex_);
 		}
 	} else {
 		for (auto& col : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				col.set_rows(ra_opt::get_rows_pointer());
+				col.set_rows(&this->rows_);
 			}
 			col.set_pivot_to_column_map(&pivotToColumnIndex_);
 		}

@@ -11,11 +11,8 @@
 #ifndef PM_MATRIX_CELL_H
 #define PM_MATRIX_CELL_H
 
-#include <utility>		//std::exchange & std::move
+#include <utility>		//std::swap, std::exchange & std::move
 #include <functional>	//std::hash
-
-#include <boost/intrusive/list.hpp>
-#include <boost/intrusive/set.hpp>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -88,7 +85,7 @@ public:
 	using index = typename Master_matrix::index;
 	using Field_element_type = typename Master_matrix::Field_type;
 
-	using base_hook_matrix_row = typename Master_matrix::row_hook_type;	//temporary during factorization process
+	// using base_hook_matrix_row = typename Master_matrix::row_hook_type;	//temporary during factorization process
 
 	Cell(){};
 	Cell(index rowIndex) 

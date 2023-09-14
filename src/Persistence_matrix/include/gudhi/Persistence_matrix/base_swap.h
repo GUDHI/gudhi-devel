@@ -11,7 +11,7 @@
 #ifndef PM_BASE_SWAP_H
 #define PM_BASE_SWAP_H
 
-#include <utility>
+#include <utility>	//std::swap, std::move & std::exchange
 #include <vector>
 
 namespace Gudhi {

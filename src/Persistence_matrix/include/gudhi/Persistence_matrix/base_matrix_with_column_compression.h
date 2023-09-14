@@ -14,7 +14,7 @@
 #include <iostream>	//print() only
 #include <vector>
 #include <set>
-#include <utility>	//std::swap
+#include <utility>	//std::swap, std::move & std::exchange
 
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
@@ -245,7 +245,7 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		for (Column_type& col : columnToRep_){
-			col.set_rows(ra_opt::get_rows_pointer());
+			col.set_rows(&this->rows_);
 		}
 	}
 }
