@@ -1,9 +1,9 @@
 project(Alpha_complex_utilities)
 
 # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+if(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen AND TARGET Boost::program_options)
   add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-  target_link_libraries(alpha_complex_persistence CGAL::CGAL Boost::program_options)
+  target_link_libraries(alpha_complex_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
   if(TARGET TBB::tbb)
     target_link_libraries(alpha_complex_persistence TBB::tbb)
@@ -27,7 +27,7 @@ if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VE
   endif()
 
   install(TARGETS alpha_complex_persistence DESTINATION bin)
-endif(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+endif()
 
 if(CGAL_FOUND AND TARGET Boost::program_options)
   add_executable(alpha_complex_3d_persistence alpha_complex_3d_persistence.cpp)

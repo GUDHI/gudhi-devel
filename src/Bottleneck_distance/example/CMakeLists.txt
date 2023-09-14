@@ -9,11 +9,11 @@ if(CGAL_FOUND)
   
   add_test(NAME Bottleneck_distance_example_basic COMMAND $<TARGET_FILE:bottleneck_basic_example>)
 
-endif(CGAL_FOUND)
+endif()
 
-if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen AND TARGET Boost::program_options)
   add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
-  target_link_libraries(alpha_rips_persistence_bottleneck_distance CGAL::CGAL Boost::program_options)
+  target_link_libraries(alpha_rips_persistence_bottleneck_distance CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
   if(TARGET TBB::tbb)
     target_link_libraries(alpha_rips_persistence_bottleneck_distance TBB::tbb)
@@ -23,4 +23,4 @@ if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options)
       COMMAND $<TARGET_FILE:alpha_rips_persistence_bottleneck_distance>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "-r" "0.15" "-m" "0.12" "-d" "3" "-p" "3")
 
-endif(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options)
+endif()

@@ -33,9 +33,9 @@ if(GMP_FOUND AND CGAL_FOUND)
 
 endif()
 
-if(CGAL_FOUND AND EIGEN3_FOUND AND TARGET Boost::program_options)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen AND TARGET Boost::program_options)
   add_executable ( Simplex_tree_example_cech_complex_cgal_mini_sphere_3d cech_complex_cgal_mini_sphere_3d.cpp )
-  target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d Boost::program_options CGAL::CGAL)
+  target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d Boost::program_options CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d TBB::tbb)
   endif()

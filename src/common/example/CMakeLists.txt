@@ -21,9 +21,9 @@ if(CGAL_FOUND)
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off")
 endif()
 
-if(CGAL_FOUND AND EIGEN3_FOUND)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen)
   add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
-  target_link_libraries(cgal_off_reader CGAL::CGAL)
+  target_link_libraries(cgal_off_reader CGAL::CGAL Eigen3::Eigen)
   add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>
       "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off")
 endif()

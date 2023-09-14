@@ -81,15 +81,12 @@ if(WITH_GUDHI_USE_TBB)
 endif()
 
 find_package(Eigen3 3.1.0)
-if (TARGET Eigen3::Eigen)
-  message("++ TARGET Eigen3::Eigen found")
-else()
-  message("++ TARGET Eigen3::Eigen NOT found")
-endif ()
-
-if (EIGEN3_FOUND)
-  include( ${EIGEN3_USE_FILE} )
-endif (EIGEN3_FOUND)
+# When Eigen3 is found, but not its target, create a "fake" one
+if(EIGEN3_FOUND AND NOT TARGET Eigen3::Eigen)
+  message("  ++  ${EIGEN3_INCLUDE_DIR}")
+  add_library(Eigen3::Eigen INTERFACE IMPORTED)
+  set_target_properties(Eigen3::Eigen PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${EIGEN3_INCLUDE_DIR}")
+endif()
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( GCOVR_PATH gcovr )

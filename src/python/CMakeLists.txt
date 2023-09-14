@@ -153,11 +153,13 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
     endif()
 
-    if (EIGEN3_FOUND)
+    if (TARGET Eigen3::Eigen)
       add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
+      get_target_property(EIGEN3_INCLUDE_DIR_FROM_TARGET Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+      set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIR_FROM_TARGET}', ")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-    endif (EIGEN3_FOUND)
+    endif ()
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_utils', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'simplex_tree', ")
@@ -176,13 +178,13 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'datasets/generators/_points', ")
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'bottleneck', ")
     endif ()
-    if(CGAL_FOUND AND EIGEN3_FOUND)
+    if(CGAL_FOUND AND TARGET Eigen3::Eigen)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
     endif ()
     # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-    if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+    if(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
@@ -355,7 +357,7 @@ if(PYTHONINTERP_FOUND)
                 if(SKLEARN_FOUND)
                   if(OT_FOUND)
                     # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-                    if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+                    if(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
                       set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                       # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
                       # Images and biblio warnings because not found on developer version
@@ -375,10 +377,10 @@ if(PYTHONINTERP_FOUND)
                                ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
                       # Set missing or not modules
                       set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                    else(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+                    else(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
                       message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
                       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                    endif(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+                    endif(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
                   else(OT_FOUND)
                     message("++ Python documentation module will not be compiled because POT was not found")
                     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -439,15 +441,15 @@ if(PYTHONINTERP_FOUND)
 
     # Test examples
     # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-    if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+    if(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
       # Bottleneck and Alpha
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
                -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-    endif(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
-    if(CGAL_FOUND AND EIGEN3_FOUND)
+    endif()
+    if(CGAL_FOUND AND TARGET Eigen3::Eigen)
       # Tangential
       add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -470,7 +472,7 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
 
-    endif(CGAL_FOUND AND EIGEN3_FOUND)
+    endif()
     if(CGAL_FOUND)
       # Bottleneck
       add_test(NAME bottleneck_basic_example_py_test
@@ -511,7 +513,7 @@ if(PYTHONINTERP_FOUND)
              -f human.off -n 700 -v)
 
     # Weighted version of dD Alpha complex requires CGAL >= 5.1.0
-    if(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+    if(CGAL_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0 AND TARGET Eigen3::Eigen)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -527,16 +529,16 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
       add_gudhi_py_test(test_alpha_complex)
-    endif(CGAL_FOUND AND EIGEN3_FOUND AND NOT CGAL_VERSION VERSION_LESS 5.1.0)
+    endif()
 
-    if(CGAL_FOUND AND EIGEN3_FOUND)
+    if(CGAL_FOUND AND TARGET Eigen3::Eigen)
       # Euclidean witness
       add_gudhi_py_test(test_euclidean_witness_complex)
 
       # Datasets generators
       add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independent from CGAL ?
 
-    endif(CGAL_FOUND AND EIGEN3_FOUND)
+    endif()
 
     # Rips
     add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
