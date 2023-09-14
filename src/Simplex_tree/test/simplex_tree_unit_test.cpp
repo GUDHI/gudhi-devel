@@ -56,6 +56,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   BOOST_CHECK(tst.is_empty());
+  BOOST_CHECK(tst.num_simplices_by_dimension() == std::vector<size_t>());
   typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
@@ -343,6 +344,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typeST::null_simplex());
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
+  BOOST_CHECK(st.num_simplices_by_dimension() == std::vector<size_t>({4, 4, 1}));
 
   /* Inserted simplex:        */
   /*    1                     */
@@ -1184,4 +1186,44 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(st == st_empty);
   st.insert_simplex_and_subfaces({0}, 2.5);
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST FOR_EACH ITERATION SKIP MECHANISM" << std::endl;
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({3, 0}, 2.);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  std::vector<size_t> num_simplices_by_dim_until_two(2);
+  auto lambda_nb_simp_by_dim = [&num_simplices_by_dim_until_two](typename typeST::Simplex_handle, int dim)
+                                  {
+                                    BOOST_CHECK (dim < 2);
+                                    ++num_simplices_by_dim_until_two[dim];
+                                    return dim >= 1; // The iteration will skip the children in this case
+                                  };
+  st.for_each_simplex(lambda_nb_simp_by_dim);
+  for (auto num_simplices : num_simplices_by_dim_until_two)
+    std::cout << num_simplices << ", ";
+  std::cout << std::endl;
+
+  auto num_simplices_by_dim = st.num_simplices_by_dimension();
+  for (auto num_simplices : num_simplices_by_dim)
+    std::cout << num_simplices << ", ";
+  std::cout << std::endl;
+
+  BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
+  BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
 }

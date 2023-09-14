@@ -216,6 +216,10 @@ class Simplex_tree {
   using Optimized_cofaces_simplex_filtered_range = boost::filtered_range<Fast_cofaces_predicate,
                                                                          Optimized_star_simplex_range>;
 
+
+  /** The largest dimension supported for simplex trees.
+   * 40 seems a conservative bound for now, as 2^41 simplices would not fit on the biggest hard-drive. */
+  static constexpr int max_dimension() { return 40; }
  public:
   /** \name Range and iterator types
    *
@@ -243,11 +247,9 @@ class Simplex_tree {
                                     std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
   /** \private
-   * \brief 40 seems a conservative bound on the dimension of a Simplex_tree for now, as it would not fit on the
-   * biggest hard-drive.
    * static_vector still has some overhead compared to a trivial hand-made version using std::aligned_storage, or
-   * compared to making suffix_ static. */
-  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, 40>;
+   * compared to reusing a static object. */
+  using Static_vertex_vector = boost::container::static_vector<Vertex_handle, max_dimension()>;
 
   /** \brief Iterator over the simplices of the boundary of a simplex.
    *
@@ -649,13 +651,15 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief returns the number of simplices in the simplex_tree. */
+  /** \brief Returns the number of simplices in the simplex_tree.
+   *
+   * This function takes time linear in the number of simplices. */
   size_t num_simplices() {
-    return num_simplices(&root_);
+    return num_simplices(root());
   }
 
  private:
-  /** \brief returns the number of simplices in the simplex_tree. */
+  /** \brief Returns the number of simplices in the simplex_tree. */
   size_t num_simplices(Siblings * sib) {
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
@@ -669,6 +673,25 @@ class Simplex_tree {
   }
 
  public:
+  /** \brief Returns the number of simplices of each dimension in the simplex tree. */
+  std::vector<size_t> num_simplices_by_dimension() {
+    if (is_empty()) return {};
+    // std::min in case the upper bound got crazy
+    std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
+    auto fun = [&res](Simplex_handle, int dim) -> void { ++res[dim]; };
+    for_each_simplex(fun);
+    if (dimension_to_be_lowered_) {
+      GUDHI_CHECK(res.front() != 0, std::logic_error("Bug in Gudhi: non-empty complex has no vertex"));
+      while (res.back() == 0) res.pop_back();
+      dimension_ = static_cast<int>(res.size()) - 1;
+      dimension_to_be_lowered_ = false;
+    } else {
+      GUDHI_CHECK(res.back() != 0,
+          std::logic_error("Bug in Gudhi: there is no simplex of dimension the dimension of the complex"));
+    }
+    return res;
+  }
+
   /** \brief Returns the dimension of a simplex.
    *
    * Must be different from null_simplex().*/
@@ -1529,37 +1552,57 @@ class Simplex_tree {
   }
 
  public:
+  /** Calls a function on each simplex. The order ensures that faces are visited before cofaces.
+   * While it is fine to modify the data of a simplex (filtration, key) in the function, modifying
+   * the structure itself (insertion, removal) is not supported.
+   *
+   * @param[in] fun Function that takes as argument a Simplex_handle and an int (representing the dimension of this
+   * simplex). It may return void or bool, and in the second case returning true means that the iteration will skip
+   * the children of this simplex (a subset of the cofaces).
+   */
+  template<class Fun>
+  void for_each_simplex(Fun&& fun) {
+    // Wrap callback so it always returns bool
+    auto f = [&fun](Simplex_handle sh, int dim) -> bool {
+      if constexpr (std::is_same_v<void, decltype(fun(sh, dim))>) {
+        fun(sh, dim);
+        return false;
+      } else {
+        return fun(sh, dim);
+      }
+    };
+    if (!is_empty())
+      rec_for_each_simplex(root(), 0, f);
+  }
+
+ private:
+  template<class Fun>
+  void rec_for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
+    Simplex_handle sh = sib->members().end();
+    GUDHI_CHECK(sh != sib->members().begin(), "Bug in Gudhi: only the root siblings may be empty");
+    do {
+      --sh;
+      if (!fun(sh, dim) && has_children(sh)) {
+        rec_for_each_simplex(sh->second.children(), dim+1, fun);
+      }
+      // We could skip checking has_children for the first element of the iteration, we know it returns false.
+    }
+    while(sh != sib->members().begin());
+  }
+
+ public:
   /** \brief This function ensures that each simplex has a higher filtration value than its faces by increasing the
    * filtration values.
    * @return True if any filtration value was modified, false if the filtration was already non-decreasing.
-   * 
+   *
    * If a simplex has a `NaN` filtration value, it is considered lower than any other defined filtration value.
    */
   bool make_filtration_non_decreasing() {
     bool modified = false;
-    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for (auto& simplex : boost::adaptors::reverse(root_.members())) {
-      if (has_children(&simplex)) {
-        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
-      }
-    }
-    if(modified)
-      clear_filtration(); // Drop the cache.
-    return modified;
-  }
-
- private:
-  /** \brief Recursively Browse the simplex tree to ensure the filtration is not decreasing.
-   * @param[in] sib Siblings to be parsed.
-   * @return The filtration modification information in order to trigger initialize_filtration.
-   */
-  bool rec_make_filtration_non_decreasing(Siblings * sib) {
-    bool modified = false;
-
-    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
-    for (auto& simplex : boost::adaptors::reverse(sib->members())) {
+    auto fun = [&modified, this](Simplex_handle sh, int dim) -> void {
+      if (dim == 0) return;
       // Find the maximum filtration value in the border
-      Boundary_simplex_range boundary = boundary_simplex_range(&simplex);
+      Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
       Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
                                                               [](Simplex_handle sh1, Simplex_handle sh2) {
                                                                 return filtration(sh1) < filtration(sh2);
@@ -1568,16 +1611,17 @@ class Simplex_tree {
       Filtration_value max_filt_border_value = filtration(*max_border);
       // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
       // That seems more useful than keeping NaN.
-      if (!(simplex.second.filtration() >= max_filt_border_value)) {
+      if (!(sh->second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
-        simplex.second.assign_filtration(max_filt_border_value);
+        sh->second.assign_filtration(max_filt_border_value);
       }
-      if (has_children(&simplex)) {
-        modified |= rec_make_filtration_non_decreasing(simplex.second.children());
-      }
-    }
-    // Make the modified information to be traced by upper call
+    };
+    // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
+    for_each_simplex(fun);
+
+    if(modified)
+      clear_filtration(); // Drop the cache.
     return modified;
   }
 
