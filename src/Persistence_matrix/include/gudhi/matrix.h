@@ -22,11 +22,12 @@
 
 #include <boost/intrusive/list.hpp>
 
-// #include "utilities/utilities.h"
+#include "utilities/utilities.h"
 #include "utilities/overlay_id_to_position_index.h"
 #include "utilities/overlay_position_to_id_index.h"
 #include "options.h"
-#include "column_types/cell.h"
+// #include "column_types/cell.h"
+#include "Persistence_matrix/columns/cell_types.h"
 #include "column_types/row_access.h"
 
 #include "Persistence_matrix/matrix_dimension_holders.h"
@@ -122,8 +123,8 @@ class Matrix
 public:
 	using Option_list = Options;
 	using Field_type = typename Options::field_coeff_type;
-	using index = unsigned int;
-	using dimension_type = int;
+	using index = typename Options::index_type;
+	using dimension_type = typename Options::dimension_type;
 
 	struct Bar{
 		Bar() : dim(-1), birth(-1), death(-1)
@@ -138,94 +139,148 @@ public:
 		int death;
 	};
 
-	struct CellPairComparator {
-		bool operator()(const std::pair<index,Field_type>& p1, const std::pair<index,Field_type>& p2) const
-		{
-			return p1.first < p2.first;
-		};
-	};
+	// struct matrix_row_tag;
+	// struct matrix_column_tag;
 
-	using Non_intrusive_cell_type = typename std::conditional<
-								Options::is_z2,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Z2_intrusive_row_cell,
-										Z2_row_cell
-									>::type,
-									Z2_base_cell
-								>::type,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Intrusive_row_cell<Field_type>,
-										Row_cell<Field_type>
-									>::type,
-									Base_cell<Field_type>
-								>::type
+	using base_hook_matrix_row = boost::intrusive::list_base_hook<
+				boost::intrusive::tag < matrix_row_tag >
+			, boost::intrusive::link_mode < boost::intrusive::auto_unlink >
+		>;
+	using base_hook_matrix_list_column = boost::intrusive::list_base_hook <
+				boost::intrusive::tag < matrix_column_tag >
+			, boost::intrusive::link_mode < boost::intrusive::safe_link >
+			>;
+	using base_hook_matrix_set_column = boost::intrusive::set_base_hook <
+				boost::intrusive::tag < matrix_column_tag >
+			, boost::intrusive::link_mode < boost::intrusive::safe_link >
+			>;
+	struct Dummy_row_hook{};
+	struct Dummy_column_hook{};
+
+	using row_hook_type = typename std::conditional<
+								Options::has_row_access && Options::has_intrusive_rows,
+								base_hook_matrix_row,
+								Dummy_row_hook
 							>::type;
-
-	using Intrusive_list_cell_type = typename std::conditional<
-								Options::is_z2,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>,
-										Z2_intrusive_list_row_cell<Z2_row_cell>
-									>::type,
-									Z2_intrusive_list_cell
-								>::type,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Intrusive_list_row_cell<Intrusive_row_cell<Field_type> >,
-										Intrusive_list_row_cell<Row_cell<Field_type> >
-									>::type,
-									Intrusive_list_cell<Field_type>
-								>::type
-							>::type;
-
-	using Intrusive_set_cell_type = typename std::conditional<
-								Options::is_z2,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>,
-										Z2_intrusive_set_row_cell<Z2_row_cell>
-									>::type,
-									Z2_intrusive_set_cell
-								>::type,
-								typename std::conditional<
-									Options::has_row_access,
-									typename std::conditional<
-										Options::has_intrusive_rows,
-										Intrusive_set_row_cell<Intrusive_row_cell<Field_type> >,
-										Intrusive_set_row_cell<Row_cell<Field_type> >
-									>::type,
-									Intrusive_set_cell<Field_type>
-								>::type
-							>::type;
-
-	using Cell_type = typename std::conditional<
+	using column_hook_type = typename std::conditional<
 								Options::column_type == Column_types::INTRUSIVE_LIST,
-								Intrusive_list_cell_type,
+								base_hook_matrix_list_column,
 								typename std::conditional<
 									Options::column_type == Column_types::INTRUSIVE_SET,
-									Intrusive_set_cell_type,
-									Non_intrusive_cell_type
+									base_hook_matrix_set_column,
+									Dummy_column_hook
 								>::type
 							>::type;
+
+	struct Dummy_cell_column_index_mixin{
+		Dummy_cell_column_index_mixin(){}
+		Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex){}
+	};
+	struct Dummy_cell_field_element_mixin{
+		Dummy_cell_field_element_mixin(){}
+		Dummy_cell_field_element_mixin([[maybe_unused]] Field_type t){}
+	};
+
+	using Cell_column_index_option = typename std::conditional<
+										Options::has_row_access,
+										Cell_column_index<index>,
+										Dummy_cell_column_index_mixin
+									>::type;
+	using Cell_field_element_option = typename std::conditional<
+										Options::is_z2,
+										Dummy_cell_field_element_mixin,
+										Cell_field_element<Field_type>
+									>::type;
+
+	// using Non_intrusive_cell_type = typename std::conditional<
+	// 							Options::is_z2,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Z2_intrusive_row_cell,
+	// 									Z2_row_cell
+	// 								>::type,
+	// 								Z2_base_cell
+	// 							>::type,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Intrusive_row_cell<Field_type>,
+	// 									Row_cell<Field_type>
+	// 								>::type,
+	// 								Base_cell<Field_type>
+	// 							>::type
+	// 						>::type;
+
+	// using Intrusive_list_cell_type = typename std::conditional<
+	// 							Options::is_z2,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>,
+	// 									Z2_intrusive_list_row_cell<Z2_row_cell>
+	// 								>::type,
+	// 								Z2_intrusive_list_cell
+	// 							>::type,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Intrusive_list_row_cell<Intrusive_row_cell<Field_type> >,
+	// 									Intrusive_list_row_cell<Row_cell<Field_type> >
+	// 								>::type,
+	// 								Intrusive_list_cell<Field_type>
+	// 							>::type
+	// 						>::type;
+
+	// using Intrusive_set_cell_type = typename std::conditional<
+	// 							Options::is_z2,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>,
+	// 									Z2_intrusive_set_row_cell<Z2_row_cell>
+	// 								>::type,
+	// 								Z2_intrusive_set_cell
+	// 							>::type,
+	// 							typename std::conditional<
+	// 								Options::has_row_access,
+	// 								typename std::conditional<
+	// 									Options::has_intrusive_rows,
+	// 									Intrusive_set_row_cell<Intrusive_row_cell<Field_type> >,
+	// 									Intrusive_set_row_cell<Row_cell<Field_type> >
+	// 								>::type,
+	// 								Intrusive_set_cell<Field_type>
+	// 							>::type
+	// 						>::type;
+
+	// using Cell_type = typename std::conditional<
+	// 							Options::column_type == Column_types::INTRUSIVE_LIST,
+	// 							Intrusive_list_cell_type,
+	// 							typename std::conditional<
+	// 								Options::column_type == Column_types::INTRUSIVE_SET,
+	// 								Intrusive_set_cell_type,
+	// 								Non_intrusive_cell_type
+	// 							>::type
+	// 						>::type;
+	using Cell_type = Cell<Matrix<Options> >;
 
 	using cell_rep_type = typename std::conditional<
 								Options::is_z2,
 								index,
 								std::pair<index,Field_type>
 							>::type;
+
+	struct CellPairComparator {
+		bool operator()(const std::pair<index,Field_type>& p1, const std::pair<index,Field_type>& p2) const
+		{
+			return p1.first < p2.first;
+		};
+	};
 
 	template<class Cell_type>
 	struct RowCellComp {
@@ -554,8 +609,7 @@ public:
 		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
 
-		template<class Submatrix_type>
-		Dummy_ru_vine_swap([[maybe_unused]] Submatrix_type &matrixR, [[maybe_unused]] Submatrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
+		Dummy_ru_vine_swap([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
 		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
 		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
 	};
@@ -600,7 +654,7 @@ public:
 		Dummy_ru_representative_cycles& operator=([[maybe_unused]] Dummy_ru_representative_cycles other){return *this;}
 		friend void swap([[maybe_unused]] Dummy_ru_representative_cycles& d1, [[maybe_unused]] Dummy_ru_representative_cycles& d2){}
 
-		Dummy_ru_representative_cycles([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Boundary_matrix_type &matrixU){}
+		Dummy_ru_representative_cycles([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU){}
 		Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
 		Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
 	};
@@ -935,7 +989,7 @@ inline void Matrix<Options>::erase_row(index rowIndex)
 }
 
 template<class Options>
-inline dimension_type Matrix<Options>::get_max_dimension() const
+inline typename Matrix<Options>::dimension_type Matrix<Options>::get_max_dimension() const
 {
 	static_assert(isNonBasic, "'get_max_dimension' is not available for the chosen options.");
 
@@ -949,7 +1003,7 @@ inline unsigned int Matrix<Options>::get_number_of_columns() const
 }
 
 template<class Options>
-inline dimension_type Matrix<Options>::get_column_dimension(index columnIndex) const
+inline typename Matrix<Options>::dimension_type Matrix<Options>::get_column_dimension(index columnIndex) const
 {
 	static_assert(isNonBasic, "'get_column_dimension' is not available for the chosen options.");
 

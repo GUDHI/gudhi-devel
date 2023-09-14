@@ -98,10 +98,11 @@ private:
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-	using matrix_type = typename Master_matrix::Boundary_matrix_type;
+	using r_matrix_type = typename Master_matrix::Boundary_matrix_type;
+	using u_matrix_type = typename Master_matrix::Base_matrix_type;
 
-	matrix_type reducedMatrixR_;
-	matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
+	r_matrix_type reducedMatrixR_;
+	u_matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
 	index nextInsertIndex_;
 
@@ -206,9 +207,9 @@ inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &bound
 	reducedMatrixR_.insert_boundary(boundary);
 
 	if constexpr (Master_matrix::Option_list::is_z2) {
-		mirrorMatrixU_.insert_boundary({nextInsertIndex_});
+		mirrorMatrixU_.insert_column({nextInsertIndex_});
 	} else {
-		mirrorMatrixU_.insert_boundary({{nextInsertIndex_, 1}});
+		mirrorMatrixU_.insert_column({{nextInsertIndex_, 1}});
 	}
 
 	if constexpr (!Master_matrix::Option_list::has_removable_columns){
@@ -286,7 +287,7 @@ inline void RU_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]] in
 	pivotToColumnIndex_.erase(reducedMatrixR_.get_column(columnIndex).get_pivot());
 
 	reducedMatrixR_.remove_maximal_simplex(columnIndex);
-	mirrorMatrixU_.remove_maximal_simplex(columnIndex);
+	mirrorMatrixU_.erase_column(columnIndex);
 }
 
 template<class Master_matrix>
@@ -439,7 +440,7 @@ inline void RU_matrix<Master_matrix>::_initialize_U()
 	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
 		if constexpr (Master_matrix::Option_list::is_z2) id = i;
 		else id.first = i;
-		mirrorMatrixU_.insert_boundary({id});
+		mirrorMatrixU_.insert_column({id});
 	}
 }
 
@@ -567,10 +568,9 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 			typename Master_matrix::Field_type coef = curr.get_pivot_value();
 			coef = coef.get_inverse();
 			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
-			curr *= coef;
-			curr += toadd;
-			mirrorMatrixU_.get_column(nextInsertIndex_) *= coef;
-			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(currIndex);
+
+			curr.multiply_and_add(coef, toadd);
+			mirrorMatrixU_.get_column(nextInsertIndex_).multiply_and_add(coef, mirrorMatrixU_.get_column(currIndex));
 		}
 
 		pivot = curr.get_pivot();

@@ -26,11 +26,12 @@ class RU_vine_swap : public std::conditional<
 							>::type
 {
 public:
-	using Base_matrix = typename Master_matrix::Boundary_matrix_type;
+	using Boundary_matrix = typename Master_matrix::Boundary_matrix_type;
+	using Base_matrix = typename Master_matrix::Base_matrix_type;
 	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using index = typename Master_matrix::index;
 
-	RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
+	RU_vine_swap(Boundary_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn);
 	RU_vine_swap(const RU_vine_swap &matrixToCopy);
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
@@ -45,7 +46,7 @@ public:
 	}
 
 protected:
-	Base_matrix *reducedMatrixR_;
+	Boundary_matrix *reducedMatrixR_;
 	Base_matrix *mirrorMatrixU_;
 	dictionnary_type *pivotToColumnIndex_;
 
@@ -77,7 +78,7 @@ private:
 };
 
 template<class Master_matrix>
-inline RU_vine_swap<Master_matrix>::RU_vine_swap(Base_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn)
+inline RU_vine_swap<Master_matrix>::RU_vine_swap(Boundary_matrix &matrixR, Base_matrix &matrixU, dictionnary_type &pivotToColumn)
 	: RUP(), reducedMatrixR_(&matrixR), mirrorMatrixU_(&matrixU), pivotToColumnIndex_(&pivotToColumn)
 {}
 

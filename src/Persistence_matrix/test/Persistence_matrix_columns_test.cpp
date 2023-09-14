@@ -11,7 +11,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "persistence_matrix"
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_LIST_SIZE 30
+#define BOOST_MPL_LIMIT_LIST_SIZE 20
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
@@ -24,7 +24,8 @@
 #include "gudhi/utilities/Zp_field.h"
 #include "gudhi/utilities/utilities.h"
 #include "gudhi/column_types/row_access.h"
-#include "gudhi/column_types/cell.h"
+// #include "gudhi/column_types/cell.h"
+#include "gudhi/Persistence_matrix/columns/cell_types.h"
 
 #include "gudhi/column_types/list_column.h"
 #include "gudhi/column_types/set_column.h"
@@ -112,310 +113,370 @@ using Gudhi::persistence_matrix::Intrusive_set_chain_column;
 using Gudhi::persistence_matrix::Z2_intrusive_list_chain_column;
 using Gudhi::persistence_matrix::Z2_intrusive_set_chain_column;
 
-using Gudhi::persistence_matrix::Base_cell;
-using Gudhi::persistence_matrix::Z2_base_cell;
-using Gudhi::persistence_matrix::Row_cell;
-using Gudhi::persistence_matrix::Z2_row_cell;
-using Gudhi::persistence_matrix::Intrusive_row_cell;
-using Gudhi::persistence_matrix::Z2_intrusive_row_cell;
-using Gudhi::persistence_matrix::Intrusive_list_cell;
-using Gudhi::persistence_matrix::Intrusive_set_cell;
-using Gudhi::persistence_matrix::Intrusive_list_row_cell;
-using Gudhi::persistence_matrix::Intrusive_set_row_cell;
-using Gudhi::persistence_matrix::Z2_intrusive_list_cell;
-using Gudhi::persistence_matrix::Z2_intrusive_set_cell;
-using Gudhi::persistence_matrix::Z2_intrusive_list_row_cell;
-using Gudhi::persistence_matrix::Z2_intrusive_set_row_cell;
-using Gudhi::persistence_matrix::base_hook_matrix_row;
+using Gudhi::persistence_matrix::Cell;
+using Gudhi::persistence_matrix::Cell_column_index;
+using Gudhi::persistence_matrix::Cell_field_element;
 
 using Gudhi::persistence_matrix::Row_access;
 using Gudhi::persistence_matrix::dimension_type;
+using Gudhi::persistence_matrix::matrix_row_tag;
+using Gudhi::persistence_matrix::matrix_column_tag;
 
 using Z5 = Zp_field_element<5>;
 using Z2 = Zp_field_element<2>;
 using dict_type = std::vector<unsigned int>;
 
-template<class Cell_type>
-struct RowCellComp {
-	bool operator()(const Cell_type& c1, const Cell_type& c2) const
-	{
-		if (c1.get_row_index() == c2.get_row_index())
+enum Column_types {
+	LIST,
+	SET,
+	HEAP,
+	VECTOR,
+	UNORDERED_SET,
+	INTRUSIVE_LIST,
+	INTRUSIVE_SET
+};
+
+template<Column_types col_type>
+struct z2_options{
+	using field_coeff_type = Z2;
+	static const bool is_z2 = true;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = false;
+	static const bool has_intrusive_rows = false;
+};
+
+template<Column_types col_type>
+struct z2_ra_options{
+	using field_coeff_type = Z2;
+	static const bool is_z2 = true;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = true;
+	static const bool has_intrusive_rows = false;
+};
+
+template<Column_types col_type>
+struct z2_ra_i_options{
+	using field_coeff_type = Z2;
+	static const bool is_z2 = true;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = true;
+	static const bool has_intrusive_rows = true;
+};
+
+template<Column_types col_type>
+struct z5_options{
+	using field_coeff_type = Z5;
+	static const bool is_z2 = false;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = false;
+	static const bool has_intrusive_rows = false;
+};
+
+template<Column_types col_type>
+struct z5_ra_options{
+	using field_coeff_type = Z5;
+	static const bool is_z2 = false;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = true;
+	static const bool has_intrusive_rows = false;
+};
+
+template<Column_types col_type>
+struct z5_ra_i_options{
+	using field_coeff_type = Z5;
+	static const bool is_z2 = false;
+	static const Column_types column_type = col_type;
+	static const bool has_row_access = true;
+	static const bool has_intrusive_rows = true;
+};
+
+template<class Options>
+struct Mini_matrix{
+	using Option_list = Options;
+	using Field_type = typename Options::field_coeff_type;
+	using index = unsigned int;
+	using dimension_type = int;
+
+	// struct matrix_row_tag;
+	// struct matrix_column_tag;
+
+	using base_hook_matrix_row = boost::intrusive::list_base_hook<
+				boost::intrusive::tag < matrix_row_tag >
+			, boost::intrusive::link_mode < boost::intrusive::auto_unlink >
+		>;
+	using base_hook_matrix_list_column = boost::intrusive::list_base_hook <
+				boost::intrusive::tag < matrix_column_tag >
+			, boost::intrusive::link_mode < boost::intrusive::safe_link >
+			>;
+	using base_hook_matrix_set_column = boost::intrusive::set_base_hook <
+				boost::intrusive::tag < matrix_column_tag >
+			, boost::intrusive::link_mode < boost::intrusive::safe_link >
+			>;
+	struct Dummy_row_hook{};
+	struct Dummy_column_hook{};
+
+	using row_hook_type = typename std::conditional<
+								Options::has_row_access && Options::has_intrusive_rows,
+								base_hook_matrix_row,
+								Dummy_row_hook
+							>::type;
+	using column_hook_type = typename std::conditional<
+								Options::column_type == Column_types::INTRUSIVE_LIST,
+								base_hook_matrix_list_column,
+								typename std::conditional<
+									Options::column_type == Column_types::INTRUSIVE_SET,
+									base_hook_matrix_set_column,
+									Dummy_column_hook
+								>::type
+							>::type;
+
+	struct Dummy_cell_column_index_mixin{
+		Dummy_cell_column_index_mixin(){}
+		Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex){}
+	};
+	struct Dummy_cell_field_element_mixin{
+		Dummy_cell_field_element_mixin(){}
+		Dummy_cell_field_element_mixin([[maybe_unused]] Field_type t){}
+	};
+
+	using Cell_column_index_option = typename std::conditional<
+										Options::has_row_access,
+										Cell_column_index<index>,
+										Dummy_cell_column_index_mixin
+									>::type;
+	using Cell_field_element_option = typename std::conditional<
+										Options::is_z2,
+										Dummy_cell_field_element_mixin,
+										Cell_field_element<Field_type>
+									>::type;
+	using Cell_type = Cell<Mini_matrix<Options> >;
+
+	struct CellPairComparator {
+		bool operator()(const std::pair<index,Field_type>& p1, const std::pair<index,Field_type>& p2) const
+		{
+			return p1.first < p2.first;
+		};
+	};
+
+	template<class Cell_type>
+	struct RowCellComp {
+		bool operator()(const Cell_type& c1, const Cell_type& c2) const
+		{
 			return c1.get_column_index() < c2.get_column_index();
-		return c1.get_row_index() < c2.get_row_index();
-	}
+		}
+	};
+
+	using Row_type = typename std::conditional<
+								Options::has_intrusive_rows,
+								boost::intrusive::list<Cell_type, boost::intrusive::constant_time_size<false>, boost::intrusive::base_hook<base_hook_matrix_row> >,
+								std::set<Cell_type,RowCellComp<Cell_type> >
+							>::type;
+
+	using row_container_type = std::vector<Row_type>;
+
+	struct Dummy_row_access{
+		friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2){}
+
+		Dummy_row_access(){}
+		Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
+		
+		static constexpr bool isActive_ = false;
+	};
+
+	using Row_access_option = typename std::conditional<
+											Options::has_row_access,
+											Row_access<row_container_type, Cell_type, Options::has_intrusive_rows, false>,
+											Dummy_row_access
+										>::type;
 };
 
-template<class Cell_type>
-using Row_type = boost::intrusive::list <
-					Cell_type
-				  , boost::intrusive::constant_time_size<false>
-				  , boost::intrusive::base_hook< base_hook_matrix_row >
-				>;
-template<class Cell_type>
-using row_container_type = std::vector<Row_type<Cell_type> >;
-template<class Cell_type>
-using row_container_set = std::vector<std::set<Cell_type,RowCellComp<Cell_type> > >;
-template<class Cell_type>
-using RA = Row_access<row_container_type<Cell_type>,Cell_type,true,false>;
-template<class Cell_type>
-using RA_set = Row_access<row_container_set<Cell_type>,Cell_type,false,false>;
-
-struct Dummy_column_pairing{
-	Dummy_column_pairing& operator=([[maybe_unused]] Dummy_column_pairing other){return *this;}
-	friend void swap([[maybe_unused]] Dummy_column_pairing& d1, [[maybe_unused]] Dummy_column_pairing& d2){}
-
-	Dummy_column_pairing(){}
-	Dummy_column_pairing([[maybe_unused]] const Dummy_column_pairing& toCopy){}
-	Dummy_column_pairing([[maybe_unused]] Dummy_column_pairing&& other) noexcept{}
-
-	static constexpr bool isActive_ = false;
-};
-
-struct Dummy_row_access{
-	friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2){}
-
-	Dummy_row_access(){}
-	Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
-
-	static constexpr bool isActive_ = false;
-};
+template<Column_types col_type>
+using matrix_z2 = Mini_matrix<z2_options<col_type> >;
+template<Column_types col_type>
+using matrix_z2_ra = Mini_matrix<z2_ra_options<col_type> >;
+template<Column_types col_type>
+using matrix_z2_ra_i = Mini_matrix<z2_ra_i_options<col_type> >;
+template<Column_types col_type>
+using matrix_z5 = Mini_matrix<z5_options<col_type> >;
+template<Column_types col_type>
+using matrix_z5_ra = Mini_matrix<z5_ra_options<col_type> >;
+template<Column_types col_type>
+using matrix_z5_ra_i = Mini_matrix<z5_ra_i_options<col_type> >;
 
 ////////////// BASICS //////////////
 
-typedef boost::mpl::list<List_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Set_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Unordered_set_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Vector_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Intrusive_list_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
-							Intrusive_set_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>,
-							List_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
+typedef boost::mpl::list<List_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
+							Set_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Unordered_set_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<Z5, matrix_z5<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							List_boundary_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
+							Set_boundary_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Unordered_set_boundary_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_boundary_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_5_columns;
 
 typedef boost::mpl::list<Z2_heap_column,
-							Z2_list_column<Z2_base_cell, Dummy_row_access>,
-							Z2_set_column<Z2_base_cell, Dummy_row_access>,
-							Z2_unordered_set_column<Z2_base_cell, Dummy_row_access>,
-							Z2_vector_column<Z2_base_cell, Dummy_row_access>,
-							Z2_intrusive_list_column<Z2_intrusive_list_cell, Dummy_row_access>,
-							Z2_intrusive_set_column<Z2_intrusive_set_cell, Dummy_row_access>,
+							Z2_list_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
+							Z2_set_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>,
 							Z2_heap_boundary_column,
-							Z2_list_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_row_access>
+							Z2_list_boundary_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
+							Z2_set_boundary_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_boundary_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_boundary_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_boundary_column<matrix_z2<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_boundary_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_2_columns;
 
-typedef boost::mpl::list<List_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Unordered_set_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Vector_boundary_column<Z5, Base_cell<Z5>, Dummy_row_access>,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
+typedef boost::mpl::list<List_boundary_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
+							Set_boundary_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Unordered_set_boundary_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_boundary_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_5_boundary_columns;
 
 typedef boost::mpl::list<Z2_heap_boundary_column,
-							Z2_list_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_set_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_unordered_set_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_vector_boundary_column<Z2_base_cell, Dummy_row_access>,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_cell, Dummy_row_access>,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_cell, Dummy_row_access>
+							Z2_list_boundary_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
+							Z2_set_boundary_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_boundary_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_boundary_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_boundary_column<matrix_z2<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_boundary_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_2_boundary_columns;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Dummy_row_access>
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
+							Set_chain_column<dict_type, Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_5_chain_columns;
 
 typedef boost::mpl::list<Z2_heap_chain_column<dict_type>,
-							Z2_list_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_vector_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Dummy_row_access>,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Dummy_row_access>
+							Z2_list_chain_column<dict_type, matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
+							Z2_set_chain_column<dict_type, matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_chain_column<dict_type, matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_2_chain_columns;
 
 ////////////// ROWS //////////////
 
-typedef boost::mpl::list<List_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
-							Vector_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
-							List_boundary_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
-						> list_of_5_columns_with_row_non_intr;
+typedef boost::mpl::list<List_column<Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
+							Vector_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							List_boundary_column<Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
+							Vector_boundary_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							List_column<Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
+							Set_column<Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
+							Unordered_set_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
+							List_boundary_column<Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
+							Set_boundary_column<Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
+							Unordered_set_boundary_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_boundary_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_list_boundary_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_list_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_list_boundary_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_boundary_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_boundary_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option>
+						> list_of_5_columns_with_row;
 
-typedef boost::mpl::list<List_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Set_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Unordered_set_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Vector_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							List_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Set_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Unordered_set_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Vector_boundary_column<Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
-						> list_of_5_columns_with_row_set_non_intr;
+typedef boost::mpl::list<Z2_list_column<matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
+							Z2_vector_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							Z2_list_boundary_column<matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
+							Z2_vector_boundary_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							Z2_list_column<matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
+							Z2_set_column<matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
+							Z2_list_boundary_column<matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
+							Z2_set_boundary_column<matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_boundary_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_boundary_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_column<matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_list_boundary_column<matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_list_boundary_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_intrusive_set_boundary_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_intrusive_set_column<matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_intrusive_set_boundary_column<matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option>
+						> list_of_2_columns_with_row;
 
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_5_columns_with_row_intr_list;
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							List_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
+							Set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
+							Unordered_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option>
+						> list_of_5_chain_columns_with_row;
 
-typedef boost::mpl::list<Intrusive_list_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >,
-							Intrusive_list_boundary_column<Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
-						> list_of_5_columns_with_row_set_intr_list;
-
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_5_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Intrusive_set_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >,
-							Intrusive_set_boundary_column<Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
-						> list_of_5_columns_with_row_set_intr_set;
-
-typedef boost::mpl::list<Z2_list_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
-							Z2_list_boundary_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_boundary_column<Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
-						> list_of_2_columns_with_row_non_intr;
-
-typedef boost::mpl::list<Z2_list_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_set_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_vector_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_list_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_set_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_vector_boundary_column<Z2_row_cell, RA_set<Z2_row_cell> >
-						> list_of_2_columns_with_row_set_non_intr;
-
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_2_columns_with_row_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_list_column<Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_list_boundary_column<Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
-						> list_of_2_columns_with_row_set_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_2_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Z2_intrusive_set_column<Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >,
-							Z2_intrusive_set_boundary_column<Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
-						> list_of_2_columns_with_row_set_intr_set;
-
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
-						> list_of_5_chain_columns_with_row_non_intr;
-
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
-						> list_of_5_chain_columns_with_row_set_non_intr;
-
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_5_chain_columns_with_row_intr_list;
-
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
-						> list_of_5_chain_columns_with_row_set_intr_list;
-
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_5_chain_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
-						> list_of_5_chain_columns_with_row_set_intr_set;
-
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
-						> list_of_2_chain_columns_with_row_non_intr;
-
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >
-						> list_of_2_chain_columns_with_row_set_non_intr;
-
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_2_chain_columns_with_row_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
-						> list_of_2_chain_columns_with_row_set_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_2_chain_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
-						> list_of_2_chain_columns_with_row_set_intr_set;
+typedef boost::mpl::list<Z2_list_chain_column<dict_type, matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							Z2_list_chain_column<dict_type, matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
+							Z2_set_chain_column<dict_type, matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_chain_column<dict_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option>
+						> list_of_2_chain_columns_with_row;
 
 ////////////// PAIRING //////////////
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Unordered_set_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Vector_chain_column<dict_type, Z5, Base_cell<Z5>, Dummy_row_access>,
-							Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_cell<Z5>, Dummy_row_access>,
-							Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_cell<Z5>, Dummy_row_access>,
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
+							Set_chain_column<dict_type, Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>,
 							Z2_heap_chain_column<dict_type>,
-							Z2_list_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_unordered_set_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_vector_chain_column<dict_type, Z2_base_cell, Dummy_row_access>,
-							Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_cell, Dummy_row_access>,
-							Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_cell, Dummy_row_access>
+							Z2_list_chain_column<dict_type, matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
+							Z2_set_chain_column<dict_type, matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_chain_column<dict_type, matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>
 						> list_of_chain_pairing_columns;
 
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Intrusive_row_cell<Z5>, RA<Intrusive_row_cell<Z5> > >
-						> list_of_pairing_chain_columns_with_row_non_intr;
-
-typedef boost::mpl::list<List_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Unordered_set_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >,
-							Vector_chain_column<dict_type, Z5, Row_cell<Z5>, RA_set<Row_cell<Z5> > >
-						> list_of_pairing_chain_columns_with_set_row_non_intr;
-
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_pairing_chain_columns_with_row_intr_list;
-
-typedef boost::mpl::list<Intrusive_list_chain_column<dict_type, Z5, Intrusive_list_row_cell<Row_cell<Z5> >, RA_set<Intrusive_list_row_cell<Row_cell<Z5> > > >
-						> list_of_pairing_chain_columns_with_set_row_intr_list;
-
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Intrusive_row_cell<Z5> >, RA<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > >
-						> list_of_pairing_chain_columns_with_row_intr_set;
-
-typedef boost::mpl::list<Intrusive_set_chain_column<dict_type, Z5, Intrusive_set_row_cell<Row_cell<Z5> >, RA_set<Intrusive_set_row_cell<Row_cell<Z5> > > >
-						> list_of_pairing_chain_columns_with_set_row_intr_set;
-
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_intrusive_row_cell, RA<Z2_intrusive_row_cell> >
-						> list_of_pairing_chain_columns_with_row_z2_non_intr;
-
-typedef boost::mpl::list<Z2_list_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_unordered_set_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >,
-							Z2_vector_chain_column<dict_type, Z2_row_cell, RA_set<Z2_row_cell> >
-						> list_of_pairing_chain_columns_with_set_row_z2_non_intr;
-
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_pairing_chain_columns_with_row_z2_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_list_chain_column<dict_type, Z2_intrusive_list_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_list_row_cell<Z2_row_cell> > >
-						> list_of_pairing_chain_columns_with_set_row_z2_intr_list;
-
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_intrusive_row_cell>, RA<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > >
-						> list_of_pairing_chain_columns_with_row_z2_intr_set;
-
-typedef boost::mpl::list<Z2_intrusive_set_chain_column<dict_type, Z2_intrusive_set_row_cell<Z2_row_cell>, RA_set<Z2_intrusive_set_row_cell<Z2_row_cell> > >
-						> list_of_pairing_chain_columns_with_set_row_z2_intr_set;
+typedef boost::mpl::list<List_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							List_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
+							Set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
+							Unordered_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Vector_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_list_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_list_chain_column<dict_type, matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							Z2_list_chain_column<dict_type, matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
+							Z2_set_chain_column<dict_type, matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
+							Z2_unordered_set_chain_column<dict_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							Z2_vector_chain_column<dict_type, matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_list_chain_column<dict_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_LIST>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option>
+						> list_of_pairing_chain_columns_with_row;
 
 template<class Column>
 void common_5_test(std::vector<Column> &matrix)
@@ -669,33 +730,8 @@ void common_5_test_with_rows(Rows &rows){
 	common_5_test(matrix);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_5_non_intr, Column, list_of_5_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_5_non_intr, Column, list_of_5_columns_with_row_set_non_intr) {
-	row_container_set<Row_cell<Z5> > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_5_intr_list, Column, list_of_5_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_5_intr_list, Column, list_of_5_columns_with_row_set_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_5_intr_set, Column, list_of_5_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_5_intr_set, Column, list_of_5_columns_with_row_set_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_5_non_intr, Column, list_of_5_columns_with_row) {
+	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
 	common_5_test_with_rows<Column>(rows);
 }
 
@@ -714,33 +750,8 @@ void common_5_chain_test_with_rows(Rows &rows){
 	common_5_test(matrix);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_5_non_intr, Column, list_of_5_chain_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_5_non_intr, Column, list_of_5_chain_columns_with_row_set_non_intr) {
-	row_container_set<Row_cell<Z5> > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_5_intr_list, Column, list_of_5_chain_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_5_intr_list, Column, list_of_5_chain_columns_with_row_set_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_5_intr_set, Column, list_of_5_chain_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
-	common_5_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_5_intr_set, Column, list_of_5_chain_columns_with_row_set_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > rows;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_5_non_intr, Column, list_of_5_chain_columns_with_row) {
+	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
 	common_5_chain_test_with_rows<Column>(rows);
 }
 
@@ -973,33 +984,8 @@ void common_2_test_with_rows(Rows &rows){
 	common_2_test(matrix);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_2_non_intr, Column, list_of_2_columns_with_row_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> rows;	//defined here to ensure it is destroyed after the columns
-	common_2_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_2_non_intr, Column, list_of_2_columns_with_row_set_non_intr) {
-	row_container_set<Z2_row_cell> rows;	//defined here to ensure it is destroyed after the columns
-	common_2_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_2_intr_list, Column, list_of_2_columns_with_row_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_2_intr_list, Column, list_of_2_columns_with_row_set_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_2_intr_set, Column, list_of_2_columns_with_row_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_set_row_common_2_intr_set, Column, list_of_2_columns_with_row_set_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_common_2_non_intr, Column, list_of_2_columns_with_row) {
+	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
 	common_2_test_with_rows<Column>(rows);
 }
 
@@ -1018,33 +1004,8 @@ void common_2_chain_test_with_rows(Rows &rows){
 	common_2_test(matrix);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_2_non_intr, Column, list_of_2_chain_columns_with_row_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> rows;	//defined here to ensure it is destroyed after the columns
-	common_2_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_2_non_intr, Column, list_of_2_chain_columns_with_row_set_non_intr) {
-	row_container_set<Z2_row_cell> rows;	//defined here to ensure it is destroyed after the columns
-	common_2_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_2_intr_list, Column, list_of_2_chain_columns_with_row_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_2_intr_list, Column, list_of_2_chain_columns_with_row_set_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_2_intr_set, Column, list_of_2_chain_columns_with_row_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
-	common_2_chain_test_with_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_common_2_intr_set, Column, list_of_2_chain_columns_with_row_set_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > rows;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_common_2_non_intr, Column, list_of_2_chain_columns_with_row) {
+	typename Column::Row_access::row_container rows;	//defined here to ensure it is destroyed after the columns
 	common_2_chain_test_with_rows<Column>(rows);
 }
 
@@ -1329,33 +1290,8 @@ void row_methods_test(Row_container_type& row_cont) {
 	row_methods_test_com(matrix, chains, row_cont);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_methods_non_intr, Column, list_of_5_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > row_cont;	//defined here to ensure it is destroyed after the columns
-	row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_set_methods_non_intr, Column, list_of_5_columns_with_row_set_non_intr) {
-	row_container_set<Row_cell<Z5> > row_cont;	//defined here to ensure it is destroyed after the columns
-	row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_methods_intr_list, Column, list_of_5_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_set_methods_intr_list, Column, list_of_5_columns_with_row_set_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_methods_intr_set, Column, list_of_5_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_set_methods_intr_set, Column, list_of_5_columns_with_row_set_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Column_types_with_row_methods_non_intr, Column, list_of_5_columns_with_row) {
+	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
 	row_methods_test<Column>(row_cont);
 }
 
@@ -1381,33 +1317,8 @@ void chain_row_methods_test(Row_container_type& row_cont) {
 	row_methods_test_com(matrix, chains, row_cont);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_methods_non_intr, Column, list_of_5_chain_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > row_cont;	//defined here to ensure it is destroyed after the columns
-	chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_set_methods_non_intr, Column, list_of_5_chain_columns_with_row_set_non_intr) {
-	row_container_set<Row_cell<Z5> > row_cont;	//defined here to ensure it is destroyed after the columns
-	chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_methods_intr_list, Column, list_of_5_chain_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_set_methods_intr_list, Column, list_of_5_chain_columns_with_row_set_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_methods_intr_set, Column, list_of_5_chain_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
-	chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_set_methods_intr_set, Column, list_of_5_chain_columns_with_row_set_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > row_cont;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_methods_non_intr, Column, list_of_5_chain_columns_with_row) {
+	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
 	chain_row_methods_test<Column>(row_cont);
 }
 
@@ -1479,33 +1390,8 @@ void z2_row_methods_test(Row_container_type& row_cont) {
 	z2_row_methods_test_com(matrix, chains, row_cont);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_methods_non_intr, Column, list_of_2_columns_with_row_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_set_methods_non_intr, Column, list_of_2_columns_with_row_set_non_intr) {
-	row_container_set<Z2_row_cell> row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_methods_intr_list, Column, list_of_2_columns_with_row_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_set_methods_intr_list, Column, list_of_2_columns_with_row_set_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_methods_intr_set, Column, list_of_2_columns_with_row_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_set_methods_intr_set, Column, list_of_2_columns_with_row_set_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_column_types_with_row_methods_non_intr, Column, list_of_2_columns_with_row) {
+	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
 	z2_row_methods_test<Column>(row_cont);
 }
 
@@ -1531,33 +1417,8 @@ void z2_chain_row_methods_test(Row_container_type& row_cont) {
 	z2_row_methods_test_com(matrix, chains, row_cont);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_methods_non_intr, Column, list_of_2_chain_columns_with_row_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_set_methods_non_intr, Column, list_of_2_chain_columns_with_row_set_non_intr) {
-	row_container_set<Z2_row_cell> row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_methods_intr_list, Column, list_of_2_chain_columns_with_row_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_set_methods_intr_list, Column, list_of_2_chain_columns_with_row_set_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_methods_intr_set, Column, list_of_2_chain_columns_with_row_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
-	z2_chain_row_methods_test<Column>(row_cont);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_set_methods_intr_set, Column, list_of_2_chain_columns_with_row_set_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > row_cont;	//defined here to ensure it is destroyed after the columns
+BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_with_row_methods_non_intr, Column, list_of_2_chain_columns_with_row) {
+	typename Column::Row_access::row_container row_cont;	//defined here to ensure it is destroyed after the columns
 	z2_chain_row_methods_test<Column>(row_cont);
 }
 
@@ -1610,63 +1471,8 @@ void pairing_test_with_chain_rows(Rows &rows){
 	pairing_test(matrix);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_non_intr, Column, list_of_pairing_chain_columns_with_row_non_intr) {
-	row_container_type<Intrusive_row_cell<Z5> > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_non_intr, Column, list_of_pairing_chain_columns_with_set_row_non_intr) {
-	row_container_set<Row_cell<Z5> > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_intr_list, Column, list_of_pairing_chain_columns_with_row_intr_list) {
-	row_container_type<Intrusive_list_row_cell<Intrusive_row_cell<Z5> > > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_intr_list, Column, list_of_pairing_chain_columns_with_set_row_intr_list) {
-	row_container_set<Intrusive_list_row_cell<Row_cell<Z5> > > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_intr_set, Column, list_of_pairing_chain_columns_with_row_intr_set) {
-	row_container_type<Intrusive_set_row_cell<Intrusive_row_cell<Z5> > > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_intr_set, Column, list_of_pairing_chain_columns_with_set_row_intr_set) {
-	row_container_set<Intrusive_set_row_cell<Row_cell<Z5> > > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_z2_non_intr, Column, list_of_pairing_chain_columns_with_row_z2_non_intr) {
-	row_container_type<Z2_intrusive_row_cell> rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_z2_non_intr, Column, list_of_pairing_chain_columns_with_set_row_z2_non_intr) {
-	row_container_set<Z2_row_cell> rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_z2_intr_list, Column, list_of_pairing_chain_columns_with_row_z2_intr_list) {
-	row_container_type<Z2_intrusive_list_row_cell<Z2_intrusive_row_cell> > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_z2_intr_list, Column, list_of_pairing_chain_columns_with_set_row_z2_intr_list) {
-	row_container_set<Z2_intrusive_list_row_cell<Z2_row_cell> > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_z2_intr_set, Column, list_of_pairing_chain_columns_with_row_z2_intr_set) {
-	row_container_type<Z2_intrusive_set_row_cell<Z2_intrusive_row_cell> > rows;
-	pairing_test_with_chain_rows<Column>(rows);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_set_row_pairing_option_z2_intr_set, Column, list_of_pairing_chain_columns_with_set_row_z2_intr_set) {
-	row_container_set<Z2_intrusive_set_row_cell<Z2_row_cell> > rows;
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_with_row_pairing_option_non_intr, Column, list_of_pairing_chain_columns_with_row) {
+	typename Column::Row_access::row_container rows;
 	pairing_test_with_chain_rows<Column>(rows);
 }
 

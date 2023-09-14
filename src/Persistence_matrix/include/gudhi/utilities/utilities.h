@@ -28,6 +28,9 @@ using dimension_type = int;
 //using filtration_value_type = double;
 //using persistence_pair = std::pair<filtration_value_type, filtration_value_type>;
 
+	struct matrix_row_tag;
+	struct matrix_column_tag;
+
 struct Bar{
 	Bar() : dim(-1), birth(-1), death(-1)
 	{}

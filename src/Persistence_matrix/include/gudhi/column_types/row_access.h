@@ -15,7 +15,7 @@
 #include <cassert>
 
 #include "../utilities/utilities.h"
-#include "cell.h"					//to recognize the alias "base_hook_matrix_row"
+// #include "cell.h"					//to recognize the alias "base_hook_matrix_row"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -24,6 +24,8 @@ template<class Row_container_type, class Cell_type, bool isIntrusive, bool hasRe
 class Row_access
 {
 public:
+	using row_container = Row_container_type;	//temporary for factorization process
+
 	Row_access();
 	Row_access(index columnIndex, Row_container_type& rows);
 	Row_access(Row_access&& other) noexcept;

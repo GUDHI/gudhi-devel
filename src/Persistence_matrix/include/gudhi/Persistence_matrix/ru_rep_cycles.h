@@ -26,10 +26,11 @@ class RU_representative_cycles
 public:
 	using index = typename Master_matrix::index;
 	using Bar = typename Master_matrix::Bar;
-	using Base_matrix = typename Master_matrix::Boundary_matrix_type;
+	using Boundary_matrix = typename Master_matrix::Boundary_matrix_type;
+	using Base_matrix = typename Master_matrix::Base_matrix_type;
 	using cycle_type = std::vector<index>;	//TODO: add coefficients
 
-	RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU);
+	RU_representative_cycles(Boundary_matrix &matrixR, Base_matrix &matrixU);
 	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
 	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
@@ -45,7 +46,7 @@ public:
 	}
 
 protected:
-	Base_matrix *reducedMatrixR_;
+	Boundary_matrix *reducedMatrixR_;
 	Base_matrix *mirrorMatrixU_;
 
 private:
@@ -54,7 +55,7 @@ private:
 };
 
 template<class Master_matrix>
-inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(Base_matrix &matrixR, Base_matrix &matrixU)
+inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(Boundary_matrix &matrixR, Base_matrix &matrixU)
 	: reducedMatrixR_(&matrixR), mirrorMatrixU_(&matrixU)
 {}
 

@@ -56,7 +56,7 @@ public:
 	template<typename Index_type>
 	std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
 	template<class Cell_range>
-	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
 	template<class Cell_range>
 	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	template<class Cell_range>
@@ -343,7 +343,7 @@ template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::erase_column(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
-			"'erase_column' is not implemented for the chosen options.");
+			"'erase_column' is not imatrix_.erase(columnIndex);mplemented for the chosen options.");
 	
 	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
 
@@ -352,14 +352,19 @@ inline void Base_matrix<Master_matrix>::erase_column(index columnIndex)
 
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::erase_row(index rowIndex)
-{	
+{
 	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
+			ra_opt::erase_row(swap_opt::indexToRow_[rowIndex]);
+		}
+		
 		auto it = swap_opt::indexToRow_.find(rowIndex);
 		swap_opt::rowToIndex_.erase(it->second);
 		swap_opt::indexToRow_.erase(it);
-	}
-	if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
-		ra_opt::erase_row(rowIndex);
+	} else {
+		if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
+			ra_opt::erase_row(rowIndex);
+		}
 	}
 }
 
@@ -397,7 +402,7 @@ inline std::enable_if_t<std::is_integral_v<Index_type> > Base_matrix<Master_matr
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+inline std::enable_if_t<!std::is_integral_v<Cell_range> > Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		matrix_.at(targetColumnIndex) += sourceColumn;
@@ -463,7 +468,7 @@ inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIn
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
-			matrix_.at(columnIndex).clear(swap_opt::indexToRow_[rowIndex]);	//TODO: reorganize columns
+			matrix_.at(columnIndex).clear(swap_opt::indexToRow_.at(rowIndex));	//TODO: reorganize columns
 		} else {
 			matrix_.at(columnIndex).clear(rowIndex);	//TODO: reorganize columns
 		}

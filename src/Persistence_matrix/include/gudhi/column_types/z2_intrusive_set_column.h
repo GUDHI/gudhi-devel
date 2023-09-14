@@ -18,7 +18,7 @@
 #include <gudhi/Simple_object_pool.h>
 
 #include "../utilities/utilities.h"
-#include "cell.h"
+// #include "cell.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -27,6 +27,10 @@ template<class Cell_type, class Row_access_option>
 class Z2_intrusive_set_column : public Row_access_option
 {
 public:
+	using base_hook_matrix_set_column = boost::intrusive::set_base_hook <
+				boost::intrusive::tag < matrix_column_tag >
+			, boost::intrusive::link_mode < boost::intrusive::safe_link >
+			>;
 //	using Cell = Z2_intrusive_set_cell;
 	using Cell = Cell_type;
 	using Column_type = boost::intrusive::set <

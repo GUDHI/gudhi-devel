@@ -80,9 +80,6 @@ public:
 	void add_to(Column_type& sourceColumn, index targetColumnIndex);
 	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 	//=================================================================
 
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
@@ -531,36 +528,6 @@ inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const
 
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
-	} else {
-		matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += sourceColumn;
-	} else {
-		matrix_[targetColumnIndex] += sourceColumn;
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
-	} else {
-		matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);

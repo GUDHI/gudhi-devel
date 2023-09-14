@@ -34,6 +34,9 @@ enum Column_types {
 template<bool is_z2_only = true, class Field_type = Z2_field_element, Column_types col_type = Column_types::INTRUSIVE_SET, bool parallelizable = false>
 struct Default_options{
 	using field_coeff_type = Field_type;
+	using index_type = unsigned int;
+	using dimension_type = int;	//needs to be signed.
+
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
 
