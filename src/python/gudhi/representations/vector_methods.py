@@ -779,7 +779,7 @@ class Atol(BaseEstimator, TransformerMixin):
         if not hasattr(self.quantiser, 'fit'):
             raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
         if sample_weight is None:
-            sample_weight = np.concatenate([self.get_weighting_method()(measure) for measure in X])
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
 
         measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
