@@ -746,15 +746,22 @@ class Atol(BaseEstimator, TransformerMixin):
                 (default: gaussian contrast function, see page 3 in the ATOL paper).
         """
         self.quantiser = quantiser
-        self.contrast = {
+        self.contrast = contrast
+        self.weighting_method = weighting_method
+        self.calib_percent = calib_percent
+
+    def get_contrast(self):
+        return {
             "gaussian": _gaus_contrast,
             "laplacian": _lapl_contrast,
             "indicator": _indicator_contrast,
-        }.get(contrast, _gaus_contrast)
-        self.weighting_method = {
+        }.get(self.contrast, _gaus_contrast)
+
+    def get_weighting_method(self):
+        return {
             "cloud"   : _cloud_weighting,
             "iidproba": _iidproba_weighting,
-        }.get(weighting_method, _cloud_weighting)
+        }.get(self.weighting_method, _cloud_weighting)
 
     def fit(self, X, y=None, sample_weight=None):
         """
@@ -773,7 +780,7 @@ class Atol(BaseEstimator, TransformerMixin):
         if not hasattr(self.quantiser, 'fit'):
             raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
         if sample_weight is None:
-            sample_weight = np.concatenate([self.weighting_method(measure) for measure in X])
+            sample_weight = np.concatenate([self.get_weighting_method()(measure) for measure in X])
 
         measures_concat = np.concatenate(X)
         self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
@@ -802,8 +809,8 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array in R^self.quantiser.n_clusters.
         """
         if sample_weight is None:
-            sample_weight = self.weighting_method(measure)
-        return np.sum(sample_weight * self.contrast(measure, self.centers, self.inertias.T).T, axis=1)
+            sample_weight = self.get_weighting_method()(measure)
+        return np.sum(sample_weight * self.get_contrast()(measure, self.centers, self.inertias.T).T, axis=1)
 
     def transform(self, X, sample_weight=None):
         """
@@ -819,5 +826,5 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array with shape (number of measures) x (self.quantiser.n_clusters).
         """
         if sample_weight is None:
-            sample_weight = [self.weighting_method(measure) for measure in X]
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
         return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
