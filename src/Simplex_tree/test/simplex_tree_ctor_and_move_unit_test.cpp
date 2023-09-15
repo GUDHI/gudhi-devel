@@ -13,6 +13,7 @@
 #include <string>
 #include <iterator>  // for std::distance
 #include <algorithm>  // for std::equal
+#include <utility>  // for std::move
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_constructor_and_move"

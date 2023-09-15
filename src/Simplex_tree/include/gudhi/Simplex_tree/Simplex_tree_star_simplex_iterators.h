@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <utility>  // for std::move
 #include <functional>  // for std::greater
+#include <algorithm>  // for std::includes
 
 namespace Gudhi {
 
