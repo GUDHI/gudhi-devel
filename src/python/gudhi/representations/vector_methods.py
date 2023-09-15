@@ -783,7 +783,8 @@ class Atol(BaseEstimator, TransformerMixin):
             sample_weight = np.concatenate([self.get_weighting_method()(measure) for measure in X])
 
         measures_concat = np.concatenate(X)
-        self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
+        weights_concat = np.concatenate(sample_weight)
+        self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
         self.centers = self.quantiser.cluster_centers_
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
