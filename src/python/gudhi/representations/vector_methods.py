@@ -10,6 +10,7 @@
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
 import numpy as np
+from scipy.spatial.distance import cdist
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
@@ -682,15 +683,15 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
 
 def _lapl_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / inertias)
+    return np.exp(-cdist(XA=measure, XB=centers) / inertias)
 
 def _gaus_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers, squared=True) / inertias**2)
+    return np.exp(-cdist(XA=measure, XB=centers, metric="sqeuclidean") / inertias**2)
 
 def _indicator_contrast(diags, centers, inertias):
     """contrast function for vectorising `measure` in ATOL"""
-    robe_curve = np.clip(2-pairwise.pairwise_distances(diags, Y=centers)/inertias, 0, 1)
+    robe_curve = np.clip(2-cdist(XA=diags, XB=centers)/inertias, 0, 1)
     return robe_curve
 
 def _cloud_weighting(measure):
