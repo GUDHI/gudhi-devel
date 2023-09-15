@@ -748,7 +748,6 @@ class Atol(BaseEstimator, TransformerMixin):
         self.quantiser = quantiser
         self.contrast = contrast
         self.weighting_method = weighting_method
-        self.calib_percent = calib_percent
 
     def get_contrast(self):
         return {
