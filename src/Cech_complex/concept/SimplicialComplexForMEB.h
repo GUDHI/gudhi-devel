@@ -35,7 +35,7 @@ struct SimplicialComplexForMEB {
   /** \brief Assigns this 'filtration' value to the 'simplex'. */
   int assign_filtration(Simplex_handle simplex, Filtration_value filtration);
 
-  /** \brief Returns the key assigned to the 'simplex' with `assign_key`. */
+  /** \brief Returns the key assigned to the 'simplex' with `assign_key()`. */
   Simplex_key key(Simplex_handle simplex);
   /** \brief Assigns this 'key' to the 'simplex'. */
   void assign_key(Simplex_handle simplex, Simplex_key key);
