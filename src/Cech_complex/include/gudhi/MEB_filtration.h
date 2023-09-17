@@ -48,8 +48,8 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
   auto fun = [&](Simplex_handle sh, int dim){
     if (dim == 0) complex.assign_filtration(sh, 0);
     else if (dim == 1) {
-      // Vertex_handle u = sh->first;
-      // Vertex_handle v = self_siblings(sh)->parent();
+      // For a Simplex_tree, this would be a bit faster, but that's probably negligible
+      // Vertex_handle u = sh->first; Vertex_handle v = self_siblings(sh)->parent();
       auto verts = complex.simplex_vertex_range(sh);
       auto vert_it = verts.begin();
       Vertex_handle u = *vert_it;
@@ -58,37 +58,53 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       Point_d m = k.midpoint_d_object()(pu, points[v]);
       FT r = k.squared_distance_d_object()(m, pu);
       if (exact) CGAL::exact(r);
-      complex.assign_key(sh, cache_.size()); // TODO: use a map if complex does not provide key?
+      complex.assign_key(sh, cache_.size());
       complex.assign_filtration(sh, std::max(cvt(r), Filtration_value(0)));
       cache_.emplace_back(std::move(m), std::move(r));
     } else {
+      Filtration_value maxf = 0; // max filtration of the faces
+      bool found = false;
+      using std::max;
       for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(sh)) {
-        auto key = complex.key(face_opposite_vertex.first);
-        Sphere const& sph = cache_[key];
-        if (k.squared_distance_d_object()(sph.first, points[face_opposite_vertex.second]) > sph.second) continue;
-        complex.assign_key(sh, key);
-        complex.assign_filtration(sh, complex.filtration(face_opposite_vertex.first));
-        return;
+        maxf = max(maxf, complex.filtration(face_opposite_vertex.first));
+        if (!found) {
+          auto key = complex.key(face_opposite_vertex.first);
+          Sphere const& sph = cache_[key];
+          if (k.squared_distance_d_object()(sph.first, points[face_opposite_vertex.second]) > sph.second) continue;
+          found = true;
+          complex.assign_key(sh, key);
+          // With exact computations, we could stop here
+          // complex.assign_filtration(sh, complex.filtration(face_opposite_vertex.first)); return;
+          // but because of possible rounding errors, we continue with the equivalent of make_filtration_non_decreasing
+        }
       }
-      // None of the faces are good enough, MEB must be the circumsphere.
-      pts.clear();
-      for (auto vertex : complex.simplex_vertex_range(sh))
-        pts.push_back(points[vertex]);
-      Point_d c = k.construct_circumcenter_d_object()(pts.begin(), pts.end());
-      FT r = k.squared_distance_d_object()(c, pts.front());
-      if (exact) CGAL::exact(r);
-      complex.assign_key(sh, cache_.size()); // TODO: use a map if complex does not provide key?
-      complex.assign_filtration(sh, cvt(r));
-      cache_.emplace_back(std::move(c), std::move(r));
+      if (!found) {
+        // None of the faces are good enough, MEB must be the circumsphere.
+        pts.clear();
+        for (auto vertex : complex.simplex_vertex_range(sh))
+          pts.push_back(points[vertex]);
+        Point_d c = k.construct_circumcenter_d_object()(pts.begin(), pts.end());
+        FT r = k.squared_distance_d_object()(c, pts.front());
+        if (exact) CGAL::exact(r);
+        maxf = max(maxf, cvt(r)); // maxf = cvt(r) except for rounding errors
+        complex.assign_key(sh, cache_.size());
+        // We could check if the simplex is maximal and avoiding adding it to the cache in that case.
+        cache_.emplace_back(std::move(c), std::move(r));
+      }
+      complex.assign_filtration(sh, maxf);
     }
   };
   complex.for_each_simplex(fun);
-  // TODO: when !exact, how do we ensure that the value is indeed larger
-  // than for the faces? Cech_complex also looks at the max of the faces,
-  // given by expansion. We would need to do compute this max as well, and
-  // in particular not short-circuit when we find a good face. For now, the
-  // simplest:
-  if (!exact) complex.make_filtration_non_decreasing();
+
+  // We could avoid computing maxf, but when !exact rounding errors may cause
+  // the filtration values to be non-monotonous, so we would need to call
+  // if (!exact) complex.make_filtration_non_decreasing();
+  // which is way more costly than computing maxf. The exact case is already so
+  // costly that it isn't worth maintaining code without maxf just for it.
+  // Cech_complex has "free" access to the max of the faces, because
+  // expansion_with_blockers computes it before the callback.
+
+  // TODO: use a map if complex does not provide key?
 }
 }  // namespace Gudhi::cech_complex
 
