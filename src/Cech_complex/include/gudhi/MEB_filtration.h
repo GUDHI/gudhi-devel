@@ -16,6 +16,7 @@ namespace Gudhi::cech_complex {
 /**
  * \ingroup cech_complex
  *
+ * \brief
  * Given a simplicial complex and an embedding of its vertices, this assigns to
  * each simplex a filtration value equal to the squared radius of its minimal
  * enclosing ball.
@@ -23,11 +24,11 @@ namespace Gudhi::cech_complex {
  * Applied on a Cech complex, it recomputes the same values (squared). Applied on a Delaunay triangulation, it computes the Delaunay-Cech filtration.
  *
  * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
- * \tparam SimplicialComplexForMEB Simplex_tree with Simplex_key an integer type large enough to store the number of simplices.
  * \tparam PointRange Random access range of `Kernel::Point_d`.
  *
- * @param[in] points Embedding of the vertices of the complex.
+ * @param[in] k The geometric kernel.
  * @param[in] complex The simplicial complex.
+ * @param[in] points Embedding of the vertices of the complex.
  * @param[in] exact If true and `Kernel` is <a href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>, the filtration values are computed exactly. Default is false.
  */
 
