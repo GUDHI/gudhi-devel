@@ -682,15 +682,18 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         return self.transform([diag])[0,:]
 
 def _lapl_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
     return np.exp(-cdist(XA=measure, XB=centers) / inertias)
 
 def _gaus_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
     return np.exp(-cdist(XA=measure, XB=centers, metric="sqeuclidean") / inertias**2)
 
 def _indicator_contrast(diags, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
     robe_curve = np.clip(2-cdist(XA=diags, XB=centers)/inertias, 0, 1)
     return robe_curve
 
