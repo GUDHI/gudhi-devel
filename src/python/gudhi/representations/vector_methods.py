@@ -781,6 +781,10 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if not hasattr(self.quantiser, 'fit'):
             raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
+
+        # In fitting we remove infinite death time points so that every center is finite
+        X = [dgm[~np.isinf(dgm).any(axis=1), :] for dgm in X]
+
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
 
