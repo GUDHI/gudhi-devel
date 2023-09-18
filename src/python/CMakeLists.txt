@@ -55,6 +55,7 @@ if(PYTHONINTERP_FOUND)
     # Cython modules
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_utils', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
+    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'edge_collapse', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'cubical_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'periodic_cubical_complex', ")
@@ -185,6 +186,7 @@ if(PYTHONINTERP_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
+    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_edge_collapse', ")
 
     # from windows vcpkg eigen 3.4.0#2 : build fails with
     # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -323,6 +325,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
+    file(COPY "gudhi/edge_collapse.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
 
     # Some files for pip package
@@ -562,6 +565,11 @@ if(PYTHONINTERP_FOUND)
     add_gudhi_py_test(test_simplex_tree)
     add_gudhi_py_test(test_simplex_generators)
     add_gudhi_py_test(test_simplex_tree_serialization)
+
+    # Edge collapse
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_collapse_edges)
+    endif()
 
     # Subsampling
     add_gudhi_py_test(test_subsampling)
