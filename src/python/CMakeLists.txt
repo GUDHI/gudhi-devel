@@ -413,7 +413,7 @@ if(PYTHONINTERP_FOUND)
         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
       endif(SPHINX_PARAMLINKS_FOUND)
     else(SPHINX_PATH)
-      message("++ Python documentation module will not be compiled because sphinx and sphinxcontrib-bibtex were not found")
+      message("++ Python documentation module will not be compiled because sphinx was not found")
       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
     endif(SPHINX_PATH)
 
