@@ -21,7 +21,7 @@ namespace Gudhi::cech_complex {
  * each simplex a filtration value equal to the squared radius of its minimal
  * enclosing ball.
  *
- * Applied on a Cech complex, it recomputes the same values (squared). Applied on a Delaunay triangulation, it computes the Delaunay-Cech filtration.
+ * Applied on a Čech complex, it recomputes the same values (squared). Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
  *
  * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
  * \tparam PointRange Random access range of `Kernel::Point_d`.
