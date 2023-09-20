@@ -122,8 +122,11 @@ if(PYTHONINTERP_FOUND)
       add_gudhi_debug_info("Sphinx-paramlinks version ${SPHINX_PARAMLINKS_VERSION}")
     endif()
     if(PYDATA_SPHINX_THEME_FOUND)
-      # Does not have a version number...
       add_gudhi_debug_info("pydata_sphinx_theme version ${PYDATA_SPHINX_THEME_VERSION}")
+    endif()
+    if(SPHINXCONTRIB.BIBTEX_FOUND)
+      # Does not have a version number...
+      add_gudhi_debug_info("sphinxcontrib-bibtex found")
     endif()
     if(NETWORKX_FOUND)
       add_gudhi_debug_info("NetworkX version ${NETWORKX_VERSION}")
@@ -349,66 +352,71 @@ if(PYTHONINTERP_FOUND)
     # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
     if(SPHINX_PATH)
       if(SPHINX_PARAMLINKS_FOUND)
-        if(PYDATA_SPHINX_THEME_FOUND)
-          if(MATPLOTLIB_FOUND)
-            if(NUMPY_FOUND)
-              if(SCIPY_FOUND)
-                if(SKLEARN_FOUND)
-                  if(OT_FOUND)
-                    if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-                      set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
-                      # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
-                      # Images and biblio warnings because not found on developer version
-                      if (GUDHI_PYTHON_PATH STREQUAL "src/python")
-                        set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
-                      endif()
-                      # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
-                      add_custom_target(sphinx
-                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
-                          COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-                          ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-                          DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
-                          COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
-                      add_test(NAME sphinx_py_test
-                               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                               COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
-                               ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
-                      # Set missing or not modules
-                      set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                    else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-                      message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
+        if(SPHINXCONTRIB.BIBTEX_FOUND)
+          if(PYDATA_SPHINX_THEME_FOUND)
+            if(MATPLOTLIB_FOUND)
+              if(NUMPY_FOUND)
+                if(SCIPY_FOUND)
+                  if(SKLEARN_FOUND)
+                    if(OT_FOUND)
+                      if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                        set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
+                        # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
+                        # Images and biblio warnings because not found on developer version
+                        if (GUDHI_PYTHON_PATH STREQUAL "src/python")
+                          set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
+                        endif()
+                        # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+                        add_custom_target(sphinx
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+                            COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+                            ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
+                            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+                            COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
+                        add_test(NAME sphinx_py_test
+                                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                                 COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+                                 ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
+                        # Set missing or not modules
+                        set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
+                      else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                        message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
+                        set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+                      endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                    else(OT_FOUND)
+                      message("++ Python documentation module will not be compiled because POT was not found")
                       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                    endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-                  else(OT_FOUND)
-                    message("++ Python documentation module will not be compiled because POT was not found")
+                    endif(OT_FOUND)
+                  else(SKLEARN_FOUND)
+                    message("++ Python documentation module will not be compiled because scikit-learn was not found")
                     set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                  endif(OT_FOUND)
-                else(SKLEARN_FOUND)
-                  message("++ Python documentation module will not be compiled because scikit-learn was not found")
+                  endif(SKLEARN_FOUND)
+                else(SCIPY_FOUND)
+                  message("++ Python documentation module will not be compiled because scipy was not found")
                   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                endif(SKLEARN_FOUND)
-              else(SCIPY_FOUND)
-                message("++ Python documentation module will not be compiled because scipy was not found")
+                endif(SCIPY_FOUND)
+              else(NUMPY_FOUND)
+                message("++ Python documentation module will not be compiled because numpy was not found")
                 set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-              endif(SCIPY_FOUND)
-            else(NUMPY_FOUND)
-              message("++ Python documentation module will not be compiled because numpy was not found")
+              endif(NUMPY_FOUND)
+            else(MATPLOTLIB_FOUND)
+              message("++ Python documentation module will not be compiled because matplotlib was not found")
               set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-            endif(NUMPY_FOUND)
-          else(MATPLOTLIB_FOUND)
-            message("++ Python documentation module will not be compiled because matplotlib was not found")
+            endif(MATPLOTLIB_FOUND)
+          else(PYDATA_SPHINX_THEME_FOUND)
+            message("++ Python documentation module will not be compiled because pydata_sphinx_theme was not found")
             set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-          endif(MATPLOTLIB_FOUND)
-        else(PYDATA_SPHINX_THEME_FOUND)
-          message("++ Python documentation module will not be compiled because pydata_sphinx_theme was not found")
+          endif(PYDATA_SPHINX_THEME_FOUND)
+        else(SPHINXCONTRIB.BIBTEX_FOUND)
+          message("++ Python documentation module will not be compiled because sphinxcontrib-bibtex was not found")
           set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-        endif(PYDATA_SPHINX_THEME_FOUND)
+        endif(SPHINXCONTRIB.BIBTEX_FOUND)
       else(SPHINX_PARAMLINKS_FOUND)
         message("++ Python documentation module will not be compiled because sphinxcontrib-paramlinks was not found")
         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
       endif(SPHINX_PARAMLINKS_FOUND)
     else(SPHINX_PATH)
-      message("++ Python documentation module will not be compiled because sphinx and sphinxcontrib-bibtex were not found")
+      message("++ Python documentation module will not be compiled because sphinx was not found")
       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
     endif(SPHINX_PATH)
 
