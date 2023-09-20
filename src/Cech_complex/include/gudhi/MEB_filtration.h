@@ -19,7 +19,7 @@ namespace Gudhi::cech_complex {
  * \brief
  * Given a simplicial complex and an embedding of its vertices, this assigns to
  * each simplex a filtration value equal to the squared radius of its minimal
- * enclosing ball.
+ * enclosing ball (MEB).
  *
  * Applied on a Čech complex, it recomputes the same values (squared). Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
  *
