@@ -88,6 +88,7 @@ cdef extern from "Simplex_tree_interface_multi.h" namespace "Gudhi::multiparamet
 		void expansion(int max_dim)  except + nogil
 		void remove_maximal_simplex(simplex_type simplex) nogil
 		# bool prune_above_filtration(filtration_type filtration) nogil
+		bool prune_above_dimension(int dimension) nogil
 		bool make_filtration_non_decreasing()  except + nogil
 		# void compute_extended_filtration() nogil
 		# Simplex_tree_multi_interface* collapse_edges(int nb_collapse_iteration)  except + nogil

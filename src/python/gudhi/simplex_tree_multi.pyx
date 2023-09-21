@@ -540,7 +540,15 @@ cdef class SimplexTreeMulti:
 	# 		method to recompute the exact dimension.
 	# 	"""
 	# 	return self.get_ptr().prune_above_filtration(filtration)
+	def prune_above_dimension(self, int dimension):
+		"""Remove all simplices of dimension greater than a given value.
 
+		:param dimension: Maximum dimension value.
+		:type dimension: int
+		:returns: The modification information.
+		:rtype: bool
+		"""
+		return self.get_ptr().prune_above_dimension(dimension)
 	def expansion(self, int max_dim)->SimplexTreeMulti:
 		"""Expands the simplex tree containing only its one skeleton
 		until dimension max_dim.
