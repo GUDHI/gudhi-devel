@@ -1339,9 +1339,12 @@ class Simplex_tree {
   }
 
   /**
-    * @brief Adds a vertex or an edge in a flag complex, as well as all
+    * @brief Adds a new vertex or a new edge in a flag complex, as well as all
     * simplices of its star, defined to maintain the property
     * of the complex to be a flag complex, truncated at dimension dim_max.
+    * The method assumes that the given edge was not already contained in
+    * the simplex tree, so the behaviour is undefined if called on an existing
+    * edge. Also, the vertices of an edge have to be inserted before the edge.
     *
     * @param[in] u,v              Vertex_handle representing the new edge
     * @param[in] fil              Filtration value of the edge
@@ -1359,9 +1362,10 @@ class Simplex_tree {
     * @warning If the edges and vertices are not inserted in the order of their
     * filtration values, the method `make_filtration_non_decreasing()` has to be
     * called at the end of the insertions to restore the intended filtration.
-    * @warning Different from other insertion methods, if a vertex or an edge
-    * was already inserted in the simplex, it will be ignored and the filtration
-    * values will not change.
+    * Note that even then, an edge has to be inserted after its vertices.
+    * @warning The method assumes that the given edge was not already contained in
+    * the simplex tree, so the behaviour is undefined if called on an existing
+    * edge. Already existing vertices are just ignored and not updated.
     */
   void insert_edge_as_flag(  Vertex_handle                   u
                            , Vertex_handle                   v
@@ -1412,15 +1416,13 @@ class Simplex_tree {
     GUDHI_CHECK(sh_u != root_.members().end() &&
           root_.members().find(v) != root_.members().end(),
           std::invalid_argument(
-                  "Simplex_tree::insert_edge_as_flag - insert an edge whose vertices are not in the complex")
+                  "Simplex_tree::insert_edge_as_flag - inserts an edge whose vertices are not in the complex")
                 );
-
-    //check if the edge {u,v} is already in the complex, if true, nothing to do.
-    if (has_children(sh_u) &&
-        sh_u->second.children()->members().find(v) != sh_u->second.children()->members().end())
-    {
-      return;
-    }
+    GUDHI_CHECK(has_children(sh_u) &&
+          sh_u->second.children()->members().find(v) != sh_u->second.children()->members().end(),
+          std::invalid_argument(
+                  "Simplex_tree::insert_edge_as_flag - inserts an already existing edge")
+                );
 
     // to update dimension
     const auto tmp_dim = dimension_;
