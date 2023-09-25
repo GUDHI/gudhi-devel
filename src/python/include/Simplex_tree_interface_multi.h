@@ -212,40 +212,6 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 /*	simplex_list.shrink_to_fit();*/
 	return simplex_list;
   }
-// DEPRECATED, USE COORDINATE SIMPLEX TREE
-//   euler_chars_type euler_char(const std::vector<std::vector<options_multi::value_type>> &point_list){ // TODO multi-critical 
-// 		const int npts = point_list.size();
-// 		if (npts == 0){
-// 			return {};
-// 		}
-// 		using Gudhi::multi_filtrations::Finitely_critical_multi_filtration;
-		
-// 		euler_chars_type out(point_list.size(), 0.);
-
-// 		// auto is_greater = [nparameters](const point_type &a, const point_type &b){ //french greater
-// 		// 	for (int i = 0; i< nparameters; i++)
-// 		// 		if( a[i] < b[i])
-// 		// 			return false;
-// 		// 	return true;
-// 		// };
-// // #pragma omp parallel for
-// 		for (int i = 0; i< npts; i++){ // Maybe add a pragma here for parallel
-// 			auto &euler_char_at_point = out[i];
-// // #pragma omp parallel for reduction(+:euler_char_at_point) // GUDHI : not possible, need a RANDOM ACCESS ITERATOR
-// 			for(const auto &SimplexHandle : Base::complex_simplex_range()){
-// 				// const Finitely_critical_multi_filtration<options_multi::value_type> &pt = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&point_list[i]);
-// 				options_multi::Filtration_value filtration = Base::filtration(SimplexHandle);
-// 				// const Finitely_critical_multi_filtration<options_multi::value_type> &filtration = *(Finitely_critical_multi_filtration<options_multi::value_type>*)(&filtration_);
-// 				Finitely_critical_multi_filtration<options_multi::value_type> pt(point_list[i]);
-// 				// if (is_greater(pt, filtration)){
-// 				if (filtration <= pt){
-// 					int sign = Base::dimension(SimplexHandle) %2 ? -1 : 1;  
-// 					euler_char_at_point += sign;
-// 				}
-// 			}
-// 		}
-// 		return out;
-// 	}
 	void resize_all_filtrations(int num){ //TODO : that is for 1 critical filtrations
 		if (num < 0)	return;
 		for(const auto &SimplexHandle : Base::complex_simplex_range()){
@@ -260,7 +226,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 };
 
 
-using interface_std = Simplex_tree_interface<Simplex_tree_options_full_featured>;
+using interface_std = Simplex_tree<Simplex_tree_options_full_featured>; // Interface not necessary (smaller so should do less segfaults)
 using interface_multi = Simplex_tree_interface_multi<Simplex_tree_options_multidimensional_filtration>;
 
 

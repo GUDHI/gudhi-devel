@@ -61,9 +61,7 @@ simplextreeinterface& get_simplextree_from_pointer(const uintptr_t splxptr){ //D
 }
 template<class simplextree_std, class simplextree_multi>
 void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_parameters, const typename simplextree_multi::Options::Filtration_value& default_values={}){
-	if (num_parameters <= 0)
-		{std::cerr << "Empty filtration\n"; throw ;}
-	// if (default_values.size() -1 > num_parameters)
+		// if (default_values.size() -1 > num_parameters)
 	// 	{std::cerr << "default values too large !\n"; throw ;}
 	typename simplextree_multi::Options::Filtration_value f(num_parameters);
 	for (auto i = 0u; i<std::min(static_cast<unsigned int>(default_values.size()), static_cast<unsigned int>(num_parameters-1));i++)
@@ -74,9 +72,12 @@ void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_par
 		simplex.clear();
 		for (auto vertex : st.simplex_vertex_range(simplex_handle))
 			simplex.push_back(vertex);
+
+		if (num_parameters > 0)
 		f[0] = st.filtration(simplex_handle);
 		// std::cout << "Inserting " << f << "\n";
-		st_multi.insert_simplex(simplex,f);
+		auto filtration_copy = f;
+		st_multi.insert_simplex(simplex,filtration_copy);
 		
 	}
 }
@@ -130,18 +131,28 @@ void flatten_diag(simplextree_std &st, simplextree_multi &st_multi, const std::v
 
 
 
-/// @brief projects the point x on the grid
+/// @brief turns filtration value x into coordinates in the grid
 /// @tparam out_type 
 /// @param x 
 /// @param grid 
 /// @return 
-template<typename out_type=int>
-std::vector<out_type> find_coordinates(const std::vector<options_multi::value_type> &x, const multi_filtration_grid &grid){
+template<typename out_type=int, typename vector_like>
+inline void find_coordinates(vector_like& x, const multi_filtration_grid &grid){
 	// TODO: optimize with, e.g., dichotomy
-	std::vector<out_type> coordinates(grid.size());
-	for (int parameter = 0; parameter < (int)grid.size(); parameter++){
+	
+	for (auto parameter = 0u; parameter < grid.size(); parameter++){
 		const auto& filtration = grid[parameter]; // assumes its sorted
 		const auto to_project = x[parameter];
+		if constexpr (std::numeric_limits<typename vector_like::value_type>::has_infinity)
+			if (to_project == std::numeric_limits<typename vector_like::value_type>::infinity()){
+				x[parameter] = std::numeric_limits<typename vector_like::value_type>::infinity();
+continue;
+			}
+		
+		if (to_project >= filtration.back()){
+			x[parameter] = filtration.size()-1;
+			continue;
+		} // deals with infinite value at the end of the grid, TODO DEAL
 		unsigned int i = 0;
 		// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
 		while (to_project > filtration[i] && i<filtration.size()) {
@@ -149,12 +160,12 @@ std::vector<out_type> find_coordinates(const std::vector<options_multi::value_ty
 			// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
 		}
 		if (i==0)
-			coordinates[parameter] = 0;
+			x[parameter] = 0;
 		else if (i < filtration.size()){
-			options_multi::value_type d1,d2;
+			typename vector_like::value_type d1,d2;
 			d1 = std::abs(filtration[i-1] - to_project);
 			d2 = std::abs(filtration[i] - to_project);
-			coordinates[parameter] = d1<d2 ? i-1 : i;
+			x[parameter] = d1<d2 ? i-1 : i;
 		}
 		// std::vector<options_multi::value_type> distance_vector(filtration.size());
 		// for (int i = 0; i < (int)filtration.size(); i++){
@@ -162,29 +173,26 @@ std::vector<out_type> find_coordinates(const std::vector<options_multi::value_ty
 		// }
 		// coordinates[parameter] = std::distance(distance_vector.begin(), std::min_element(distance_vector.begin(), distance_vector.end()));
 	}
-	return coordinates;
+	// return x;
 }
+
 
 // TODO integer filtrations, does this help with performance ?
 // projects filtrations values to the grid. If coordinate_values is set to true, the filtration values are the coordinates of this grid
 void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bool coordinate_values=true){
 	
 	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
-	int num_parameters = st_multi.get_number_of_parameters();
-	if ((int)grid.size() != num_parameters){
+	auto num_parameters = static_cast<unsigned int>(st_multi.get_number_of_parameters());
+	if (grid.size() != num_parameters){
 		std::cerr << "Bad grid !" << std::endl;
 		throw;
 	}
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
-		std::vector<options_multi::value_type> simplex_filtration = st_multi.filtration(simplex_handle);
-		if (coordinate_values)
-			st_multi.assign_filtration(simplex_handle, find_coordinates<options_multi::value_type>(simplex_filtration, grid));
-		else{
-			auto coordinates = find_coordinates<int>(simplex_filtration, grid);
-			std::vector<options_multi::value_type> squeezed_filtration(num_parameters);
-			for (int parameter = 0; parameter < num_parameters; parameter++)
-				squeezed_filtration[parameter] = grid[parameter][coordinates[parameter]];
-			st_multi.assign_filtration(simplex_handle, squeezed_filtration);
+		auto& simplex_filtration = st_multi.filtration_mutable(simplex_handle);
+		find_coordinates<options_multi::value_type>(simplex_filtration, grid); // turns the simplexfiltration into coords in the grid
+		if (!coordinate_values){
+			for (auto parameter = 0u; parameter < num_parameters; parameter++)
+				simplex_filtration[parameter] = grid[parameter][simplex_filtration[parameter]];
 		}
 	}
 	return;
@@ -213,6 +221,8 @@ std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr
 }
 
 }	// namespace Gudhi
+
+
 
 namespace std {
 

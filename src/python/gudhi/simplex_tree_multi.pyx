@@ -59,8 +59,8 @@ cdef extern from "Simplex_tree_multi.h" namespace "Gudhi::multiparameter":
 	vector[vector[vector[value_type]]] get_filtration_values(uintptr_t, const vector[int]&)  except + nogil
 
 
-cdef bool callback(vector[int] simplex, void *blocker_func):
-	return (<object>blocker_func)(simplex)
+# cdef bool callback(vector[int] simplex, void *blocker_func):
+	# 	return (<object>blocker_func)(simplex)
 
 # SimplexTree python interface
 cdef class SimplexTreeMulti:
@@ -84,7 +84,7 @@ cdef class SimplexTreeMulti:
 
 	# cdef Simplex_tree_persistence_interface * pcohptr
 	# Fake constructor that does nothing but documenting the constructor
-	def __init__(self, other = None, num_parameters:int=2,default_values=[]):
+	def __init__(self, other = None, num_parameters:int=2,default_values=[], safe_conversion=False):
 		"""SimplexTreeMulti constructor.
 		
 		:param other: If `other` is `None` (default value), an empty `SimplexTreeMulti` is created.
@@ -102,6 +102,7 @@ cdef class SimplexTreeMulti:
 	# The real cython constructor
 	def __cinit__(self, other = None, int num_parameters=2, 
 		default_values=[-np.inf], # I'm not sure why `[]` does not work. Cython bug ? 
+bool safe_conversion=False,
 		): #TODO doc
 		cdef vector[value_type] c_default_values=default_values
 		if other is not None:
@@ -111,7 +112,11 @@ cdef class SimplexTreeMulti:
 				self.filtration_grid = other.filtration_grid
 			elif isinstance(other, SimplexTree): # Constructs a SimplexTreeMulti from a SimplexTree
 				self.thisptr = <intptr_t>(new Simplex_tree_multi_interface())
-				multify_from_ptr(other.thisptr, self.thisptr, num_parameters, c_default_values)
+				if safe_conversion:
+					new_st_multi  = _safe_simplextree_multify(other, num_parameters = num_parameters)
+					self.thisptr, new_st_multi.thisptr = new_st_multi.thisptr, self.thisptr
+				else:
+					multify_from_ptr(other.thisptr, self.thisptr, num_parameters, c_default_values)
 			else:
 				raise TypeError("`other` argument requires to be of type `SimplexTree`, `SimplexTreeMulti`, or `None`.")
 		else:
@@ -1217,4 +1222,19 @@ def _simplextree_multify(simplextree:SimplexTree, num_parameters:int=2, default_
 	cdef vector[value_type] c_default_values=default_values
 	with nogil:
 		multify_from_ptr(old_ptr, new_ptr, c_num_parameters, c_default_values)
-	return 
+	return st
+
+def _safe_simplextree_multify(simplextree:SimplexTree,int num_parameters=2)->SimplexTreeMulti:
+	if isinstance(simplextree, SimplexTreeMulti):
+		return simplextree
+	simplices = [[] for _ in range(simplextree.dimension()+1)]
+	filtration_values = [[] for _ in range(simplextree.dimension()+1)]
+	for s,f in simplextree.get_simplices():
+		filtration_values[len(s)-1].append(f)
+		simplices[len(s)-1].append(s)
+	st_multi = SimplexTreeMulti(num_parameters=1)
+	for batch_simplices, batch_filtrations in zip(simplices,filtration_values):
+		st_multi.insert_batch(np.asarray(batch_simplices).T, np.asarray(batch_filtrations)[:,None])
+	if num_parameters > 1:
+		st_multi.set_num_parameter(num_parameters)
+	return st_multi 
