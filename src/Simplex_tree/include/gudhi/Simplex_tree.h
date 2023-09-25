@@ -1317,24 +1317,14 @@ class Simplex_tree {
    * already present, its filtration value is not modified, unlike with other insertion functions. */
   template <class VertexRange>
   void insert_batch_vertices(VertexRange const& vertices, Filtration_value filt = 0) {
-    // When Options::link_nodes_by_label, update_simplex_tree_after_node_insertion must be called only if
-    // not already inserted - copy vertex handles from flat_map
-    std::vector<Vertex_handle> old_members(root_.members().size());
-    if constexpr (Options::link_nodes_by_label) {
-      for (auto sh = root_.members().begin(); sh != root_.members().end(); sh++)
-        old_members.emplace_back(sh->first);
-    }
-
     auto verts = vertices | boost::adaptors::transformed([&](auto v){
-      return Dit_value_t(v, Node(&root_, filt)); });
+        return Dit_value_t(v, Node(&root_, filt)); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
     if (dimension_ < 0 && !root_.members_.empty()) dimension_ = 0;
-    for (auto sh = root_.members().begin(); sh != root_.members().end(); sh++) {
-      if constexpr (Options::link_nodes_by_label) {
-        if (std::find(old_members.begin(), old_members.end(), sh->first) == std::end(old_members))
+    if constexpr (Options::link_nodes_by_label) {
+      for (auto sh = root_.members().begin(); sh != root_.members().end(); sh++) {
+        if (nodes_label_to_list_.find(sh->first) == nodes_label_to_list_.end())
           update_simplex_tree_after_node_insertion(sh);
-      } else {
-        update_simplex_tree_after_node_insertion(sh);
       }
     }
   }
