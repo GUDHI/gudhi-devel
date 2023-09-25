@@ -1323,7 +1323,8 @@ class Simplex_tree {
     if (dimension_ < 0 && !root_.members_.empty()) dimension_ = 0;
     if constexpr (Options::link_nodes_by_label) {
       for (auto sh = root_.members().begin(); sh != root_.members().end(); sh++) {
-        if (nodes_label_to_list_.find(sh->first) == nodes_label_to_list_.end())
+        // update newly inserted simplex (the one that are not linked)
+        if (!sh->second.list_max_vertex_hook_.is_linked())
           update_simplex_tree_after_node_insertion(sh);
       }
     }
