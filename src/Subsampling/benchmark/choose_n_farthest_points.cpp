@@ -76,7 +76,16 @@ int main(int argc, char**argv) {
             << " vs metric "              << std::chrono::duration_cast<std::chrono::milliseconds>((time_stop2 - time_start2)).count()
             << "  (Boost version " << BOOST_VERSION << ")\n";
   if (dists != dists2 || results != results2) {
+    // Note that with many points, it often happens that 2 points with the same distance are swapped in the output.
     std::cerr << "Results differ\n";
+#ifdef LOG_DIFF
+    std::ofstream log_gen("log_gen");
+    std::ofstream log_met("log_met");
+    for(std::size_t i = 0; i < results.size(); ++i){
+      log_gen << dists2[i] << '\t' << results2[i] << '\n';
+      log_met << dists [i] << '\t' << results [i] << '\n';
+    }
+#endif
     return -1;
   }
 #endif

@@ -320,7 +320,7 @@ void choose_n_farthest_points_metric(Distance dist_,
     auto handle_neighbor_neighbors = [&](std::size_t ngb)
     {
         auto& ngb_info = landmarks[ngb];
-        std::remove_if(ngb_info.neighbors.begin(), ngb_info.neighbors.end(), [&](auto near_){
+        auto it = std::remove_if(ngb_info.neighbors.begin(), ngb_info.neighbors.end(), [&](auto near_){
             std::size_t near = near_.first;
             FT d = near_.second;
             // Conservative 3 * radius: we could use the old radii of ngb and near, but not the new ones.
@@ -328,6 +328,7 @@ void choose_n_farthest_points_metric(Distance dist_,
             // Here it is safe to use the new radii.
             return d >= max_dist(ngb_info.radius, landmarks[near].radius);
             });
+        ngb_info.neighbors.erase(it, ngb_info.neighbors.end());
     };
     // First update the Voronoi diagram, so we can compute all the updated
     // radii before pruning neighbor lists. The main drawback is that we have
