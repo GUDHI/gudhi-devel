@@ -28,7 +28,7 @@
 
 
 /**
- * @brief Holds the square box on which to compute.
+ * @brief Simple box in $\mathbb R^n$ .
  */
 
 namespace Gudhi::multiparameter::multi_filtrations{
@@ -74,7 +74,6 @@ inline Box<T>::Box(const point_type &bottomCorner, const point_type &upperCorner
 	  upperCorner_(upperCorner)
 {
 	assert(bottomCorner.size() == upperCorner.size()
-		//    && is_smaller(bottomCorner, upperCorner)
 			&& bottomCorner <= upperCorner
 			&& "This box is trivial !");
 }
@@ -89,11 +88,6 @@ inline Box<T>::Box(const std::pair<point_type, point_type> &box)
 template<typename T>
 inline void Box<T>::inflate(T delta)
 {
-// #pragma omp simd
-	// for (int i = 0; i < bottomCorner_.size(); i++){
-	// 	bottomCorner_[i] -= delta;
-	// 	upperCorner_[i] += delta;
-	// }
 	bottomCorner_ -= delta;
 	upperCorner_ += delta;
 }
@@ -151,12 +145,6 @@ inline bool Box<T>::contains(const point_type &point) const
 {
 	if (point.size() != bottomCorner_.size()) return false;
 
-	// for (int i = 0; i < (int)point.size(); i++){
-	// 	if (point[i] < bottomCorner_[i]) return false;
-	// 	if (point[i] > upperCorner_[i]) return false;
-	// }
-
-	// return true;
 	return bottomCorner_ <= point && point <= upperCorner_;
 }
 

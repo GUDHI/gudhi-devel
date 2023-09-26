@@ -53,16 +53,16 @@ using simplextree_multi = Simplex_tree<options_multi>;
 using multi_filtration_type = std::vector<options_multi::value_type>;
 using multi_filtration_grid = std::vector<multi_filtration_type>;
 
-
+// Retrieves a simplextree from a pointer. As the python simplex_tree and simplex_tree_multi don't know each other we have to exchange them using pointers.
 template<class simplextreeinterface>
 simplextreeinterface& get_simplextree_from_pointer(const uintptr_t splxptr){ //DANGER
 	simplextreeinterface &st = *(simplextreeinterface*)(splxptr); 
 	return st;
 }
+
+// Turns a 1-parameter simplextree into a multiparameter simplextree, and keeps the 1-filtration in the 1st axis 
 template<class simplextree_std, class simplextree_multi>
 void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_parameters, const typename simplextree_multi::Options::Filtration_value& default_values={}){
-		// if (default_values.size() -1 > num_parameters)
-	// 	{std::cerr << "default values too large !\n"; throw ;}
 	typename simplextree_multi::Options::Filtration_value f(num_parameters);
 	for (auto i = 0u; i<std::min(static_cast<unsigned int>(default_values.size()), static_cast<unsigned int>(num_parameters-1));i++)
 		f[i+1] = default_values[i];
@@ -75,7 +75,6 @@ void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_par
 
 		if (num_parameters > 0)
 		f[0] = st.filtration(simplex_handle);
-		// std::cout << "Inserting " << f << "\n";
 		auto filtration_copy = f;
 		st_multi.insert_simplex(simplex,filtration_copy);
 		
@@ -84,7 +83,7 @@ void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_par
 
 
 
-
+// Turns a multi-parameter simplextree into a 1-parameter simplextree
 template<class simplextree_std, class simplextree_multi>
 void flatten(simplextree_std &st, simplextree_multi &st_multi, const int dimension = 0){
 	for (const auto &simplex_handle : st_multi.complex_simplex_range()){
@@ -96,6 +95,7 @@ void flatten(simplextree_std &st, simplextree_multi &st_multi, const int dimensi
 	}
 }
 
+// Applies a linear form (i.e. scalar product with Riesz rpz) to the filtration to flatten a simplextree multi
 template<class simplextree_std, class simplextree_multi>
 void linear_projection(simplextree_std &st, simplextree_multi &st_multi, const std::vector<typename simplextree_multi::Options::value_type>& linear_form){
 	auto sh = st.complex_simplex_range().begin();
@@ -108,9 +108,6 @@ void linear_projection(simplextree_std &st, simplextree_multi &st_multi, const s
 		st.assign_filtration(*sh, projected_filtration);
 	}
 }
-// For python interface. Do not use.
-
-
 
 template<class simplextree_std, class simplextree_multi>
 void flatten_diag(simplextree_std &st, simplextree_multi &st_multi, const std::vector<typename simplextree_multi::Options::value_type> basepoint, int dimension){
@@ -146,18 +143,16 @@ inline void find_coordinates(vector_like& x, const multi_filtration_grid &grid){
 		if constexpr (std::numeric_limits<typename vector_like::value_type>::has_infinity)
 			if (to_project == std::numeric_limits<typename vector_like::value_type>::infinity()){
 				x[parameter] = std::numeric_limits<typename vector_like::value_type>::infinity();
-continue;
+				continue;
 			}
-		
 		if (to_project >= filtration.back()){
 			x[parameter] = filtration.size()-1;
 			continue;
-		} // deals with infinite value at the end of the grid, TODO DEAL
+		} // deals with infinite value at the end of the grid
+
 		unsigned int i = 0;
-		// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
 		while (to_project > filtration[i] && i<filtration.size()) {
 			i++;
-			// std::cout << to_project<< " " <<filtration[i]<<" " <<i << "\n";
 		}
 		if (i==0)
 			x[parameter] = 0;
@@ -167,13 +162,7 @@ continue;
 			d2 = std::abs(filtration[i] - to_project);
 			x[parameter] = d1<d2 ? i-1 : i;
 		}
-		// std::vector<options_multi::value_type> distance_vector(filtration.size());
-		// for (int i = 0; i < (int)filtration.size(); i++){
-		// 	distance_vector[i] = std::abs(to_project - filtration[i]);
-		// }
-		// coordinates[parameter] = std::distance(distance_vector.begin(), std::min_element(distance_vector.begin(), distance_vector.end()));
 	}
-	// return x;
 }
 
 
@@ -197,6 +186,8 @@ void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bo
 	}
 	return;
 }
+
+// retrieves the filtration values of a simplextree. Useful to generate a grid.
 std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr, const std::vector<int> &degrees){
 	Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi>*)(splxptr);
 	int num_parameters = st_multi.get_number_of_parameters();

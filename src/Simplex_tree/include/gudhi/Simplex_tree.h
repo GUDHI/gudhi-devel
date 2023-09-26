@@ -153,7 +153,6 @@ class Simplex_tree {
   struct Filtration_simplex_base_real {
     Filtration_simplex_base_real() : filt_{} {}
     void assign_filtration(const Filtration_value& f) { filt_ = f; }
-    // Filtration_value filtration() const { return filt_; }
     const Filtration_value& filtration() const { return filt_; }
     Filtration_value& filtration() { return filt_; }
    private:
@@ -980,22 +979,14 @@ class Simplex_tree {
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
     if (!one_is_new) {
-      if (!(filtration(simplex_one) <= filt)) { // TODO : For multipersistence, it's not clear what should be the default, especially for multicritical filtrations
+      if (!(filtration(simplex_one) <= filt)) { 
         if constexpr (SimplexTreeOptions::is_multi_parameter){
+          // By default, does nothing and assumes that the user is smart.
           if (filt < filtration(simplex_one)){
-          //   assign_filtration(simplex_one, filt);
-          // I don't really like this behavior. 
-            // It prevents inserting simplices by default at the smallest possible position after its childrens.
-            // e.g., if (python) we type : st.insert([0], [1,0]), st.insert([1], [0,1]), st.insert([0,1])
-            // we may want st.filtration([0,1]) to be [1,1]. (maybe after a make_filtration_decreasing from user)
-            // Furthermore, this may more sense as default value -> 0 can erase filtration values of childrens... 
+            // placeholder for comparable filtrations
           }
-          else{ // As multicritical filtrations are not well supported yet, its not safe to concatenate yet.
-            // two incomparables filtrations values -> we concatenate 
-            // std::cout << "incomparable -> concatenate" << std::endl;
-            // Filtration_value new_filtration = filtration(simplex_one);
-            // new_filtration.insert_new(filt); // we assume then that Filtration_value has a insert_new method.
-            // assign_filtration(simplex_one, new_filtration);
+          else{
+            // placeholder for incomparable filtrations
           }
         }
         else{ // non-multiparameter
@@ -1633,10 +1624,10 @@ class Simplex_tree {
       if (dim == 0) return;
       // Find the maximum filtration value in the border
       Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
-      typename SimplexTreeOptions::Filtration_value max_filt_border_value;
+      Filtration_value max_filt_border_value;
       if constexpr (SimplexTreeOptions::is_multi_parameter){
         // in that case, we assume that Filtration_value has a `push_to` member to handle this.
-        max_filt_border_value = typename SimplexTreeOptions::Filtration_value(this->number_of_parameters_);
+        max_filt_border_value = Filtration_value(this->number_of_parameters_);
         for (auto &face_sh : boundary){
           max_filt_border_value.push_to(filtration(face_sh)); // pushes the value of max_filt_border_value to reach simplex' filtration
         }

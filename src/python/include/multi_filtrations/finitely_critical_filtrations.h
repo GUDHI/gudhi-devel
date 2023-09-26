@@ -11,9 +11,6 @@ template<typename T=float>
 class Finitely_critical_multi_filtration : public std::vector<T> {
 	// Class to prevent doing illegal stuff with the standard library, e.g., compare two vectors
 public:
-	// explicit Finitely_critical_multi_filtration(std::vector<T>& v) : ptr_(&v) {
-	// }; // Conversion
-	// using std::vector<T>::vector;
 	Finitely_critical_multi_filtration() : std::vector<T>() {};
 	Finitely_critical_multi_filtration(int n) : std::vector<T>(n, -std::numeric_limits<T>::infinity()) {}; // minus infinity by default
 	Finitely_critical_multi_filtration(int n, T value) : std::vector<T>(n,value) {};
@@ -32,24 +29,9 @@ public:
 
 
 
-	//TODO : multicritical -> iterator over filtrations
-
-	// LESS THAN OPERATORS
 	friend bool operator<(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b)
 	{
 		bool isSame = true;
-		// if (a.size() != b.size()){
-			
-			
-		// 	if (a.size()>1 && b.size() >1){
-		// 		std::cerr << "Filtrations are not of the same size ! (" << a.size() << " " << b.size() << ").";
-		// 		throw;
-		// 	}
-		// 	// {inf, inf, ...} can be stored as {inf}
-		// 	if (b[0] == std::numeric_limits<T>::infinity()) //TODO FIXME, we have to check every coord of b instead of 1
-		// 		return a[0] != std::numeric_limits<T>::infinity();
-		// 	return false;
-		// }
 		int n = std::min(a.size(), b.size());
 		for (int i = 0; i < n; ++i){
 			if (a[i] > b[i]) return false;
@@ -60,16 +42,6 @@ public:
 	}
 	friend bool operator<=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) 
 	{
-		// if (a.size() != b.size()){
-		// 	if (a.size()>1 && b.size() >1){
-		// 		std::cerr << "Filtrations are not of the same size ! (" << a.size() << " " << b.size() << ").";
-		// 		throw;
-		// 	}
-		// 	// {inf, inf, ...} can be stored as {inf}
-		// 	if (b[0] == std::numeric_limits<T>::infinity()) //TODO FIXME, we have to check every coord of b instead of 1
-		// 		return a[0] != std::numeric_limits<T>::infinity();
-		// 	return false;
-		// }
 		int n = std::min(a.size(), b.size());
 		for (int i = 0; i < n; ++i){
 			if (a[i] > b[i]) return false;
@@ -82,11 +54,11 @@ public:
 	//GREATER THAN OPERATORS
 	friend bool operator>(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b)
 	{
-		return b<a; // C'est honteux.
+		return b<a; 
 	}
 	friend bool operator>=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) 
 	{
-		return b<=a; // C'est honteux.
+		return b<=a; 
 	}
 
 	Finitely_critical_multi_filtration& operator=(const Finitely_critical_multi_filtration& a){
@@ -133,8 +105,10 @@ public:
 		return std::vector<Finitely_critical_multi_filtration<T>>(to_convert.begin(), to_convert.end());;
 	}
 	void push_to(const Finitely_critical_multi_filtration<T>& x){
-		if (this->size() != x.size())
-			{std::cerr << "Does only work with 1-critical filtrations ! Sizes " << this->size() << " and " << x.size() << "are different !" << std::endl; return;}
+		if (this->size() != x.size()){
+			std::cerr << "Does only work with 1-critical filtrations ! Sizes " << this->size() << " and " << x.size() << "are different !" << std::endl; 
+			throw std::logic_error("Bad sizes");
+		}
 		for (unsigned int i = 0; i < x.size(); i++)
 			this->at(i) = this->at(i) > x[i] ? this->at(i) : x[i];
 	}
@@ -145,6 +119,8 @@ public:
 		);
 	}
 
+
+	// scalar product of a filtration value with x.
 	T linear_projection(const std::vector<T>& x){
 		T projection=0;
 		unsigned int size = std::min(x.size(), this->size());

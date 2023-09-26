@@ -48,19 +48,15 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 
   Extended_filtration_data efd;
   
-//   bool find_simplex(const Simplex& simplex) {
-// 	return (Base::find(simplex) != Base::null_simplex());
-//   }
+  bool find_simplex(const Simplex& simplex) {
+	return (Base::find(simplex) != Base::null_simplex());
+  }
 
   void assign_simplex_filtration(const Simplex& simplex, const Filtration_value& filtration) {
 	Base::assign_filtration(Base::find(simplex), filtration);
 	Base::clear_filtration();
   }
-//   void assign_simplex_filtration(const Simplex& simplex, const Python_filtration_type& filtration) {
-// 	Filtration_value& filtration_ = *(Filtration_value*)(&filtration); // Jardinage for no copy. 
-// 	Base::assign_filtration(Base::find(simplex), filtration_);
-// 	Base::clear_filtration();
-//   }
+
 
   bool insert(const Simplex& simplex, const Filtration_value& filtration ) {
 	Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
@@ -104,7 +100,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
   }
    typename SimplexTreeOptions::value_type* simplex_filtration(const Simplex& simplex) {
 	auto& filtration = Base::filtration_mutable(Base::find(simplex));
-	return &filtration[0];
+	return &filtration[0]; // We return the pointer to get a numpy view afterward
   }
 
 
@@ -168,6 +164,8 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	Base::assign_key(Base::find(simplex), key);
 	return;
   }
+
+  // Fills a parameter with a lower-star filtration
   void fill_lowerstar(const std::vector<options_multi::value_type>& filtration, int axis){
 	using value_type=options_multi::value_type;
 	for (auto &SimplexHandle : Base::complex_simplex_range()){
@@ -180,6 +178,8 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 		// Base::assign_filtration(SimplexHandle, current_birth);
 	}
   }
+
+
   using simplices_list = std::vector<std::vector<int>>;
   simplices_list get_simplices_of_dimension(int dimension){
 	simplices_list simplex_list;
@@ -215,9 +215,6 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 	void resize_all_filtrations(int num){ //TODO : that is for 1 critical filtrations
 		if (num < 0)	return;
 		for(const auto &SimplexHandle : Base::complex_simplex_range()){
-			// std::vector<options_multi::value_type> new_filtration_value = Base::filtration(SimplexHandle);
-			// new_filtration_value.resize(num);
-			// Base::assign_filtration(SimplexHandle, new_filtration_value);
 			Base::filtration_mutable(SimplexHandle).resize(num);;
 		}
 	}
@@ -229,7 +226,7 @@ class Simplex_tree_interface_multi : public Simplex_tree_interface<Simplex_tree_
 using interface_std = Simplex_tree<Simplex_tree_options_full_featured>; // Interface not necessary (smaller so should do less segfaults)
 using interface_multi = Simplex_tree_interface_multi<Simplex_tree_options_multidimensional_filtration>;
 
-
+// Wrappers of the functions in Simplex_tree_multi.h, to deal with the "pointer only" python interface
 void flatten_diag_from_ptr(const uintptr_t splxptr, const uintptr_t newsplxptr, const std::vector<interface_multi::Options::value_type> basepoint, int dimension){ // for python
 	auto &st = get_simplextree_from_pointer<interface_std>(newsplxptr);
 	auto &st_multi = get_simplextree_from_pointer<interface_multi>(splxptr);
