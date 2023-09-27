@@ -1321,6 +1321,13 @@ class Simplex_tree {
         return Dit_value_t(v, Node(&root_, filt)); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
     if (dimension_ < 0 && !root_.members_.empty()) dimension_ = 0;
+    if constexpr (Options::link_nodes_by_label) {
+      for (auto sh = root_.members().begin(); sh != root_.members().end(); sh++) {
+        // update newly inserted simplex (the one that are not linked)
+        if (!sh->second.list_max_vertex_hook_.is_linked())
+          update_simplex_tree_after_node_insertion(sh);
+      }
+    }
   }
 
   /** \brief Expands the Simplex_tree containing only its one skeleton
