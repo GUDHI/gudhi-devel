@@ -96,6 +96,16 @@ public:
 		return result;	
 	}
 
+	// template<class array_like>
+	friend bool operator==(Finitely_critical_multi_filtration<T> &self, const Finitely_critical_multi_filtration<T> &to_compare){
+		if (self.size() != to_compare.size()) return false;
+		auto it = to_compare.begin();
+		for (auto i = 0u; i<self.size(); i++){
+			if (self.at(i) != *(it++)) return false;
+		}
+		return true;	
+	}
+
 	static std::vector<std::vector<T>> to_python(const std::vector<Finitely_critical_multi_filtration<T>>& to_convert){
 		return std::vector<std::vector<T>>(to_convert.begin(), to_convert.end());
 	}
@@ -131,7 +141,8 @@ public:
 
 	// easy debug 
     friend std::ostream& operator<<(std::ostream& stream, const Finitely_critical_multi_filtration<T>& truc){
-        stream << "[";
+        if (truc.empty()) {stream << "[]"; return stream;}
+		stream << "[";
         for(unsigned int i = 0; i < truc.size()-1; i++){
             stream << truc[i] << ", ";
         }
