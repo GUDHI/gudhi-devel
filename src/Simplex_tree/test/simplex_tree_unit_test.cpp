@@ -1157,8 +1157,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
   }
 }
 
-BOOST_AUTO_TEST_CASE(batch_vertices) {
-  typedef Simplex_tree<> typeST;
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> >
+                           list_of_tested_variants_wo_fast_persistence;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(batch_vertices, typeST, list_of_tested_variants_wo_fast_persistence) {
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST BATCH VERTEX INSERTION" << std::endl;
   typeST st;
@@ -1169,6 +1173,16 @@ BOOST_AUTO_TEST_CASE(batch_vertices) {
   BOOST_CHECK(st.num_simplices() == 4);
   BOOST_CHECK(st.filtration(st.find({2})) == 0.);
   BOOST_CHECK(st.filtration(st.find({3})) == 1.5);
+
+  for (auto coface : st.star_simplex_range(st.find({5}))) {
+    std::clog << "coface";
+    for (auto vertex : st.simplex_vertex_range(coface)) {
+      std::clog << " " << vertex;
+      // Should be the only one
+      BOOST_CHECK(vertex == 5);
+    }
+    std::clog << "\n";
+  }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variants) {
