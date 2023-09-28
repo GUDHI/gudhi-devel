@@ -16,6 +16,12 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct Dummy_chain_pairing{
+	friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2){}
+
+	Dummy_chain_pairing(){}
+};
+
 template<class Master_matrix>
 class Chain_pairing
 {

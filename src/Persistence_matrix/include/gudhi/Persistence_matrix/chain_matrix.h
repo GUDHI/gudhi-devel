@@ -160,7 +160,9 @@ private:
 	void _update_largest_death_in_F(const std::vector<cell_rep_type>& chainsInF);
 	void _insert_chain(const tmp_column_type& column, dimension_type dimension);
 	void _insert_chain(const tmp_column_type& column, dimension_type dimension, index pair);
-	void _add_to(const Column_type& column, tmp_column_type& set, unsigned int coef = 1u);
+	void _add_to(const Column_type& column, tmp_column_type& set, unsigned int coef);
+	template<typename F>
+	void _add_to(Column_type& target, F&& addition);
 
 	constexpr barcode_type& _barcode();
 	constexpr bar_dictionnary_type& _indexToBar();
@@ -170,8 +172,8 @@ template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix()
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(),
+	  rep_opt(),
 	  ra_opt(),
 	  nextInsertIndex_(0)
 {}
@@ -181,8 +183,8 @@ template<class Boundary_type>
 inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type> &orderedBoundaries)
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(),
+	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextInsertIndex_(0)
 {
@@ -202,8 +204,8 @@ template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns)
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(),
+	  rep_opt(),
 	  ra_opt(numberOfColumns),
 	  nextInsertIndex_(0)
 {
@@ -222,8 +224,8 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 		DeathComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_, birthComparator, deathComparator),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(birthComparator, deathComparator),
+	  rep_opt(),
 	  ra_opt(),
 	  nextInsertIndex_(0)
 {}
@@ -236,8 +238,8 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 		DeathComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_, birthComparator, deathComparator),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(birthComparator, deathComparator),
+	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextInsertIndex_(0)
 {
@@ -260,8 +262,8 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 		DeathComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
-	  swap_opt(matrix_, birthComparator, deathComparator),
-	  rep_opt(matrix_, pivotToColumnIndex_),
+	  swap_opt(birthComparator, deathComparator),
+	  rep_opt(),
 	  ra_opt(numberOfColumns),
 	  nextInsertIndex_(0)
 {
@@ -275,43 +277,35 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 
 template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy)
-	: dim_opt(matrixToCopy),
-	  pair_opt(matrixToCopy),
-	  swap_opt(matrixToCopy),
-	  rep_opt(matrixToCopy),
-	  ra_opt(matrixToCopy),
+	: dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
+	  pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
+	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
+	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
+	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
-	if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles){
-		rep_opt::matrix_ = &matrix_;
-		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
-	}
-	if constexpr (Master_matrix::Option_list::has_vine_update){
-		swap_opt::matrix_ = &matrix_;
-	}
-
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, pivotToColumnIndex_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, pivotToColumnIndex_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, pivotToColumnIndex_));
+				matrix_.try_emplace(p.first, Column_type(col));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, pivotToColumnIndex_);
+				matrix_.emplace_back(col);
 			}
 		}
 	}
@@ -320,36 +314,26 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCop
 template<class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
 		Chain_matrix &&other) noexcept
-	: dim_opt(std::move(other)),
-	  pair_opt(std::move(other)),
-	  swap_opt(std::move(other)),
-	  rep_opt(std::move(other)),
-	  ra_opt(std::move(other)),
+	: dim_opt(std::move(static_cast<dim_opt&>(other))),
+	  pair_opt(std::move(static_cast<pair_opt&>(other))),
+	  swap_opt(std::move(static_cast<swap_opt&>(other))),
+	  rep_opt(std::move(static_cast<rep_opt&>(other))),
+	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
 {
-	if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles){
-		rep_opt::matrix_ = &matrix_;
-		rep_opt::pivotToPosition_ = &pivotToColumnIndex_;
-	}
-	if constexpr (Master_matrix::Option_list::has_vine_update){
-		swap_opt::matrix_ = &matrix_;
-	}
-
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		for (auto& p : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
 				p.second.set_rows(&this->rows_);
 			}
-			p.second.set_pivot_to_column_map(&pivotToColumnIndex_);
 		}
 	} else {
 		for (auto& col : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
 				col.set_rows(&this->rows_);
 			}
-			col.set_pivot_to_column_map(&pivotToColumnIndex_);
 		}
 	}
 }
@@ -383,7 +367,7 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 		}
 	}
 	
-	if constexpr (Master_matrix::Option_list::has_dimension_access){
+	if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
 		dim_opt::update_up(boundary.size() == 0 ? 0 : boundary.size() - 1);
 	}
 
@@ -442,7 +426,7 @@ inline void Chain_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]]
 
 	//TODO: find simple test to verify that col at columnIndex is maximal.
 
-	if constexpr (Master_matrix::Option_list::has_dimension_access){
+	if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
 		dim_opt::update_down(matrix_.at(toErase).get_dimension());
 	}
 
@@ -500,9 +484,11 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
+		auto& col = matrix_.at(targetColumnIndex);
+		_add_to(col, [&](){col += matrix_.at(sourceColumnIndex);});
 	} else {
-		matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
+		auto& col = matrix_[targetColumnIndex];
+		_add_to(col, [&](){col += matrix_[sourceColumnIndex];});
 	}
 }
 
@@ -510,9 +496,11 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += sourceColumn;
+		auto& col = matrix_.at(targetColumnIndex);
+		_add_to(col, [&](){col += sourceColumn;});
 	} else {
-		matrix_[targetColumnIndex] += sourceColumn;
+		auto& col = matrix_[targetColumnIndex];
+		_add_to(col, [&](){col += sourceColumn;});
 	}
 }
 
@@ -520,9 +508,11 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+		auto& col = matrix_.at(targetColumnIndex);
+		_add_to(col, [&](){col.multiply_and_add(coefficient, sourceColumn);});
 	} else {
-		matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
+		auto& col = matrix_[targetColumnIndex];
+		_add_to(col, [&](){col.multiply_and_add(coefficient, sourceColumn);});
 	}
 }
 
@@ -530,9 +520,11 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+		auto& col = matrix_.at(targetColumnIndex);
+		_add_to(col, [&](){col.multiply_and_add(sourceColumn, coefficient);});
 	} else {
-		matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
+		auto& col = matrix_[targetColumnIndex];
+		_add_to(col, [&](){col.multiply_and_add(sourceColumn, coefficient);});
 	}
 }
 
@@ -593,22 +585,22 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, pivotToColumnIndex_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, pivotToColumnIndex_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), pivotToColumnIndex_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index()));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), pivotToColumnIndex_);
+				matrix_.emplace_back(col, col.get_column_index());
 			}
 		}
 	}
@@ -742,7 +734,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_G(
 {
 	Column_type& col = get_column(currentPivot);
 	if constexpr (Master_matrix::Option_list::is_z2){
-		_add_to(col, column);	//Reduce with the column col_g
+		_add_to(col, column, 1u);	//Reduce with the column col_g
 		chainsInH.push_back(col.get_paired_chain_index());//keep the col_h with which col_g is paired
 	} else {
 		Field_element_type coef = col.get_pivot_value();
@@ -762,7 +754,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_F(
 {
 	Column_type& col = get_column(currentPivot);
 	if constexpr (Master_matrix::Option_list::is_z2){
-		_add_to(col, column);	//Reduce with the column col_g
+		_add_to(col, column, 1u);	//Reduce with the column col_g
 		chainsInF.push_back(currentPivot);
 	} else {
 		Field_element_type coef = col.get_pivot_value();
@@ -783,7 +775,7 @@ inline void Chain_matrix<Master_matrix>::_build_from_H(
 	if constexpr (Master_matrix::Option_list::is_z2){
 		column.insert(simplexIndex);
 		for (index idx_h : chainsInH) {
-			_add_to(get_column(idx_h), column);
+			_add_to(get_column(idx_h), column, 1u);
 		}
 	} else {
 		column.emplace(simplexIndex, 1);
@@ -829,9 +821,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		}
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_, pivotToColumnIndex_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_));
 		} else {
-			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension, pivotToColumnIndex_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension));
 		}
 
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
@@ -840,9 +832,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_, pivotToColumnIndex_);
+			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_);
 		} else {
-			matrix_.emplace_back(column, dimension, pivotToColumnIndex_);
+			matrix_.emplace_back(column, dimension);
 		}
 		
 		pivotToColumnIndex_[nextInsertIndex_] = nextInsertIndex_;
@@ -870,9 +862,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_, pivotToColumnIndex_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_));
 		} else {
-			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension, pivotToColumnIndex_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension));
 		}
 
 		matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
@@ -890,9 +882,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_, pivotToColumnIndex_);
+			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_);
 		} else {
-			matrix_.emplace_back(column, dimension, pivotToColumnIndex_);
+			matrix_.emplace_back(column, dimension);
 		}
 
 		matrix_[nextInsertIndex_].assign_paired_chain(pair);
@@ -943,6 +935,22 @@ inline void Chain_matrix<Master_matrix>::_add_to(
 				p.second *= coef;
 				set.insert(p);
 			}
+		}
+	}
+}
+
+template<class Master_matrix>
+template<typename F>
+inline void Chain_matrix<Master_matrix>::_add_to(Column_type& target, F&& addition)
+{
+	auto pivot = target.get_pivot();
+	addition();
+
+	if (pivot != target.get_pivot()){
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			std::swap(pivotToColumnIndex_.at(pivot), pivotToColumnIndex_.at(target.get_pivot()));
+		} else {
+			std::swap(pivotToColumnIndex_[pivot], pivotToColumnIndex_[target.get_pivot()]);
 		}
 	}
 }

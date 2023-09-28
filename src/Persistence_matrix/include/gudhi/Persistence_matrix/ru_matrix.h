@@ -19,9 +19,6 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 template<class Master_matrix>
-class RU_matrix;
-
-template<class Master_matrix>
 class RU_matrix
 		: public Master_matrix::RU_pairing_option,
 		  public Master_matrix::RU_vine_swap_option,
@@ -101,6 +98,9 @@ private:
 	using r_matrix_type = typename Master_matrix::Boundary_matrix_type;
 	using u_matrix_type = typename Master_matrix::Base_matrix_type;
 
+	friend rep_opt;		//direct access to the two matrices
+	friend swap_opt;	//direct access to the two matrices
+
 	r_matrix_type reducedMatrixR_;
 	u_matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
@@ -116,18 +116,18 @@ private:
 
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix()
-	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
-	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
+	: pair_opt(),
+	  swap_opt(),
+	  rep_opt(),
 	  nextInsertIndex_(0)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &orderedBoundaries)
-	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
-	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
+	: pair_opt(),
+	  swap_opt(),
+	  rep_opt(),
 	  reducedMatrixR_(orderedBoundaries),
 	  mirrorMatrixU_(orderedBoundaries.size()),
 	  nextInsertIndex_(orderedBoundaries.size())
@@ -144,9 +144,9 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &ord
 
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
-	: Master_matrix::RU_pairing_option(),
-	  Master_matrix::RU_vine_swap_option(reducedMatrixR_, mirrorMatrixU_, pivotToColumnIndex_),
-	  Master_matrix::RU_representative_cycles_option(reducedMatrixR_, mirrorMatrixU_),
+	: pair_opt(),
+	  swap_opt(),
+	  rep_opt(),
 	  reducedMatrixR_(numberOfColumns),
 	  mirrorMatrixU_(numberOfColumns),
 	  nextInsertIndex_(0)
@@ -160,45 +160,25 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
 
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy)
-	: Master_matrix::RU_pairing_option(matrixToCopy),
-	  Master_matrix::RU_vine_swap_option(matrixToCopy),
-	  Master_matrix::RU_representative_cycles_option(matrixToCopy),
+	: pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
+	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
+	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
 	  reducedMatrixR_(matrixToCopy.reducedMatrixR_),
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
-{
-	if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles){
-		rep_opt::reducedMatrixR_ = &reducedMatrixR_;
-		rep_opt::mirrorMatrixU_ = &mirrorMatrixU_;
-	}
-	if constexpr (Master_matrix::Option_list::has_vine_update){
-		swap_opt::reducedMatrixR_ = &reducedMatrixR_;
-		swap_opt::mirrorMatrixU_ = &mirrorMatrixU_;
-		swap_opt::pivotToColumnIndex_ = &pivotToColumnIndex_;
-	}
-}
+{}
 
 template<class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix &&other) noexcept
-	: Master_matrix::RU_pairing_option(std::move(other)),
-	  Master_matrix::RU_vine_swap_option(std::move(other)),
-	  Master_matrix::RU_representative_cycles_option(std::move(other)),
+	: pair_opt(std::move(static_cast<pair_opt&>(other))),
+	  swap_opt(std::move(static_cast<swap_opt&>(other))),
+	  rep_opt(std::move(static_cast<rep_opt&>(other))),
 	  reducedMatrixR_(std::move(other.reducedMatrixR_)),
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
-{
-	if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles){
-		rep_opt::reducedMatrixR_ = &reducedMatrixR_;
-		rep_opt::mirrorMatrixU_ = &mirrorMatrixU_;
-	}
-	if constexpr (Master_matrix::Option_list::has_vine_update){
-		swap_opt::reducedMatrixR_ = &reducedMatrixR_;
-		swap_opt::mirrorMatrixU_ = &mirrorMatrixU_;
-		swap_opt::pivotToColumnIndex_ = &pivotToColumnIndex_;
-	}
-}
+{}
 
 template<class Master_matrix>
 template<class Boundary_type>

@@ -48,17 +48,13 @@ public:
 		Column_type(const Container_type& nonZeroRowIndices)
 			: Base(nonZeroRowIndices)
 		{}
-		template<class Container_type>
-		Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension)
-			: Base(nonZeroRowIndices, dimension)
-		{}
-		template<class Row_container_type>
-		Column_type(index columnIndex, Row_container_type &rowContainer)
-			: Base(columnIndex, rowContainer)
-		{}
 		template<class Container_type, class Row_container_type>
 		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer)
 			: Base(columnIndex, nonZeroRowIndices, rowContainer)
+		{}
+		template<class Container_type>
+		Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension)
+			: Base(nonZeroRowIndices, dimension)
 		{}
 		template<class Container_type, class Row_container_type>
 		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
@@ -67,15 +63,12 @@ public:
 		Column_type(const Column_type& column)
 			: Base(static_cast<const Base&>(column))
 		{}
-		Column_type(const Column_type& column, index columnIndex)
-			: Base(static_cast<const Base&>(column), columnIndex)
-		{}
 		template<class Row_container_type>
 		Column_type(const Column_type& column, index columnIndex, Row_container_type &rowContainer)
 			: Base(static_cast<const Base&>(column), columnIndex, rowContainer)
 		{}
 		Column_type(Column_type&& column) noexcept
-			: Base(std::move(static_cast<Base&&>(column)))
+			: Base(std::move(static_cast<Base&>(column)))
 		{}
 
 		index get_rep() const{
@@ -88,7 +81,7 @@ public:
 		struct Hasher {
 			size_t operator()(const Column_type& c) const
 			{
-				return std::hash<Base>()(c);
+				return std::hash<Base>()(static_cast<Base>(c));
 			}
 		};
 
@@ -216,7 +209,7 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 
 template<class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const Base_matrix_with_column_compression &matrixToCopy)
-	: ra_opt(matrixToCopy),
+	: ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  columnClasses_(matrixToCopy.columnClasses_),
 	  repToColumn_(matrixToCopy.repToColumn_.size(), nullptr),
 	  nextColumnIndex_(0)
@@ -237,7 +230,7 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 
 template<class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(Base_matrix_with_column_compression &&other) noexcept
-	: ra_opt(std::move(other)),
+	: ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  columnToRep_(std::move(other.columnToRep_)),
 	  columnClasses_(std::move(other.columnClasses_)),
 	  repToColumn_(std::move(other.repToColumn_)),
@@ -512,7 +505,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(i
 		return;
 	}
 
-	repToColumn_[columnIndex]->set_rep(columnIndex);
+	col.set_rep(columnIndex);
 	auto res = columnToRep_.insert(col);
 	if (res.first->get_rep() != columnIndex){
 		_insert_double_column(columnIndex, res.first);

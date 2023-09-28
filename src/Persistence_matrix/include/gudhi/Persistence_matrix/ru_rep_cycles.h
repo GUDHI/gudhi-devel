@@ -15,10 +15,16 @@
 #include <algorithm>	//std::sort
 #include <vector>
 
-#include "../options.h"		//Column_types
-
 namespace Gudhi {
 namespace persistence_matrix {
+
+struct Dummy_ru_representative_cycles{
+	friend void swap([[maybe_unused]] Dummy_ru_representative_cycles& d1, [[maybe_unused]] Dummy_ru_representative_cycles& d2){}
+
+	Dummy_ru_representative_cycles(){}
+	Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
+	Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
+};
 
 template<class Master_matrix>
 class RU_representative_cycles
@@ -30,7 +36,7 @@ public:
 	using Base_matrix = typename Master_matrix::Base_matrix_type;
 	using cycle_type = std::vector<index>;	//TODO: add coefficients
 
-	RU_representative_cycles(Boundary_matrix &matrixR, Base_matrix &matrixU);
+	RU_representative_cycles();
 	RU_representative_cycles(const RU_representative_cycles& matrixToCopy);
 	RU_representative_cycles(RU_representative_cycles&& other) noexcept;
 
@@ -45,33 +51,29 @@ public:
 		base1.birthToCycle_.swap(base2.birthToCycle_);
 	}
 
-protected:
-	Boundary_matrix *reducedMatrixR_;
-	Base_matrix *mirrorMatrixU_;
-
 private:
+	using ru_matrix = typename Master_matrix::RU_matrix_type;
+
 	std::vector<cycle_type> representativeCycles_;
 	std::vector<int> birthToCycle_;
+
+	constexpr ru_matrix* _matrix() { return static_cast<ru_matrix*>(this); }
+	constexpr const ru_matrix* _matrix() const { return static_cast<const ru_matrix*>(this); }
 };
 
 template<class Master_matrix>
-inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(Boundary_matrix &matrixR, Base_matrix &matrixU)
-	: reducedMatrixR_(&matrixR), mirrorMatrixU_(&matrixU)
+inline RU_representative_cycles<Master_matrix>::RU_representative_cycles()
 {}
 
 template<class Master_matrix>
 inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(const RU_representative_cycles<Master_matrix>& matrixToCopy)
-	: reducedMatrixR_(matrixToCopy.reducedMatrixR_),
-	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
-	  representativeCycles_(matrixToCopy.representativeCycles_),
+	: representativeCycles_(matrixToCopy.representativeCycles_),
 	  birthToCycle_(matrixToCopy.birthToCycle_)
 {}
 
 template<class Master_matrix>
 inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(RU_representative_cycles<Master_matrix> &&other) noexcept
-	: reducedMatrixR_(other.reducedMatrixR_),
-	  mirrorMatrixU_(other.mirrorMatrixU_),
-	  representativeCycles_(std::move(other.representativeCycles_)),
+	: representativeCycles_(std::move(other.representativeCycles_)),
 	  birthToCycle_(std::move(other.birthToCycle_))
 {}
 
@@ -79,14 +81,15 @@ template<class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::update_representative_cycles()
 {
 	birthToCycle_.clear();
-	birthToCycle_.resize(reducedMatrixR_->get_number_of_columns(), -1);
-	for (unsigned int i = 0; i < reducedMatrixR_->get_number_of_columns(); i++){
-		if (reducedMatrixR_->is_zero_column(i)){
+	birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
+	for (unsigned int i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++){
+		if (_matrix()->reducedMatrixR_.is_zero_column(i)){
 			representativeCycles_.push_back(cycle_type());
-			for (const auto& cell : mirrorMatrixU_->get_column(i)){
+			for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)){
 				representativeCycles_.back().push_back(cell.get_row_index());
 			}
-			if constexpr (Master_matrix::Option_list::column_type == Column_types::HEAP || Master_matrix::Option_list::column_type == Column_types::UNORDERED_SET)
+			if constexpr (std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Heap_column_type> 
+							|| std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Unordered_set_column_type>)
 				std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());
 			birthToCycle_[i] = representativeCycles_.size() - 1;
 		}

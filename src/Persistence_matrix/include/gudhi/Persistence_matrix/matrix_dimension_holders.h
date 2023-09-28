@@ -17,6 +17,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct Dummy_matrix_dimension_holder{
+	template<typename dimension_type>
+	Dummy_matrix_dimension_holder([[maybe_unused]] dimension_type maximalDimension){}
+};
+
 template<typename dimension_type>
 class Matrix_max_dimension_holder
 {

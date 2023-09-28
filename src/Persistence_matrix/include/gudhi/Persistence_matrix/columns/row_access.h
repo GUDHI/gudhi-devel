@@ -18,6 +18,15 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct Dummy_row_access{
+	friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2){}
+
+	Dummy_row_access(){}
+	Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
+	
+	static constexpr bool isActive_ = false;	//TODO: to remove when columns are redone without
+};
+
 template<class Master_matrix>
 class Row_access
 {

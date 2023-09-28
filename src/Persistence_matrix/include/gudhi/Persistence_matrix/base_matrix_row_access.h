@@ -16,6 +16,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct Dummy_matrix_row_access{
+	Dummy_matrix_row_access(){};
+	Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfColumns){};
+};
+
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
 class Base_matrix_row_access
 {

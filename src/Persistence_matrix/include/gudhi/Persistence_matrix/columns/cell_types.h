@@ -17,6 +17,22 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+struct Dummy_cell_column_index_mixin{
+	Dummy_cell_column_index_mixin(){}
+	template<typename index>
+	Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex){}
+	Dummy_cell_column_index_mixin([[maybe_unused]] const Dummy_cell_column_index_mixin& cell){};
+	Dummy_cell_column_index_mixin([[maybe_unused]] Dummy_cell_column_index_mixin&& cell){};
+};
+
+struct Dummy_cell_field_element_mixin{
+	Dummy_cell_field_element_mixin(){}
+	template<class Field_element_type>
+	Dummy_cell_field_element_mixin([[maybe_unused]] Field_element_type t){}
+	Dummy_cell_field_element_mixin([[maybe_unused]] const Dummy_cell_field_element_mixin& cell){};
+	Dummy_cell_field_element_mixin([[maybe_unused]] Dummy_cell_field_element_mixin&& cell){};
+};
+
 template<typename index>
 class Cell_column_index
 {
@@ -81,6 +97,10 @@ class Cell : public Master_matrix::Cell_column_index_option,
 			 public Master_matrix::row_hook_type, 
 			 public Master_matrix::column_hook_type
 {
+private:
+	using col_opt = typename Master_matrix::Cell_column_index_option;
+	using field_opt = typename Master_matrix::Cell_field_element_option;
+
 public:
 	using index = typename Master_matrix::index;
 	using Field_element_type = typename Master_matrix::Field_type;
@@ -89,33 +109,33 @@ public:
 
 	Cell(){};
 	Cell(index rowIndex) 
-		: Master_matrix::Cell_column_index_option(),
-		  Master_matrix::Cell_field_element_option(),
+		: col_opt(),
+		  field_opt(),
 		  rowIndex_(rowIndex)
 	{};
 	Cell(index columnIndex, index rowIndex) 
-		: Master_matrix::Cell_column_index_option(columnIndex),
-		  Master_matrix::Cell_field_element_option(),
+		: col_opt(columnIndex),
+		  field_opt(),
 		  rowIndex_(rowIndex)
 	{};
 	Cell(Field_element_type element, index rowIndex) 
-		: Master_matrix::Cell_column_index_option(),
-		  Master_matrix::Cell_field_element_option(element),
+		: col_opt(),
+		  field_opt(element),
 		  rowIndex_(rowIndex)
 	{};
 	Cell(Field_element_type element, index columnIndex, index rowIndex) 
-		: Master_matrix::Cell_column_index_option(columnIndex),
-		  Master_matrix::Cell_field_element_option(element),
+		: col_opt(columnIndex),
+		  field_opt(element),
 		  rowIndex_(rowIndex)
 	{};
 	Cell(const Cell& cell) 
-		: Master_matrix::Cell_column_index_option(cell),
-		  Master_matrix::Cell_field_element_option(cell),
+		: col_opt(static_cast<const col_opt&>(cell)),
+		  field_opt(static_cast<const field_opt&>(cell)),
 		  rowIndex_(cell.rowIndex_)
 	{};
 	Cell(Cell&& cell) noexcept 
-		: Master_matrix::Cell_column_index_option(std::move(cell)),
-		  Master_matrix::Cell_field_element_option(std::move(cell)),
+		: col_opt(std::move(static_cast<col_opt&>(cell))),
+		  field_opt(std::move(static_cast<field_opt&>(cell))),
 		  rowIndex_(std::exchange(cell.rowIndex_, 0))
 	{};
 
@@ -127,8 +147,8 @@ public:
 	};
 
 	Cell& operator=(Cell other){
-		Master_matrix::Cell_column_index_option::operator=(other);
-		Master_matrix::Cell_field_element_option::operator=(other);
+		col_opt::operator=(other);
+		field_opt::operator=(other);
 		std::swap(rowIndex_, other.rowIndex_);
 		return *this;
 	};
@@ -147,7 +167,7 @@ public:
 		if constexpr (Master_matrix::Option_list::is_z2){
 			return {rowIndex_, 1};
 		} else {
-			return {rowIndex_, Master_matrix::Cell_field_element_option::element_};
+			return {rowIndex_, field_opt::element_};
 		}
 	}
 

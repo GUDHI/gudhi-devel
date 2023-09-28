@@ -20,7 +20,8 @@ namespace persistence_matrix {
 
 template<class Master_matrix>
 class Base_matrix
-		: public Master_matrix::Base_swap_option, protected Master_matrix::Matrix_row_access_option
+		: public Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >, 
+		  protected Master_matrix::Matrix_row_access_option
 {
 public:
 	using index = typename Master_matrix::index;
@@ -73,8 +74,8 @@ public:
 
 	Base_matrix& operator=(const Base_matrix& other);
 	friend void swap(Base_matrix& matrix1, Base_matrix& matrix2){
-		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
-			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >&>(matrix1),
+			 static_cast<typename Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
 		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
 
@@ -102,7 +103,7 @@ public:
 	void print();  //for debug
 
 private:
-	using swap_opt = typename Master_matrix::Base_swap_option;
+	using swap_opt = typename Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >;
 	using ra_opt = typename Master_matrix::Matrix_row_access_option;
 	using matrix_type = typename Master_matrix::column_container_type;
 	using cell_rep_type = typename std::conditional<
@@ -110,6 +111,8 @@ private:
 								index,
 								std::pair<index,Field_element_type>
 							>::type;
+
+	friend swap_opt;	//direct access to matrix_ to avoid row reorder.
 
 	matrix_type matrix_;
 	index nextInsertIndex_;
@@ -119,7 +122,7 @@ private:
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix()
-	: swap_opt(matrix_),
+	: swap_opt(),
 	  ra_opt(),
 	  nextInsertIndex_(0)
 {}
@@ -127,7 +130,7 @@ inline Base_matrix<Master_matrix>::Base_matrix()
 template<class Master_matrix>
 template<class Container_type>
 inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type> &columns)
-	: swap_opt(matrix_, columns.size()),
+	: swap_opt(columns.size()),
 	  ra_opt(columns.size()),	//not ideal if max row index is much smaller than max column index, does that happen often?
 	  matrix_(!Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_row_access ? 0 : columns.size()),
 	  nextInsertIndex_(columns.size())
@@ -154,7 +157,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
-	: swap_opt(matrix_, numberOfColumns),
+	: swap_opt(numberOfColumns),
 	  ra_opt(numberOfColumns),
 	  matrix_(!Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_row_access ? 0 : numberOfColumns),
 	  nextInsertIndex_(0)
@@ -165,13 +168,10 @@ inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
-	: swap_opt(matrixToCopy),
-	  ra_opt(matrixToCopy),
+	: swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
+	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
-	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps)
-		swap_opt::matrix_ = &matrix_;
-
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		matrix_.reserve(matrixToCopy.matrix_.size());
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
@@ -191,14 +191,11 @@ inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
 
 template<class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
-	: swap_opt(std::move(other)),
-	  ra_opt(std::move(other)),
+	: swap_opt(std::move(static_cast<swap_opt&>(other))),
+	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
 {
-	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps)
-		swap_opt::matrix_ = &matrix_;
-
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (auto& p : matrix_){

@@ -75,6 +75,9 @@
 // #include "chain_matrix/chain_matrix_0011.h"
 #include "Persistence_matrix/chain_matrix.h"
 
+#include "Persistence_matrix/columns/column_dimension_holder.h"
+#include "Persistence_matrix/columns/chain_column_extra_properties.h"
+#include "Persistence_matrix/columns/intrusive_list_column.h"
 #include "gudhi/column_types/list_column.h"
 #include "gudhi/column_types/set_column.h"
 #include "gudhi/column_types/unordered_set_column.h"
@@ -84,9 +87,9 @@
 #include "gudhi/column_types/z2_set_column.h"
 #include "gudhi/column_types/z2_unordered_set_column.h"
 #include "gudhi/column_types/z2_vector_column.h"
-#include "gudhi/column_types/intrusive_list_column.h"
+// #include "gudhi/column_types/intrusive_list_column.h"
 #include "gudhi/column_types/intrusive_set_column.h"
-#include "gudhi/column_types/z2_intrusive_list_column.h"
+// #include "gudhi/column_types/z2_intrusive_list_column.h"
 #include "gudhi/column_types/z2_intrusive_set_column.h"
 #include "gudhi/column_types/boundary_columns/boundary_list_column.h"
 #include "gudhi/column_types/boundary_columns/boundary_set_column.h"
@@ -97,9 +100,9 @@
 #include "gudhi/column_types/boundary_columns/z2_boundary_set_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_vector_column.h"
-#include "gudhi/column_types/boundary_columns/boundary_intrusive_list_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_intrusive_list_column.h"
 #include "gudhi/column_types/boundary_columns/boundary_intrusive_set_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_list_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_list_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_set_column.h"
 #include "gudhi/column_types/chain_columns/chain_list_column.h"
 #include "gudhi/column_types/chain_columns/chain_set_column.h"
@@ -110,9 +113,9 @@
 #include "gudhi/column_types/chain_columns/z2_chain_set_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_vector_column.h"
-#include "gudhi/column_types/chain_columns/chain_intrusive_list_column.h"
+// #include "gudhi/column_types/chain_columns/chain_intrusive_list_column.h"
 #include "gudhi/column_types/chain_columns/chain_intrusive_set_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_intrusive_list_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_intrusive_list_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_intrusive_set_column.h"
 
 namespace Gudhi {
@@ -127,6 +130,7 @@ public:
 	using index = typename Options::index_type;
 	using dimension_type = typename Options::dimension_type;
 
+	//TODO: move outside
 	struct Bar{
 		Bar() : dim(-1), birth(-1), death(-1)
 		{}
@@ -172,15 +176,6 @@ public:
 									Dummy_column_hook
 								>::type
 							>::type;
-
-	struct Dummy_cell_column_index_mixin{
-		Dummy_cell_column_index_mixin(){}
-		Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex){}
-	};
-	struct Dummy_cell_field_element_mixin{
-		Dummy_cell_field_element_mixin(){}
-		Dummy_cell_field_element_mixin([[maybe_unused]] Field_type t){}
-	};
 
 	using Cell_column_index_option = typename std::conditional<
 										Options::has_row_access,
@@ -228,20 +223,6 @@ public:
 											std::vector<Row_type>
 										>::type;
 
-	struct Dummy_row_access{
-		friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2){}
-
-		Dummy_row_access(){}
-		Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
-		
-		static constexpr bool isActive_ = false;
-	};
-
-	struct Dummy_matrix_row_access{
-		Dummy_matrix_row_access(){};
-		Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfColumns){};
-	};
-
 	using Row_access_option = typename std::conditional<
 											Options::has_row_access,
 											Row_access<Matrix<Options> >,
@@ -262,6 +243,18 @@ public:
 										>::type;
 
 	static const bool isNonBasic = Options::has_column_pairings || Options::has_vine_update || Options::can_retrieve_representative_cycles;
+
+	using Column_dimension_option = typename std::conditional<
+											isNonBasic,
+											Column_dimension_holder<Matrix<Options> >,
+											Dummy_dimension_holder
+										>::type;
+
+	using Chain_column_option = typename std::conditional<
+											isNonBasic && !Options::is_of_boundary_type,
+											Chain_column_extra_properties<Matrix<Options> >,
+											Dummy_chain_properties
+										>::type;
 
 	using Heap_column_type = typename std::conditional<
 											isNonBasic,
@@ -361,27 +354,7 @@ public:
 											>::type
 										>::type;
 
-	using Intrusive_list_column_type = typename std::conditional<
-											isNonBasic,
-											typename std::conditional<
-												Options::is_of_boundary_type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_intrusive_list_boundary_column<Cell_type, Row_access_option>,
-													Intrusive_list_boundary_column<Field_type, Cell_type, Row_access_option>
-												>::type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_intrusive_list_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
-													Intrusive_list_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
-												>::type
-											>::type,
-											typename std::conditional<
-												Options::is_z2,
-												Z2_intrusive_list_column<Cell_type, Row_access_option>,
-												Intrusive_list_column<Field_type, Cell_type, Row_access_option>
-											>::type
-										>::type;
+	using Intrusive_list_column_type = Intrusive_list_column<Matrix<Options> >;
 
 	using Intrusive_set_column_type = typename std::conditional<
 											isNonBasic,
@@ -454,16 +427,10 @@ public:
 									std::initializer_list<std::pair<index,Field_type> >
 								>::type;
 
-	struct Dummy_matrix_dimension_holder{
-		Dummy_matrix_dimension_holder([[maybe_unused]] dimension_type maximalDimension){};
-
-		// friend void swap([[maybe_unused]] Dummy_matrix_dimension_holder& d1, [[maybe_unused]] Dummy_matrix_dimension_holder& d2){}
-	};
-
 	static const bool dimensionIsNeeded = Options::has_column_pairings && !Options::has_vine_update && !Options::can_retrieve_representative_cycles;
 
 	using Matrix_dimension_option = typename std::conditional<
-											Options::has_dimension_access || dimensionIsNeeded,
+											Options::has_matrix_maximal_dimension_access || dimensionIsNeeded,
 											typename std::conditional<
 												Options::has_removable_columns,
 												Matrix_all_dimension_holder<dimension_type>,
@@ -477,128 +444,48 @@ public:
 												Base_matrix_with_column_compression<Matrix<Options> >,
 												Base_matrix<Matrix<Options> >
 											>::type;
-
 	using Boundary_matrix_type = Boundary_matrix<Matrix<Options> >;
-
 	using RU_matrix_type = RU_matrix<Matrix<Options> >;
-
 	using Chain_matrix_type = Chain_matrix<Matrix<Options> >;
 
-	struct Dummy_base_swap{
-		Dummy_base_swap& operator=([[maybe_unused]] Dummy_base_swap other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2){}
-
-		Dummy_base_swap([[maybe_unused]] column_container_type &matrix){}
-		Dummy_base_swap([[maybe_unused]] column_container_type &matrix, [[maybe_unused]] unsigned int numberOfColumns){}
-		Dummy_base_swap([[maybe_unused]] const Dummy_base_swap& matrixToCopy){}
-		Dummy_base_swap([[maybe_unused]] Dummy_base_swap&& other) noexcept{}
-	};
-
+	template<class Base>
 	using Base_swap_option = typename std::conditional<
 											Options::has_vine_update || Options::has_column_and_row_swaps,
-											Base_swap<Matrix<Options> >,
+											Base_swap<Matrix<Options>,Base>,
 											Dummy_base_swap
 										>::type;
-
-	struct Dummy_base_pairing{
-		Dummy_base_pairing& operator=([[maybe_unused]] Dummy_base_pairing other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_base_pairing& d1, [[maybe_unused]] Dummy_base_pairing& d2){}
-
-		Dummy_base_pairing([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dimension_type& maxDim){}
-		Dummy_base_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
-		Dummy_base_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
-	};
-
 	using Base_pairing_option = typename std::conditional<
 											Options::has_column_pairings && !Options::has_vine_update && !Options::can_retrieve_representative_cycles,
 											Base_pairing<Matrix<Options> >,
 											Dummy_base_pairing
 										>::type;
 
-	struct Dummy_ru_pairing{
-		Dummy_ru_pairing& operator=([[maybe_unused]] Dummy_ru_pairing other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_ru_pairing& d1, [[maybe_unused]] Dummy_ru_pairing& d2){}
-
-		Dummy_ru_pairing(){}
-		Dummy_ru_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy){}
-		Dummy_ru_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept{}
-	};
-
 	using RU_pairing_option = typename std::conditional<
 											Options::has_column_pairings && !Options::has_vine_update,
 											RU_pairing<Matrix<Options> >,
 											Dummy_ru_pairing
 										>::type;
-
-	struct Dummy_ru_vine_swap{
-		Dummy_ru_vine_swap& operator=([[maybe_unused]] Dummy_ru_vine_swap other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2){}
-
-		Dummy_ru_vine_swap([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU, [[maybe_unused]] dictionnary_type<int> &pivotToColumn){}
-		Dummy_ru_vine_swap([[maybe_unused]] const Dummy_ru_vine_swap& matrixToCopy){}
-		Dummy_ru_vine_swap([[maybe_unused]] Dummy_ru_vine_swap&& other) noexcept{}
-	};
-
 	using RU_vine_swap_option = typename std::conditional<
 											Options::has_vine_update,
 											RU_vine_swap<Matrix<Options> >,
 											Dummy_ru_vine_swap
 										>::type;
-
-	struct Dummy_chain_pairing{
-		Dummy_chain_pairing& operator=([[maybe_unused]] Dummy_chain_pairing other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2){}
-
-		Dummy_chain_pairing(){}
-		Dummy_chain_pairing([[maybe_unused]] const Dummy_chain_pairing& matrixToCopy){}
-		Dummy_chain_pairing([[maybe_unused]] Dummy_chain_pairing&& other) noexcept{}
-	};
-
-	using Chain_pairing_option = typename std::conditional<
-											Options::has_column_pairings && !Options::has_vine_update,
-											Chain_pairing<Matrix<Options> >,
-											Dummy_chain_pairing
-										>::type;
-
-	struct Dummy_chain_vine_swap{
-		Dummy_chain_vine_swap& operator=([[maybe_unused]] Dummy_chain_vine_swap other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2){}
-
-		Dummy_chain_vine_swap([[maybe_unused]] column_container_type& matrix){}
-		Dummy_chain_vine_swap([[maybe_unused]] const Dummy_chain_vine_swap& matrixToCopy){}
-		Dummy_chain_vine_swap([[maybe_unused]] Dummy_chain_vine_swap&& other) noexcept{}
-	};
-
-	using Chain_vine_swap_option = typename std::conditional<
-											Options::has_vine_update,
-											Chain_vine_swap<Matrix<Options> >,
-											Dummy_chain_vine_swap
-										>::type;
-
-	struct Dummy_ru_representative_cycles{
-		Dummy_ru_representative_cycles& operator=([[maybe_unused]] Dummy_ru_representative_cycles other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_ru_representative_cycles& d1, [[maybe_unused]] Dummy_ru_representative_cycles& d2){}
-
-		Dummy_ru_representative_cycles([[maybe_unused]] Boundary_matrix_type &matrixR, [[maybe_unused]] Base_matrix_type &matrixU){}
-		Dummy_ru_representative_cycles([[maybe_unused]] const Dummy_ru_representative_cycles& matrixToCopy){}
-		Dummy_ru_representative_cycles([[maybe_unused]] Dummy_ru_representative_cycles&& other) noexcept{}
-	};
-
 	using RU_representative_cycles_option = typename std::conditional<
 												Options::can_retrieve_representative_cycles,
 												RU_representative_cycles<Matrix<Options>>,
 												Dummy_ru_representative_cycles
 											>::type;
 
-	struct Dummy_chain_representative_cycles{
-		Dummy_chain_representative_cycles& operator=([[maybe_unused]] Dummy_chain_representative_cycles other){return *this;}
-		friend void swap([[maybe_unused]] Dummy_chain_representative_cycles& d1, [[maybe_unused]] Dummy_chain_representative_cycles& d2){}
-
-		Dummy_chain_representative_cycles([[maybe_unused]] column_container_type& matrix, [[maybe_unused]] dictionnary_type<index>& pivotToPosition){}
-		Dummy_chain_representative_cycles([[maybe_unused]] const Dummy_chain_representative_cycles& matrixToCopy){}
-		Dummy_chain_representative_cycles([[maybe_unused]] Dummy_chain_representative_cycles&& other) noexcept{}
-	};
-
+	using Chain_pairing_option = typename std::conditional<
+											Options::has_column_pairings && !Options::has_vine_update,
+											Chain_pairing<Matrix<Options> >,
+											Dummy_chain_pairing
+										>::type;
+	using Chain_vine_swap_option = typename std::conditional<
+											Options::has_vine_update,
+											Chain_vine_swap<Matrix<Options> >,
+											Dummy_chain_vine_swap
+										>::type;
 	using Chain_representative_cycles_option = typename std::conditional<
 													Options::can_retrieve_representative_cycles,
 													Chain_representative_cycles<Matrix<Options>>,
@@ -617,7 +504,6 @@ public:
 									const Row_type,
 									Row_type
 								>::type;
-
 	using insertion_return_type = typename std::conditional<
 									Options::is_of_boundary_type || !isNonBasic,
 									void,

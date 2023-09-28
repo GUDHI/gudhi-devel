@@ -44,7 +44,7 @@ struct Default_options{
 	static const bool is_parallelizable = parallelizable;					//not implemented yet
 	static const bool is_double_linked = true;								//not implemented yet, it depends of the column type for now (all double linked except for UNORDERED_SET). usefull?
 
-	static const bool has_dimension_access = true;							//ignored and put to false if matrix is not specialised, as the notion of dimension makes no sense for free columns. Also ignored but set to true if `has_column_pairings` is true and `has_vine_update` and `can_retrieve_representative_cycles` are false, because needed.
+	static const bool has_matrix_maximal_dimension_access = true;			//ignored and put to false if matrix is not specialised, as the notion of dimension makes no sense for free columns. Also ignored but set to true if `has_column_pairings` is true and `has_vine_update` and `can_retrieve_representative_cycles` are false, because needed.
 	static const bool has_row_access = false;
 	static const bool has_intrusive_rows = column_type != Column_types::SET && column_type != Column_types::UNORDERED_SET;	//ignored if has_row_access = false
 	static const bool has_removable_rows = false;							//ignored if has_row_access = false

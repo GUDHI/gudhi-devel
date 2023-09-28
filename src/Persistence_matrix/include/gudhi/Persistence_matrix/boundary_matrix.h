@@ -21,7 +21,7 @@ namespace persistence_matrix {
 template<class Master_matrix>
 class Boundary_matrix		//TODO: factorize/inheritate/compose with base matrix?
 		: public Master_matrix::Matrix_dimension_option,
-		  public Master_matrix::Base_swap_option,
+		  public Master_matrix::template Base_swap_option<Boundary_matrix<Master_matrix> >,
 		  public Master_matrix::Base_pairing_option, 
 		  protected Master_matrix::Matrix_row_access_option
 {
@@ -75,8 +75,8 @@ public:
 	friend void swap(Boundary_matrix& matrix1, Boundary_matrix& matrix2){
 		swap(static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix1),
 			 static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix2));
-		swap(static_cast<typename Master_matrix::Base_swap_option&>(matrix1),
-			 static_cast<typename Master_matrix::Base_swap_option&>(matrix2));
+		swap(static_cast<typename Master_matrix::template Base_swap_option<Boundary_matrix<Master_matrix> >&>(matrix1),
+			 static_cast<typename Master_matrix::template Base_swap_option<Boundary_matrix<Master_matrix> >&>(matrix2));
 		swap(static_cast<typename Master_matrix::Base_pairing_option&>(matrix1),
 			 static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
@@ -107,15 +107,17 @@ public:
 
 private:
 	using dim_opt = typename Master_matrix::Matrix_dimension_option;
-	using swap_opt = typename Master_matrix::Base_swap_option;
+	using swap_opt = typename Master_matrix::template Base_swap_option<Boundary_matrix<Master_matrix> >;
 	using pair_opt = typename Master_matrix::Base_pairing_option;
 	using ra_opt = typename Master_matrix::Matrix_row_access_option;
 	using matrix_type = typename Master_matrix::column_container_type;
 
+	friend swap_opt;
+
 	matrix_type matrix_;
 	index nextInsertIndex_;
 
-	static const bool activeDimOption = Master_matrix::Option_list::has_dimension_access || Master_matrix::dimensionIsNeeded;
+	static const bool activeDimOption = Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::dimensionIsNeeded;
 	static const bool activeSwapOption = Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update;
 	static const bool activePairingOption = Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update && !Master_matrix::Option_list::can_retrieve_representative_cycles;
 };
@@ -123,8 +125,8 @@ private:
 template<class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix()
 	: dim_opt(-1),
-	  swap_opt(matrix_),
-	  pair_opt(matrix_, dim_opt::maxDim_),
+	  swap_opt(),
+	  pair_opt(),
 	  ra_opt(),
 	  nextInsertIndex_(0)
 {}
@@ -133,8 +135,8 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundary_type> &orderedBoundaries)
 	: dim_opt(-1),
-	  swap_opt(matrix_, orderedBoundaries.size()),
-	  pair_opt(matrix_, dim_opt::maxDim_),
+	  swap_opt(orderedBoundaries.size()),
+	  pair_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextInsertIndex_(orderedBoundaries.size())
 {
@@ -166,8 +168,8 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 template<class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColumns)
 	: dim_opt(-1),
-	  swap_opt(matrix_, numberOfColumns),
-	  pair_opt(matrix_, dim_opt::maxDim_),
+	  swap_opt(numberOfColumns),
+	  pair_opt(),
 	  ra_opt(numberOfColumns),
 	  matrix_(!Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_row_access ? 0 : numberOfColumns),
 	  nextInsertIndex_(0)
@@ -178,19 +180,12 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColu
 
 template<class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &matrixToCopy)
-	: dim_opt(matrixToCopy),
-	  swap_opt(matrixToCopy),
-	  pair_opt(matrixToCopy),
-	  ra_opt(matrixToCopy),
+	: dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
+	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
+	  pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
+	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
 {
-	if constexpr (activeSwapOption)
-		swap_opt::matrix_ = &matrix_;
-	if constexpr (activePairingOption){
-		pair_opt::matrix_ = &matrix_;
-		pair_opt::maxDim_ = &this->dim_opt::maxDim_;
-	}
-
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		matrix_.reserve(matrixToCopy.matrix_.size());
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
@@ -210,20 +205,13 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &ma
 
 template<class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(Boundary_matrix &&other) noexcept
-	: dim_opt(std::move(other)),
-	  swap_opt(std::move(other)),
-	  pair_opt(std::move(other)),
-	  ra_opt(std::move(other)),
+	: dim_opt(std::move(static_cast<dim_opt&>(other))),
+	  swap_opt(std::move(static_cast<swap_opt&>(other))),
+	  pair_opt(std::move(static_cast<pair_opt&>(other))),
+	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
 {
-	if constexpr (activeSwapOption)
-		swap_opt::matrix_ = &matrix_;
-	if constexpr (activePairingOption){
-		pair_opt::matrix_ = &matrix_;
-		pair_opt::maxDim_ = &this->dim_opt::maxDim_;
-	}
-
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			for (auto& p : matrix_){
@@ -522,6 +510,10 @@ inline bool Boundary_matrix<Master_matrix>::is_zero_column(index columnIndex)
 template<class Master_matrix>
 inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
+	if constexpr (activeSwapOption){
+		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+	}
+	
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return matrix_.at(columnIndex).get_pivot();
 	} else {
