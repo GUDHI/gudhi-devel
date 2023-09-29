@@ -12,8 +12,8 @@
 
 #include <algorithm>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/multi_filtrations/finitely_critical_filtrations.h>
-#include <gudhi/Simplex_tree/multi_filtrations/line.h>
+#include <gudhi/Simplex_tree/multi_filtrations/Finitely_critical_filtrations.h>
+#include <gudhi/Simplex_tree/multi_filtrations/Line.h>
 
 
 

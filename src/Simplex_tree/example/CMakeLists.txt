@@ -21,6 +21,13 @@ if(TARGET TBB::tbb)
 endif()
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
+add_executable ( Simplex_tree_multi_example simplex_tree_multi.cpp )
+if(TARGET TBB::tbb)
+  target_link_libraries(Simplex_tree_multi_example TBB::tbb)
+endif()
+add_test(NAME Simplex_tree_multi_example COMMAND $<TARGET_FILE:Simplex_tree_multi_example>)
+
+
 # An example with Simplex-tree using CGAL alpha_shapes_3
 if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
   add_executable ( Simplex_tree_example_alpha_shapes_3_from_off example_alpha_shapes_3_simplex_tree_from_off_file.cpp )

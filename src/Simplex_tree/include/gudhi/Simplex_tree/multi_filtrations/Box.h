@@ -22,7 +22,7 @@
 #include <limits>
 #include <cassert>
 
-#include "finitely_critical_filtrations.h"
+#include "Finitely_critical_filtrations.h"
 
 /**
  * @brief Simple box in $\mathbb R^n$ .

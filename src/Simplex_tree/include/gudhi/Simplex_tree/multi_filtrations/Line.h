@@ -11,8 +11,8 @@
 #ifndef LINE_FILTRATION_TRANSLATION_H_INCLUDED
 #define LINE_FILTRATION_TRANSLATION_H_INCLUDED
 
-#include "box.h"
-#include "finitely_critical_filtrations.h"
+#include "Box.h"
+#include "Finitely_critical_filtrations.h"
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
