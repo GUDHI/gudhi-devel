@@ -2281,7 +2281,7 @@ class Simplex_tree {
    * */
   int get_number_of_parameters() const { return number_of_parameters_; }
 
-  inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity() ? 
+  inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity ? 
       std::numeric_limits<Filtration_value>::infinity() 
     : std::numeric_limits<Filtration_value>::max(); /**< Default infinite value. */
 
