@@ -2275,11 +2275,21 @@ class Simplex_tree {
   /**
    * \brief Sets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
    * */
-  void set_number_of_parameters(int num) { number_of_parameters_ = num; }
+  void set_number_of_parameters(int num) { 
+    static_assert(SimplexTreeOptions::is_multi_parameter, 
+      "Cannot set number of parameters of 1-parameter simplextree."
+    ); 
+    number_of_parameters_ = num; 
+  }
   /**
    * \brief Gets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
    * */
-  int get_number_of_parameters() const { return number_of_parameters_; }
+  int get_number_of_parameters() const { 
+    if constexpr (SimplexTreeOptions::is_multi_parameter)
+      return number_of_parameters_;
+    else
+      return 1;
+  }
 
   inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity ? 
       std::numeric_limits<Filtration_value>::infinity() 
