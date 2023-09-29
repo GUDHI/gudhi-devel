@@ -33,7 +33,7 @@ cdef extern from "Tangential_complex_interface.h" namespace "Gudhi":
         unsigned number_of_simplices()
         unsigned number_of_inconsistent_simplices()
         unsigned number_of_inconsistent_stars()
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree)
         void fix_inconsistencies_using_perturbation(double max_perturb, double time_limit)
         void set_max_squared_edge_length(double max_squared_edge_length)
 
@@ -143,7 +143,7 @@ cdef class TangentialComplex:
         """
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
-        self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr)
+        self.thisptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr)
         return stree
 
     def fix_inconsistencies_using_perturbation(self, max_perturb, time_limit=-1.0):

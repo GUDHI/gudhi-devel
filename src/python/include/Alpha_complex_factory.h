@@ -68,7 +68,7 @@ class Abstract_alpha_complex {
  public:
   virtual std::vector<double> get_point(int vh) = 0;
 
-  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) = 0;
   
   virtual std::size_t num_vertices() const = 0;
@@ -101,7 +101,7 @@ class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
     return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
   }
 
-  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
@@ -136,7 +136,7 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
     // Can be a Weighted or a Bare point in function of Weighted
     return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
   }
-  virtual bool create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
     return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
   }

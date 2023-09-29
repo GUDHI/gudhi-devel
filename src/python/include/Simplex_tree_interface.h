@@ -25,10 +25,25 @@
 
 namespace Gudhi {
 
-template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
-class Simplex_tree_interface : public Simplex_tree<SimplexTreeOptions> {
+/** Model of SimplexTreeOptions.
+ * 
+ * Specific to python interfaces of the Simplex_tree */
+struct Simplex_tree_options_for_python {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+
+class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_python> {
  public:
-  using Base = Simplex_tree<SimplexTreeOptions>;
+  using Base = Simplex_tree<Simplex_tree_options_for_python>;
   using Filtration_value = typename Base::Filtration_value;
   using Vertex_handle = typename Base::Vertex_handle;
   using Simplex_handle = typename Base::Simplex_handle;

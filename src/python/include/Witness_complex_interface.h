@@ -38,12 +38,12 @@ class Witness_complex_interface {
     delete witness_complex_;
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double  max_alpha_square,
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double  max_alpha_square,
                            std::size_t limit_dimension) {
     witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree,
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                            double  max_alpha_square) {
     witness_complex_->create_complex(*simplex_tree, max_alpha_square);
   }

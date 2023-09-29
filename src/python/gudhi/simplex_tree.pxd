@@ -19,34 +19,31 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_options_full_featured:
+    cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface::Simplex_handle":
         pass
 
-    cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Simplex_handle":
-        pass
-
-    cdef cppclass Simplex_tree_simplices_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Complex_simplex_iterator":
+    cdef cppclass Simplex_tree_simplices_iterator "Gudhi::Simplex_tree_interface::Complex_simplex_iterator":
         Simplex_tree_simplices_iterator() nogil
         Simplex_tree_simplex_handle& operator*() nogil
         Simplex_tree_simplices_iterator operator++() nogil
         bint operator!=(Simplex_tree_simplices_iterator) nogil
 
-    cdef cppclass Simplex_tree_skeleton_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Skeleton_simplex_iterator":
+    cdef cppclass Simplex_tree_skeleton_iterator "Gudhi::Simplex_tree_interface::Skeleton_simplex_iterator":
         Simplex_tree_skeleton_iterator() nogil
         Simplex_tree_simplex_handle& operator*() nogil
         Simplex_tree_skeleton_iterator operator++() nogil
         bint operator!=(Simplex_tree_skeleton_iterator) nogil
 
-    cdef cppclass Simplex_tree_boundary_iterator "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>::Boundary_simplex_iterator":
+    cdef cppclass Simplex_tree_boundary_iterator "Gudhi::Simplex_tree_interface::Boundary_simplex_iterator":
         Simplex_tree_boundary_iterator() nogil
         Simplex_tree_simplex_handle& operator*() nogil
         Simplex_tree_boundary_iterator operator++() nogil
         bint operator!=(Simplex_tree_boundary_iterator) nogil
 
 
-    cdef cppclass Simplex_tree_interface_full_featured "Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>":
-        Simplex_tree_interface_full_featured() nogil
-        Simplex_tree_interface_full_featured(Simplex_tree_interface_full_featured&) nogil
+    cdef cppclass Simplex_tree_python_interface "Gudhi::Simplex_tree_interface":
+        Simplex_tree_python_interface() nogil
+        Simplex_tree_python_interface(Simplex_tree_python_interface&) nogil
         double simplex_filtration(vector[int] simplex) nogil
         void assign_simplex_filtration(vector[int] simplex, double filtration) nogil except +
         void initialize_filtration() nogil
@@ -68,9 +65,9 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool prune_above_dimension(int dimension) nogil
         bool make_filtration_non_decreasing() nogil
         void compute_extended_filtration() nogil
-        Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil except +
+        Simplex_tree_python_interface* collapse_edges(int nb_collapse_iteration) nogil except +
         void reset_filtration(double filtration, int dimension) nogil
-        bint operator==(Simplex_tree_interface_full_featured) nogil
+        bint operator==(Simplex_tree_python_interface) nogil
         # Iterators over Simplex tree
         pair[vector[int], double] get_simplex_and_filtration(Simplex_tree_simplex_handle f_simplex) nogil
         Simplex_tree_simplices_iterator get_simplices_iterator_begin() nogil
@@ -88,8 +85,8 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         size_t get_serialization_size() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":
-        Simplex_tree_persistence_interface(Simplex_tree_interface_full_featured * st, bool persistence_dim_max) nogil
+    cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface>":
+        Simplex_tree_persistence_interface(Simplex_tree_python_interface * st, bool persistence_dim_max) nogil
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[int] betti_numbers() nogil

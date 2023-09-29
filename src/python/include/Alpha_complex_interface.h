@@ -50,7 +50,7 @@ class Alpha_complex_interface {
     return alpha_ptr_->get_point(vh);
   }
 
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree, double max_alpha_square,
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                            bool default_filtration_value) {
     // Nothing to be done in case of an empty point set
     if (alpha_ptr_->num_vertices() > 0)
