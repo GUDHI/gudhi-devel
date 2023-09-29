@@ -23,7 +23,13 @@ namespace Gudhi::multiparameter::multi_filtrations {
  * \ingroup multiparameter
  *
  * \details Child of `std::vector<T>` that has numpy-like pointwise operators.
- *
+ * One critical simplicial filtrations are filtrations such that the lifetime each simplex is a positive cone, e.g.
+ *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \f$ is valid, while 
+ *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{x \in  \mathbb R^2 :  x>=(2,1)\} \f$ is not-
+ * Finitely critical filtrations are filtrations such that the lifetime of each simplex is a union of such cones, e.g.,
+ *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{ x \in  \mathbb R^2 : x>=(2,1)\} \f$ is finitely critical, and more particularly 2-critical, while
+ *  - \f$ \{ x \in  \mathbb R^2 : x>= \mathrm{epigraph}(y\mapsto e^{-y})\} \f$ is not.
+ * Non 1-critical filtrations are not supported yet.
  * \tparam T value type of the vector-like. 
  */
 template <typename T = float>
