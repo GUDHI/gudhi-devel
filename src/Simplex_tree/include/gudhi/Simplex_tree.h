@@ -831,9 +831,11 @@ class Simplex_tree {
    * to the new simplex.
    * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
    * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * and the simplex tree is not multi parameter (`SimplexTreeOptions::is_multi_parameter == false`),
    * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
-   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
-   * null_simplex.
+   * output pair to the Simplex_handle of the simplex. When the simplex tree is multi parameter,
+   * the existing filtration values are not updated. If the insertion fails for other reasons, 
+   * we set the Simplex_handle part to `null_simplex`.
    * 
   */
   template <class RandomVertexHandleRange = std::initializer_list<Vertex_handle>>
@@ -978,26 +980,17 @@ class Simplex_tree {
 
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
-    if (!one_is_new) {
-      if (!(filtration(simplex_one) <= filt)) { 
-        if constexpr (SimplexTreeOptions::is_multi_parameter){
-          // By default, does nothing and assumes that the user is smart.
-          if (filt < filtration(simplex_one)){
-            // placeholder for comparable filtrations
-          }
-          else{
-            // placeholder for incomparable filtrations
-          }
+    if constexpr (!SimplexTreeOptions::is_multi_parameter){ // Ignores the assign part for multiparameter filtrations.
+      if (!one_is_new) {
+        if (filtration(simplex_one) > filt){ 
+            assign_filtration(simplex_one, filt);
+        } else {
+          // FIXME: this interface makes no sense, and it doesn't seem to be tested.
+          insertion_result.first = null_simplex();
         }
-        else{ // non-multiparameter
-          assign_filtration(simplex_one, filt);
-        }
-        
-      } else {
-        // FIXME: this interface makes no sense, and it doesn't seem to be tested.
-        insertion_result.first = null_simplex();
       }
     }
+
     if (++first == last) return insertion_result;
     if (!has_children(simplex_one))
       // TODO: have special code here, we know we are building the whole subtree from scratch.
@@ -1632,21 +1625,20 @@ class Simplex_tree {
       // Find the maximum filtration value in the border
       Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
       Filtration_value max_filt_border_value;
-      if constexpr (SimplexTreeOptions::is_multi_parameter){
+      if constexpr (SimplexTreeOptions::is_multi_parameter) {
         // in that case, we assume that Filtration_value has a `push_to` member to handle this.
         max_filt_border_value = Filtration_value(this->number_of_parameters_);
-        for (auto &face_sh : boundary){
-          max_filt_border_value.push_to(filtration(face_sh)); // pushes the value of max_filt_border_value to reach simplex' filtration
+        for (auto& face_sh : boundary) {
+          max_filt_border_value.push_to(
+              filtration(face_sh));  // pushes the value of max_filt_border_value to reach simplex' filtration
         }
-      }
-      else{
-        Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
-                                                              [](Simplex_handle sh1, Simplex_handle sh2) {
-                                                                return filtration(sh1) < filtration(sh2);
-                                                              });
+      } else {
+        Boundary_simplex_iterator max_border =
+            std::max_element(std::begin(boundary), std::end(boundary),
+                             [](Simplex_handle sh1, Simplex_handle sh2) { return filtration(sh1) < filtration(sh2); });
         max_filt_border_value = filtration(*max_border);
       }
-      
+
       // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
       // That seems more useful than keeping NaN.
       if (!(sh->second.filtration() >= max_filt_border_value)) {
@@ -2278,17 +2270,14 @@ class Simplex_tree {
   int dimension_;
   bool dimension_to_be_lowered_ = false;
 
-//MULTIPERS STUFF
-public: 
-  void set_number_of_parameters(int num){
-		number_of_parameters_ = num;
-	}
-	int get_number_of_parameters() const{
-		return number_of_parameters_;
-	}
+  // MULTIPERS STUFF
+ public:
+  void set_number_of_parameters(int num) { number_of_parameters_ = num; }
+  int get_number_of_parameters() const { return number_of_parameters_; }
   inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::infinity();
-private:
-	int number_of_parameters_;
+
+ private:
+  int number_of_parameters_;
 };
 
 // Print a Simplex_tree in os.
