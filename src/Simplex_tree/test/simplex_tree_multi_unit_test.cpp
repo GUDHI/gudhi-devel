@@ -631,7 +631,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST SIMPLEX TREE CLEAR" << std::endl;
   typeST st;
-  st.insert_simplex_and_subfaces({0, 1}, vec{1.5});
+  st.insert_simplex_and_subfaces({0, 1}, vec{{1.5}});
   st.initialize_filtration();
   st.clear();
   BOOST_CHECK(st.num_vertices() == 0);
@@ -641,7 +641,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(boost::size(st.filtration_simplex_range()) == 0);
   typeST st_empty;
   BOOST_CHECK(st == st_empty);
-  st.insert_simplex_and_subfaces({0}, vec{2.5});
+  st.insert_simplex_and_subfaces({0}, vec{{2.5}});
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
 }
 

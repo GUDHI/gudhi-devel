@@ -1,12 +1,10 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Hannah Schreiber
+ *    Author(s):       David Loiseaux, Hannah Schreiber
  *
- *    Copyright (C) 2014 Inria        """
- *
+ *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- * 		- 2022/11 David Loiseaux / Hannah Schreiber : added multify / flatten to interface standard simplextree.
  *      - YYYY/MM Author: Description of the modification
  */
 #ifndef SIMPLEX_TREE_MULTI_H_

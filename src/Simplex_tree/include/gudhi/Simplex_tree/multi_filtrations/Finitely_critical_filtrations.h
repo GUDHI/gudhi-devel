@@ -1,3 +1,13 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       David Loiseaux
+ *
+ *    Copyright (C) 2023 Inria
+ *
+ *    Modification(s):
+ *      - YYYY/MM Author: Description of the modification
+ */
+
 #ifndef FINITELY_CRITICAL_FILTRATIONS_H_
 #define FINITELY_CRITICAL_FILTRATIONS_H_
 
