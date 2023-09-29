@@ -236,7 +236,7 @@ std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr
 	std::vector<int> degree_index(degrees.size());
 	int count = 0;
 	for (auto degree : degrees){
-		degree_index[degree] = count; count++;
+		degree_index[degree] = count++;
 		out[degree_index[degree]].reserve(st_multi.num_simplices());
 	}
 		
