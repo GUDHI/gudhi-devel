@@ -2272,12 +2272,21 @@ class Simplex_tree {
 
   // MULTIPERS STUFF
  public:
+  /**
+   * \brief Sets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
+   * */
   void set_number_of_parameters(int num) { number_of_parameters_ = num; }
+  /**
+   * \brief Gets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
+   * */
   int get_number_of_parameters() const { return number_of_parameters_; }
-  inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::infinity();
+
+  inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity() ? 
+      std::numeric_limits<Filtration_value>::infinity() 
+    : std::numeric_limits<Filtration_value>::max(); /**< Default infinite value. */
 
  private:
-  int number_of_parameters_;
+  int number_of_parameters_; /**< Number of parameters of the multi-filtrations when SimplexTreeOptions::is_multi_parameter.-*/
 };
 
 // Print a Simplex_tree in os.

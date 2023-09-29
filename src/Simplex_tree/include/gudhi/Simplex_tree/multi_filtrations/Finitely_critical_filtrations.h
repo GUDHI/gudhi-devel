@@ -17,6 +17,15 @@
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
+/** \class Finitely_critical_multi_filtration Finitely_critical_multi_filtration.h gudhi/Simplex_tree/multi_filtrations/Finitely_critical_multi_filtration.h
+ * \brief Vector-like filtration value, for multiparameter persistence 
+ *
+ * \ingroup multiparameter
+ *
+ * \details Child of `std::vector<T>` that has numpy-like pointwise operators.
+ *
+ * \tparam T value type of the vector-like. 
+ */
 template <typename T = float>
 class Finitely_critical_multi_filtration : public std::vector<T> {
   // Class to prevent doing illegal stuff with the standard library, e.g., compare two vectors
