@@ -195,8 +195,7 @@ void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bo
   }
   for (const auto &simplex_handle : st_multi.complex_simplex_range()) {
     auto &simplex_filtration = st_multi.filtration_mutable(simplex_handle);
-    find_coordinates<options_multi::value_type>(simplex_filtration,
-                                                grid);  // turns the simplexfiltration into coords in the grid
+    find_coordinates(simplex_filtration,grid);  // turns the simplexfiltration into coords in the grid
     if (!coordinate_values) {
       for (auto parameter = 0u; parameter < num_parameters; parameter++)
         simplex_filtration[parameter] = grid[parameter][simplex_filtration[parameter]];
