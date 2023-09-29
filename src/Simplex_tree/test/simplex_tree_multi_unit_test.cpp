@@ -28,7 +28,7 @@
 //  ^
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree/Simplex_tree_multi.h"
-#include "gudhi/Simplex_tree/multi_filtrations/finitely_critical_filtrations.h"
+#include "gudhi/Simplex_tree/multi_filtrations/Finitely_critical_filtrations.h"
 
 using namespace Gudhi;
 using namespace Gudhi::multiparameter;
