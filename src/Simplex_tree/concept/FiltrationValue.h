@@ -17,7 +17,18 @@
   * its subsimplices of same filtration value) provides an indexing scheme 
   * (see IndexingTag).
   */
-  struct FiltrationValue {
-    /** \brief Operator < is a StrictWeakOrdering. */
-    bool operator<(FiltrationValue f1, FiltrationValue f2);
-  };
+struct FiltrationValue {
+  /** \brief Operator < is a StrictWeakOrdering. */
+  bool operator<(FiltrationValue f1, FiltrationValue f2);
+
+  /** \brief For multiparameter filtrations, this methods pushes a filtration value 
+   * to the first moment, for operator< such that f < this. For instance, for a one critical filtration, with
+   *  - this = (1,2)
+   *  - x = (2,1)
+   * after calling this method, x should be equal to (2,2).
+   * This function is called when using, e.g. `make_filtration_non_decreasing`, as the filtration of a simplex
+   * has to be greater than the filtration of any of its faces.
+   * */ 
+  void push_to(const FiltrationValue f);
+
+};
