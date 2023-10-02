@@ -75,8 +75,6 @@ namespace Gudhi {
  */
 enum class Extended_simplex_type {UP, DOWN, EXTRA};
 
-struct Simplex_tree_options_full_featured;
-
 /**
  * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Simplex Tree data structure for representing simplicial complexes.
@@ -90,7 +88,7 @@ struct Simplex_tree_options_full_featured;
  *
  */
 
-template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
+template<typename SimplexTreeOptions = Simplex_tree_options_default>
 class Simplex_tree {
  public:
   typedef SimplexTreeOptions Options;

@@ -16,10 +16,10 @@
 #include <cstdint>  // for std::uint8_t
 
 /* We could perfectly well use the default Simplex_tree<> (which uses
- * Simplex_tree_options_full_featured), the following simply demonstrates
+ * Simplex_tree_options_default), the following simply demonstrates
  * how to save on storage by not storing a filtration value.  */
 
-struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
+struct MyOptions : Gudhi::Simplex_tree_options_minimal {
   // Implicitly use 0 as filtration value for all simplices
   static const bool store_filtration = false;
   // The persistence algorithm needs this

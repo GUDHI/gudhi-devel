@@ -24,6 +24,21 @@ namespace Gudhi {
 
 /** Model of SimplexTreeOptions.
  * 
+ * Default options version of the Simplex_tree. */
+struct Simplex_tree_options_default {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+/** Model of SimplexTreeOptions.
+ * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
  * (about 4 billions of simplices). */
 struct Simplex_tree_options_full_featured {
@@ -33,6 +48,22 @@ struct Simplex_tree_options_full_featured {
   typedef std::uint32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = false;
+};
+
+/** Model of SimplexTreeOptions.
+ * 
+ * Minimal version of the Simplex_tree. No filtration values are stored and it is impossible to compute persistence
+ * with these options. */
+struct Simplex_tree_options_minimal {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = false;
+  static const bool store_filtration = false;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
@@ -52,23 +83,6 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-};
-
-/** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
- * `link_nodes_by_label` option.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_fast_cofaces {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = false;
 };
 

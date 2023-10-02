@@ -105,10 +105,10 @@ int main(int argc, char *argv[]) {
     nb_vertices = atoi(argv[1]);
     
   std::clog << "** Without cofaces computation optimization" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_default>>(nb_vertices);
 
   std::clog << "** With cofaces computation optimization" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_fast_cofaces>>(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(nb_vertices);
 
   std::clog << "** With cofaces computation optimization and stable simplex handles" << std::endl;
   benchmark_stars_computation<Gudhi::Simplex_tree<Simplex_tree_options_stable_simplex_handles> >(nb_vertices);
