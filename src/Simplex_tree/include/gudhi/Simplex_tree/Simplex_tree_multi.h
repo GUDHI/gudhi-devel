@@ -137,7 +137,7 @@ void flatten_diag(simplextree_std &st, simplextree_multi &st_multi,
 }
 
 /**
- * \brief Given a point an a multiparameter discrete grid, pushes the point onto this grid.
+ * \brief Given a point on a multiparameter discrete grid, pushes the point onto this grid.
  * Turns the input point as the closest grid point, as coordinates in this grid.
  * \ingroup multiparameter
  * \tparam vector_like Vector like class
