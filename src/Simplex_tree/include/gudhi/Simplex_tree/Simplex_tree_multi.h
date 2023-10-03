@@ -196,8 +196,7 @@ template <class simplextree_multi>
 void squeeze_filtration(simplextree_multi& st_multi, const multi_filtration_grid &grid, bool coordinate_values = true) {
   auto num_parameters = static_cast<unsigned int>(st_multi.get_number_of_parameters());
   if (grid.size() != num_parameters) {
-    std::cerr << "Bad grid !" << std::endl;
-    throw;
+    throw std::invalid_argument("Grid and simplextree do not agree on number of parameters.");
   }
   for (const auto &simplex_handle : st_multi.complex_simplex_range()) {
     auto &simplex_filtration = st_multi.filtration_mutable(simplex_handle);
