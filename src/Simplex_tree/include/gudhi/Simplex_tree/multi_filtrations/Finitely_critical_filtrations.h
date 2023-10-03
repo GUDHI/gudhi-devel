@@ -176,10 +176,14 @@ template<typename T>
 class numeric_limits<Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>>
 {
 public:
+static constexpr bool has_infinity = true; 
+
 	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> infinity() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::infinity());
 	};
-
+static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> max() throw(){
+		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::max());
+	};
 	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> quiet_NaN() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, numeric_limits<T>::quiet_NaN());
 	};
