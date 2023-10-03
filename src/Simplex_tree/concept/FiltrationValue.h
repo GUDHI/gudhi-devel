@@ -25,6 +25,7 @@ struct FiltrationValue {
    * to the first moment, for operator< such that f < this. For instance, for a one critical filtration, with
    *  - this = (1,2)
    *  - x = (2,1)
+   *
    * after calling this method, x should be equal to (2,2).
    * This function is called when using, e.g. `make_filtration_non_decreasing`, as the filtration of a simplex
    * has to be greater than the filtration of any of its faces.
