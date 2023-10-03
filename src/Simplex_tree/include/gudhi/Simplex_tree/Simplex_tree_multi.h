@@ -67,8 +67,7 @@ void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_par
     for (auto vertex : st.simplex_vertex_range(simplex_handle)) simplex.push_back(vertex);
 
     if (num_parameters > 0) f[0] = st.filtration(simplex_handle);
-    auto filtration_copy = f;
-    st_multi.insert_simplex(simplex, filtration_copy);
+    st_multi.insert_simplex(simplex, f);
   }
 }
 
@@ -130,13 +129,13 @@ void linear_projection(simplextree_std &st, simplextree_multi &st_multi,
 template <class simplextree_std, class simplextree_multi>
 void flatten_diag(simplextree_std &st, simplextree_multi &st_multi,
                   const std::vector<typename simplextree_multi::Options::value_type> basepoint, int dimension) {
-  multi_filtrations::Line<typename simplextree_multi::Options::value_type> l(basepoint);
-  for (const auto &simplex_handle : st_multi.complex_simplex_range()) {
+   assert(dimension>0);
+   multi_filtrations::Line<typename simplextree_multi::Options::value_type> l(basepoint);
+   for (const auto &simplex_handle : st_multi.complex_simplex_range()) {
     std::vector<int> simplex;
     for (auto vertex : st_multi.simplex_vertex_range(simplex_handle)) simplex.push_back(vertex);
 
     std::vector<typename simplextree_multi::Options::value_type> f = st_multi.filtration(simplex_handle);
-    if (dimension < 0) dimension = 0;
     typename simplextree_multi::Options::value_type new_filtration = l.push_forward(f)[dimension];
     st.insert_simplex(simplex, new_filtration);
   }
