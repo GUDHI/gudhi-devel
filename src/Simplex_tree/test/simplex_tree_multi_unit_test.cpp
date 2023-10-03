@@ -582,11 +582,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
   std::clog << "TEST RESET FILTRATION" << std::endl;
   typeST st;
 
-  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
-  st.insert_simplex_and_subfaces({3, 0}, 2.);
-  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
-
+  st.insert_simplex_and_subfaces({2, 1, 0}, vec({2.,1.}));
+  st.insert_simplex_and_subfaces({3, 0}, vec({1.,2.}));
+  st.insert_simplex_and_subfaces({3, 4, 5}, vec({3.,4.}));
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, vec({4.,3.}));
+  std::cout <<"TRUC "<< st.filtration(st.find({2,1,0})) << std::endl;
   /* Inserted simplex:        */
   /*    1   6                 */
   /*    o---o                 */
@@ -604,13 +604,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
     std::clog << ") - filtration = " << st.filtration(f_simplex);
     std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
     // Guaranteed by construction
-    BOOST_CHECK(st.filtration(f_simplex) >= 2.);
+    BOOST_CHECK(st.filtration(f_simplex) >= vec({1.,1.}));
   }
 
   // dimension until 5 even if simplex tree is of dimension 3 to test the limits
   for(int dimension = 5; dimension >= 0; dimension --) {
     std::clog << "### reset_filtration - dimension = " << dimension << "\n";
-    st.reset_filtration(0., dimension);
+    st.reset_filtration(st.inf_, dimension);
     for (auto f_simplex : st.skeleton_simplex_range(3)) {
       std::clog << "vertex = (";
       for (auto vertex : st.simplex_vertex_range(f_simplex)) {
@@ -619,7 +619,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
       std::clog << ") - filtration = " << st.filtration(f_simplex);
       std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
       if (st.dimension(f_simplex) < dimension)
-        BOOST_CHECK(st.filtration(f_simplex) >= 2.);
+        BOOST_CHECK(st.filtration(f_simplex) >= vec({1.,1}));
       else
         BOOST_CHECK(st.filtration(f_simplex) == st.inf_);
     }
@@ -631,7 +631,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST SIMPLEX TREE CLEAR" << std::endl;
   typeST st;
-  st.insert_simplex_and_subfaces({0, 1}, vec{{1.5}});
+  st.insert_simplex_and_subfaces({0, 1}, vec({1.5}));
   st.initialize_filtration();
   st.clear();
   BOOST_CHECK(st.num_vertices() == 0);
@@ -641,7 +641,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(boost::size(st.filtration_simplex_range()) == 0);
   typeST st_empty;
   BOOST_CHECK(st == st_empty);
-  st.insert_simplex_and_subfaces({0}, vec{{2.5}});
+  st.insert_simplex_and_subfaces({0}, vec({2.5}));
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
 }
 
