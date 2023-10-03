@@ -14,6 +14,7 @@
 #include <iostream>
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
