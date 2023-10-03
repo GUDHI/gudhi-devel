@@ -31,93 +31,96 @@
 #include "gudhi/Persistence_matrix/columns/chain_column_extra_properties.h"
 
 #include "gudhi/Persistence_matrix/columns/intrusive_list_column.h"
+#include "gudhi/Persistence_matrix/columns/intrusive_set_column.h"
+#include "gudhi/Persistence_matrix/columns/list_column.h"
+#include "gudhi/Persistence_matrix/columns/set_column.h"
 
-#include "gudhi/column_types/list_column.h"
-#include "gudhi/column_types/set_column.h"
+// #include "gudhi/column_types/list_column.h"
+// #include "gudhi/column_types/set_column.h"
 #include "gudhi/column_types/unordered_set_column.h"
 #include "gudhi/column_types/vector_column.h"
 #include "gudhi/column_types/z2_heap_column.h"
-#include "gudhi/column_types/z2_list_column.h"
-#include "gudhi/column_types/z2_set_column.h"
+// #include "gudhi/column_types/z2_list_column.h"
+// #include "gudhi/column_types/z2_set_column.h"
 #include "gudhi/column_types/z2_unordered_set_column.h"
 #include "gudhi/column_types/z2_vector_column.h"
 // #include "gudhi/column_types/intrusive_list_column.h"
-#include "gudhi/column_types/intrusive_set_column.h"
+// #include "gudhi/column_types/intrusive_set_column.h"
 // #include "gudhi/column_types/z2_intrusive_list_column.h"
-#include "gudhi/column_types/z2_intrusive_set_column.h"
+// #include "gudhi/column_types/z2_intrusive_set_column.h"
 
-#include "gudhi/column_types/boundary_columns/boundary_list_column.h"
-#include "gudhi/column_types/boundary_columns/boundary_set_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_list_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_set_column.h"
 #include "gudhi/column_types/boundary_columns/boundary_unordered_set_column.h"
 #include "gudhi/column_types/boundary_columns/boundary_vector_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_list_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_list_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_set_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_vector_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_intrusive_list_column.h"
-#include "gudhi/column_types/boundary_columns/boundary_intrusive_set_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_intrusive_set_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_list_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_set_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_set_column.h"
 
-#include "gudhi/column_types/chain_columns/chain_list_column.h"
-#include "gudhi/column_types/chain_columns/chain_set_column.h"
+// #include "gudhi/column_types/chain_columns/chain_list_column.h"
+// #include "gudhi/column_types/chain_columns/chain_set_column.h"
 #include "gudhi/column_types/chain_columns/chain_unordered_set_column.h"
 #include "gudhi/column_types/chain_columns/chain_vector_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_list_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_list_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_set_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_vector_column.h"
 // #include "gudhi/column_types/chain_columns/chain_intrusive_list_column.h"
-#include "gudhi/column_types/chain_columns/chain_intrusive_set_column.h"
+// #include "gudhi/column_types/chain_columns/chain_intrusive_set_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_intrusive_list_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_intrusive_set_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_intrusive_set_column.h"
 
 using Gudhi::persistence_matrix::Zp_field_element;
 
 using Gudhi::persistence_matrix::Intrusive_list_column;
-
+using Gudhi::persistence_matrix::Intrusive_set_column;
 using Gudhi::persistence_matrix::List_column;
 using Gudhi::persistence_matrix::Set_column;
+
 using Gudhi::persistence_matrix::Unordered_set_column;
 using Gudhi::persistence_matrix::Vector_column;
 using Gudhi::persistence_matrix::Z2_heap_column;
-using Gudhi::persistence_matrix::Z2_list_column;
+// using Gudhi::persistence_matrix::Z2_list_column;
 using Gudhi::persistence_matrix::Z2_set_column;
 using Gudhi::persistence_matrix::Z2_unordered_set_column;
 using Gudhi::persistence_matrix::Z2_vector_column;
-using Gudhi::persistence_matrix::Intrusive_set_column;
 // using Gudhi::persistence_matrix::Z2_intrusive_list_column;
-using Gudhi::persistence_matrix::Z2_intrusive_set_column;
+// using Gudhi::persistence_matrix::Z2_intrusive_set_column;
 
-using Gudhi::persistence_matrix::List_boundary_column;
-using Gudhi::persistence_matrix::Set_boundary_column;
+// using Gudhi::persistence_matrix::List_boundary_column;
+// using Gudhi::persistence_matrix::Set_boundary_column;
 using Gudhi::persistence_matrix::Unordered_set_boundary_column;
 using Gudhi::persistence_matrix::Vector_boundary_column;
 using Gudhi::persistence_matrix::Z2_heap_boundary_column;
-using Gudhi::persistence_matrix::Z2_list_boundary_column;
+// using Gudhi::persistence_matrix::Z2_list_boundary_column;
 using Gudhi::persistence_matrix::Z2_set_boundary_column;
 using Gudhi::persistence_matrix::Z2_unordered_set_boundary_column;
 using Gudhi::persistence_matrix::Z2_vector_boundary_column;
 // using Gudhi::persistence_matrix::Intrusive_list_boundary_column;
-using Gudhi::persistence_matrix::Intrusive_set_boundary_column;
+// using Gudhi::persistence_matrix::Intrusive_set_boundary_column;
 // using Gudhi::persistence_matrix::Z2_intrusive_list_boundary_column;
-using Gudhi::persistence_matrix::Z2_intrusive_set_boundary_column;
+// using Gudhi::persistence_matrix::Z2_intrusive_set_boundary_column;
 
-using Gudhi::persistence_matrix::List_chain_column;
-using Gudhi::persistence_matrix::Set_chain_column;
+// using Gudhi::persistence_matrix::List_chain_column;
+// using Gudhi::persistence_matrix::Set_chain_column;
 using Gudhi::persistence_matrix::Unordered_set_chain_column;
 using Gudhi::persistence_matrix::Vector_chain_column;
 using Gudhi::persistence_matrix::Z2_heap_chain_column;
-using Gudhi::persistence_matrix::Z2_list_chain_column;
+// using Gudhi::persistence_matrix::Z2_list_chain_column;
 using Gudhi::persistence_matrix::Z2_set_chain_column;
 using Gudhi::persistence_matrix::Z2_unordered_set_chain_column;
 using Gudhi::persistence_matrix::Z2_vector_chain_column;
 // using Gudhi::persistence_matrix::Intrusive_list_chain_column;
-using Gudhi::persistence_matrix::Intrusive_set_chain_column;
+// using Gudhi::persistence_matrix::Intrusive_set_chain_column;
 // using Gudhi::persistence_matrix::Z2_intrusive_list_chain_column;
-using Gudhi::persistence_matrix::Z2_intrusive_set_chain_column;
+// using Gudhi::persistence_matrix::Z2_intrusive_set_chain_column;
 
 using Gudhi::persistence_matrix::Cell;
 using Gudhi::persistence_matrix::Cell_column_index;
@@ -303,6 +306,14 @@ struct Mini_matrix{
 		}
 	};
 
+	template<class Cell_type>
+	struct CellPointerComp {
+		bool operator()(const Cell_type* c1, const Cell_type* c2) const
+		{
+			return *c1 < *c2;
+		}
+	};
+
 	using Row_type = typename std::conditional<
 								Options::has_intrusive_rows,
 								boost::intrusive::list<Cell_type, boost::intrusive::constant_time_size<false>, boost::intrusive::base_hook<base_hook_matrix_row> >,
@@ -345,155 +356,155 @@ using matrix_z5_ra_i = Mini_matrix<z5_ra_i_options<col_type,basic,boundary> >;
 
 ////////////// BASICS //////////////
 
-typedef boost::mpl::list</* List_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
-							Set_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
-							Unordered_set_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, true, false> >,
+							Set_column<matrix_z5<Column_types::SET, true, false> >,
+							// Unordered_set_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, true, false> >,
-							// Intrusive_set_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							// List_boundary_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
-							// Set_boundary_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
+							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, true, false> >,
+							List_column<matrix_z5<Column_types::LIST, false, true> >,
+							Set_column<matrix_z5<Column_types::SET, false, true> >,
 							// Unordered_set_boundary_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
 							// Vector_boundary_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
-							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Intrusive_set_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_5_columns;
 
-typedef boost::mpl::list</* Z2_heap_column,
-							Z2_list_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
-							Z2_set_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list</* Z2_heap_column, */
+							List_column<matrix_z2<Column_types::LIST, true, false> >,
+							Set_column<matrix_z2<Column_types::SET, true, false> >,
+							// Z2_unordered_set_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, true, false> >,
-							// Z2_intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, true, false> >,
 							// Z2_heap_boundary_column,
-							// Z2_list_boundary_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
-							// Z2_set_boundary_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							List_column<matrix_z2<Column_types::LIST, false, true> >,
+							Set_column<matrix_z2<Column_types::SET, false, true> >,
 							// Z2_unordered_set_boundary_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
 							// Z2_vector_boundary_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
-							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Z2_intrusive_set_boundary_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_2_columns;
 
-typedef boost::mpl::list</* List_boundary_column<Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
-							Set_boundary_column<Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
-							Unordered_set_boundary_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_boundary_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>, */
-							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Intrusive_set_boundary_column<Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option> */
+typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, true> >,
+							Set_column<matrix_z5<Column_types::SET, false, true> >,
+							// Unordered_set_boundary_column<Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_boundary_column<Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_5_boundary_columns;
 
-typedef boost::mpl::list</* Z2_heap_boundary_column,
-							Z2_list_boundary_column<matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
-							Z2_set_boundary_column<matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_boundary_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_boundary_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>, */
-							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Z2_intrusive_set_boundary_column<matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option> */
+typedef boost::mpl::list</* Z2_heap_boundary_column, */
+							List_column<matrix_z2<Column_types::LIST, false, true> >,
+							Set_column<matrix_z2<Column_types::SET, false, true> >,
+							// Z2_unordered_set_boundary_column<matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_boundary_column<matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_2_boundary_columns;
 
-typedef boost::mpl::list</* List_chain_column<dict_type, Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
-							Set_chain_column<dict_type, Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
-							Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>, */
-							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, false> >/* ,
-							Intrusive_set_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option> */
+typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, false> >,
+							Set_column<matrix_z5<Column_types::SET, false, false> >,
+							// Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, false> >,
+							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_5_chain_columns;
 
-typedef boost::mpl::list</* Z2_heap_chain_column<dict_type>,
-							Z2_list_chain_column<dict_type, matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
-							Z2_set_chain_column<dict_type, matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_chain_column<dict_type, matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_chain_column<dict_type, matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>, */
-							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, false> >/* ,
-							Z2_intrusive_set_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option> */
+typedef boost::mpl::list</* Z2_heap_chain_column<dict_type>, */
+							List_column<matrix_z2<Column_types::LIST, false, false> >,
+							Set_column<matrix_z2<Column_types::SET, false, false> >,
+							// Z2_unordered_set_chain_column<dict_type, matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_chain_column<dict_type, matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>,
+							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, false> >,
+							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_2_chain_columns;
 
 ////////////// ROWS //////////////
 
-typedef boost::mpl::list</* List_column<Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
-							Vector_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
-							List_boundary_column<Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
-							Vector_boundary_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
-							List_column<Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
-							Set_column<Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
-							Unordered_set_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
-							List_boundary_column<Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
-							Set_boundary_column<Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
-							Unordered_set_boundary_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_boundary_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z5_ra_i<Column_types::LIST, true, false> >,
+							List_column<matrix_z5_ra_i<Column_types::LIST, false, true> >,
+							List_column<matrix_z5_ra<Column_types::LIST, true, false> >,
+							List_column<matrix_z5_ra<Column_types::LIST, false, true> >,
+							Set_column<matrix_z5_ra<Column_types::SET, true, false> >,
+							Set_column<matrix_z5_ra<Column_types::SET, false, true> >,
+							// Vector_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Vector_boundary_column<Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Unordered_set_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
+							// Unordered_set_boundary_column<Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_boundary_column<Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z5_ra_i<Column_types::INTRUSIVE_LIST, true, false> >,
 							Intrusive_list_column<matrix_z5_ra_i<Column_types::INTRUSIVE_LIST, false, true> >,
 							Intrusive_list_column<matrix_z5_ra<Column_types::INTRUSIVE_LIST, true, false> >,
-							Intrusive_list_column<matrix_z5_ra<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Intrusive_set_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Intrusive_set_boundary_column<Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Intrusive_set_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Intrusive_set_boundary_column<Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z5_ra<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z5_ra_i<Column_types::INTRUSIVE_SET, true, false> >,
+							Intrusive_set_column<matrix_z5_ra_i<Column_types::INTRUSIVE_SET, false, true> >,
+							Intrusive_set_column<matrix_z5_ra<Column_types::INTRUSIVE_SET, true, false> >,
+							Intrusive_set_column<matrix_z5_ra<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_5_columns_with_row;
 
-typedef boost::mpl::list</* Z2_list_column<matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
-							Z2_vector_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
-							Z2_list_boundary_column<matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
-							Z2_vector_boundary_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
-							Z2_list_column<matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
-							Z2_set_column<matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
-							Z2_list_boundary_column<matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
-							Z2_set_boundary_column<matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_boundary_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_boundary_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z2_ra_i<Column_types::LIST, true, false> >,
+							List_column<matrix_z2_ra_i<Column_types::LIST, false, true> >,
+							List_column<matrix_z2_ra<Column_types::LIST, true, false> >,
+							List_column<matrix_z2_ra<Column_types::LIST, false, true> >,
+							Set_column<matrix_z2_ra<Column_types::SET, true, false> >,
+							Set_column<matrix_z2_ra<Column_types::SET, false, true> >,
+							// Z2_vector_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Z2_vector_boundary_column<matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Z2_unordered_set_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
+							// Z2_unordered_set_boundary_column<matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_boundary_column<matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z2_ra_i<Column_types::INTRUSIVE_LIST, true, false> >,
 							Intrusive_list_column<matrix_z2_ra_i<Column_types::INTRUSIVE_LIST, false, true> >,
 							Intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST, true, false> >,
-							Intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST, false, true> >/* ,
-							Z2_intrusive_set_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Z2_intrusive_set_boundary_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Z2_intrusive_set_column<matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Z2_intrusive_set_boundary_column<matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST, false, true> >,
+							Intrusive_set_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET, true, false> >,
+							Intrusive_set_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET, false, true> >,
+							Intrusive_set_column<matrix_z2_ra<Column_types::INTRUSIVE_SET, true, false> >,
+							Intrusive_set_column<matrix_z2_ra<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_2_columns_with_row;
 
-typedef boost::mpl::list</* List_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::LIST>::Cell_type, matrix_z5_ra_i<Column_types::LIST>::Row_access_option>,
-							Vector_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
-							List_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::LIST>::Cell_type, matrix_z5_ra<Column_types::LIST>::Row_access_option>,
-							Set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::SET>::Cell_type, matrix_z5_ra<Column_types::SET>::Row_access_option>,
-							Unordered_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z5_ra_i<Column_types::LIST, false, false> >,
+							List_column<matrix_z5_ra<Column_types::LIST, false, false> >,
+							Set_column<matrix_z5_ra<Column_types::SET, false, false> >,
+							// Vector_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::VECTOR>::Cell_type, matrix_z5_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Unordered_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z5_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::VECTOR>::Cell_type, matrix_z5_ra<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z5_ra_i<Column_types::INTRUSIVE_LIST, false, false> >,
-							Intrusive_list_column<matrix_z5_ra<Column_types::INTRUSIVE_LIST, false, false> >/* ,
-							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Intrusive_set_chain_column<dict_type, Z5, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5_ra<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z5_ra<Column_types::INTRUSIVE_LIST, false, false> >,
+							Intrusive_set_column<matrix_z5_ra_i<Column_types::INTRUSIVE_SET, false, false> >,
+							Intrusive_set_column<matrix_z5_ra<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_5_chain_columns_with_row;
 
-typedef boost::mpl::list</* Z2_list_chain_column<dict_type, matrix_z2_ra_i<Column_types::LIST>::Cell_type, matrix_z2_ra_i<Column_types::LIST>::Row_access_option>,
-							Z2_vector_chain_column<dict_type, matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
-							Z2_list_chain_column<dict_type, matrix_z2_ra<Column_types::LIST>::Cell_type, matrix_z2_ra<Column_types::LIST>::Row_access_option>,
-							Z2_set_chain_column<dict_type, matrix_z2_ra<Column_types::SET>::Cell_type, matrix_z2_ra<Column_types::SET>::Row_access_option>,
-							Z2_unordered_set_chain_column<dict_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
-							Z2_vector_chain_column<dict_type, matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z2_ra_i<Column_types::LIST, false, false> >,
+							List_column<matrix_z2_ra<Column_types::LIST, false, false> >,
+							Set_column<matrix_z2_ra<Column_types::SET, false, false> >,
+							// Z2_vector_chain_column<dict_type, matrix_z2_ra_i<Column_types::VECTOR>::Cell_type, matrix_z2_ra_i<Column_types::VECTOR>::Row_access_option>,
+							// Z2_unordered_set_chain_column<dict_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Cell_type, matrix_z2_ra<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Z2_vector_chain_column<dict_type, matrix_z2_ra<Column_types::VECTOR>::Cell_type, matrix_z2_ra<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z2_ra_i<Column_types::INTRUSIVE_LIST, false, false> >,
-							Intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST, false, false> >/* ,
-							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra_i<Column_types::INTRUSIVE_SET>::Row_access_option>,
-							Z2_intrusive_set_chain_column<dict_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2_ra<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z2_ra<Column_types::INTRUSIVE_LIST, false, false> >,
+							Intrusive_set_column<matrix_z2_ra_i<Column_types::INTRUSIVE_SET, false, false> >,
+							Intrusive_set_column<matrix_z2_ra<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_2_chain_columns_with_row;
 
 ////////////// PAIRING //////////////
 
-typedef boost::mpl::list</* List_chain_column<dict_type, Z5, matrix_z5<Column_types::LIST>::Cell_type, matrix_z5<Column_types::LIST>::Row_access_option>,
-							Set_chain_column<dict_type, Z5, matrix_z5<Column_types::SET>::Cell_type, matrix_z5<Column_types::SET>::Row_access_option>,
-							Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
-							Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>, */
+typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, false> >,
+							Set_column<matrix_z5<Column_types::SET, false, false> >,
+							// Unordered_set_chain_column<dict_type, Z5, matrix_z5<Column_types::UNORDERED_SET>::Cell_type, matrix_z5<Column_types::UNORDERED_SET>::Row_access_option>,
+							// Vector_chain_column<dict_type, Z5, matrix_z5<Column_types::VECTOR>::Cell_type, matrix_z5<Column_types::VECTOR>::Row_access_option>,
 							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, false> >,
-							// Intrusive_set_chain_column<dict_type, Z5, matrix_z5<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z5<Column_types::INTRUSIVE_SET>::Row_access_option>,
+							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, false> >,
 							// Z2_heap_chain_column<dict_type>,
-							// Z2_list_chain_column<dict_type, matrix_z2<Column_types::LIST>::Cell_type, matrix_z2<Column_types::LIST>::Row_access_option>,
-							// Z2_set_chain_column<dict_type, matrix_z2<Column_types::SET>::Cell_type, matrix_z2<Column_types::SET>::Row_access_option>,
+							List_column<matrix_z2<Column_types::LIST, false, false> >,
+							Set_column<matrix_z2<Column_types::SET, false, false> >,
 							// Z2_unordered_set_chain_column<dict_type, matrix_z2<Column_types::UNORDERED_SET>::Cell_type, matrix_z2<Column_types::UNORDERED_SET>::Row_access_option>,
 							// Z2_vector_chain_column<dict_type, matrix_z2<Column_types::VECTOR>::Cell_type, matrix_z2<Column_types::VECTOR>::Row_access_option>, */
-							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, false> >/* ,
-							Z2_intrusive_set_chain_column<dict_type, matrix_z2<Column_types::INTRUSIVE_SET>::Cell_type, matrix_z2<Column_types::INTRUSIVE_SET>::Row_access_option> */
+							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, false, false> >,
+							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_chain_pairing_columns;
 
 template<class Column>
@@ -1081,7 +1092,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_types_methods, Column, list_of_5_b
 
 	std::vector<unsigned int> permutation{0,5,2,3,1,4,6};
 	col3.reorder(permutation);
-	res = col3.get_content(7);
+	res = col3.get_content(9);
 	BOOST_CHECK_EQUAL(res[0], 4u);
 	BOOST_CHECK_EQUAL(res[1], 0u);
 	BOOST_CHECK_EQUAL(res[2], 1u);
@@ -1089,6 +1100,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_types_methods, Column, list_of_5_b
 	BOOST_CHECK_EQUAL(res[4], 1u);
 	BOOST_CHECK_EQUAL(res[5], 2u);
 	BOOST_CHECK_EQUAL(res[6], 1u);
+	BOOST_CHECK_EQUAL(res[7], 0u);
+	BOOST_CHECK_EQUAL(res[8], 0u);
 
 	BOOST_CHECK_EQUAL(col3.get_pivot(), 6);
 	BOOST_CHECK_EQUAL(col3.get_pivot_value(), 1u);
@@ -1170,21 +1183,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_column_types_methods, Column, list_of_5_chai
 	matrix.push_back(Column(std::vector<std::pair<unsigned int,Z5> >{{0,Z5(4)}, {1,Z5(3)}}, 4));
 	matrix.push_back(Column(std::vector<std::pair<unsigned int,Z5> >{{1,Z5(2)},{2,Z5(4)}}, 4));
 	matrix.push_back(Column(std::vector<std::pair<unsigned int,Z5> >{{0,Z5(2)},{2,Z5(3)},{3,Z5(1)}}, 4));
-	matrix.push_back(Column());
 	matrix.push_back(matrix[0]);
 
 	BOOST_CHECK_EQUAL(matrix[0].get_pivot(), 0);
 	BOOST_CHECK_EQUAL(matrix[1].get_pivot(), 1);
 	BOOST_CHECK_EQUAL(matrix[2].get_pivot(), 2);
 	BOOST_CHECK_EQUAL(matrix[3].get_pivot(), 3);
-	BOOST_CHECK_EQUAL(matrix[4].get_pivot(), -1);
-	BOOST_CHECK_EQUAL(matrix[5].get_pivot(), 0);
+	BOOST_CHECK_EQUAL(matrix[4].get_pivot(), 0);
 	BOOST_CHECK_EQUAL(matrix[0].get_pivot_value(), 1u);
 	BOOST_CHECK_EQUAL(matrix[1].get_pivot_value(), 3u);
 	BOOST_CHECK_EQUAL(matrix[2].get_pivot_value(), 4u);
 	BOOST_CHECK_EQUAL(matrix[3].get_pivot_value(), 1u);
-	BOOST_CHECK_EQUAL(matrix[4].get_pivot_value(), 0u);
-	BOOST_CHECK_EQUAL(matrix[5].get_pivot_value(), 1u);
+	BOOST_CHECK_EQUAL(matrix[4].get_pivot_value(), 1u);
 
 	matrix[0] += matrix[1];
 
@@ -1201,15 +1211,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_column_types_methods, Column, list_of_2_c
 	matrix.push_back(Column(std::vector<unsigned int>{0,1}, 4));
 	matrix.push_back(Column(std::vector<unsigned int>{1,2}, 4));
 	matrix.push_back(Column(std::vector<unsigned int>{0,2,3}, 4));
-	matrix.push_back(Column());
 	matrix.push_back(matrix[0]);
 
 	BOOST_CHECK_EQUAL(matrix[0].get_pivot(), 0);
 	BOOST_CHECK_EQUAL(matrix[1].get_pivot(), 1);
 	BOOST_CHECK_EQUAL(matrix[2].get_pivot(), 2);
 	BOOST_CHECK_EQUAL(matrix[3].get_pivot(), 3);
-	BOOST_CHECK_EQUAL(matrix[4].get_pivot(), -1);
-	BOOST_CHECK_EQUAL(matrix[5].get_pivot(), 0);
+	BOOST_CHECK_EQUAL(matrix[4].get_pivot(), 0);
 
 	matrix[0] += matrix[1];
 

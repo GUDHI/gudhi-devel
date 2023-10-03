@@ -411,14 +411,14 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z2,Column_types::INTRUSIVE_LIST> >
 						> list_of_matrix_types;
 
-typedef boost::mpl::list</* Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
-							Matrix<opt_b_ra_r<Z2,Column_types::SET> >, */
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
@@ -429,20 +429,20 @@ typedef boost::mpl::list</* Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z5,Column_types::SET> >,
-							// Matrix<opt_ra<Z2,Column_types::SET> >,
+							Matrix<opt_ra<Z5,Column_types::SET> >,
+							Matrix<opt_ra<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
-							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >/* ,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_r<Z5,Column_types::SET> >,
-							Matrix<opt_ra_r<Z2,Column_types::SET> > */
+							Matrix<opt_ra_r<Z2,Column_types::SET> >
 						> list_of_matrix_types2;
 
 template<class Matrix>
@@ -520,14 +520,14 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
@@ -681,20 +681,20 @@ typedef boost::mpl::list<Matrix<opt_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z5,Column_types::SET> >,
-							// Matrix<opt_ra<Z2,Column_types::SET> >,
+							Matrix<opt_ra<Z5,Column_types::SET> >,
+							Matrix<opt_ra<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
-							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >/* ,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_r<Z5,Column_types::SET> >,
-							Matrix<opt_ra_r<Z2,Column_types::SET> > */
+							Matrix<opt_ra_r<Z2,Column_types::SET> >
 						> list_of_chain_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_methods, Matrix, list_of_chain_matrix_types) {
@@ -770,10 +770,10 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
@@ -783,10 +783,10 @@ typedef boost::mpl::list<Matrix<opt_b_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
@@ -953,26 +953,26 @@ typedef boost::mpl::list<Matrix<opt_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z2,Column_types::SET> >,
+							Matrix<opt_ra<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
-							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >/* ,
-							Matrix<opt_ra_r<Z2,Column_types::SET> > */
+							Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z2,Column_types::SET> >
 						> list_of_Z2_chain_matrix_types;
 typedef boost::mpl::list<Matrix<opt_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_p<Z5,Column_types::SET> >,
 							Matrix<opt_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z5,Column_types::SET> >,
+							Matrix<opt_ra<Z5,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
-							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >/* ,
-							Matrix<opt_ra_r<Z5,Column_types::SET> > */
+							Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z5,Column_types::SET> >
 						> list_of_Z5_chain_matrix_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_matrix_methods, Matrix, list_of_Z2_chain_matrix_types) {
@@ -1062,13 +1062,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z5_chain_matrix_methods, Matrix, list_of_Z5_chain_
 }
 
 typedef boost::mpl::list<Matrix<opt_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_p<Z5,Column_types::SET> >,
 							Matrix<opt_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z5,Column_types::SET> >,
+							Matrix<opt_ra<Z5,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
-							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >/* ,
-							Matrix<opt_ra_r<Z5,Column_types::SET> > */
+							Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z5,Column_types::SET> >
 						> list_of_z5_chain_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_row_access_columns_options, Matrix, list_of_z5_chain_options_with_row_access) {
@@ -1109,13 +1109,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_row_access_columns_options, Matrix, list_of_
 }
 
 typedef boost::mpl::list<Matrix<opt_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra<Z2,Column_types::SET> >,
+							Matrix<opt_ra<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
-							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >/* ,
-							Matrix<opt_ra_r<Z2,Column_types::SET> > */
+							Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
+							Matrix<opt_ra_r<Z2,Column_types::SET> >
 						> list_of_z2_chain_options_with_row_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_row_access_columns_options, Matrix, list_of_z2_chain_options_with_row_access) {
@@ -1154,10 +1154,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_chain_row_access_columns_options, Matrix, list_
 	}
 }
 
-typedef boost::mpl::list</* Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
-							Matrix<opt_b_ra_r<Z5,Column_types::SET> >, */
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
@@ -1200,10 +1200,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_row_access_columns_options, Matrix, list_of_z
 	}
 }
 
-typedef boost::mpl::list</* Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
+typedef boost::mpl::list<Matrix<opt_b_ra_p<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
-							Matrix<opt_b_ra_r<Z2,Column_types::SET> >, */
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_i_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
@@ -1247,12 +1247,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Z2_base_row_access_columns_options, Matrix, list_o
 
 typedef boost::mpl::list<Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_ra_r_p<Z2,Column_types::SET> >,
 							Matrix<opt_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_ra_r<Z5,Column_types::SET> >,
-							// Matrix<opt_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_r<Z5,Column_types::INTRUSIVE_LIST> >,
@@ -1265,12 +1265,12 @@ typedef boost::mpl::list<Matrix<opt_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_r<Z2,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z5,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z5,Column_types::SET> >,
 							Matrix<opt_b_ra_i_r_p<Z5,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r<Z5,Column_types::INTRUSIVE_LIST> >,
-							// Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
-							// Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r_p<Z2,Column_types::SET> >,
+							Matrix<opt_b_ra_r<Z2,Column_types::SET> >,
 							Matrix<opt_b_ra_i_r_p<Z2,Column_types::INTRUSIVE_LIST> >,
 							Matrix<opt_b_ra_i_r<Z2,Column_types::INTRUSIVE_LIST> >
 						> list_of_options_with_remove;
