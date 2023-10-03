@@ -16,10 +16,7 @@
 #include <gudhi/Simplex_tree/multi_filtrations/Line.h>
 
 namespace Gudhi::multiparameter {
-/** Model of SimplexTreeOptions.
- *
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
+/** Model of SimplexTreeOptions, with a multiparameter filtration. */
 struct Simplex_tree_options_multidimensional_filtration {
  public:
   typedef linear_indexing_tag Indexing_tag;
@@ -44,10 +41,15 @@ using multi_filtration_type = std::vector<options_multi::value_type>;
 using multi_filtration_grid = std::vector<multi_filtration_type>;
 
 /**
- * \brief Turns a 1-parameter simplextree into a multiparameter simplextree, and keeps the 1-filtration in the 1st axis.
- * Default values can be specified. \ingroup multiparameter \tparam simplextree_std A non-multi simplextree \tparam
- * simplextree_multi A multi simplextree \param st Simplextree to copy \param st_multi Multiparameter simplextree
- * container to fill. \param default_values If given, this vector is assume to be of size `num_parameters-1` and
+ * \brief Turns a 1-parameter simplextree into a multiparameter simplextree, 
+ * and keeps the 1-filtration in the 1st axis.
+ * Default values can be specified. 
+ * \ingroup multiparameter 
+ * \tparam simplextree_std A non-multi simplextree 
+ * \tparam simplextree_multi A multi simplextree 
+ * \param st Simplextree to copy 
+ * \param st_multi Multiparameter simplextree container to fill. 
+ * \param default_values If given, this vector is assume to be of size `num_parameters-1` and
  * contains the default values of axes `1` to `num_parameters`.
  * */
 template <class simplextree_std, class simplextree_multi>
@@ -116,10 +118,14 @@ void linear_projection(simplextree_std &st, simplextree_multi &st_multi,
 
 /**
  * \brief Pushes the filtration values of a multiparameter simplextree to a diagonal line, to get a 1 parameter
- * simplextree. \ingroup multiparameter \tparam simplextree_std A non-multi simplextree \tparam simplextree_multi A
- * multi simplextree \param st Simplextree to fill. \param st_multi Multiparameter simplextree to convert into a 1
- * parameter simplex tree. \param basepoint The basepoint of the diagonal line. \param dimension The coordinate of the
- * line to choose as a 1 parameter filtration (they are all equivalent).
+ * simplextree. 
+ * \ingroup multiparameter 
+ * \tparam simplextree_std A non-multi simplextree 
+ * \tparam simplextree_multi A multiparameter simplextree 
+ * \param st Simplextree to fill. 
+ * \param st_multi Multiparameter simplextree to convert into a 1 parameter simplex tree. 
+ * \param basepoint The basepoint of the diagonal line. 
+ * \param dimension The coordinate of the line to choose as a 1 parameter filtration (they are all equivalent).
  * */
 template <class simplextree_std, class simplextree_multi>
 void flatten_diag(simplextree_std &st, simplextree_multi &st_multi,
@@ -180,14 +186,14 @@ inline void find_coordinates(vector_like &x, const multi_filtration_grid &grid) 
 /**
  * \brief Pushes all of the filtration values of a simplextree onto a grid, c.f. \ref find_coordinates.
  * \ingroup multiparameter
- * \param splxptr Simplextree pointer.
+ * \param st_multi Multiparameter simplex tree to squeeze on the grid.
  * \param grid The multiparameter grid. A vector of size `num_parameters`,
  * whose elements are the elements of the grid for this axis.
  * \param coordinate_values If set to true the filtration values will be turned into coordinates in this grid
  * instead of points in this grid.
  * */
-void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bool coordinate_values = true) {
-  Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi> *)(splxptr);
+template <class simplextree_multi>
+void squeeze_filtration(simplextree_multi& st_multi, const multi_filtration_grid &grid, bool coordinate_values = true) {
   auto num_parameters = static_cast<unsigned int>(st_multi.get_number_of_parameters());
   if (grid.size() != num_parameters) {
     std::cerr << "Bad grid !" << std::endl;
@@ -206,13 +212,15 @@ void squeeze_filtration(uintptr_t splxptr, const multi_filtration_grid &grid, bo
 
 // retrieves the filtration values of a simplextree. Useful to generate a grid.
 /**
- * \brief Retrieves all of the filtration values, for each simplex dimension, of the simplextree. Useful to generate
- * grids. \ingroup multiparameter \param splxptr Simplextree pointer. whose elements are the elements of the grid for
- * this axis. \param degrees Only the simpleces of these dimension will be taken into account. Useful for, e.g., Rips
+ * \brief Retrieves all of the filtration values, for each simplex dimension, of the simplextree. 
+ * Useful to generate grids. 
+ * \ingroup multiparameter 
+ * \param st_multi Simplextree on which filtration values are exctracted.
+ * \param degrees Only the simpleces of these dimension will be taken into account. Useful for, e.g., Rips
  * filtrations.
  * */
-std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr, const std::vector<int> &degrees) {
-  Simplex_tree<options_multi> &st_multi = *(Gudhi::Simplex_tree<options_multi> *)(splxptr);
+template <class simplextree_multi>
+std::vector<multi_filtration_grid> get_filtration_values(simplextree_multi& st_multi, const std::vector<int> &degrees) {
   int num_parameters = st_multi.get_number_of_parameters();
   std::vector<multi_filtration_grid> out(degrees.size(), multi_filtration_grid(num_parameters));
   std::vector<int> degree_index(degrees.size());
