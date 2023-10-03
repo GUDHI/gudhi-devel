@@ -235,24 +235,4 @@ std::vector<multi_filtration_grid> get_filtration_values(const uintptr_t splxptr
 
 }  // namespace Gudhi::multiparameter
 
-namespace std {
-
-template <>
-class numeric_limits<Gudhi::multiparameter::multi_filtration_type> {
- public:
-  static Gudhi::multiparameter::multi_filtration_type infinity() throw() {
-    return Gudhi::multiparameter::multi_filtration_type(
-        1, std::numeric_limits<
-               Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration::value_type>::infinity());
-  };
-
-  static Gudhi::multiparameter::multi_filtration_type quiet_NaN() throw() {
-    return Gudhi::multiparameter::multi_filtration_type(
-        1, numeric_limits<
-               Gudhi::multiparameter::Simplex_tree_options_multidimensional_filtration::value_type>::quiet_NaN());
-  };
-};
-
-}  // namespace std
-
 #endif  // SIMPLEX_TREE_MULTI_H_
