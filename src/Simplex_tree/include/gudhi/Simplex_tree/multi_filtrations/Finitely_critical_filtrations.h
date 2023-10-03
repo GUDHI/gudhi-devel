@@ -168,4 +168,23 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
 };
 
 }  // namespace Gudhi::multiparameter::multi_filtrations
+
+namespace std {
+
+template<typename T>
+class numeric_limits<Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>>
+{
+public:
+	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> infinity() throw(){
+		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::infinity());
+	};
+
+	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> quiet_NaN() throw(){
+		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, numeric_limits<T>::quiet_NaN());
+	};
+
+};
+
+}
+
 #endif  // FINITELY_CRITICAL_FILTRATIONS_H_
