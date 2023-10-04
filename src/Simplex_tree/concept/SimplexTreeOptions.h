@@ -31,7 +31,7 @@ struct SimplexTreeOptions {
   static const bool link_nodes_by_label;
   /// If true, Simplex_handle will not be invalidated after insertions or removals.
   static const bool stable_simplex_handles;
-  /// If true, assumes that Filtration_value is vector-like instead of float-like. This also assumes that SimplexTreeOptions::Filtration_value is a class, which has a `push_to` method to push a filtration value \f$x\f$ onto \f$this>=0\f$. 
+  /// If true, assumes that SimplexTreeOptions::Filtration_value is vector-like instead of float-like. This also assumes that SimplexTreeOptions::Filtration_value is a class, which has a `push_to` method to push a filtration value \f$x\f$ onto \f$\mathrm{this} \geq 0\f$. 
   static const bool is_multi_parameter;
 };
 
