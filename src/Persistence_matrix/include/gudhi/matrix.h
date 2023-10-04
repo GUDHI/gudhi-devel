@@ -81,41 +81,44 @@
 #include "Persistence_matrix/columns/intrusive_set_column.h"
 #include "Persistence_matrix/columns/list_column.h"
 #include "Persistence_matrix/columns/set_column.h"
+#include "Persistence_matrix/columns/unordered_set_column.h"
+#include "Persistence_matrix/columns/vector_column.h"
+#include "Persistence_matrix/columns/naive_vector_column.h"
 // #include "gudhi/column_types/list_column.h"
 // #include "gudhi/column_types/set_column.h"
-#include "gudhi/column_types/unordered_set_column.h"
-#include "gudhi/column_types/vector_column.h"
+// #include "gudhi/column_types/unordered_set_column.h"
+// #include "gudhi/column_types/vector_column.h"
 #include "gudhi/column_types/z2_heap_column.h"
 // #include "gudhi/column_types/z2_list_column.h"
 // #include "gudhi/column_types/z2_set_column.h"
-#include "gudhi/column_types/z2_unordered_set_column.h"
-#include "gudhi/column_types/z2_vector_column.h"
+// #include "gudhi/column_types/z2_unordered_set_column.h"
+// #include "gudhi/column_types/z2_vector_column.h"
 // #include "gudhi/column_types/intrusive_list_column.h"
 // #include "gudhi/column_types/intrusive_set_column.h"
 // #include "gudhi/column_types/z2_intrusive_list_column.h"
 // #include "gudhi/column_types/z2_intrusive_set_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_list_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_set_column.h"
-#include "gudhi/column_types/boundary_columns/boundary_unordered_set_column.h"
-#include "gudhi/column_types/boundary_columns/boundary_vector_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_unordered_set_column.h"
+// #include "gudhi/column_types/boundary_columns/boundary_vector_column.h"
 #include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_list_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_set_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_vector_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_vector_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_intrusive_list_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_intrusive_set_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_list_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_intrusive_set_column.h"
 // #include "gudhi/column_types/chain_columns/chain_list_column.h"
 // #include "gudhi/column_types/chain_columns/chain_set_column.h"
-#include "gudhi/column_types/chain_columns/chain_unordered_set_column.h"
-#include "gudhi/column_types/chain_columns/chain_vector_column.h"
+// #include "gudhi/column_types/chain_columns/chain_unordered_set_column.h"
+// #include "gudhi/column_types/chain_columns/chain_vector_column.h"
 #include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_list_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_set_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_vector_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_vector_column.h"
 // #include "gudhi/column_types/chain_columns/chain_intrusive_list_column.h"
 // #include "gudhi/column_types/chain_columns/chain_intrusive_set_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_intrusive_list_column.h"
@@ -213,14 +216,6 @@ public:
 		}
 	};
 
-	template<class Cell_type>
-	struct CellPointerComp {
-		bool operator()(const Cell_type* c1, const Cell_type* c2) const
-		{
-			return *c1 < *c2;
-		}
-	};
-
 	using Row_type = typename std::conditional<
 								Options::has_intrusive_rows,
 								boost::intrusive::list<Cell_type, boost::intrusive::constant_time_size<false>, boost::intrusive::base_hook<base_hook_matrix_row> >,
@@ -278,55 +273,11 @@ public:
 										>::type;
 
 	using List_column_type = List_column<Matrix<Options> >;
-
-	using Vector_column_type = typename std::conditional<
-											isNonBasic,
-											typename std::conditional<
-												Options::is_of_boundary_type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_vector_boundary_column<Cell_type, Row_access_option>,
-													Vector_boundary_column<Field_type, Cell_type, Row_access_option>
-												>::type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_vector_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
-													Vector_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
-												>::type
-											>::type,
-											typename std::conditional<
-												Options::is_z2,
-												Z2_vector_column<Cell_type, Row_access_option>,
-												Vector_column<Field_type, Cell_type, Row_access_option>
-											>::type
-										>::type;
-
+	using Vector_column_type = Vector_column<Matrix<Options> >;
+	using Naive_vector_column_type = Naive_vector_column<Matrix<Options> >;
 	using Set_column_type = Set_column<Matrix<Options> >;
-
-	using Unordered_set_column_type = typename std::conditional<
-											isNonBasic,
-											typename std::conditional<
-												Options::is_of_boundary_type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_unordered_set_boundary_column<Cell_type, Row_access_option>,
-													Unordered_set_boundary_column<Field_type, Cell_type, Row_access_option>
-												>::type,
-												typename std::conditional<
-													Options::is_z2,
-													Z2_unordered_set_chain_column<dictionnary_type<index>, Cell_type, Row_access_option>,
-													Unordered_set_chain_column<dictionnary_type<index>, Field_type, Cell_type, Row_access_option>
-												>::type
-											>::type,
-											typename std::conditional<
-												Options::is_z2,
-												Z2_unordered_set_column<Cell_type, Row_access_option>,
-												Unordered_set_column<Field_type, Cell_type, Row_access_option>
-											>::type
-										>::type;
-
+	using Unordered_set_column_type = Unordered_set_column<Matrix<Options> >;
 	using Intrusive_list_column_type = Intrusive_list_column<Matrix<Options> >;
-
 	using Intrusive_set_column_type = Intrusive_set_column<Matrix<Options> >;
 
 	using Column_type = typename std::conditional<
@@ -347,7 +298,11 @@ public:
 												typename std::conditional<
 													Options::column_type == Column_types::INTRUSIVE_LIST,
 													Intrusive_list_column_type,
-													Intrusive_set_column_type
+													typename std::conditional<
+														Options::column_type == Column_types::NAIVE_VECTOR,
+														Naive_vector_column_type,
+														Intrusive_set_column_type
+													>::type
 												>::type
 											>::type
 										>::type
@@ -997,7 +952,7 @@ inline typename Matrix<Options>::index Matrix<Options>::vine_swap(index columnIn
 template<class Options>
 inline constexpr void Matrix<Options>::_assert_options()
 {
-	static_assert(!Options::has_row_access || (Options::column_type != Column_types::SET && Options::column_type != Column_types::UNORDERED_SET) || !Options::has_intrusive_rows, "Intrusive row access is not compatible with column types storing const elements.");
+	static_assert(!Options::has_row_access || (Options::column_type != Column_types::SET && Options::column_type != Column_types::UNORDERED_SET) || !Options::has_intrusive_rows, "Intrusive row access is not compatible with column types storing const elements.");	//eventually not true anymore as the columns contain now pointers and not directly cells.
 	static_assert(!Options::can_retrieve_representative_cycles || Options::has_column_pairings, "Representative cycles requires computation of the barcode (column pairing).");
 	static_assert(!Options::has_vine_update || Options::is_z2, "Vine update currently works only for Z_2 coefficients.");
 	static_assert(Options::column_type != Column_types::HEAP || !Options::has_row_access, "Row access is not possible for heap columns.");

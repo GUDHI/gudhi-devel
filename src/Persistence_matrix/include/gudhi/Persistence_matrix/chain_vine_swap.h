@@ -222,7 +222,7 @@ private:
 	BirthCompFuncPointer birthComp_;	// for F x F & H x H
 	DeathCompFuncPointer deathComp_;	// for G x G
 
-	bool _is_negative_in_pair(index columnIndex) const;
+	bool _is_negative_in_pair(index columnIndex);
 
 	index _positive_vine_swap(index columnIndex1, index columnIndex2);
 	index _positive_negative_vine_swap(index columnIndex1, index columnIndex2);
@@ -363,7 +363,7 @@ inline Chain_vine_swap<Master_matrix> &Chain_vine_swap<Master_matrix>::operator=
 }
 
 template<class Master_matrix>
-inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(index columnIndex) const
+inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(index columnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		return CP::is_negative_in_pair(_matrix()->get_pivot(columnIndex));

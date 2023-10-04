@@ -65,6 +65,7 @@ public:
 	std::vector<Field_element_type> get_content(int columnLength = -1) const;
 	bool is_non_zero(index rowIndex) const;
 	bool is_empty() const;
+	std::size_t size() const;
 
 	//****************
 	//only for base and boundary
@@ -377,6 +378,9 @@ Intrusive_list_column<Master_matrix>::get_content(int columnLength) const
 template<class Master_matrix>
 inline bool Intrusive_list_column<Master_matrix>::is_non_zero(index rowIndex) const
 {
+	//could be changed to dichotomic search as column is ordered by row index, 
+	//but I am not sure if it is really worth it as there is no random access
+	//and the columns should not be that long anyway.
 	for (const Cell& cell : column_)
 		if (cell.get_row_index() == rowIndex) return true;
 
@@ -387,6 +391,11 @@ template<class Master_matrix>
 inline bool Intrusive_list_column<Master_matrix>::is_empty() const
 {
 	return column_.empty();
+}
+
+template<class Master_matrix>
+inline std::size_t Intrusive_list_column<Master_matrix>::size() const{
+	return column_.size();
 }
 
 template<class Master_matrix>
