@@ -36,6 +36,7 @@ using Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtrati
 using vec=Finitely_critical_multi_filtration<float>;
 
 typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_multidimensional_filtration>> list_of_tested_variants;
+using typeST_STD = Simplex_tree<Simplex_tree_options_full_featured>;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
@@ -684,3 +685,42 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
 }
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST MULTIFY" << std::endl;
+ 
+  typeST_STD st;
+  typeST st_multi;
+  st.insert_simplex_and_subfaces({1,2,3}, 1.);
+  BOOST_CHECK(st.get_number_of_parameters() == 1);
+  int num_parameters = 3;
+  Gudhi::multiparameter::multify(st,st_multi,num_parameters,{2.,3.}); //fills st_multi by simplices of filtration [{st.filtration(sh)}, default_values[0],default_values[1], ...]
+  BOOST_CHECK(st_multi.get_number_of_parameters() == num_parameters); // num parameters is defined by multify
+  BOOST_CHECK(st_multi.num_simplices() == st.num_simplices()); // simplicial complexes should be the same
+  for (auto sh : st_multi.complex_simplex_range()){
+    const auto& filtration = st_multi.filtration(sh);
+    BOOST_CHECK(filtration == vec({1,2,3})); // Checks the filtration values
+  }
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST FLATTEN" << std::endl;
+
+  for (int dimension=0; dimension < 3; dimension++){
+    st.clear();
+    Gudhi::multiparameter::flatten(st, st_multi, dimension);
+    for (auto sh : st.complex_simplex_range()){
+      BOOST_CHECK(st.filtration(sh) == dimension +1);
+    }
+  }
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST LINEAR PROJECTION" << std::endl;
+  // st has already the same simplicial complex as st_multi, and the filtration values of st_multi are all {1,2,3}
+  Gudhi::multiparameter::linear_projection(st,st_multi,{17,37,73}); // sets the filtration values of st to the dot product of st_multi.filtration and {17,37,73}.
+  for (auto sh : st.complex_simplex_range()){
+    BOOST_CHECK(st.filtration(sh) == 1*17 + 2*37 + 3*73);
+  }
+}
+
+
