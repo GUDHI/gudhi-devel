@@ -69,6 +69,7 @@ void multify(simplextree_std &st, simplextree_multi &st_multi, const int num_par
     if (num_parameters > 0) f[0] = st.filtration(simplex_handle);
     st_multi.insert_simplex(simplex, f);
   }
+  st_multi.set_number_of_parameters(num_parameters);
 }
 
 /**
