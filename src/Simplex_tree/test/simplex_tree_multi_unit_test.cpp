@@ -930,7 +930,7 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi) {
 
   filt = st.filtration(st.find({3, 0}));
   std::clog << "filtration([3,0]) = " << filt << std::endl;
-  BOOST_CHECK(filt == Multi_Filtration_values({3., 4.}));
+  BOOST_CHECK(filt == Multi_Filtration_values({5., 4.}));
 }
 
 BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi_nan_values) {

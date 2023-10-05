@@ -1630,7 +1630,7 @@ class Simplex_tree {
       Filtration_value max_filt_border_value;
       if constexpr (SimplexTreeOptions::is_multi_parameter) {
         // in that case, we assume that Filtration_value has a `push_to` member to handle this.
-        max_filt_border_value = Filtration_value(*number_of_parameters_); // is multiparam
+        max_filt_border_value = Filtration_value(*number_of_parameters_); 
         for (auto& face_sh : boundary) {
           max_filt_border_value.push_to(
               filtration(face_sh));  // pushes the value of max_filt_border_value to reach simplex' filtration
@@ -1647,7 +1647,13 @@ class Simplex_tree {
       if (!(sh->second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
-        sh->second.assign_filtration(max_filt_border_value);
+        if constexpr (Options::is_multi_parameter){
+          auto& to_increase_filtration = filtration_mutable(sh);
+          to_increase_filtration.push_to(max_filt_border_value);
+        }
+        else{
+         sh->second.assign_filtration(max_filt_border_value);
+        }
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
