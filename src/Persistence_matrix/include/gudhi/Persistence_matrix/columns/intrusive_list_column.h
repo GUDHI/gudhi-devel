@@ -710,6 +710,8 @@ Intrusive_list_column<Master_matrix>::operator=(const Intrusive_list_column& oth
 
 	dim_opt::operator=(other);
 	chain_opt::operator=(other);
+
+	column_.clear_and_dispose(delete_disposer(this));
 	column_.clone_from(other.column_, new_cloner(), delete_disposer(this));
 	return *this;
 }

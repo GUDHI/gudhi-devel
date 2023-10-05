@@ -708,10 +708,20 @@ List_column<Master_matrix>::operator=(const List_column& other)
 
 	dim_opt::operator=(other);
 	chain_opt::operator=(other);
+
+	while (column_.size() > other.column_.size()) {
+		if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(column_.back());
+		cellPool_.destroy(column_.back());
+		column_.pop_back();
+	}
 	
-	column_.resize(other.column_.size());
+	column_.resize(other.column_.size(), nullptr);
 	auto it = column_.begin();
 	for (const Cell* cell : other.column_){
+		if (*it != nullptr){
+			if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(*it);
+			cellPool_.destroy(*it);
+		}
 		if constexpr (Master_matrix::Option_list::is_z2){
 			_update_cell(cell->get_row_index(), it++);
 		} else {

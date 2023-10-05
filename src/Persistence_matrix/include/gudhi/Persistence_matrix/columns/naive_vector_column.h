@@ -706,10 +706,20 @@ Naive_vector_column<Master_matrix>::operator=(const Naive_vector_column& other)
 
 	dim_opt::operator=(other);
 	chain_opt::operator=(other);
+
+	while (column_.size() > other.column_.size()) {
+		if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(column_.back());
+		cellPool_.destroy(column_.back());
+		column_.pop_back();
+	}
 	
-	column_.resize(other.column_.size());
+	column_.resize(other.column_.size(), nullptr);
 	unsigned int i = 0;
 	for (const Cell* cell : other.column_){
+		if (column_[i] != nullptr){
+			if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(column_[i]);
+			cellPool_.destroy(column_[i]);
+		}
 		if constexpr (Master_matrix::Option_list::is_z2){
 			_update_cell(cell->get_row_index(), i++);
 		} else {
@@ -736,8 +746,7 @@ inline void Naive_vector_column<Master_matrix>::_insert_cell(
 		column.push_back(new_cell);
 		ra_opt::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = cellPool_.construct(value, rowIndex);
-		column.push_back(new_cell);
+		column.push_back(cellPool_.construct(value, rowIndex));
 	}
 }
 
@@ -750,8 +759,7 @@ inline void Naive_vector_column<Master_matrix>::_insert_cell(
 		column.push_back(new_cell);
 		ra_opt::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = cellPool_.construct(rowIndex);
-		column.push_back(new_cell);
+		column.push_back(cellPool_.construct(rowIndex));
 	}
 }
 

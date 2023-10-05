@@ -238,9 +238,9 @@ typedef boost::mpl::list<Matrix<opt_bar_b<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_bar<Z2,Column_types::LIST> >,
 							Matrix<opt_bar<Z5,Column_types::LIST> >,
 							Matrix<opt_bar_r<Z2,Column_types::LIST> >,
-							Matrix<opt_bar_r<Z5,Column_types::LIST> >/* ,
+							Matrix<opt_bar_r<Z5,Column_types::LIST> >,
 							Matrix<opt_bar_b<Z2,Column_types::HEAP> >,
-							Matrix<opt_bar_b_r<Z2,Column_types::HEAP> > */
+							Matrix<opt_bar_b_r<Z2,Column_types::HEAP> >
 						> list_of_options_with_barcode_access;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Barcode_options, Matrix, list_of_options_with_barcode_access) {
@@ -358,9 +358,9 @@ typedef boost::mpl::list<Matrix<opt_rep_b<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_rep<Z2,Column_types::LIST> >,
 							Matrix<opt_rep<Z5,Column_types::LIST> >,
 							Matrix<opt_rep_r<Z2,Column_types::LIST> >,
-							Matrix<opt_rep_r<Z5,Column_types::LIST> >/* ,
+							Matrix<opt_rep_r<Z5,Column_types::LIST> >,
 							Matrix<opt_rep_b<Z2,Column_types::HEAP> >,
-							Matrix<opt_rep_b_r<Z2,Column_types::HEAP> > */
+							Matrix<opt_rep_b_r<Z2,Column_types::HEAP> >
 						> list_of_options_with_rep_cycles;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Representative_cycle_options, Matrix, list_of_options_with_rep_cycles) {
@@ -432,8 +432,8 @@ typedef boost::mpl::list<Matrix<opt_vine_b<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine_b_r<Z2,Column_types::VECTOR> >,
 							Matrix<opt_vine_b<Z2,Column_types::LIST> >,
 							Matrix<opt_vine_b_r<Z2,Column_types::LIST> >,
-							// Matrix<opt_vine_b<Z2,Column_types::HEAP> >,
-							// Matrix<opt_vine_b_r<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b_r<Z2,Column_types::HEAP> >,
 							Matrix<opt_vine_ii<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine_r_ii<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine_ii<Z2,Column_types::INTRUSIVE_LIST> >,
@@ -758,8 +758,8 @@ typedef boost::mpl::list<Matrix<opt_vine_b_ii<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine_b_r_ii<Z2,Column_types::VECTOR> >,
 							Matrix<opt_vine_b_ii<Z2,Column_types::LIST> >,
 							Matrix<opt_vine_b_r_ii<Z2,Column_types::LIST> >,
-							// Matrix<opt_vine_b_ii<Z2,Column_types::HEAP> >,
-							// Matrix<opt_vine_b_r_ii<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b_ii<Z2,Column_types::HEAP> >,
+							Matrix<opt_vine_b_r_ii<Z2,Column_types::HEAP> >,
 							Matrix<opt_vine<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine_r<Z2,Column_types::INTRUSIVE_SET> >,
 							Matrix<opt_vine<Z2,Column_types::INTRUSIVE_LIST> >,

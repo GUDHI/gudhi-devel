@@ -36,12 +36,14 @@
 #include "gudhi/Persistence_matrix/columns/set_column.h"
 #include "gudhi/Persistence_matrix/columns/unordered_set_column.h"
 #include "gudhi/Persistence_matrix/columns/vector_column.h"
+#include "gudhi/Persistence_matrix/columns/naive_vector_column.h"
+#include "gudhi/Persistence_matrix/columns/heap_column.h"
 
 // #include "gudhi/column_types/list_column.h"
 // #include "gudhi/column_types/set_column.h"
 // #include "gudhi/column_types/unordered_set_column.h"
 // #include "gudhi/column_types/vector_column.h"
-#include "gudhi/column_types/z2_heap_column.h"
+// #include "gudhi/column_types/z2_heap_column.h"
 // #include "gudhi/column_types/z2_list_column.h"
 // #include "gudhi/column_types/z2_set_column.h"
 // #include "gudhi/column_types/z2_unordered_set_column.h"
@@ -55,7 +57,7 @@
 // #include "gudhi/column_types/boundary_columns/boundary_set_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_unordered_set_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_vector_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_list_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_set_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
@@ -69,7 +71,7 @@
 // #include "gudhi/column_types/chain_columns/chain_set_column.h"
 // #include "gudhi/column_types/chain_columns/chain_unordered_set_column.h"
 // #include "gudhi/column_types/chain_columns/chain_vector_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_list_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_set_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
@@ -87,8 +89,8 @@ using Gudhi::persistence_matrix::List_column;
 using Gudhi::persistence_matrix::Set_column;
 using Gudhi::persistence_matrix::Unordered_set_column;
 using Gudhi::persistence_matrix::Vector_column;
+using Gudhi::persistence_matrix::Heap_column;
 
-using Gudhi::persistence_matrix::Z2_heap_column;
 // using Gudhi::persistence_matrix::Z2_list_column;
 // using Gudhi::persistence_matrix::Z2_set_column;
 // using Gudhi::persistence_matrix::Z2_unordered_set_column;
@@ -100,7 +102,7 @@ using Gudhi::persistence_matrix::Z2_heap_column;
 // using Gudhi::persistence_matrix::Set_boundary_column;
 // using Gudhi::persistence_matrix::Unordered_set_boundary_column;
 // using Gudhi::persistence_matrix::Vector_boundary_column;
-using Gudhi::persistence_matrix::Z2_heap_boundary_column;
+// using Gudhi::persistence_matrix::Z2_heap_boundary_column;
 // using Gudhi::persistence_matrix::Z2_list_boundary_column;
 // using Gudhi::persistence_matrix::Z2_set_boundary_column;
 // using Gudhi::persistence_matrix::Z2_unordered_set_boundary_column;
@@ -114,7 +116,7 @@ using Gudhi::persistence_matrix::Z2_heap_boundary_column;
 // using Gudhi::persistence_matrix::Set_chain_column;
 // using Gudhi::persistence_matrix::Unordered_set_chain_column;
 // using Gudhi::persistence_matrix::Vector_chain_column;
-using Gudhi::persistence_matrix::Z2_heap_chain_column;
+// using Gudhi::persistence_matrix::Z2_heap_chain_column;
 // using Gudhi::persistence_matrix::Z2_list_chain_column;
 // using Gudhi::persistence_matrix::Z2_set_chain_column;
 // using Gudhi::persistence_matrix::Z2_unordered_set_chain_column;
@@ -372,14 +374,14 @@ typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, true, false> 
 							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_5_columns;
 
-typedef boost::mpl::list</* Z2_heap_column, */
+typedef boost::mpl::list<Heap_column<matrix_z2<Column_types::HEAP, true, false> >,
 							List_column<matrix_z2<Column_types::LIST, true, false> >,
 							Set_column<matrix_z2<Column_types::SET, true, false> >,
 							Unordered_set_column<matrix_z2<Column_types::UNORDERED_SET, true, false> >,
 							Vector_column<matrix_z2<Column_types::VECTOR, true, false> >,
 							Intrusive_list_column<matrix_z2<Column_types::INTRUSIVE_LIST, true, false> >,
 							Intrusive_set_column<matrix_z2<Column_types::INTRUSIVE_SET, true, false> >,
-							// Z2_heap_boundary_column,
+							Heap_column<matrix_z2<Column_types::HEAP, false, true> >,
 							List_column<matrix_z2<Column_types::LIST, false, true> >,
 							Set_column<matrix_z2<Column_types::SET, false, true> >,
 							Unordered_set_column<matrix_z2<Column_types::UNORDERED_SET, false, true> >,
@@ -396,7 +398,7 @@ typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, true> 
 							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, true> >
 						> list_of_5_boundary_columns;
 
-typedef boost::mpl::list</* Z2_heap_boundary_column, */
+typedef boost::mpl::list<Heap_column<matrix_z2<Column_types::HEAP, false, true> >,
 							List_column<matrix_z2<Column_types::LIST, false, true> >,
 							Set_column<matrix_z2<Column_types::SET, false, true> >,
 							Unordered_set_column<matrix_z2<Column_types::UNORDERED_SET, false, true> >,
@@ -413,7 +415,7 @@ typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, false>
 							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, false> >
 						> list_of_5_chain_columns;
 
-typedef boost::mpl::list</* Z2_heap_chain_column<dict_type>, */
+typedef boost::mpl::list<Heap_column<matrix_z2<Column_types::HEAP, false, false> >,
 							List_column<matrix_z2<Column_types::LIST, false, false> >,
 							Set_column<matrix_z2<Column_types::SET, false, false> >,
 							Unordered_set_column<matrix_z2<Column_types::UNORDERED_SET, false, false> >,
@@ -500,7 +502,7 @@ typedef boost::mpl::list<List_column<matrix_z5<Column_types::LIST, false, false>
 							Vector_column<matrix_z5<Column_types::VECTOR, false, false> >,
 							Intrusive_list_column<matrix_z5<Column_types::INTRUSIVE_LIST, false, false> >,
 							Intrusive_set_column<matrix_z5<Column_types::INTRUSIVE_SET, false, false> >,
-							// Z2_heap_chain_column<dict_type>,
+							Heap_column<matrix_z2<Column_types::HEAP, false, false> >,
 							List_column<matrix_z2<Column_types::LIST, false, false> >,
 							Set_column<matrix_z2<Column_types::SET, false, false> >,
 							Unordered_set_column<matrix_z2<Column_types::UNORDERED_SET, false, false> >,

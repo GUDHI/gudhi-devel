@@ -84,11 +84,12 @@
 #include "Persistence_matrix/columns/unordered_set_column.h"
 #include "Persistence_matrix/columns/vector_column.h"
 #include "Persistence_matrix/columns/naive_vector_column.h"
+#include "Persistence_matrix/columns/heap_column.h"
 // #include "gudhi/column_types/list_column.h"
 // #include "gudhi/column_types/set_column.h"
 // #include "gudhi/column_types/unordered_set_column.h"
 // #include "gudhi/column_types/vector_column.h"
-#include "gudhi/column_types/z2_heap_column.h"
+// #include "gudhi/column_types/z2_heap_column.h"
 // #include "gudhi/column_types/z2_list_column.h"
 // #include "gudhi/column_types/z2_set_column.h"
 // #include "gudhi/column_types/z2_unordered_set_column.h"
@@ -101,7 +102,7 @@
 // #include "gudhi/column_types/boundary_columns/boundary_set_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_unordered_set_column.h"
 // #include "gudhi/column_types/boundary_columns/boundary_vector_column.h"
-#include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
+// #include "gudhi/column_types/boundary_columns/z2_boundary_heap_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_list_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_set_column.h"
 // #include "gudhi/column_types/boundary_columns/z2_boundary_unordered_set_column.h"
@@ -114,7 +115,7 @@
 // #include "gudhi/column_types/chain_columns/chain_set_column.h"
 // #include "gudhi/column_types/chain_columns/chain_unordered_set_column.h"
 // #include "gudhi/column_types/chain_columns/chain_vector_column.h"
-#include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
+// #include "gudhi/column_types/chain_columns/z2_chain_heap_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_list_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_set_column.h"
 // #include "gudhi/column_types/chain_columns/z2_chain_unordered_set_column.h"
@@ -262,16 +263,7 @@ public:
 											Dummy_chain_properties
 										>::type;
 
-	using Heap_column_type = typename std::conditional<
-											isNonBasic,
-											typename std::conditional<
-												Options::is_of_boundary_type,
-												Z2_heap_boundary_column,
-												Z2_heap_chain_column<dictionnary_type<index>>
-											>::type,
-											Z2_heap_column
-										>::type;
-
+	using Heap_column_type = Heap_column<Matrix<Options> >;
 	using List_column_type = List_column<Matrix<Options> >;
 	using Vector_column_type = Vector_column<Matrix<Options> >;
 	using Naive_vector_column_type = Naive_vector_column<Matrix<Options> >;
