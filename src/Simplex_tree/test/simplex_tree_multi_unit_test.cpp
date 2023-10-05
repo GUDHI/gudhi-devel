@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       David Loiseaux
+ *    Author(s):       David Loiseaux, Vincent Rouvreau
  *
  *    Copyright (C) 2023 Inria
  *
@@ -21,7 +21,7 @@
 #include <cstddef>  // for std::size_t
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "simplex_tree"
+#define BOOST_TEST_MODULE "simplex_tree_multi"
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
@@ -33,10 +33,14 @@
 using namespace Gudhi;
 using namespace Gudhi::multiparameter;
 using Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration;
-using vec=Finitely_critical_multi_filtration<float>;
+using namespace Gudhi;
+using namespace Gudhi::multiparameter;
+using Multi_Filtration_values = Finitely_critical_multi_filtration<float>;
 
-typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_multidimensional_filtration>> list_of_tested_variants;
 using typeST_STD = Simplex_tree<Simplex_tree_options_full_featured>;
+using Stree_multi = Simplex_tree<Simplex_tree_options_multidimensional_filtration>;
+
+typedef boost::mpl::list<Stree_multi> list_of_tested_variants;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
@@ -583,10 +587,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
   std::clog << "TEST RESET FILTRATION" << std::endl;
   typeST st;
 
-  st.insert_simplex_and_subfaces({2, 1, 0}, vec({2.,1.}));
-  st.insert_simplex_and_subfaces({3, 0}, vec({1.,2.}));
-  st.insert_simplex_and_subfaces({3, 4, 5}, vec({3.,4.}));
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, vec({4.,3.}));
+  st.insert_simplex_and_subfaces({2, 1, 0}, Multi_Filtration_values({2.,1.}));
+  st.insert_simplex_and_subfaces({3, 0}, Multi_Filtration_values({1.,2.}));
+  st.insert_simplex_and_subfaces({3, 4, 5}, Multi_Filtration_values({3.,4.}));
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, Multi_Filtration_values({4.,3.}));
   std::cout <<"TRUC "<< st.filtration(st.find({2,1,0})) << std::endl;
   /* Inserted simplex:        */
   /*    1   6                 */
@@ -605,7 +609,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
     std::clog << ") - filtration = " << st.filtration(f_simplex);
     std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
     // Guaranteed by construction
-    BOOST_CHECK(st.filtration(f_simplex) >= vec({1.,1.}));
+    BOOST_CHECK(st.filtration(f_simplex) >= Multi_Filtration_values({1.,1.}));
   }
 
   // dimension until 5 even if simplex tree is of dimension 3 to test the limits
@@ -620,7 +624,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_reset_filtration, typeST, list_of_tes
       std::clog << ") - filtration = " << st.filtration(f_simplex);
       std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
       if (st.dimension(f_simplex) < dimension)
-        BOOST_CHECK(st.filtration(f_simplex) >= vec({1.,1}));
+        BOOST_CHECK(st.filtration(f_simplex) >= Multi_Filtration_values({1.,1}));
       else
         BOOST_CHECK(st.filtration(f_simplex) == st.inf_);
     }
@@ -632,7 +636,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST SIMPLEX TREE CLEAR" << std::endl;
   typeST st;
-  st.insert_simplex_and_subfaces({0, 1}, vec({1.5}));
+  st.insert_simplex_and_subfaces({0, 1}, Multi_Filtration_values({1.5}));
   st.initialize_filtration();
   st.clear();
   BOOST_CHECK(st.num_vertices() == 0);
@@ -642,54 +646,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(boost::size(st.filtration_simplex_range()) == 0);
   typeST st_empty;
   BOOST_CHECK(st == st_empty);
-  st.insert_simplex_and_subfaces({0}, vec({2.5}));
+  st.insert_simplex_and_subfaces({0}, Multi_Filtration_values({2.5}));
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_tested_variants) {
-  std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST FOR_EACH ITERATION SKIP MECHANISM" << std::endl;
-  typeST st;
-
-  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
-  st.insert_simplex_and_subfaces({3, 0}, 2.);
-  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
-
-  /* Inserted simplex:        */
-  /*    1   6                 */
-  /*    o---o                 */
-  /*   /X\7/                  */
-  /*  o---o---o---o           */
-  /*  2   0   3\X/4           */
-  /*            o             */
-  /*            5             */
-
-  std::vector<size_t> num_simplices_by_dim_until_two(2);
-  auto lambda_nb_simp_by_dim = [&num_simplices_by_dim_until_two](typename typeST::Simplex_handle, int dim)
-                                  {
-                                    BOOST_CHECK (dim < 2);
-                                    ++num_simplices_by_dim_until_two[dim];
-                                    return dim >= 1; // The iteration will skip the children in this case
-                                  };
-  st.for_each_simplex(lambda_nb_simp_by_dim);
-  for (auto num_simplices : num_simplices_by_dim_until_two)
-    std::cout << num_simplices << ", ";
-  std::cout << std::endl;
-
-  auto num_simplices_by_dim = st.num_simplices_by_dimension();
-  for (auto num_simplices : num_simplices_by_dim)
-    std::cout << num_simplices << ", ";
-  std::cout << std::endl;
-
-  BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
-  BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
-}
-
-
 BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST MULTIFY" << std::endl;
+  std::clog << "TEST MULTIFY FLATTEN LINEAR PROJECTION" << std::endl;
  
   typeST_STD st;
   typeST st_multi;
@@ -701,7 +664,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_varia
   BOOST_CHECK(st_multi.num_simplices() == st.num_simplices()); // simplicial complexes should be the same
   for (auto sh : st_multi.complex_simplex_range()){
     const auto& filtration = st_multi.filtration(sh);
-    BOOST_CHECK(filtration == vec({1,2,3})); // Checks the filtration values
+    BOOST_CHECK(filtration == Multi_Filtration_values({1,2,3})); // Checks the filtration values
   }
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST FLATTEN" << std::endl;
@@ -723,4 +686,303 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_varia
   }
 }
 
+
+
+
+BOOST_AUTO_TEST_CASE(simplex_tree_multi_assign_filtration) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST MULTI FILTRATION INSERT SIMPLEX AND SUBFACES" << std::endl;
+  Stree_multi st;
+
+  typename Stree_multi::Simplex_handle sh;
+  bool success = false;
+  const Multi_Filtration_values multi_filt_1 = {1., 2.};
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({0, 1}, multi_filt_1);
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  // Only [0,1], [0] and [1] are already inserted
+  const Multi_Filtration_values multi_filt_2 = {3., 2., 1.};
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({2, 1, 0}, multi_filt_2);
+  BOOST_CHECK(success);
+  BOOST_CHECK(sh != st.null_simplex());
+  // Already inserted
+  std::tie(sh, success) = st.insert_simplex_and_subfaces({0, 2}, {4.});
+  BOOST_CHECK(!success);
+  BOOST_CHECK(sh != st.null_simplex());
+
+  // Check filtration values of an already inserted simplex
+  sh = st.find({1, 2});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_2);
+  // And assign a new value
+  Multi_Filtration_values const multi_filt_3 = {5.};
+  st.assign_filtration(sh, multi_filt_3);
+
+  for (auto f_simplex : st.complex_simplex_range()) {
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+    }
+    std::clog << ") - filtration = " << st.filtration(f_simplex);
+    std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+  }
+
+  // Check all filtration values
+  sh = st.find({2, 1, 0});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_2);
+  sh = st.find({1, 0});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_1);
+  sh = st.find({2, 0});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_2);
+  sh = st.find({0});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_1);
+  sh = st.find({2, 1});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_3);
+  sh = st.find({1});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_1);
+  sh = st.find({2});
+  BOOST_CHECK(sh != st.null_simplex());
+  BOOST_CHECK(st.filtration(sh) == multi_filt_2);
+
+}
+
+BOOST_AUTO_TEST_CASE(simplex_tree_multi_reset_filtration) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST RESET MULTI FILTRATION" << std::endl;
+  Stree_multi st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3., 2.});
+  st.insert_simplex_and_subfaces({3, 0}, {2., 3.});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3., 2.});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4.});
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  for (auto f_simplex : st.complex_simplex_range()) {
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+    }
+    std::clog << ") - filtration = " << st.filtration(f_simplex);
+    std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+    // Guaranteed by construction
+    BOOST_CHECK(st.filtration(f_simplex) >= 2.);
+  }
+ 
+  Multi_Filtration_values new_filt = {0., 1., 2.};
+  // dimension until 5 even if simplex tree is of dimension 3 to test the limits
+  for(int dimension = 5; dimension >= 0; dimension --) {
+    std::clog << "### reset_filtration - dimension = " << dimension << "\n";
+    st.reset_filtration(new_filt, dimension);
+    for (auto f_simplex : st.complex_simplex_range()) {
+      std::clog << "vertex = (";
+      for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+        std::clog << vertex << ",";
+      }
+      std::clog << ") - filtration = " << st.filtration(f_simplex);
+      std::clog << " - dimension = " << st.dimension(f_simplex) << std::endl;
+      if (st.dimension(f_simplex) >= dimension)
+        BOOST_CHECK(st.filtration(f_simplex) == new_filt);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(simplex_tree_multi_filtration_multify) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST MULTI FILTRATION MULTIFY" << std::endl;
+
+  Simplex_tree<> st;
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({3, 0}, 2.);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  Stree_multi st_multi;
+  Multi_Filtration_values default_multi (3, std::numeric_limits<Stree_multi::Options::value_type>::quiet_NaN());
+  Gudhi::multiparameter::multify(st, st_multi, 3, default_multi);
+
+  for (auto f_simplex : st_multi.complex_simplex_range()) {
+    std::clog << "vertex = (";
+    for (auto vertex : st_multi.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+    }
+    auto multi_filtration = st_multi.filtration(f_simplex);
+    std::clog << ") - filtration = " << multi_filtration << std::endl;
+    BOOST_CHECK(!std::isnan(multi_filtration[0]));
+    BOOST_CHECK(std::isnan(multi_filtration[1]));
+    BOOST_CHECK(std::isnan(multi_filtration[2]));
+  }
+
+  {
+    Simplex_tree<> copy;
+    Gudhi::multiparameter::flatten(copy, st_multi, 0);
+    BOOST_CHECK(st == copy);
+  }
+
+  {
+    Simplex_tree<> copy;
+    Gudhi::multiparameter::flatten(copy, st_multi, 1);
+    for (auto f_simplex : copy.complex_simplex_range()) {
+      std::clog << "vertex = (";
+      for (auto vertex : copy.simplex_vertex_range(f_simplex)) {
+        std::clog << vertex << ",";
+      }
+      std::clog << ") - filtration = " << copy.filtration(f_simplex) << std::endl;
+      BOOST_CHECK(std::isnan(copy.filtration(f_simplex)));
+    }
+  }
+
+}
+
+BOOST_AUTO_TEST_CASE(simplex_tree_multi_filtration_numeric_limits) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST MULTI FILTRATION NUMERIC LIMITS" << std::endl;
+
+  // NaN
+  auto nan_multi = std::numeric_limits<Multi_Filtration_values>::quiet_NaN();
+  BOOST_CHECK(nan_multi.size() == 1);
+  BOOST_CHECK(std::isnan(nan_multi[0]));
+  std::clog << nan_multi << std::endl;
+
+  // Inf
+  auto inf_multi = std::numeric_limits<Multi_Filtration_values>::infinity();
+  BOOST_CHECK(inf_multi.size() == 1);
+  BOOST_CHECK(std::isinf(inf_multi[0]));
+  std::clog << inf_multi << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST MULTI FILTRATION NON DECREASING" << std::endl;
+  Stree_multi st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3., 4.});
+  st.insert_simplex_and_subfaces({3, 0},    {2., 3.});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3., 4.});
+  
+  /* Inserted simplex:     */
+  /*    1                  */
+  /*    o                  */
+  /*   /X\                 */
+  /*  o---o---o---o        */
+  /*  2   0   3\X/4        */
+  /*            o          */
+  /*            5          */
+
+
+  for (auto f_simplex : st.complex_simplex_range()) {
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+    }
+    std::clog << ") - filtration = " << st.filtration(f_simplex) << std::endl;
+  }
+  auto filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({2., 3.}));
+
+  st.set_number_of_parameters(2);
+  st.make_filtration_non_decreasing();
+
+  filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({3., 4.}));
+
+  st.assign_filtration(st.find({3, 0}), Multi_Filtration_values({2.9, 4.}));
+  filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({2.9, 4.}));
+
+  st.make_filtration_non_decreasing();
+
+  filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({3., 4.}));
+
+  st.assign_filtration(st.find({3, 0}), Multi_Filtration_values({5., 3.99}));
+  filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({5., 3.99}));
+  
+  st.make_filtration_non_decreasing();
+
+  filt = st.filtration(st.find({3, 0}));
+  std::clog << "filtration([3,0]) = " << filt << std::endl;
+  BOOST_CHECK(filt == Multi_Filtration_values({3., 4.}));
+}
+
+BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi_nan_values) {
+  Stree_multi st;
+  
+  BOOST_CHECK(std::numeric_limits<Multi_Filtration_values>::quiet_NaN().is_nan());
+  BOOST_CHECK(std::numeric_limits<Multi_Filtration_values>::infinity().is_inf());
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {1.,2.,3.});
+  st.insert_simplex_and_subfaces({3, 0},    {1.,2.,3.});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {1.,2.,3.});
+
+  st.assign_filtration(st.find({0}), std::numeric_limits<Multi_Filtration_values>::quiet_NaN());
+  st.assign_filtration(st.find({3}), std::numeric_limits<Multi_Filtration_values>::infinity());
+  
+  /* Inserted simplex:     */
+  /*    1                  */
+  /*    o                  */
+  /*   /X\                 */
+  /*  o---o---o---o        */
+  /*  2   0   3\X/4        */
+  /*            o          */
+  /*            5          */
+
+  // Default number of parameter is 2
+  BOOST_CHECK(st.get_number_of_parameters() == 2);
+  
+  st.set_number_of_parameters(3);
+  BOOST_CHECK(st.get_number_of_parameters() == 3);
+
+  std::clog << "SPECIFIC CASE:" << std::endl;
+  std::clog << "Insertion with NaN values does not ensure the filtration values are non decreasing" << std::endl;
+  st.make_filtration_non_decreasing();
+
+  std::clog << "Check that NaN filtrations are ignored, and inf filtrations are propagated." << std::endl;
+  for (auto f_simplex : st.complex_simplex_range()) {
+    auto filt = st.filtration(f_simplex);
+    bool contains3 = false;
+    bool contains0 = false;
+    int dim = -1;
+    std::clog << "Simplex ";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)){
+      std::clog << vertex << " ";
+      if (vertex == 3) contains3 = true;
+      else if (vertex == 0) contains0 = true;
+      dim++;
+    }
+    bool is_zero = dim == 0 && contains0;
+    std::clog << "Filtration: " << filt << std::endl;
+    if (is_zero) BOOST_CHECK(filt.is_nan());
+    else if (contains3) BOOST_CHECK(filt.is_inf());
+    else BOOST_CHECK(filt == Multi_Filtration_values({1.,2.,3.}));
+  }
+}
 

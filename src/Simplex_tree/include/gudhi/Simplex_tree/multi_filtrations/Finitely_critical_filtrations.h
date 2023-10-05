@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <limits>
 #include <vector>
+#include <cmath>
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
@@ -53,7 +54,20 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   operator std::vector<T>&() const { return *this; }
   std::vector<T> get_vector() const { return static_cast<std::vector<T>>(*this); }
 
-  friend bool operator<(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+  inline bool is_inf() const {
+    if (this->size() != 1) return false;
+    return *(this->begin()) == std::numeric_limits<T>::infinity();
+  }
+  inline bool is_minus_inf() const {
+    if (this->size() != 1) return false;
+    return *(this->begin()) == - std::numeric_limits<T>::infinity();
+  }
+  inline bool is_nan() const {
+    if (this->size() != 1) return false;
+    return std::isnan(*(this->begin()));
+  }
+  inline friend bool operator<(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+    if (a.is_inf() || b.is_inf() || a.is_nan() || b.is_nan()) return false;
     bool isSame = true;
     int n = std::min(a.size(), b.size());
     for (int i = 0; i < n; ++i) {
@@ -63,7 +77,9 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
     if (isSame) return false;
     return true;
   }
-  friend bool operator<=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+  inline friend bool operator<=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+    if (a.is_nan() || b.is_nan()) return false;
+    if (b.is_inf()) return a.is_inf();
     int n = std::min(a.size(), b.size());
     for (int i = 0; i < n; ++i) {
       if (a[i] > b[i]) return false;
@@ -72,32 +88,32 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   }
 
   // GREATER THAN OPERATORS
-  friend bool operator>(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+  inline friend bool operator>(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
     return b < a;
   }
-  friend bool operator>=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
+  inline friend bool operator>=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
     return b <= a;
   }
 
-  Finitely_critical_multi_filtration& operator=(const Finitely_critical_multi_filtration& a) {
+  inline Finitely_critical_multi_filtration& operator=(const Finitely_critical_multi_filtration& a) {
     std::vector<T>::operator=(a);
     return *this;
   }
 
   std::vector<T>& _convert_back() { return *this; }
 
-  friend Finitely_critical_multi_filtration& operator-=(Finitely_critical_multi_filtration& result,
+  inline friend Finitely_critical_multi_filtration& operator-=(Finitely_critical_multi_filtration& result,
                                                         const Finitely_critical_multi_filtration& to_substract) {
     std::transform(result.begin(), result.end(), to_substract.begin(), result.begin(), std::minus<T>());
     return result;
   }
-  friend Finitely_critical_multi_filtration<T>& operator+=(Finitely_critical_multi_filtration<T>& result,
+  inline friend Finitely_critical_multi_filtration<T>& operator+=(Finitely_critical_multi_filtration<T>& result,
                                                            const Finitely_critical_multi_filtration& to_add) {
     std::transform(result.begin(), result.end(), to_add.begin(), result.begin(), std::plus<T>());
     return result;
   }
 
-  friend Finitely_critical_multi_filtration& operator-=(Finitely_critical_multi_filtration& result,
+  inline friend Finitely_critical_multi_filtration& operator-=(Finitely_critical_multi_filtration& result,
                                                         const T& to_substract) {
     // std::transform(result.begin(), result.end(), to_substract.begin(),result.begin(), std::minus<T>());
     for (auto& truc : result) {
@@ -105,7 +121,7 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
     }
     return result;
   }
-  friend Finitely_critical_multi_filtration<T>& operator+=(Finitely_critical_multi_filtration<T>& result,
+  inline friend Finitely_critical_multi_filtration<T>& operator+=(Finitely_critical_multi_filtration<T>& result,
                                                            const T& to_add) {
     for (auto& truc : result) {
       truc += to_add;
@@ -114,7 +130,7 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   }
 
   // template<class array_like>
-  friend bool operator==(Finitely_critical_multi_filtration<T>& self,
+  inline friend bool operator==(Finitely_critical_multi_filtration<T>& self,
                          const Finitely_critical_multi_filtration<T>& to_compare) {
     if (self.size() != to_compare.size()) return false;
     auto it = to_compare.begin();
@@ -124,28 +140,37 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
     return true;
   }
 
-  static std::vector<std::vector<T>> to_python(const std::vector<Finitely_critical_multi_filtration<T>>& to_convert) {
+  inline static std::vector<std::vector<T>> to_python(const std::vector<Finitely_critical_multi_filtration<T>>& to_convert) {
     return std::vector<std::vector<T>>(to_convert.begin(), to_convert.end());
   }
 
-  static std::vector<Finitely_critical_multi_filtration<T>> from_python(const std::vector<std::vector<T>>& to_convert) {
+  inline static std::vector<Finitely_critical_multi_filtration<T>> from_python(const std::vector<std::vector<T>>& to_convert) {
     return std::vector<Finitely_critical_multi_filtration<T>>(to_convert.begin(), to_convert.end());
   }
-  void push_to(const Finitely_critical_multi_filtration<T>& x) {
+  inline void push_to(const Finitely_critical_multi_filtration<T>& x) {
+    if (this->is_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) 
+      return;
+    if (x.is_inf() || this->is_minus_inf()) {
+      *this = x;
+      return;
+    }
     if (this->size() != x.size()) {
-      std::cerr << "Does only work with 1-critical filtrations ! Sizes " << this->size() << " and " << x.size()
-                << "are different !" << std::endl;
+      std::cerr << "Does only work with 1-critical filtrations ! Sizes " 
+      << this->size() << " and " << x.size()
+      << "are different !" << std::endl;
+      std::cerr << "This : " << *this << std::endl;
+      std::cerr << "arg : " << x << std::endl;
       throw std::logic_error("Bad sizes");
     }
     for (unsigned int i = 0; i < x.size(); i++) this->at(i) = this->at(i) > x[i] ? this->at(i) : x[i];
   }
   // Warning, this function  assumes that the comparisons checks have already been made !
-  void insert_new(Finitely_critical_multi_filtration to_concatenate) {
+  inline void insert_new(Finitely_critical_multi_filtration to_concatenate) {
     this->insert(this->end(), std::move_iterator(to_concatenate.begin()), std::move_iterator(to_concatenate.end()));
   }
 
   // scalar product of a filtration value with x.
-  T linear_projection(const std::vector<T>& x) {
+  inline T linear_projection(const std::vector<T>& x) {
     T projection = 0;
     unsigned int size = std::min(x.size(), this->size());
     for (auto i = 0u; i < size; i++) projection += x[i] * this->at(i);
@@ -153,7 +178,19 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   }
 
   // easy debug
-  friend std::ostream& operator<<(std::ostream& stream, const Finitely_critical_multi_filtration<T>& truc) {
+  inline friend std::ostream& operator<<(std::ostream& stream, const Finitely_critical_multi_filtration<T>& truc) {
+    if (truc.is_inf()) {
+      stream << "[inf, ..., inf]";
+      return stream;
+    }
+    if (truc.is_minus_inf()) {
+      stream << "[-inf, ..., -inf]";
+      return stream;
+    }
+    if (truc.is_nan()) {
+      stream << "[NaN]";
+      return stream;
+    }
     if (truc.empty()) {
       stream << "[]";
       return stream;
@@ -191,5 +228,8 @@ static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtrat
 };
 
 }
+
+
+
 
 #endif  // FINITELY_CRITICAL_FILTRATIONS_H_
