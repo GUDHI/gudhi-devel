@@ -16,8 +16,8 @@ set(GUDHI_PYTHON_PATH "src/python")
 include(GUDHI_submodules)
 
 if (WITH_GUDHI_THIRD_PARTY)
-	# For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
-	include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
+  # For third parties libraries management - To be done last as CGAL updates CMAKE_MODULE_PATH
+  include(GUDHI_third_party_libraries NO_POLICY_SCOPE)
 endif()
 
 include(GUDHI_compilation_flags)
@@ -45,29 +45,28 @@ add_gudhi_module(Tangential_complex)
 add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
-add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Persistence_matrix)
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
 foreach(GUDHI_MODULE ${GUDHI_MODULES})
-	foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
-		if(EXISTS ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/CMakeLists.txt)
-			add_subdirectory(src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/)
-		endif()
-	endforeach()
+  foreach(GUDHI_SUB_DIRECTORY ${GUDHI_SUB_DIRECTORIES})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/CMakeLists.txt)
+      add_subdirectory(src/${GUDHI_MODULE}/${GUDHI_SUB_DIRECTORY}/)
+    endif()
+  endforeach()
 endforeach()
 
-if (WITH_GUDHI_UI)
-	add_subdirectory(src/GudhUI)
+if (WITH_GUDHI_THIRD_PARTY)
+  add_subdirectory(src/GudhUI)
 endif()
 
 if (WITH_GUDHI_PYTHON)
-	# specific for cython module
-	add_subdirectory(${GUDHI_PYTHON_PATH})
+  # specific for cython module
+  add_subdirectory(${GUDHI_PYTHON_PATH})
 else()
-	message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
-	set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")
+  message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python")
 endif()
 
 # For "make user_version" - Requires GUDHI_modules to be performed
