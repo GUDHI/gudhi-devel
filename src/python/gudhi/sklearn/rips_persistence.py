@@ -29,7 +29,7 @@ from joblib import Parallel, delayed
 
 class RipsPersistence(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the persistence diagrams from a Vietoris-Rips complex.
+    This is a class for constructing Vietoris-Rips complexes and computing the persistence diagrams from them.
     """
 
     def __init__(
