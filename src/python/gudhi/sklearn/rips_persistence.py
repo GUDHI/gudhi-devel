@@ -60,7 +60,9 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             expand_extra_dimension (bool): :func:`~gudhi.SimplexTree.expansion` is performed at
                 `max(homology_dimensions) + 1` if true, and `max(homology_dimensions)` otherwise. Default is true.
-            n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
+            n_jobs (int): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
+                joblib.parallel_backend context. `-1` means using all processors. cf.
+                https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
         self.homology_dimensions = homology_dimensions
         self.threshold = threshold
