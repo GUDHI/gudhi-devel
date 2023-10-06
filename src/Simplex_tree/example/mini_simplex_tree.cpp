@@ -18,6 +18,8 @@ struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
   static const bool store_filtration = false;
   // I have few vertices
   typedef short Vertex_handle;
+
+  static const bool stable_simplex_handles = true;
 };
 
 using ST = Gudhi::Simplex_tree<MyOptions>;

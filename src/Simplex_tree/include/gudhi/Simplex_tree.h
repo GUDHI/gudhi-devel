@@ -1662,7 +1662,35 @@ class Simplex_tree {
  private:
   bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
     auto&& list = sib->members();
-    auto last = std::remove_if(list.begin(), list.end(), [this,filt](Dit_value_t& simplex) {
+    bool modified;
+
+    if constexpr (Options::stable_simplex_handles) {
+      modified = false;
+      for (auto sh = list.begin(); sh != list.end();) {
+        if (sh->second.filtration() > filt) {
+          modified = true;
+          if (has_children(sh)) rec_delete(sh->second.children());
+          // dimension may need to be lowered
+          dimension_to_be_lowered_ = true;
+          sh = list.erase(sh);
+        } else {
+          ++sh;
+        }
+      }
+      if (list.empty() && sib != root()) {
+        // Removing the whole siblings, parent becomes a leaf.
+        sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
+        delete sib;
+        // dimension may need to be lowered
+        dimension_to_be_lowered_ = true;  //TODO: already done for sure, no?
+        return true;
+      } else {
+        // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
+        for (auto&& simplex : list)
+          if (has_children(&simplex)) modified |= rec_prune_above_filtration(simplex.second.children(), filt);
+      }
+    } else {
+      auto last = std::remove_if(list.begin(), list.end(), [this, filt](Dit_value_t& simplex) {
         if (simplex.second.filtration() <= filt) return false;
         if (has_children(&simplex)) rec_delete(simplex.second.children());
         // dimension may need to be lowered
@@ -1670,21 +1698,22 @@ class Simplex_tree {
         return true;
       });
 
-    bool modified = (last != list.end());
-    if (last == list.begin() && sib != root()) {
-      // Removing the whole siblings, parent becomes a leaf.
-      sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
-      delete sib;
-      // dimension may need to be lowered
-      dimension_to_be_lowered_ = true;
-      return true;
-    } else {
-      // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
-      list.erase(last, list.end());
-      for (auto&& simplex : list)
-        if (has_children(&simplex))
-          modified |= rec_prune_above_filtration(simplex.second.children(), filt);
+      modified = (last != list.end());
+      if (last == list.begin() && sib != root()) {
+        // Removing the whole siblings, parent becomes a leaf.
+        sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
+        delete sib;
+        // dimension may need to be lowered
+        dimension_to_be_lowered_ = true;
+        return true;
+      } else {
+        // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
+        list.erase(last, list.end());
+        for (auto&& simplex : list)
+          if (has_children(&simplex)) modified |= rec_prune_above_filtration(simplex.second.children(), filt);
+      }
     }
+
     return modified;
   }
 
@@ -2296,7 +2325,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
+  static const bool stable_simplex_handles = true;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2313,7 +2342,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
+  static const bool stable_simplex_handles = true;
 };
 
 /** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
@@ -2330,7 +2359,7 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = false;
+  static const bool stable_simplex_handles = true;
 };
 
 /** @}*/  // end addtogroup simplex_tree

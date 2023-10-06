@@ -28,6 +28,8 @@ struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
   typedef short Vertex_handle;
   // Maximum number of simplices to compute persistence is 2^8 - 1 = 255. One is reserved for null_key
   typedef std::uint8_t Simplex_key;
+
+  static const bool stable_simplex_handles = true;
 };
 
 using ST = Gudhi::Simplex_tree<MyOptions>;
