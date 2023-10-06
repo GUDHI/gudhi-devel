@@ -23,9 +23,9 @@
 
 #include "gudhi/matrix.h"
 #include "gudhi/persistence_matrix_options.h"
-#include "gudhi/utilities/Z2_field.h"
-#include "gudhi/utilities/Zp_field.h"
-// #include "gudhi/utilities/utilities.h"
+#include "gudhi/Fields/Z2_field.h"
+#include "gudhi/Fields/Zp_field.h"
+// #include "gudhi/Fields/utilities.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;

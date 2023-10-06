@@ -21,8 +21,8 @@
 #include <set>
 #include <utility>
 
-#include "gudhi/utilities/Zp_field.h"
-#include "gudhi/utilities/utilities.h"
+#include "gudhi/Fields/Zp_field.h"
+// #include "gudhi/Fields/utilities.h"
 // #include "gudhi/column_types/row_access.h"
 // #include "gudhi/column_types/cell.h"
 #include "gudhi/Persistence_matrix/columns/cell_types.h"
@@ -132,9 +132,9 @@ using Gudhi::persistence_matrix::Cell_field_element;
 
 using Gudhi::persistence_matrix::Row_access;
 using Gudhi::persistence_matrix::Dummy_row_access;
-using Gudhi::persistence_matrix::dimension_type;
-using Gudhi::persistence_matrix::matrix_row_tag;
-using Gudhi::persistence_matrix::matrix_column_tag;
+// using Gudhi::persistence_matrix::dimension_type;
+// using Gudhi::persistence_matrix::matrix_row_tag;
+// using Gudhi::persistence_matrix::matrix_column_tag;
 using Gudhi::persistence_matrix::Column_dimension_holder;
 using Gudhi::persistence_matrix::Dummy_dimension_holder;
 using Gudhi::persistence_matrix::Chain_column_extra_properties;
@@ -241,8 +241,8 @@ struct Mini_matrix{
 
 	static constexpr bool isNonBasic = !Options::is_basic;
 
-	// struct matrix_row_tag;
-	// struct matrix_column_tag;
+	struct matrix_row_tag;
+	struct matrix_column_tag;
 
 	using base_hook_matrix_row = boost::intrusive::list_base_hook<
 				boost::intrusive::tag < matrix_row_tag >

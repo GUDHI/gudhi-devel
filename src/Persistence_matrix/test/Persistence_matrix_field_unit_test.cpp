@@ -12,13 +12,13 @@
 #define BOOST_TEST_MODULE "persistence_matrix"
 #include <boost/test/unit_test.hpp>
 
-#include "gudhi/utilities/Z2_field.h"
-#include "gudhi/utilities/Zp_field.h"
-#include "gudhi/utilities/Zp_field_shared.h"
-#include "gudhi/utilities/Multi_field.h"
-#include "gudhi/utilities/Multi_field_small.h"
-#include "gudhi/utilities/Multi_field_shared.h"
-#include "gudhi/utilities/Multi_field_small_shared.h"
+#include "gudhi/Fields/Z2_field.h"
+#include "gudhi/Fields/Zp_field.h"
+#include "gudhi/Fields/Zp_field_shared.h"
+#include "gudhi/Fields/Multi_field.h"
+#include "gudhi/Fields/Multi_field_small.h"
+#include "gudhi/Fields/Multi_field_shared.h"
+#include "gudhi/Fields/Multi_field_small_shared.h"
 
 using Gudhi::persistence_matrix::Z2_field_element;
 using Gudhi::persistence_matrix::Zp_field_element;

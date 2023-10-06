@@ -16,7 +16,7 @@
 #ifndef OPTIONS_INCLUDED
 #define OPTIONS_INCLUDED
 
-#include "utilities/Z2_field.h"
+#include "Fields/Z2_field.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
