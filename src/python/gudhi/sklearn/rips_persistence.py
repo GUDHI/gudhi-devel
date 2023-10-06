@@ -37,7 +37,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions,
         threshold=float('inf'),
         input_type='point cloud',
-        nb_collapse=-1,
+        num_collapses=True,
         homology_coeff_field=11,
         min_persistence=0.0,
         expand_extra_dimension = True,
@@ -54,9 +54,10 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             input_type (str): Can be 'point cloud' when inputs are point clouds, or 'lower distance matrix', when
                 inputs are lower triangular distance matrix (can be full square, but the upper part of the distance
                 matrix will not be considered). Default is 'point cloud'.
-            nb_collapse (int): The number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform on the
-                SimplexTree. Default is -1, which means "automatic" (a relatively good enough number of iterations is
-                choosen).
+            num_collapses (bool or int): Specify if :func:`~gudhi.SimplexTree.collapse_edges` is performed. When
+                `num_collapses` is an integer, it specifies the number of :func:`~gudhi.SimplexTree.collapse_edges`
+                iterations to perform on the SimplexTree. Default is True, which means "automatic" (a relatively good
+                enough number of iterations is choosen).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             min_persistence (float): The minimum persistence value to take into account (strictly greater than
                 `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
@@ -67,7 +68,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.homology_dimensions = homology_dimensions
         self.threshold = threshold
         self.input_type = input_type
-        self.nb_collapse = nb_collapse
+        self.num_collapses = num_collapses
         self.homology_coeff_field = homology_coeff_field
         self.min_persistence = min_persistence
         self.expand_extra_dimension = expand_extra_dimension
@@ -86,12 +87,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         if self.expand_extra_dimension:
             max_dimension += 1
 
-        # nb_collapse "automatic" case management
-        if self.nb_collapse < 0:
-            nb_collapse = 1
-        else:
-            nb_collapse = self.nb_collapse
-        
         if self.input_type == 'point cloud':
             rips = RipsComplex(points=inputs, max_edge_length = self.threshold)
         elif self.input_type == 'lower distance matrix':
@@ -101,7 +96,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         
         if max_dimension > 1:
             stree = rips.create_simplex_tree(max_dimension=1)
-            stree.collapse_edges(nb_iterations = nb_collapse)
+            # 0 iteration when num_collapses is False, and 1 when num_collapses is True, aka. "automatic mode"
+            stree.collapse_edges(nb_iterations = int(self.num_collapses))
             stree.expansion(max_dimension)
         else:
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
