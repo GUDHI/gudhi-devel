@@ -17,7 +17,7 @@ namespace cech_complex {
 
 /**  \defgroup cech_complex Čech complex
  * 
- * \author    Vincent Rouvreau, Hind montassif
+ * \author    Vincent Rouvreau, Hind montassif, Marc Glisse
  * 
  * @{
  * 
@@ -61,6 +61,11 @@ namespace cech_complex {
  *
  * This radius computation is the reason why the Cech_complex is taking much more time to be computed than the
  * \ref rips_complex but it offers more topological guarantees.
+ *
+ * If you already have a simplicial complex, it is possible to assign to each simplex a filtration value corresponding
+ * to the squared radius of its minimal enclosing ball using `assign_MEB_filtration()`. This can provide an alternate
+ * way of computing a Čech filtration, or it can be used on a Delaunay triangulation to compute a Delaunay-Čech
+ * filtration.
  *
  * \subsection cechpointscloudexample Example from a point cloud
  * 

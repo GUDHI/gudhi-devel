@@ -56,6 +56,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.num_vertices() == (size_t) 0);
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   BOOST_CHECK(tst.is_empty());
+  BOOST_CHECK(tst.num_simplices_by_dimension() == std::vector<size_t>());
   typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
@@ -343,6 +344,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(shReturned == typeST::null_simplex());
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
+  BOOST_CHECK(st.num_simplices_by_dimension() == std::vector<size_t>({4, 4, 1}));
 
   /* Inserted simplex:        */
   /*    1                     */
@@ -931,6 +933,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st1.insert_graph(g);
   BOOST_CHECK(st1.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst1;
+  sst1.insert_graph(g);
+  BOOST_CHECK(sst1.num_simplices() == 6);
+
   // edges can have multiplicity in the graph unless we replace the first vecS with (hash_)setS
   add_edge(1, 0, 1.1, g);
   add_edge(1, 2, 3.3, g);
@@ -942,13 +948,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st2.insert_graph(g);
   BOOST_CHECK(st2.num_simplices() == 6);
 
+  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst2;
+  sst2.insert_graph(g);
+  BOOST_CHECK(sst2.num_simplices() == 6);
+
   std::clog << "st1 is" << std::endl;
   std::clog << st1 << std::endl;
 
   std::clog << "st2 is" << std::endl;
   std::clog << st2 << std::endl;
 
+  std::clog << "sst1 is" << std::endl;
+  std::clog << sst1 << std::endl;
+
+  std::clog << "sst2 is" << std::endl;
+  std::clog << sst2 << std::endl;
+
   BOOST_CHECK(st1 == st2);
+  BOOST_CHECK(sst1 == sst2);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(insert_duplicated_vertices, typeST, list_of_tested_variants) {
@@ -1139,8 +1156,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
   }
 }
 
-BOOST_AUTO_TEST_CASE(batch_vertices) {
-  typedef Simplex_tree<> typeST;
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> >
+                           list_of_tested_variants_wo_fast_persistence;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(batch_vertices, typeST, list_of_tested_variants_wo_fast_persistence) {
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST BATCH VERTEX INSERTION" << std::endl;
   typeST st;
@@ -1151,6 +1172,16 @@ BOOST_AUTO_TEST_CASE(batch_vertices) {
   BOOST_CHECK(st.num_simplices() == 4);
   BOOST_CHECK(st.filtration(st.find({2})) == 0.);
   BOOST_CHECK(st.filtration(st.find({3})) == 1.5);
+
+  for (auto coface : st.star_simplex_range(st.find({5}))) {
+    std::clog << "coface";
+    for (auto vertex : st.simplex_vertex_range(coface)) {
+      std::clog << " " << vertex;
+      // Should be the only one
+      BOOST_CHECK(vertex == 5);
+    }
+    std::clog << "\n";
+  }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variants) {
@@ -1169,4 +1200,44 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_clear, typeST, list_of_tested_variant
   BOOST_CHECK(st == st_empty);
   st.insert_simplex_and_subfaces({0}, 2.5);
   BOOST_CHECK(boost::size(st.cofaces_simplex_range(st.find({0}), 1)) == 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST FOR_EACH ITERATION SKIP MECHANISM" << std::endl;
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({3, 0}, 2.);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.);
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  std::vector<size_t> num_simplices_by_dim_until_two(2);
+  auto lambda_nb_simp_by_dim = [&num_simplices_by_dim_until_two](typename typeST::Simplex_handle, int dim)
+                                  {
+                                    BOOST_CHECK (dim < 2);
+                                    ++num_simplices_by_dim_until_two[dim];
+                                    return dim >= 1; // The iteration will skip the children in this case
+                                  };
+  st.for_each_simplex(lambda_nb_simp_by_dim);
+  for (auto num_simplices : num_simplices_by_dim_until_two)
+    std::cout << num_simplices << ", ";
+  std::cout << std::endl;
+
+  auto num_simplices_by_dim = st.num_simplices_by_dimension();
+  for (auto num_simplices : num_simplices_by_dim)
+    std::cout << num_simplices << ", ";
+  std::cout << std::endl;
+
+  BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
+  BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
 }
