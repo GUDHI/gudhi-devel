@@ -39,7 +39,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         input_type='point cloud',
         num_collapses=True,
         homology_coeff_field=11,
-        min_persistence=0.0,
         expand_extra_dimension = True,
         n_jobs=None,
     ):
@@ -59,8 +58,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 iterations to perform on the SimplexTree. Default is True, which means "automatic" (a relatively good
                 enough number of iterations is choosen).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
-            min_persistence (float): The minimum persistence value to take into account (strictly greater than
-                `min_persistence`). Default value is `0.0`. Set `min_persistence` to `-1.0` to see all values.
             expand_extra_dimension (bool): :func:`~gudhi.SimplexTree.expansion` is performed at
                 `max(homology_dimensions) + 1` if true, and `max(homology_dimensions)` otherwise. Default is true.
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
@@ -70,7 +67,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.input_type = input_type
         self.num_collapses = num_collapses
         self.homology_coeff_field = homology_coeff_field
-        self.min_persistence = min_persistence
         self.expand_extra_dimension = expand_extra_dimension
         self.n_jobs = n_jobs
 
@@ -108,7 +104,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
 
         stree.compute_persistence(
             homology_coeff_field=self.homology_coeff_field,
-            min_persistence=self.min_persistence,
             persistence_dim_max=persistence_dim_max
         )
 
