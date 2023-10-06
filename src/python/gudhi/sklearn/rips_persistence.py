@@ -35,7 +35,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         homology_dimensions,
-        max_edge_length=float('inf'),
+        threshold=float('inf'),
         input_type='point cloud',
         nb_collapse=-1,
         homology_coeff_field=11,
@@ -50,7 +50,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
-            max_edge_length (float): Rips value. Default is +Inf.
+            threshold (float): Rips maximal edge length value. Default is +Inf.
             input_type (str): Can be 'point cloud' when inputs are point clouds, or 'lower distance matrix', when
                 inputs are lower triangular distance matrix (can be full square, but the upper part of the distance
                 matrix will not be considered). Default is 'point cloud'.
@@ -65,7 +65,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             n_jobs (int): cf. https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html
         """
         self.homology_dimensions = homology_dimensions
-        self.max_edge_length = max_edge_length
+        self.threshold = threshold
         self.input_type = input_type
         self.nb_collapse = nb_collapse
         self.homology_coeff_field = homology_coeff_field
@@ -93,9 +93,9 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             nb_collapse = self.nb_collapse
         
         if self.input_type == 'point cloud':
-            rips = RipsComplex(points=inputs, max_edge_length = self.max_edge_length)
+            rips = RipsComplex(points=inputs, max_edge_length = self.threshold)
         elif self.input_type == 'lower distance matrix':
-            rips = RipsComplex(distance_matrix=inputs, max_edge_length = self.max_edge_length)
+            rips = RipsComplex(distance_matrix=inputs, max_edge_length = self.threshold)
         else:
             raise ValueError("Only 'point cloud' and  'lower distance matrix' are valid input_type")
         
