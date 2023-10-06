@@ -248,7 +248,7 @@ RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR) const
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::remove_maximal_simplex([[maybe_unused]] index columnIndex)
+inline void RU_matrix<Master_matrix>::remove_maximal_simplex(index columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'remove_maximal_simplex' is not implemented for the chosen options.");

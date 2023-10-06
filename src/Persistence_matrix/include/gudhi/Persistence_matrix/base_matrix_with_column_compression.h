@@ -112,7 +112,7 @@ public:
 	template<typename Index_type>
 	std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
 	template<class Cell_range>
-	void add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
 	template<class Cell_range>
 	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	template<class Cell_range>
@@ -352,7 +352,7 @@ inline std::enable_if_t<std::is_integral_v<Index_type> > Base_matrix_with_column
 
 template<class Master_matrix>
 template<class Cell_range>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+inline std::enable_if_t<!std::is_integral_v<Cell_range> > Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
 {
 	// index targetRep = columnClasses_.find(targetColumnIndex);
 	index targetRep = columnClasses_.find_set(targetColumnIndex);

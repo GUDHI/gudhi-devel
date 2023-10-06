@@ -22,21 +22,21 @@ struct Dummy_matrix_row_access{
 };
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-class Base_matrix_row_access
+class Matrix_row_access
 {
 public:
-	Base_matrix_row_access();
-	Base_matrix_row_access(unsigned int numberOfColumns);
-	Base_matrix_row_access(const Base_matrix_row_access& toCopy);
-	Base_matrix_row_access(Base_matrix_row_access&& other) noexcept;
+	Matrix_row_access();
+	Matrix_row_access(unsigned int numberOfColumns);
+	Matrix_row_access(const Matrix_row_access& toCopy);
+	Matrix_row_access(Matrix_row_access&& other) noexcept;
 
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex);
 	const Row_type& get_row(index rowIndex) const;
 	void erase_row(index rowIndex);		//assumes that row is empty.
 
-	Base_matrix_row_access& operator=(const Base_matrix_row_access& other);
-	friend void swap(Base_matrix_row_access& matrix1, Base_matrix_row_access& matrix2){
+	Matrix_row_access& operator=(const Matrix_row_access& other);
+	friend void swap(Matrix_row_access& matrix1, Matrix_row_access& matrix2){
 		matrix1.rows_.swap(matrix2.rows_);
 	}
 
@@ -45,11 +45,11 @@ protected:
 };
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Base_matrix_row_access() 
+inline Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Matrix_row_access() 
 {}
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Base_matrix_row_access(unsigned int numberOfColumns)
+inline Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Matrix_row_access(unsigned int numberOfColumns)
 {
 	if constexpr (!has_removable_rows){
 		rows_.resize(numberOfColumns);
@@ -57,7 +57,7 @@ inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,ind
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Base_matrix_row_access(const Base_matrix_row_access &toCopy)
+inline Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Matrix_row_access(const Matrix_row_access &toCopy)
 {
 	if constexpr (!has_removable_rows){
 		rows_.resize(toCopy.rows_.size());
@@ -65,12 +65,12 @@ inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,ind
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Base_matrix_row_access(Base_matrix_row_access &&other) noexcept
+inline Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::Matrix_row_access(Matrix_row_access &&other) noexcept
 	: rows_(std::move(other.rows_))
 {}
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Row_type& Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::get_row(index rowIndex)
+inline Row_type& Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::get_row(index rowIndex)
 {
 	if constexpr (has_removable_rows) {
 		return rows_.at(rowIndex);
@@ -80,7 +80,7 @@ inline Row_type& Base_matrix_row_access<Row_type,Row_container_type,has_removabl
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline const Row_type& Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::get_row(index rowIndex) const
+inline const Row_type& Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::get_row(index rowIndex) const
 {
 	if constexpr (has_removable_rows) {
 		return rows_.at(rowIndex);
@@ -90,7 +90,7 @@ inline const Row_type& Base_matrix_row_access<Row_type,Row_container_type,has_re
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline void Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::erase_row(index rowIndex)
+inline void Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::erase_row(index rowIndex)
 {
 	static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");
 
@@ -98,8 +98,8 @@ inline void Base_matrix_row_access<Row_type,Row_container_type,has_removable_row
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
-inline Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index> &
-Base_matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::operator=(const Base_matrix_row_access &other)
+inline Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index> &
+Matrix_row_access<Row_type,Row_container_type,has_removable_rows,index>::operator=(const Matrix_row_access &other)
 {
 	if constexpr (has_removable_rows)
 		rows_.reserve(other.rows_.size());

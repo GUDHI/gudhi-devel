@@ -22,13 +22,13 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include "options.h"
-#include "utilities/utilities.h"
-#include "utilities/overlay_id_to_position_index.h"
-#include "utilities/overlay_position_to_id_index.h"
+#include "persistence_matrix_options.h"
+
+#include "Persistence_matrix/overlay_id_to_position_index.h"
+#include "Persistence_matrix/overlay_position_to_id_index.h"
 
 #include "Persistence_matrix/matrix_dimension_holders.h"
-#include "Persistence_matrix/base_matrix_row_access.h"
+#include "Persistence_matrix/matrix_row_access.h"
 #include "Persistence_matrix/base_swap.h"
 #include "Persistence_matrix/base_pairing.h"
 #include "Persistence_matrix/ru_pairing.h"
@@ -84,8 +84,8 @@ public:
 		int death;
 	};
 
-	// struct matrix_row_tag;
-	// struct matrix_column_tag;
+	struct matrix_row_tag;
+	struct matrix_column_tag;
 
 	using base_hook_matrix_row = boost::intrusive::list_base_hook<
 				boost::intrusive::tag < matrix_row_tag >
@@ -171,7 +171,7 @@ public:
 
 	using Matrix_row_access_option = typename std::conditional<
 											Options::has_row_access,
-											Base_matrix_row_access<Row_type, row_container_type, Options::has_removable_rows, index>,
+											Matrix_row_access<Row_type, row_container_type, Options::has_removable_rows, index>,
 											Dummy_matrix_row_access
 										>::type;
 
@@ -432,6 +432,222 @@ public:
 	const Bar& get_bar_from_pivot(index simplexIndex){
 		return matrix_.get_bar_from_pivot(simplexIndex);
 	}
+
+	// Id_to_position_indexation_overlay();
+	// template<class Container_type>
+	// Id_to_position_indexation_overlay(const std::vector<Container_type>& columns);
+	// Id_to_position_indexation_overlay(unsigned int numberOfColumns);
+	// Id_to_position_indexation_overlay(const Id_to_position_indexation_overlay& matrixToCopy);
+	// Id_to_position_indexation_overlay(Id_to_position_indexation_overlay&& other) noexcept;
+
+	// //chain
+	// template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+	// Id_to_position_indexation_overlay(
+	// 	BirthComparatorFunction&& birthComparator, 
+	// 	DeathComparatorFunction&& deathComparator);
+	// //chain
+	// template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
+	// Id_to_position_indexation_overlay(
+	// 	const std::vector<Boundary_type>& orderedBoundaries,
+	// 	BirthComparatorFunction&& birthComparator, 
+	// 	DeathComparatorFunction&& deathComparator);
+	// //chain
+	// template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+	// Id_to_position_indexation_overlay(
+	// 	unsigned int numberOfColumns,
+	// 	BirthComparatorFunction&& birthComparator, 
+	// 	DeathComparatorFunction&& deathComparator);
+
+	// //base
+	// //base comp
+	// template<class Container_type>
+	// void insert_column(const Container_type& column);
+	// //base
+	// template<class Container_type>
+	// void insert_column(const Container_type& column, int columnIndex);
+	// //base: same as insert_column
+	// //base comp: same as insert_column
+	// //boundary: does not update barcode as it needs reduction
+	// //ru
+	// template<class Boundary_type>
+	// void insert_boundary(const Boundary_type& boundary);
+	// //chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
+	// template<class Boundary_type>
+	// std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary);
+	// //chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
+	// template<class Boundary_type>
+	// std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary);
+	// //base
+	// //boundary
+	// //ru: inR = true forced
+	// //chain
+	// Column_type& get_column(index columnIndex);
+	// //base
+	// //base comp: non const because of path compression in union-find
+	// //boundary
+	// //ru: inR = true forced
+	// //chain
+	// const Column_type& get_column(index columnIndex) const;
+	// //get_row(rowIndex) --> simplex ID (=/= columnIndex)
+	// //base
+	// //boundary
+	// //ru: inR = true forced
+	// //chain
+	// Row_type& get_row(index rowIndex);
+	// //base
+	// //base comp
+	// //boundary
+	// //ru: inR = true forced
+	// //chain
+	// const Row_type& get_row(index rowIndex) const;
+	// //base
+	// void erase_column(index columnIndex);
+	// //base: assumes the row is empty, just thought as index a cleanup
+	// //base comp: assumes the row is empty, just thought as index a cleanup
+	// //boundary: indirect
+	// //ru: indirect
+	// //chain: indirect
+	// void erase_row(index rowIndex);
+	// //boundary: update barcode if already computed, does not verify if it really was maximal
+	// //ru
+	// //chain
+	// void remove_maximal_simplex(index columnIndex);
+
+	// //boundary: indirect
+	// //ru
+	// //chain: indirect
+	// dimension_type get_max_dimension() const;
+	// //base
+	// //base comp
+	// //boundary
+	// //ru
+	// //chain
+	// unsigned int get_number_of_columns() const;
+	// //boundary
+	// //ru
+	// //chain
+	// dimension_type get_column_dimension(index columnIndex) const;
+
+	// //base
+	// //base comp
+	// template<typename Index_type>
+	// std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
+	// //base
+	// //base comp
+	// template<class Cell_range>
+	// std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+	// //base
+	// //base comp
+	// template<class Cell_range>
+	// void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	// //base
+	// //base comp
+	// template<class Cell_range>
+	// void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
+	// //base: necessary because of vector columns ?
+	// //base comp: necessary because of vector columns ?
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// //chain: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	// //base
+	// //base comp
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// //chain: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	// //base
+	// //base comp
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// //chain: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// //chain: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(index sourceColumnIndex, index targetColumnIndex);
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(const Column_type& sourceColumn, index targetColumnIndex);
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: avoid calling with specialized options or make it such that it makes sense for persistence
+	// void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+
+	// //base
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
+	// void zero_cell(index columnIndex, index rowIndex);
+	// //base
+	// //boundary: avoid calling with pairing option or make it such that it makes sense for persistence
+	// //ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
+	// void zero_column(index columnIndex);
+	// //base
+	// //base comp
+	// //boundary
+	// //ru: inR = true forced
+	// //chain
+	// bool is_zero_cell(index columnIndex, index rowIndex) const;
+	// //base
+	// //base comp
+	// //boundary
+	// //ru: inR = true forced
+	// //chain: just for sanity checks as a valid chain matrix never has an empty column.
+	// bool is_zero_column(index columnIndex);
+
+	// //ru: assumes that pivot exists
+	// //chain
+	// index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
+	// //boundary
+	// //chain
+	// index get_pivot(index columnIndex);
+
+	// Id_to_position_indexation_overlay& operator=(Id_to_position_indexation_overlay other);
+	// friend void swap(Id_to_position_indexation_overlay& matrix1,
+	// 				 Id_to_position_indexation_overlay& matrix2){
+	// 	swap(matrix1.matrix_, matrix2.matrix_);
+	// 	matrix1.columnIDToPosition_.swap(matrix2.columnIDToPosition_);
+	// 	std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
+	// 	std::swap(matrix1.lastID_, matrix2.lastID_);
+	// }
+
+	// void print();  //for debug
+
+	// //access to optionnal methods
+
+	// //boundary
+	// const barcode_type& get_current_barcode();
+	// //chain
+	// //ru
+	// const barcode_type& get_current_barcode() const;
+	// //base
+	// //boundary
+	// void swap_columns(index columnIndex1, index columnIndex2);
+	// //base
+	// //boundary
+	// void swap_rows(index rowIndex1, index rowIndex2);
+	// //base
+	// //boundary
+	// void swap_at_indices(index index1, index index2);
+	// //chain
+	// //ru
+	// void update_representative_cycles();
+	// //chain
+	// //ru
+	// const std::vector<cycle_type>& get_representative_cycles();
+	// //chain
+	// //ru
+	// const cycle_type& get_representative_cycle(const bar_type& bar);
+	// //chain: returns index which was not modified, ie new i+1
+	// index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);	//by column id with potentielly unordered columns
+	// //chain: returns index which was not modified, ie new i+1
+	// index vine_swap(index columnIndex1, index columnIndex2);					//by column id with potentielly unordered columns
+	// //ru: returns true if barcode was changed
+	// bool vine_swap_with_z_eq_1_case(index index);
+	// //ru: returns true if barcode was changed
+	// bool vine_swap(index index);
 
 private:
 	using matrix_type = typename std::conditional<

@@ -52,6 +52,11 @@ public:
 		: CP(std::move(static_cast<CP&>(other))), 
 		  pivotToPosition_(std::move(other.pivotToPosition_)) {};
 
+protected:
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+
+	dictionnary_type pivotToPosition_;	//necessary to keep track of the barcode changes
+	
 	void swap_positions(index pivot1, index pivot2){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
@@ -121,11 +126,6 @@ public:
 		swap1.pivotToPosition_.swap(swap2.pivotToPosition_);
 	}
 
-protected:
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
-
-	dictionnary_type pivotToPosition_;	//necessary to keep track of the barcode changes
-
 	int death(index pivot) const
 	{
 		index simplexIndex = _get_pivot_position(pivot);
@@ -148,7 +148,7 @@ protected:
 		}
 	}
 
-// private:
+private:
 	index _get_pivot_position(index pivot) const{
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			return pivotToPosition_.at(pivot);		//quite often called, make public and pass position instead of pivot to avoid find() everytime?
