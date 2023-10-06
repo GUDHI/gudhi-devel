@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "gudhi/matrix.h"
-#include "gudhi/options.h"
+#include "gudhi/persistence_matrix_options.h"
 #include "gudhi/utilities/Z2_field.h"
 #include "gudhi/utilities/Zp_field.h"
 // #include "gudhi/utilities/utilities.h"
