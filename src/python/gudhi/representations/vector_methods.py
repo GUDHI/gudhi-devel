@@ -10,6 +10,7 @@
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
 import numpy as np
+from scipy.spatial.distance import cdist
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
@@ -681,16 +682,19 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         return self.transform([diag])[0,:]
 
 def _lapl_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / inertias)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    return np.exp(-cdist(XA=measure, XB=centers) / inertias)
 
 def _gaus_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers, squared=True) / inertias**2)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    return np.exp(-cdist(XA=measure, XB=centers, metric="sqeuclidean") / inertias**2)
 
 def _indicator_contrast(diags, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    robe_curve = np.clip(2-pairwise.pairwise_distances(diags, Y=centers)/inertias, 0, 1)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    robe_curve = np.clip(2-cdist(XA=diags, XB=centers)/inertias, 0, 1)
     return robe_curve
 
 def _cloud_weighting(measure):
@@ -745,15 +749,21 @@ class Atol(BaseEstimator, TransformerMixin):
                 (default: gaussian contrast function, see page 3 in the ATOL paper).
         """
         self.quantiser = quantiser
-        self.contrast = {
+        self.contrast = contrast
+        self.weighting_method = weighting_method
+
+    def get_contrast(self):
+        return {
             "gaussian": _gaus_contrast,
             "laplacian": _lapl_contrast,
             "indicator": _indicator_contrast,
-        }.get(contrast, _gaus_contrast)
-        self.weighting_method = {
+        }.get(self.contrast, _gaus_contrast)
+
+    def get_weighting_method(self):
+        return {
             "cloud"   : _cloud_weighting,
             "iidproba": _iidproba_weighting,
-        }.get(weighting_method, _cloud_weighting)
+        }.get(self.weighting_method, _cloud_weighting)
 
     def fit(self, X, y=None, sample_weight=None):
         """
@@ -771,18 +781,24 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if not hasattr(self.quantiser, 'fit'):
             raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
+
+        # In fitting we remove infinite death time points so that every center is finite
+        X = [dgm[~np.isinf(dgm).any(axis=1), :] for dgm in X]
+
         if sample_weight is None:
-            sample_weight = np.concatenate([self.weighting_method(measure) for measure in X])
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
 
         measures_concat = np.concatenate(X)
-        self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
+        weights_concat = np.concatenate(sample_weight)
+        self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
         self.centers = self.quantiser.cluster_centers_
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
             dist_centers = pairwise.pairwise_distances(measures_concat)
             np.fill_diagonal(dist_centers, 0)
-            self.inertias = np.array([np.max(dist_centers)/2])
+            best_inertia = np.max(dist_centers)/2 if np.max(dist_centers)/2 > 0 else 1
+            self.inertias = np.array([best_inertia])
         else:
             dist_centers = pairwise.pairwise_distances(self.centers)
             dist_centers[dist_centers == 0] = np.inf
@@ -800,8 +816,8 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array in R^self.quantiser.n_clusters.
         """
         if sample_weight is None:
-            sample_weight = self.weighting_method(measure)
-        return np.sum(sample_weight * self.contrast(measure, self.centers, self.inertias.T).T, axis=1)
+            sample_weight = self.get_weighting_method()(measure)
+        return np.sum(sample_weight * self.get_contrast()(measure, self.centers, self.inertias.T).T, axis=1)
 
     def transform(self, X, sample_weight=None):
         """
@@ -817,5 +833,5 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array with shape (number of measures) x (self.quantiser.n_clusters).
         """
         if sample_weight is None:
-            sample_weight = [self.weighting_method(measure) for measure in X]
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
         return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
