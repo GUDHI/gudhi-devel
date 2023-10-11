@@ -1662,56 +1662,49 @@ class Simplex_tree {
  private:
   bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
     auto&& list = sib->members();
-    bool modified;
+    bool modified = false;
+    bool emptied = false;
+    Simplex_handle last;
 
+    auto remove_children = [this, filt](Dit_value_t& simplex) {
+      if (simplex.second.filtration() <= filt) return false;
+      if (has_children(&simplex)) rec_delete(simplex.second.children());
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
+      return true;
+    };
+
+    //TODO: `if constexpr` replacable by `std::erase_if` in C++20? Has a risk of additional runtime,
+    //so to benchmark first.
     if constexpr (Options::stable_simplex_handles) {
       modified = false;
       for (auto sh = list.begin(); sh != list.end();) {
-        if (sh->second.filtration() > filt) {
-          modified = true;
-          if (has_children(sh)) rec_delete(sh->second.children());
-          // dimension may need to be lowered
-          dimension_to_be_lowered_ = true;
+        if (remove_children(*sh)) {
           sh = list.erase(sh);
+          modified = true;
         } else {
           ++sh;
         }
       }
-      if (list.empty() && sib != root()) {
-        // Removing the whole siblings, parent becomes a leaf.
-        sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
-        delete sib;
-        // dimension may need to be lowered
-        dimension_to_be_lowered_ = true;  //TODO: already done for sure, no?
-        return true;
-      } else {
-        // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
-        for (auto&& simplex : list)
-          if (has_children(&simplex)) modified |= rec_prune_above_filtration(simplex.second.children(), filt);
-      }
+      emptied = (list.empty() && sib != root());
     } else {
-      auto last = std::remove_if(list.begin(), list.end(), [this, filt](Dit_value_t& simplex) {
-        if (simplex.second.filtration() <= filt) return false;
-        if (has_children(&simplex)) rec_delete(simplex.second.children());
-        // dimension may need to be lowered
-        dimension_to_be_lowered_ = true;
-        return true;
-      });
-
+      last = std::remove_if(list.begin(), list.end(), remove_children);
       modified = (last != list.end());
-      if (last == list.begin() && sib != root()) {
-        // Removing the whole siblings, parent becomes a leaf.
-        sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
-        delete sib;
-        // dimension may need to be lowered
-        dimension_to_be_lowered_ = true;
-        return true;
-      } else {
-        // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
-        list.erase(last, list.end());
-        for (auto&& simplex : list)
-          if (has_children(&simplex)) modified |= rec_prune_above_filtration(simplex.second.children(), filt);
-      }
+      emptied = (last == list.begin() && sib != root());
+    }
+
+    if (emptied) {
+      // Removing the whole siblings, parent becomes a leaf.
+      sib->oncles()->members()[sib->parent()].assign_children(sib->oncles());
+      delete sib;
+      // dimension may need to be lowered
+      dimension_to_be_lowered_ = true;
+      return true;
+    } else {
+      // Keeping some elements of siblings. Remove the others, and recurse in the remaining ones.
+      if constexpr (!Options::stable_simplex_handles) list.erase(last, list.end());
+      for (auto&& simplex : list)
+        if (has_children(&simplex)) modified |= rec_prune_above_filtration(simplex.second.children(), filt);
     }
 
     return modified;
