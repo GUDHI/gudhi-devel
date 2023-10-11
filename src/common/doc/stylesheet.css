@@ -1,15 +1,8 @@
-#projectname
+#projectrow
 {
-  border: 0px none;
+	height: 24px;
 }
-#projectbrief
-{
-  font: 60% Tahoma, Arial,sans-serif;
-}
-#projectnumber
-{
-  font: 80% Tahoma, Arial,sans-serif;
-}
+
 .arrow
 {
     width: auto;
@@ -25,4 +18,10 @@
 // this setting is required
 ul {
   overflow: visible;
+}
+
+img.footer {
+	border: 0px;
+	vertical-align: middle;
+	width: 60px;
 }
