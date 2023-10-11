@@ -67,10 +67,12 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
     return std::isnan(*(this->begin()));
   }
   inline friend bool operator<(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
-    if (a.is_inf() || b.is_inf() || a.is_nan() || b.is_nan()) return false;
+    if (a.is_inf() || a.is_nan() || b.is_nan() || b.is_minus_inf()) return false;
+if (b.is_inf() || a.is_minus_inf()) return true;
     bool isSame = true;
-    int n = std::min(a.size(), b.size());
-    for (int i = 0; i < n; ++i) {
+    auto n = a.size();
+    assert(a.size() == b.size());
+    for (auto i = 0u; i < n; ++i) {
       if (a[i] > b[i]) return false;
       if (isSame && a[i] != b[i]) isSame = false;
     }
@@ -79,9 +81,11 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   }
   inline friend bool operator<=(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
     if (a.is_nan() || b.is_nan()) return false;
-    if (b.is_inf()) return a.is_inf();
-    int n = std::min(a.size(), b.size());
-    for (int i = 0; i < n; ++i) {
+    if (b.is_inf() || a.is_minus_inf()) return true;
+    if (a.is_inf() || b.is_minus_inf()) return false;
+    auto n = a.size();
+    assert(a.size() == b.size());
+    for (auto i = 0u; i < n; ++i) {
       if (a[i] > b[i]) return false;
     }
     return true;
@@ -128,9 +132,47 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
     }
     return result;
   }
+inline friend Finitely_critical_multi_filtration<T>& operator*=(Finitely_critical_multi_filtration<T>& result,
+                                                                  const T& to_add) {
+    for (auto& truc : result) {
+      truc *= to_add;
+    }
+    return result;
+  }
+  inline friend Finitely_critical_multi_filtration<T>& operator/=(Finitely_critical_multi_filtration<T>& result,
+                                                                  const T& to_add) {
+    for (auto& truc : result) {
+      truc /= to_add;
+    }
+    return result;
+  }
+  inline friend Finitely_critical_multi_filtration<T> operator-(Finitely_critical_multi_filtration<T> result,
+                                                                  const T& to_add) {
+    for (auto& truc : result) {
+      truc -= static_cast<T>(to_add);
+    }
+    return result;
+  }
+  inline friend Finitely_critical_multi_filtration<T> operator-(const T& to_add,
+                                                                const Finitely_critical_multi_filtration<T>& result
+                                                                ) {
+    return  result - to_add;
+  }
+  inline friend Finitely_critical_multi_filtration<T> operator*(Finitely_critical_multi_filtration<T> result,
+                                                                  const T& to_add) {
+    for (auto& truc : result) {
+      truc *= static_cast<T>(to_add);
+    }
+    return result;
+  }
+  inline friend Finitely_critical_multi_filtration<T> operator*(const T& to_add,
+                                                                const Finitely_critical_multi_filtration<T>& result
+                                                                ) {
+    return  result - to_add;
+  }
 
   // template<class array_like>
-  inline friend bool operator==(Finitely_critical_multi_filtration<T>& self,
+  inline friend bool operator==(const Finitely_critical_multi_filtration<T>& self,
                          const Finitely_critical_multi_filtration<T>& to_compare) {
     if (self.size() != to_compare.size()) return false;
     auto it = to_compare.begin();
@@ -218,6 +260,9 @@ static constexpr bool has_infinity = true;
 	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> infinity() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::infinity());
 	};
+static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> minus_infinity() throw(){
+      return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, -std::numeric_limits<T>::infinity());
+    };
 static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> max() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::max());
 	};
