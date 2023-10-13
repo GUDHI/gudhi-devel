@@ -2318,7 +2318,7 @@ struct Simplex_tree_options_full_featured {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = true;
+  static const bool stable_simplex_handles = false;
 };
 
 /** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
@@ -2335,7 +2335,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = true;
+  static const bool stable_simplex_handles = false;
 };
 
 /** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
@@ -2352,7 +2352,7 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = true;
+  static const bool stable_simplex_handles = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree
