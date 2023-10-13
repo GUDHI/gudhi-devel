@@ -20,7 +20,7 @@
 namespace Gudhi::multiparameter::multi_filtrations {
 
 /** \class Finitely_critical_multi_filtration Finitely_critical_multi_filtration.h gudhi/Simplex_tree/multi_filtrations/Finitely_critical_multi_filtration.h
- * \brief Vector-like filtration value, for multiparameter persistence 
+ * \brief Vector-like filtration value, for multiparameter persistence, with numpy-like methods.
  *
  * \ingroup multiparameter
  *
@@ -36,7 +36,6 @@ namespace Gudhi::multiparameter::multi_filtrations {
  */
 template <typename T = float>
 class Finitely_critical_multi_filtration : public std::vector<T> {
-  // Class to prevent doing illegal stuff with the standard library, e.g., compare two vectors
  public:
   Finitely_critical_multi_filtration() : std::vector<T>(){};
   Finitely_critical_multi_filtration(int n)
@@ -68,7 +67,7 @@ class Finitely_critical_multi_filtration : public std::vector<T> {
   }
   inline friend bool operator<(const Finitely_critical_multi_filtration& a, const Finitely_critical_multi_filtration& b) {
     if (a.is_inf() || a.is_nan() || b.is_nan() || b.is_minus_inf()) return false;
-if (b.is_inf() || a.is_minus_inf()) return true;
+    if (b.is_inf() || a.is_minus_inf()) return true;
     bool isSame = true;
     auto n = a.size();
     assert(a.size() == b.size());
@@ -189,6 +188,12 @@ inline friend Finitely_critical_multi_filtration<T>& operator*=(Finitely_critica
   inline static std::vector<Finitely_critical_multi_filtration<T>> from_python(const std::vector<std::vector<T>>& to_convert) {
     return std::vector<Finitely_critical_multi_filtration<T>>(to_convert.begin(), to_convert.end());
   }
+  
+  /** \brief This functions take the filtration value `this` and pushes it to the cone \f$ \{ y\in \mathbb R^n : y>=x \} \f$.
+   * After calling this method, the value of this is updated to
+   * \f$ \mathrm{this} = \min \{ y\in \mathbb R^n : y>=this \}\cap \{ y\in \mathbb R^n : y>=x \}
+   * @param[in] x The target filtration value on which to push `this`.
+   */
   inline void push_to(const Finitely_critical_multi_filtration<T>& x) {
     if (this->is_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) 
       return;
@@ -255,15 +260,15 @@ template<typename T>
 class numeric_limits<Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>>
 {
 public:
-static constexpr bool has_infinity = true; 
+  static constexpr bool has_infinity = true; 
 
 	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> infinity() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::infinity());
 	};
-static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> minus_infinity() throw(){
+  static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> minus_infinity() throw(){
       return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, -std::numeric_limits<T>::infinity());
     };
-static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> max() throw(){
+  static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> max() throw(){
 		return Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T>(1, std::numeric_limits<T>::max());
 	};
 	static Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<T> quiet_NaN() throw(){
