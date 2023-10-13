@@ -1666,7 +1666,7 @@ class Simplex_tree {
     bool emptied = false;
     Simplex_handle last;
 
-    auto remove_children = [this, filt](Dit_value_t& simplex) {
+    auto to_remove = [this, filt](Dit_value_t& simplex) {
       if (simplex.second.filtration() <= filt) return false;
       if (has_children(&simplex)) rec_delete(simplex.second.children());
       // dimension may need to be lowered
@@ -1679,7 +1679,7 @@ class Simplex_tree {
     if constexpr (Options::stable_simplex_handles) {
       modified = false;
       for (auto sh = list.begin(); sh != list.end();) {
-        if (remove_children(*sh)) {
+        if (to_remove(*sh)) {
           sh = list.erase(sh);
           modified = true;
         } else {
@@ -1688,7 +1688,7 @@ class Simplex_tree {
       }
       emptied = (list.empty() && sib != root());
     } else {
-      last = std::remove_if(list.begin(), list.end(), remove_children);
+      last = std::remove_if(list.begin(), list.end(), to_remove);
       modified = (last != list.end());
       emptied = (last == list.begin() && sib != root());
     }
