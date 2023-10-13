@@ -1370,6 +1370,10 @@ class Simplex_tree {
     * @brief Adds a new vertex or a new edge in a flag complex, as well as all
     * simplices of its star, defined to maintain the property
     * of the complex to be a flag complex, truncated at dimension dim_max.
+    * To insert a new edge, the two given vertex handles have to correspond 
+    * to the two end points of the edge. To insert a new vertex, the handles
+    * have to be twice the same and correspond to the number you want assigned
+    * to it. I.e., to insert vertex \f$i\f$, give \f$u = v = i\f$.
     * The method assumes that the given edge was not already contained in
     * the simplex tree, so the behaviour is undefined if called on an existing
     * edge. Also, the vertices of an edge have to be inserted before the edge.
@@ -1446,8 +1450,8 @@ class Simplex_tree {
           std::invalid_argument(
                   "Simplex_tree::insert_edge_as_flag - inserts an edge whose vertices are not in the complex")
                 );
-    GUDHI_CHECK(has_children(sh_u) &&
-          sh_u->second.children()->members().find(v) != sh_u->second.children()->members().end(),
+    GUDHI_CHECK(!has_children(sh_u) ||
+          sh_u->second.children()->members().find(v) == sh_u->second.children()->members().end(),
           std::invalid_argument(
                   "Simplex_tree::insert_edge_as_flag - inserts an already existing edge")
                 );
@@ -1565,12 +1569,12 @@ class Simplex_tree {
     //intersect N^+(v) with labels y > v in curr_sib
     Simplex_handle next_it = sh_v;
     ++next_it;
-    thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
+
     if (dimension_ > k) {
       dimension_ = k;   //to keep track of the max height of the recursion tree
     }
 
-    create_expansion<true>(curr_sib, sh_v, inter, next_it, fil_uv, k, &added_simplices);
+    create_expansion<true>(curr_sib, sh_v, next_it, fil_uv, k, &added_simplices);
   }
   //TODO boost::container::ordered_unique_range_t in the creation of a Siblings
 
@@ -1594,11 +1598,10 @@ class Simplex_tree {
     if (k == 0) { return; } //max dimension
     Dictionary_it next = ++(siblings->members().begin());
 
-    thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          next != siblings->members().end(); ++s_h, ++next)
     { //find N^+(s_h)
-      create_expansion<true>(siblings, s_h, inter, next, fil, k, &added_simplices);
+      create_expansion<true>(siblings, s_h, next, fil, k, &added_simplices);
     }
   }
 
@@ -1614,11 +1617,10 @@ class Simplex_tree {
     Dictionary_it next = siblings->members().begin();
     ++next;
 
-    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
          s_h != siblings->members().end(); ++s_h, ++next)
     {
-      create_expansion<false>(siblings, s_h, inter, next, s_h->second.filtration(), k);
+      create_expansion<false>(siblings, s_h, next, s_h->second.filtration(), k);
     }
   }
 
@@ -1629,13 +1631,13 @@ class Simplex_tree {
   template<bool force_filtration_value>
   void create_expansion(Siblings * siblings,
                         Dictionary_it& s_h,
-                        std::vector<std::pair<Vertex_handle, Node> >& inter,
                         Dictionary_it& next,
                         Filtration_value fil,
                         int k,
                         std::vector<Simplex_handle>* added_simplices = nullptr)
   {
     Simplex_handle root_sh = find_vertex(s_h->first);
+    thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
 
     if (!has_children(root_sh)) return;
 
