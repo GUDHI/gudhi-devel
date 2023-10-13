@@ -1378,8 +1378,9 @@ class Simplex_tree {
     * the simplex tree, so the behaviour is undefined if called on an existing
     * edge. Also, the vertices of an edge have to be inserted before the edge.
     *
-    * @param[in] u,v              Vertex_handle representing the new edge
-    * @param[in] fil              Filtration value of the edge
+    * @param[in] u,v              Vertex_handle representing the new edge 
+    *                             (@p v != @p u) or the new vertex (@p v == @p u).
+    * @param[in] fil              Filtration value of the edge.
     * @param[in] dim_max          Maximal dimension of the expansion.
     *                             If set to -1, the expansion goes as far as possible.
     * @param[out] added_simplices Contains at the end all new
