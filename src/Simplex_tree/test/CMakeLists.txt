@@ -47,6 +47,12 @@ if(TARGET TBB::tbb)
 endif()
 gudhi_add_boost_test(Simplex_tree_serialization_test_unit)
 
+add_executable ( Simplex_tree_edge_expansion_unit_test simplex_tree_edge_expansion_unit_test.cpp )
+if(TARGET TBB::tbb)
+  target_link_libraries(Simplex_tree_edge_expansion_unit_test TBB::tbb)
+endif()
+gudhi_add_boost_test(Simplex_tree_edge_expansion_unit_test)
+
 add_executable ( Simplex_tree_extended_filtration_test_unit simplex_tree_extended_filtration_unit_test.cpp )
 if(TARGET TBB::tbb)
   target_link_libraries(Simplex_tree_extended_filtration_test_unit TBB::tbb)

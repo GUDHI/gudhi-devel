@@ -5,8 +5,10 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - 2020/09 Clément Maria: option to link all simplex tree nodes with same label in an intrusive list.
+ *      - 2020/09 Clément Maria: Option to link all simplex tree nodes with same label in an intrusive list
+ *      - 2020/09 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/02 Vincent Rouvreau: Add de/serialize methods for pickle feature
+ *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
  *      - YYYY/MM Author: Description of the modification
  */
@@ -540,33 +542,43 @@ class Simplex_tree {
   }
 
  public:
+//   friend Simplex_tree<Simplex_tree_options_full_featured>;
+//   friend Simplex_tree<Simplex_tree_options_fast_persistence>;
+//   friend Simplex_tree<Simplex_tree_options_fast_cofaces>;
+  template<typename> friend class Simplex_tree;
+
   /** \brief Checks if two simplex trees are equal. */
-  bool operator==(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator==(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     if ((null_vertex_ != st2.null_vertex_) ||
         (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
-    return rec_equal(&root_, &st2.root_);
+    return rec_equal<OtherSimplexTreeOptions>(&root_, &st2.root_);
   }
 
   /** \brief Checks if two simplex trees are different. */
-  bool operator!=(Simplex_tree& st2) {
+  template<class OtherSimplexTreeOptions>
+  bool operator!=(Simplex_tree<OtherSimplexTreeOptions>& st2) {
     return (!(*this == st2));
   }
 
  private:
   /** rec_equal: Checks recursively whether or not two simplex trees are equal, using depth first search. */
-  bool rec_equal(Siblings* s1, Siblings* s2) {
+  template<class OtherSimplexTreeOptions>
+  bool rec_equal(Siblings* s1, typename Simplex_tree<OtherSimplexTreeOptions>::Siblings* s2) {
     if (s1->members().size() != s2->members().size())
       return false;
-    for (auto sh1 = s1->members().begin(), sh2 = s2->members().begin();
-         (sh1 != s1->members().end() && sh2 != s2->members().end()); ++sh1, ++sh2) {
+    auto sh2 = s2->members().begin();
+    for (auto sh1 = s1->members().begin();
+         (sh1 != s1->members().end() && sh2 != s2->members().end());
+         ++sh1, ++sh2) {
       if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
         return false;
       if (has_children(sh1) != has_children(sh2))
         return false;
       // Recursivity on children only if both have children
       else if (has_children(sh1))
-        if (!rec_equal(sh1->second.children(), sh2->second.children()))
+        if (!rec_equal<OtherSimplexTreeOptions>(sh1->second.children(), sh2->second.children()))
           return false;
     }
     return true;
@@ -696,13 +708,7 @@ class Simplex_tree {
    *
    * Must be different from null_simplex().*/
   int dimension(Simplex_handle sh) {
-    Siblings * curr_sib = self_siblings(sh);
-    int dim = 0;
-    while (curr_sib != nullptr) {
-      ++dim;
-      curr_sib = curr_sib->oncles();
-    }
-    return dim - 1;
+    return dimension(self_siblings(sh));
   }
 
   /** \brief Returns an upper bound on the dimension of the simplicial complex. */
@@ -721,7 +727,7 @@ class Simplex_tree {
   }
 
   /** \brief Returns true if the node in the simplex tree pointed by
-   * sh has children.*/
+   * the given simplex handle has children.*/
   template<class SimplexHandle>
   bool has_children(SimplexHandle sh) const {
     // Here we rely on the root using null_vertex(), which cannot match any real vertex.
@@ -1354,11 +1360,228 @@ class Simplex_tree {
     dimension_ = max_dim - dimension_;
   }
 
+  /**
+    * @brief Adds a vertex or an edge in a flag complex, as well as all
+    * simplices of its star, defined to maintain the property
+    * of the complex to be a flag complex, truncated at dimension dim_max.
+    *
+    * @param[in] u,v              Vertex_handle representing the new edge
+    * @param[in] fil              Filtration value of the edge
+    * @param[in] dim_max          Maximal dimension of the expansion.
+    *                             If set to -1, the expansion goes as far as possible.
+    * @param[in] added_simplices  Contains at the end all new
+    *                             simplices induced by the insertion of the edge.
+    *
+    * @pre `SimplexTreeOptions::link_nodes_by_label` must be true.
+    * @pre When inserting the edge `[u,v]`, the vertices @p u and @p v have to be
+    * already inserted in the simplex tree.
+    *
+    * @warning If the edges and vertices are not inserted in the order of their
+    * filtration values, the method `make_filtration_non_decreasing()` has to be
+    * called at the end of the insertions to restore the intended filtration.
+    * @warning Different from other insertion methods, if a vertex or an edges
+    * was already inserted in the simplex, it will be ignored and the filtration
+    * values will not change.
+    */
+  void insert_edge_as_flag(  Vertex_handle                   u
+                           , Vertex_handle                   v
+                           , Filtration_value                fil
+                           , int                             dim_max
+                           , std::vector<Simplex_handle>&    added_simplices)
+  {
+    /**
+     * In term of edges in the graph, inserting edge `[u,v]` only affects
+     * the subtree rooted at @p u.
+     *
+     * For a new node with label @p v, we first do a local expansion for
+     * computing the children of this new node, and then a standard expansion
+     * for its children.
+     * Nodes with label @p v (and their subtrees) already in the tree
+     * do not get affected.
+     *
+     * Nodes with label @p u get affected only if a Node with label @p v is in their same
+     * siblings set.
+     * We then try to insert "ponctually" @p v all over the subtree rooted
+     * at `Node(u)`. Each insertion of a Node with @p v label induces a local
+     * expansion at this Node (as explained above) and a sequence of "ponctual"
+     * insertion of `Node(v)` in the subtree rooted at sibling nodes of the new node,
+     * on its left.
+     */
+
+    static_assert(Options::link_nodes_by_label, "Options::link_nodes_by_label must be true");
+
+    if (u == v) { // Are we inserting a vertex?
+      auto res_ins = root_.members().emplace(u, Node(&root_,fil));
+      if (res_ins.second) { //if the vertex is not in the complex, insert it
+        added_simplices.push_back(res_ins.first); //no more insert in root_.members()
+        update_simplex_tree_after_node_insertion(res_ins.first);
+      }
+      return; //because the vertex is isolated, no more insertions.
+    }
+    // else, we are inserting an edge: ensure that u < v
+    if (v < u) { std::swap(u,v); }
+
+    //Note that we copy Simplex_handle (aka map iterators) in added_simplices
+    //while we are still modifying the Simplex_tree. Insertions in siblings may
+    //invalidate Simplex_handles; we take care of this fact by first doing all
+    //insertion in a Sibling, then inserting all handles in added_simplices.
+
+    //check whether vertices u and v are in the tree. If not, return an error.
+    auto sh_u = root_.members().find(u);
+    GUDHI_CHECK(sh_u != root_.members().end() &&
+          root_.members().find(v) != root_.members().end(),
+          std::invalid_argument(
+                  "Simplex_tree::insert_edge_as_flag - insert an edge whose vertices are not in the complex")
+                );
+
+    //check if the edge {u,v} is already in the complex, if true, nothing to do.
+    if (has_children(sh_u) &&
+        sh_u->second.children()->members().find(v) != sh_u->second.children()->members().end())
+    {
+      GUDHI_CHECK(false,"Simplex_tree::insert_edge_as_flag - insert an edge already in the complex");
+      return;
+    }
+
+    //upper bound on dimension
+    dimension_ = dim_max == -1 ? num_vertices() : dim_max;
+    dimension_to_be_lowered_ = true;
+
+    //for all siblings containing a Node labeled with u (including the root), run
+    //compute_punctual_expansion
+    //todo parallelise
+    auto ptr_list_u = nodes_by_label(u);//all Nodes with u label
+
+    GUDHI_CHECK(ptr_list_u != nullptr,"Simplex_tree::insert_edge_as_flag - cannot find the list of Nodes with label u");
+
+    for (auto hook_u_it = ptr_list_u->begin(); hook_u_it != ptr_list_u->end(); ++hook_u_it)
+    {
+      Node & node_u = static_cast<Node&>(*hook_u_it); //corresponding node
+      Siblings * sib_u = self_siblings(simplex_handle_from_node(node_u));
+      if (sib_u->members().find(v) != sib_u->members().end()) {
+        int curr_dim = dimension(sib_u);
+        if (dim_max == -1 || curr_dim < dim_max){
+          if (node_u.children()->parent() != u) { //now has a new child Node labeled v
+            node_u.assign_children(new Siblings(sib_u, u));
+          }
+          compute_punctual_expansion(
+                v,
+                node_u.children(),
+                fil,
+                dim_max - curr_dim - 1, //>= 0 if dim_max >= 0, <0 otherwise
+                added_simplices );      //u on top
+        }
+      }
+    }
+  }
+
  private:
+
+  int dimension(Siblings* curr_sib) {
+    int dim = 0;
+    while (curr_sib != nullptr) {
+      ++dim;
+      curr_sib = curr_sib->oncles();
+    }
+    return dim - 1;
+  }
+
+  /** \brief Insert a Node with label @p v in the set of siblings sib, and percolate the
+   * expansion on the subtree rooted at sib. Sibling sib must not contain
+   * @p v.
+   * The percolation of the expansion is twofold:
+   * 1- the newly inserted Node labeled @p v in sib has a subtree computed
+   * via create_local_expansion.
+   * 2- All Node in the members of sib, with label @p x and @p x < @p v,
+   * need in turn a local_expansion by @p v iff N^+(x) contains @p v.
+   */
+  void compute_punctual_expansion(  Vertex_handle    v
+                                  , Siblings *       sib
+                                  , Filtration_value fil
+                                  , int              k    //k == dim_max - dimension simplices in sib
+                                  , std::vector<Simplex_handle>& added_simplices )
+  { //insertion always succeeds because the edge {u,v} used to not be here.
+    auto res_ins_v = sib->members().emplace(v, Node(sib,fil));
+    added_simplices.push_back(res_ins_v.first); //no more insertion in sib
+    update_simplex_tree_after_node_insertion(res_ins_v.first);
+
+    if (k == 0) { return; } //reached the maximal dimension. if max_dim == -1, k is never equal to 0.
+
+    //create the subtree of new Node(v)
+    create_local_expansion(  res_ins_v.first
+                           , sib
+                           , fil
+                           , k
+                           , added_simplices );
+
+    //punctual expansion in nodes on the left of v, i.e. with label x < v
+    for (auto sh = sib->members().begin(); sh != res_ins_v.first; ++sh)
+    { //if v belongs to N^+(x), punctual expansion
+      Simplex_handle root_sh = find_vertex(sh->first); //Node(x), x < v
+      if (has_children(root_sh) &&
+          root_sh->second.children()->members().find(v) != root_sh->second.children()->members().end())
+      { //edge {x,v} is in the complex
+        if (!has_children(sh)){
+          sh->second.assign_children(new Siblings(sib, sh->first));
+        }
+        //insert v in the children of sh, and expand.
+        compute_punctual_expansion(  v
+                                   , sh->second.children()
+                                   , fil
+                                   , k-1
+                                   , added_simplices );
+      }
+    }
+  }
+
+  /** \brief After the insertion of edge `{u,v}`, expansion of a subtree rooted at @p v, where the
+   * Node with label @p v has just been inserted, and its parent is a Node labeled with
+   * @p u. sh has no children here.
+   *
+   * k must be > 0
+   */
+  void create_local_expansion(
+        Simplex_handle   sh_v       //Node with label v which has just been inserted
+      , Siblings       * curr_sib   //Siblings containing the node sh_v
+      , Filtration_value fil_uv     //Fil value of the edge uv in the zz filtration
+      , int              k          //Stopping condition for recursion based on max dim
+      , std::vector<Simplex_handle> &added_simplices) //range of all new simplices
+  { //pick N^+(v)
+    //intersect N^+(v) with labels y > v in curr_sib
+    Simplex_handle next_it = sh_v;
+    ++next_it;
+    thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
+
+    create_expansion<true>(curr_sib, sh_v, inter, next_it, fil_uv, k, &added_simplices);
+  }
+  //TODO boost::container::ordered_unique_range_t in the creation of a Siblings
+
+  /** \brief Global expansion of a subtree in the simplex tree.
+   *
+   * The filtration value is absolute and defined by `Filtration_value fil`.
+   * The new Node are also connected appropriately in the coface
+   * data structure.
+   */
+  void siblings_expansion(
+        Siblings       * siblings  // must contain elements
+      , Filtration_value fil
+      , int              k         //==max_dim expansion - dimension curr siblings
+      , std::vector<Simplex_handle> & added_simplices )
+  {
+    if (k == 0) { return; } //max dimension
+    Dictionary_it next = ++(siblings->members().begin());
+
+    thread_local std::vector< std::pair<Vertex_handle, Node> > inter;
+    for( Dictionary_it s_h = siblings->members().begin();
+         next != siblings->members().end(); ++s_h, ++next)
+    { //find N^+(s_h)
+      create_expansion<true>(siblings, s_h, inter, next, fil, k, &added_simplices);
+    }
+  }
+
   /** \brief Recursive expansion of the simplex tree.*/
   void siblings_expansion(Siblings * siblings,  // must contain elements
                           int k) {
-    if (dimension_ > k) {
+    if (k >= 0 && dimension_ > k) {
       dimension_ = k;
     }
     if (k == 0)
@@ -1368,38 +1591,60 @@ class Simplex_tree {
 
     thread_local std::vector<std::pair<Vertex_handle, Node> > inter;
     for (Dictionary_it s_h = siblings->members().begin();
-         s_h != siblings->members().end(); ++s_h, ++next) {
-      Simplex_handle root_sh = find_vertex(s_h->first);
-      if (has_children(root_sh)) {
-        intersection(
-                     inter,  // output intersection
-                     next,  // begin
-                     siblings->members().end(),  // end
-                     root_sh->second.children()->members().begin(),
-                     root_sh->second.children()->members().end(),
-                     s_h->second.filtration());
-        if (inter.size() != 0) {
-          Siblings * new_sib = new Siblings(siblings,  // oncles
-                                            s_h->first,  // parent
-                                            inter);  // boost::container::ordered_unique_range_t
-          for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
-            update_simplex_tree_after_node_insertion(it);
-          }
+         s_h != siblings->members().end(); ++s_h, ++next)
+    {
+      create_expansion<false>(siblings, s_h, inter, next, s_h->second.filtration(), k);
+    }
+  }
 
-          inter.clear();
-          s_h->second.assign_children(new_sib);
-          siblings_expansion(new_sib, k - 1);
-        } else {
-          // ensure the children property
-          s_h->second.assign_children(siblings);
-          inter.clear();
+  /** \brief Recursive expansion of the simplex tree.*/
+  template<bool force_filtration_value>
+  void create_expansion(Siblings * siblings,
+                        Dictionary_it& s_h,
+                        std::vector<std::pair<Vertex_handle, Node> >& inter,
+                        Dictionary_it& next,
+                        Filtration_value fil,
+                        int k,
+                        std::vector<Simplex_handle>* added_simplices = nullptr)
+  {
+    Simplex_handle root_sh = find_vertex(s_h->first);
+
+    if (!has_children(root_sh)) return;
+
+    intersection<force_filtration_value>(
+          inter,  // output intersection
+          next,   // begin
+          siblings->members().end(),  // end
+          root_sh->second.children()->members().begin(),
+          root_sh->second.children()->members().end(),
+          fil);
+    if (inter.size() != 0) {
+      Siblings * new_sib = new Siblings(siblings,   // oncles
+                                        s_h->first, // parent
+                                        inter);     // boost::container::ordered_unique_range_t
+      for (auto it = new_sib->members().begin(); it != new_sib->members().end(); ++it) {
+        update_simplex_tree_after_node_insertion(it);
+        if constexpr (force_filtration_value){
+          added_simplices->push_back(it);
         }
       }
+      inter.clear();
+      s_h->second.assign_children(new_sib);
+      if constexpr (force_filtration_value){
+        siblings_expansion(new_sib, fil, k - 1, *added_simplices);
+      } else {
+        siblings_expansion(new_sib, k - 1);
+      }
+    } else {
+      // ensure the children property
+      s_h->second.assign_children(siblings);
+      inter.clear();
     }
   }
 
   /** \brief Intersects Dictionary 1 [begin1;end1) with Dictionary 2 [begin2,end2)
    * and assigns the maximal possible Filtration_value to the Nodes. */
+  template<bool force_filtration_value = false>
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
@@ -1408,8 +1653,12 @@ class Simplex_tree {
       return;  // ----->>
     while (true) {
       if (begin1->first == begin2->first) {
-        Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
-        intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        if constexpr (force_filtration_value){
+          intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
+        } else {
+          Filtration_value filt = (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+          intersection.emplace_back(begin1->first, Node(nullptr, filt));
+        }
         if (++begin1 == end1 || ++begin2 == end2)
           return;  // ----->>
       } else if (begin1->first < begin2->first) {
@@ -2331,6 +2580,43 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = false;
+};
+
+/** Model of SimplexTreeOptions, fitting the requirement of the @ref Gudhi::zigzag_persistence::ZigzagComplex concept.
+ *
+ * Maximum number of arrows in the filtration is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
+ * (about 2 billions of arrows). If more arrows are needed, just inherit from this structure and redefine
+ * the type `Simplex_key`, for example as `std::int64_t`.*/
+struct Simplex_tree_options_zigzag_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+/** Model of SimplexTreeOptions, as expected from @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_range.
+ * The values of `stable_simplex_handles`, `store_key` and `store_filtration` are mandatory.
+ * `Simplex_key` has to be a signed integer type if @ref Gudhi::zigzag_persistence::Zigzag_persistence is used 
+ * for the range. Otherwise, the options can be readapted.
+ *
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::int64_t>::max()</CODE>
+ * (way enough simplices). If less are needed, just inherit from this structure and redefine
+ * the type `Simplex_key`. */
+struct Simplex_tree_options_oscillating_rips {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int64_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
 };
 
 /** @}*/  // end addtogroup simplex_tree
