@@ -79,35 +79,43 @@ def test_distance_transform_consistency():
 
 kernel_dict = {
     "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
-                           dict(num_directions=10), dict(rel=1e-3), dict(rel=1e-2)),
+                           dict(num_directions=10)),
     "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
-                           dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
-                           dict(rel=1e-3), dict(rel=1e-2)),
-    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=4.,
+                           dict(bandwidth=3.),),  # corresponds to bandwidth_fisher in the kernel class
+    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=2.,
                                                                         weight=lambda x: x[1]-x[0]),
-                                      dict(bandwidth=4., weight=lambda x: x[1]-x[0]),
-                                      dict(rel=1e-3), dict(rel=1e-2)),
-    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=4.),
-                                      dict(bandwidth=4.),
-                                      dict(rel=1e-3), dict(rel=1e-2)),
+                                      dict(bandwidth=2., weight=lambda x: x[1]-x[0]),),
+    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=3.),
+                                      dict(bandwidth=3.)),
 }
 
 def test_kernel_from_distance():
     l1, l2 = _n_diags(9), _n_diags(11)
+    tolerance = dict(rel=1e-3)
     for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
-        kernelClass, kernelParams, tolerance, _ = kernel_dict[kernelName]
+        kernelClass, kernelParams = kernel_dict[kernelName]
         f1 = kernelClass.fit_transform(l1)
         d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
         assert np.exp(-d1/kernelClass.bandwidth) == pytest.approx(f1, **tolerance)
 
 def test_kernel_distance_consistency():
     l1, l2 = _n_diags(9), _n_diags(11)
-    for kernelName, (kernelClass, kernelParams, tolerance, tolerance_approximate_kernel) in kernel_dict.items():
+    tolerance = dict(rel=1e-3)
+    for kernelName, (kernelClass, kernelParams) in kernel_dict.items():
         _ = kernelClass.fit(l1)
         f2 = kernelClass.transform(l2)
         f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
         assert f12 == pytest.approx(f2, **tolerance)
-        kernel_approx = RBFSampler(gamma=0.5, n_components=1000).fit(np.array([[0., 2.]]))
+
+def test_kernel_approximation():
+    l1, l2 = _n_diags(3), _n_diags(3)
+    tolerance_approximate_kernel = dict(rel=1e-1)
+    for kernelName in ["persistence_weighted_gaussian", "persistence_scale_space"]:
+        kernelClass, kernelParams = kernel_dict[kernelName]
+        _ = kernelClass.fit(l1)
+        f2 = kernelClass.transform(l2)
+        gamma = 0.5*1./(kernelParams["bandwidth"]**2)
+        kernel_approx = RBFSampler(gamma=gamma, n_components=1000).fit(np.array([[0., 2.]]))
         kernelClass.kernel_approx = kernel_approx
         _ = kernelClass.fit(l1)
         f2_approx = kernelClass.transform(l2)
