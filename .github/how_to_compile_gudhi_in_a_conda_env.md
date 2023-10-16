@@ -68,8 +68,8 @@ mkdir build
 cd build
 # python OFF to prevent python modules search makes cmake faster
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_PYTHON=OFF  ..
-make doxygen 2>&1 | tee dox.log
-grep warning dox.log # Warnings can be lost with parallel doxygen
+make doxygen
+grep warning doxygen.log # Warnings can be lost with parallel doxygen
 firefox html/index.html # [optional] To display the c++ documentation. Anything else than firefox can be used.
 ```
 

@@ -26,8 +26,8 @@ struct Trie {
   typedef typename SimplexHandle::Vertex_handle Vertex_handle;
 
   Vertex_handle v;
-  std::vector<std::shared_ptr<Trie> > childs;
-  // std::vector<std::unique_ptr<Trie> > childs; -> use of deleted function
+  std::vector<std::shared_ptr<Trie> > children;
+  // std::vector<std::unique_ptr<Trie> > children; -> use of deleted function
  private:
   const Trie* parent_;
 
@@ -45,7 +45,7 @@ struct Trie {
   void add_child(Trie* child) {
     if (child) {
       std::shared_ptr<Trie> ptr_to_add(child);
-      childs.push_back(ptr_to_add);
+      children.push_back(ptr_to_add);
       child->parent_ = this;
     }
   }
@@ -71,7 +71,7 @@ struct Trie {
     ++s_it;
     if (s_it == s_end) return;
     if (!is_leaf()) {
-      for (auto child : childs) {
+      for (auto child : children) {
         if (child->v == *s_it)
           return child->add_simplex_helper(s_it, s_end);
       }
@@ -86,7 +86,7 @@ struct Trie {
   void maximal_faces_helper(std::vector<Simplex>& res) const {
     if (is_leaf()) res.push_back(simplex());
     else
-      for (auto child : childs)
+      for (auto child : children)
         child->maximal_faces_helper(res);
   }
 
@@ -122,7 +122,7 @@ struct Trie {
   }
 
   bool is_leaf() const {
-    return childs.empty();
+    return children.empty();
   }
 
   bool is_root() const {
@@ -136,7 +136,7 @@ struct Trie {
   void remove_leaf() {
     assert(is_leaf());
     if (!is_root())
-      parent_->childs.erase(this);
+      parent_->children.erase(this);
   }
 
   /**
@@ -150,7 +150,7 @@ struct Trie {
     ++s_pos;
     while (s_pos != s.end() && current != 0) {
       bool found = false;
-	  for (const auto& child : current->childs) {
+	  for (const auto& child : current->children) {
         if (child->v == *s_pos) {
           ++s_pos;
           current = child.get();
@@ -167,12 +167,12 @@ struct Trie {
     if (is_leaf())
       return this;
     else
-      return (*childs.begin())->go_bottom_left();
+      return (*children.begin())->go_bottom_left();
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const Trie& trie) {
     stream << "T( " << trie.v << " ";
-    for (auto t : trie.childs)
+    for (auto t : trie.children)
       stream << *t;
     stream << ")";
     return stream;
@@ -206,7 +206,7 @@ struct Tries {
 
   Simplex positive_neighbors(Vertex_handle v) const {
     Simplex res;
-    for (auto child : cofaces_[v]->childs)
+    for (auto child : cofaces_[v]->children)
       res.add_vertex(child->v);
     return res;
   }
@@ -228,7 +228,7 @@ struct Tries {
     std::vector<Simplex> res;
     while (!(to_see_.empty()) && (to_see_.front()->simplex().dimension() == current_dimension_)) {
       res.emplace_back(to_see_.front()->simplex());
-      for (auto child : to_see_.front()->childs)
+      for (auto child : to_see_.front()->children)
         to_see_.push_back(child.get());
       to_see_.pop_front();
     }

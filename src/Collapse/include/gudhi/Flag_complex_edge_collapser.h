@@ -283,7 +283,7 @@ end_move:
 };
 
 template<class R> R to_range(R&& r) { return std::move(r); }
-template<class R, class T> R to_range(T&& t) { R r; r.insert(r.end(), t.begin(), t.end()); return r; }
+template<class R, class T> R to_range(T const& t) { R r; r.insert(r.end(), t.begin(), t.end()); return r; }
 
 template<class FilteredEdgeRange, class Delay>
 auto flag_complex_collapse_edges(FilteredEdgeRange&& edges, Delay&&delay) {

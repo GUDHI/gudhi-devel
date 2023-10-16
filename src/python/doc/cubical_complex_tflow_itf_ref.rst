@@ -36,5 +36,4 @@ Documentation for CubicalLayer
 
 .. autoclass:: gudhi.tensorflow.CubicalLayer
    :members:
-   :special-members: __init__
    :show-inheritance:

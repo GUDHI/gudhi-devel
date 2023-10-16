@@ -11,6 +11,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iterator>  // for std::distance
+#include <algorithm>  // for std::equal
+#include <utility>  // for std::move
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_constructor_and_move"
@@ -23,7 +26,22 @@
 
 using namespace Gudhi;
 
-typedef boost::mpl::list<Simplex_tree<>, Simplex_tree<Simplex_tree_options_fast_persistence>> list_of_tested_variants;
+struct Simplex_tree_options_stable_simplex_handles {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
+typedef boost::mpl::list<Simplex_tree<>,
+                         Simplex_tree<Simplex_tree_options_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<typename Simplex_tree>
 void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
@@ -147,9 +165,119 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st == st8);
   BOOST_CHECK(st7 == st);
 
+#if __GNUC__ >= 13
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
   st = std::move(st);
+#if __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   print_simplex_filtration(st, "Third self move assignment from the default Simplex_tree");
 
   BOOST_CHECK(st7 == st);
 
+}
+
+template<typename Simplex_tree>
+std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_tree& st) {
+  std::vector<std::vector<typename Simplex_tree::Vertex_handle>> output;
+  auto sh = st.find({0,1});
+  if (sh != st.null_simplex())
+  {
+    auto stars = st.star_simplex_range(sh);
+    output.resize(std::distance(stars.begin(), stars.end()));
+    for (auto simplex = stars.begin(); simplex != stars.end(); ++simplex) {
+      typename Simplex_tree::Simplex_vertex_range rg = st.simplex_vertex_range(*simplex);
+      std::clog << "(";
+      for (auto vertex = rg.begin(); vertex != rg.end(); ++vertex) {
+        std::clog << *vertex << ", ";
+      }
+      std::clog << ")" << std::endl;
+      output.emplace_back(rg.begin(), rg.end());
+    }
+  }
+  return output;
+}
+
+BOOST_AUTO_TEST_CASE(simplex_fast_cofaces_rule_of_five) {
+  // Only for fast cofaces version to check the data structure for this feature is up to date 
+  using STree = Simplex_tree<Simplex_tree_options_fast_cofaces>;
+  STree st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
+  st.insert_simplex_and_subfaces({3, 0}, 2.0);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
+  st.insert_simplex_and_subfaces({8}, 1.0);
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o   o       */
+  /*  2   0   3\X/4   8       */
+  /*            o             */
+  /*            5             */
+  /*                          */
+  /* In other words:          */
+  /*   A facet  [2,1,0]       */
+  /*   An edge  [0,3]         */
+  /*   A facet  [3,4,5]       */
+  /*   A cell   [0,1,6,7]     */
+  /*   A vertex [8]           */
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF COPY CONSTRUCTOR FOR COFACES" << std::endl;
+
+  STree st1(st);
+
+  std::clog << "get_star on the original simplex" << std::endl;
+  auto stars = get_star(st);
+  std::clog << "get_star on the copy by construction" << std::endl;
+  auto stars1 = get_star(st1);
+  BOOST_CHECK(stars.size() == stars1.size());
+  BOOST_CHECK(std::equal(stars.begin(), stars.begin() + stars.size(), stars1.begin()));
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF COPY ASSIGNMENT FOR COFACES" << std::endl;
+  STree st2;
+  // To check there is no memory leak
+  st2.insert_simplex_and_subfaces({9, 10, 11}, 200.0);
+  st2 = st;
+
+  std::clog << "get_star on the copy by assignment" << std::endl;
+  auto stars2 = get_star(st2);
+
+  BOOST_CHECK(stars.size() == stars2.size());
+  BOOST_CHECK(std::equal(stars.begin(), stars.begin() + stars.size(), stars2.begin()));
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF MOVE CONSTRUCTOR FOR COFACES" << std::endl;
+  STree st3(std::move(st1));
+
+  std::clog << "get_star on the move by construction" << std::endl;
+  auto stars3 = get_star(st3);
+  std::clog << "what about the moved one ?" << std::endl;
+  auto stars1_moved = get_star(st1);
+
+  BOOST_CHECK(stars.size() == stars3.size());
+  BOOST_CHECK(std::equal(stars.begin(), stars.begin() + stars.size(), stars3.begin()));
+  BOOST_CHECK(stars1_moved.size() == 0);
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF MOVE ASSIGNMENT FOR COFACES" << std::endl;
+
+  STree st4;
+  // To check there is no memory leak
+  st4.insert_simplex_and_subfaces({9, 10, 11}, 200.0);
+  st4 = std::move(st2);
+
+  std::clog << "get_star on the move by assignment" << std::endl;
+  auto stars4 = get_star(st4);
+  std::clog << "what about the moved one ?" << std::endl;
+  auto stars2_moved = get_star(st2);
+
+  BOOST_CHECK(stars.size() == stars4.size());
+  BOOST_CHECK(std::equal(stars.begin(), stars.begin() + stars.size(), stars4.begin()));
+  BOOST_CHECK(stars2_moved.size() == 0);
 }

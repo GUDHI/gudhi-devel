@@ -77,7 +77,7 @@ void Viewer::postSelection(const QPoint& point) {
 
   if (found) {
     Point_3 position(vec[0], vec[1], vec[2]);
-    emit(click(position));
+    /*emit*/ click(position);
   }
 }
 

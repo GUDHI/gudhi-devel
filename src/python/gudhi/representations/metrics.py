@@ -30,7 +30,7 @@ def _sliced_wasserstein_distance(D1, D2, num_directions):
     Returns: 
         float: the sliced Wasserstein distance between persistence diagrams. 
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
     approx1 = np.matmul(D1, lines)
     approx_diag1 = np.matmul(np.broadcast_to(D1.sum(-1,keepdims=True)/2,(len(D1),2)), lines)
@@ -46,13 +46,13 @@ def _compute_persistence_diagram_projections(X, num_directions):
     This is a function for projecting the points of a list of persistence diagrams (as well as their diagonal projections) onto a fixed number of lines sampled uniformly on [-pi/2, pi/2]. This function can be used as a preprocessing step in order to speed up the running time for computing all pairwise sliced Wasserstein distances / kernel values on a list of persistence diagrams. 
 
     Parameters:
-        X (list of n numpy arrays of shape (numx2)): list of persistence diagrams. 
+        X (list of n numpy arrays of shape (num,2)): list of persistence diagrams.
         num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
 
     Returns: 
-        list of n numpy arrays of shape (2*numx2): list of projected persistence diagrams.
+        list of n numpy arrays of shape (2*num,num_directions): list of projected persistence diagrams.
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions+1)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
     XX = [np.vstack([np.matmul(D, lines), np.matmul(np.matmul(D, .5 * np.ones((2,2))), lines)]) for D in X]
     return XX
@@ -240,7 +240,7 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         return _sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions)
 
 class BottleneckDistance(BaseEstimator, TransformerMixin):
-    """
+    r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
     :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
@@ -368,12 +368,6 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.order, self.internal_p, self.mode = order, internal_p, mode
-        if mode == "pot":
-            self.metric = "pot_wasserstein"
-        elif mode == "hera":
-            self.metric = "hera_wasserstein"
-        else:
-            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.delta = delta
         self.n_jobs = n_jobs
 
@@ -385,6 +379,8 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
+        if self.mode not in ("pot", "hera"):
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.diagrams_ = X
         return self
 
@@ -398,10 +394,10 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise Wasserstein distances.
         """
-        if self.metric == "hera_wasserstein":
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
+        if self.mode == "hera":
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="hera_wasserstein", order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
         else:
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric=self.metric, order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
+            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="pot_wasserstein", order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -415,12 +411,14 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: Wasserstein distance.
         """
-        if self.metric == "hera_wasserstein":
+        if self.mode == "hera":
             return hera_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, delta=self.delta)
-        else:
+        elif self.mode == "pot":
             try:
                 from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
                 return pot_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False)
             except ImportError:
-                print("POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
+                print("POT (Python Optimal Transport) is not installed. Please install POT or use mode='hera'")
                 raise
+        else:
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")

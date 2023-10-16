@@ -25,11 +25,11 @@ except ImportError:
 
 def _empty_alpha(precision):
     alpha_complex = AlphaComplex(precision = precision)
-    assert alpha_complex.__is_defined() == True
+    assert alpha_complex._is_defined() == True
 
 def _one_2d_point_alpha(precision):
     alpha_complex = AlphaComplex(points=[[0, 0]], precision = precision)
-    assert alpha_complex.__is_defined() == True
+    assert alpha_complex._is_defined() == True
 
 def test_empty_alpha():
     for precision in ['fast', 'safe', 'exact']:
@@ -39,10 +39,10 @@ def test_empty_alpha():
 def _infinite_alpha(precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
     alpha_complex = AlphaComplex(points=point_list, precision = precision)
-    assert alpha_complex.__is_defined() == True
+    assert alpha_complex._is_defined() == True
 
     simplex_tree = alpha_complex.create_simplex_tree()
-    assert simplex_tree.__is_persistence_defined() == False
+    assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 11
     assert simplex_tree.num_vertices() == 4
@@ -313,3 +313,12 @@ def test_float_relative_precision():
         assert filtrations[idx][0] == filtrations_better_resolution[idx][0]
         # check filtration is about the same with a relative precision of the worst case
         assert filtrations[idx][1] == pytest.approx(filtrations_better_resolution[idx][1], rel=1e-5)
+
+def test_numpy_arrays():
+    points=np.array([[ 1., -1., -1.],
+                    [-1.,  1., -1.],
+                    [-1., -1.,  1.],
+                    [ 1.,  1.,  1.],
+                    [ 2.,  2.,  2.]])
+    weights=np.array([4., 4., 4., 4., 1.])
+    alpha = AlphaComplex(points=points, weights=weights)

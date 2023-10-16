@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython.operator import dereference, preincrement
@@ -82,12 +83,12 @@ cdef class SimplexTree:
         if self.pcohptr != NULL:
             del self.pcohptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if SimplexTree pointer is not NULL.
          """
         return self.get_ptr() != NULL
 
-    def __is_persistence_defined(self):
+    def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
@@ -165,6 +166,14 @@ cdef class SimplexTree:
         :rtype:  int
         """
         return self.get_ptr().num_simplices()
+
+    def is_empty(self):
+        """This function returns whether the simplicial complex is empty.
+
+        :returns:  True if the simplicial complex is empty.
+        :rtype:  bool
+        """
+        return self.get_ptr().is_empty()
 
     def dimension(self):
         """This function returns the dimension of the simplicial complex.
@@ -470,6 +479,16 @@ cdef class SimplexTree:
             method to recompute the exact dimension.
         """
         return self.get_ptr().prune_above_filtration(filtration)
+
+    def prune_above_dimension(self, dimension):
+        """Remove all simplices of dimension greater than a given value.
+
+        :param dimension: Maximum dimension value.
+        :type dimension: int
+        :returns: The modification information.
+        :rtype: bool
+        """
+        return self.get_ptr().prune_above_dimension(dimension)
 
     def expansion(self, max_dimension):
         """Expands the simplex tree containing only its one skeleton
@@ -792,11 +811,43 @@ cdef class SimplexTree:
             del ptr
 
     def __eq__(self, other:SimplexTree):
-        """Test for structural equality
-        :returns: True if the 2 simplex trees are equal, False otherwise.
+        """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
+    
+    def __getstate__(self):
+        """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
+        :rtype: numpy.array of shape (n,)
+        """
+        cdef size_t buffer_size = self.get_ptr().get_serialization_size()
+        # Let's use numpy to allocate a buffer. Will be deleted automatically
+        np_buffer = np.empty(buffer_size, dtype='B')
+        cdef char[:] buffer = np_buffer
+        cdef char* buffer_start = &buffer[0]
+        with nogil:
+            self.get_ptr().serialize(buffer_start, buffer_size)
+        
+        return np_buffer
+
+    def __setstate__(self, state):
+        """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
+        in order to unpickle a SimplexTree.
+        
+        :param state: Serialized SimplexTree data structure
+        :type state: numpy.array of shape (n,)
+        """
+        cdef char[:] buffer = state
+        cdef size_t buffer_size = state.shape[0]
+        cdef char* buffer_start = &buffer[0]
+        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
+        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        del ptr
+        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+        with nogil:
+            # New pointer is a deserialized simplex tree
+            self.get_ptr().deserialize(buffer_start, buffer_size)
+
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
     return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))

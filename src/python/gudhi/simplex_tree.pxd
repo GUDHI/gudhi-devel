@@ -5,6 +5,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
 from cython cimport numeric
@@ -47,10 +48,11 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_interface_full_featured() nogil
         Simplex_tree_interface_full_featured(Simplex_tree_interface_full_featured&) nogil
         double simplex_filtration(vector[int] simplex) nogil
-        void assign_simplex_filtration(vector[int] simplex, double filtration) nogil
+        void assign_simplex_filtration(vector[int] simplex, double filtration) nogil except +
         void initialize_filtration() nogil
         int num_vertices() nogil
         int num_simplices() nogil
+        bool is_empty() nogil
         void set_dimension(int dimension) nogil
         int dimension() nogil
         int upper_bound_dimension() nogil
@@ -63,6 +65,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void expansion(int max_dim) nogil except +
         void remove_maximal_simplex(vector[int] simplex) nogil
         bool prune_above_filtration(double filtration) nogil
+        bool prune_above_dimension(int dimension) nogil
         bool make_filtration_non_decreasing() nogil
         void compute_extended_filtration() nogil
         Simplex_tree_interface_full_featured* collapse_edges(int nb_collapse_iteration) nogil except +
@@ -78,8 +81,11 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         Simplex_tree_skeleton_iterator get_skeleton_iterator_end(int dimension) nogil
         pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] get_boundary_iterators(vector[int] simplex) nogil except +
         # Expansion with blockers
-        ctypedef bool (*blocker_func_t)(vector[int], void *user_data)
-        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data)
+        ctypedef bool (*blocker_func_t)(vector[int], void *user_data) except +
+        void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) except +
+        void serialize(char* buffer, const size_t buffer_size) nogil except +
+        void deserialize(const char* buffer, const size_t buffer_size) nogil except +
+        size_t get_serialization_size() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface<Gudhi::Simplex_tree_options_full_featured>>":

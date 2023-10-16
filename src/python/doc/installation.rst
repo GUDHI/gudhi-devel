@@ -39,8 +39,8 @@ If you are instead using a git checkout, beware that the paths are a bit
 different, and in particular the `python/` subdirectory is actually `src/python/`
 there.
 
-The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.66.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.5  to generate makefiles,
+The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.8,
 Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
@@ -180,14 +180,17 @@ A complete configuration would be :
     TensorFlow version 2.7.0 
     Sphinx version 4.3.0 
     Sphinx-paramlinks version 0.5.2 
-    python_docs_theme found
+    pydata_sphinx_theme version 0.13.1 
+    NetworkX version 3.0 
     Eigen3 version 3.4.0
     Boost version 1.74.0
     CGAL version 5.3
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
-    TBB version 9107 found and used
+    TBB version 2021.7.0 found and used
+    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so
+    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
     + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
@@ -200,7 +203,7 @@ Documentation
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
-`python-docs-theme <https://github.com/python/python-docs-theme>`_ are
+`pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
 `Matplotlib`_, `NumPy`_, `POT`_, `Scikit-learn`_ and `SciPy`_ are
 also mandatory to build the documentation.
@@ -262,15 +265,14 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :m
     * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
     * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
-Threading Building Blocks
--------------------------
+oneAPI Threading Building Blocks
+--------------------------------
 
-`Intel® TBB <https://www.threadingbuildingblocks.org/>`_ lets you easily write
-parallel C++ programs that take full advantage of multicore performance, that
-are portable and composable, and that have future-proof scalability.
+`Intel® oneAPI TBB <https://github.com/oneapi-src/oneTBB>`_ lets you easily write parallel C++ programs that take
+full advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
-Having Intel® TBB installed is recommended to parallelize and accelerate some
-GUDHI computations.
+Having Intel® oneAPI TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
+computations.
 
 Run time dependencies
 =====================
@@ -299,28 +301,6 @@ Hnswlib
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `Hnswlib <https://github.com/nmslib/hnswlib>`_ as a backend if explicitly
 requested, to speed-up queries.
-
-Matplotlib
-----------
-
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
-library which produces publication quality figures in a variety of hardcopy
-formats and interactive environments across platforms.
-
-The following examples require the `Matplotlib <http://matplotlib.org>`_:
-
-.. only:: builder_html
-
-    * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
-    * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
-    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
-    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
-    * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
-    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
-    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
 
 LaTeX
 ~~~~~
@@ -351,6 +331,35 @@ You can still deactivate LaTeX rendering by saying:
     import gudhi as gd
     gd.persistence_graphical_tools._gudhi_matplotlib_use_tex=False
 
+Matplotlib
+----------
+
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
+module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
+library which produces publication quality figures in a variety of hardcopy
+formats and interactive environments across platforms.
+
+The following examples require the `Matplotlib <http://matplotlib.org>`_:
+
+.. only:: builder_html
+
+    * :download:`alpha_complex_diagram_persistence_from_off_file_example.py <../example/alpha_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`gudhi_graphical_tools_example.py <../example/gudhi_graphical_tools_example.py>`
+    * :download:`periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py <../example/periodic_cubical_complex_barcode_persistence_from_perseus_file_example.py>`
+    * :download:`rips_complex_diagram_persistence_from_off_file_example.py <../example/rips_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`rips_persistence_diagram.py <../example/rips_persistence_diagram.py>`
+    * :download:`rips_complex_diagram_persistence_from_distance_matrix_file_example.py <../example/rips_complex_diagram_persistence_from_distance_matrix_file_example.py>`
+    * :download:`tangential_complex_plain_homology_from_off_file_example.py <../example/tangential_complex_plain_homology_from_off_file_example.py>`
+    * :download:`euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_strong_witness_complex_diagram_persistence_from_off_file_example.py>`
+    * :download:`euclidean_witness_complex_diagram_persistence_from_off_file_example.py <../example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py>`
+
+NetworkX
+--------
+
+The :class:`~gudhi.cover_complex.GraphInducedComplex`, :class:`~gudhi.cover_complex.MapperComplex` and
+:class:`~gudhi.cover_complex.NerveComplex` `get_networkx` methods require `NetworkX <https://networkx.org/>`_,
+a Python library for studying and visualizing graphs and networks.
+
 PyKeOps
 -------
 
@@ -374,9 +383,12 @@ PyTorch
 Scikit-learn
 ------------
 
-The :doc:`persistence representations </representations>` module require
+The :doc:`persistence representations </representations>` module requires
 `scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
+
+Some classes of the :doc:`cover complex </cover_complex_sklearn_isk_ref>` module
+also follow and require the `scikit-learn <https://scikit-learn.org/>`_ interface.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
 `scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly

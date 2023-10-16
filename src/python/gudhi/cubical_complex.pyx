@@ -29,9 +29,9 @@ __license__ = "MIT"
 np.import_array()
 
 cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Bitmap_cubical_complex_base_interface "Gudhi::Cubical_complex::Cubical_complex_interface":
-        Bitmap_cubical_complex_base_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil except +
-        Bitmap_cubical_complex_base_interface(const char* perseus_file) nogil except +
+    cdef cppclass Bitmap_cubical_complex_interface "Gudhi::Cubical_complex::Cubical_complex_interface":
+        Bitmap_cubical_complex_interface(vector[unsigned] dimensions, vector[double] cells, bool input_top_cells) nogil except +
+        Bitmap_cubical_complex_interface(const char* perseus_file) nogil except +
         int num_simplices() nogil
         int dimension() nogil
         vector[unsigned] shape() nogil
@@ -39,7 +39,7 @@ cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Cubical_complex_interface>":
-        Cubical_complex_persistence_interface(Bitmap_cubical_complex_base_interface * st, bool persistence_dim_max) nogil
+        Cubical_complex_persistence_interface(Bitmap_cubical_complex_interface * st, bool persistence_dim_max) nogil
         void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
         vector[pair[int, pair[double, double]]] get_persistence() nogil
         vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
@@ -54,7 +54,7 @@ cdef class CubicalComplex:
     computational mathematics (specially rigorous numerics) and image
     analysis.
     """
-    cdef Bitmap_cubical_complex_base_interface * thisptr
+    cdef Bitmap_cubical_complex_interface * thisptr
     cdef Cubical_complex_persistence_interface * pcohptr
     cdef bool _built_from_vertices
 
@@ -94,7 +94,7 @@ cdef class CubicalComplex:
 
         Or
 
-        :param perseus_file: A Perseus-style file name, giving the filtration values
+        :param perseus_file: A `Perseus-style <fileformats.html#perseus>`_ file name, giving the filtration values
             of top-dimensional cells.
         :type perseus_file: str
         """
@@ -127,11 +127,11 @@ cdef class CubicalComplex:
 
     def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, bool input_top_cells):
         with nogil:
-            self.thisptr = new Bitmap_cubical_complex_base_interface(dimensions, cells, input_top_cells)
+            self.thisptr = new Bitmap_cubical_complex_interface(dimensions, cells, input_top_cells)
 
     def _construct_from_file(self, const char* filename):
         with nogil:
-            self.thisptr = new Bitmap_cubical_complex_base_interface(filename)
+            self.thisptr = new Bitmap_cubical_complex_interface(filename)
 
     def __dealloc__(self):
         if self.thisptr != NULL:
@@ -139,12 +139,12 @@ cdef class CubicalComplex:
         if self.pcohptr != NULL:
             del self.pcohptr
 
-    def __is_defined(self):
+    def _is_defined(self):
         """Returns true if CubicalComplex pointer is not NULL.
          """
         return self.thisptr != NULL
 
-    def __is_persistence_defined(self):
+    def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not NULL.
          """
         return self.pcohptr != NULL
@@ -209,7 +209,7 @@ cdef class CubicalComplex:
         """
         if self.pcohptr != NULL:
             del self.pcohptr
-        assert self.__is_defined()
+        assert self._is_defined()
         cdef int field = homology_coeff_field
         cdef double minp = min_persistence
         with nogil:
