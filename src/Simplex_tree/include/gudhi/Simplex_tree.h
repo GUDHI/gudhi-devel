@@ -689,12 +689,12 @@ class Simplex_tree {
    * @return Height of the siblings in the tree (root counts as zero to make the height correspond to the dimension).
    */
   int dimension(Siblings* curr_sib) {
-    int dim = 0;
+    int dim = -1;
     while (curr_sib != nullptr) {
       ++dim;
       curr_sib = curr_sib->oncles();
     }
-    return dim - 1;
+    return dim;
   }
 
  public:
@@ -1396,9 +1396,9 @@ class Simplex_tree {
     * filtration values, the method `make_filtration_non_decreasing()` has to be
     * called at the end of the insertions to restore the intended filtration.
     * Note that even then, an edge has to be inserted after its vertices.
-    * @warning The method assumes that the given edge was not already contained in
-    * the simplex tree, so the behaviour is undefined if called on an existing
-    * edge. Already existing vertices are just ignored and not updated.
+    * @warning The method assumes that the given edge or vertex was not already 
+    * contained in the simplex tree, so the behaviour is undefined if called on 
+    * an existing simplex.
     */
   void insert_edge_as_flag(  Vertex_handle                   u
                            , Vertex_handle                   v
