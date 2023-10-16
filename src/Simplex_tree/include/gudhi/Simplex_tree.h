@@ -1444,6 +1444,7 @@ class Simplex_tree {
     //invalidate Simplex_handles; we take care of this fact by first doing all
     //insertion in a Sibling, then inserting all handles in added_simplices.
 
+#ifdef GUDHI_DEBUG
     //check whether vertices u and v are in the tree. If not, return an error.
     auto sh_u = root_.members().find(u);
     GUDHI_CHECK(sh_u != root_.members().end() &&
@@ -1456,6 +1457,7 @@ class Simplex_tree {
           std::invalid_argument(
                   "Simplex_tree::insert_edge_as_flag - inserts an already existing edge")
                 );
+#endif
 
     // to update dimension
     const auto tmp_dim = dimension_;
