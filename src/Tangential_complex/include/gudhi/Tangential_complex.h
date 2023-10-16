@@ -1580,7 +1580,7 @@ class Tangential_complex {
     typename K::Scaled_vector_d k_scaled_vec = m_k.scaled_vector_d_object();
 
     CGAL::Random_points_in_ball_d<Tr_bare_point> tr_point_in_ball_generator(
-        m_intrinsic_dim, m_random_generator.get_double(0., max_perturb));
+        m_intrinsic_dim, CGAL::get_default_random().get_double(0., max_perturb));
 
     Tr_point local_random_transl =
         local_tr_traits.construct_weighted_point_d_object()(*tr_point_in_ball_generator++, 0);
@@ -2013,8 +2013,6 @@ class Tangential_complex {
   Points m_points_for_tse;
   Points_ds m_points_ds_for_tse;
 #endif
-
-  mutable CGAL::Random m_random_generator;
 };  // /class Tangential_complex
 
 }  // end namespace tangential_complex
