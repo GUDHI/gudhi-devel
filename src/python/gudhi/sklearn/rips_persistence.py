@@ -37,7 +37,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions,
         threshold=float('inf'),
         input_type='point cloud',
-        num_collapses=True,
+        num_collapses=1,
         homology_coeff_field=11,
         expand_extra_dimension = True,
         n_jobs=None,
@@ -53,10 +53,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             input_type (str): Can be 'point cloud' when inputs are point clouds, or 'lower distance matrix', when
                 inputs are lower triangular distance matrix (can be full square, but the upper part of the distance
                 matrix will not be considered). Default is 'point cloud'.
-            num_collapses (bool or int): Specify if :func:`~gudhi.SimplexTree.collapse_edges` is performed. When
-                `num_collapses` is an integer, it specifies the number of :func:`~gudhi.SimplexTree.collapse_edges`
-                iterations to perform on the SimplexTree. Default is True, which means "automatic" (a relatively good
-                enough number of iterations is choosen).
+            num_collapses (int): Specify the number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform
+                on the SimplexTree. Default value is 1 (a relatively good enough number of iterations).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
             expand_extra_dimension (bool): :func:`~gudhi.SimplexTree.expansion` is performed at
                 `max(homology_dimensions) + 1` if true, and `max(homology_dimensions)` otherwise. Default is true.
@@ -94,8 +92,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         
         if max_dimension > 1:
             stree = rips.create_simplex_tree(max_dimension=1)
-            # 0 iteration when num_collapses is False, and 1 when num_collapses is True, aka. "automatic mode"
-            stree.collapse_edges(nb_iterations = int(self.num_collapses))
+            stree.collapse_edges(nb_iterations = self.num_collapses)
             stree.expansion(max_dimension)
         else:
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
