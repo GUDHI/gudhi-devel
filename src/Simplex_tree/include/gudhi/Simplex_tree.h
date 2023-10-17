@@ -2533,11 +2533,12 @@ class Simplex_tree {
         }
       }
       Vertex_handle child_size;
-      for (auto& map_el : sib->members()) {
+      for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
+        update_simplex_tree_after_node_insertion(sh);
         ptr = Gudhi::simplex_tree::deserialize_trivial(child_size, ptr);
         if (child_size > 0) {
-          Siblings* child = new Siblings(sib, map_el.first);
-          map_el.second.assign_children(child);
+          Siblings* child = new Siblings(sib, sh->first);
+          sh->second.assign_children(child);
           ptr = rec_deserialize(child, child_size, ptr, dim + 1);
         }
       }
