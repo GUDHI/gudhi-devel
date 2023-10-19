@@ -24,7 +24,10 @@ namespace Gudhi {
 
 /** Model of SimplexTreeOptions.
  * 
- * Default options version of the Simplex_tree. */
+ * Default options version of the Simplex_tree.
+ * 
+ * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
+ * (about 4 billions of simplices). */
 struct Simplex_tree_options_default {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
