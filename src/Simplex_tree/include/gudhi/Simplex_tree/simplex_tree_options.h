@@ -69,7 +69,7 @@ struct Simplex_tree_options_minimal {
   static const bool stable_simplex_handles = false;
 };
 
-/** @private @brief Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
+/** @private @brief Model of SimplexTreeOptions, faster than `Simplex_tree_options_default` but note the unsafe
  * `contiguous_vertices` option.
  * 
  * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
