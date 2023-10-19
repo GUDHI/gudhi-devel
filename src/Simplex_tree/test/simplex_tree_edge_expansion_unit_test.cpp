@@ -35,6 +35,7 @@ struct Simplex_tree_options_stable_simplex_handles {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = true;
+  static const bool is_multi_parameter = false;
 };
 
 using Point = std::vector<double>;
