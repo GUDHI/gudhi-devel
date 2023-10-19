@@ -25,7 +25,19 @@
 
 using namespace Gudhi;
 
-struct Simplex_tree_options_stable_simplex_handles {
+struct Simplex_tree_options_fast_cofaces {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = false;
+};
+
+struct Simplex_tree_options_stable_simplex_handles_fast_cofaces {
   typedef linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef double Filtration_value;
@@ -122,15 +134,15 @@ BOOST_AUTO_TEST_CASE(simplex_tree_random_rips_expansion) {
     std::clog << "simplex_tree_random_rips_expansion\n";
     std::clog << "Test tree 1: insertion by filtration values\n";
     std::clog << "************************************************************************\n";
+    test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles_fast_cofaces>(simplex_tree);
     test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_fast_cofaces>(simplex_tree);
-    test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles>(simplex_tree);
 
     std::clog << i << "  ********************************************************************\n";
     std::clog << "simplex_tree_random_rips_expansion\n";
     std::clog << "Test tree 2: insertion by lexicographical order\n"; //equivalent to random order
     std::clog << "************************************************************************\n";
+    test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles_fast_cofaces>(simplex_tree);
     test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_fast_cofaces>(simplex_tree);
-    test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles>(simplex_tree);
   }
 }
 
@@ -148,20 +160,20 @@ BOOST_AUTO_TEST_CASE(simplex_tree_random_rips_expansion_with_max_dim) {
     std::clog << "simplex_tree_random_rips_expansion\n";
     std::clog << "Test tree 3: insertion by filtration values and max dimension = " << maxDim << "\n";
     std::clog << "************************************************************************\n";
+    test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles_fast_cofaces>(simplex_tree, maxDim);
     test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_fast_cofaces>(simplex_tree, maxDim);
-    test_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles>(simplex_tree, maxDim);
 
     std::clog << i << "  ********************************************************************\n";
     std::clog << "simplex_tree_random_rips_expansion\n";
     std::clog << "Test tree 4: insertion by lexicographical order and max dimension = " << maxDim << "\n";   //equivalent to random order
     std::clog << "************************************************************************\n";
+    test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles_fast_cofaces>(simplex_tree, maxDim);
     test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_fast_cofaces>(simplex_tree, maxDim);
-    test_unordered_insert_as_flag<Simplex_tree<>,Simplex_tree_options_stable_simplex_handles>(simplex_tree, maxDim);
   }
 }
 
 BOOST_AUTO_TEST_CASE(flag_expansion) {
-  using typeST = Simplex_tree<Simplex_tree_options_fast_cofaces>;
+  using typeST = Simplex_tree<Simplex_tree_options_stable_simplex_handles_fast_cofaces>;
   {
     std::cout << "************************************************************************" << std::endl;
     std::cout << "Test flag expansion 1" << std::endl;
