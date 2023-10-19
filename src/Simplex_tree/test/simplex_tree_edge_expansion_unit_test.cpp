@@ -37,15 +37,7 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool stable_simplex_handles = false;
 };
 
-struct Simplex_tree_options_stable_simplex_handles_fast_cofaces {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
+struct Simplex_tree_options_stable_simplex_handles_fast_cofaces : Simplex_tree_options_fast_cofaces {
   static const bool stable_simplex_handles = true;
 };
 
