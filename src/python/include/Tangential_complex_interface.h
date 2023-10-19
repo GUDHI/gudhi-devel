@@ -88,7 +88,7 @@ class Tangential_complex_interface {
       num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  void create_simplex_tree(Simplex_tree<Simplex_tree_options_for_python>* simplex_tree) {
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree) {
     tangential_complex_->create_complex<Simplex_tree<Simplex_tree_options_for_python>>(*simplex_tree);
   }
 
