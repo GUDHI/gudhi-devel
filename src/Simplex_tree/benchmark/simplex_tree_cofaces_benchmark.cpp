@@ -81,7 +81,7 @@ void benchmark_stars_computation(int nb_vertices) {
   std::clog << benchmark_cofaces << std::endl;
 }
 
-struct Simplex_tree_options_stable_simplex_handles {
+struct Stree_basic_cofaces_options {
   typedef Gudhi::linear_indexing_tag Indexing_tag;
   typedef int Vertex_handle;
   typedef double Filtration_value;
@@ -89,6 +89,15 @@ struct Simplex_tree_options_stable_simplex_handles {
   static const bool store_key = true;
   static const bool store_filtration = true;
   static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+struct Stree_fast_cofaces_options : Stree_basic_cofaces_options {
+  static const bool link_nodes_by_label = true;
+};
+
+struct Stree_fast_cofaces_stable_simplex_handles_options : Stree_basic_cofaces_options {
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = true;
 };
@@ -105,13 +114,13 @@ int main(int argc, char *argv[]) {
     nb_vertices = atoi(argv[1]);
     
   std::clog << "** Without cofaces computation optimization" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_default>>(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Stree_basic_cofaces_options>>(nb_vertices);
 
   std::clog << "** With cofaces computation optimization" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Stree_fast_cofaces_options>>(nb_vertices);
 
   std::clog << "** With cofaces computation optimization and stable simplex handles" << std::endl;
-  benchmark_stars_computation<Gudhi::Simplex_tree<Simplex_tree_options_stable_simplex_handles> >(nb_vertices);
+  benchmark_stars_computation<Gudhi::Simplex_tree<Stree_fast_cofaces_stable_simplex_handles_options> >(nb_vertices);
 
   return EXIT_SUCCESS;
 }
