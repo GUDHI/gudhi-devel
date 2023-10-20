@@ -20,9 +20,9 @@
  * how to save on storage by not storing a filtration value.  */
 
 struct MyOptions : Gudhi::Simplex_tree_options_minimal {
-  // Implicitly use 0 as filtration value for all simplices
-  static const bool store_filtration = false;
-  // The persistence algorithm needs this
+  // Implicitly use 0 as filtration value for all simplices - inherited from Simplex_tree_options_minimal
+  // static const bool store_filtration = false;
+  // However the persistence algorithm needs this
   static const bool store_key = true;
   // I have few vertices
   typedef short Vertex_handle;
