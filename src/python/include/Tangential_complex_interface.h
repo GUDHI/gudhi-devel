@@ -89,7 +89,7 @@ class Tangential_complex_interface {
   }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree) {
-    tangential_complex_->create_complex<Simplex_tree<Simplex_tree_options_for_python>>(*simplex_tree);
+    tangential_complex_->create_complex<Simplex_tree_interface>(*simplex_tree);
   }
 
   void set_max_squared_edge_length(double max_squared_edge_length) {

@@ -112,21 +112,9 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return (result.second);
   }
 
-  // Do not interface this function, only used in interface for complex creation
-  bool insert_simplex_and_subfaces(const Simplex& simplex, Filtration_value filtration = 0) {
-    Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
-    return (result.second);
-  }
-
   // Do not interface this function, only used in strong witness interface for complex creation
   bool insert_simplex(const std::vector<std::size_t>& simplex, Filtration_value filtration = 0) {
     Insertion_result result = Base::insert_simplex(simplex, filtration);
-    return (result.second);
-  }
-
-  // Do not interface this function, only used in strong witness interface for complex creation
-  bool insert_simplex_and_subfaces(const std::vector<std::size_t>& simplex, Filtration_value filtration = 0) {
-    Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
     return (result.second);
   }
 
