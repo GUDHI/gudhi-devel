@@ -1774,10 +1774,9 @@ class Simplex_tree {
       }
       if (intersection.size() != 0) {
         // Reverse the order to insert
-        Siblings * new_sib = new Siblings(
-              siblings,                                 // oncles
-              simplex->first,                           // parent
-              boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
+        Siblings * new_sib = new Siblings(siblings,  // oncles
+                                          simplex->first,  // parent
+                                          boost::adaptors::reverse(intersection));  // boost::container::ordered_unique_range_t
         simplex->second.assign_children(new_sib);
         std::vector<Vertex_handle> blocked_new_sib_vertex_list;
         // As all intersections are inserted, we can call the blocker function on all new_sib members
@@ -2645,6 +2644,22 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = false;
+};
+
+/** Model of SimplexTreeOptions, fitting the requirement of the @ref Gudhi::zigzag_persistence::ZigzagComplex concept.
+ *
+ * Maximum number of arrows in the filtration is <CODE>std::numeric_limits<std::int32_t>::max()</CODE>
+ * (about 2 billions of arrows). If more arrows are needed, just inherit from this structure and redefine
+ * the type `Simplex_key`, for example as `std::int64_t`.*/
+struct Simplex_tree_options_zigzag_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = false;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree

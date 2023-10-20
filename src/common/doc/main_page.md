@@ -383,6 +383,31 @@
  </tr>
 </table>
 
+### Zigzag Persistent Homology
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "zigzag_ex.png"
+    </td>
+    <td width="50%">
+    Zigzag filtrations are a generalization of (standard) filtrations: the inclusion maps can not only go forward, 
+    but also backward. In other words, simplices can also be removed from the complex which is build.
+    The implemented algorithm is from \cite zigzag.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Cl&eacute;ment Maria, Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.9.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref zigzag_persistence
+    </td>
+ </tr>
+</table>
+
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
 
 ### Bottleneck distance
