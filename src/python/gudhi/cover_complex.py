@@ -325,9 +325,9 @@ class MapperComplex(CoverComplexPy):
             delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
             if self.clustering is None:
                 if self.input_type == "point cloud":
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="euclidean")
+                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, metric="euclidean")
                 else:
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="precomputed")
+                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, metric="precomputed")
             if self.resolutions is None:
                 self.resolutions = np.multiply(resolutions, 1./self.gains)
                 self.resolutions = np.array([int( (self.filter_bnds[ir,1]-self.filter_bnds[ir,0])/r) for ir, r in enumerate(self.resolutions)])
