@@ -5,15 +5,16 @@ set -e
 # Assumes that the user has enough rights to run brew fetch
 
 # Downloading
+SED_PGM='s/^Downloaded to: |^Already downloaded: //p'
 mkdir deps-amd64
 cd deps-amd64
-tar xf "`brew fetch --bottle-tag=x86_64_monterey gmp        | sed -ne 's/^Downloaded to: //p'`"
-tar xf "`brew fetch --bottle-tag=x86_64_monterey mpfr       | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=x86_64_monterey gmp  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=x86_64_monterey mpfr | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 mkdir deps-arm64
 cd deps-arm64
-tar xf "`brew fetch --bottle-tag=arm64_monterey gmp  | sed -ne 's/^Downloaded to: //p'`"
-tar xf "`brew fetch --bottle-tag=arm64_monterey mpfr | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=arm64_monterey gmp   | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=arm64_monterey mpfr  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 
 # Merging
