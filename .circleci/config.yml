@@ -59,7 +59,7 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-fsanitize=address -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
             make all
-            ctest --output-on-failure -E Persistence_lanscapes_test_unit
+            ctest --output-on-failure
 
   utils:
     docker:
