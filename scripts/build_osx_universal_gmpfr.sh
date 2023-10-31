@@ -18,11 +18,11 @@ cd ..
 
 # Merging
 mkdir -p deps-uni/lib
-GMP1=deps-amd64/gmp/*/lib/libgmp.*.dylib
+GMP1=`ls deps-amd64/gmp/*/lib/libgmp.*.dylib`
 GMP=`basename $GMP1`
-GMPXX1=deps-amd64/gmp/*/lib/libgmpxx.*.dylib
+GMPXX1=`ls deps-amd64/gmp/*/lib/libgmpxx.*.dylib`
 GMPXX=`basename $GMPXX1`
-MPFR1=deps-amd64/mpfr/*/lib/libmpfr.*.dylib
+MPFR1=`ls deps-amd64/mpfr/*/lib/libmpfr.*.dylib`
 MPFR=`basename $MPFR1`
 lipo -create $GMP1 deps-arm64/gmp/*/lib/$GMP -output deps-uni/lib/$GMP
 lipo -create $GMPXX1 deps-arm64/gmp/*/lib/$GMPXX -output deps-uni/lib/$GMPXX
