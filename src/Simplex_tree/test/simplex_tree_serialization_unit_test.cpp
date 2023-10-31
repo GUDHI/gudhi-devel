@@ -279,3 +279,44 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
 }
 #endif
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_serialization_and_cofaces, Stree, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "BASIC SIMPLEX TREE SERIALIZATION/DESERIALIZATION" << std::endl;
+  Stree st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0});
+  st.insert_simplex_and_subfaces({3, 0});
+  st.insert_simplex_and_subfaces({3, 4, 5});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7});
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o           */
+  /*  2   0   3\X/4           */
+  /*            o             */
+  /*            5             */
+
+  const std::size_t stree_buffer_size = st.get_serialization_size();
+  std::clog << "Serialization (from the simplex tree) size in bytes = " << stree_buffer_size << std::endl;
+  char* stree_buffer = new char[stree_buffer_size];
+
+  st.serialize(stree_buffer, stree_buffer_size);
+
+  Stree st_from_buffer;
+  st_from_buffer.deserialize(stree_buffer, stree_buffer_size);
+  delete[] stree_buffer;
+
+  int num_stars = 0;
+  for (auto coface : st_from_buffer.star_simplex_range(st.find({1, 0}))) {
+    std::clog << "coface";
+    for (auto vertex : st_from_buffer.simplex_vertex_range(coface)) {
+      std::clog << " " << vertex;
+    }
+    std::clog << "\n";
+    num_stars++;
+  }
+  // [([0, 1], 0.0), ([0, 1, 2], 0.0), ([0, 1, 6], 0.0), ([0, 1, 6, 7], 0.0), ([0, 1, 7], 0.0)]
+  BOOST_CHECK(num_stars == 5);
+
+}
