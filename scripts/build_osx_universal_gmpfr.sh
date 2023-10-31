@@ -33,9 +33,10 @@ install_name_tool -id $PWD/deps-uni/lib/$GMP deps-uni/lib/$GMP
 install_name_tool -id $PWD/deps-uni/lib/$GMPXX deps-uni/lib/$GMPXX
 install_name_tool -id $PWD/deps-uni/lib/$MPFR deps-uni/lib/$MPFR
 # Also fix dependencies
-BADGMP=`otool -L deps-uni/lib/$MPFR|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'`
+# otool gives twice the same dependency, keep only one (a loop would be safer...)
+BADGMP=`otool -L deps-uni/lib/$MPFR|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'|uniq`
 install_name_tool -change $BADGMP $PWD/deps-uni/lib/$GMP deps-uni/lib/$MPFR
-BADGMP=`otool -L deps-uni/lib/$GMPXX|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'`
+BADGMP=`otool -L deps-uni/lib/$GMPXX|sed -ne 's/[[:space:]]*\(.*libgmp\..*dylib\).*/\1/p'|uniq`
 install_name_tool -change $BADGMP $PWD/deps-uni/lib/$GMP deps-uni/lib/$GMPXX
 
 ln -s $GMP deps-uni/lib/libgmp.dylib
