@@ -7,13 +7,13 @@ set -e
 # Downloading
 mkdir deps-amd64
 cd deps-amd64
-tar xf "`brew fetch --bottle-tag=big_sur gmp        | sed -ne 's/^Downloaded to: //p'`"
-tar xf "`brew fetch --bottle-tag=big_sur mpfr       | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=x86_64_monterey gmp        | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=x86_64_monterey mpfr       | sed -ne 's/^Downloaded to: //p'`"
 cd ..
 mkdir deps-arm64
 cd deps-arm64
-tar xf "`brew fetch --bottle-tag=arm64_big_sur gmp  | sed -ne 's/^Downloaded to: //p'`"
-tar xf "`brew fetch --bottle-tag=arm64_big_sur mpfr | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=arm64_monterey gmp  | sed -ne 's/^Downloaded to: //p'`"
+tar xf "`brew fetch --bottle-tag=arm64_monterey mpfr | sed -ne 's/^Downloaded to: //p'`"
 cd ..
 
 # Merging
