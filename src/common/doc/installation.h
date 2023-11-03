@@ -81,7 +81,7 @@ make doxygen\endverbatim
  * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
  * 
  * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
- * Library</a> (CGAL \cite cgal:eb-19b) and will not be built if CGAL version 4.11.0 or higher is not installed:
+ * Library</a> (CGAL \cite cgal:eb-19b) and will not be built if CGAL version 4.12.0 or higher is not installed:
  * \li \gudhi_example_link{Simplex_tree,example_alpha_shapes_3_simplex_tree_from_off_file.cpp}
  * \li \gudhi_example_link{Witness_complex,strong_witness_persistence.cpp}
  * \li \gudhi_example_link{Witness_complex,weak_witness_persistence.cpp}

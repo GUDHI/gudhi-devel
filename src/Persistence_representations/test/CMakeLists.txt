@@ -25,13 +25,11 @@ gudhi_add_boost_test(Read_persistence_from_file_test_unit)
 add_executable ( kernels_unit kernels.cpp )
 gudhi_add_boost_test(kernels_unit)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen)
   add_executable (Persistence_intervals_with_distances_test_unit persistence_intervals_with_distances_test.cpp )
+  target_link_libraries(Persistence_intervals_with_distances_test_unit CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
-  target_link_libraries(Persistence_intervals_with_distances_test_unit TBB::tbb)
+    target_link_libraries(Persistence_intervals_with_distances_test_unit TBB::tbb)
   endif()
   gudhi_add_boost_test(Persistence_intervals_with_distances_test_unit)
-endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-
-
-
+endif()

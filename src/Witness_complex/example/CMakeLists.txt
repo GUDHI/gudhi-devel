@@ -8,18 +8,16 @@ add_test(NAME Witness_complex_example_nearest_landmark_table
     COMMAND $<TARGET_FILE:Witness_complex_example_nearest_landmark_table>)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen)
   add_executable( Witness_complex_example_off example_witness_complex_off.cpp )
+  add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
+  add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
+  target_link_libraries(Witness_complex_example_off CGAL::CGAL Eigen3::Eigen)
+  target_link_libraries(Witness_complex_example_sphere CGAL::CGAL Eigen3::Eigen)
+  target_link_libraries(Witness_complex_example_strong_off CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(Witness_complex_example_off TBB::tbb)
-  endif()
-  add_executable ( Witness_complex_example_sphere example_witness_complex_sphere.cpp )
-  if(TARGET TBB::tbb)
     target_link_libraries(Witness_complex_example_sphere TBB::tbb)
-  endif()
-  
-  add_executable( Witness_complex_example_strong_off example_strong_witness_complex_off.cpp )
-  if(TARGET TBB::tbb)
     target_link_libraries(Witness_complex_example_strong_off TBB::tbb)
   endif()
 
@@ -32,4 +30,4 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
       COMMAND $<TARGET_FILE:Witness_complex_example_strong_off>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" "20" "1.0" "3")
 
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif()

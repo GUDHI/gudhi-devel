@@ -28,24 +28,14 @@ if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
   add_definitions(-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int)
 endif()
 
-# In CMakeLists.txt, when include(${CGAL_USE_FILE}), CMAKE_CXX_FLAGS are overwritten.
-# cf. http://doc.cgal.org/latest/Manual/installation.html#title40
-# A workaround is to include(${CGAL_USE_FILE}) before adding "-std=c++11".
-# A fix would be to use https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html
-# or even better https://cmake.org/cmake/help/v3.1/variable/CMAKE_CXX_STANDARD.html
-# but it implies to use cmake version 3.1 at least.
-find_package(CGAL QUIET)
-
-# Only CGAL versions > 4.11 supports what Gudhi uses from CGAL
-if (CGAL_FOUND AND CGAL_VERSION VERSION_LESS 4.11.0)
-  message("++ CGAL version ${CGAL_VERSION} is considered too old to be used by Gudhi.")
-  unset(CGAL_FOUND)
-  unset(CGAL_VERSION)
+find_package(CGAL 4.12.0 QUIET)
+# find_package(CGAL 4.12.0) fails for CGAL versions 5.* - workaround, cf. https://github.com/CGAL/cgal/issues/7645
+if(NOT CGAL_FOUND)
+  find_package(CGAL 5.0.0 QUIET)
 endif()
 
 if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
-  include( ${CGAL_USE_FILE} )
 endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
@@ -90,12 +80,13 @@ if(WITH_GUDHI_USE_TBB)
   endif()
 endif()
 
-set(CGAL_WITH_EIGEN3_VERSION 0.0.0)
 find_package(Eigen3 3.1.0)
-if (EIGEN3_FOUND)
-  include( ${EIGEN3_USE_FILE} )
-  set(CGAL_WITH_EIGEN3_VERSION ${CGAL_VERSION})
-endif (EIGEN3_FOUND)
+# When Eigen3 is found, but not its target, create a "fake" one
+if(EIGEN3_FOUND AND NOT TARGET Eigen3::Eigen)
+  message("  ++  ${EIGEN3_INCLUDE_DIR}")
+  add_library(Eigen3::Eigen INTERFACE IMPORTED)
+  set_target_properties(Eigen3::Eigen PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${EIGEN3_INCLUDE_DIR}")
+endif()
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( GCOVR_PATH gcovr )

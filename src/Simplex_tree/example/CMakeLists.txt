@@ -22,9 +22,9 @@ endif()
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
-if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
+if(GMP_FOUND AND CGAL_FOUND)
   add_executable ( Simplex_tree_example_alpha_shapes_3_from_off example_alpha_shapes_3_simplex_tree_from_off_file.cpp )
-  target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${GMP_LIBRARIES} ${CGAL_LIBRARY})
+  target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${GMP_LIBRARIES} CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off TBB::tbb)
   endif()
@@ -33,16 +33,14 @@ if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
 endif()
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-  if(TARGET Boost::program_options)
-    add_executable ( Simplex_tree_example_cech_complex_cgal_mini_sphere_3d cech_complex_cgal_mini_sphere_3d.cpp )
-    target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d Boost::program_options ${CGAL_LIBRARY})
-    if(TARGET TBB::tbb)
-      target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d TBB::tbb)
-    endif()
-    add_test(NAME Simplex_tree_example_cech_complex_cgal_mini_sphere_3d COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_cgal_mini_sphere_3d>
-        "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" -r 0.3 -d 3)
+if(CGAL_FOUND AND TARGET Eigen3::Eigen AND TARGET Boost::program_options)
+  add_executable ( Simplex_tree_example_cech_complex_cgal_mini_sphere_3d cech_complex_cgal_mini_sphere_3d.cpp )
+  target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d Boost::program_options CGAL::CGAL Eigen3::Eigen)
+  if(TARGET TBB::tbb)
+    target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d TBB::tbb)
   endif()
+  add_test(NAME Simplex_tree_example_cech_complex_cgal_mini_sphere_3d COMMAND $<TARGET_FILE:Simplex_tree_example_cech_complex_cgal_mini_sphere_3d>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" -r 0.3 -d 3)
 endif ()
 
 add_executable ( Simplex_tree_example_graph_expansion_with_blocker graph_expansion_with_blocker.cpp )

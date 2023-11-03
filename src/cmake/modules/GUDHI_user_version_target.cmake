@@ -44,6 +44,8 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/CMakeGUDHIVersion.txt ${GUDHI_USER_VERSION_DIR}/CMakeGUDHIVersion.txt)
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/Doxyfile.in ${GUDHI_USER_VERSION_DIR}/Doxyfile.in)
+add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
+                   copy ${CMAKE_SOURCE_DIR}/conanfile.txt ${GUDHI_USER_VERSION_DIR}/conanfile.txt)
 
 # As cython generates .cpp files in source, we have to copy all except cpp files from python directory
 file(GLOB_RECURSE PYTHON_FILES ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/*)

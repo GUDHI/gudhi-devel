@@ -125,7 +125,7 @@
       <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
@@ -156,7 +156,7 @@
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
@@ -181,7 +181,7 @@
       <b>Author:</b> Vincent Rouvreau, Hind Montassif<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal
+      <b>Requires:</b> \ref cgal &ge; 5.1.0
     </td>
  </tr>
  <tr>
@@ -261,7 +261,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
-      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
@@ -287,7 +287,7 @@
       <b>Author:</b> Mathieu Carri&egrave;re<br>
       <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
@@ -341,7 +341,7 @@
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
@@ -404,7 +404,7 @@
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal &ge; 4.12.0
     </td>
  </tr>
  <tr>
