@@ -122,9 +122,16 @@ inline void Base_pairing<Master_matrix>::_reduce()
 					pivotsToColumn.emplace(pivot, i);
 					_matrix()->get_column(pivot).clear();
 					barcode_.push_back(Bar(d - 1, pivot, i));
+					if constexpr (Master_matrix::Option_list::has_removable_columns){
+						indexToBar_.emplace(pivot,std::prev(barcode_.end()));
+						indexToBar_.emplace(i,std::prev(barcode_.end()));
+					}
 				} else {
 					curr.clear();
 					barcode_.push_back(Bar(d, i, -1));
+					if constexpr (Master_matrix::Option_list::has_removable_columns){
+						indexToBar_.emplace(i,std::prev(barcode_.end()));
+					}
 				}
 			}
 		}
@@ -132,6 +139,9 @@ inline void Base_pairing<Master_matrix>::_reduce()
 	for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
 		if (_matrix()->get_column(i).get_dimension() == 0 && pivotsToColumn.find(i) == pivotsToColumn.end()){
 			barcode_.push_back(Bar(0, i, -1));
+			if constexpr (Master_matrix::Option_list::has_removable_columns){
+				indexToBar_.emplace(i,std::prev(barcode_.end()));
+			}
 		}
 	}
 

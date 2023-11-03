@@ -12,6 +12,7 @@
 #define PM_BASE_MATRIX_H
 
 #include <iostream>	//print() only
+#include <stdexcept>
 #include <vector>
 #include <utility>	//std::swap, std::move & std::exchange
 
@@ -44,28 +45,19 @@ public:
 	template<class Boundary_type>
 	void insert_boundary(const Boundary_type& boundary);	//same as insert_column
 	Column_type& get_column(index columnIndex);
-	const Column_type& get_column(index columnIndex) const;
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex);
-	const Row_type& get_row(index rowIndex) const;
 	void erase_column(index columnIndex);
 	void erase_row(index rowIndex);		//assumes the row is empty, just thought as index a cleanup
 
 	unsigned int get_number_of_columns() const;
 
-	// void add_to(index sourceColumnIndex, index targetColumnIndex);
-	template<typename Index_type>
-	std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
-	template<class Cell_range>
-	std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
-	template<class Cell_range>
-	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	template<class Cell_range>
-	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
-	//necessary because of vector columns ? TODO: base vector with naive cell clear ?
-	void add_to(Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
@@ -261,9 +253,12 @@ template<class Container_type>
 inline void Base_matrix<Master_matrix>::insert_column(const Container_type &column, int columnIndex)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns, "Specification of the column index only possible for removable columns.");
+	//TODO: avoid find check by pushing it into debug mode only in a gudhi_check?
+	if (matrix_.find(columnIndex) != matrix_.end()){
+		throw std::invalid_argument("Column already existing at given index.");
+	}
 
 	index id = columnIndex < 0 ? nextInsertIndex_ : columnIndex;
-	assert(matrix_.find(id) == matrix_.end() && "Column already existing at given index.");
 	if (columnIndex > static_cast<int>(nextInsertIndex_)) nextInsertIndex_ = columnIndex + 1;
 	else if (columnIndex < 0) nextInsertIndex_++;
 
@@ -275,13 +270,15 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type &colu
 
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (!Master_matrix::Option_list::has_removable_rows){
-			unsigned int pivot;
-			if constexpr (Master_matrix::Option_list::is_z2){
-				pivot = *std::prev(column.end());
-			} else {
-				pivot = std::prev(column.end())->first;
+			if (column.begin() != column.end()){
+				unsigned int pivot;
+				if constexpr (Master_matrix::Option_list::is_z2){
+					pivot = *std::prev(column.end());
+				} else {
+					pivot = std::prev(column.end())->first;
+				}
+				if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
 			}
-			if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
 		}
 		matrix_.try_emplace(id, Column_type(id, column, ra_opt::rows_));
 	} else {
@@ -308,27 +305,7 @@ inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matr
 }
 
 template<class Master_matrix>
-inline const typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::get_column(index columnIndex) const
-{
-	_orderRowsIfNecessary();
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		return matrix_.at(columnIndex);
-	} else {
-		return matrix_[columnIndex];
-	}
-}
-
-template<class Master_matrix>
 inline typename Base_matrix<Master_matrix>::Row_type &Base_matrix<Master_matrix>::get_row(index rowIndex)
-{
-	static_assert(Master_matrix::Option_list::has_row_access, "Row access has to be enabled for this method.");
-
-	_orderRowsIfNecessary();
-	return ra_opt::get_row(rowIndex);
-}
-
-template<class Master_matrix>
-inline const typename Base_matrix<Master_matrix>::Row_type &Base_matrix<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(Master_matrix::Option_list::has_row_access, "Row access has to be enabled for this method.");
 
@@ -342,7 +319,7 @@ inline void Base_matrix<Master_matrix>::erase_column(index columnIndex)
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'erase_column' is not imatrix_.erase(columnIndex);mplemented for the chosen options.");
 	
-	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
+	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;	//assumes somehow that the user does not do random things with the insertions at given column indices
 
 	matrix_.erase(columnIndex);
 }
@@ -354,10 +331,11 @@ inline void Base_matrix<Master_matrix>::erase_row(index rowIndex)
 		if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
 			ra_opt::erase_row(swap_opt::indexToRow_[rowIndex]);
 		}
-		
-		auto it = swap_opt::indexToRow_.find(rowIndex);
-		swap_opt::rowToIndex_.erase(it->second);
-		swap_opt::indexToRow_.erase(it);
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			auto it = swap_opt::indexToRow_.find(rowIndex);
+			swap_opt::rowToIndex_.erase(it->second);
+			swap_opt::indexToRow_.erase(it);
+		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
 			ra_opt::erase_row(rowIndex);
@@ -376,87 +354,60 @@ inline unsigned int Base_matrix<Master_matrix>::get_number_of_columns() const
 	}
 }
 
-// template<class Master_matrix>
-// inline void Base_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
-// {
-// 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-// 		matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
-// 	} else {
-// 		matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
-// 	}
-// }
-
 template<class Master_matrix>
-template<typename Index_type>
-inline std::enable_if_t<std::is_integral_v<Index_type> > Base_matrix<Master_matrix>::add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex) += matrix_.at(sourceColumn);
+		} else {
+			matrix_[targetColumnIndex] += matrix_[sourceColumn];
+		}
 	} else {
-		matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex) += sourceColumn;
+		} else {
+			matrix_[targetColumnIndex] += sourceColumn;
+		}
 	}
 }
 
 template<class Master_matrix>
-template<class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range> > Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += sourceColumn;
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex).multiply_and_add(coefficient, matrix_.at(sourceColumn));
+		} else {
+			matrix_[targetColumnIndex].multiply_and_add(coefficient, matrix_[sourceColumn]);
+		}
 	} else {
-		matrix_[targetColumnIndex] += sourceColumn;
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+		} else {
+			matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
+		}
 	}
 }
 
 template<class Master_matrix>
-template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex).multiply_and_add(matrix_.at(sourceColumn), coefficient);
+		} else {
+			matrix_[targetColumnIndex].multiply_and_add(matrix_[sourceColumn], coefficient);
+		}
 	} else {
-		matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
-	}
-}
-
-template<class Master_matrix>
-template<class Cell_range>
-inline void Base_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
-	} else {
-		matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
-	}
-}
-
-template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex) += sourceColumn;
-	} else {
-		matrix_[targetColumnIndex] += sourceColumn;
-	}
-}
-
-template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
-	} else {
-		matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
-	}
-}
-
-template<class Master_matrix>
-inline void Base_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
-	} else {
-		matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+		} else {
+			matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
+		}
 	}
 }
 
@@ -548,7 +499,7 @@ inline void Base_matrix<Master_matrix>::print()
 	std::cout << "Base_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
 		const Column_type& col = matrix_[i];
-		for (const auto e : col.get_content(nextInsertIndex_)){
+		for (const auto& e : col.get_content(nextInsertIndex_)){
 			if (e == 0u) std::cout << "- ";
 			else std::cout << e << " ";
 		}

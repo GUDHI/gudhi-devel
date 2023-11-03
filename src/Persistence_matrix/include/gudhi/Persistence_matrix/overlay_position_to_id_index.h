@@ -105,15 +105,11 @@ public:
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
 	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
 	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 
 	//boundary
 	//ru: inR = true forced
@@ -128,6 +124,7 @@ public:
 	//chain
 	index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
 	//boundary
+	//ru
 	//chain
 	index get_pivot(index columnIndex);
 
@@ -171,6 +168,8 @@ private:
 
 template<class Matrix_type, class Master_matrix_type>
 inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Position_to_id_indexation_overlay()
+	: nextIndex_(0),
+	  nextID_(0)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
@@ -233,7 +232,8 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 		const Position_to_id_indexation_overlay &matrixToCopy)
 	: matrix_(matrixToCopy.matrix_),
 	  columnPositionToID_(matrixToCopy.columnPositionToID_),
-	  nextIndex_(matrixToCopy.nextIndex_)
+	  nextIndex_(matrixToCopy.nextIndex_),
+	  nextID_(matrixToCopy.nextID_)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
@@ -241,7 +241,8 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 		Position_to_id_indexation_overlay &&other) noexcept
 	: matrix_(std::move(other.matrix_)),
 	  columnPositionToID_(std::move(other.columnPositionToID_)),
-	  nextIndex_(std::exchange(other.nextIndex_, 0))
+	  nextIndex_(std::exchange(other.nextIndex_, 0)),
+	  nextID_(std::exchange(other.nextID_, 0))
 {}
 
 template<class Matrix_type, class Master_matrix_type>
@@ -330,21 +331,15 @@ inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::a
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(Column_type& sourceColumn, index targetColumnIndex)
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	return matrix_.add_to(sourceColumn, columnPositionToID_[targetColumnIndex]);
+	return matrix_.add_to(columnPositionToID_[sourceColumnIndex], coefficient, columnPositionToID_[targetColumnIndex]);
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
-	return matrix_.add_to(sourceColumn, coefficient, columnPositionToID_[targetColumnIndex]);
-}
-
-template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	return matrix_.add_to(coefficient, sourceColumn, columnPositionToID_[targetColumnIndex]);
+	return matrix_.add_to(coefficient, columnPositionToID_[sourceColumnIndex], columnPositionToID_[targetColumnIndex]);
 }
 
 template<class Matrix_type, class Master_matrix_type>

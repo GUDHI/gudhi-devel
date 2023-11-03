@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <set>
+#include <utility>	//std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
 
@@ -29,6 +30,7 @@ class Set_column : public Master_matrix::Row_access_option,
 				   public Master_matrix::Chain_column_option
 {
 public:
+	using Master = Master_matrix;
 	using Field_element_type = typename std::conditional<
 								  Master_matrix::Option_list::is_z2,
 								  bool,
@@ -52,13 +54,13 @@ public:
 	using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
 	Set_column();
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Set_column(const Container_type& nonZeroRowIndices);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Set_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Set_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension);	//dimension gets ignored for base
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Set_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type &rowContainer);	//dimension gets ignored for base
 	Set_column(const Set_column& column);
 	template<class Row_container_type>
@@ -348,7 +350,8 @@ template<class Master_matrix>
 inline std::vector<typename Set_column<Master_matrix>::Field_element_type> 
 Set_column<Master_matrix>::get_content(int columnLength) const
 {
-	if (columnLength < 0) columnLength = (*column_.rbegin())->get_row_index() + 1;
+	if (columnLength < 0 && column_.size() > 0) columnLength = (*column_.rbegin())->get_row_index() + 1;
+	else if (columnLength < 0) return std::vector<Field_element_type>();
 
 	std::vector<Field_element_type> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<index>(columnLength); ++it){
@@ -698,7 +701,12 @@ Set_column<Master_matrix>::operator=(const Set_column& other)
 	dim_opt::operator=(other);
 	chain_opt::operator=(other);
 	
-	clear();
+	for (auto* cell : column_){
+		if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(cell);
+		cellPool_.destroy(cell);
+	}
+	column_.clear();
+	
 	for (const Cell* cell : other.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			_insert_cell(cell->get_row_index(), column_.end());
@@ -752,8 +760,8 @@ inline bool Set_column<Master_matrix>::_add(const Cell_range &column)
 {
 	bool pivotIsZeroed = false;
 
-	for (Cell &cell : column) {
-		auto it1 = column_.find(&cell);
+	for (const Cell &cell : column) {
+		auto it1 = column_.find(const_cast<Cell*>(&cell));
 		if (it1 != column_.end()) {
 			if constexpr (Master_matrix::Option_list::is_z2){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
@@ -857,8 +865,8 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Cell_range& colum
 
 	bool pivotIsZeroed = false;
 
-	for (Cell &cell : column) {
-		auto it1 = column_.find(&cell);
+	for (const Cell &cell : column) {
+		auto it1 = column_.find(const_cast<Cell*>(&cell));
 		if (it1 != column_.end()) {
 			(*it1)->get_element() += (cell.get_element() * val);
 			if ((*it1)->get_element() == Field_element_type::get_additive_identity()){

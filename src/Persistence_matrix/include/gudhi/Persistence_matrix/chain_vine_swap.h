@@ -23,7 +23,7 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-static constexpr bool _no_G_death_comparator(std::size_t columnIndex1, std::size_t columnIndex2){
+static constexpr bool _no_G_death_comparator(unsigned int columnIndex1, unsigned int columnIndex2){
 	return false;
 }
 
@@ -35,6 +35,12 @@ struct Dummy_chain_vine_swap{
 	Dummy_chain_vine_swap([[maybe_unused]] BirthComparatorFunction&& birthComparator, [[maybe_unused]] DeathComparatorFunction&& deathComparator){}
 	Dummy_chain_vine_swap([[maybe_unused]] const Dummy_chain_vine_swap &matrixToCopy){}
 	Dummy_chain_vine_swap([[maybe_unused]] Dummy_chain_vine_swap&& other) noexcept{}
+};
+
+struct Dummy_chain_vine_pairing{
+	friend void swap([[maybe_unused]] Dummy_chain_vine_pairing& d1, [[maybe_unused]] Dummy_chain_vine_pairing& d2){}
+
+	Dummy_chain_vine_pairing(){}
 };
 
 template<typename Master_matrix>
@@ -180,7 +186,7 @@ template<class Master_matrix>
 class Chain_vine_swap : public std::conditional<
 									Master_matrix::Option_list::has_column_pairings,
 									Chain_barcode_swap<Master_matrix>,
-									Dummy_chain_pairing
+									Dummy_chain_vine_pairing
 								>::type
 {
 public:
@@ -215,7 +221,7 @@ private:
 	using CP = typename std::conditional<
 							Master_matrix::Option_list::has_column_pairings,
 							Chain_barcode_swap<Master_matrix>,
-							Dummy_chain_pairing
+							Dummy_chain_vine_pairing
 						>::type;
 	using chain_matrix = typename Master_matrix::Chain_matrix_type;
 
@@ -388,8 +394,10 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 		bool hasSmallerBirth;
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
 			hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
+			std::cout << "b: " << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::birth(col1.get_pivot()) << ", " << CP::birth(col2.get_pivot()) << " - " << hasSmallerBirth << "\n";
 		} else {
 			hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
+			std::cout << "b: " << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerBirth << "\n";
 		}
 		if (!col2.is_paired() && hasSmallerBirth){
 			_matrix()->add_to(columnIndex1, columnIndex2);
@@ -414,8 +422,10 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	bool hasSmallerDeath;
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		hasSmallerDeath = (CP::death(col1.get_pivot()) < CP::death(col2.get_pivot()));
+		std::cout << "d: " << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::death(col1.get_pivot()) << ", " << CP::death(col2.get_pivot()) << " - " << hasSmallerDeath << "\n";
 	} else {
 		hasSmallerDeath = deathComp_(columnIndex1, columnIndex2);
+		std::cout << "d: " << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerDeath << "\n";
 	}
 
 	// G x G
@@ -475,8 +485,10 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	bool hasSmallerBirth;
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
+		std::cout << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::birth(col1.get_pivot()) << ", " << CP::birth(col2.get_pivot()) << " - " << hasSmallerBirth << "\n";
 	} else {
 		hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
+		std::cout << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerBirth << "\n";
 
 		//for debug, to remove
 		if (hasSmallerBirth != (_matrix()->get_pivot(pairedIndex1) < _matrix()->get_pivot(pairedIndex2)))

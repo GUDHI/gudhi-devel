@@ -19,6 +19,8 @@ namespace persistence_matrix {
 struct Dummy_matrix_row_access{
 	Dummy_matrix_row_access(){};
 	Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfColumns){};
+
+	friend void swap([[maybe_unused]] Dummy_matrix_row_access& d1, [[maybe_unused]] Dummy_matrix_row_access& d2){}
 };
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>
@@ -94,7 +96,8 @@ inline void Matrix_row_access<Row_type,Row_container_type,has_removable_rows,ind
 {
 	static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");
 
-	rows_.erase(rowIndex);
+	auto it = rows_.find(rowIndex);
+	if (it != rows_.end() && it->second.empty()) rows_.erase(it);
 }
 
 template<typename Row_type, typename Row_container_type, bool has_removable_rows, typename index>

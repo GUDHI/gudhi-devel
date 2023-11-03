@@ -88,29 +88,13 @@ public:
 
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	// void add_to(Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	// void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	// void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
-	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
@@ -151,10 +135,10 @@ public:
 	//ru
 	//chain
 	const barcode_type& get_current_barcode();
-	//boundary
-	void swap_columns(index columnIndex1, index columnIndex2);
-	//boundary
-	void swap_rows(index rowIndex1, index rowIndex2);
+	// //boundary
+	// void swap_columns(index columnIndex1, index columnIndex2);	//to enable, row and column position have to be separated
+	// //boundary
+	// void swap_rows(index rowIndex1, index rowIndex2);	//to enable, row and column position have to be separated
 	//boundary
 	void swap_at_indices(index index1, index index2);
 	//chain
@@ -327,21 +311,15 @@ inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::a
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
+inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	return matrix_.add_to(sourceColumn, _column_id_to_position(targetColumnIndex));
+	return matrix_.add_to(_column_id_to_position(sourceColumnIndex), coefficient, _column_id_to_position(targetColumnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
-	return matrix_.add_to(sourceColumn, coefficient, _column_id_to_position(targetColumnIndex));
-}
-
-template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
-{
-	return matrix_.add_to(coefficient, sourceColumn, _column_id_to_position(targetColumnIndex));
+	return matrix_.add_to(coefficient, _column_id_to_position(sourceColumnIndex), _column_id_to_position(targetColumnIndex));
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -429,21 +407,22 @@ Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_represent
 	return matrix_.get_representative_cycle(bar);
 }
 
-template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::swap_columns(index columnIndex1, index columnIndex2)
-{
-	return matrix_.swap_columns(_column_id_to_position(columnIndex1), _column_id_to_position(columnIndex2));
-}
+// template<class Matrix_type, class Master_matrix_type>
+// inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::swap_columns(index columnIndex1, index columnIndex2)
+// {
+// 	return matrix_.swap_columns(_column_id_to_position(columnIndex1), _column_id_to_position(columnIndex2));
+// }
 
-template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::swap_rows(index rowIndex1, index rowIndex2)
-{
-	return matrix_.swap_rows(_column_id_to_position(rowIndex1), _column_id_to_position(rowIndex2));
-}
+// template<class Matrix_type, class Master_matrix_type>
+// inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::swap_rows(index rowIndex1, index rowIndex2)
+// {
+// 	return matrix_.swap_rows(_column_id_to_position(rowIndex1), _column_id_to_position(rowIndex2));
+// }
 
 template<class Matrix_type, class Master_matrix_type>
 inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::swap_at_indices(index columnIndex1, index columnIndex2)
 {
+	std::swap(columnIDToPosition_.at(columnIndex1), columnIDToPosition_.at(columnIndex2));
 	return matrix_.swap_at_indices(_column_id_to_position(columnIndex1), _column_id_to_position(columnIndex2));
 }
 

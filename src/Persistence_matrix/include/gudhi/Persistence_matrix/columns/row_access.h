@@ -13,8 +13,6 @@
 
 #include <utility>	//std::swap
 
-// #include "cell.h"					//to recognize the alias "base_hook_matrix_row"
-
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -22,9 +20,9 @@ struct Dummy_row_access{
 	friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2){}
 
 	Dummy_row_access(){}
+	template<typename index, class Row_container_type>
+	Dummy_row_access([[maybe_unused]] index columnIndex, [[maybe_unused]] Row_container_type& rows){}
 	Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept{}
-	
-	static constexpr bool isActive_ = false;	//TODO: to remove when columns are redone without
 };
 
 template<class Master_matrix>
@@ -40,9 +38,9 @@ public:
 	Row_access(Row_access&& other) noexcept;
 
 	void insert_cell(index rowIndex, Cell_type *cell);
-	void insert_cell(index rowIndex, const Cell_type &cell);
+	void insert_cell(index rowIndex, const Cell_type &cell);	//still used??
 	void unlink(Cell_type *cell);
-	void unlink(const Cell_type &cell);
+	void unlink(const Cell_type &cell);							//still used??
 	void update_cell(const Cell_type &cell);
 	index get_column_index() const;
 
@@ -56,14 +54,13 @@ public:
 protected:
 	index columnIndex_;
 	Row_container_type* rows_;			//be carefull to not destroy container before columns
-	static constexpr bool isActive_ = true;	//TODO: to remove when columns are redone without
 
 private:
 	using base_hook_matrix_row = typename Master_matrix::base_hook_matrix_row;
 };
 
 template<class Master_matrix>
-inline Row_access<Master_matrix>::Row_access() : rows_(nullptr)
+inline Row_access<Master_matrix>::Row_access() : columnIndex_(-1), rows_(nullptr)
 {}
 
 template<class Master_matrix>

@@ -20,6 +20,8 @@ namespace persistence_matrix {
 struct Dummy_matrix_dimension_holder{
 	template<typename dimension_type>
 	Dummy_matrix_dimension_holder([[maybe_unused]] dimension_type maximalDimension){}
+
+	friend void swap([[maybe_unused]] Dummy_matrix_dimension_holder& d1, [[maybe_unused]] Dummy_matrix_dimension_holder& d2){}
 };
 
 template<typename dimension_type>

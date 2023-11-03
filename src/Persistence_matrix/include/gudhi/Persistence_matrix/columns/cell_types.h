@@ -23,6 +23,10 @@ struct Dummy_cell_column_index_mixin{
 	Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex){}
 	Dummy_cell_column_index_mixin([[maybe_unused]] const Dummy_cell_column_index_mixin& cell){};
 	Dummy_cell_column_index_mixin([[maybe_unused]] Dummy_cell_column_index_mixin&& cell){};
+
+	Dummy_cell_column_index_mixin& operator=([[maybe_unused]] const Dummy_cell_column_index_mixin& other){
+		return *this;
+	};
 };
 
 struct Dummy_cell_field_element_mixin{
@@ -31,13 +35,17 @@ struct Dummy_cell_field_element_mixin{
 	Dummy_cell_field_element_mixin([[maybe_unused]] Field_element_type t){}
 	Dummy_cell_field_element_mixin([[maybe_unused]] const Dummy_cell_field_element_mixin& cell){};
 	Dummy_cell_field_element_mixin([[maybe_unused]] Dummy_cell_field_element_mixin&& cell){};
+
+	Dummy_cell_field_element_mixin& operator=([[maybe_unused]] const Dummy_cell_field_element_mixin& other){
+		return *this;
+	};
 };
 
 template<typename index>
 class Cell_column_index
 {
 public:
-	Cell_column_index(){};
+	Cell_column_index() : columnIndex_(-1) {};
 	Cell_column_index(index columnIndex) : columnIndex_(columnIndex)
 	{};
 	Cell_column_index(const Cell_column_index& cell) : columnIndex_(cell.columnIndex_)
@@ -63,7 +71,7 @@ template<class Field_element_type>
 class Cell_field_element
 {
 public:
-	Cell_field_element(){};
+	Cell_field_element() : element_(0) {};
 	Cell_field_element(Field_element_type element) : element_(element)
 	{};
 	Cell_field_element(const Cell_field_element& cell) : element_(cell.element_)

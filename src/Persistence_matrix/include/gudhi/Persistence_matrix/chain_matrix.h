@@ -26,7 +26,7 @@ class Chain_matrix
 		  public Master_matrix::Chain_pairing_option,
 		  public Master_matrix::Chain_vine_swap_option,
 		  public Master_matrix::Chain_representative_cycles_option,
-		  protected Master_matrix::Matrix_row_access_option
+		  public Master_matrix::Matrix_row_access_option
 {
 public:
 	using Field_element_type = typename Master_matrix::Field_type;
@@ -45,17 +45,17 @@ public:
 	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
 	Chain_matrix(
 		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator = _no_G_death_comparator);
+		DeathComparatorFunction&& deathComparator);
 	template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type = boundary_type>
 	Chain_matrix(
 		const std::vector<Boundary_type>& orderedBoundaries,
 		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator = _no_G_death_comparator);
+		DeathComparatorFunction&& deathComparator);
 	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
 	Chain_matrix(
 		unsigned int numberOfColumns,
 		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator = _no_G_death_comparator);
+		DeathComparatorFunction&& deathComparator);
 	Chain_matrix(const Chain_matrix& matrixToCopy);
 	Chain_matrix(Chain_matrix&& other) noexcept;
 
@@ -66,8 +66,6 @@ public:
 	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
-	Row_type& get_row(index rowIndex);
-	const Row_type& get_row(index rowIndex) const;
 	void remove_maximal_simplex(index simplexIndex);
 
 	unsigned int get_number_of_columns() const;
@@ -77,9 +75,8 @@ public:
 	//avoid calling with specialized options or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 	//=================================================================
 
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
@@ -353,7 +350,7 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 {
 	if constexpr (!Master_matrix::Option_list::has_removable_columns){
 		if (pivotToColumnIndex_.size() <= simplexIndex){
-			pivotToColumnIndex_.resize(simplexIndex * 2, -1);
+			pivotToColumnIndex_.resize(simplexIndex * 2 + 1, -1);
 		}
 	}
 
@@ -366,7 +363,7 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 			swap_opt::pivotToPosition_[simplexIndex] = simplexIndex;
 		}
 	}
-	
+
 	if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
 		dim_opt::update_up(boundary.size() == 0 ? 0 : boundary.size() - 1);
 	}
@@ -394,26 +391,6 @@ Chain_matrix<Master_matrix>::get_column(index columnIndex) const
 	} else {
 		return matrix_[columnIndex];
 	}
-}
-
-template<class Master_matrix>
-inline typename Chain_matrix<Master_matrix>::Row_type&
-Chain_matrix<Master_matrix>::get_row(index rowIndex)
-{
-	static_assert(Master_matrix::Option_list::has_row_access,
-			"'get_row' is not implemented for the chosen options.");
-
-	return ra_opt::get_row(rowIndex);
-}
-
-template<class Master_matrix>
-inline const typename Chain_matrix<Master_matrix>::Row_type&
-Chain_matrix<Master_matrix>::get_row(index rowIndex) const
-{
-	static_assert(Master_matrix::Option_list::has_row_access,
-			"'get_row' is not implemented for the chosen options.");
-
-	return ra_opt::get_row(rowIndex);
 }
 
 template<class Master_matrix>
@@ -493,38 +470,26 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index t
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		auto& col = matrix_.at(targetColumnIndex);
-		_add_to(col, [&](){col += sourceColumn;});
+		_add_to(col, [&](){col.multiply_and_add(coefficient, matrix_.at(sourceColumnIndex));});
 	} else {
 		auto& col = matrix_[targetColumnIndex];
-		_add_to(col, [&](){col += sourceColumn;});
+		_add_to(col, [&](){col.multiply_and_add(coefficient, matrix_[sourceColumnIndex]);});
 	}
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		auto& col = matrix_.at(targetColumnIndex);
-		_add_to(col, [&](){col.multiply_and_add(coefficient, sourceColumn);});
+		_add_to(col, [&](){col.multiply_and_add(matrix_.at(sourceColumnIndex), coefficient);});
 	} else {
 		auto& col = matrix_[targetColumnIndex];
-		_add_to(col, [&](){col.multiply_and_add(coefficient, sourceColumn);});
-	}
-}
-
-template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		auto& col = matrix_.at(targetColumnIndex);
-		_add_to(col, [&](){col.multiply_and_add(sourceColumn, coefficient);});
-	} else {
-		auto& col = matrix_[targetColumnIndex];
-		_add_to(col, [&](){col.multiply_and_add(sourceColumn, coefficient);});
+		_add_to(col, [&](){col.multiply_and_add(matrix_[sourceColumnIndex], coefficient);});
 	}
 }
 
@@ -612,7 +577,7 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::print() const
 {
 	std::cout << "Column Matrix:\n";
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (!Master_matrix::Option_list::has_removable_columns){
 		for (unsigned int i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != -1; ++i){
 			index pos = pivotToColumnIndex_[i];
 			const Column_type& col = matrix_[pos];

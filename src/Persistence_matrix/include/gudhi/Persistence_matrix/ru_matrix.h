@@ -42,10 +42,9 @@ public:
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary);
 	Column_type& get_column(index columnIndex, bool inR = true);
-	const Column_type& get_column(index columnIndex, bool inR = true) const;
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex, bool inR = true);
-	const Row_type& get_row(index rowIndex, bool inR = true) const;
+	void erase_row(index rowIndex);	//only erase row in R, as U will never have an empty row
 	void remove_maximal_simplex(index columnIndex);
 
 	dimension_type get_max_dimension() const;
@@ -56,12 +55,8 @@ public:
 	//avoid calling with specialized options or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
+	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
+	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex, bool inR = true);
 	void zero_column(index columnIndex, bool inR = true);
@@ -212,16 +207,6 @@ RU_matrix<Master_matrix>::get_column(index columnIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline const typename RU_matrix<Master_matrix>::Column_type &
-RU_matrix<Master_matrix>::get_column(index columnIndex, bool inR) const
-{
-	if (inR){
-		return reducedMatrixR_.get_column(columnIndex);
-	}
-	return mirrorMatrixU_.get_column(columnIndex);
-}
-
-template<class Master_matrix>
 inline typename RU_matrix<Master_matrix>::Row_type&
 RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR)
 {
@@ -235,16 +220,9 @@ RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline const typename RU_matrix<Master_matrix>::Row_type&
-RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR) const
+inline void RU_matrix<Master_matrix>::erase_row(index rowIndex)
 {
-	static_assert(Master_matrix::Option_list::has_row_access,
-			"'get_row' is not implemented for the chosen options.");
-
-	if (inR){
-		return reducedMatrixR_.get_row(rowIndex);
-	}
-	return mirrorMatrixU_.get_row(rowIndex);
+	reducedMatrixR_.erase_row(rowIndex);
 }
 
 template<class Master_matrix>
@@ -296,45 +274,17 @@ inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targ
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
+inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	reducedMatrixR_.add_to(sourceColumn, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumn, targetColumnIndex);
+	reducedMatrixR_.add_to(sourceColumnIndex, coefficient, targetColumnIndex);
+	mirrorMatrixU_.add_to(sourceColumnIndex, coefficient, targetColumnIndex);
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void RU_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
-	reducedMatrixR_.add_to(sourceColumn, coefficient, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumn, coefficient, targetColumnIndex);
-}
-
-template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	reducedMatrixR_.add_to(coefficient, sourceColumn, targetColumnIndex);
-	mirrorMatrixU_.add_to(coefficient, sourceColumn, targetColumnIndex);
-}
-
-template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, index targetColumnIndex)
-{
-	reducedMatrixR_.add_to(sourceColumn, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumn, targetColumnIndex);
-}
-
-template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
-{
-	reducedMatrixR_.add_to(sourceColumn, coefficient, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumn, coefficient, targetColumnIndex);
-}
-
-template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex)
-{
-	reducedMatrixR_.add_to(coefficient, sourceColumn, targetColumnIndex);
-	mirrorMatrixU_.add_to(coefficient, sourceColumn, targetColumnIndex);
+	reducedMatrixR_.add_to(coefficient, sourceColumnIndex, targetColumnIndex);
+	mirrorMatrixU_.add_to(coefficient, sourceColumnIndex, targetColumnIndex);
 }
 
 template<class Master_matrix>
@@ -464,7 +414,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
 					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 
 					curr.multiply_and_add(coef, toadd);
-					mirrorMatrixU_.get_column(i).multiply_and_add(coef, mirrorMatrixU_.get_column(currIndex));
+					mirrorMatrixU_.add_to(currIndex, coef, i);
 				}
 
 				pivot = curr.get_pivot();

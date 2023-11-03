@@ -14,6 +14,7 @@
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>	//std::swap, std::move & std::exchange
 
 #include <boost/intrusive/list.hpp>
 
@@ -28,6 +29,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 							  public Master_matrix::Chain_column_option
 {
 public:
+	using Master = Master_matrix;
 	using Field_element_type = typename std::conditional<
 								  Master_matrix::Option_list::is_z2,
 								  bool,
@@ -48,13 +50,13 @@ public:
 	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
 
 	Intrusive_list_column();
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Intrusive_list_column(const Container_type& nonZeroRowIndices);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Intrusive_list_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Intrusive_list_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension);	//dimension gets ignored for base
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Intrusive_list_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type &rowContainer);	//dimension gets ignored for base
 	Intrusive_list_column(const Intrusive_list_column& column);
 	template<class Row_container_type>
@@ -362,7 +364,8 @@ template<class Master_matrix>
 inline std::vector<typename Intrusive_list_column<Master_matrix>::Field_element_type> 
 Intrusive_list_column<Master_matrix>::get_content(int columnLength) const
 {
-	if (columnLength < 0) columnLength = column_.back().get_row_index() + 1;
+	if (columnLength < 0 && column_.size() > 0) columnLength = column_.back().get_row_index() + 1;
+	else if (columnLength < 0) return std::vector<Field_element_type>();
 
 	std::vector<Field_element_type> container(columnLength);
 	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){

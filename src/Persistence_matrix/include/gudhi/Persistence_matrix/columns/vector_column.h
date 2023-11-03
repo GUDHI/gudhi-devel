@@ -16,6 +16,7 @@
 #include <type_traits>
 #include <algorithm>	//binary_search
 #include <unordered_set>
+#include <utility>	//std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
 
@@ -30,6 +31,7 @@ class Vector_column : public Master_matrix::Row_access_option,
 					  public Master_matrix::Chain_column_option
 {
 public:
+	using Master = Master_matrix;
 	using Field_element_type = typename std::conditional<
 								  Master_matrix::Option_list::is_z2,
 								  bool,
@@ -46,13 +48,13 @@ public:
 	using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
 	Vector_column();
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Vector_column(const Container_type& nonZeroRowIndices);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Vector_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type>
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Vector_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension);	//dimension gets ignored for base
-	template<class Container_type, class Row_container_type>
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Vector_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type &rowContainer);	//dimension gets ignored for base
 	Vector_column(const Vector_column& column);
 	template<class Row_container_type>
@@ -79,14 +81,14 @@ public:
 	Field_element_type get_pivot_value();
 	//****************
 
-	iterator begin() noexcept;						//potentally does not ignore erase values
-	const_iterator begin() const noexcept;			//potentally does not ignore erase values
-	iterator end() noexcept;						//potentally does not ignore erase values
-	const_iterator end() const noexcept;			//potentally does not ignore erase values
-	reverse_iterator rbegin() noexcept;				//potentally does not ignore erase values
-	const_reverse_iterator rbegin() const noexcept;	//potentally does not ignore erase values
-	reverse_iterator rend() noexcept;				//potentally does not ignore erase values
-	const_reverse_iterator rend() const noexcept;	//potentally does not ignore erase values
+	iterator begin() noexcept;						//potentally does not ignore erased values
+	const_iterator begin() const noexcept;			//potentally does not ignore erased values
+	iterator end() noexcept;						//potentally does not ignore erased values
+	const_iterator end() const noexcept;			//potentally does not ignore erased values
+	reverse_iterator rbegin() noexcept;				//potentally does not ignore erased values
+	const_reverse_iterator rbegin() const noexcept;	//potentally does not ignore erased values
+	reverse_iterator rend() noexcept;				//potentally does not ignore erased values
+	const_reverse_iterator rend() const noexcept;	//potentally does not ignore erased values
 
 	template<class Cell_range>
 	Vector_column& operator+=(const Cell_range& column);	//for base & boundary except vector	//may not work if Cell_range = Vector_column<Other>
@@ -384,7 +386,8 @@ template<class Master_matrix>
 inline std::vector<typename Vector_column<Master_matrix>::Field_element_type> 
 Vector_column<Master_matrix>::get_content(int columnLength) const
 {
-	if (columnLength < 0) columnLength = column_.back()->get_row_index() + 1;
+	if (columnLength < 0 && column_.size() > 0) columnLength = column_.back()->get_row_index() + 1;
+	else if (columnLength < 0) return std::vector<Field_element_type>();
 
 	std::vector<Field_element_type> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<index>(columnLength); ++it){

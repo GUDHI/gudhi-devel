@@ -108,19 +108,12 @@ public:
 
 	unsigned int get_number_of_columns() const;
 
-	// void add_to(index sourceColumnIndex, index targetColumnIndex);
-	template<typename Index_type>
-	std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
-	template<class Cell_range>
-	std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
-	template<class Cell_range>
-	void add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	template<class Cell_range>
-	void add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex);
-	//necessary because of vector columns ? TODO: base vector with naive cell clear ?
-	void add_to(Column_type& sourceColumn, index targetColumnIndex);
-	void add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	template<class Cell_range_or_column_index>
+	void add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 
 	bool is_zero_cell(index columnIndex, index rowIndex);
 	bool is_zero_column(index columnIndex);
@@ -325,97 +318,54 @@ inline unsigned int Base_matrix_with_column_compression<Master_matrix>::get_numb
 	return nextColumnIndex_;
 }
 
-// template<class Master_matrix>
-// inline void Base_matrix_with_column_compression<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
-// {
-// 	//handle case where targetRep == sourceRep?
-// 	// index targetRep = columnClasses_.find(targetColumnIndex);
-// 	index targetRep = columnClasses_.find_set(targetColumnIndex);
-// 	Column_type& target = *repToColumn_[targetRep];
-// 	columnToRep_.erase(target);
-// 	target += get_column(sourceColumnIndex);
-// 	_insert_column(targetRep);
-// }
-
 template<class Master_matrix>
-template<typename Index_type>
-inline std::enable_if_t<std::is_integral_v<Index_type> > Base_matrix_with_column_compression<Master_matrix>::add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
 	//handle case where targetRep == sourceRep?
 	// index targetRep = columnClasses_.find(targetColumnIndex);
 	index targetRep = columnClasses_.find_set(targetColumnIndex);
 	Column_type& target = *repToColumn_[targetRep];
 	columnToRep_.erase(target);
-	target += get_column(sourceColumnIndex);
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		target += get_column(sourceColumn);
+	} else {
+		target += sourceColumn;
+	}
 	_insert_column(targetRep);
 }
 
 template<class Master_matrix>
-template<class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range> > Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, index targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
+	//handle case where targetRep == sourceRep?
 	// index targetRep = columnClasses_.find(targetColumnIndex);
 	index targetRep = columnClasses_.find_set(targetColumnIndex);
 	Column_type& target = *repToColumn_[targetRep];
 	columnToRep_.erase(target);
-	target += sourceColumn;
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		target.multiply_and_add(coefficient, get_column(sourceColumn));
+	} else {
+		target.multiply_and_add(coefficient, sourceColumn);
+	}
 	_insert_column(targetRep);
 }
 
 template<class Master_matrix>
-template<class Cell_range>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+template<class Cell_range_or_column_index>
+inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
+	//handle case where targetRep == sourceRep?
 	// index targetRep = columnClasses_.find(targetColumnIndex);
 	index targetRep = columnClasses_.find_set(targetColumnIndex);
 	Column_type& target = *repToColumn_[targetRep];
 	columnToRep_.erase(target);
-	target.multiply_and_add(coefficient, sourceColumn);
-	_insert_column(targetRep);
-}
-
-template<class Master_matrix>
-template<class Cell_range>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range& sourceColumn, index targetColumnIndex)
-{
-	// index targetRep = columnClasses_.find(targetColumnIndex);
-	index targetRep = columnClasses_.find_set(targetColumnIndex);
-	Column_type& target = *repToColumn_[targetRep];
-	columnToRep_.erase(target);
-	target.multiply_and_add(sourceColumn, coefficient);
-	_insert_column(targetRep);
-}
-
-template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(Column_type& sourceColumn, index targetColumnIndex)
-{
-	// index targetRep = columnClasses_.find(targetColumnIndex);
-	index targetRep = columnClasses_.find_set(targetColumnIndex);
-	Column_type& target = *repToColumn_[targetRep];
-	columnToRep_.erase(target);
-	target += sourceColumn;
-	_insert_column(targetRep);
-}
-
-template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
-{
-	// index targetRep = columnClasses_.find(targetColumnIndex);
-	index targetRep = columnClasses_.find_set(targetColumnIndex);
-	Column_type& target = *repToColumn_[targetRep];
-	columnToRep_.erase(target);
-	target.multiply_and_add(coefficient, sourceColumn);
-	_insert_column(targetRep);
-}
-
-template<class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, Column_type& sourceColumn, index targetColumnIndex)
-{
-	// index targetRep = columnClasses_.find(targetColumnIndex);
-	index targetRep = columnClasses_.find_set(targetColumnIndex);
-	Column_type& target = *repToColumn_[targetRep];
-	columnToRep_.erase(target);
-	target.multiply_and_add(sourceColumn, coefficient);
+	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
+		target.multiply_and_add(get_column(sourceColumn), coefficient);
+	} else {
+		target.multiply_and_add(sourceColumn, coefficient);
+	}
 	_insert_column(targetRep);
 }
 
