@@ -22,6 +22,8 @@ namespace persistence_matrix {
 class Shared_Zp_field_element {
 public:
 	using element_type = unsigned int;
+	template <class T>
+	using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
 	Shared_Zp_field_element();
 	Shared_Zp_field_element(unsigned int element);
@@ -41,11 +43,15 @@ public:
 	friend void operator+=(Shared_Zp_field_element& f, unsigned int const v){
 		f.element_ = Shared_Zp_field_element::_add(f.element_, v < characteristic_ ? v : v % characteristic_);
 	}
-	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f, const Integer_type v){
 		f += v;
 		return f;
 	}
-	friend unsigned int operator+(unsigned int v, Shared_Zp_field_element const& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator+(Integer_type v, Shared_Zp_field_element const& f){
 		v += f.element_;
 		if (v >= characteristic_) v %= characteristic_;
 		return v;
@@ -61,11 +67,15 @@ public:
 	friend void operator-=(Shared_Zp_field_element& f, unsigned int const v){
 		f.element_ = Shared_Zp_field_element::_substract(f.element_, v < characteristic_ ? v : v % characteristic_);
 	}
-	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f, const Integer_type v){
 		f -= v;
 		return f;
 	}
-	friend unsigned int operator-(unsigned int v, Shared_Zp_field_element const& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator-(Integer_type v, Shared_Zp_field_element const& f){
 		if (v >= characteristic_) v %= characteristic_;
 		if (f.element_ > v) v += characteristic_;
 		v -= f.element_;
@@ -82,11 +92,15 @@ public:
 	friend void operator*=(Shared_Zp_field_element& f, unsigned int const v){
 		f.element_ = Shared_Zp_field_element::_multiply(f.element_, v < characteristic_ ? v : v % characteristic_);
 	}
-	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f, const Integer_type v){
 		f *= v;
 		return f;
 	}
-	friend unsigned int operator*(unsigned int v, Shared_Zp_field_element const& f){
+	//uses bitwise operations on v, so be carefull with signed integers
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator*(Integer_type v, Shared_Zp_field_element const& f){
 		unsigned int b = f.element_;
 		unsigned int res = 0;
 		unsigned int temp_b;
@@ -111,21 +125,29 @@ public:
 	friend bool operator==(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2){
 		return f1.element_ == f2.element_;
 	}
-	friend bool operator==(const unsigned int v, const Shared_Zp_field_element& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Integer_type v, const Shared_Zp_field_element& f){
 		if (v < characteristic_) return v == f.element_;
 		return (v % characteristic_) == f.element_;
 	}
-	friend bool operator==(const Shared_Zp_field_element& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Shared_Zp_field_element& f, const Integer_type v){
 		if (v < characteristic_) return v == f.element_;
 		return (v % characteristic_) == f.element_;
 	}
 	friend bool operator!=(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2){
 		return !(f1 == f2);
 	}
-	friend bool operator!=(const unsigned int v, const Shared_Zp_field_element& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Integer_type v, const Shared_Zp_field_element& f){
 		return !(v == f);
 	}
-	friend bool operator!=(const Shared_Zp_field_element& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Shared_Zp_field_element& f, const Integer_type v){
 		return !(v == f);
 	}
 

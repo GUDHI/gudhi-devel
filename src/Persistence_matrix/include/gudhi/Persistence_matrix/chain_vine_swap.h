@@ -394,10 +394,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 		bool hasSmallerBirth;
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
 			hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
-			std::cout << "b: " << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::birth(col1.get_pivot()) << ", " << CP::birth(col2.get_pivot()) << " - " << hasSmallerBirth << "\n";
 		} else {
 			hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
-			std::cout << "b: " << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerBirth << "\n";
 		}
 		if (!col2.is_paired() && hasSmallerBirth){
 			_matrix()->add_to(columnIndex1, columnIndex2);
@@ -422,10 +420,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	bool hasSmallerDeath;
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		hasSmallerDeath = (CP::death(col1.get_pivot()) < CP::death(col2.get_pivot()));
-		std::cout << "d: " << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::death(col1.get_pivot()) << ", " << CP::death(col2.get_pivot()) << " - " << hasSmallerDeath << "\n";
 	} else {
 		hasSmallerDeath = deathComp_(columnIndex1, columnIndex2);
-		std::cout << "d: " << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerDeath << "\n";
 	}
 
 	// G x G
@@ -485,10 +481,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	bool hasSmallerBirth;
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
-		std::cout << col1.get_pivot() << ", " << col2.get_pivot() << ", " << CP::birth(col1.get_pivot()) << ", " << CP::birth(col2.get_pivot()) << " - " << hasSmallerBirth << "\n";
 	} else {
 		hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
-		std::cout << columnIndex1 << ", " << columnIndex2 << " - " << hasSmallerBirth << "\n";
 
 		//for debug, to remove
 		if (hasSmallerBirth != (_matrix()->get_pivot(pairedIndex1) < _matrix()->get_pivot(pairedIndex2)))

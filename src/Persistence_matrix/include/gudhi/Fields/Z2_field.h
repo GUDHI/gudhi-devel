@@ -19,6 +19,8 @@ namespace persistence_matrix {
 class Z2_field_element {
 public:
 	using element_type = unsigned int;
+	template <class T>
+	using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
 	Z2_field_element();
 	Z2_field_element(unsigned int element);
@@ -36,11 +38,14 @@ public:
 	friend void operator+=(Z2_field_element& f, unsigned int const v){
 		f.element_ = (f.element_ != (v % 2));
 	}
-	friend Z2_field_element operator+(Z2_field_element f, unsigned int const v){
+	//v will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Z2_field_element operator+(Z2_field_element f, const Integer_type v){
 		f += v;
 		return f;
 	}
-	friend unsigned int operator+(unsigned int const v, Z2_field_element const& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator+(const Integer_type v, Z2_field_element const& f){
 		return f.element_ != (v % 2);
 	}
 
@@ -54,11 +59,14 @@ public:
 	friend void operator-=(Z2_field_element& f, unsigned int const v){
 		f.element_ = (f.element_ != (v % 2));
 	}
-	friend Z2_field_element operator-(Z2_field_element f, unsigned int const v){
+	//v will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Z2_field_element operator-(Z2_field_element f, const Integer_type v){
 		f -= v;
 		return f;
 	}
-	friend unsigned int operator-(unsigned int const v, Z2_field_element const& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator-(const Integer_type v, Z2_field_element const& f){
 		return f.element_ != (v % 2);
 	}
 
@@ -72,30 +80,37 @@ public:
 	friend void operator*=(Z2_field_element& f, unsigned int const v){
 		f.element_ = (f.element_ && (v % 2));
 	}
-	friend Z2_field_element operator*(Z2_field_element f, unsigned int const v){
+	//v will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Z2_field_element operator*(Z2_field_element f, const Integer_type v){
 		f *= v;
 		return f;
 	}
-	friend unsigned int operator*(unsigned int const v, Z2_field_element const& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator*(const Integer_type v, Z2_field_element const& f){
 		return f.element_ && (v % 2);
 	}
 
 	friend bool operator==(const Z2_field_element& f1, const Z2_field_element& f2){
 		return f1.element_ == f2.element_;
 	}
-	friend bool operator==(const unsigned int v, const Z2_field_element& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Integer_type v, const Z2_field_element& f){
 		return (v % 2) == f.element_;
 	}
-	friend bool operator==(const Z2_field_element& f, const unsigned int v){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Z2_field_element& f, const Integer_type v){
 		return (v % 2) == f.element_;
 	}
 	friend bool operator!=(const Z2_field_element& f1, const Z2_field_element& f2){
 		return !(f1 == f2);
 	}
-	friend bool operator!=(const unsigned int v, const Z2_field_element& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Integer_type v, const Z2_field_element& f){
 		return !(v == f);
 	}
-	friend bool operator!=(const Z2_field_element& f, const unsigned int v){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Z2_field_element& f, const Integer_type v){
 		return !(v == f);
 	}
 

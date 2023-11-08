@@ -80,7 +80,7 @@ public:
 	//=================================================================
 
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
-	bool is_zero_column(index columnIndex) const;	//just for sanity checks as a valid chain matrix never has an empty column.
+	bool is_zero_column(index columnIndex);	//just for sanity checks as a valid chain matrix never has an empty column.
 
 	index get_column_with_pivot(index simplexIndex) const;
 	index get_pivot(index columnIndex);
@@ -504,7 +504,7 @@ inline bool Chain_matrix<Master_matrix>::is_zero_cell(index columnIndex, index r
 }
 
 template<class Master_matrix>
-inline bool Chain_matrix<Master_matrix>::is_zero_column(index columnIndex) const
+inline bool Chain_matrix<Master_matrix>::is_zero_column(index columnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return matrix_.at(columnIndex).is_empty();
@@ -769,7 +769,7 @@ inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
 		{
-			add_to(other_col_it->second, get_column(other_col_it->first), toUpdate);
+			add_to(other_col_it->second, other_col_it->first, toUpdate);
 		}
 	}
 }

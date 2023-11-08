@@ -26,6 +26,8 @@ namespace persistence_matrix {
 class Shared_multi_field_element_with_small_characteristics {
 public:
 	using element_type = unsigned int;
+	template <class T>
+	using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
 	Shared_multi_field_element_with_small_characteristics();
 	Shared_multi_field_element_with_small_characteristics(unsigned int element);
@@ -45,11 +47,14 @@ public:
 	friend void operator+=(Shared_multi_field_element_with_small_characteristics& f, unsigned int const v){
 		f.element_ = _add(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
 	}
-	friend Shared_multi_field_element_with_small_characteristics operator+(Shared_multi_field_element_with_small_characteristics f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_multi_field_element_with_small_characteristics operator+(Shared_multi_field_element_with_small_characteristics f, const Integer_type v){
 		f += v;
 		return f;
 	}
-	friend unsigned int operator+(unsigned int v, Shared_multi_field_element_with_small_characteristics const& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator+(Integer_type v, Shared_multi_field_element_with_small_characteristics const& f){
 		v += f.element_;
 		v %= productOfAllCharacteristics_;
 		return v;
@@ -65,11 +70,15 @@ public:
 	friend void operator-=(Shared_multi_field_element_with_small_characteristics& f, unsigned int const v){
 		f.element_ = _substract(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
 	}
-	friend Shared_multi_field_element_with_small_characteristics operator-(Shared_multi_field_element_with_small_characteristics f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_multi_field_element_with_small_characteristics operator-(Shared_multi_field_element_with_small_characteristics f, const Integer_type v){
 		f -= v;
 		return f;
 	}
-	friend unsigned int operator-(unsigned int v, Shared_multi_field_element_with_small_characteristics const& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator-(Integer_type v, Shared_multi_field_element_with_small_characteristics const& f){
 		if (v >= productOfAllCharacteristics_) v %= productOfAllCharacteristics_;
 		if (f.element_ > v) v += productOfAllCharacteristics_;
 		v -= f.element_;
@@ -86,11 +95,15 @@ public:
 	friend void operator*=(Shared_multi_field_element_with_small_characteristics& f, unsigned int const v){
 		f.element_ = _multiply(f.element_, v < productOfAllCharacteristics_ ? v : v % productOfAllCharacteristics_);
 	}
-	friend Shared_multi_field_element_with_small_characteristics operator*(Shared_multi_field_element_with_small_characteristics f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Shared_multi_field_element_with_small_characteristics operator*(Shared_multi_field_element_with_small_characteristics f, const Integer_type v){
 		f *= v;
 		return f;
 	}
-	friend unsigned int operator*(unsigned int v, Shared_multi_field_element_with_small_characteristics const& f){
+	//uses bitwise operations on v, so be carefull with signed integers
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator*(Integer_type v, Shared_multi_field_element_with_small_characteristics const& f){
 		unsigned int b = f.element_;
 		unsigned int res = 0;
 		unsigned int temp_b;
@@ -115,21 +128,29 @@ public:
 	friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f1, const Shared_multi_field_element_with_small_characteristics& f2){
 		return f1.element_ == f2.element_;
 	}
-	friend bool operator==(const unsigned int v, const Shared_multi_field_element_with_small_characteristics& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Integer_type v, const Shared_multi_field_element_with_small_characteristics& f){
 		if (v < productOfAllCharacteristics_) return v == f.element_;
 		return (v % productOfAllCharacteristics_) == f.element_;
 	}
-	friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type v){
 		if (v < productOfAllCharacteristics_) return v == f.element_;
 		return (v % productOfAllCharacteristics_) == f.element_;
 	}
 	friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f1, const Shared_multi_field_element_with_small_characteristics& f2){
 		return !(f1 == f2);
 	}
-	friend bool operator!=(const unsigned int v, const Shared_multi_field_element_with_small_characteristics& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Integer_type v, const Shared_multi_field_element_with_small_characteristics& f){
 		return !(v == f);
 	}
-	friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type v){
 		return !(v == f);
 	}
 

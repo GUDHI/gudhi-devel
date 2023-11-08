@@ -23,6 +23,8 @@ template<unsigned int characteristic>
 class Zp_field_element {
 public:
 	using element_type = unsigned int;
+	template <class T>
+	using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
 	Zp_field_element();
 	Zp_field_element(unsigned int element);
@@ -37,14 +39,17 @@ public:
 		f1 += f2;
 		return f1;
 	}
-	friend void operator+=(Zp_field_element& f, unsigned int const v){
+	friend void operator+=(Zp_field_element& f, const unsigned int v){
 		f.element_ = Zp_field_element::_add(f.element_, v < characteristic ? v : v % characteristic);
 	}
-	friend Zp_field_element operator+(Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Zp_field_element operator+(Zp_field_element f, const Integer_type v){
 		f += v;
 		return f;
 	}
-	friend unsigned int operator+(unsigned int v, Zp_field_element const& f){
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Integer_type operator+(Integer_type v, Zp_field_element const& f){
 		v += f.element_;
 		if (v >= characteristic) v %= characteristic;
 		return v;
@@ -60,11 +65,15 @@ public:
 	friend void operator-=(Zp_field_element& f, unsigned int const v){
 		f.element_ = Zp_field_element::_substract(f.element_, v < characteristic ? v : v % characteristic);
 	}
-	friend Zp_field_element operator-(Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Zp_field_element operator-(Zp_field_element f, const Integer_type v){
 		f -= v;
 		return f;
 	}
-	friend unsigned int operator-(unsigned int v, Zp_field_element const& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend unsigned int operator-(Integer_type v, Zp_field_element const& f){
 		if (v >= characteristic) v %= characteristic;
 		if (f.element_ > v) v += characteristic;
 		v -= f.element_;
@@ -81,11 +90,15 @@ public:
 	friend void operator*=(Zp_field_element& f, unsigned int const v){
 		f.element_ = Zp_field_element::_multiply(f.element_, v < characteristic ? v : v % characteristic);
 	}
-	friend Zp_field_element operator*(Zp_field_element f, unsigned int const v){
+	//v is assumed to be positive and will be casted into an unsigned int
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend Zp_field_element operator*(Zp_field_element f, const Integer_type v){
 		f *= v;
 		return f;
 	}
-	friend unsigned int operator*(unsigned int v, Zp_field_element const& f){
+	//uses bitwise operations on v, so be carefull with signed integers
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend unsigned int operator*(Integer_type v, Zp_field_element const& f){
 		unsigned int b = f.element_;
 		unsigned int res = 0;
 		unsigned int temp_b;
@@ -110,21 +123,29 @@ public:
 	friend bool operator==(const Zp_field_element& f1, const Zp_field_element& f2){
 		return f1.element_ == f2.element_;
 	}
-	friend bool operator==(const unsigned int v, const Zp_field_element& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Integer_type v, const Zp_field_element& f){
 		if (v < characteristic) return v == f.element_;
 		return (v % characteristic) == f.element_;
 	}
-	friend bool operator==(const Zp_field_element& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator==(const Zp_field_element& f, const Integer_type v){
 		if (v < characteristic) return v == f.element_;
 		return (v % characteristic) == f.element_;
 	}
 	friend bool operator!=(const Zp_field_element& f1, const Zp_field_element& f2){
 		return !(f1 == f2);
 	}
-	friend bool operator!=(const unsigned int v, const Zp_field_element& f){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Integer_type v, const Zp_field_element& f){
 		return !(v == f);
 	}
-	friend bool operator!=(const Zp_field_element& f, const unsigned int v){
+	//v is assumed to be positive
+	template<typename Integer_type, class = isInteger<Integer_type> >
+	friend bool operator!=(const Zp_field_element& f, const Integer_type v){
 		return !(v == f);
 	}
 
@@ -194,48 +215,6 @@ template<unsigned int characteristic>
 inline Zp_field_element<characteristic>::Zp_field_element(Zp_field_element<characteristic> &&toMove) noexcept
 	: element_(std::exchange(toMove.element_, 0))
 {}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(Zp_field_element<characteristic> const &f)
-//{
-//	_add(f.element_);
-//	return *this;
-//}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator+=(unsigned int const v)
-//{
-//	_add(v % characteristic);
-//	return *this;
-//}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(Zp_field_element<characteristic> const &f)
-//{
-//	_substract(f.element_);
-//	return *this;
-//}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator-=(unsigned int const v)
-//{
-//	_substract(v % characteristic);
-//	return *this;
-//}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(Zp_field_element<characteristic> const &f)
-//{
-//	_multiply(f.element_);
-//	return *this;
-//}
-
-//template<unsigned int characteristic>
-//inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator*=(unsigned int const v)
-//{
-//	_multiply(v % characteristic);
-//	return *this;
-//}
 
 template<unsigned int characteristic>
 inline Zp_field_element<characteristic> &Zp_field_element<characteristic>::operator=(Zp_field_element other)
