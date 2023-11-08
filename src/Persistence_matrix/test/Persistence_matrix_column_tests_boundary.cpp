@@ -15,8 +15,8 @@
 // #include <boost/mpl/list.hpp>
 // #include <boost/mp11.hpp>
 
-#include "column_tests.h"
-#include "column_tests_boost_type_lists.h"
+#include "pm_column_tests.h"
+#include "pm_column_tests_boost_type_lists.h"
 
 using option_name_list = mp_list_q<c_boundary_options>;
 using no_row_access_columns = columns_list<no_ra_option_list<option_name_list> >;

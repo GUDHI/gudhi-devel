@@ -134,6 +134,12 @@ struct Column_mini_matrix
 											Chain_column_extra_properties<Column_mini_matrix<Options> >,
 											Dummy_chain_properties
 										>::type;
+
+	using boundary_type = typename std::conditional<
+									Options::is_z2,
+									std::initializer_list<index>,
+									std::initializer_list<std::pair<index,Field_type> >
+								>::type;
 };
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>

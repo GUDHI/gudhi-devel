@@ -19,7 +19,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "pm_test_utilities.h"
-#include "column_tests_mastermatrix.h"
+#include "pm_column_tests_mastermatrix.h"
 
 //assumes column was not modified since construction, ie no duplicated / erased values in heap or vector column
 template<class Column>
