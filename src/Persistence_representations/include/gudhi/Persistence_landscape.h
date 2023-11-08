@@ -388,6 +388,7 @@ class Persistence_landscape {
       nextLevelMerge.swap(nextNextLevelMerge);
     }
     (*this) = (*nextLevelMerge[0]);
+    if (!is_this_first_level) delete nextLevelMerge[0];
     (*this) *= 1 / static_cast<double>(to_average.size());
   }
 
