@@ -87,7 +87,7 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 
 	for (index i = 0; i < _matrix()->get_number_of_columns(); i++){
 		auto &col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-		if (!col.is_paired() || i < col.get_paired_chain_index()){
+		if (!col.is_paired() || static_cast<int>(i) < col.get_paired_chain_index()){
 			cycle_type cycle;
 			for (auto& c : col){
 				cycle.push_back(c.get_row_index());

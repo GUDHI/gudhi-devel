@@ -117,7 +117,7 @@ public:
 	//boundary
 	//ru
 	//chain
-	index get_pivot(index columnIndex);
+	int get_pivot(index columnIndex);
 
 	Id_to_position_indexation_overlay& operator=(Id_to_position_indexation_overlay other);
 	friend void swap(Id_to_position_indexation_overlay& matrix1,
@@ -350,15 +350,14 @@ template<class Matrix_type, class Master_matrix_type>
 inline typename Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::index 
 Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_with_pivot(index simplexIndex) const
 {
-	index pos = matrix_.get_column_with_pivot(simplexIndex);
+	int pos = matrix_.get_column_with_pivot(simplexIndex);
 	unsigned int i = 0;
 	while (_column_id_to_position(i) != pos) ++i;
 	return i;
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline typename Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::index 
-Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_pivot(index columnIndex)
+inline int Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::get_pivot(index columnIndex)
 {
 	return matrix_.get_pivot(_column_id_to_position(columnIndex));
 }

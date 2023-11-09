@@ -126,7 +126,7 @@ public:
 	//boundary
 	//ru
 	//chain
-	index get_pivot(index columnIndex);
+	int get_pivot(index columnIndex);
 
 	Position_to_id_indexation_overlay& operator=(Position_to_id_indexation_overlay other);
 	friend void swap(Position_to_id_indexation_overlay& matrix1,
@@ -365,8 +365,7 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_column_wi
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::index 
-Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_pivot(index columnIndex)
+inline int Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_pivot(index columnIndex)
 {
 	return matrix_.get_pivot(columnPositionToID_[columnIndex]);
 }

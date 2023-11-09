@@ -65,7 +65,7 @@ public:
 	bool is_zero_column(index columnIndex, bool inR = true);
 
 	index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
-	index get_pivot(index columnIndex);
+	int get_pivot(index columnIndex);
 
 	RU_matrix& operator=(RU_matrix other);
 	friend void swap(RU_matrix& matrix1, RU_matrix& matrix2){
@@ -334,7 +334,7 @@ inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_co
 }
 
 template<class Master_matrix>
-inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline int RU_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	return reducedMatrixR_.get_column(columnIndex).get_pivot();
 }
@@ -401,7 +401,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
 		{
 			Column_type &curr = reducedMatrixR_.get_column(i);
 			int pivot = curr.get_pivot();
-			index currIndex = get_column_with_pivot_(pivot);
+			int currIndex = get_column_with_pivot_(pivot);
 
 			while (pivot != -1 && currIndex != -1){
 				if constexpr (Master_matrix::Option_list::is_z2){
@@ -487,7 +487,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 	}
 
 	int pivot = curr.get_pivot();
-	index currIndex = get_column_with_pivot_(pivot);
+	int currIndex = get_column_with_pivot_(pivot);
 
 	while (pivot != -1 && currIndex != -1){
 		if constexpr (Master_matrix::Option_list::is_z2){

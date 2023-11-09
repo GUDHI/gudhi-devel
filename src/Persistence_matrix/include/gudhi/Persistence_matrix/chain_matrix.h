@@ -83,7 +83,7 @@ public:
 	bool is_zero_column(index columnIndex);	//just for sanity checks as a valid chain matrix never has an empty column.
 
 	index get_column_with_pivot(index simplexIndex) const;
-	index get_pivot(index columnIndex);
+	int get_pivot(index columnIndex);
 
 	Chain_matrix& operator=(const Chain_matrix& other);
 	friend void swap(Chain_matrix& matrix1,
@@ -524,7 +524,7 @@ inline typename Chain_matrix<Master_matrix>::index Chain_matrix<Master_matrix>::
 }
 
 template<class Master_matrix>
-inline typename Chain_matrix<Master_matrix>::index Chain_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline int Chain_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
 		return matrix_.at(columnIndex).get_pivot();

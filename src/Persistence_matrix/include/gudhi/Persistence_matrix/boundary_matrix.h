@@ -67,7 +67,7 @@ public:
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	index get_pivot(index columnIndex);
+	int get_pivot(index columnIndex);
 
 	Boundary_matrix& operator=(const Boundary_matrix& other);
 	friend void swap(Boundary_matrix& matrix1, Boundary_matrix& matrix2){
@@ -499,7 +499,7 @@ inline bool Boundary_matrix<Master_matrix>::is_zero_column(index columnIndex)
 }
 
 template<class Master_matrix>
-inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline int Boundary_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	if constexpr (activeSwapOption){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();

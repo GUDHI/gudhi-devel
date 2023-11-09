@@ -374,7 +374,7 @@ inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(index columnInd
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		return CP::is_negative_in_pair(_matrix()->get_pivot(columnIndex));
 	} else {
-		const auto& col = _matrix()->get_column(columnIndex);
+		auto& col = _matrix()->get_column(columnIndex);
 		if (!col.is_paired()) return false;
 		return col.get_pivot() > _matrix()->get_pivot(col.get_paired_chain_index());
 	}
