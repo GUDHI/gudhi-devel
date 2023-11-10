@@ -19,6 +19,45 @@ __author__ = "Mathieu Carriere"
 __copyright__ = "Copyright (C) 2017 Inria"
 __license__ = "GPL v3"
 
+def save_to_html_(dat, lens, color, param, nums, points, edges, html_output_filename):
+
+    network = {}
+    mapper = km.KeplerMapper(verbose=0)
+    data = np.zeros((3,3))
+    projected_data = mapper.fit_transform( data, projection="sum", scaler=None )
+
+    num_nodes = nums[0]
+    num_edges = nums[1]
+
+    nodes = defaultdict(list)
+    links = defaultdict(list)
+    custom = defaultdict(list)
+
+    for point in points:
+        nodes[  str(int(point[0]))  ] = [  int(point[0]), point[1], int(point[2])  ]
+        links[  str(int(point[0]))  ] = []
+        custom[  int(point[0])  ] = point[1]
+
+    for edge in edges:
+        links[  str(edge[0])  ].append(  str(edge[1])  )
+        links[  str(edge[1])  ].append(  str(edge[0])  )
+
+    m = min([custom[i] for i in range(0,num_nodes)])
+    M = max([custom[i] for i in range(0,num_nodes)])
+
+    network["nodes"] = nodes
+    network["links"] = links
+    network["meta"] = lens
+
+
+    mapper.visualize(network, color_function=color, path_html=html_output_filename, title=dat,
+    graph_link_distance=30, graph_gravity=0.1, graph_charge=-120, custom_tooltips=custom, width_html=0,
+    height_html=0, show_tooltips=True, show_title=True, show_meta=True, res=param[0], gain=param[1], minimum=m, maximum=M)
+    message = repr(html_output_filename) + " is generated. You can now use your favorite web browser to visualize it."
+    print(message)
+
+
+
 parser = argparse.ArgumentParser(description='Creates an html Keppler Mapper '
                                  'file to visualize a SC.txt file.',
                                  epilog='Example: '
@@ -30,48 +69,16 @@ parser.add_argument("-f", "--file", type=str, required=True)
 args = parser.parse_args()
 
 with open(args.file, 'r') as f:
-    network = {}
-    mapper = km.KeplerMapper(verbose=0)
-    data = np.zeros((3,3))
-    projected_data = mapper.fit_transform( data, projection="sum", scaler=None )
-
-    nodes = defaultdict(list)
-    links = defaultdict(list)
-    custom = defaultdict(list)
 
     dat = f.readline()
     lens = f.readline()
     color = f.readline();
     param = [float(i) for i in f.readline().split(" ")]
-
     nums = [int(i) for i in f.readline().split(" ")]
-    num_nodes = nums[0]
-    num_edges = nums[1]
-
-    for i in range(0,num_nodes):
-        point = [float(j) for j in f.readline().split(" ")]
-        nodes[  str(int(point[0]))  ] = [  int(point[0]), point[1], int(point[2])  ]
-        links[  str(int(point[0]))  ] = []
-        custom[  int(point[0])  ] = point[1]
-
-    m = min([custom[i] for i in range(0,num_nodes)])
-    M = max([custom[i] for i in range(0,num_nodes)])
-
-    for i in range(0,num_edges):
-        edge = [int(j) for j in f.readline().split(" ")]
-        links[  str(edge[0])  ].append(  str(edge[1])  )
-        links[  str(edge[1])  ].append(  str(edge[0])  )
-
-    network["nodes"] = nodes
-    network["links"] = links
-    network["meta"] = lens
-
+    points = [[float(j) for j in f.readline().split(" ")] for i in range(0, nums[0])]
+    edges = [[int(j) for j in f.readline().split(" ")]    for i in range(0, nums[1])]
     html_output_filename = args.file.rsplit('.', 1)[0] + '.html'
-    mapper.visualize(network, color_function=color, path_html=html_output_filename, title=dat,
-    graph_link_distance=30, graph_gravity=0.1, graph_charge=-120, custom_tooltips=custom, width_html=0,
-    height_html=0, show_tooltips=True, show_title=True, show_meta=True, res=param[0],gain=param[1], minimum=m,maximum=M)
-    message = repr(html_output_filename) + " is generated. You can now use your favorite web browser to visualize it."
-    print(message)
-
 
     f.close()
+
+save_to_html_(dat, lens, color, param, nums, points, edges, html_output_filename)

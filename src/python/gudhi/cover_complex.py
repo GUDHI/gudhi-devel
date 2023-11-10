@@ -18,6 +18,9 @@ from sklearn.metrics         import pairwise_distances
 from scipy.spatial.distance  import directed_hausdorff
 
 from . import SimplexTree, CoverComplex
+import sys
+sys.path.append("../../Nerve_GIC/utilities/")
+from KeplerMapperVisuFromTxtFile import save_to_html_
 
 class CoverComplexPy(BaseEstimator):
     """
@@ -138,7 +141,7 @@ class CoverComplexPy(BaseEstimator):
             f.write(data_name + "\n")
             f.write(cover_name + "\n")
             f.write(color_name + "\n")
-            f.write("0 0\n")
+            f.write(str(self.resolutions[0]) + " " + str(self.gains[0]) + "\n")
             f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
             name2id = {}
             idv = 0
@@ -150,6 +153,39 @@ class CoverComplexPy(BaseEstimator):
                 if len(s) == 2:
                     f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
     
+    def save_to_html(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
+        """
+        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser.
+
+        Parameters
+        ----------
+        file_name : string
+            name for the output .txt file, default "cover_complex" 
+        data_name : string
+            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py 
+        cover_name : string
+            name to use for the cover used to compute the cover complex, default "cover". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
+        color_name : string
+            name to use for the color used to color the cover complex nodes, default "color". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
+        """
+
+        st = self.simplex_tree_
+
+        if not file_name.lower().endswith(".html"):
+            file_name += ".html"
+
+        points, edges, name2id, idv = [], [], {}, 0
+        for s,_ in st.get_skeleton(0):
+            points.append([ idv, self.node_info_[s[0]]["colors"][0], self.node_info_[s[0]]["size"] ])
+            name2id[s[0]] = idv
+            idv += 1
+        for s,_ in st.get_skeleton(1):
+            if len(s) == 2:
+                edges.append([ name2id[s[0]] , name2id[s[1]] ])
+
+        save_to_html_(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], [st.num_vertices(), len(list(st.get_skeleton(1)))-st.num_vertices()], points, edges, file_name)
+
+
     class _constant_clustering():
         def fit_predict(X):
             return np.zeros([len(X)], dtype=np.int32)
