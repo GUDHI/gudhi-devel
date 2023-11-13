@@ -30,3 +30,8 @@ def test_compatibility_with_rips():
     st_from_rips = rips_complex.create_simplex_tree(max_dimension=1)
     assert list(st.get_filtration()) == list(st_from_rips.get_filtration())
 
+def test_empty_dtm_rips_complex():
+    dtm_rips = DTMRipsComplex()
+    st = dtm_rips.create_simplex_tree(max_dimension=1)
+    assert st.num_simplices() == 1
+    assert st.filtration([0]) == 0.

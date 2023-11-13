@@ -37,7 +37,7 @@ class DTMRipsComplex(WeightedRipsComplex):
         if distance_matrix is None:
             if points is None:
                 # Empty Rips construction
-                points=[]
+                points=[[]]
             distance_matrix = cdist(points,points)
         self.distance_matrix = distance_matrix
 
