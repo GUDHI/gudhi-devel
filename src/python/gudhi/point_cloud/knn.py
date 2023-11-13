@@ -53,6 +53,8 @@ class KNearestNeighbors:
                 Defaults to False.
             kwargs: additional parameters are forwarded to the backends.
         """
+        if k < 1:
+            raise ValueError(f"Expected number of neighbors (aka. 'k') > 0. Got {k}")
         self.k = k
         self.return_index = return_index
         self.return_distance = return_distance
@@ -90,6 +92,8 @@ class KNearestNeighbors:
         Args:
             X (numpy.array): coordinates for reference points.
         """
+        if self.k > len(X):
+            raise ValueError(f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k} and number of samples={len(X)}")
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
             import eagerpy as ep

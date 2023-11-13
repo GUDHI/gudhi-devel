@@ -128,3 +128,16 @@ def test_knn_nop():
     assert None is KNearestNeighbors(
         k=1, return_index=False, return_distance=False, metric="precomputed"
     ).fit_transform(p)
+
+def test_knn_k_limits():
+    nb_sample = 1000
+    for impl in ["sklearn", "ckdtree", "hnsw", "keops"]:
+        data = np.random.rand(nb_sample, 4)
+        with pytest.raises(ValueError):
+            KNearestNeighbors(
+                k=0, return_index=False, return_distance=True, sort_results=False, implementation=impl
+            ).fit_transform(data)
+        with pytest.raises(ValueError):
+            KNearestNeighbors(
+                k=nb_sample+1, return_index=False, return_distance=True, sort_results=False, implementation=impl
+            ).fit_transform(data)
