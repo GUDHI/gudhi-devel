@@ -33,7 +33,14 @@ def test_knn_explicit():
     )
     assert r == pytest.approx(np.array([[0.0, 1], [1, 1], [1, 2]]))
     r = (
-        KNearestNeighbors(2, metric="chebyshev", return_distance=True, return_index=False, implementation="keops", enable_autodiff=True)
+        KNearestNeighbors(
+            2,
+            metric="chebyshev",
+            return_distance=True,
+            return_index=False,
+            implementation="keops",
+            enable_autodiff=True,
+        )
         .fit(base)
         .transform(query)
     )
@@ -59,7 +66,9 @@ def test_knn_explicit():
     assert np.array_equal(r[0], [[0, 1], [1, 0], [2, 0]])
     assert np.array_equal(r[1], [[0, 3], [0, 1], [0, 1]])
     # Second time in parallel
-    knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=False, n_jobs=2, sort_results=True)
+    knn = KNearestNeighbors(
+        2, metric="precomputed", return_index=True, return_distance=False, n_jobs=2, sort_results=True
+    )
     r = knn.fit_transform(dist)
     assert np.array_equal(r, [[0, 1], [1, 0], [2, 0]])
     knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=True, n_jobs=2)
@@ -129,6 +138,7 @@ def test_knn_nop():
         k=1, return_index=False, return_distance=False, metric="precomputed"
     ).fit_transform(p)
 
+
 def test_knn_k_limits():
     nb_sample = 1000
     for impl in ["sklearn", "ckdtree", "hnsw", "keops"]:
@@ -139,5 +149,5 @@ def test_knn_k_limits():
             ).fit_transform(data)
         with pytest.raises(ValueError):
             KNearestNeighbors(
-                k=nb_sample+1, return_index=False, return_distance=True, sort_results=False, implementation=impl
+                k=nb_sample + 1, return_index=False, return_distance=True, sort_results=False, implementation=impl
             ).fit_transform(data)
