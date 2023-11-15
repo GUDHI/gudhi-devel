@@ -11,6 +11,7 @@
 from gudhi.weighted_rips_complex import WeightedRipsComplex
 from gudhi.point_cloud.dtm import DistanceToMeasure
 from scipy.spatial.distance import cdist
+import numpy as np
 
 
 class DTMRipsComplex(WeightedRipsComplex):
@@ -33,10 +34,11 @@ class DTMRipsComplex(WeightedRipsComplex):
             max_filtration (float): specifies the maximal filtration value to be considered.
         """
         if distance_matrix is None:
-            if points is None:
+            if points is not None:
+                distance_matrix = cdist(points, points)
+            else:
                 # Empty Rips construction
-                points = [[]]
-            distance_matrix = cdist(points, points)
+                distance_matrix = np.ndarray((0,0))
         self.distance_matrix = distance_matrix
 
         # TODO: address the error when k is too large
