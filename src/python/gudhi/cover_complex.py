@@ -17,6 +17,10 @@ from sklearn.cluster         import DBSCAN, AgglomerativeClustering
 from sklearn.metrics         import pairwise_distances
 from scipy.spatial.distance  import directed_hausdorff
 
+from sklearn import __version__ as sklearn_version
+from sklearn.utils.fixes import parse_version
+agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version('1.2.0')
+
 from . import SimplexTree, CoverComplex
 
 class CoverComplexPy(BaseEstimator):
@@ -324,10 +328,10 @@ class MapperComplex(CoverComplexPy):
         if self.resolutions is None or self.clustering is None:
             delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
             if self.clustering is None:
-                if self.input_type == "point cloud":
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="euclidean")
-                else:
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="precomputed")
+                self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, **{
+        "metric" if agglomerative_clustering_metric else "affinity":
+        "euclidean" if self.input_type == "point cloud" else "precomputed"
+                                                        })
             if self.resolutions is None:
                 self.resolutions = np.multiply(resolutions, 1./self.gains)
                 self.resolutions = np.array([int( (self.filter_bnds[ir,1]-self.filter_bnds[ir,0])/r) for ir, r in enumerate(self.resolutions)])
