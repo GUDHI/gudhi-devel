@@ -1,4 +1,4 @@
-kepler_mapper.py is a fork of https://github.com/MLWave/kepler-mapper.
+_kepler_mapper.py is a fork of https://github.com/MLWave/kepler-mapper.
 Only the visualization part has been kept (Mapper part has been removed).
 
 This file has the following Copyright :

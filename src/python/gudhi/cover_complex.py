@@ -23,9 +23,9 @@ agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_versio
 
 from . import SimplexTree, CoverComplex
 
-def save_to_html_(dat, lens, color, param, nums, points, edges, html_output_filename):
+def _save_to_html(dat, lens, color, param, nums, points, edges, html_output_filename):
 
-    from .kepler_mapper import KeplerMapper
+    from ._kepler_mapper import KeplerMapper
     network = {}
     mapper = KeplerMapper(verbose=0)
     data = np.zeros((3,3))
@@ -201,13 +201,13 @@ class CoverComplexPy(BaseEstimator):
         Parameters
         ----------
         file_name : string
-            name for the output .txt file, default "cover_complex" 
+            name for the output .html file, default "cover_complex" 
         data_name : string
-            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py 
+            name to use for the data on which the cover complex was computed, default "data".
         cover_name : string
-            name to use for the cover used to compute the cover complex, default "cover". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
+            name to use for the cover used to compute the cover complex, default "cover".
         color_name : string
-            name to use for the color used to color the cover complex nodes, default "color". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
+            name to use for the color used to color the cover complex nodes, default "color".
         """
 
         st = self.simplex_tree_
@@ -224,7 +224,7 @@ class CoverComplexPy(BaseEstimator):
             if len(s) == 2:
                 edges.append([ name2id[s[0]] , name2id[s[1]] ])
 
-        save_to_html_(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], [st.num_vertices(), len(list(st.get_skeleton(1)))-st.num_vertices()], points, edges, file_name)
+        _save_to_html(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], [st.num_vertices(), len(list(st.get_skeleton(1)))-st.num_vertices()], points, edges, file_name)
 
 
     class _constant_clustering():
