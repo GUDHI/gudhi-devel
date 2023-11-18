@@ -196,7 +196,7 @@ class CoverComplexPy(BaseEstimator):
     
     def save_to_html(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
         """
-        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser.
+        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/MLWave/kepler-mapper
 
         Parameters
         ----------
