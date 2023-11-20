@@ -16,11 +16,11 @@
 #ifndef SIMPLEX_TREE_H_
 #define SIMPLEX_TREE_H_
 
+#include <gudhi/Simplex_tree/simplex_tree_options.h>
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 #include <gudhi/Simplex_tree/Simplex_tree_siblings.h>
 #include <gudhi/Simplex_tree/Simplex_tree_iterators.h>
 #include <gudhi/Simplex_tree/Simplex_tree_star_simplex_iterators.h>
-#include <gudhi/Simplex_tree/indexing_tag.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for Gudhi::simplex_tree::de/serialize_trivial
 #include <gudhi/Simplex_tree/hooks_simplex_base.h>
 
@@ -53,7 +53,6 @@
 #include <limits>  // Inf
 #include <initializer_list>
 #include <algorithm>  // for std::max
-#include <cstdint>  // for std::uint32_t
 #include <iterator>  // for std::distance
 #include <type_traits>  // for std::conditional
 #include <unordered_map>
@@ -79,8 +78,6 @@ namespace Gudhi {
  */
 enum class Extended_simplex_type {UP, DOWN, EXTRA};
 
-struct Simplex_tree_options_full_featured;
-
 /**
  * \class Simplex_tree Simplex_tree.h gudhi/Simplex_tree.h
  * \brief Simplex Tree data structure for representing simplicial complexes.
@@ -94,7 +91,7 @@ struct Simplex_tree_options_full_featured;
  *
  */
 
-template<typename SimplexTreeOptions = Simplex_tree_options_full_featured>
+template<typename SimplexTreeOptions = Simplex_tree_options_default>
 class Simplex_tree {
  public:
   typedef SimplexTreeOptions Options;
@@ -2596,56 +2593,6 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
 
   return is;
 }
-
-/** Model of SimplexTreeOptions.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-};
-
-/** Model of SimplexTreeOptions, faster than `Simplex_tree_options_full_featured` but note the unsafe
- * `contiguous_vertices` option.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_fast_persistence {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef float Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = true;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-};
-
-/** Model of SimplexTreeOptions, faster cofaces than `Simplex_tree_options_full_featured`, note the
- * `link_nodes_by_label` option.
- * 
- * Maximum number of simplices to compute persistence is <CODE>std::numeric_limits<std::uint32_t>::max()</CODE>
- * (about 4 billions of simplices). */
-struct Simplex_tree_options_fast_cofaces {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = false;
-};
 
 /** @}*/  // end addtogroup simplex_tree
 

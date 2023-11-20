@@ -37,7 +37,7 @@ struct Simplex_tree_options_stable_simplex_handles {
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_full_featured>,
                          Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(make_filtration_non_decreasing, typeST, list_of_tested_variants) {

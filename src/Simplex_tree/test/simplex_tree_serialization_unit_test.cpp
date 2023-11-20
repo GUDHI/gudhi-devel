@@ -40,7 +40,7 @@ struct Low_options : Gudhi::Simplex_tree_options_full_featured {
   typedef std::uint8_t Simplex_key;
 };
 
-struct Stable_options : Gudhi::Simplex_tree_options_full_featured {
+struct Stable_options : Gudhi::Simplex_tree_options_default {
   //disabled by default.
   static const bool stable_simplex_handles = true;
 };
@@ -48,7 +48,7 @@ struct Stable_options : Gudhi::Simplex_tree_options_full_featured {
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
                          Simplex_tree<Low_options>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_full_featured>,
                          Simplex_tree<Stable_options> > list_of_tested_variants;
 
 template<class Filtration_type>

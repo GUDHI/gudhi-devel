@@ -30,7 +30,7 @@ cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
     cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
         Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
         @staticmethod
         void set_float_relative_precision(double precision) nogil
         @staticmethod
@@ -134,7 +134,7 @@ cdef class AlphaComplex:
         cdef intptr_t stree_int_ptr=stree.thisptr
         cdef bool compute_filtration = default_filtration_value == True
         with nogil:
-            self.this_ptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+            self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
                                               mas, compute_filtration)
         return stree
 

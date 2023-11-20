@@ -27,7 +27,7 @@ namespace cover_complex {
 
 class Nerve_gic_interface : public Cover_complex<std::vector<double>> {
  public:
-  void create_simplex_tree(Simplex_tree_interface<>* simplex_tree) {
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree) {
     create_complex(*simplex_tree);
   }
   void set_cover_from_Euclidean_Voronoi(int m) {
