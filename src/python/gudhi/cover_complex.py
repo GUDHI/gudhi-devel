@@ -23,16 +23,13 @@ agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_versio
 
 from . import SimplexTree, CoverComplex
 
-def _save_to_html(dat, lens, color, param, nums, points, edges, html_output_filename):
+def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
 
     from ._kepler_mapper import KeplerMapper
     network = {}
     mapper = KeplerMapper(verbose=0)
     data = np.zeros((3,3))
     projected_data = mapper.fit_transform( data, projection="sum", scaler=None )
-
-    num_nodes = nums[0]
-    num_edges = nums[1]
 
     from collections import defaultdict
     nodes = defaultdict(list)
@@ -48,9 +45,10 @@ def _save_to_html(dat, lens, color, param, nums, points, edges, html_output_file
         links[  str(edge[0])  ].append(  str(edge[1])  )
         links[  str(edge[1])  ].append(  str(edge[0])  )
 
-    m = min([custom[i] for i in range(0,num_nodes)])
-    M = max([custom[i] for i in range(0,num_nodes)])
-
+    custom_val = custom.values()
+    m = min(custom_val)
+    M = max(custom_val)
+    
     network["nodes"] = nodes
     network["links"] = links
     network["meta"] = lens
@@ -224,7 +222,7 @@ class CoverComplexPy(BaseEstimator):
             if len(s) == 2:
                 edges.append([ name2id[s[0]] , name2id[s[1]] ])
 
-        _save_to_html(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], [st.num_vertices(), len(list(st.get_skeleton(1)))-st.num_vertices()], points, edges, file_name)
+        _save_to_html(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], points, edges, file_name)
 
 
     class _constant_clustering():
