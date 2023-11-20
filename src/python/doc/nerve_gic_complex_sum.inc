@@ -12,7 +12,7 @@
    |                                                                |                                                                        |                                                                 |
    |                                                                |                                                                        |                                                                 |
    +----------------------------------------------------------------+------------------------------------------------------------------------+-----------------------------------------------------------------+
-   | * :doc:`cover_complex_sklearn_user`                            | * :doc:`cover_complex_sklearn_isk_ref`                                 | :requires: `Scikit-learn <installation.html#scikit-learn>`_     |
+   | * :doc:`cover_complex_sklearn_user`                            | * :doc:`cover_complex_sklearn_isk_ref`                                 | :Requires: `Scikit-learn <installation.html#scikit-learn>`_     |
    +----------------------------------------------------------------+------------------------------------------------------------------------+-----------------------------------------------------------------+
    | * :doc:`nerve_gic_complex_user`                                | * :doc:`nerve_gic_complex_ref`                                         |                                                                 |
    |                                                                |                                                                        |                                                                 |

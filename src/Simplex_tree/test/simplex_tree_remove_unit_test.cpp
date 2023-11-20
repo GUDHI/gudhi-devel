@@ -20,7 +20,7 @@
 
 using namespace Gudhi;
 
-struct MyOptions : Simplex_tree_options_full_featured {
+struct MyOptions : Simplex_tree_options_minimal {
   // Not doing persistence, so we don't need those
   static const bool store_key = false;
   static const bool store_filtration = false;
