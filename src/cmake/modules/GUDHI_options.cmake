@@ -4,6 +4,7 @@ option(WITH_GUDHI_REMOTE_TEST "Activate/deactivate datasets fetching test which 
 option(WITH_GUDHI_PYTHON "Activate/deactivate python module compilation and installation" ON)
 option(WITH_GUDHI_TEST "Activate/deactivate examples compilation and installation" ON)
 option(WITH_GUDHI_UTILITIES "Activate/deactivate utilities compilation and installation" ON)
+option(WITH_GUDHI_GUDHUI "Activate/deactivate GudhUI" ON)
 option(WITH_GUDHI_THIRD_PARTY "Activate/deactivate third party libraries cmake detection. When set to OFF, it is useful for doxygen or user_version i.e." ON)
 
 if (NOT WITH_GUDHI_THIRD_PARTY)
@@ -12,4 +13,5 @@ if (NOT WITH_GUDHI_THIRD_PARTY)
   set (WITH_GUDHI_PYTHON OFF)
   set (WITH_GUDHI_TEST OFF)
   set (WITH_GUDHI_UTILITIES OFF)
+  set (WITH_GUDHI_GUDHUI OFF)
 endif()
