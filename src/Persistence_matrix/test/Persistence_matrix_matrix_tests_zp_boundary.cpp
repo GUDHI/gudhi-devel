@@ -14,13 +14,23 @@
 #include "pm_matrix_tests.h"
 #include "pm_matrix_tests_boost_type_lists.h"
 
-using full_matrices = matrices_list<zp_boundary_option_list>;
-using row_access_matrices = matrices_list<zp_ra_boundary_option_list>;
-using removable_rows_matrices = matrices_list<zp_ra_r_boundary_option_list>;
-using removable_columns_matrices = matrices_list<zp_r_boundary_option_list>;
-using max_dim_matrices = matrices_list<zp_dim_boundary_option_list>;
-using barcode_matrices = matrices_list<zp_barcode_boundary_option_list>;
-using swap_matrices = matrices_list<zp_swap_boundary_option_list>;
+#ifdef PM_TEST_ID_IDX
+using full_matrices = matrices_list<opt_boundary_zp<false_value_list> >;
+using row_access_matrices = matrices_list<opt_boundary_zp_ra<false_value_list> >;
+using removable_rows_matrices = matrices_list<opt_boundary_zp_ra_r<false_value_list> >;
+using removable_columns_matrices = matrices_list<opt_boundary_zp_r<false_value_list> >;
+using max_dim_matrices = matrices_list<opt_boundary_zp_dim<false_value_list> >;
+using barcode_matrices = matrices_list<opt_boundary_zp_barcode<false_value_list> >;
+using swap_matrices = matrices_list<opt_boundary_zp_swap<false_value_list> >;
+#else
+using full_matrices = matrices_list<opt_boundary_zp<true_value_list> >;
+using row_access_matrices = matrices_list<opt_boundary_zp_ra<true_value_list> >;
+using removable_rows_matrices = matrices_list<opt_boundary_zp_ra_r<true_value_list> >;
+using removable_columns_matrices = matrices_list<opt_boundary_zp_r<true_value_list> >;
+using max_dim_matrices = matrices_list<opt_boundary_zp_dim<true_value_list> >;
+using barcode_matrices = matrices_list<opt_boundary_zp_barcode<true_value_list> >;
+using swap_matrices = matrices_list<opt_boundary_zp_swap<true_value_list> >;
+#endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_constructors, Matrix, full_matrices) {
 	test_constructors<Matrix>();
@@ -39,7 +49,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_zeroing, Matrix, full_matrices)
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_row_access, Matrix, row_access_matrices) {
-	test_non_base_row_access<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_row_removal, Matrix, removable_rows_matrices) {
@@ -51,7 +63,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_column_removal, Matrix, removab
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_max_dimension, Matrix, max_dim_matrices) {
-	test_maximal_dimension<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_maximal_dimension<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_operation, Matrix, full_matrices) {
@@ -62,14 +76,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_barcode, Matrix, barcode_matric
 	test_barcode<Matrix>();
 }
 
+#ifdef PM_TEST_ID_IDX
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_swaps, Matrix, swap_matrices) {
-	if constexpr (Matrix::Option_list::is_indexed_by_position) {
-		test_base_swaps<Matrix>();
-		test_base_index_swaps<Matrix>();
-	} else {
-		test_base_indexed_by_id_index_swaps<Matrix>();
-	}
+	test_base_indexed_by_id_index_swaps<Matrix>();
 }
+#else
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_swaps, Matrix, swap_matrices) {
+	test_base_swaps<Matrix>();
+	test_base_index_swaps<Matrix>();
+}
+#endif
 
 
 

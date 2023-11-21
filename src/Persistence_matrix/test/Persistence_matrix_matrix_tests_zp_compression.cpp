@@ -14,9 +14,9 @@
 #include "pm_matrix_tests.h"
 #include "pm_matrix_tests_boost_type_lists.h"
 
-using full_matrices = matrices_list<zp_col_comp_option_list>;
-using row_access_matrices = matrices_list<zp_ra_col_comp_option_list>;
-using removable_rows_matrices = matrices_list<zp_ra_r_col_comp_option_list>;
+using full_matrices = matrices_list<opt_col_comp_zp>;
+using row_access_matrices = matrices_list<opt_col_comp_zp_ra>;
+using removable_rows_matrices = matrices_list<opt_col_comp_zp_ra_r>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_zp_constructors, Matrix, full_matrices) {
 	test_constructors<Matrix>();

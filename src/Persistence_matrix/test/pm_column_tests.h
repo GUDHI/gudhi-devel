@@ -11,12 +11,10 @@
 #ifndef PM_COLUMN_TESTS_H
 #define PM_COLUMN_TESTS_H
 
-#include <utility>	//std::swap, std::move & std::exchange
-// #include <type_traits>
 #include <vector>
 #include <set>
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/test_tools.hpp>
 
 #include "pm_test_utilities.h"
 #include "pm_column_tests_mastermatrix.h"
@@ -866,7 +864,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(3, setcont);
+	matrix[4].multiply_and_add(1, setcont);
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	BOOST_CHECK(matrix[4].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -874,7 +872,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	setcont = {};
-	matrix[5].multiply_and_add(setcont, 3);
+	matrix[5].multiply_and_add(setcont, 1);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -882,7 +880,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	setcont = {2,3,6};
-	matrix[5].multiply_and_add(setcont, 3);
+	matrix[5].multiply_and_add(setcont, 1);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -890,7 +888,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = v * this + column
 	setcont = {0,1,3,5};
-	matrix[3].multiply_and_add(4, setcont);
+	matrix[3].multiply_and_add(0, setcont);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1094,7 +1092,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 // Field_element_type get_pivot_value() const;
 // dimension_type get_dimension() const { return dim_; }
 
-// index get_paired_chain_index() const { return pairedColumn_; }
+// int get_paired_chain_index() const { return pairedColumn_; }
 // bool is_paired() const { return pairedColumn_ != -1; }
 // void assign_paired_chain(index other_col){ pairedColumn_ = other_col; }
 // void unassign_paired_chain() { pairedColumn_ = -1; };

@@ -50,17 +50,6 @@ struct c_chain_options{
 	using type = Chain_col_options<is_z2_only::t,col_type::t,has_row::t,rem_row::t,intr_row::t>;
 };
 
-template <class option>
-class option_non_validity{
-private:
-	static constexpr bool is_non_valide(){
-		return (!option::has_row_access && (option::has_removable_rows || option::has_intrusive_rows)) ||
-			(option::has_row_access && option::column_type == Column_types::HEAP);
-	}
-public:
-	static constexpr bool value = is_non_valide();
-};
-
 template <class col_type>
 class column_non_validity{
 private:
@@ -91,31 +80,31 @@ public:
 
 //if a new column type is implemented, create a `ct_*` structure for it and add it to this list...
 using col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_set, ct_list, ct_set, ct_heap, ct_unordered_set, ct_vector, ct_naive_vector>;
+using row_col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_set, ct_list, ct_set, ct_unordered_set, ct_vector, ct_naive_vector>;
 //...and add the column name here.
 using column_list = mp_list_q<Intrusive_list_column,Intrusive_set_column,List_column,Set_column,Unordered_set_column,Naive_vector_column,Vector_column,Heap_column>;
 using c_matrix_type_list = mp_list_q<Column_mini_matrix>;
 
+template<typename option_name_list, typename bool_is_z2, typename col_t, typename bool_has_row, typename bool_rem_row, typename bool_intr_row>
+using option_template = boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, bool_is_z2, col_t, bool_has_row, bool_rem_row, bool_intr_row> >;
+
 template<typename option_name_list>
-using full_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, bool_value_list, col_type_list, bool_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
+using z2_no_ra_option_list = option_template<option_name_list, true_value_list, col_type_list, false_value_list, false_value_list, false_value_list>;
 template<typename option_name_list>
-using z2_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, true_value_list, col_type_list, bool_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
+using z2_only_ra_r_option_list = option_template<option_name_list, true_value_list, row_col_type_list, true_value_list, true_value_list, bool_value_list>;
 template<typename option_name_list>
-using z5_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, false_value_list, col_type_list, bool_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
+using z2_only_ra_option_list = option_template<option_name_list, true_value_list, row_col_type_list, true_value_list, false_value_list, bool_value_list>;
 template<typename option_name_list>
-using no_ra_option_list = boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, bool_value_list, col_type_list, false_value_list, false_value_list, false_value_list> >;
+using z5_no_ra_option_list = option_template<option_name_list, false_value_list, col_type_list, false_value_list, false_value_list, false_value_list>;
 template<typename option_name_list>
-using only_ra_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, bool_value_list, col_type_list, true_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
+using z5_only_ra_r_option_list = option_template<option_name_list, false_value_list, row_col_type_list, true_value_list, true_value_list, bool_value_list>;
 template<typename option_name_list>
-using z2_no_ra_option_list = boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, true_value_list, col_type_list, false_value_list, false_value_list, false_value_list> >;
-template<typename option_name_list>
-using z2_only_ra_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, true_value_list, col_type_list, true_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
-template<typename option_name_list>
-using z5_no_ra_option_list = boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, false_value_list, col_type_list, false_value_list, false_value_list, false_value_list> >;
-template<typename option_name_list>
-using z5_only_ra_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, option_name_list, false_value_list, col_type_list, true_value_list, bool_value_list, bool_value_list> >, option_non_validity>;
+using z5_only_ra_option_list = option_template<option_name_list, false_value_list, row_col_type_list, true_value_list, false_value_list, bool_value_list>;
 
 template<typename complete_option_list>
 using c_matrices_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, c_matrix_type_list, complete_option_list>;
+
+//the remove_if here is quite unefficiant as it has to remove a lot. But I did not found another way to do it without having to define something for each column type individually.
 template<typename complete_option_list>
 using columns_list = boost::mp11::mp_remove_if<boost::mp11::mp_product<boost::mp11::mp_invoke_q, column_list, c_matrices_list<complete_option_list> >, column_non_validity>;
 

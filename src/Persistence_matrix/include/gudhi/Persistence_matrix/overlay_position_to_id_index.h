@@ -196,7 +196,10 @@ template<class Matrix_type, class Master_matrix_type>
 template<typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Position_to_id_indexation_overlay(
 		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator) : matrix_(birthComparator, deathComparator)
+		DeathComparatorFunction&& deathComparator) 
+	: matrix_(birthComparator, deathComparator), 
+	  nextIndex_(0), 
+	  nextID_(0)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
@@ -253,6 +256,7 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_bounda
 	if (columnPositionToID_.size() <= nextIndex_) {
 		columnPositionToID_.resize(nextIndex_ * 2 + 1);
 	}
+
 	columnPositionToID_[nextIndex_++] = nextID_++;
 
 	return matrix_.insert_boundary(boundary);

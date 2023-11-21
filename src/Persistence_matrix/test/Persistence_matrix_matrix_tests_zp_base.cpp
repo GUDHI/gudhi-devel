@@ -19,11 +19,11 @@
 #include "pm_matrix_tests_boost_type_lists.h"
 // #include "matrix_tests_options.h"
 
-using full_matrices = matrices_list<zp_base_option_list>;
-using row_access_matrices = matrices_list<zp_ra_base_option_list>;
-using removable_rows_matrices = matrices_list<zp_ra_r_base_option_list>;
-using removable_columns_matrices = matrices_list<zp_r_base_option_list>;
-using swap_matrices = matrices_list<zp_swap_base_option_list>;
+using full_matrices = matrices_list<opt_base_zp>;
+using row_access_matrices = matrices_list<opt_base_zp_ra>;
+using removable_rows_matrices = matrices_list<opt_base_zp_ra_r>;
+using removable_columns_matrices = matrices_list<opt_base_zp_r>;
+using swap_matrices = matrices_list<opt_base_zp_swap>;
 
 // using opt = Base_options<false,Column_types::INTRUSIVE_LIST,true,true>;
 // using mat = Matrix<opt>;

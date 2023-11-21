@@ -14,12 +14,25 @@
 #include "pm_matrix_tests.h"
 #include "pm_matrix_tests_boost_type_lists.h"
 
-using full_matrices = matrices_list<zp_chain_rep_option_list>;
-using row_access_matrices = matrices_list<zp_ra_chain_rep_option_list>;
-using removable_rows_matrices = matrices_list<zp_ra_r_chain_rep_option_list>;
-using removable_columns_matrices = matrices_list<zp_r_chain_rep_option_list>;
-using max_dim_matrices = matrices_list<zp_dim_chain_rep_option_list>;
-using barcode_matrices = matrices_list<zp_barcode_chain_rep_option_list>;
+#ifdef PM_TEST_ID_IDX
+#ifdef PM_TEST_MAX_DIM
+using opts = boost::mp11::mp_list<false_value_list, true_value_list>;
+#else
+using opts = boost::mp11::mp_list<false_value_list, false_value_list>;
+#endif
+#else
+#ifdef PM_TEST_MAX_DIM
+using opts = boost::mp11::mp_list<true_value_list, true_value_list>;
+#else
+using opts = boost::mp11::mp_list<true_value_list, false_value_list>;
+#endif
+#endif
+
+using full_matrices = matrices_list<boost::mp11::mp_apply<opt_chain_rep_zp, opts> >;
+using row_access_matrices = matrices_list<boost::mp11::mp_apply<opt_chain_rep_zp_ra, opts> >;
+using removable_rows_matrices = matrices_list<boost::mp11::mp_apply<opt_chain_rep_zp_ra_r, opts> >;
+using removable_columns_matrices = matrices_list<boost::mp11::mp_apply<opt_chain_rep_zp_r, opts> >;
+using barcode_matrices = matrices_list<boost::mp11::mp_apply<opt_chain_rep_zp_barcode, opts> >;
 
 // #include <boost/mpl/list.hpp>
 // using opt = Chain_rep_options<Column_types::INTRUSIVE_LIST,true, false, true, true, true>;
@@ -32,31 +45,53 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_constructors, Matrix, full_mat
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_insertion, Matrix, full_matrices) {
-	test_chain_boundary_insertion<Matrix>();
+	Matrix m1;
+
+	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	orderedBoundaries.pop_back();
+	orderedBoundaries.pop_back();
+
+	Matrix m2(orderedBoundaries);
+
+	test_chain_boundary_insertion<Matrix>(m1, m2);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_access, Matrix, full_matrices) {
-	test_chain_access<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_chain_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_row_access, Matrix, row_access_matrices) {
-	test_non_base_row_access<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_row_removal, Matrix, removable_rows_matrices) {
-	test_chain_row_removal<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_chain_row_removal<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_column_removal, Matrix, removable_columns_matrices) {
-	test_chain_maximal_simplex_removal<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_chain_maximal_simplex_removal<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_max_dimension, Matrix, max_dim_matrices) {
-	test_maximal_dimension<Matrix>();
+#ifdef PM_TEST_MAX_DIM
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_max_dimension, Matrix, full_matrices) {
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_maximal_dimension<Matrix>(m);
 }
+#endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_operation, Matrix, full_matrices) {
-	test_chain_operation<Matrix>();
+	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_chain_operation<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_barcode, Matrix, barcode_matrices) {
@@ -64,7 +99,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_barcode, Matrix, barcode_matri
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_representative_cycles, Matrix, full_matrices) {
-	test_representative_cycles<Matrix>();
+	auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+	Matrix m(columns);
+	test_representative_cycles<Matrix>(m);
 }
 
 

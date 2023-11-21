@@ -19,11 +19,11 @@
 #include "pm_matrix_tests_boost_type_lists.h"
 // #include "matrix_tests_options.h"
 
-using full_matrices = matrices_list<z2_base_option_list>;
-using row_access_matrices = matrices_list<z2_ra_base_option_list>;
-using removable_rows_matrices = matrices_list<z2_ra_r_base_option_list>;
-using removable_columns_matrices = matrices_list<z2_r_base_option_list>;
-using swap_matrices = matrices_list<z2_swap_base_option_list>;
+using full_matrices = matrices_list<opt_base_z2>;
+using row_access_matrices = matrices_list<opt_base_z2_ra>;
+using removable_rows_matrices = matrices_list<opt_base_z2_ra_r>;
+using removable_columns_matrices = matrices_list<opt_base_z2_r>;
+using swap_matrices = matrices_list<opt_base_z2_swap>;
 
 // using opt = Base_options<false,Column_types::INTRUSIVE_LIST,true,true>;
 // using mat = Matrix<opt>;
@@ -34,6 +34,7 @@ using swap_matrices = matrices_list<z2_swap_base_option_list>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_z2_constructors, Matrix, full_matrices) {
 	// test.insert(typeid(Matrix()).name());
 	// std::cout << test.size() << "\n";
+	std::cout << typeid(Matrix()).name() << "\n";
 	test_constructors<Matrix>();
 }
 

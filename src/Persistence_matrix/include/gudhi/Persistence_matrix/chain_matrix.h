@@ -11,11 +11,10 @@
 #ifndef PM_CHAIN_MATRIX_H
 #define PM_CHAIN_MATRIX_H
 
-#include <iostream>				//print() only
+#include <iostream>	//print() only
 #include <set>
 #include <vector>
-
-#include "chain_vine_swap.h"	//_no_G_death_comparator
+#include <utility>	//std::swap, std::move & std::exchange
 
 namespace Gudhi {
 namespace persistence_matrix {

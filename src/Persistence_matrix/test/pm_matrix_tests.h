@@ -594,7 +594,7 @@ void test_boundary_insertion(){
 
 //for chain
 template<class Matrix>
-void test_chain_boundary_insertion(){
+void test_chain_boundary_insertion(Matrix& m1, Matrix& m2){
 	auto test = [](Matrix& m){
 		BOOST_CHECK(m.is_zero_cell(1,2));
 		BOOST_CHECK(!m.is_zero_cell(1,1));
@@ -634,7 +634,6 @@ void test_chain_boundary_insertion(){
 
 	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
 
-	Matrix m1;
 	for (unsigned int i = 0; i < orderedBoundaries.size(); ++i){
 		if constexpr (Matrix::Option_list::is_indexed_by_position) m1.insert_boundary(orderedBoundaries[i]);
 		else m1.insert_boundary(i, orderedBoundaries[i]);
@@ -647,7 +646,6 @@ void test_chain_boundary_insertion(){
 	auto boundary1 = orderedBoundaries.back();
 	orderedBoundaries.pop_back();
 
-	Matrix m2(orderedBoundaries);
 	BOOST_CHECK(m2.is_zero_cell(1,2));
 	BOOST_CHECK(!m2.is_zero_cell(1,1));
 	BOOST_CHECK(!m2.is_zero_cell(3,3));
@@ -724,12 +722,8 @@ void test_boundary_access(){
 }
 
 template<class Matrix>
-void test_chain_access(){
-	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(orderedBoundaries);
-
+void test_chain_access(Matrix& m){
 	auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
-
 	test_content_equality(columns, m);
 }
 
@@ -893,10 +887,7 @@ void test_base_z5_row_access(){
 }
 
 template<class Matrix>
-void test_non_base_row_access(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
-
+void test_non_base_row_access(Matrix& m){
 	std::vector<witness_content<typename Matrix::Column_type> > rows;
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
 		if constexpr (is_RU<Matrix>()){
@@ -985,11 +976,7 @@ void test_row_removal(){
 }
 
 template<class Matrix>
-void test_chain_row_removal(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-
-	Matrix m(columns);
-
+void test_chain_row_removal(Matrix& m){
 	m.erase_row(6);	//not empty, so ignored
 	BOOST_CHECK_NO_THROW(m.get_row(6));
 
@@ -1087,11 +1074,8 @@ void test_ru_maximal_simplex_removal(){
 }
 
 template<class Matrix>
-void test_chain_maximal_simplex_removal(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
-
-	columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+void test_chain_maximal_simplex_removal(Matrix& m){
+	auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
 
 	test_content_equality(columns, m);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
@@ -1120,10 +1104,7 @@ void test_chain_maximal_simplex_removal(){
 	// //*******************
 
 template<class Matrix>
-void test_maximal_dimension(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
-
+void test_maximal_dimension(Matrix& m){
 	BOOST_CHECK_EQUAL(m.get_max_dimension(), 2);
 
 	if constexpr (Matrix::Option_list::is_z2){
@@ -1370,13 +1351,10 @@ void test_ru_operation(){
 }
 
 template<class Matrix>
-void test_chain_operation(){
+void test_chain_operation(Matrix& m){
 	using F = typename Matrix::Field_type;
 
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
-
-	columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+	auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
 
 	test_content_equality(columns, m);
 
@@ -2507,11 +2485,7 @@ void test_vine_swap_with_id_index(Matrix& m){
 // 	const cycle_type& get_representative_cycle(const Bar& bar);
 
 template<class Matrix>
-void test_representative_cycles(){
-	auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
-
-	Matrix mb(columns);
-
+void test_representative_cycles(Matrix& mb){
 	mb.update_representative_cycles();
 
 	const auto& cycles = mb.get_representative_cycles();

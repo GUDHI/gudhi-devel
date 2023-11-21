@@ -117,141 +117,230 @@ template <class option>
 class matrix_non_validity{
 private:
 	static constexpr bool is_non_valide(){
-		return option::has_row_access && option::column_type == Column_types::HEAP;
+		return (option::has_row_access || option::has_column_compression) && option::column_type == Column_types::HEAP;
 	}
 public:
 	static constexpr bool value = is_non_valide();
 };
 
-template <class option>
-class chain_opt_non_validity{
-private:
-	static constexpr bool is_non_valide(){
-		return (!option::vine && !option::rep && !option::barcode) || (option::vine && !option::z2);
-	}
-public:
-	static constexpr bool value = is_non_valide();
-};
+//to avoid long compilation time and high memory usage, the tests are restricted to one column type by default for users. But in case real changes were made to this module, it would be better to test at least once with all column types as below:
+// using col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_set, ct_list, ct_set, ct_heap, ct_unordered_set, ct_vector, ct_naive_vector>;
+#ifdef PM_TEST_INTR_LIST
+using col_type_list = boost::mp11::mp_list<ct_intrusive_list>;
+#else
+#ifdef PM_TEST_INTR_SET
+using col_type_list = boost::mp11::mp_list<ct_intrusive_set>;
+#else
+#ifdef PM_TEST_LIST
+using col_type_list = boost::mp11::mp_list<ct_list>;
+#else
+#ifdef PM_TEST_SET
+using col_type_list = boost::mp11::mp_list<ct_set>;
+#else
+#ifdef PM_TEST_HEAP
+using col_type_list = boost::mp11::mp_list<ct_heap>;	//WARNING: unit tests involving row access will not compile (they template list will be empty), so they have to be commented to test heap columns alone
+#else
+#ifdef PM_TEST_UNORD_SET
+using col_type_list = boost::mp11::mp_list<ct_unordered_set>;
+#else
+#ifdef PM_TEST_NAIVE_VECTOR
+using col_type_list = boost::mp11::mp_list<ct_naive_vector>;
+#else
+using col_type_list = boost::mp11::mp_list<ct_vector>;
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
 
 using matrix_type_list = mp_list_q<Matrix>;
-using col_type_list = boost::mp11::mp_list<ct_intrusive_list>;	//to avoid long compilation time and high memory usage, the tests are restricted to one column type by default for users. But in case real changes were made to this module, it would be better to test at least once with all column types as below:
-// using col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_set, ct_list, ct_set, ct_heap, ct_unordered_set, ct_vector, ct_naive_vector>;
 
 using all_ra_values_list = boost::mp11::mp_list<ra_value<false,false,false>,ra_value<true,false,false>,ra_value<true,true,true>,ra_value<true,true,false>,ra_value<true,false,true> >;
 using ra_values_list = boost::mp11::mp_list<ra_value<true,false,false>,ra_value<true,true,true>,ra_value<true,true,false>,ra_value<true,false,true> >;
 using ra_r_values_list = boost::mp11::mp_list<ra_value<true,true,true>,ra_value<true,true,false> >;
+
+// Base matrices
+
+template<typename bool_is_z2, typename has_row_t, typename bool_rem_col, typename bool_swap>
+using base_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, bool_is_z2, col_type_list, has_row_t, bool_rem_col, bool_swap> >, matrix_non_validity>;
+
+using opt_base_z2 = base_option_template<true_value_list, all_ra_values_list, bool_value_list, bool_value_list>;
+using opt_base_z2_ra = base_option_template<true_value_list, ra_values_list, bool_value_list, bool_value_list>;
+using opt_base_z2_ra_r = base_option_template<true_value_list, ra_r_values_list, bool_value_list, bool_value_list>;
+using opt_base_z2_r = base_option_template<true_value_list, all_ra_values_list, true_value_list, bool_value_list>;
+using opt_base_z2_swap = base_option_template<true_value_list, all_ra_values_list, bool_value_list, true_value_list>;
+
+using opt_base_zp = base_option_template<false_value_list, all_ra_values_list, bool_value_list, bool_value_list>;
+using opt_base_zp_ra = base_option_template<false_value_list, ra_values_list, bool_value_list, bool_value_list>;
+using opt_base_zp_ra_r = base_option_template<false_value_list, ra_r_values_list, bool_value_list, bool_value_list>;
+using opt_base_zp_r = base_option_template<false_value_list, all_ra_values_list, true_value_list, bool_value_list>;
+using opt_base_zp_swap = base_option_template<false_value_list, all_ra_values_list, bool_value_list, true_value_list>;
+
+// Compression matrices
+
+template<typename bool_is_z2, typename has_row_t>
+using compression_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, bool_is_z2, col_type_list, has_row_t> >, matrix_non_validity>;
+
+using opt_col_comp_z2 = compression_option_template<true_value_list, all_ra_values_list>;
+using opt_col_comp_z2_ra = compression_option_template<true_value_list, ra_values_list>;
+using opt_col_comp_z2_ra_r = compression_option_template<true_value_list, ra_r_values_list>;
+
+using opt_col_comp_zp = compression_option_template<false_value_list, all_ra_values_list>;
+using opt_col_comp_zp_ra = compression_option_template<false_value_list, ra_values_list>;
+using opt_col_comp_zp_ra_r = compression_option_template<false_value_list, ra_r_values_list>;
+
+// Boundary matrices
+
+template<typename bool_is_z2, typename has_row_t, typename bool_rem_col, typename bool_swap, typename bool_pos_idx>
+using boundary_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, bool_is_z2, col_type_list, has_row_t, bool_rem_col, bool_swap, bool_pos_idx> >, matrix_non_validity>;
+
+template<typename bool_pos_idx>
+using opt_boundary_z2 = boundary_option_template<true_value_list, all_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_ra = boundary_option_template<true_value_list, ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_ra_r = boundary_option_template<true_value_list, ra_r_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_r = boundary_option_template<true_value_list, all_ra_values_list, true_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_dim = opt_boundary_z2<bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_barcode = opt_boundary_z2<bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_z2_swap = boundary_option_template<true_value_list, all_ra_values_list, bool_value_list, true_value_list, bool_pos_idx>;
+
+template<typename bool_pos_idx>
+using opt_boundary_zp = boundary_option_template<false_value_list, all_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_ra = boundary_option_template<false_value_list, ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_ra_r = boundary_option_template<false_value_list, ra_r_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_r = boundary_option_template<false_value_list, all_ra_values_list, true_value_list, bool_value_list, bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_dim = opt_boundary_zp<bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_barcode = opt_boundary_zp<bool_pos_idx>;
+template<typename bool_pos_idx>
+using opt_boundary_zp_swap = boundary_option_template<false_value_list, all_ra_values_list, bool_value_list, true_value_list, bool_pos_idx>;
+
+// RU matrices
 
 using z2_ru_vine_values_list = boost::mp11::mp_list<ru_opt_values<true,true,false>,ru_opt_values<true,true,true> >;
 using z2_ru_vine_rep_values_list = boost::mp11::mp_list<ru_opt_values<true,true,true> >;
 using z2_ru_rep_values_list = boost::mp11::mp_list<ru_opt_values<true,false,true> >;
 using zp_ru_rep_values_list = boost::mp11::mp_list<ru_opt_values<false,false,true> >;
 
-// using z2_chain_vine_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, bool_value_list, true_value_list, bool_value_list>;
+template<typename ru_opt_t, typename has_row_t, typename bool_rem_col, typename bool_pos_idx, typename bool_dim, typename bool_barcode>
+using ru_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, ru_opt_t, has_row_t, bool_rem_col, bool_pos_idx, bool_dim, bool_barcode> >, matrix_non_validity>;
+
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2 = ru_option_template<z2_ru_vine_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_ra = ru_option_template<z2_ru_vine_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_ra_r = ru_option_template<z2_ru_vine_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_r = ru_option_template<z2_ru_vine_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_rep = ru_option_template<z2_ru_vine_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_z2 = ru_option_template<z2_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_z2_ra = ru_option_template<z2_ru_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_z2_ra_r = ru_option_template<z2_ru_rep_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_z2_r = ru_option_template<z2_ru_rep_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_zp = ru_option_template<zp_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_zp_ra = ru_option_template<zp_ru_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_zp_ra_r = ru_option_template<zp_ru_rep_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_rep_zp_r = ru_option_template<zp_ru_rep_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+
+// Chain matrices
+
 using z2_chain_vine_rep_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, true_value_list, true_value_list>;
+using z2_chain_vine_rep_no_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, false_value_list, true_value_list, true_value_list>;
 using z2_chain_vine_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, true_value_list, bool_value_list>;
 using z2_chain_vine_no_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, false_value_list, true_value_list, bool_value_list>;
 using z2_chain_rep_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, bool_value_list, false_value_list, true_value_list>;
 using z2_chain_rep_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, false_value_list, true_value_list>;
-using z2_chain_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, false_value_list, false_value_list>;
 using zp_chain_rep_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, false_value_list, bool_value_list, false_value_list, true_value_list>;
 using zp_chain_rep_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, false_value_list, true_value_list, false_value_list, true_value_list>;
+using z2_chain_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, false_value_list, false_value_list>;
 using zp_chain_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, false_value_list, true_value_list, false_value_list, false_value_list>;
 
-using z2_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, true_value_list, col_type_list, all_ra_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, true_value_list, col_type_list, all_ra_values_list> >, matrix_non_validity>;
-using z2_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, true_value_list, col_type_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, false_value_list, col_type_list, all_ra_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, false_value_list, col_type_list, all_ra_values_list> >, matrix_non_validity>;
-using zp_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, false_value_list, col_type_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
+template<typename chain_opt_t, typename has_row_t, typename bool_rem_col, typename bool_pos_idx, typename bool_dim>
+using chain_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, chain_opt_t, has_row_t, bool_rem_col, bool_pos_idx, bool_dim> >, matrix_non_validity>;
 
-//TODO: test if the compilation is faster when using mp_remove_if on the full_*_option_list instead of recalculating them with other templates.
-// or computing all smaller partitions first to concatenate them for the bigger ones (mp_append)
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_ra = chain_option_template<z2_chain_vine_barcode_values_list, ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_ra_no_barcode = chain_option_template<z2_chain_vine_no_barcode_values_list, ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_ra_r = chain_option_template<z2_chain_vine_barcode_values_list, ra_r_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_ra_r_no_barcode = chain_option_template<z2_chain_vine_no_barcode_values_list, ra_r_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_barcode = chain_option_template<z2_chain_vine_barcode_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_no_barcode = chain_option_template<z2_chain_vine_no_barcode_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_rep = chain_option_template<z2_chain_vine_rep_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_rep_no_barcode = chain_option_template<z2_chain_vine_rep_no_barcode_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
 
-using z2_ra_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, true_value_list, col_type_list, ra_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, true_value_list, col_type_list, ra_values_list> >, matrix_non_validity>;
-using z2_ra_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, true_value_list, col_type_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, false_value_list, col_type_list, ra_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, false_value_list, col_type_list, ra_values_list> >, matrix_non_validity>;
-using zp_ra_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, false_value_list, col_type_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2 = chain_option_template<z2_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2_ra = chain_option_template<z2_chain_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2_ra_r = chain_option_template<z2_chain_rep_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2_r = chain_option_template<z2_chain_rep_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2_barcode = chain_option_template<z2_chain_rep_barcode_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
 
-using z2_ra_r_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, true_value_list, col_type_list, ra_r_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, true_value_list, col_type_list, ra_r_values_list> >, matrix_non_validity>;
-using z2_ra_r_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, true_value_list, col_type_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_r_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, false_value_list, col_type_list, ra_r_values_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_r_col_comp_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_col_comp_options>, false_value_list, col_type_list, ra_r_values_list> >, matrix_non_validity>;
-using zp_ra_r_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, false_value_list, col_type_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp = chain_option_template<zp_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp_ra = chain_option_template<zp_chain_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp_ra_r = chain_option_template<zp_chain_rep_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp_r = chain_option_template<zp_chain_rep_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp_barcode = chain_option_template<zp_chain_rep_barcode_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
 
-using z2_r_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, true_value_list, col_type_list, all_ra_values_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, true_value_list, col_type_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_r_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, false_value_list, col_type_list, all_ra_values_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_r_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, false_value_list, col_type_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_z2 = chain_option_template<z2_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_z2_ra = chain_option_template<z2_chain_barcode_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_z2_ra_r = chain_option_template<z2_chain_barcode_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_z2_r = chain_option_template<z2_chain_barcode_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim>;
 
-using z2_dim_boundary_option_list = z2_boundary_option_list;
-using zp_dim_boundary_option_list = zp_boundary_option_list;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_zp = chain_option_template<zp_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_zp_ra = chain_option_template<zp_chain_barcode_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_zp_ra_r = chain_option_template<zp_chain_barcode_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+template<typename bool_pos_idx, typename bool_dim>
+using opt_chain_bar_zp_r = chain_option_template<zp_chain_barcode_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim>;
 
-using z2_barcode_boundary_option_list = z2_boundary_option_list;
-using zp_barcode_boundary_option_list = zp_boundary_option_list;
-
-using z2_swap_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, true_value_list, col_type_list, all_ra_values_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using z2_swap_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, true_value_list, col_type_list, all_ra_values_list, bool_value_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_swap_base_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, false_value_list, col_type_list, all_ra_values_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using zp_swap_boundary_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, false_value_list, col_type_list, all_ra_values_list, bool_value_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-
-using z2_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_dim_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_barcode_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using z2_rep_ru_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_vine_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-
-using z2_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_r_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_r_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_dim_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_dim_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_barcode_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, z2_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using zp_barcode_ru_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_ru_options>, col_type_list, zp_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-
-// using z2_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_no_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_barcode_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_barcode_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_barcode_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_dim_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using z2_barcode_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_no_barcode_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_no_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_rep_chain_vine_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_vine_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-
-using z2_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_r_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_r_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_dim_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using zp_dim_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using z2_barcode_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_rep_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_barcode_chain_rep_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_rep_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-
-using z2_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_barcode_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_barcode_values_list, ra_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_ra_r_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_barcode_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_ra_r_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_barcode_values_list, ra_r_values_list, bool_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_r_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_barcode_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using zp_r_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_barcode_values_list, all_ra_values_list, true_value_list, bool_value_list, bool_value_list> >, matrix_non_validity>;
-using z2_dim_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, z2_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
-using zp_dim_chain_bar_option_list = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_chain_options>, col_type_list, zp_chain_barcode_values_list, all_ra_values_list, bool_value_list, bool_value_list, true_value_list> >, matrix_non_validity>;
+// Final template
 
 template<typename complete_option_list>
-using matrices_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, matrix_type_list, complete_option_list>;
+using matrices_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, matrix_type_list, complete_option_list >;
 
 #endif // PM_MATRIX_TESTS_TYPE_LISTS_H

@@ -14,15 +14,12 @@
 #include <type_traits>	//std::is_same_v
 #include <set>
 
-#include <boost/test/unit_test.hpp>
+#include <boost/test/test_tools.hpp>
 #include <gudhi/Persistence_matrix/columns/heap_column.h>
 #include <gudhi/matrix.h>
-// #include <gudhi/Fields/Zp_field.h>
 
 using Gudhi::persistence_matrix::Heap_column;
 using Gudhi::persistence_matrix::Matrix;
-
-// using Z5 = Gudhi::persistence_matrix::Zp_field_element<5>;
 
 template<class Column>
 constexpr bool is_z2(){
@@ -126,18 +123,6 @@ void test_column_equality(const witness_content<Column>& witness, const column_c
 	BOOST_CHECK_EQUAL(ord.size(), witness.size());
 	auto itW = witness.begin();
 	auto itO = ord.begin();
-	// std::cout << "w: ";
-	// for (auto& w : witness) std::cout << "(" << w.first << ", " << w.second << ") ";
-	// std::cout << "\n";
-	// std::cout << "o: ";
-	// for (auto& w : ord) std::cout << "(" << w.first << ", " << w.second << ") ";
-	// std::cout << "\n";
-	// std::cout << "w: ";
-	// for (auto& w : witness) std::cout << w << " ";
-	// std::cout << "\n";
-	// std::cout << "o: ";
-	// for (auto& w : ord) std::cout << w << " ";
-	// std::cout << "\n";
 	while (itW != witness.end()){
 		if constexpr (is_z2<Column>()){
 			BOOST_CHECK_EQUAL(*itW, *itO);
