@@ -35,11 +35,11 @@ struct Simplex_tree_options_fast_cofaces {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 struct Simplex_tree_options_stable_simplex_handles_fast_cofaces : Simplex_tree_options_fast_cofaces {
   static const bool stable_simplex_handles = true;
-  static const bool is_multi_parameter = false;
 };
 
 using Point = std::vector<double>;

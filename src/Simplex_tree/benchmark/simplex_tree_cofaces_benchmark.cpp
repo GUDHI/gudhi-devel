@@ -91,6 +91,7 @@ struct Stree_basic_cofaces_options {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 struct Stree_fast_cofaces_options : Stree_basic_cofaces_options {
