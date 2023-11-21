@@ -88,8 +88,8 @@ class Tangential_complex_interface {
       num_inconsistencies_ = tangential_complex_->number_of_inconsistent_simplices();
   }
 
-  void create_simplex_tree(Simplex_tree<>* simplex_tree) {
-    tangential_complex_->create_complex<Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_full_featured>>(*simplex_tree);
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree) {
+    tangential_complex_->create_complex<Simplex_tree_interface>(*simplex_tree);
   }
 
   void set_max_squared_edge_length(double max_squared_edge_length) {

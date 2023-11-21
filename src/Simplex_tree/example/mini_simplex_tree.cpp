@@ -12,11 +12,10 @@
 #include <iostream>
 #include <initializer_list>
 
-struct MyOptions : Gudhi::Simplex_tree_options_full_featured {
-  // Not doing persistence, so we don't need those
-  static const bool store_key = false;
-  static const bool store_filtration = false;
-  // I have few vertices
+// With Gudhi::Simplex_tree_options_minimal filtration values are not stored and persistence cannot be computed.
+// I can still improve the memory footprint
+struct MyOptions : Gudhi::Simplex_tree_options_minimal {
+  // As I have few vertices
   typedef short Vertex_handle;
 };
 

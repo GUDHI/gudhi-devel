@@ -46,7 +46,7 @@ struct Simplex_tree_options_stable_simplex_handles {
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_full_featured>,
                          Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<class typeST>
@@ -1158,7 +1158,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
 }
 
 typedef boost::mpl::list<Simplex_tree<>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_full_featured>,
                          Simplex_tree<Simplex_tree_options_stable_simplex_handles> >
                            list_of_tested_variants_wo_fast_persistence;
 

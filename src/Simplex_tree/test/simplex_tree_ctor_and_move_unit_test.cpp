@@ -41,7 +41,7 @@ struct Simplex_tree_options_stable_simplex_handles {
 
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_fast_cofaces>,
+                         Simplex_tree<Simplex_tree_options_full_featured>,
                          Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
 
 template<typename Simplex_tree>
@@ -203,7 +203,7 @@ std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_
 
 BOOST_AUTO_TEST_CASE(simplex_fast_cofaces_rule_of_five) {
   // Only for fast cofaces version to check the data structure for this feature is up to date 
-  using STree = Simplex_tree<Simplex_tree_options_fast_cofaces>;
+  using STree = Simplex_tree<Simplex_tree_options_full_featured>;
   STree st;
 
   st.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
