@@ -1,6 +1,6 @@
 We are pleased to announce the release 3.9.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers ...
+As a major new feature, the GUDHI library now offers a much faster implementation for the Cubical 2d case, fast cofaces access and stable simplex handles for the `Simplex_tree`.
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
@@ -9,8 +9,23 @@ Below is a list of changes made since GUDHI 3.8.0:
 - [Module](link)
      - **...**
 
-- [Module](link)
-     - **...**
+- [Simplex_tree options](https://gudhi.inria.fr/doc/latest/struct_simplex_tree_options.html)
+     - A new option `link_nodes_by_label` to enhance cofaces and stars access, when set to true.
+     - A new option `stable_simplex_handles` to keep Simplex handles even after insertions or removals, when set to true.
+
+- [Simplex_tree](https://gudhi.inria.fr/doc/latest/group__simplex__tree.html)
+     - `Simplex_tree_options_full_featured` has been renamed `Simplex_tree_options_default` and `Simplex_tree_options_python`.
+     These are respectively the options used by all the utilities and by the python interface of the `SimplexTree` (as before this version).
+     - From GUDHI 3.9.0, `Simplex_tree_options_full_featured` now activates `link_nodes_by_label` and `stable_simplex_handles`.
+
+     | Simplex_tree_options_*  | :warning: full_featured | default | python | minimal |
+     | ---- | ---- | ---- | ---- | ---- |
+     | store_key              | 1       | 1      | 1      | 0 |
+     | store_filtration       | 1       | 1      | 1      | 0 |
+     | contiguous_vertices    | 0       | 0      | 0      | 0 |
+     | link_nodes_by_label    | ***1*** | 0      | 0      | 0 |
+     | stable_simplex_handles | ***1*** | 0      | 0      | 0 |
+     | Filtration_value       | double  | double | double | 0 |
 
 - [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
      - Much faster implementation for the 2d case with input from top-dimensional cells.
