@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_multi_reset_filtration) {
   st.insert_simplex_and_subfaces({2, 1, 0}, {3., 2.});
   st.insert_simplex_and_subfaces({3, 0}, {2., 3.});
   st.insert_simplex_and_subfaces({3, 4, 5}, {3., 2.});
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4.});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4.,4.});
 
   /* Inserted simplex:        */
   /*    1   6                 */
