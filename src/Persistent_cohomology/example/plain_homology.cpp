@@ -24,7 +24,7 @@ struct MyOptions : Gudhi::Simplex_tree_options_minimal {
   // static const bool store_filtration = false;
   // However the persistence algorithm needs this
   static const bool store_key = true;
-  static const is_multi_parameter = false;
+  static const bool is_multi_parameter = false;
   // I have few vertices
   typedef short Vertex_handle;
   // Maximum number of simplices to compute persistence is 2^8 - 1 = 255. One is reserved for null_key
