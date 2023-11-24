@@ -17,9 +17,9 @@ jobs:
         # and python 3.8+
         python-version: ['3.12']
         include:
-          - python-version: '3.8'
+          - python-version: '3.12'
             numpy-version: '1.26.0'
-    name: Build wheels for Python ${{ matrix.python-version }} - ${{ matrix.numpy-version }}
+    name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -32,8 +32,7 @@ jobs:
         run: |
           brew update || true
           brew install boost eigen gmp mpfr cgal || true
-          echo ${{ matrix.numpy-version }}
-          python -m pip install --user "numpy~=${{ matrix.numpy-version }}"
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user delocate
           ./scripts/build_osx_universal_gmpfr.sh
