@@ -14,14 +14,18 @@ import numpy as np
 from math import sqrt
 import pytest
 
+
 def test_dtm_rips_complex():
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
     dtm_rips = DTMRipsComplex(points=pts, k=2)
     st = dtm_rips.create_simplex_tree(max_dimension=2)
     st.persistence()
     persistence_intervals0 = st.persistence_intervals_in_dimension(0)
-    assert persistence_intervals0 == pytest.approx(np.array([[3.16227766, 5.39834564],[3.16227766, 5.39834564], [3.16227766, float("inf")]]))
-    
+    assert persistence_intervals0 == pytest.approx(
+        np.array([[3.16227766, 5.39834564], [3.16227766, 5.39834564], [3.16227766, float("inf")]])
+    )
+
+
 def test_compatibility_with_rips():
     distance_matrix = np.array([[0, 1, 1, sqrt(2)], [1, 0, sqrt(2), 1], [1, sqrt(2), 0, 1], [sqrt(2), 1, 1, 0]])
     dtm_rips = DTMRipsComplex(distance_matrix=distance_matrix, max_filtration=42)
@@ -30,3 +34,9 @@ def test_compatibility_with_rips():
     st_from_rips = rips_complex.create_simplex_tree(max_dimension=1)
     assert list(st.get_filtration()) == list(st_from_rips.get_filtration())
 
+
+def test_empty_dtm_rips_complex():
+    dtm_rips = DTMRipsComplex()
+    st = dtm_rips.create_simplex_tree(max_dimension=1)
+    assert st.num_simplices() == 0
+    assert st.dimension() == -1
