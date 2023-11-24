@@ -100,7 +100,7 @@ public:
 	template<class Container_type>
 	void insert_column(const Container_type& column);
 	template<class Boundary_type>
-	void insert_boundary(const Boundary_type& boundary);	//same as insert_column
+	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);	//same as insert_column
 	const Column_type& get_column(index columnIndex);	//non const because of path compression in union-find
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	const Row_type& get_row(index rowIndex) const;
@@ -246,13 +246,22 @@ template<class Master_matrix>
 template<class Container_type>
 inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(const Container_type &column)
 {
+	insert_boundary(column);
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
+{
+	if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+
 	if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows){
-		if (column.begin() != column.end()){
+		if (boundary.begin() != boundary.end()){
 			unsigned int pivot;
 			if constexpr (Master_matrix::Option_list::is_z2){
-				pivot = *std::prev(column.end());
+				pivot = *std::prev(boundary.end());
 			} else {
-				pivot = std::prev(column.end())->first;
+				pivot = std::prev(boundary.end())->first;
 			}
 			if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
 		}
@@ -262,27 +271,20 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(co
 	if (repToColumn_.size() == nextColumnIndex_){
 		columnClasses_.link(nextColumnIndex_, nextColumnIndex_);	//could perhaps be avoided, if find_set returns something special when it does not find
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			repToColumn_.push_back(columnPool_.construct(nextColumnIndex_, column, ra_opt::rows_));
+			repToColumn_.push_back(columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_));
 		} else {
-			repToColumn_.push_back(columnPool_.construct(column));
+			repToColumn_.push_back(columnPool_.construct(boundary, dim));
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(nextColumnIndex_, column, ra_opt::rows_);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_);
 		} else {
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(column);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim);
 		}
 	}
 	_insert_column(nextColumnIndex_);
 
 	nextColumnIndex_++;
-}
-
-template<class Master_matrix>
-template<class Boundary_type>
-inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_type &boundary)
-{
-	insert_column(boundary);
 }
 
 template<class Master_matrix>

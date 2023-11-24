@@ -11,12 +11,10 @@
 #ifndef MASTER_MATRIX_H
 #define MASTER_MATRIX_H
 
-#include <cstddef>
 #include <type_traits>
 #include <vector>
 #include <unordered_map>
 #include <map>
-#include <functional>
 #include <assert.h>
 #include <initializer_list>
 
@@ -357,11 +355,11 @@ class Matrix {
   // chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come
   // back. id to pos pos to id
   template <class Boundary_type = boundary_type>
-  insertion_return_type insert_boundary(const Boundary_type& boundary);
+  insertion_return_type insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
   // chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come
   // back. id to pos
   template <class Boundary_type>
-  insertion_return_type insert_boundary(index simplexIndex, const Boundary_type& boundary);
+  insertion_return_type insert_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 
   // base
   // base comp: non const because of path compression in union-find
@@ -735,24 +733,26 @@ inline void Matrix<Options>::insert_column(const Container_type& column, int col
 
 template <class Options>
 template <class Boundary_type>
-inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(const Boundary_type& boundary) {
+inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(const Boundary_type& boundary,
+                                                                                        dimension_type dim) {
   assert(Field_type::get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified. "
          "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
          "class.");
-  return matrix_.insert_boundary(boundary);
+  return matrix_.insert_boundary(boundary, dim);
 }
 
 template <class Options>
 template <class Boundary_type>
 inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(index simplexIndex,
-                                                                                        const Boundary_type& boundary) {
+                                                                                        const Boundary_type& boundary,
+                                                                                        dimension_type dim) {
   assert(Field_type::get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified. "
          "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
          "class.");
   static_assert(isNonBasic && !Options::is_indexed_by_position, "Only enabled for matrices index by simplex ID.");
-  return matrix_.insert_boundary(simplexIndex, boundary);
+  return matrix_.insert_boundary(simplexIndex, boundary, dim);
 }
 
 template <class Options>

@@ -26,6 +26,7 @@ class Base_matrix
 {
 public:
 	using index = typename Master_matrix::index;
+	using dimension_type = typename Master_matrix::dimension_type;
 	using Field_element_type = typename Master_matrix::Field_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using container_type = typename Master_matrix::boundary_type;
@@ -43,7 +44,7 @@ public:
 	template<class Container_type = container_type>
 	void insert_column(const Container_type& column, int columnIndex);
 	template<class Boundary_type>
-	void insert_boundary(const Boundary_type& boundary);	//same as insert_column
+	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);	//same as insert_column
 	Column_type& get_column(index columnIndex);
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex);
@@ -205,47 +206,7 @@ template<class Master_matrix>
 template<class Container_type>
 inline void Base_matrix<Master_matrix>::insert_column(const Container_type &column)
 {
-	_orderRowsIfNecessary();
-
-	if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows){
-		unsigned int pivot;
-		if constexpr (Master_matrix::Option_list::is_z2){
-			pivot = *std::prev(column.end());
-		} else {
-			pivot = std::prev(column.end())->first;
-		}
-		if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
-	}
-	
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
-			swap_opt::indexToRow_[nextInsertIndex_] = nextInsertIndex_;
-			swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
-		}
-
-		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, ra_opt::rows_));
-			++nextInsertIndex_;
-		} else {
-			matrix_.try_emplace(nextInsertIndex_++, column);
-		}
-	} else {
-		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_++, column, ra_opt::rows_);
-		} else {
-			unsigned int size = matrix_.size();
-			if (size <= nextInsertIndex_) {
-				if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
-					for (unsigned int i = size; i <= size * 2; i++){
-						swap_opt::indexToRow_.push_back(i);
-						swap_opt::rowToIndex_.push_back(i);
-					}
-				}
-				matrix_.resize(size * 2);
-			}
-			matrix_[nextInsertIndex_++] = Column_type(column);
-		}
-	}
+	insert_boundary(column);
 }
 
 template<class Master_matrix>
@@ -288,9 +249,50 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type &colu
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
-	insert_column(boundary);
+	if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+	_orderRowsIfNecessary();
+
+	if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows){
+		unsigned int pivot;
+		if constexpr (Master_matrix::Option_list::is_z2){
+			pivot = *std::prev(boundary.end());
+		} else {
+			pivot = std::prev(boundary.end())->first;
+		}
+		if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
+	}
+	
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+			swap_opt::indexToRow_[nextInsertIndex_] = nextInsertIndex_;
+			swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
+		}
+
+		if constexpr (Master_matrix::Option_list::has_row_access){
+			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_));
+			++nextInsertIndex_;
+		} else {
+			matrix_.try_emplace(nextInsertIndex_++, boundary, dim);
+		}
+	} else {
+		if constexpr (Master_matrix::Option_list::has_row_access){
+			matrix_.emplace_back(nextInsertIndex_++, boundary, dim, ra_opt::rows_);
+		} else {
+			unsigned int size = matrix_.size();
+			if (size <= nextInsertIndex_) {
+				if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+					for (unsigned int i = size; i <= size * 2; i++){
+						swap_opt::indexToRow_.push_back(i);
+						swap_opt::rowToIndex_.push_back(i);
+					}
+				}
+				matrix_.resize(size * 2);
+			}
+			matrix_[nextInsertIndex_++] = Column_type(boundary, dim);
+		}
+	}
 }
 
 template<class Master_matrix>

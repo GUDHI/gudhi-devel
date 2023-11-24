@@ -40,7 +40,7 @@ public:
 	RU_matrix(RU_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex, bool inR = true);
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(index rowIndex, bool inR = true);
@@ -177,9 +177,9 @@ inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix &&other) noexcept
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
-	reducedMatrixR_.insert_boundary(boundary);
+	reducedMatrixR_.insert_boundary(boundary, dim);
 
 	if constexpr (Master_matrix::Option_list::is_z2) {
 		mirrorMatrixU_.insert_column({nextInsertIndex_});

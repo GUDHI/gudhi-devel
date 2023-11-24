@@ -41,7 +41,7 @@ public:
 	Boundary_matrix(Boundary_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);	//does not update barcode as it needs reduction
+	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);	//does not update barcode as it needs reduction
 	Column_type& get_column(index columnIndex);
 	Row_type& get_row(index rowIndex);
 	void remove_maximal_simplex(index columnIndex);		//update barcode if already computed
@@ -225,8 +225,10 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(Boundary_matrix &&other) 
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void Boundary_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary)
+inline void Boundary_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
+	if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+
 	if constexpr (activeSwapOption){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
@@ -248,14 +250,14 @@ inline void Boundary_matrix<Master_matrix>::insert_boundary(const Boundary_type 
 		}
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, ra_opt::rows_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_));
 			++nextInsertIndex_;
 		} else {
-			matrix_.try_emplace(nextInsertIndex_++, boundary);
+			matrix_.try_emplace(nextInsertIndex_++, boundary, dim);
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_++, boundary, ra_opt::rows_);
+			matrix_.emplace_back(nextInsertIndex_++, boundary, dim, ra_opt::rows_);
 		} else {
 			unsigned int size = matrix_.size();
 			if (size <= nextInsertIndex_) {
@@ -267,7 +269,7 @@ inline void Boundary_matrix<Master_matrix>::insert_boundary(const Boundary_type 
 				}
 				matrix_.resize(size * 2);
 			}
-			matrix_[nextInsertIndex_++] = Column_type(boundary);
+			matrix_[nextInsertIndex_++] = Column_type(boundary, dim);
 		}
 	}
 

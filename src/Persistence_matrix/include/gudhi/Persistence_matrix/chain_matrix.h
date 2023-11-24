@@ -60,9 +60,9 @@ public:
 
 	//new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
 	template<class Boundary_type = boundary_type>
-	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary);
+	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
 	template<class Boundary_type = boundary_type>
-	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary);
+	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	void remove_maximal_simplex(index simplexIndex);
@@ -143,7 +143,7 @@ private:
 	index nextInsertIndex_;
 
 	template<class Boundary_type>
-	std::vector<cell_rep_type> _reduce_boundary(index simplexIndex, const Boundary_type& boundary);
+	std::vector<cell_rep_type> _reduce_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim);
 	void _reduce_by_G(tmp_column_type& column,
 					  std::vector<cell_rep_type>& chainsInH,
 					  index currentPivot);
@@ -337,15 +337,15 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 template<class Master_matrix>
 template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::insert_boundary(
-		const Boundary_type &boundary)
+		const Boundary_type &boundary, dimension_type dim)
 {
-	return insert_boundary(nextInsertIndex_, boundary);
+	return insert_boundary(nextInsertIndex_, boundary, dim);
 }
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::insert_boundary(
-		index simplexIndex, const Boundary_type &boundary)
+		index simplexIndex, const Boundary_type &boundary, dimension_type dim)
 {
 	if constexpr (!Master_matrix::Option_list::has_removable_columns){
 		if (pivotToColumnIndex_.size() <= simplexIndex){
@@ -364,10 +364,10 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 	}
 
 	if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
-		dim_opt::update_up(boundary.size() == 0 ? 0 : boundary.size() - 1);
+		dim_opt::update_up(dim == -1 ? (boundary.size() == 0 ? 0 : boundary.size() - 1) : dim);
 	}
 
-	return _reduce_boundary(simplexIndex, boundary);
+	return _reduce_boundary(simplexIndex, boundary, dim);
 }
 
 template<class Master_matrix>
@@ -623,10 +623,10 @@ inline void Chain_matrix<Master_matrix>::print() const
 template<class Master_matrix>
 template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::_reduce_boundary(
-		index simplexIndex, const Boundary_type& boundary)
+		index simplexIndex, const Boundary_type& boundary, dimension_type dim)
 {
 	tmp_column_type column(boundary.begin(), boundary.end());
-	int dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
+	if (dim == -1) dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
 	std::vector<cell_rep_type> chainsInH; //for corresponding indices in H (paired columns)
 	std::vector<cell_rep_type> chainsInF; //for corresponding indices in F (unpaired, essential columns)
 

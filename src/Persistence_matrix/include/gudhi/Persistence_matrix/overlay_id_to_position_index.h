@@ -43,10 +43,10 @@ public:
 	//boundary: does not update barcode as it needs reduction
 	//ru
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(const Boundary_type& boundary);
+	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
 	//chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
 	template<class Boundary_type = boundary_type>
-	void insert_boundary(index simplexIndex, const Boundary_type& boundary);
+	void insert_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 	//boundary
 	//ru: inR = true forced
 	//chain
@@ -206,9 +206,9 @@ inline Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::Id_to_
 
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type& boundary)
+inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type& boundary, dimension_type dim)
 {
-	matrix_.insert_boundary(boundary);
+	matrix_.insert_boundary(boundary, dim);
 	if constexpr (Master_matrix_type::Option_list::has_removable_columns){
 		columnIDToPosition_[nextIndex_] = columnIDToPosition_.size();
 	} else {
@@ -223,14 +223,14 @@ inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::i
 
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
-inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(index simplexIndex, const Boundary_type& boundary)
+inline void Id_to_position_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim)
 {
 	if constexpr (Master_matrix_type::Option_list::has_removable_columns){
 		assert(columnIDToPosition_.find(simplexIndex) == columnIDToPosition_.end() && "Index for simplex already chosen!");
 	} else {
 		assert((columnIDToPosition_.size() <= simplexIndex || columnIDToPosition_[simplexIndex] == -1)  && "Index for simplex already chosen!");
 	}
-	matrix_.insert_boundary(boundary);
+	matrix_.insert_boundary(boundary, dim);
 	if constexpr (Master_matrix_type::Option_list::has_removable_columns){
 		columnIDToPosition_[simplexIndex] = matrix_.get_number_of_columns();
 	} else {

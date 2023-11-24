@@ -58,7 +58,7 @@ public:
 
 	//chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
 	template<class Boundary_type = boundary_type>
-	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary);
+	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
 	//boundary
 	//ru: inR = true forced
 	//chain
@@ -251,7 +251,7 @@ inline Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Positi
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
 inline std::vector<typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::cell_rep_type> 
-Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type &boundary)
+Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
 	if (columnPositionToID_.size() <= nextIndex_) {
 		columnPositionToID_.resize(nextIndex_ * 2 + 1);
@@ -259,7 +259,7 @@ Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::insert_bounda
 
 	columnPositionToID_[nextIndex_++] = nextID_++;
 
-	return matrix_.insert_boundary(boundary);
+	return matrix_.insert_boundary(boundary, dim);
 }
 
 template<class Matrix_type, class Master_matrix_type>
