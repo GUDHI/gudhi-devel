@@ -126,15 +126,15 @@ add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
 if (WITH_GUDHI_PYTHON)
   # Find the correct Python interpreter.
-  # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
-  find_package( PythonInterp )
+  # Can be set with -DPython_EXECUTABLE=/usr/bin/python3 for instance.
+  find_package( Python )
   
   # find_python_module tries to import module in Python interpreter and to retrieve its version number
   # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
   function( find_python_module PYTHON_MODULE_NAME )
     string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
     execute_process(
-            COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
+            COMMAND ${Python_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
             RESULT_VARIABLE PYTHON_MODULE_RESULT
             OUTPUT_VARIABLE PYTHON_MODULE_VERSION
             ERROR_VARIABLE PYTHON_MODULE_ERROR)
@@ -159,7 +159,7 @@ if (WITH_GUDHI_PYTHON)
   function( find_python_module_no_version PYTHON_MODULE_NAME )
     string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
     execute_process(
-            COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}"
+            COMMAND ${Python_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}"
             RESULT_VARIABLE PYTHON_MODULE_RESULT
             ERROR_VARIABLE PYTHON_MODULE_ERROR)
     if(PYTHON_MODULE_RESULT EQUAL 0)
@@ -174,7 +174,7 @@ if (WITH_GUDHI_PYTHON)
     endif()
   endfunction( find_python_module_no_version )
   
-  if( PYTHONINTERP_FOUND )
+  if( Python_Interpreter_FOUND )
     find_python_module("cython")
     find_python_module("pytest")
     find_python_module("matplotlib")
@@ -201,12 +201,12 @@ if (WITH_GUDHI_PYTHON)
   
   option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
   
-  if(PYTHONINTERP_FOUND AND CYTHON_FOUND)
+  if(Python_Interpreter_FOUND AND CYTHON_FOUND)
     if(SPHINX_FOUND)
       # Documentation generation is available through sphinx
       #find_program( SPHINX_PATH sphinx-build )
       # Calling sphinx-build may use a different version of python and fail
-      set(SPHINX_PATH "${PYTHON_EXECUTABLE}" "-m" "sphinx.cmd.build")
+      set(SPHINX_PATH "${Python_EXECUTABLE}" "-m" "sphinx.cmd.build")
     endif(SPHINX_FOUND)
-  endif(PYTHONINTERP_FOUND AND CYTHON_FOUND)
+  endif(Python_Interpreter_FOUND AND CYTHON_FOUND)
 endif (WITH_GUDHI_PYTHON)

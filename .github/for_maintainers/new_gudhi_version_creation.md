@@ -32,7 +32,7 @@ Checkin the modifications, build and test the version:
 ```bash
 git submodule update --init
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ -DPython_ADDITIONAL_VERSIONS=3 ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON  -DUSER_VERSION_DIR=gudhi.@GUDHI_VERSION@ ..
 make user_version
 date +"%d-%m-%Y-%T" > gudhi.@GUDHI_VERSION@/timestamp.txt
 tar -czvf gudhi.@GUDHI_VERSION@.tar.gz gudhi.@GUDHI_VERSION@
@@ -54,7 +54,7 @@ mkdir gudhi.doc.@GUDHI_VERSION@
 ```bash
 cd gudhi.@GUDHI_VERSION@
 rm -rf build; mkdir build; cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON ..
 make doxygen && grep warning doxygen.log
 ```
 
