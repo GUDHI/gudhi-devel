@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir build
           cd ".\build\"
-          for /f "delims=" %%a in ('where python') do @set MY_PYTHON_PATH=%%a
+          FOR /F "delims=" %i IN ('where python') DO set MY_PYTHON_PATH=%i
           echo %MY_PYTHON_PATH%
           cmake -DCMAKE_BUILD_TYPE=Release -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DPython_EXECUTABLE=%MY_PYTHON_PATH% ..
           cd ".\src\python\"
