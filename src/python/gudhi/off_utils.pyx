@@ -7,6 +7,7 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/11 Vincent Rouvreau: numpy interface for read_points_from_off_file
 #   - YYYY/MM Author: Description of the modification
 
 from __future__ import print_function
@@ -32,14 +33,14 @@ def read_points_from_off_file(off_file=''):
     :type off_file: string
 
     :returns:  The point set.
-    :rtype: List[List[float]]
+    :rtype: numpy.ndarray
     """
     if off_file:
         if os.path.isfile(off_file):
-            return read_points_from_OFF_file(off_file.encode('utf-8'))
+            points = read_points_from_OFF_file(off_file.encode('utf-8'))
+            return np.array(points, copy=False)
         else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                    off_file)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
 
 @cython.embedsignature(True)
 def write_points_to_off_file(fname, points):
