@@ -75,9 +75,9 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
-        FOR /F "delims=" %i IN ('where python') DO set MY_PYTHON_PATH=%i
-        echo %MY_PYTHON_PATH%
-        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON -DPython_EXECUTABLE=%MY_PYTHON_PATH% .
+        $MY_PYTHON_PATH = (Get-Command python).Path
+        echo $MY_PYTHON_PATH
+        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON -DPython_EXECUTABLE=$MY_PYTHON_PATH .
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd src\python
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
