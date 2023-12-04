@@ -36,11 +36,19 @@ def read_points_from_off_file(off_file=''):
     :rtype: numpy.ndarray
     """
     if off_file:
-        if os.path.isfile(off_file):
-            points = read_points_from_OFF_file(off_file.encode('utf-8'))
-            return np.array(points, copy=False)
-        else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
+        with open(off_file) as input_file:
+            line = next(input_file).lower()
+            # First line should be "OFF" (3d case) or "nOFF" (dD case)
+            if line.startswith("off"):
+                index = 0
+            elif line.startswith("noff"):
+                index = 1
+            else:
+                raise ValueError(f"Inconsistent OFF header for {off_file}, got '{line.rstrip()}', should be 'OFF' or 'nOFF'")
+            # Number of points is the first number ("OFF" case) or the second one ("nOFF" case) of the second line
+            nb_points = int(next(input_file).split()[index])
+        
+        return np.loadtxt(off_file, skiprows=2, max_rows=nb_points, dtype=np.floating)
 
 @cython.embedsignature(True)
 def write_points_to_off_file(fname, points):
