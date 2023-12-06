@@ -27,6 +27,19 @@ cdef extern from "Off_reader_interface.h" namespace "Gudhi":
     vector[vector[double]] read_points_from_OFF_file(string off_file)
 
 def _get_next_line(skiprows, file_desc, comment='#'):
+    """Return the next line that is not a comment.
+
+    :param skiprows: Should be set at -1 when starting to read a file.
+        Is incremented each time a new line is read and returned
+    :type skiprows: int
+    :param file_desc: An open file in read mode.
+    :type file_desc: A file descriptor
+    :param comment: The characters or list of characters used to indicate the start of a comment.
+    :type comment: string
+
+    :returns: The new skiprows value and the line of the file as a string.
+    :rtype: tuple(int, string)
+    """
     while True:
         line = next(file_desc)
         skiprows += 1
@@ -35,6 +48,17 @@ def _get_next_line(skiprows, file_desc, comment='#'):
     return skiprows, line
 
 def _read_off_file_header(off_file=''):
+    """Return the information contained in the header of an OFF file.
+
+    :param off_file: An OFF file style name.
+    :type off_file: string
+
+    :returns: The number of lines to skip, the point cloud dimension, and the number of points.
+    :rtype: tuple(int, string)
+
+    Raises:
+        ValueError: If the file does not respect the OFF file format.
+    """
     # Must start at -1 as first line (aka. 0), must be at least read
     skiprows = -1
     nb_vertices = -1
