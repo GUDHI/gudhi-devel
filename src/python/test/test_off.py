@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 from tempfile import NamedTemporaryFile
 
+
 def test_off_rw():
     for dim in range(2, 6):
         X = np.random.rand(123, dim)
@@ -20,10 +21,12 @@ def test_off_rw():
         Y = gd.read_points_from_off_file("rand.off")
         assert Y == pytest.approx(X)
 
+
 def test_human_off():
     pts = gd.read_points_from_off_file("human.off")
     # Should not try to read faces
     assert pts.shape == (4706, 3)
+
 
 def test_invalid_off_file():
     name = NamedTemporaryFile().name
@@ -34,3 +37,53 @@ def test_invalid_off_file():
     # Try to open a non-existing file - a new temp file name should not exist
     with pytest.raises(FileNotFoundError):
         gd.read_points_from_off_file(NamedTemporaryFile().name)
+
+
+def test_off_file_header():
+    name = NamedTemporaryFile().name
+    print(name)
+    # OFF
+    ## classic case
+    random_nb_points = np.random.randint(0, 100)
+    with open(name, "w") as f:
+        f.write(f"OFF\n{random_nb_points} 200 2\n1.2 1.3 1.4")
+    assert gd.off_utils._read_off_file_header(name) == (2, 3, random_nb_points)
+    ## with comments
+    random_nb_points = np.random.randint(0, 100)
+    with open(name, "w") as f:
+        f.write(
+            f"# comment on the first line\nOFF\n# comment on the third line\n{random_nb_points} 200 2\n"
+            "# comment before points\n1.2 1.3 1.4"
+        )
+    assert gd.off_utils._read_off_file_header(name) == (5, 3, random_nb_points)
+    # nOFF
+    ## when 'dim nb_vertices nb_faces nb_edges' on the same line
+    random_nb_points = np.random.randint(0, 100)
+    random_dim = np.random.randint(3, 100)
+    with open(name, "w") as f:
+        f.write(f"nOFF\n{random_dim} {random_nb_points} 200 2\n1.2 1.3 1.4")
+    assert gd.off_utils._read_off_file_header(name) == (2, random_dim, random_nb_points)
+    ## when 'dim nb_vertices nb_faces nb_edges' on the same line + comments
+    random_nb_points = np.random.randint(0, 100)
+    random_dim = np.random.randint(3, 100)
+    with open(name, "w") as f:
+        f.write(
+            f"# comment on the first line\nnOFF\n# comment on the third line\n{random_dim} {random_nb_points} 200 2\n"
+            "# comment before points\n1.2 1.3 1.4"
+        )
+    assert gd.off_utils._read_off_file_header(name) == (5, random_dim, random_nb_points)
+    ## when 'dim' and 'nb_vertices nb_faces nb_edges' on the separated lines
+    random_nb_points = np.random.randint(0, 100)
+    random_dim = np.random.randint(3, 100)
+    with open(name, "w") as f:
+        f.write(f"nOFF\n{random_dim}\n{random_nb_points} 200 2\n1.2 1.3 1.4")
+    assert gd.off_utils._read_off_file_header(name) == (3, random_dim, random_nb_points)
+    ## when 'dim' and 'nb_vertices nb_faces nb_edges' on the separated lines + comments
+    random_nb_points = np.random.randint(0, 100)
+    random_dim = np.random.randint(3, 100)
+    with open(name, "w") as f:
+        f.write(
+            f"# first comment\nnOFF\n# second comment\n{random_dim}\n# third comment\n{random_nb_points} 200 2\n"
+            "# another comment\n1.2 1.3 1.4"
+        )
+    assert gd.off_utils._read_off_file_header(name) == (7, random_dim, random_nb_points)
