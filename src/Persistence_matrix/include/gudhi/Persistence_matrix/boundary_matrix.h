@@ -546,7 +546,10 @@ inline Boundary_matrix<Master_matrix> &Boundary_matrix<Master_matrix>::operator=
 template<class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::print()
 {
-	std::cout << "Base_matrix:\n";
+	if constexpr (activeSwapOption){
+		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+	}
+	std::cout << "Boundary_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
 		Column_type& col = matrix_[i];
 		for (auto e : col.get_content(nextInsertIndex_)){

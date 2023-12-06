@@ -776,13 +776,23 @@ void test_ru_u_access(){
 
 	std::vector<witness_content<typename Matrix::Column_type> > uColumns(7);
 	if constexpr (Matrix::Option_list::is_z2){
-		uColumns[0] = {0};
-		uColumns[1] = {1};
-		uColumns[2] = {2};
-		uColumns[3] = {3};
-		uColumns[4] = {4};
-		uColumns[5] = {3,4,5};
-		uColumns[6] = {6};
+		if constexpr (Matrix::Option_list::has_vine_update){
+			uColumns[0] = {0};
+			uColumns[1] = {1};
+			uColumns[2] = {2};
+			uColumns[3] = {3,5};
+			uColumns[4] = {4,5};
+			uColumns[5] = {5};
+			uColumns[6] = {6};
+		} else {
+			uColumns[0] = {0};
+			uColumns[1] = {1};
+			uColumns[2] = {2};
+			uColumns[3] = {3};
+			uColumns[4] = {4};
+			uColumns[5] = {3,4,5};
+			uColumns[6] = {6};
+		}
 	} else {
 		uColumns[0] = {{0,1}};
 		uColumns[1] = {{1,1}};
@@ -799,14 +809,25 @@ void test_ru_u_access(){
 		test_column_equality<typename Matrix::Column_type>(c, get_column_content_via_iterators(col));
 	}
 
-	BOOST_CHECK(!m.is_zero_cell(5, 3, false));
-	BOOST_CHECK(!m.is_zero_column(4, false));
-	m.zero_cell(5, 3, false);
-	BOOST_CHECK(m.is_zero_cell(5, 3, false));
-	BOOST_CHECK(!m.is_zero_column(4, false));
-	m.zero_column(4, false);
-	BOOST_CHECK(m.is_zero_cell(5, 3, false));
-	BOOST_CHECK(m.is_zero_column(4, false));
+	if constexpr (Matrix::Option_list::has_vine_update){
+		BOOST_CHECK(!m.is_zero_cell(3, 5, false));
+		BOOST_CHECK(!m.is_zero_column(4, false));
+		m.zero_cell(3, 5, false);
+		BOOST_CHECK(m.is_zero_cell(3, 5, false));
+		BOOST_CHECK(!m.is_zero_column(4, false));
+		m.zero_column(4, false);
+		BOOST_CHECK(m.is_zero_cell(3, 5, false));
+		BOOST_CHECK(m.is_zero_column(4, false));
+	} else {
+		BOOST_CHECK(!m.is_zero_cell(5, 3, false));
+		BOOST_CHECK(!m.is_zero_column(4, false));
+		m.zero_cell(5, 3, false);
+		BOOST_CHECK(m.is_zero_cell(5, 3, false));
+		BOOST_CHECK(!m.is_zero_column(4, false));
+		m.zero_column(4, false);
+		BOOST_CHECK(m.is_zero_cell(5, 3, false));
+		BOOST_CHECK(m.is_zero_column(4, false));
+	}
 }
 
 // //row access
@@ -919,13 +940,23 @@ void test_ru_u_row_access(){
 
 	std::vector<witness_content<typename Matrix::Column_type> > rows;
 	if constexpr (Matrix::Option_list::is_z2){
-		rows.push_back({0});
-		rows.push_back({1});
-		rows.push_back({2});
-		rows.push_back({3,5});
-		rows.push_back({4,5});
-		rows.push_back({5});
-		rows.push_back({6});
+		if constexpr (Matrix::Option_list::has_vine_update){
+			rows.push_back({0});
+			rows.push_back({1});
+			rows.push_back({2});
+			rows.push_back({3});
+			rows.push_back({4});
+			rows.push_back({3,4,5});
+			rows.push_back({6});
+		} else {
+			rows.push_back({0});
+			rows.push_back({1});
+			rows.push_back({2});
+			rows.push_back({3,5});
+			rows.push_back({4,5});
+			rows.push_back({5});
+			rows.push_back({6});
+		}
 	} else {
 		rows.push_back({{0,1}});
 		rows.push_back({{1,1}});
@@ -1260,13 +1291,23 @@ void test_ru_operation(){
 
 	std::vector<witness_content<typename Matrix::Column_type> > uColumns(7);
 	if constexpr (Matrix::Option_list::is_z2){
-		uColumns[0] = {0};
-		uColumns[1] = {1};
-		uColumns[2] = {2};
-		uColumns[3] = {3};
-		uColumns[4] = {4};
-		uColumns[5] = {3,4,5};
-		uColumns[6] = {6};
+		if constexpr (Matrix::Option_list::has_vine_update){
+			uColumns[0] = {0};
+			uColumns[1] = {1};
+			uColumns[2] = {2};
+			uColumns[3] = {3,5};
+			uColumns[4] = {4,5};
+			uColumns[5] = {5};
+			uColumns[6] = {6};
+		} else {
+			uColumns[0] = {0};
+			uColumns[1] = {1};
+			uColumns[2] = {2};
+			uColumns[3] = {3};
+			uColumns[4] = {4};
+			uColumns[5] = {3,4,5};
+			uColumns[6] = {6};
+		}
 	} else {
 		uColumns[0] = {{0,1}};
 		uColumns[1] = {{1,1}};
@@ -1288,7 +1329,10 @@ void test_ru_operation(){
 	m.add_to(3, 5);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,1};
-		uColumns[5] = {4,5};
+		if constexpr (Matrix::Option_list::has_vine_update)
+			uColumns[3] = {3};
+		else
+			uColumns[5] = {4,5};
 	} else {
 		columns[5] = {{0,1},{1,4}};
 		uColumns[5] = {{3,2},{4,1},{5,4}};
@@ -1304,7 +1348,10 @@ void test_ru_operation(){
 	m.add_to(4, 5);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2};
-		uColumns[5] = {5};
+		if constexpr (Matrix::Option_list::has_vine_update)
+			uColumns[4] = {4};
+		else
+			uColumns[5] = {5};
 	} else {
 		columns[5] = {{0,1},{2,4}};
 		uColumns[5] = {{3,2},{4,2},{5,4}};
@@ -1317,35 +1364,37 @@ void test_ru_operation(){
 		}
 	}
 
-	m.add_to(5, F(3), 3);
-	if constexpr (Matrix::Option_list::is_z2){
-		columns[3] = {1,2};
-		uColumns[3] = {3,5};
-	} else {
-		columns[3] = {{0,4},{1,2},{2,4}};
-		uColumns[3] = {{4,2},{5,4}};
-	}
-	test_content_equality(columns, m);
-	if constexpr (Matrix::Option_list::is_indexed_by_position){
-		i = 0;
-		for (auto& b : uColumns){
-			test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+	if constexpr (!Matrix::Option_list::has_vine_update){
+		m.add_to(5, F(3), 3);
+		if constexpr (Matrix::Option_list::is_z2){
+			columns[3] = {1,2};
+			uColumns[3] = {3,5};
+		} else {
+			columns[3] = {{0,4},{1,2},{2,4}};
+			uColumns[3] = {{4,2},{5,4}};
 		}
-	}
+		test_content_equality(columns, m);
+		if constexpr (Matrix::Option_list::is_indexed_by_position){
+			i = 0;
+			for (auto& b : uColumns){
+				test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+			}
+		}
 
-	m.add_to(F(4), 5, 4);
-	if constexpr (Matrix::Option_list::is_z2){
-		columns[4] = {1,2};
-		uColumns[4] = {4};
-	} else {
-		columns[4] = {{0,4},{1,1}};
-		uColumns[4] = {{3,3},{4,4},{5,1}};
-	}
-	test_content_equality(columns, m);
-	if constexpr (Matrix::Option_list::is_indexed_by_position){
-		i = 0;
-		for (auto& b : uColumns){
-			test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+		m.add_to(F(4), 5, 4);
+		if constexpr (Matrix::Option_list::is_z2){
+			columns[4] = {1,2};
+			uColumns[4] = {4};
+		} else {
+			columns[4] = {{0,4},{1,1}};
+			uColumns[4] = {{3,3},{4,4},{5,1}};
+		}
+		test_content_equality(columns, m);
+		if constexpr (Matrix::Option_list::is_indexed_by_position){
+			i = 0;
+			for (auto& b : uColumns){
+				test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+			}
 		}
 	}
 }
@@ -1946,7 +1995,7 @@ void test_vine_swap_with_position_index(Matrix& m){
 		BOOST_CHECK(it == barcode.end());
 	}
 
-	change = m.vine_swap_with_z_eq_1_case(4);
+	change = m.vine_swap(4);
 	BOOST_CHECK(change);
 
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
@@ -2062,7 +2111,7 @@ void test_vine_swap_with_position_index(Matrix& m){
 		BOOST_CHECK(m.is_zero_column(3));
 		BOOST_CHECK(m.is_zero_column(7));
 		columns[3].clear();
-		columns[4] = {1,2};
+		columns[4] = {0,2};
 		columns[5] = {0,1};
 		columns[6] = {0,3};
 		columns[7].clear();
@@ -2292,7 +2341,7 @@ void test_vine_swap_with_id_index(Matrix& m){
 		BOOST_CHECK(it == barcode.end());
 	}
 
-	next = m.vine_swap_with_z_eq_1_case(3, 4);
+	next = m.vine_swap(3, 4);
 	BOOST_CHECK_EQUAL(next, 3);
 
 	if constexpr (Matrix::Option_list::is_of_boundary_type){
@@ -2409,7 +2458,7 @@ void test_vine_swap_with_id_index(Matrix& m){
 		BOOST_CHECK(m.is_zero_column(7));
 
 		columns[3].clear();
-		columns[4] = {1,2};
+		columns[4] = {0,2};
 		columns[5] = {0,1};
 		columns[6] = {4,5,7};	//by id and not position
 		columns[7].clear();

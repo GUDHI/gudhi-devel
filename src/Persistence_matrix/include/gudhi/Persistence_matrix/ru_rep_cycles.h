@@ -80,18 +80,40 @@ inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(RU_repr
 template<class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::update_representative_cycles()
 {
-	birthToCycle_.clear();
-	birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
-	for (unsigned int i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++){
-		if (_matrix()->reducedMatrixR_.is_zero_column(i)){
-			representativeCycles_.push_back(cycle_type());
-			for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)){
-				representativeCycles_.back().push_back(cell.get_row_index());
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		birthToCycle_.clear();
+		birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
+		unsigned int c = 0;
+		for (unsigned int i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++){
+			if (_matrix()->reducedMatrixR_.is_zero_column(i)){
+				birthToCycle_[i] = c;
+				++c;
 			}
-			if constexpr (std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Heap_column_type> 
-							|| std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Unordered_set_column_type>)
-				std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());
-			birthToCycle_[i] = representativeCycles_.size() - 1;
+		}
+		representativeCycles_.clear();
+		representativeCycles_.resize(c);
+		for (unsigned int i = 0; i < _matrix()->mirrorMatrixU_.get_number_of_columns(); i++){
+			for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)){
+				auto idx = birthToCycle_[cell.get_row_index()];
+				if (idx != -1){
+					representativeCycles_[idx].push_back(i);
+				}
+			}
+		}
+	} else {
+		birthToCycle_.clear();
+		birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
+		for (unsigned int i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++){
+			if (_matrix()->reducedMatrixR_.is_zero_column(i)){
+				representativeCycles_.push_back(cycle_type());
+				for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)){
+					representativeCycles_.back().push_back(cell.get_row_index());
+				}
+				if constexpr (std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Heap_column_type> 
+								|| std::is_same_v<typename Master_matrix::Column_type, typename Master_matrix::Unordered_set_column_type>)
+					std::sort(representativeCycles_.back().begin(), representativeCycles_.back().end());
+				birthToCycle_[i] = representativeCycles_.size() - 1;
+			}
 		}
 	}
 }

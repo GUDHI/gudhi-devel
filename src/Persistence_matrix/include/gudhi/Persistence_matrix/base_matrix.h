@@ -223,7 +223,7 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type &colu
 	if (columnIndex > static_cast<int>(nextInsertIndex_)) nextInsertIndex_ = columnIndex + 1;
 	else if (columnIndex < 0) nextInsertIndex_++;
 
-	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 		swap_opt::indexToRow_[id] = id;
 		swap_opt::rowToIndex_[id] = id;
@@ -265,7 +265,7 @@ inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &bou
 	}
 	
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 			swap_opt::indexToRow_[nextInsertIndex_] = nextInsertIndex_;
 			swap_opt::rowToIndex_[nextInsertIndex_] = nextInsertIndex_;
 		}
@@ -282,7 +282,7 @@ inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type &bou
 		} else {
 			unsigned int size = matrix_.size();
 			if (size <= nextInsertIndex_) {
-				if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+				if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 					for (unsigned int i = size; i <= size * 2; i++){
 						swap_opt::indexToRow_.push_back(i);
 						swap_opt::rowToIndex_.push_back(i);
@@ -329,7 +329,7 @@ inline void Base_matrix<Master_matrix>::erase_column(index columnIndex)
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::erase_row(index rowIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 		if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
 			ra_opt::erase_row(swap_opt::indexToRow_[rowIndex]);
 		}
@@ -417,13 +417,13 @@ template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 			matrix_.at(columnIndex).clear(swap_opt::indexToRow_.at(rowIndex));	//TODO: reorganize columns
 		} else {
 			matrix_.at(columnIndex).clear(rowIndex);	//TODO: reorganize columns
 		}
 	} else {
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 			matrix_[columnIndex].clear(swap_opt::indexToRow_[rowIndex]);	//TODO: reorganize columns
 		} else {
 			matrix_[columnIndex].clear(rowIndex);	//TODO: reorganize columns
@@ -445,13 +445,13 @@ template<class Master_matrix>
 inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 			return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
 		} else {
 			return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
 		}
 	} else {	//operator[] non const for maps
-		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 			return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
 		} else {
 			return !(matrix_[columnIndex].is_non_zero(rowIndex));
@@ -498,6 +498,7 @@ inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(const B
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::print()
 {
+	_orderRowsIfNecessary();
 	std::cout << "Base_matrix:\n";
 	for (unsigned int i = 0; i < nextInsertIndex_; ++i){
 		const Column_type& col = matrix_[i];
@@ -523,7 +524,7 @@ inline void Base_matrix<Master_matrix>::print()
 
 template<class Master_matrix>
 inline void Base_matrix<Master_matrix>::_orderRowsIfNecessary(){
-	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps){
+	if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();
 	}
 }

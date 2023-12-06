@@ -55,8 +55,8 @@ public:
 	//avoid calling with specialized options or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
+	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);	//do not call with vine updates
+	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);	//do not call with vine updates
 
 	void zero_cell(index columnIndex, index rowIndex, bool inR = true);
 	void zero_column(index columnIndex, bool inR = true);
@@ -270,7 +270,10 @@ template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
 	reducedMatrixR_.add_to(sourceColumnIndex, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumnIndex, targetColumnIndex);
+	if constexpr (Master_matrix::Option_list::has_vine_update)
+		mirrorMatrixU_.add_to(targetColumnIndex, sourceColumnIndex);
+	else
+		mirrorMatrixU_.add_to(sourceColumnIndex, targetColumnIndex);
 }
 
 template<class Master_matrix>
@@ -406,7 +409,10 @@ inline void RU_matrix<Master_matrix>::_reduce()
 			while (pivot != -1 && currIndex != -1){
 				if constexpr (Master_matrix::Option_list::is_z2){
 					curr += reducedMatrixR_.get_column(currIndex);
-					mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(currIndex);
+					if constexpr (Master_matrix::Option_list::has_vine_update)
+						mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(i);
+					else
+						mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(currIndex);
 				} else {
 					Column_type &toadd = reducedMatrixR_.get_column(currIndex);
 					typename Master_matrix::Field_type coef = curr.get_pivot_value();
@@ -492,7 +498,10 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 	while (pivot != -1 && currIndex != -1){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			curr += reducedMatrixR_.get_column(currIndex);
-			mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(currIndex);
+			if constexpr (Master_matrix::Option_list::has_vine_update)
+				mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(nextInsertIndex_);
+			else
+				mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(currIndex);
 		} else {
 			Column_type &toadd = reducedMatrixR_.get_column(currIndex);
 			typename Master_matrix::Field_type coef = curr.get_pivot_value();
