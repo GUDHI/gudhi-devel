@@ -127,7 +127,9 @@ add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 if (WITH_GUDHI_PYTHON)
   # Find the correct Python interpreter.
   # Can be set with -DPython_EXECUTABLE=/usr/bin/python3 for instance.
-  find_package( Python )
+  # CMP0094 OLD finds system python interpreter instead of conda even when using '-DCMAKE_PREFIX_PATH=$CONDA_PREFIX'
+  cmake_policy(SET CMP0094 NEW)
+  find_package( Python COMPONENTS Interpreter NumPy)
   
   # find_python_module tries to import module in Python interpreter and to retrieve its version number
   # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
@@ -174,11 +176,11 @@ if (WITH_GUDHI_PYTHON)
     endif()
   endfunction( find_python_module_no_version )
   
-  if( Python_Interpreter_FOUND )
+  if( TARGET Python::Interpreter )
+    # no need to find_python_module("numpy") - cf. find_package Python
     find_python_module("cython")
     find_python_module("pytest")
     find_python_module("matplotlib")
-    find_python_module("numpy")
     find_python_module("scipy")
     find_python_module("sphinx")
     find_python_module("sklearn")
@@ -201,12 +203,4 @@ if (WITH_GUDHI_PYTHON)
   
   option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
   
-  if(Python_Interpreter_FOUND AND CYTHON_FOUND)
-    if(SPHINX_FOUND)
-      # Documentation generation is available through sphinx
-      #find_program( SPHINX_PATH sphinx-build )
-      # Calling sphinx-build may use a different version of python and fail
-      set(SPHINX_PATH "${Python_EXECUTABLE}" "-m" "sphinx.cmd.build")
-    endif(SPHINX_FOUND)
-  endif(Python_Interpreter_FOUND AND CYTHON_FOUND)
 endif (WITH_GUDHI_PYTHON)
