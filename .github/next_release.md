@@ -17,7 +17,7 @@ Below is a list of changes made since GUDHI 3.8.0:
 
 - Installation
      - Boost &ge; 1.71.0 is now required (was &ge; 1.66.0).
-     - CMake &ge; 3.12 is now required (was &ge; 3.8).
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
      - cython &ge; 3.0.0 is now supported.
 
 - Miscellaneous
