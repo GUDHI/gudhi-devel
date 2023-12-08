@@ -110,11 +110,12 @@ def read_points_from_off_file(off_file=''):
     """
     with open(off_file) as input_file:
         dim, nb_points = _read_off_file_header(input_file)
-        print(dim, nb_points)
         # usecols=list(range(dim)) stands here to avoid comments at the end of line
         # or colors that can be added in RGB format after the points, the faces, ...
-        return np.loadtxt(input_file, dtype=np.floating, comments='#',
-                          usecols=list(range(dim)), max_rows=nb_points)
+        points = np.loadtxt(input_file, dtype=np.floating, comments='#',
+                            usecols=range(dim), max_rows=nb_points)
+        assert points.shape == (nb_points, dim), f"{points.shape} is different from expected ({nb_points}, {dim})"
+        return points
 
 @cython.embedsignature(True)
 def write_points_to_off_file(fname, points):
