@@ -30,7 +30,7 @@ def _get_next_line(file_desc, comment='#'):
     """Return the next line that is not a comment.
 
     :param file_desc: An open file in read mode.
-    :type file_desc: A file descriptor
+    :type file_desc: file
     :param comment: The characters or list of characters used to indicate the start of a comment.
     :type comment: string
 
@@ -45,11 +45,11 @@ def _get_next_line(file_desc, comment='#'):
             break
     return line
 
-def _read_off_file_header(input_file):
+def _read_off_file_header(file_desc):
     """Return the information contained in the header of an OFF file.
 
-    :param off_file: An OFF file style name.
-    :type off_file: string
+    :param file_desc: An open file in read mode.
+    :type file_desc: file
 
     :returns: The point cloud dimension, and the number of points.
     :rtype: tuple(int, int)
@@ -59,7 +59,7 @@ def _read_off_file_header(input_file):
     """
     nb_vertices = -1
 
-    line = _get_next_line(input_file)
+    line = _get_next_line(file_desc)
     # First line should be "OFF" (3d case) or "nOFF" (dD case)
     if line.lower().startswith("off"):
         dim = 3
@@ -68,7 +68,7 @@ def _read_off_file_header(input_file):
     elif line.lower().startswith("noff"):
         # "nOFF" case, next line is the dimension
         # can also contain nb_vertices, nb_faces nb_edges (can also be on the next line)
-        line = _get_next_line(input_file)
+        line = _get_next_line(file_desc)
         digits = [int(s) for s in line.split() if s.isdigit()]
         dim = digits[0]
         if len(digits) > 1:
@@ -82,16 +82,16 @@ def _read_off_file_header(input_file):
     # nb_vertices can be already set by "nOFF" case, when 'dim nb_vertices nb_faces nb_edges' on the same line
     if nb_vertices < 0:
         # Number of points is the first number ("OFF" case) or the second one ("nOFF" case) of the second line
-        line = _get_next_line(input_file)
+        line = _get_next_line(file_desc)
         digits = [int(s) for s in line.split() if s.isdigit()]
         nb_vertices = digits[0]
         # nb_faces =  digits[1]
         # nb_edges =  digits[2] # not used - can be ignored
         # nb_cells =  digits[3]
     # If comments between header and the first point
-    line = _get_next_line(input_file)
+    line = _get_next_line(file_desc)
     # Here the first line without comment is read - let's go back to the beginning of this line
-    input_file.seek(input_file.tell() - len(line))
+    file_desc.seek(file_desc.tell() - len(line))
     return dim, nb_vertices
 
 def read_points_from_off_file(off_file=''):
