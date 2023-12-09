@@ -8,7 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import collapse_edges
+from gudhi.flag_filtration.edge_collapse import reduce_graph as collapse_edges
 import numpy as np
 from scipy.sparse import coo_matrix
 import pytest
