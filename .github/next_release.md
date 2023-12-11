@@ -6,12 +6,9 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.8.0:
 
-- [Module](link)
-     - **...**
-
 - [Simplex_tree options](https://gudhi.inria.fr/doc/latest/struct_simplex_tree_options.html)
-     - A new option `link_nodes_by_label` to enhance cofaces and stars access, when set to true.
-     - A new option `stable_simplex_handles` to keep Simplex handles even after insertions or removals, when set to true.
+     - A new option `link_nodes_by_label` to speed up cofaces and stars access, when set to true.
+     - A new option `stable_simplex_handles` to keep Simplex handles valid even after insertions or removals, when set to true.
 
 - [Simplex_tree](https://gudhi.inria.fr/doc/latest/group__simplex__tree.html)
      - `Simplex_tree_options_full_featured` has been renamed `Simplex_tree_options_default` and `Simplex_tree_options_python`.
@@ -25,7 +22,7 @@ Below is a list of changes made since GUDHI 3.8.0:
      | contiguous_vertices    | 0       | 0      | 0      | 0 |
      | link_nodes_by_label    | ***1*** | 0      | 0      | 0 |
      | stable_simplex_handles | ***1*** | 0      | 0      | 0 |
-     | Filtration_value       | double  | double | double | 0 |
+     | Filtration_value       | double  | double | double |   |
 
 - [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
      - Much faster implementation for the 2d case with input from top-dimensional cells.
