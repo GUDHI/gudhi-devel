@@ -113,7 +113,7 @@ def read_points_from_off_file(off_file=''):
         dim, nb_points = _read_off_file_header(input_file)
         # usecols=list(range(dim)) stands here to avoid comments at the end of line
         # or colors that can be added in RGB format after the points, the faces, ...
-        points = np.loadtxt(input_file, dtype=np.floating, comments='#',
+        points = np.loadtxt(input_file, dtype=np.float64, comments='#',
                             usecols=range(dim), max_rows=nb_points)
         assert points.shape == (nb_points, dim), f"{points.shape} is different from expected ({nb_points}, {dim})"
         return points
