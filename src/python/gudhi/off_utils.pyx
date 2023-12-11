@@ -60,12 +60,8 @@ def _read_off_file_header(file_desc):
     nb_vertices = -1
 
     line = _get_next_line(file_desc)
-    # First line should be "OFF" (3d case) or "nOFF" (dD case)
-    if line.lower().startswith("off"):
-        dim = 3
-    elif line.lower().startswith("4off"):
-        dim = 4
-    elif line.lower().startswith("noff"):
+    # First line should be "OFF" (3d case with some variants) "4OFF" (4d case) or "nOFF" (dD case)
+    if line.lower().startswith("noff"):
         # "nOFF" case, next line is the dimension
         # can also contain nb_vertices, nb_faces nb_edges (can also be on the next line)
         line = _get_next_line(file_desc)
@@ -76,6 +72,11 @@ def _read_off_file_header(file_desc):
             # nb_faces =  digits[2]
             # nb_edges =  digits[3] # not used - can be ignored
             # nb_cells =  digits[4]
+    elif line.lower().startswith("4off"):
+        dim = 4
+    # "OFF", "COFF" and "STOFF" are 3d cases - let's stick with the C++ interface
+    elif line.lower().find("off") >= 0:
+        dim = 3
     else:
         raise ValueError(f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'")
         
