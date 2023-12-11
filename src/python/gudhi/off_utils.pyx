@@ -88,7 +88,8 @@ def _read_off_file_header(file_desc):
         # nb_faces =  digits[1]
         # nb_edges =  digits[2] # not used - can be ignored
         # nb_cells =  digits[3]
-    # If comments between header and the first point
+    # "_get_next_line + go back to the previous line" is just a hack for comments in the most likely places
+    # TODO: remove "_get_next_line + go back to the previous line" when numpy ≥ 1.23.0 will be the standard
     line = _get_next_line(file_desc)
     # Here the first line without comment is read - let's go back to the beginning of this line
     file_desc.seek(file_desc.tell() - len(line))
@@ -105,8 +106,8 @@ def read_points_from_off_file(off_file=''):
 
     .. warning::
         This function is using `numpy.loadtxt <https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html>`_
-        with `comments='#'` as an argument. It is advised to use a numpy version &ge; 1.23.0 if the `off_file` contains
-        lines without data or with comments in between the points.
+        with `comments='#'` as an argument. Empty and or comment lines between the points are only supported with numpy
+        &ge; 1.23.0.
     """
     with open(off_file) as input_file:
         dim, nb_points = _read_off_file_header(input_file)
