@@ -190,9 +190,82 @@ The output is:
      [0.7375     0.7625    ]
      [0.2375     0.2625    ]]
 
+
+
 Tutorial
 ********
 
 This
 `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
 presents the concept of barycenter, or Fréchet mean, of a family of persistence diagrams.
+
+
+Quantization
+------------
+
+:Since: GUDHI 3.5.0
+:Requires: `SciPy <installation.html#scipy>`_
+
+The quantization problem consists, given a measure :math:`\mu` (e.g. a persistence diagram) and a budget :math:`k`,
+in finding a measure :math:`\nu` supported on :math:`k` points that is the best approximation possible of :math:`\mu` ;
+the :math:`k`-means problem is a particular example of quantization problem.
+The output of a quantization algorithm is often referred to as a codebook; it consists of :math:`k` points (centroids)
+optimally positioned to summarize the input measure :math:`\mu`.
+
+If one has access to a sample of measures instead, one may perform online quantization: given a sample
+:math:`\mu_1,\dots,\mu_n` and an initial codebook :math:`c`, we progressively update :math:`c` by going through
+(possibly batches of) the :math:`(\mu_i)_i`. Theoretical properties (including convergence rates and guarantees) of the
+final codebook are provided in :cite:`divolLacombe2021quantization`.
+
+The Figure below showcases the use of the online-quantization approach provided by the
+``gudhi.wasserstein.quantization`` method.
+In this experiment, Rips persistence diagrams (in homology dimension 1) are built from random point clouds supported on
+different tori with some additional noise.
+Starting from an initial codebook ``c0``, centroids are iteratively updated as new diagrams are provided.
+As we use the Wasserstein metrics between persistence diagrams (denoted here by :math:`\mathrm{OT}_2`), points in the
+diagrams that are close to the diagonal do not interfere in the codebook update process.
+Doing so, the final codebook is able to properly retrieve the two 1-dimensional features of the underlying points clouds
+(the two loops generating the tori).
+
+.. figure::
+     ./img/quantiz.gif
+     :figclass: align-center
+
+     Online-quantization of a family of persistence diagrams built from random tori.
+
+.. autofunction:: gudhi.wasserstein.quantization
+
+Basic example:
+**************
+
+This example outputs a codebook for a set of diagrams with two proeminent modes around :math:`(0,1)` and :math:`(0,3)`.
+Diagrams, as often, also contain points near the diagonal. As we compare the codebook and the input diagrams
+using the standard :math:`2`-Wasserstein metric between persistence diagram (which maps points to the diagonal rather
+than any centroids if it reduces the matching cost), those points do not influence the centroids positions,
+an improvement over using vanilla :math:`k`-mean (Lloyd algorithm) to quantize persistence diagrams.
+
+.. testcode::
+
+    d1 = np.array([[0, 1.001], [0, 3], [2, 2.001], [3, 3.001], [1, 1.01]])
+    d2 = np.array([[0, 1], [0, 3.001], [0, 0.001]])
+    d3 = np.array([[0, 0.999], [0, 3.002], [0, 2.998]])
+    d4 = np.array([[0, 0.003], [0, 1.001], [0,3.004], [4, 4.01]])
+    pdiagset = [d1, d2, d3, d4]
+    c_final = quantization(pdiagset, k=2)
+    print("Final codebook obtained:")
+    print(c_final)
+
+.. testoutput::
+
+    Final codebook obtained:
+    [[0.      1.00025]
+     [0.      3.00125]]
+
+
+Tutorial
+********
+
+
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Quantization-of-persistence-diagrams.ipynb>`_
+presents the concept of quantization, or codebooks, of a family of persistence diagrams.
+
