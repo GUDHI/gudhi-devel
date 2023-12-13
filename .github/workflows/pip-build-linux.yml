@@ -20,7 +20,7 @@ jobs:
           cd src/python
           $PYTHON312/bin/python -m build -n -w
           auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.8
+      - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install --user pytest build_312/src/python/dist/*.whl
           $PYTHON312/bin/python -m pip install numpy --upgrade
