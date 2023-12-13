@@ -15,10 +15,10 @@ jobs:
       matrix:
         # numpy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4
         # and python 3.8+
-        python-version: ['3.12']
+        python-version: ['3.8']
         include:
-          - python-version: '3.12'
-            numpy-version: '1.26.0'
+          - python-version: '3.8'
+            numpy-version: '1.21.4'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
