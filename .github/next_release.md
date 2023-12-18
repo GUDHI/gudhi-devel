@@ -9,11 +9,11 @@ Below is a list of changes made since GUDHI 3.8.0:
 
 - [Simplex_tree](https://gudhi.inria.fr/doc/latest/group__simplex__tree.html)
      - A helper `for_each_simplex` that applies a given function object on each simplex
-     - `make_filtration_non_decreasing` has been rewritten, and a new method `num_simplices_by_dimension` is now available thanks to this helper.
+     - A new method `num_simplices_by_dimension` is now available thanks to this helper.
      - A `clear` method to empty the data stucture.
      - A new argument `ignore_infinite_values` for `initialize_filtration` method to skip infinite values. As a side effect, this change enhances the persistence computation.
      - `Simplex_tree_options_full_featured` has been renamed `Simplex_tree_options_default` and `Simplex_tree_options_python`.
-     These are respectively the options used by all the utilities and by the python interface of the `SimplexTree` (as before this version).
+     These are respectively the default options used by the `Simplex_tree` and by the python interface of the `SimplexTree` (as before this version).
      - From GUDHI 3.9.0, `Simplex_tree_options_full_featured` now activates `link_nodes_by_label` and `stable_simplex_handles`.
 
      | Simplex_tree_options_*  | :warning: full_featured | default | python | minimal |
@@ -33,7 +33,7 @@ Below is a list of changes made since GUDHI 3.8.0:
      - A function `assign_MEB_filtration` that assigns to each simplex a filtration value equal to the squared radius of its minimal enclosing ball (MEB), given a simplicial complex and an embedding of its vertices. Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
 
 - [Edge collapse](https://gudhi.inria.fr/python/latest/edge_collapse.html)
-     - A Python function `collapse_edges` to simplify a clique filtration (represented as a sparse weighted graph), while preserving its persistent homology.
+     - A Python function `reduce_graph` to simplify a clique filtration (represented as a sparse weighted graph), while preserving its persistent homology.
 
 - [Mapper/GIC/Nerve complexes](https://gudhi.inria.fr/python/latest/cover_complex_sklearn_isk_ref.html)
      - A new method `save_to_html` to ease the Keppler Mapper visualization
