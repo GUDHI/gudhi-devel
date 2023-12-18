@@ -1,16 +1,17 @@
 We are pleased to announce the release 3.9.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers a much faster implementation for the Cubical 2d case, fast cofaces access and stable simplex handles for the `Simplex_tree`, and a pip package for Python 3.12.
-
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
 Below is a list of changes made since GUDHI 3.8.0:
 
-- [Simplex_tree options](https://gudhi.inria.fr/doc/latest/struct_simplex_tree_options.html)
-     - A new option `link_nodes_by_label` to speed up cofaces and stars access, when set to true.
-     - A new option `stable_simplex_handles` to keep Simplex handles valid even after insertions or removals, when set to true.
+- [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
+     - Much faster implementation for the 2d case with input from top-dimensional cells.
 
 - [Simplex_tree](https://gudhi.inria.fr/doc/latest/group__simplex__tree.html)
+     - A helper `for_each_simplex` that applies a given function object on each simplex
+     - `make_filtration_non_decreasing` has been rewritten, and a new method `num_simplices_by_dimension` is now available thanks to this helper.
+     - A `clear` method to empty the data stucture.
+     - A new argument `ignore_infinite_values` for `initialize_filtration` method to skip infinite values. As a side effect, this change enhances the persistence computation.
      - `Simplex_tree_options_full_featured` has been renamed `Simplex_tree_options_default` and `Simplex_tree_options_python`.
      These are respectively the options used by all the utilities and by the python interface of the `SimplexTree` (as before this version).
      - From GUDHI 3.9.0, `Simplex_tree_options_full_featured` now activates `link_nodes_by_label` and `stable_simplex_handles`.
@@ -24,8 +25,18 @@ Below is a list of changes made since GUDHI 3.8.0:
      | stable_simplex_handles | ***1*** | 0      | 0      | 0 |
      | Filtration_value       | double  | double | double |   |
 
-- [CubicalPersistence](https://gudhi.inria.fr/python/latest/cubical_complex_sklearn_itf_ref.html)
-     - Much faster implementation for the 2d case with input from top-dimensional cells.
+- [Simplex_tree options](https://gudhi.inria.fr/doc/latest/struct_simplex_tree_options.html)
+     - A new option `link_nodes_by_label` to speed up cofaces and stars access, when set to true.
+     - A new option `stable_simplex_handles` to keep Simplex handles valid even after insertions or removals, when set to true.
+
+- [Čech complex](https://gudhi.inria.fr/doc/latest/group__cech__complex.html)
+     - A function `assign_MEB_filtration` that assigns to each simplex a filtration value equal to the squared radius of its minimal enclosing ball (MEB), given a simplicial complex and an embedding of its vertices. Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
+
+- [Edge collapse](https://gudhi.inria.fr/python/latest/edge_collapse.html)
+     - A Python function `collapse_edges` to simplify a clique filtration (represented as a sparse weighted graph), while preserving its persistent homology.
+
+- [Mapper/GIC/Nerve complexes](https://gudhi.inria.fr/python/latest/cover_complex_sklearn_isk_ref.html)
+     - A new method `save_to_html` to ease the Keppler Mapper visualization
 
 - Installation
      - Boost &ge; 1.71.0 is now required (was &ge; 1.66.0).
