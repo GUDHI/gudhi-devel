@@ -15,6 +15,8 @@ from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.metrics       import pairwise
+from sklearn.cluster import KMeans
+
 try:
     # New location since 1.0
     from sklearn.metrics     import DistanceMetric
@@ -733,7 +735,12 @@ class Atol(BaseEstimator, TransformerMixin):
            [1.25157463, 0.02062512]])
     """
     # Note the example above must be up to date with the one in tests called test_atol_doc
-    def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
+    def __init__(
+            self,
+            quantiser=KMeans(n_clusters=2, random_state=202312),
+            weighting_method="cloud",
+            contrast="gaussian"
+    ):
         """
         Constructor for the Atol measure vectorisation class.
 
