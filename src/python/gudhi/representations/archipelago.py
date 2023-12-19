@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.cluster import KMeans
 
 from .vector_methods import Atol
 
@@ -27,22 +26,51 @@ class Archipelago(BaseEstimator, TransformerMixin):
     >>> archipelago.transform(X=diag_data)
     """
 
-    def __init__(self, settler_class: type = Atol, settler_params=None):
+    # def __init__(self, homology_dimensions=None, settler_class: type = Atol, settler_params=None):
+    def __init__(
+            self,
+            homology_dimensions=None,
+            settler=None,
+            settler_list=None
+    ):
         """
         Constructor for the Archipelago class that sets the future number of cluster per Atol created.
 
-        @param settler_class: elementary class for populating the archipelago.
-        @param settler_params: parameters dict with which to instantiate the populating class.
+        Parameters:
+            homology_dimensions (int or list of int): The targeted persistence diagrams dimension(s).
+                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
+                dimension matters (in other words, when `homology_dimensions` is an int).
+            settler: settler for populating atol, i.e. object to vectorize persistence diagrams in each homology
+                dimensions. Must be copy.deepcopy-able. Will be ignored if settler_list is given.
+            settler_list: settler list for populating atols, i.e. list of object to vectorize persistence diagrams
+                in order of passed homology_dimensions.
         """
-        if settler_params is None:
-            settler_params = {"quantiser": KMeans(n_init='auto'), "weighting_method": "iidproba"}
-        self.settler_class = settler_class
-        self.settler_params = settler_params
-        self.archipelago_: dict[str: Atol] = {}
+        if homology_dimensions is None:
+            homology_dimensions = [0]
+        self.homology_dimensions = homology_dimensions
+        # @todo: rename this `island` or something
+        if settler is None:
+            settler = Atol()
+        self.settler = settler
+        self.settler_list = settler_list
+
+        if isinstance(self.homology_dimensions, int):
+            self.dim_list_ = [ self.homology_dimensions ]
+        else:
+            self.dim_list_ = self.homology_dimensions
+
+        if settler_list is not None:
+            if len(settler_list) != len(self.dim_list_):
+                raise ValueError("settler_list must be of the same length as number of targeted homology dimensions.")
+            else:
+                self.settler_list_ = self.settler_list
+        else:
+            self.settler_list_ = [copy.deepcopy(self.settler) for i in range(len(self.dim_list_))]
+        self.archipelago_ = {}
 
     def fit(self, X, y=None):
         """
-        Calibration step: create and fit Atol elements to the corresponding diagram element
+        Calibration step: create and fit settler elements to the corresponding diagram element
 
         Parameters:
             X (dictionary of diagrams): input sets of diagrams to be fit by the Atol algorithm.
@@ -51,6 +79,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
+
         for key, dgms in X.items():
             if not (dgms.apply(type) == np.ndarray).all():
                 print(f"[Archipelago] {key} does not yield only ndarrays.")
@@ -59,19 +88,20 @@ class Archipelago(BaseEstimator, TransformerMixin):
                 print(f"[Archipelago] No point to fit for {key}, dropping this key.")
                 continue
 
-            atol = self.settler_class(**copy.deepcopy(self.settler_params))
-
             n_points = np.concatenate(dgms).shape[0]
-            if atol.quantiser.n_clusters > n_points:
-                print(f"[Archipelago] {key} has only {n_points} points for `fit`, reducing n_clusters.")
-                atol.quantiser.n_clusters = np.min([atol.quantiser.n_clusters, n_points])
-            try:
-                atol.fit(X=dgms, y=y)
-            except ValueError as ve:
-                print(f'[Archipelago] Fit of {key} returned "{ve}", archipelago will ignore this key.')
-                continue
-            # atol.inertias *= 10
-            self.archipelago_[key] = atol
+            for (homology_dimension, settler) in zip(self.dim_list_, self.settler_list_):
+                if f"(D{homology_dimension})" not in key:
+                    continue
+                print(f"[Archipelago] Fitting key {key} matching homology dimension {homology_dimension}.")
+                if settler.quantiser.n_clusters > n_points:
+                    print(f"[Archipelago] {key} has only {n_points} points for `fit`, reducing n_clusters.")
+                    settler.quantiser.n_clusters = np.min([settler.quantiser.n_clusters, n_points])
+                try:
+                    settler.fit(X=dgms, y=y)
+                except ValueError as ve:
+                    print(f'[Archipelago] Fit of {key} returned "{ve}", archipelago will ignore this key.')
+                    continue
+                self.archipelago_[key] = settler
         return self
 
     def transform(self, X, y=None):
