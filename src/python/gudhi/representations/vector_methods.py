@@ -737,7 +737,7 @@ class Atol(BaseEstimator, TransformerMixin):
     # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(
             self,
-            quantiser=KMeans(n_clusters=2, random_state=202312),
+            quantiser=KMeans(n_clusters=2, random_state=202312, n_init='auto'),
             weighting_method="cloud",
             contrast="gaussian"
     ):
