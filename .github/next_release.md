@@ -14,7 +14,7 @@ Below is a list of changes made since GUDHI 3.8.0:
      - A new argument `ignore_infinite_values` for `initialize_filtration` method to skip infinite values. As a side effect, this change enhances the persistence computation.
      - `Simplex_tree_options_full_featured` has been renamed `Simplex_tree_options_default` and `Simplex_tree_options_python`.
      These are respectively the default options used by the `Simplex_tree` and by the python interface of the `SimplexTree` (as before this version).
-     - From GUDHI 3.9.0, `Simplex_tree_options_full_featured` now activates `link_nodes_by_label` and `stable_simplex_handles`.
+     - From GUDHI 3.9.0, `Simplex_tree_options_full_featured` now activates `link_nodes_by_label` and `stable_simplex_handles` (making it slower, except for browsing cofaces).
 
      | Simplex_tree_options_*  | :warning: full_featured | default | python | minimal |
      | ---- | ---- | ---- | ---- | ---- |
