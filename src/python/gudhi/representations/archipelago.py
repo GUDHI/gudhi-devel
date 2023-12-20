@@ -26,12 +26,11 @@ class Archipelago(BaseEstimator, TransformerMixin):
     >>> archipelago.transform(X=diag_data)
     """
 
-    # def __init__(self, homology_dimensions=None, settler_class: type = Atol, settler_params=None):
     def __init__(
             self,
             homology_dimensions=None,
-            settler=None,
-            settler_list=None
+            island=None,
+            island_list=None
     ):
         """
         Constructor for the Archipelago class that sets the future number of cluster per Atol created.
@@ -40,32 +39,31 @@ class Archipelago(BaseEstimator, TransformerMixin):
             homology_dimensions (int or list of int): The targeted persistence diagrams dimension(s).
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
                 dimension matters (in other words, when `homology_dimensions` is an int).
-            settler: settler for populating atol, i.e. object to vectorize persistence diagrams in each homology
-                dimensions. Must be copy.deepcopy-able. Will be ignored if settler_list is given.
-            settler_list: settler list for populating atols, i.e. list of object to vectorize persistence diagrams
+            island: island for populating archipelago, i.e. object to vectorize the target in each homology
+                dimensions. Must be `copy.deepcopy`-able. Will be ignored if island_list is given.
+            island_list: island list for populating archipelago, i.e. list of object to vectorize the target
                 in order of passed homology_dimensions.
         """
         if homology_dimensions is None:
             homology_dimensions = [0]
         self.homology_dimensions = homology_dimensions
-        # @todo: rename this `island` or something
-        if settler is None:
-            settler = Atol()
-        self.settler = settler
-        self.settler_list = settler_list
+        if island is None:
+            island = Atol()
+        self.island = island
+        self.island_list = island_list
 
         if isinstance(self.homology_dimensions, int):
             self.dim_list_ = [ self.homology_dimensions ]
         else:
             self.dim_list_ = self.homology_dimensions
 
-        if settler_list is not None:
-            if len(settler_list) != len(self.dim_list_):
+        if island_list is not None:
+            if len(island_list) != len(self.dim_list_):
                 raise ValueError("settler_list must be of the same length as number of targeted homology dimensions.")
             else:
-                self.settler_list_ = self.settler_list
+                self.island_list_ = self.island_list
         else:
-            self.settler_list_ = [copy.deepcopy(self.settler) for i in range(len(self.dim_list_))]
+            self.island_list_ = [copy.deepcopy(self.island) for i in range(len(self.dim_list_))]
         self.archipelago_ = {}
 
     def fit(self, X, y=None):
@@ -89,7 +87,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
                 continue
 
             n_points = np.concatenate(dgms).shape[0]
-            for (homology_dimension, settler) in zip(self.dim_list_, self.settler_list_):
+            for (homology_dimension, settler) in zip(self.dim_list_, self.island_list_):
                 if f"(D{homology_dimension})" not in key:
                     continue
                 print(f"[Archipelago] Fitting key {key} matching homology dimension {homology_dimension}.")
