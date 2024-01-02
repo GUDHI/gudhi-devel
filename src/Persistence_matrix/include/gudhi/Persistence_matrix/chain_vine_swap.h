@@ -393,10 +393,11 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	if (!col1.is_paired()){		// F x *
 		bool hasSmallerBirth;
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
-			hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
+			hasSmallerBirth = (CP::birth(col2.get_pivot()) < CP::birth(col1.get_pivot()));	//this order because position were swapped with CP::swap_positions
 		} else {
 			hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
 		}
+
 		if (!col2.is_paired() && hasSmallerBirth){
 			_matrix()->add_to(columnIndex1, columnIndex2);
 			if constexpr (Master_matrix::Option_list::has_column_pairings){
@@ -419,7 +420,7 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 
 	bool hasSmallerDeath;
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
-		hasSmallerDeath = (CP::death(col1.get_pivot()) < CP::death(col2.get_pivot()));
+		hasSmallerDeath = (CP::death(col2.get_pivot()) < CP::death(col1.get_pivot()));	//this order because position were swapped with CP::swap_positions
 	} else {
 		hasSmallerDeath = deathComp_(columnIndex1, columnIndex2);
 	}
