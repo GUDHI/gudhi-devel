@@ -797,7 +797,13 @@ class Atol(BaseEstimator, TransformerMixin):
 
         measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
-        self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
+
+        try:
+            self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
+        except ValueError as ve:
+            print(f'[Atol] fit returned "{ve}.')
+            return self
+
         self.centers = self.quantiser.cluster_centers_
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
