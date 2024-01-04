@@ -13,9 +13,8 @@ from gudhi.representations.vector_methods import Atol, TopologicalVector
 
 
 def _diag_to_dict_by_dim_format(pdiagram, max_dimension=None):
-    """ transforms list of Tuple(dimension, Tuple(x,y)) into list of ndarray[[x_0, y_0], [x_1, y_1], ...]
-     for each dimension, so if Tuple(x,y) has dimension i it will be found in the ith ndarray of
-     the resulting list, e.g.:
+    """ transforms persistence diagrams in gudhi format (so list of Tuple(dimension, Tuple(x,y)))
+     into dictionary of ndarray[[x_0, y_0], [x_1, y_1], ...] for each dimension, e.g.:
          [(1, (1.0577792405537423, 1.1003878733068035)),
           (0, (0.0, inf)),
           (0, (0.0, 1.0556057201636535)),
@@ -34,11 +33,20 @@ def _diag_to_dict_by_dim_format(pdiagram, max_dimension=None):
 class Archipelago(BaseEstimator, TransformerMixin):
     """
     Wrapper class for gudhi.representations.vector_methods in pandas format that is sklearn-API consistent.
-    One provides vectorizers (`island` or `island_list`) and the target homology dimensions (`homology_dimensions`),
-    and the Archipelago object will |fit on| and |transform = vectorize| dataframes of persistence diagrams.
+    One provides persistence diagram vectorizers (by way of either `island` or `island_list`) and the target homology
+    dimensions (`homology_dimensions`), and the Archipelago object will |fit on| and |transform = vectorize| dataframes
+    of persistence diagrams.
+
+    Parameters:
+        homology_dimensions (int or list of int): The targeted persistence diagrams dimension(s).
+            Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
+            dimension matters (in other words, when `homology_dimensions` is an int).
+        island: island for populating archipelago, i.e. object to vectorize the target in each homology
+            dimensions. Must be `copy.deepcopy`-able. Will be ignored if island_list is given.
+        island_list: island list for populating archipelago, i.e. list of object to vectorize the target
+            in order of passed homology_dimensions.
 
     Examples
-    --------
     >>> pdiagram1 = [(0, (0.0, 2.34)), (0, (0.0, 0.956)), (1, (0.536, 0.856)), (2, (1.202, 1.734))]
     >>> pdiagram2 = [(0, (0.0, 3.34)), (0, (0.0, 2.956)), (1, (0.536, 1.856)), (2, (1.202, 2.734))]
     >>> pdiagram3 = [(0, (1.0, 4.34)), (0, (2.0, 3.956)), (1, (1.536, 2.856)), (2, (3.202, 4.734))]
@@ -60,18 +68,6 @@ class Archipelago(BaseEstimator, TransformerMixin):
             island=None,
             island_list=None
     ):
-        """
-        Constructor for the Archipelago class that sets the future number of cluster per Atol created.
-
-        Parameters:
-            homology_dimensions (int or list of int): The targeted persistence diagrams dimension(s).
-                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
-                dimension matters (in other words, when `homology_dimensions` is an int).
-            island: island for populating archipelago, i.e. object to vectorize the target in each homology
-                dimensions. Must be `copy.deepcopy`-able. Will be ignored if island_list is given.
-            island_list: island list for populating archipelago, i.e. list of object to vectorize the target
-                in order of passed homology_dimensions.
-        """
         if homology_dimensions is None:
             homology_dimensions = [0]
         self.homology_dimensions = homology_dimensions
@@ -96,9 +92,9 @@ class Archipelago(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         """
-        Calibration step: create and fit settler elements to the corresponding diagram element
+        Calibration step: create and fit `island` vectorizer to each matching diagram element
 
-        Parameters:
+        Args:
             X (pandas.DataFrame of diagrams): input sets of diagrams to be fitted on.
             y: possibly labels for each diagram
 
@@ -127,8 +123,9 @@ class Archipelago(BaseEstimator, TransformerMixin):
         """
         Apply measure vectorisation on a dictionary of list of measures.
 
-        Parameters:
+        Args:
             X (pandas.DataFrame of diagrams): input sets of diagrams to vectorize.
+            y: Ignored, present for API consistency by convention.
 
         Returns:
             dict of numpy array with shape (number of measures) x (n_clusters_by_atol).
