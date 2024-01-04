@@ -9,7 +9,7 @@ import pandas as pd
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from gudhi.representations.vector_methods import Atol, TopologicalVector
+from gudhi.representations.vector_methods import Atol, TopologicalVector, BettiCurve
 
 
 class Archipelago(BaseEstimator, TransformerMixin):
@@ -34,7 +34,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
     >>> archipelago = Archipelago(island=Atol())
     >>> archipelago.fit(X=list_pdiags)
     >>> archipelago.transform(X=list_pdiags)
-    >>> archipelago = Archipelago(island_list={1: Atol(), 2: Atol(), 0:TopologicalVector()})
+    >>> archipelago = Archipelago(island_dict={2: BettiCurve(resolution=4), 0:TopologicalVector(threshold=3)})
     >>> archipelago.fit(X=series_pdiags)
     >>> archipelago.transform(X=series_pdiags)
     """
@@ -72,13 +72,16 @@ class Archipelago(BaseEstimator, TransformerMixin):
                 continue
             if self.island_dict is not None and dimension in self.island_dict.keys():
                 island = self.island_dict[dimension]
+            elif self.island_dict is not None:
+                continue
             else:
                 island = copy.deepcopy(self.island)
             try:
                 island.fit(X=this_dim_list_pdiags, y=y)
             except ValueError as ve:
-                print(f'[Archipelago] Fit of homology dimension {dimension} returned "{ve}". Will ignore this key.')
+                print(f"[Archipelago] Fit of homology dimension {dimension} returned {ve}. Will ignore this key.")
                 continue
+            print(f"[Archipelago] Fit of homology dimension {dimension} with object {island.__class__} succeeded.")
             self.archipelago_[dimension] = island
         return self
 
@@ -103,7 +106,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
         archipelago_vectorized = pd.DataFrame(index=my_index)
         for dimension in range(0, max_dimension + 1):
             if dimension not in self.archipelago_.keys():
-                print(f'[Archipelago] Encounters dimension {dimension} that he has fitted on. Will ignore this key')
+                print(f"[Archipelago] Encounters homology dimension {dimension} that has not been fitted on. Will ignore this key")
                 continue
             this_dim_list_pdiags = [pdiags[dimension] for pdiags in by_dim_list_pdiags]
             vectorized_dgms = self.archipelago_[dimension].transform(this_dim_list_pdiags)
