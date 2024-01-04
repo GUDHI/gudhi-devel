@@ -83,7 +83,8 @@ class Archipelago(BaseEstimator, TransformerMixin):
 
         if island_list is not None:
             if len(island_list) != len(self.dim_list_):
-                raise ValueError("settler_list must be of the same length as number of targeted homology dimensions.")
+                raise ValueError("Archipelago initialization:"
+                                 "`island_list` must be of the same length as number of targeted homology dimensions.")
             else:
                 self.island_list_ = self.island_list
         else:
