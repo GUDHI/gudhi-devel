@@ -1,7 +1,6 @@
-# coding: utf-8
-"""
-@author: Martin Royer
-"""
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):       Martin Royer
 
 import copy
 
@@ -10,20 +9,49 @@ import pandas as pd
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from .vector_methods import Atol
+from gudhi.representations.vector_methods import Atol, TopologicalVector
 
-# @martin@todo: doc, exemple d'utilisation
+
+def _diag_to_dict_by_dim_format(pdiagram, max_dimension=None):
+    """ transforms list of Tuple(dimension, Tuple(x,y)) into list of ndarray[[x_0, y_0], [x_1, y_1], ...]
+     for each dimension, so if Tuple(x,y) has dimension i it will be found in the ith ndarray of
+     the resulting list, e.g.:
+         [(1, (1.0577792405537423, 1.1003878733068035)),
+          (0, (0.0, inf)),
+          (0, (0.0, 1.0556057201636535)),
+          (0, (0.0, 0.8756047102452433))]
+     transforms into
+         {'(D0)': array([[0.        ,        inf],
+                         [0.        , 1.05560572],
+                         [0.        , 0.87560471]]),
+          '(D1)': array([[1.05777924, 1.10038787]])}
+    """
+    max_dimension = max(dim for (dim, _) in pdiagram) if max_dimension is None else max_dimension
+    by_dim_pdiagram = {f"(D{i})": np.array([_ for (dim, _) in pdiagram if dim == i]) for i in range(0, max_dimension + 1)}
+    return by_dim_pdiagram
 
 
 class Archipelago(BaseEstimator, TransformerMixin):
     """
-    Wrapper class for Atol dictionaries that is sklearn-API consistent.
+    Wrapper class for gudhi.representations.vector_methods in pandas format that is sklearn-API consistent.
+    One provides vectorizers (`island` or `island_list`) and the target homology dimensions (`homology_dimensions`),
+    and the Archipelago object will |fit on| and |transform = vectorize| dataframes of persistence diagrams.
 
-    Example
+    Examples
     --------
-    >>> archipelago = Archipelago(settler_class=Atol, settler_params={"quantiser": KMeans(n_init='auto'), "weighting_method": "iidproba"}),
-    >>> archipelago.fit(X=train_diags)
-    >>> archipelago.transform(X=diag_data)
+    >>> pdiagram1 = [(0, (0.0, 2.34)), (0, (0.0, 0.956)), (1, (0.536, 0.856)), (2, (1.202, 1.734))]
+    >>> pdiagram2 = [(0, (0.0, 3.34)), (0, (0.0, 2.956)), (1, (0.536, 1.856)), (2, (1.202, 2.734))]
+    >>> pdiagram3 = [(0, (1.0, 4.34)), (0, (2.0, 3.956)), (1, (1.536, 2.856)), (2, (3.202, 4.734))]
+    >>> dict_pdiag1 = _diag_to_dict_by_dim_format(pdiagram1)
+    >>> dict_pdiag2 = _diag_to_dict_by_dim_format(pdiagram2)
+    >>> dict_pdiag3 = _diag_to_dict_by_dim_format(pdiagram3)
+    >>> df_pdiags = pd.DataFrame([dict_pdiag1, dict_pdiag2, dict_pdiag3])
+    >>> archipelago = Archipelago(homology_dimensions=range(3), island=Atol())
+    >>> archipelago.fit(X=df_pdiags)
+    >>> archipelago.transform(X=df_pdiags)
+    >>> archipelago = Archipelago(homology_dimensions=range(2), island_list=[Atol(), TopologicalVector()])
+    >>> archipelago.fit(X=df_pdiags)
+    >>> archipelago.transform(X=df_pdiags)
     """
 
     def __init__(
@@ -63,7 +91,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
             else:
                 self.island_list_ = self.island_list
         else:
-            self.island_list_ = [copy.deepcopy(self.island) for i in range(len(self.dim_list_))]
+            self.island_list_ = [copy.deepcopy(self.island) for _ in range(len(self.dim_list_))]
         self.archipelago_ = {}
 
     def fit(self, X, y=None):
@@ -71,7 +99,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Calibration step: create and fit settler elements to the corresponding diagram element
 
         Parameters:
-            X (dictionary of diagrams): input sets of diagrams to be fit by the Atol algorithm.
+            X (pandas.DataFrame of diagrams): input sets of diagrams to be fitted on.
             y: possibly labels for each diagram
 
         Returns:
@@ -79,27 +107,20 @@ class Archipelago(BaseEstimator, TransformerMixin):
         """
 
         for key, dgms in X.items():
-            if not (dgms.apply(type) == np.ndarray).all():
-                print(f"[Archipelago] {key} does not yield only ndarrays.")
-                continue
-            if not np.sum(len(dgm) for dgm in dgms):
+            if not sum(len(dgm) for dgm in dgms):
                 print(f"[Archipelago] No point to fit for {key}, dropping this key.")
                 continue
 
-            n_points = np.concatenate(dgms).shape[0]
-            for (homology_dimension, settler) in zip(self.dim_list_, self.island_list_):
+            for (homology_dimension, island) in zip(self.dim_list_, self.island_list_):
                 if f"(D{homology_dimension})" not in key:
                     continue
                 print(f"[Archipelago] Fitting key {key} matching homology dimension {homology_dimension}.")
-                if settler.quantiser.n_clusters > n_points:
-                    print(f"[Archipelago] {key} has only {n_points} points for `fit`, reducing n_clusters.")
-                    settler.quantiser.n_clusters = np.min([settler.quantiser.n_clusters, n_points])
                 try:
-                    settler.fit(X=dgms, y=y)
+                    island.fit(X=dgms, y=y)
                 except ValueError as ve:
                     print(f'[Archipelago] Fit of {key} returned "{ve}", archipelago will ignore this key.')
                     continue
-                self.archipelago_[key] = settler
+                self.archipelago_[key] = island
         return self
 
     def transform(self, X, y=None):
@@ -107,21 +128,19 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Apply measure vectorisation on a dictionary of list of measures.
 
         Parameters:
-            X (dict of list N x d numpy arrays): dict of input measures in R^d to vectorize according to Atol centers
-                (measures can have different N).
+            X (pandas.DataFrame of diagrams): input sets of diagrams to vectorize.
 
         Returns:
             dict of numpy array with shape (number of measures) x (n_clusters_by_atol).
         """
-        archipelago_vectorize = {key: pd.DataFrame(index=X.index, dtype=float,
-                                                   columns=[f"{key} Center {i + 1}" for i in
-                                                            range(self.archipelago_[key].quantiser.n_clusters)])
-                                 for key in self.archipelago_.keys()}
+        archipelago_vectorized = pd.DataFrame(index=X.index)
         for key, dgms in X.items():
             if key not in self.archipelago_.keys():
                 continue
-            archipelago_vectorize[key].loc[X.index] = self.archipelago_[key].transform(dgms)
-        return pd.concat(archipelago_vectorize.values(), axis=1)
+            vectorized_dgms = self.archipelago_[key].transform(dgms)
+            col_keys = [f"{key} Center {i + 1}" for i in range(vectorized_dgms.shape[1])]
+            archipelago_vectorized.loc[:, col_keys] = vectorized_dgms
+        return archipelago_vectorized
 
     def get_feature_names_out(self):
         # hack to get access to skl `set_output`
