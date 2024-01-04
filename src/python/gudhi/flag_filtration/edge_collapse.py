@@ -7,10 +7,10 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from ._edge_collapse import _collapse_edges
+from .._edge_collapse import _collapse_edges
 
 
-def collapse_edges(input_edges, nb_iterations=1):
+def reduce_graph(input_edges, nb_iterations=1):
     """Simplify a clique filtration, preserving its persistent homology.
     The clique filtration is represented as a sparse weighted graph, giving for each edge its 2 vertices
     and its filtration value, and the output is in the same format. An edge may be represented arbitrarily as (i, j)

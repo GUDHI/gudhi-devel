@@ -5,4 +5,5 @@
 Edge collapse
 =============
 
-.. autofunction:: gudhi.collapse_edges
+.. automodule:: gudhi.flag_filtration.edge_collapse
+   :members:
