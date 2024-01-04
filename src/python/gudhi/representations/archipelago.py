@@ -32,10 +32,10 @@ def _diag_to_dict_by_dim_format(pdiagram, max_dimension=None):
 
 class Archipelago(BaseEstimator, TransformerMixin):
     """
-    Wrapper class for gudhi.representations.vector_methods in pandas format that is sklearn-API consistent.
+    Transformer that dictionary-wraps persistence diagram vectorizers, i.e. objects from gudhi.representations.vector_methods.
     One provides persistence diagram vectorizers (by way of either `island` or `island_list`) and the target homology
     dimensions (`homology_dimensions`), and the Archipelago object will |fit on| and |transform = vectorize| dataframes
-    of persistence diagrams.
+    of persistence diagrams (in pandas format). The object is sklearn-API consistent.
 
     Parameters:
         homology_dimensions (int or list of int): The targeted persistence diagrams dimension(s).
@@ -96,7 +96,8 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Calibration step: create and fit `island` vectorizer to each matching diagram element
 
         Args:
-            X (pandas.DataFrame of diagrams): input sets of diagrams to be fitted on.
+            X (pandas.DataFrame of diagrams): input persistence diagrams to vectorize, where each row is a persistence
+                diagram, each column a homology dimension and values are ndarrays.
             y: possibly labels for each diagram
 
         Returns:
@@ -125,11 +126,12 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Apply measure vectorisation on a dictionary of list of measures.
 
         Args:
-            X (pandas.DataFrame of diagrams): input sets of diagrams to vectorize.
+            X (pandas.DataFrame of diagrams): input persistence diagrams to vectorize, where each row is a persistence
+                diagram, each column a homology dimension and values are ndarrays.
             y: Ignored, present for API consistency by convention.
 
         Returns:
-            dict of numpy array with shape (number of measures) x (n_clusters_by_atol).
+            pandas.DataFrame with the same index as X but vectorized columns in order of dimension apparition.
         """
         archipelago_vectorized = pd.DataFrame(index=X.index)
         for key, dgms in X.items():
