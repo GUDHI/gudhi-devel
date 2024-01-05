@@ -122,9 +122,9 @@ def test_atol_doc():
     # Atol will do
     # X = np.concatenate([a,b,c])
     # kmeans = KMeans(n_clusters=2, random_state=202006, n_init="auto").fit(X)
-    # kmeans.labels_ will be : array([1, 0, 1, 0, 0, 1, 0, 0])
-    first_cluster = np.asarray([a[0], a[2], b[2]])
-    second_cluster = np.asarray([a[1], b[0], b[2], c[0], c[1]])
+    # kmeans.labels_ will be : array([0, 0, 0, 1, 1, 1, 1, 0])
+    first_cluster = np.asarray([a[0], a[1], a[2], c[1]])
+    second_cluster = np.asarray([b[0], b[1], b[2], c[0]])
 
     # Check the center of the first_cluster and second_cluster are in Atol centers
     centers = atol_vectoriser.fit(X=[a, b, c]).centers
