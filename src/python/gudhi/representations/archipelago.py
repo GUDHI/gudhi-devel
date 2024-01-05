@@ -5,7 +5,6 @@
 import copy
 
 import numpy as np
-import pandas as pd
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -49,6 +48,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
         self.island = island
         self.island_dict = island_dict
         self.archipelago_ = {}
+        self._running_transform_names = ""
 
     def fit(self, X, y=None):
         """
@@ -102,18 +102,18 @@ class Archipelago(BaseEstimator, TransformerMixin):
             np.array([_ for (dim, _) in pdiagram if dim == dimension]) for dimension in range(0, max_dimension + 1)
         ] for pdiagram in X]
 
-        my_index = X.index if (isinstance(X, pd.DataFrame) or isinstance(X, pd.Series)) else list(range(len(X)))
-        archipelago_vectorized = pd.DataFrame(index=my_index)
+        archipelago_vectorized = []
+        running_transform_names = []
         for dimension in range(0, max_dimension + 1):
             if dimension not in self.archipelago_.keys():
                 print(f"[Archipelago] Encounters homology dimension {dimension} that has not been fitted on. Will ignore this key")
                 continue
             this_dim_list_pdiags = [pdiags[dimension] for pdiags in by_dim_list_pdiags]
             vectorized_dgms = self.archipelago_[dimension].transform(this_dim_list_pdiags)
-            col_keys = [f"{dimension} Center {i + 1}" for i in range(vectorized_dgms.shape[1])]
-            archipelago_vectorized.loc[:, col_keys] = vectorized_dgms
-        return archipelago_vectorized
+            running_transform_names += [f"{dimension} Center {i + 1}" for i in range(vectorized_dgms.shape[1])]
+            archipelago_vectorized.append(vectorized_dgms)
+        self._running_transform_names = running_transform_names
+        return np.concatenate(archipelago_vectorized, axis=1)
 
     def get_feature_names_out(self):
-        # hack to get access to skl `set_output`
-        pass
+        return self._running_transform_names
