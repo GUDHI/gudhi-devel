@@ -814,7 +814,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.min(dist_centers, axis=0)/2
         return self
 
-    def __call__(self, measure, sample_weight=None):
+    def _transform(self, measure, sample_weight=None):
         """
         Apply measure vectorisation on a single measure. Only available after `fit` has been called.
 
@@ -843,4 +843,4 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
-        return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+        return np.stack([self._transform(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
