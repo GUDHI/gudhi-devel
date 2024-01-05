@@ -758,6 +758,7 @@ class Atol(BaseEstimator, TransformerMixin):
         self.quantiser = quantiser
         self.contrast = contrast
         self.weighting_method = weighting_method
+        self._running_transform_names = ""
 
     def get_contrast(self):
         return {
@@ -843,4 +844,8 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
+        self._running_transform_names = [f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)]
         return np.stack([self._transform(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+
+    def get_feature_names_out(self):
+        return self._running_transform_names
