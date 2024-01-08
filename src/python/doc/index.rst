@@ -35,6 +35,11 @@ Rips complex
 
 .. include:: rips_complex_sum.inc
 
+Edge collapse
+=============
+
+.. include:: edge_collapse_sum.inc
+
 Witness complex
 ===============
 

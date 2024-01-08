@@ -48,7 +48,7 @@ class Cech_blocker {
   // Numeric type of coordinates in the kernel
   using FT = typename Kernel::FT;
   // Sphere is a pair of point and squared radius.
-  using Sphere = typename std::pair<Point_d, FT>;
+  using Sphere = std::pair<Point_d, FT>;
 
  private:
 

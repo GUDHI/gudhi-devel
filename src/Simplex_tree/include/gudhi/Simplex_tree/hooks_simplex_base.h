@@ -12,6 +12,7 @@
 #define SIMPLEX_TREE_HOOKS_SIMPLEX_BASE_H_
 
 #include <boost/intrusive/list.hpp>
+#include <stdexcept>
 
 namespace Gudhi {
   /** \brief No hook when SimplexTreeOptions::link_nodes_by_label is false.

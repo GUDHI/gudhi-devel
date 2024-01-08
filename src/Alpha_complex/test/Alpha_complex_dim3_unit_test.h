@@ -5,13 +5,11 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
+ *      - 2023/11 Vincent Rouvreau: Split the test
  *      - YYYY/MM Author: Description of the modification
  */
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "alpha_complex_dim3"
 #include <boost/test/unit_test.hpp>
-#include <boost/mpl/list.hpp>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Epeck_d.h>
@@ -23,7 +21,7 @@
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Simplex_tree.h>
 
-// Use dynamic_dimension_tag for the user to be able to set dimension
+/*// Use dynamic_dimension_tag for the user to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dynamic_dimension_tag > Exact_kernel_d;
 // Use static dimension_tag for the user not to be able to set dimension
 typedef CGAL::Epeck_d< CGAL::Dimension_tag<3> > Exact_kernel_s;
@@ -34,8 +32,10 @@ typedef CGAL::Epick_d< CGAL::Dimension_tag<3> > Inexact_kernel_s;
 // The triangulation uses the default instantiation of the TriangulationDataStructure template parameter
 
 typedef boost::mpl::list<Exact_kernel_d, Exact_kernel_s, Inexact_kernel_d, Inexact_kernel_s> list_of_kernel_variants;
+*/
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of_kernel_variants) {
+template<class CGAL_kernel>
+void test_alpha_complex_from_OFF_file() {
   // ----------------------------------------------------------------------------
   //
   // Init of an alpha-complex from a OFF file
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
   std::clog << "========== OFF FILE NAME = " << off_file_name << " - alpha²=" <<
       max_alpha_square_value << "==========" << std::endl;
 
-  Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex_from_file(off_file_name);
+  Gudhi::alpha_complex::Alpha_complex<CGAL_kernel> alpha_complex_from_file(off_file_name);
 
   Gudhi::Simplex_tree<> simplex_tree_60;
   BOOST_CHECK(alpha_complex_from_file.create_complex(simplex_tree_60, max_alpha_square_value));
@@ -84,18 +84,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_OFF_file, TestedKernel, list_of
 }
 
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Alpha_complex_from_empty_points, TestedKernel, list_of_kernel_variants) {
+template<class CGAL_kernel>
+void test_alpha_complex_from_empty_points() {
   std::clog << "========== Alpha_complex_from_empty_points ==========" << std::endl;
 
   // ----------------------------------------------------------------------------
   // Init of an empty list of points
   // ----------------------------------------------------------------------------
-  std::vector<typename TestedKernel::Point_d> points;
+  std::vector<typename CGAL_kernel::Point_d> points;
 
   // ----------------------------------------------------------------------------
   // Init of an alpha complex from the list of points
   // ----------------------------------------------------------------------------
-  Gudhi::alpha_complex::Alpha_complex<TestedKernel> alpha_complex_from_points(points);
+  Gudhi::alpha_complex::Alpha_complex<CGAL_kernel> alpha_complex_from_points(points);
 
   std::clog << "alpha_complex_from_points.num_vertices()=" << alpha_complex_from_points.num_vertices() << std::endl;
   BOOST_CHECK(alpha_complex_from_points.num_vertices() == points.size());

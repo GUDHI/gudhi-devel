@@ -22,8 +22,8 @@ __license__ = "MIT"
 cdef extern from "Strong_witness_complex_interface.h" namespace "Gudhi":
     cdef cppclass Strong_witness_complex_interface "Gudhi::witness_complex::Strong_witness_complex_interface":
         Strong_witness_complex_interface(vector[vector[pair[size_t, double]]] nearest_landmark_table)
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square) except +
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, double max_alpha_square,
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square) except +
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square,
             unsigned limit_dimension) except +
 
 # StrongWitnessComplex python interface
@@ -69,9 +69,9 @@ cdef class StrongWitnessComplex:
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
         if limit_dimension != -1:
-            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+            self.thisptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
                 max_alpha_square, limit_dimension)
         else:
-            self.thisptr.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr,
+            self.thisptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
                 max_alpha_square)
         return stree

@@ -19,7 +19,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
 
-struct Low_options : Gudhi::Simplex_tree_options_full_featured {
+struct Low_options : Gudhi::Simplex_tree_options_default {
   typedef float Filtration_value;
   typedef std::uint8_t Vertex_handle;
 };

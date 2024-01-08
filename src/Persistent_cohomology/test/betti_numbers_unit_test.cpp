@@ -12,7 +12,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Persistent_cohomology.h>
 
-struct MiniSTOptions : Gudhi::Simplex_tree_options_full_featured {
+struct MiniSTOptions : Gudhi::Simplex_tree_options_minimal {
   // Implicitly use 0 as filtration value for all simplices
   static const bool store_filtration = false;
   // The persistence algorithm needs this
