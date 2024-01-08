@@ -15,7 +15,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
     """
     Transformer that dictionary-wraps persistence diagram vectorizers, i.e. objects from gudhi.representations.vector_methods.
     One provides persistence diagram vectorizers (by way of either `island` or `island_dict`), and the Archipelago object will
-    |fit on| and |transform = vectorize| list or series of persistence diagrams (in pandas format).
+    |fit on| and |transform = vectorize| lists or series of persistence diagrams.
     The object is sklearn-API consistent.
 
     Parameters:
@@ -55,7 +55,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Calibration step: create and fit `island` vectorizer to each matching diagram element
 
         Args:
-            X (list or pandas.Series of diagrams): input persistence diagrams to fit vectorizers on.
+            X (list of diagrams): input persistence diagrams to fit vectorizers on.
             y: possibly labels for each diagram
 
         Returns:
@@ -90,11 +90,12 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Apply measure vectorisation on a dictionary of list of measures.
 
         Args:
-            X (list or pandas.Series of diagrams): input persistence diagrams to vectorize.
+            X (list of diagrams): input persistence diagrams to vectorize.
             y: Ignored, present for API consistency by convention.
 
         Returns:
-            pandas.DataFrame with the same index as X but vectorized columns in order of increased dimension.
+            vectors : array of shape (len(X), n_features) where the columns features are vectorized homology dimension
+                in increasing order.
         """
 
         max_dimension = max(dim for pdiagram in X for (dim, _) in pdiagram)

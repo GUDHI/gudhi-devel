@@ -723,16 +723,16 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> c = np.array([[3, 2, -1], [1, 2, -1]])
     >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init="auto"))
     >>> atol_vectoriser.fit(X=[a, b, c]).centers
-    array([[ 2.6       ,  2.8       , -0.4       ],
-           [ 2.        ,  0.66666667,  3.33333333]])
+    array([[2.83333333, 2.33333333, 0.        ],
+           [1.        , 1.        , 4.        ]])
     >>> atol_vectoriser._transform(a)
-    array([0.42375966, 1.18168665])
+    array([0.34723399, 1.66402206])
     >>> atol_vectoriser._transform(c)
-    array([1.25157463, 0.02062512])
+    array([1.23515214, 0.01072498])
     >>> atol_vectoriser.transform(X=[a, b, c])
-    array([[0.42375966, 1.18168665],
-           [1.06330156, 0.29861028],
-           [1.25157463, 0.02062512]])
+    array([[0.34723399, 1.66402206],
+           [1.34322953, 0.07961846],
+           [1.23515214, 0.01072498]])
     """
     # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(
