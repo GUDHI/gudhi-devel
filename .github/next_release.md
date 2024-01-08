@@ -4,8 +4,8 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes made since GUDHI 3.9.0:
 
-- [Module](link)
-     - **...**
+- [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
+     - Rips complex persistence scikit-learn like interface
 
 - [Module](link)
      - **...**
