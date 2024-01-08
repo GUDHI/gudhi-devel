@@ -9,7 +9,7 @@ Rips complex persistence scikit-learn like interface
    :width: 100%
    :header-rows: 0
 
-   * - :Since: GUDHI 3.9.0
+   * - :Since: GUDHI 3.10.0
      - :License: MIT
      - :Requires: `Scikit-learn <installation.html#scikit-learn>`_
 
