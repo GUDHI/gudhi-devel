@@ -39,7 +39,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         input_type='point cloud',
         num_collapses=1,
         homology_coeff_field=11,
-        expand_extra_dimension = True,
         n_jobs=None,
     ):
         """
@@ -56,8 +55,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             num_collapses (int): Specify the number of :func:`~gudhi.SimplexTree.collapse_edges` iterations to perform
                 on the SimplexTree. Default value is 1 (a relatively good enough number of iterations).
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
-            expand_extra_dimension (bool): :func:`~gudhi.SimplexTree.expansion` is performed at
-                `max(homology_dimensions) + 1` if true, and `max(homology_dimensions)` otherwise. Default is true.
             n_jobs (int): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
@@ -67,7 +64,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.input_type = input_type
         self.num_collapses = num_collapses
         self.homology_coeff_field = homology_coeff_field
-        self.expand_extra_dimension = expand_extra_dimension
         self.n_jobs = n_jobs
 
     def fit(self, X, Y=None):
@@ -77,11 +73,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, inputs):
-        # persistence_dim_max is False by default, but True when expand_extra_dimension is False
-        persistence_dim_max = self.expand_extra_dimension
-        max_dimension = max(self.dim_list_)
-        if self.expand_extra_dimension:
-            max_dimension += 1
+        max_dimension = max(self.dim_list_) + 1
 
         if self.input_type == 'point cloud':
             rips = RipsComplex(points=inputs, max_edge_length = self.threshold)
@@ -97,6 +89,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         else:
             stree = rips.create_simplex_tree(max_dimension=max_dimension)
 
+        persistence_dim_max = False
         # Specific case where, despite expansion(max_dimension), stree has a lower dimension
         if max_dimension > stree.dimension():
             persistence_dim_max = True
