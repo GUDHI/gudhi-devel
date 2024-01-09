@@ -164,7 +164,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return;
   }
 
-  Simplex_tree_interface* collapse_edges(int nb_collapse_iteration) {
+  void collapse_edges(int nb_collapse_iteration) {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
     for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
@@ -177,19 +177,20 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
       }
     }
 
+    // Empty the data structure now we have all the required information in edges
+    clear();
+
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
       edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges));
     }
-    Simplex_tree_interface* collapsed_stree_ptr = new Simplex_tree_interface();
     // Copy the original 0-skeleton
     for (Simplex_handle sh : Base::skeleton_simplex_range(0)) {
-      collapsed_stree_ptr->insert({*(Base::simplex_vertex_range(sh).begin())}, Base::filtration(sh));
+      insert({*(Base::simplex_vertex_range(sh).begin())}, Base::filtration(sh));
     }
     // Insert remaining edges
     for (auto remaining_edge : edges) {
-      collapsed_stree_ptr->insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+      insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
     }
-    return collapsed_stree_ptr;
   }
 
   void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) {
