@@ -840,11 +840,9 @@ cdef class SimplexTree:
         cdef char[:] buffer = state
         cdef size_t buffer_size = state.shape[0]
         cdef char* buffer_start = &buffer[0]
-        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
-        cdef Simplex_tree_python_interface* ptr = self.get_ptr()
-        del ptr
-        self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
         with nogil:
+            # deserialization requires an empty SimplexTree
+            self.get_ptr().clear()
             # New pointer is a deserialized simplex tree
             self.get_ptr().deserialize(buffer_start, buffer_size)
 
