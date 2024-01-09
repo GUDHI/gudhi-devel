@@ -18,8 +18,7 @@ def test_rips_persistence_of_points_on_a_circle():
     NB_PC = 5
     point_clouds = [points.sphere(n_samples = random.randint(100,150), ambient_dim = 2) for _ in range(NB_PC)]
     
-    # No edge collapse as we want to test number of H0 features with the number of points
-    rips = RipsPersistence(homology_dimensions=[0, 1], num_collapses=0, n_jobs=-2)
+    rips = RipsPersistence(homology_dimensions=[0, 1], n_jobs=-2)
     diags = rips.fit_transform(point_clouds)
     # list of one array as an input means list of one array as an output
     assert len(diags) == NB_PC

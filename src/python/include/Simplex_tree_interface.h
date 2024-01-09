@@ -177,15 +177,11 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
       }
     }
 
-    // Empty the data structure now we have all the required information in edges
-    clear();
+    // Keep only the vertices
+    prune_above_dimension(0);
 
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
       edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges));
-    }
-    // Copy the original 0-skeleton
-    for (Simplex_handle sh : Base::skeleton_simplex_range(0)) {
-      insert({*(Base::simplex_vertex_range(sh).begin())}, Base::filtration(sh));
     }
     // Insert remaining edges
     for (auto remaining_edge : edges) {
