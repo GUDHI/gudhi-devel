@@ -566,6 +566,21 @@ if(PYTHONINTERP_FOUND)
 
     add_gudhi_py_test(test_rips_complex)
 
+    if(SKLEARN_FOUND)
+      # test_sklearn_rips_persistence is using gudhi.datasets.generators
+      if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+        add_gudhi_py_test(test_sklearn_rips_persistence)
+      endif()
+
+      # Datasets are fetched for these tests 
+      if(WITH_GUDHI_REMOTE_TEST)
+        add_test(NAME rips_complex_sklearn_itf_py_test
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                 COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-plot")
+      endif()
+    endif()
+
     # Simplex tree
     add_test(NAME simplex_tree_example_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
