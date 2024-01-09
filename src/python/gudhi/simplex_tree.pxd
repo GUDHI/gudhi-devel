@@ -83,6 +83,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         void serialize(char* buffer, const size_t buffer_size) nogil except +
         void deserialize(const char* buffer, const size_t buffer_size) nogil except +
         size_t get_serialization_size() nogil
+        void clear() nogil
 
 cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Simplex_tree_interface>":
