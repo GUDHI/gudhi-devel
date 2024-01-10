@@ -65,7 +65,7 @@ cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
         bool prune_above_dimension(int dimension) nogil
         bool make_filtration_non_decreasing() nogil
         void compute_extended_filtration() nogil
-        Simplex_tree_python_interface* collapse_edges(int nb_collapse_iteration) nogil except +
+        void collapse_edges(int nb_collapse_iteration) nogil except +
         void reset_filtration(double filtration, int dimension) nogil
         bint operator==(Simplex_tree_python_interface) nogil
         # Iterators over Simplex tree
