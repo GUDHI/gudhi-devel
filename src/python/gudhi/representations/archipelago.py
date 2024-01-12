@@ -78,11 +78,7 @@ class Archipelago(BaseEstimator, TransformerMixin):
                 continue
             else:
                 island = copy.deepcopy(self.island)
-            try:
-                island.fit(X=this_dim_list_pdiags, y=y)
-            except ValueError as ve:
-                print(f"[Archipelago] Fit of homology dimension {dimension} returned {ve}. Will ignore this key.")
-                continue
+            island.fit(X=this_dim_list_pdiags, y=y)
             print(f"[Archipelago] Fit of homology dimension {dimension} with object {island.__class__} succeeded.")
             self.archipelago_[dimension] = island
         return self
