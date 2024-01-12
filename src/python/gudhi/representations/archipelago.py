@@ -109,7 +109,11 @@ class Archipelago(BaseEstimator, TransformerMixin):
                 continue
             this_dim_list_pdiags = [pdiags[dimension] for pdiags in by_dim_list_pdiags]
             vectorized_dgms = self.archipelago_[dimension].transform(this_dim_list_pdiags)
-            running_transform_names += [f"{dimension} Center {i + 1}" for i in range(vectorized_dgms.shape[1])]
+            if hasattr(self.archipelago_[dimension], 'get_feature_names_out') and callable(self.archipelago_[dimension].get_feature_names_out):
+                this_dim_names = self.archipelago_[dimension].get_feature_names_out()
+            else:
+                this_dim_names = [f"Feat{i + 1}" for i in range(vectorized_dgms.shape[1])]
+            running_transform_names += [f"(D{dimension}) {name}" for name in this_dim_names]
             archipelago_vectorized.append(vectorized_dgms)
         self._running_transform_names = running_transform_names
         return np.concatenate(archipelago_vectorized, axis=1)
