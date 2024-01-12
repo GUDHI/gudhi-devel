@@ -39,18 +39,18 @@ class Archipelago(BaseEstimator, TransformerMixin):
     >>> archipelago.fit(X=series_pdiags)
     >>> archipelago.transform(X=series_pdiags)
     """
+    _parameter_constraints = {
+        "island": [object, None],
+        "island_dict": [dict, None],
+    }
 
     def __init__(
             self,
             island=None,
             island_dict=None
     ):
-        if island is None and island_dict is None:
-            island = Atol()
         self.island = island
         self.island_dict = island_dict
-        self.archipelago_ = {}
-        self._running_transform_names = ""
 
     def fit(self, X, y=None):
         """
@@ -63,6 +63,11 @@ class Archipelago(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
+        self._validate_params()
+        if self.island is None and self.island_dict is None:
+            self.island = Atol()
+        self.archipelago_ = {}
+        self._running_transform_names = ""
 
         max_dimension = max(dim for pdiagram in X for (dim, _) in pdiagram)
         by_dim_list_pdiags = [[
