@@ -29,11 +29,13 @@ class Archipelago(BaseEstimator, TransformerMixin):
     >>> pdiagram2 = [(0, (0.0, 3.34)), (0, (0.0, 2.956)), (1, (0.536, 1.856)), (2, (1.202, 2.734))]
     >>> pdiagram3 = [(0, (1.0, 4.34)), (0, (2.0, 3.956)), (1, (1.536, 2.856)), (2, (3.202, 4.734))]
     >>> list_pdiags = [pdiagram1, pdiagram2, pdiagram3]
-    >>> series_pdiags = pd.Series(list_pdiags)
     >>> archipelago = Archipelago(island=Atol())
     >>> archipelago.fit(X=list_pdiags)
     >>> archipelago.transform(X=list_pdiags)
-    >>> archipelago = Archipelago(island_dict={2: BettiCurve(resolution=4), 0:TopologicalVector(threshold=3)})
+    >>> archipelago = Archipelago(island_dict={2: BettiCurve(resolution=4), 0:Atol()})
+    >>> import pandas as pd
+    >>> series_pdiags = pd.Series(list_pdiags)
+    >>> archipelago.set_output(transform="pandas")
     >>> archipelago.fit(X=series_pdiags)
     >>> archipelago.transform(X=series_pdiags)
     """

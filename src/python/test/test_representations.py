@@ -118,13 +118,13 @@ def test_atol_doc():
     b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     c = np.array([[3, 2, -1], [1, 2, -1]])
 
-    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init="auto"))
+    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init=10))
     # Atol will do
     # X = np.concatenate([a,b,c])
-    # kmeans = KMeans(n_clusters=2, random_state=202006, n_init="auto").fit(X)
-    # kmeans.labels_ will be : array([0, 0, 0, 1, 1, 1, 1, 0])
-    first_cluster = np.asarray([a[0], a[1], a[2], c[1]])
-    second_cluster = np.asarray([b[0], b[1], b[2], c[0]])
+    # kmeans = KMeans(n_clusters=2, random_state=202006, n_init=10).fit(X)
+    # kmeans.labels_ will be : array([1, 0, 1, 0, 0, 1, 0, 0])
+    first_cluster = np.asarray([a[0], a[2], b[2]])
+    second_cluster = np.asarray([a[1], b[0], b[1], c[0], c[1]])
 
     # Check the center of the first_cluster and second_cluster are in Atol centers
     centers = atol_vectoriser.fit(X=[a, b, c]).centers
@@ -145,7 +145,7 @@ def test_dummy_atol():
     for weighting_method in ["cloud", "iidproba"]:
         for contrast in ["gaussian", "laplacian", "indicator"]:
             atol_vectoriser = Atol(
-                quantiser=KMeans(n_clusters=1, random_state=202006, n_init="auto"),
+                quantiser=KMeans(n_clusters=1, random_state=202006, n_init=10),
                 weighting_method=weighting_method,
                 contrast=contrast,
             )
