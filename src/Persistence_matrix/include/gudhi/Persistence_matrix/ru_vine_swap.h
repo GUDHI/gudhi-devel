@@ -326,7 +326,6 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 		_positive_transpose(index);
 		return true;
 	}
-
 	return false;
 }
 

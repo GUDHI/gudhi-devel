@@ -12,7 +12,6 @@
 #define PM_BASE_SWAP_H
 
 #include <utility>	//std::swap, std::move & std::exchange
-#include <vector>
 
 namespace Gudhi {
 namespace persistence_matrix {

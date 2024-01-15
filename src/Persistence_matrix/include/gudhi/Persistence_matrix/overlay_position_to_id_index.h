@@ -280,7 +280,7 @@ template<class Matrix_type, class Master_matrix_type>
 inline typename Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::Row_type &
 Position_to_id_indexation_overlay<Matrix_type,Master_matrix_type>::get_row(index rowIndex)
 {
-	return matrix_.get_row(matrix_.get_pivot(columnPositionToID_[rowIndex]));		//TODO: ???
+	return matrix_.get_row(matrix_.get_pivot(columnPositionToID_[rowIndex]));		//necessary because there can be a difference between the id used for the positioning and the id used for the simplex if the user used its own ids instead of id = initial position
 }
 
 template<class Matrix_type, class Master_matrix_type>
