@@ -59,9 +59,9 @@ sometimes even 1), is to build the Rips complex only up to dimension 1 (a graph)
 trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a complex that is
 often significantly smaller and thus faster to process.
 
-Finally, if you are only interested in the persistence computation of a Rips complex, you should consider using
-:class:`~gudhi.sklearn.rips_persistence.RipsPersistence` instead, as it builds efficiently a Rips complex from the
-inputs and returns its persistence diagrams.
+Finally, if you are only interested in the persistence diagram of a Rips complex, you should consider using
+:class:`~gudhi.sklearn.rips_persistence.RipsPersistence` instead, which directly returns the diagram and can be faster
+than explicitly building the complex before computing its persistence.
 
 Point cloud
 -----------
