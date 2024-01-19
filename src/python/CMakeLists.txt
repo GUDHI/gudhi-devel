@@ -55,7 +55,6 @@ if(PYTHONINTERP_FOUND)
     # Cython modules
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_utils', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
-    set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'edge_collapse', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'cubical_complex', ")
     set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'periodic_cubical_complex', ")
@@ -78,6 +77,7 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
     set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cover_complex', ")
+    set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'flag_filtration', ")
 
     add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
     add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
@@ -330,7 +330,7 @@ if(PYTHONINTERP_FOUND)
     file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
     file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
     file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-    file(COPY "gudhi/edge_collapse.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+    file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 
     # Some files for pip package
@@ -565,6 +565,21 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_from_points_example.py)
 
     add_gudhi_py_test(test_rips_complex)
+
+    if(SKLEARN_FOUND)
+      # test_sklearn_rips_persistence is using gudhi.datasets.generators
+      if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+        add_gudhi_py_test(test_sklearn_rips_persistence)
+      endif()
+
+      # Datasets are fetched for these tests 
+      if(WITH_GUDHI_REMOTE_TEST)
+        add_test(NAME rips_complex_sklearn_itf_py_test
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                 COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/rips_complex_sklearn_itf.py" "--no-plot")
+      endif()
+    endif()
 
     # Simplex tree
     add_test(NAME simplex_tree_example_py_test
