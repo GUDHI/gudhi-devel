@@ -110,7 +110,8 @@ def read_points_from_off_file(off_file=''):
         with `comments='#'` as an argument. Empty and or comment lines between the points are only supported with numpy
         &ge; 1.23.0.
     """
-    with open(off_file) as input_file:
+    # newline='' is required for Windows, otherwise end of line with '\r\n' are only detected as '\n'
+    with open(off_file, newline='') as input_file:
         dim, nb_points = _read_off_file_header(input_file)
         # usecols=list(range(dim)) stands here to avoid comments at the end of line
         # or colors that can be added in RGB format after the points, the faces, ...
