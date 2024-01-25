@@ -17,6 +17,7 @@ from functools import lru_cache
 import warnings
 import errno
 import os
+import shutil
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -93,14 +94,27 @@ def _limit_to_max_intervals(persistence, max_intervals, key):
 
 
 @lru_cache(maxsize=1)
-def _matplotlib_can_use_tex():
+def _matplotlib_can_use_tex() -> bool:
     """This function returns True if matplotlib can deal with LaTeX, False otherwise.
     The returned value is cached.
     """
     try:
-        from matplotlib import checkdep_usetex
+        from matplotlib import _get_executable_info, ExecutableNotFoundError
+        if not shutil.which("tex"):
+            warnings.warn("usetex mode requires TeX.")
+            return False
+        try:
+            _get_executable_info("dvipng")
+        except ExecutableNotFoundError:
+            warnings.warn("usetex mode requires dvipng.")
+            return False
+        try:
+            _get_executable_info("gs")
+        except ExecutableNotFoundError:
+            warnings.warn("usetex mode requires ghostscript.")
+            return False
+        return True
 
-        return checkdep_usetex(True)
     except ImportError as import_error:
         warnings.warn(f"This function is not available.\nModuleNotFoundError: No module named '{import_error.name}'.")
 
