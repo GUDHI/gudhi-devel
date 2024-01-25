@@ -100,6 +100,7 @@ def _matplotlib_can_use_tex() -> bool:
     """
     try:
         from matplotlib import _get_executable_info, ExecutableNotFoundError
+
         if not shutil.which("tex"):
             warnings.warn("usetex mode requires TeX.")
             return False
