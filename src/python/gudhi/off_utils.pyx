@@ -111,6 +111,7 @@ def read_points_from_off_file(off_file=''):
         &ge; 1.23.0.
     """
     # newline='' is required for Windows, otherwise end of line with '\r\n' are only detected as '\n'
+    # This is required by _read_off_file_header that needs the exact length of the line (to go backward in the file reading)
     with open(off_file, newline='') as input_file:
         dim, nb_points = _read_off_file_header(input_file)
         # usecols=list(range(dim)) stands here to avoid comments at the end of line
