@@ -64,12 +64,13 @@ jobs:
         vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
+    # Call CMake with '-A x64', cf. https://gitlab.kitware.com/cmake/cmake/-/issues/19024
     - script: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -A x64 -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ninja
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
