@@ -138,18 +138,18 @@ If :code:`import gudhi` succeeds, please have a look to debug information:
 
     import gudhi as gd
     print(gd.__debug_info__)
-    print("+ Installed modules are: " + gd.__available_modules)
-    print("+ Missing modules are: " + gd.__missing_modules)
+    print(f"+ Installed modules are: {gd.__available_modules}")
+    print(f"+ Missing modules are: {gd.__missing_modules}")
 
 You shall have something like:
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1 
     Python version 3.7.12
-    Cython version 0.29.25 
-    Numpy version 1.21.4 
-    Boost version 1.77.0
+    pybind11 version 2.8.1
+    numpy version 1.21.4
+    cython version 0.29.25
+    Boost version 1.77.
     + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
     + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
@@ -165,23 +165,25 @@ A complete configuration would be :
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1 
-    Python version 3.9.7
-    Cython version 0.29.24 
-    Pytest version 6.2.5 
-    Matplotlib version 3.5.0 
-    Numpy version 1.21.4 
-    Scipy version 1.7.3 
-    Scikit-learn version 1.0.1 
-    POT version 0.8.0 
-    HNSWlib found
-    PyKeOps version [pyKeOps]: 2.1
-    EagerPy version 0.30.0 
-    TensorFlow version 2.7.0 
-    Sphinx version 4.3.0 
-    Sphinx-paramlinks version 0.5.2 
-    pydata_sphinx_theme version 0.13.1 
-    NetworkX version 3.0 
+    Python version 3.9.16
+    networkx version 3.0
+    sphinxcontrib-bibtex version 2.5.0
+    pydata-sphinx-theme version 0.13.1
+    sphinx-paramlinks version 0.5.4
+    tensorflow version 2.11.1
+    hnswlib version 0.7.0
+    eagerpy version 0.30.0
+    pykeops version 2.1.2
+    torch version 2.0.0
+    pybind11 version 2.11.1
+    pot version 0.9.1
+    scikit-learn version 0.24.2
+    sphinx version 6.1.3
+    scipy version 1.10.1
+    numpy version 1.22.4
+    matplotlib version 3.6.3
+    pytest version 7.2.2
+    cython version 0.29.36
     Eigen3 version 3.4.0
     Boost version 1.74.0
     CGAL version 5.3
