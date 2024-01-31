@@ -49,7 +49,7 @@ cdef class AlphaComplex:
 
     .. note::
 
-        When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+        When AlphaComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
 
     cdef Delaunay_complex_interface * this_ptr
