@@ -55,15 +55,11 @@ cdef class AlphaComplex:
     cdef Delaunay_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, points=[], off_file='', weights=None, precision='safe'):
+    def __init__(self, points=[], weights=None, precision='safe'):
         """AlphaComplex constructor.
 
         :param points: A list of points in d-Dimension.
         :type points: Iterable[Iterable[float]]
-
-        :param off_file: **[deprecated]** An `OFF file style <fileformats.html#off-file-format>`_ name.
-            If an `off_file` is given with `points` as arguments, only points from the file are taken into account.
-        :type off_file: string
 
         :param weights: A list of weights. If set, the number of weights must correspond to the number of points.
         :type weights: Iterable[float]
@@ -71,20 +67,14 @@ cdef class AlphaComplex:
         :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
 
-        :raises FileNotFoundError: **[deprecated]** If `off_file` is set but not found.
         :raises ValueError: In case of inconsistency between the number of points and weights.
         """
 
     # The real cython constructor
-    def __cinit__(self, points = [], off_file = '', weights=None, precision = 'safe'):
+    def __cinit__(self, points = [], weights=None, precision = 'safe'):
         assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
-
-        if off_file:
-            warnings.warn("off_file is a deprecated parameter, please consider using gudhi.read_points_from_off_file",
-                          DeprecationWarning)
-            points = read_points_from_off_file(off_file = off_file)
 
         # weights are set but is inconsistent with the number of points
         if weights is not None and len(weights) != len(points):

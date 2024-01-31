@@ -230,27 +230,6 @@ def test_3d_tetrahedrons():
     for precision in ['fast', 'safe', 'exact']:
         _3d_tetrahedrons(precision)
 
-def test_off_file_deprecation_warning():
-    off_file = open("alphacomplexdoc.off", "w")
-    off_file.write("OFF         \n" \
-                   "7 0 0       \n" \
-                   "1.0 1.0  0.0\n" \
-                   "7.0 0.0  0.0\n" \
-                   "4.0 6.0  0.0\n" \
-                   "9.0 6.0  0.0\n" \
-                   "0.0 14.0 0.0\n" \
-                   "2.0 19.0 0.0\n" \
-                   "9.0 17.0 0.0\n"  )
-    off_file.close()
-
-    with pytest.warns(DeprecationWarning):
-        alpha = AlphaComplex(off_file="alphacomplexdoc.off")
-
-def test_non_existing_off_file():
-    with pytest.warns(DeprecationWarning):
-        with pytest.raises(FileNotFoundError):
-            alpha = AlphaComplex(off_file="pouetpouettralala.toubiloubabdou")
-
 def test_inconsistency_points_and_weights():
     points = [[1.0, 1.0 , 0.0],
               [7.0, 0.0 , 0.0],
