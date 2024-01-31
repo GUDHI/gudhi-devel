@@ -33,28 +33,28 @@ class Delaunay_complex_interface {
     const bool weighted = (weights.size() > 0);
     if (fast_version) {
       if (weighted) {
-        alpha_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<true>>(points, weights);
+        delaunay_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<true>>(points, weights);
       } else {
-        alpha_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<false>>(points);
+        delaunay_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<false>>(points);
       }
     } else {
       if (weighted) {
-        alpha_ptr_ = std::make_unique<Exact_delaunay_complex_dD<true>>(points, weights, exact_version);
+        delaunay_ptr_ = std::make_unique<Exact_delaunay_complex_dD<true>>(points, weights, exact_version);
       } else {
-        alpha_ptr_ = std::make_unique<Exact_delaunay_complex_dD<false>>(points, exact_version);
+        delaunay_ptr_ = std::make_unique<Exact_delaunay_complex_dD<false>>(points, exact_version);
       }
     }
   }
 
   std::vector<double> get_point(int vh) {
-    return alpha_ptr_->get_point(vh);
+    return delaunay_ptr_->get_point(vh);
   }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                            bool default_filtration_value) {
     // Nothing to be done in case of an empty point set
-    if (alpha_ptr_->num_vertices() > 0)
-      alpha_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
+    if (delaunay_ptr_->num_vertices() > 0)
+      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value);
   }
 
   static void set_float_relative_precision(double precision) {
@@ -68,7 +68,7 @@ class Delaunay_complex_interface {
   }
 
  private:
-  std::unique_ptr<Abstract_delaunay_complex> alpha_ptr_;
+  std::unique_ptr<Abstract_delaunay_complex> delaunay_ptr_;
 };
 
 }  // namespace delaunay_complex
