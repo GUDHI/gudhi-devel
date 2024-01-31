@@ -530,6 +530,11 @@ class Alpha_complex {
       }
     }
   }
+
+ public:
+  Kernel get_kernel() {
+    return kernel_.get_kernel();
+  }
 };
 
 }  // namespace alpha_complex
