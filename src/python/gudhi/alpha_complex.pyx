@@ -26,9 +26,9 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
-cdef extern from "Alpha_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Alpha_complex_interface "Gudhi::alpha_complex::Alpha_complex_interface":
-        Alpha_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
+cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Delaunay_complex_interface "Gudhi::delaunay_complex::Delaunay_complex_interface":
+        Delaunay_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, bool default_filtration_value) nogil except +
         @staticmethod
@@ -52,7 +52,7 @@ cdef class AlphaComplex:
         When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
 
-    cdef Alpha_complex_interface * this_ptr
+    cdef Delaunay_complex_interface * this_ptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points=[], off_file='', weights=None, precision='safe'):
@@ -97,7 +97,7 @@ cdef class AlphaComplex:
         if weights is not None:
             wgts = weights
         with nogil:
-            self.this_ptr = new Alpha_complex_interface(pts, wgts, fast, exact)
+            self.this_ptr = new Delaunay_complex_interface(pts, wgts, fast, exact)
 
     def __dealloc__(self):
         if self.this_ptr != NULL:
@@ -151,7 +151,7 @@ cdef class AlphaComplex:
         """
         if precision <=0. or precision >= 1.:
             raise ValueError("Relative precision value must be strictly greater than 0 and strictly lower than 1")
-        Alpha_complex_interface.set_float_relative_precision(precision)
+        Delaunay_complex_interface.set_float_relative_precision(precision)
     
     @staticmethod
     def get_float_relative_precision():
@@ -161,4 +161,4 @@ cdef class AlphaComplex:
             :code:`precision = 'safe'` (the default).
         :rtype: float
         """
-        return Alpha_complex_interface.get_float_relative_precision()
+        return Delaunay_complex_interface.get_float_relative_precision()

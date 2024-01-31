@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef INCLUDE_ALPHA_COMPLEX_FACTORY_H_
-#define INCLUDE_ALPHA_COMPLEX_FACTORY_H_
+#ifndef INCLUDE_DELAUNAY_COMPLEX_FACTORY_H_
+#define INCLUDE_DELAUNAY_COMPLEX_FACTORY_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Alpha_complex.h>
@@ -29,7 +29,7 @@
 
 namespace Gudhi {
 
-namespace alpha_complex {
+namespace delaunay_complex {
 
 // template Functor that transforms a CGAL point to a vector of double as expected by cython
 template<typename CgalPointType, bool Weighted>
@@ -64,7 +64,7 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
   return CgalPointType(vec.size(), vec.begin(), vec.end());
 }
 
-class Abstract_alpha_complex {
+class Abstract_delaunay_complex {
  public:
   virtual std::vector<double> get_point(int vh) = 0;
 
@@ -73,11 +73,11 @@ class Abstract_alpha_complex {
   
   virtual std::size_t num_vertices() const = 0;
 
-  virtual ~Abstract_alpha_complex() = default;
+  virtual ~Abstract_delaunay_complex() = default;
 };
 
 template <bool Weighted = false>
-class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
+class Exact_delaunay_complex_dD final : public Abstract_delaunay_complex {
  private:
   using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
   using Bare_point = typename Kernel::Point_d;
@@ -85,38 +85,38 @@ class Exact_alpha_complex_dD final : public Abstract_alpha_complex {
                                              typename Kernel::Point_d>;
 
  public:
-  Exact_alpha_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
+  Exact_delaunay_complex_dD(const std::vector<std::vector<double>>& points, bool exact_version)
     : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+      delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
   }
 
-  Exact_alpha_complex_dD(const std::vector<std::vector<double>>& points,
+  Exact_delaunay_complex_dD(const std::vector<std::vector<double>>& points,
                            const std::vector<double>& weights, bool exact_version)
     : exact_version_(exact_version),
-      alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
+      delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
     // Can be a Weighted or a Bare point in function of Weighted
-    return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
+    return Point_cgal_to_cython<Point, Weighted>()(delaunay_complex_.get_point(vh));
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+    return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
   }
 
   virtual std::size_t num_vertices() const override {
-    return alpha_complex_.num_vertices();
+    return delaunay_complex_.num_vertices();
   }
 
  private:
   bool exact_version_;
-  Alpha_complex<Kernel, Weighted> alpha_complex_;
+  Gudhi::alpha_complex::Alpha_complex<Kernel, Weighted> delaunay_complex_;
 };
 
 template <bool Weighted = false>
-class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
+class Inexact_delaunay_complex_dD final : public Abstract_delaunay_complex {
  private:
   using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
   using Bare_point = typename Kernel::Point_d;
@@ -124,33 +124,33 @@ class Inexact_alpha_complex_dD final : public Abstract_alpha_complex {
                                              typename Kernel::Point_d>;
 
  public:
-  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points)
-    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+  Inexact_delaunay_complex_dD(const std::vector<std::vector<double>>& points)
+    : delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
   }
 
-  Inexact_alpha_complex_dD(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
-    : alpha_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
+  Inexact_delaunay_complex_dD(const std::vector<std::vector<double>>& points, const std::vector<double>& weights)
+    : delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
     // Can be a Weighted or a Bare point in function of Weighted
-    return Point_cgal_to_cython<Point, Weighted>()(alpha_complex_.get_point(vh));
+    return Point_cgal_to_cython<Point, Weighted>()(delaunay_complex_.get_point(vh));
   }
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value) override {
-    return alpha_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
+    return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
   }
 
   virtual std::size_t num_vertices() const override {
-    return alpha_complex_.num_vertices();
+    return delaunay_complex_.num_vertices();
   }
 
  private:
-  Alpha_complex<Kernel, Weighted> alpha_complex_;
+  Gudhi::alpha_complex::Alpha_complex<Kernel, Weighted> delaunay_complex_;
 };
 
-}  // namespace alpha_complex
+}  // namespace delaunay_complex
 
 }  // namespace Gudhi
 
-#endif  // INCLUDE_ALPHA_COMPLEX_FACTORY_H_
+#endif  // INCLUDE_DELAUNAY_COMPLEX_FACTORY_H_
