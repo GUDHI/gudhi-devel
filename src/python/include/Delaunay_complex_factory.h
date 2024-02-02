@@ -15,6 +15,7 @@
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/Alpha_complex_options.h>
+#include <gudhi/MEB_filtration.h>
 #include <CGAL/Epeck_d.h>
 #include <CGAL/Epick_d.h>
 
@@ -69,10 +70,10 @@ class Abstract_delaunay_complex {
   virtual std::vector<double> get_point(int vh) = 0;
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   bool default_filtration_value) = 0;
+                                   bool default_filtration_value, bool assign_meb_filtration) = 0;
   
   virtual std::size_t num_vertices() const = 0;
-
+  
   virtual ~Abstract_delaunay_complex() = default;
 };
 
@@ -102,8 +103,23 @@ class Exact_delaunay_complex_dD final : public Abstract_delaunay_complex {
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   bool default_filtration_value) override {
-    return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square, exact_version_, default_filtration_value);
+                                   bool default_filtration_value, bool assign_meb_filtration) override {
+    if ((assign_meb_filtration == false) || (default_filtration_value == false)) {
+      // return the Alpha complex, also a shortcut for the Delaunay complex
+      return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square,
+                                              exact_version_, default_filtration_value);
+    } else {
+      // Construct the Delaunay complex
+      bool result = delaunay_complex_.create_complex(*simplex_tree,
+                                       std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
+                                       exact_version_,
+                                       false);
+      if (result == true)
+        // Construct the Delaunay-Cech complex by assigning filtration values with MEB
+        Gudhi::cech_complex::assign_MEB_filtration(delaunay_complex_.get_kernel(), *simplex_tree,
+                                                   delaunay_complex_.get_point_cloud());
+      return result;
+    }
   }
 
   virtual std::size_t num_vertices() const override {
@@ -137,8 +153,22 @@ class Inexact_delaunay_complex_dD final : public Abstract_delaunay_complex {
     return Point_cgal_to_cython<Point, Weighted>()(delaunay_complex_.get_point(vh));
   }
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   bool default_filtration_value) override {
-    return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square, false, default_filtration_value);
+                                   bool default_filtration_value, bool assign_meb_filtration) override {
+    if ((assign_meb_filtration == false) || (default_filtration_value == false)) {
+      // return the Alpha complex, also a shortcut for the Delaunay complex
+      return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square,
+                                              false, default_filtration_value);
+    } else {
+      // Construct the Delaunay complex
+      bool result = delaunay_complex_.create_complex(*simplex_tree,
+                                       std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
+                                       false, false);
+      if (result == true)
+        // Construct the Delaunay-Cech complex by assigning filtration values with MEB
+        Gudhi::cech_complex::assign_MEB_filtration(delaunay_complex_.get_kernel(), *simplex_tree,
+                                                   delaunay_complex_.get_point_cloud());
+      return result;
+    }
   }
 
   virtual std::size_t num_vertices() const override {

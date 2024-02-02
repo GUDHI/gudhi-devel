@@ -535,6 +535,20 @@ class Alpha_complex {
   Kernel get_kernel() {
     return kernel_.get_kernel();
   }
+
+  // Kernel::Point_d are not weighted points
+  std::vector<typename Kernel::Point_d> get_point_cloud() {
+    std::vector<typename Kernel::Point_d> point_cloud;
+    int point_cloud_size = vertex_handle_to_iterator_.size();
+    point_cloud.resize(point_cloud_size);
+    for (int index = 0; index < point_cloud_size; index++) {
+      if constexpr (Weighted)
+        point_cloud[index] = vertex_handle_to_iterator_[index]->point().point();
+      else
+        point_cloud[index] = vertex_handle_to_iterator_[index]->point();
+    }
+    return point_cloud;
+  }
 };
 
 }  // namespace alpha_complex
