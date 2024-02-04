@@ -56,4 +56,4 @@ def torus(n_samples, dim, sample='random'):
         # Generate points on a grid
         return _generate_grid_points_on_torus(n_samples, dim)
     else:
-        raise ValueError("Sample type '{}' is not supported".format(sample))
+        raise ValueError(f"Sample type '{sample}' is not supported")
