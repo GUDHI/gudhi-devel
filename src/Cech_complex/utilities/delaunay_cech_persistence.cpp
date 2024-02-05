@@ -46,8 +46,9 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_
   std::vector<Point> point_cloud = off_reader.get_point_cloud();
   Delaunay_complex delaunay_complex_from_file(point_cloud);
   delaunay_complex_from_file.create_complex(stree, std::numeric_limits< Filtration_value >::infinity(),
-                                            exact_version, true);
-  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), stree, point_cloud);
+                                            // exact can be false (or true), as default_filtration_value is set to true
+                                            false, true);
+  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), stree, point_cloud, exact_version);
   stree.prune_above_filtration(max_radius);
   return stree;
 }
@@ -76,6 +77,7 @@ int main(int argc, char* argv[]) {
     using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
     stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_radius);
   } else {
+    std::clog << "exact_version = " << exact_version << "\n";
     using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
     stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_radius);
   }
