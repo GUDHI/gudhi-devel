@@ -14,8 +14,14 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 
 ## cech_persistence ##
 This program computes the persistent homology with coefficient field *Z/pZ* of
-a Čech complex defined on a set of input points, using Euclidean distance. The
-output diagram contains one bar per line, written with the convention:
+a Čech complex defined on a set of input points, using Euclidean distance.
+
+Different versions of Delaunay-Čech complex computation are available:
+ * fast: right combinatorics, values can be arbitrarily bad
+ * safe (default): values can have a relative error at most 1e-5
+ * exact: true values rounded to double.
+
+The output diagram contains one bar per line, written with the convention:
 
 `p dim birth death`
 
@@ -55,9 +61,16 @@ Beware: this program may use a lot of RAM and take a lot of time if `max-radius`
 
 
 ## dealaunay_cech_persistence ##
-This program computes the persistent homology with coefficient field *Z/pZ* of
-a Delaunay-Čech complex defined on a set of input points, using Euclidean
-distance. The output diagram contains one bar per line, written with the
+
+This program Computes the persistent homology with coefficient field *Z/pZ* 
+of a Delaunay-Čech complex defined on a set of input points.
+
+Different versions of Delaunay-Čech complex computation are available:
+ * fast: right combinatorics, values can be arbitrarily bad
+ * safe (default): values can have a relative error at most 1e-5
+ * exact: true values rounded to double.
+
+The output diagram contains one bar per line, written with the
 convention:
 
 `p dim birth death`

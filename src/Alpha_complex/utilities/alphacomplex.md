@@ -12,8 +12,16 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 
 ## alpha_complex_persistence ##
 
-This program computes the persistent homology with coefficient field Z/pZ of
+This program computes the persistent homology with coefficient field *Z/pZ* of
 the dD alpha complex built from a dD point cloud.
+ 
+Different versions of Alpha complex computation are available:
+ * fast: right combinatorics, values can be arbitrarily bad
+ * safe (default): values can have a relative error at most 1e-5
+ * exact: true values rounded to double.
+ 
+Alpha complex can be, or not, weighted (requires a file containing weights values).
+
 The output diagram contains one bar per line, written with the convention:
 
 ```
@@ -47,8 +55,7 @@ coefficient field Z/pZ for computing homology.
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
 to be recorded. Enter a negative value to see zero length intervals.
 * `-w [ --weight-file ]` is the path to the file containing the weights of the
-points (one value per line).
-Default version is not weighted.
+points (one value per line). Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
 
@@ -68,14 +75,16 @@ and
 
 
 ## alpha_complex_3d_persistence ##
-This program computes the persistent homology with coefficient field Z/pZ of
-the 3D alpha complex built from a 3D point cloud.
-One can use exact computation. It is slower, but it is necessary when points
-are on a grid for instance.
-Alpha complex 3d can be weighted and/or periodic (refer to the
-[CGAL's 3D Periodic Triangulations User Manual](
-https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html)
-for more details).
+This program computes the persistent homology with coefficient field *Z/pZ* of
+the 3D Alpha complex built from a 3D point cloud.
+
+Different versions of 3D Alpha complex computation are available:
+ * fast: right combinatorics, values can be arbitrarily bad
+ * safe (default): values can have a relative error at most 1e-5
+ * exact: true values rounded to double.
+ 
+3D Alpha complex can be, or not, weighted (requires a file containing weights values)
+and/or periodic (requires a file describing the periodic domain).
 
 The output diagram contains
 one bar per line, written with the convention:
@@ -134,3 +143,5 @@ N.B.:
 [Alpha shape](https://doc.cgal.org/latest/Alpha_shapes_3/index.html#Alpha_shapes_3Definitions)
 and
 [Regular triangulation](https://doc.cgal.org/latest/Triangulation_3/index.html#Triangulation3secclassRegulartriangulation) documentation.
+* The periodic domain is detailed on CGAL [3D Periodic Triangulations User Manual](
+https://doc.cgal.org/latest/Periodic_3_triangulation_3/index.html)

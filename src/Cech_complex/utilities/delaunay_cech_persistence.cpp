@@ -146,6 +146,10 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
     std::clog << std::endl;
     std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
     std::clog << "of a Delaunay-Cech complex defined on a set of input points.\n \n";
+    std::clog << "Different versions of Delaunay-Cech complex computation are available:\n";
+    std::clog << " * fast: right combinatorics, values can be arbitrarily bad\n";
+    std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
+    std::clog << " * exact: true values rounded to double.\n \n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";
