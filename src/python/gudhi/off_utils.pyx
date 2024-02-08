@@ -41,7 +41,7 @@ def _get_next_line(file_desc, comment='#'):
         # file_desc.readline() is preferred to next(file_desc), as the second option is not compatible with
         # seek and tell methods
         line = file_desc.readline()
-        if not line.startswith(comment):
+        if (not line.startswith(comment)) and len(line.split()) > 0:
             break
     return line
 
