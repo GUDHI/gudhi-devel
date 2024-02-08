@@ -288,7 +288,12 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
     std::clog << std::endl;
     std::clog << "Compute the persistent homology with coefficient field Z/pZ \n";
     std::clog << "of a 3D Alpha complex defined on a set of input points.\n";
-    std::clog << "3D Alpha complex can be safe (by default) exact or fast, weighted and/or periodic\n\n";
+    std::clog << "Different versions of 3D Alpha complex computation are available:\n";
+    std::clog << " * fast: right combinatorics, values can be arbitrarily bad\n";
+    std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
+    std::clog << " * exact: true values rounded to double.\n \n";
+    std::clog << "3D Alpha complex can be, or not, weighted (requires a file containing weights values)\n";
+    std::clog << "and/or periodic (requires a file describing the periodic domain).\n\n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";

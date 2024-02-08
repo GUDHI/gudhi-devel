@@ -48,12 +48,12 @@ if (TARGET Boost::program_options)
 
     if (DIFF_PATH)
       add_test(Delaunay_Cech_complex_utilities_diff_exact ${DIFF_PATH}
-               "exact.pers" "safe.pers")
+               "delaunay_exact.pers" "delaunay_safe.pers")
       set_tests_properties(Delaunay_Cech_complex_utilities_diff_exact PROPERTIES DEPENDS
                "Delaunay_Cech_complex_utility_from_rips_on_tore_3D_safe;Delaunay_Cech_complex_utility_from_rips_on_tore_3D_exact")
 
       add_test(Delaunay_Cech_complex_utilities_diff_fast ${DIFF_PATH}
-               "fast.pers" "safe.pers")
+               "delaunay_fast.pers" "delaunay_safe.pers")
       set_tests_properties(Delaunay_Cech_complex_utilities_diff_fast PROPERTIES DEPENDS
                "Delaunay_Cech_complex_utility_from_rips_on_tore_3D_safe;Delaunay_Cech_complex_utility_from_rips_on_tore_3D_fast")
     endif()
