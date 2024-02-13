@@ -202,13 +202,12 @@ def _warn_infty(matching):
     Handle essential parts with different cardinalities. Warn the user about cost being infinite and (if
     `matching=True`) about the returned matching being `None`.
     '''
+    user_warning = 'Cardinality of essential parts differs.'
     if matching:
-        warnings.warn('''Cardinality of essential parts differs. Distance (cost) is +inf, and the returned matching is
-                      None.
-                      ''')
+        warnings.warn(f'{user_warning} Distance (cost) is +inf, and the returned matching is None.')
         return np.inf, None
     else:
-        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +inf.')
+        warnings.warn(f'{user_warning} Distance (cost) is +inf.')
         return np.inf
 
 
