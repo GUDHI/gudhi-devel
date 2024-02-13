@@ -351,7 +351,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
 
     # Comptuation of the ot cost using the ot.emd2 library.
     # Note: it is the Wasserstein distance to the power q.
-    # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value ?
+    # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value?
     ot_cost = ot.emd2(a, b, M, numItermax=2000000)
 
     return (ot_cost + essential_cost) ** (1./order)
