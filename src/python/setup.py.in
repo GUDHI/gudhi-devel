@@ -12,7 +12,6 @@
 from setuptools import setup, Extension, find_packages
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
-import sys
 import pybind11
 
 __author__ = "Vincent Rouvreau"
