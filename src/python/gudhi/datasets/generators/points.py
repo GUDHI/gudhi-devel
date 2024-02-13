@@ -17,7 +17,8 @@ def _generate_random_points_on_torus(n_samples, dim):
     # Generate random angles of size n_samples*dim
     alpha = 2*np.pi*np.random.rand(n_samples*dim)
 
-    # Based on angles, construct points of size n_samples*dim on a circle and reshape the result in a n_samples*2*dim array
+    # Based on angles, construct points of size n_samples*dim on a circle and reshape the result in a
+    # n_samples*2*dim array
     array_points = np.column_stack([np.cos(alpha), np.sin(alpha)]).reshape(-1, 2*dim)
 
     return array_points
@@ -47,7 +48,8 @@ def torus(n_samples, dim, sample='random'):
 
     If sample is 'random': (n_samples, 2*dim).
 
-    If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
+    If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect
+    'dim'th power.
     """
     if sample == 'random':
         # Generate points randomly
