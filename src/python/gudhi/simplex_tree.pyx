@@ -801,14 +801,11 @@ cdef class SimplexTree:
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
         """
-        # Backup old pointer
-        cdef Simplex_tree_python_interface* ptr = self.get_ptr()
+        if nb_iterations < 1:
+            return
         cdef int nb_iter = nb_iterations
         with nogil:
-            # New pointer is a new collapsed simplex tree
-            self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
-            # Delete old pointer
-            del ptr
+            self.get_ptr().collapse_edges(nb_iter)
 
     def __eq__(self, other:SimplexTree):
         """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
@@ -840,11 +837,9 @@ cdef class SimplexTree:
         cdef char[:] buffer = state
         cdef size_t buffer_size = state.shape[0]
         cdef char* buffer_start = &buffer[0]
-        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
-        cdef Simplex_tree_python_interface* ptr = self.get_ptr()
-        del ptr
-        self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
         with nogil:
+            # deserialization requires an empty SimplexTree
+            self.get_ptr().clear()
             # New pointer is a deserialized simplex tree
             self.get_ptr().deserialize(buffer_start, buffer_size)
 
