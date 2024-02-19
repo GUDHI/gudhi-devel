@@ -20,6 +20,7 @@
 
 using Gudhi::persistence_matrix::Column_types;
 using Gudhi::persistence_matrix::Matrix;
+using Gudhi::persistence_matrix::Column_indexation_types;
 
 using Z5 = Gudhi::persistence_matrix::Zp_field_element<5>;
 using Z2 = Gudhi::persistence_matrix::Z2_field_element;
@@ -34,13 +35,13 @@ struct Base_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = Column_indexation_types::CONTAINER;
 
 	static const bool has_matrix_maximal_dimension_access = false;
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
 	static const bool is_of_boundary_type = true;
-	static const bool is_indexed_by_position = true;
 	static const bool has_column_compression = false;
 
 	static const bool has_row_access = false;
@@ -63,13 +64,13 @@ struct Base_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = Column_indexation_types::CONTAINER;
 
 	static const bool has_matrix_maximal_dimension_access = false;
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
 	static const bool is_of_boundary_type = true;
-	static const bool is_indexed_by_position = true;
 	static const bool has_column_compression = false;
 
 	static const bool has_row_access = true;
@@ -92,13 +93,13 @@ struct Column_compression_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = Column_indexation_types::CONTAINER;
 
 	static const bool has_matrix_maximal_dimension_access = false;
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
 	static const bool is_of_boundary_type = true;
-	static const bool is_indexed_by_position = true;
 	static const bool has_map_column_container = false;
 	static const bool has_column_and_row_swaps = false;
 	static const bool has_removable_columns = false;
@@ -121,13 +122,13 @@ struct Column_compression_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = Column_indexation_types::CONTAINER;
 
 	static const bool has_matrix_maximal_dimension_access = false;
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
 	static const bool is_of_boundary_type = true;
-	static const bool is_indexed_by_position = true;
 	static const bool has_map_column_container = false;
 	static const bool has_column_and_row_swaps = false;
 	static const bool has_removable_columns = false;
@@ -149,6 +150,7 @@ struct Boundary_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool has_matrix_maximal_dimension_access = true;
 	static const bool has_column_pairings = true;
@@ -164,7 +166,6 @@ struct Boundary_options{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_column_and_row_swaps = swaps;
 };
 
@@ -178,6 +179,7 @@ struct Boundary_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool has_matrix_maximal_dimension_access = true;
 	static const bool has_column_pairings = true;
@@ -193,7 +195,6 @@ struct Boundary_options_with_row_access{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_column_and_row_swaps = swaps;
 };
 
@@ -207,6 +208,7 @@ struct RU_vine_options{
 
 	static const bool is_z2 = true;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool is_of_boundary_type = true;
 	static const bool has_column_compression = false;
@@ -223,7 +225,6 @@ struct RU_vine_options{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 	static const bool has_column_pairings = barcode;
 };
@@ -238,6 +239,7 @@ struct RU_rep_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool is_of_boundary_type = true;
 	static const bool has_column_compression = false;
@@ -254,7 +256,6 @@ struct RU_rep_options{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 	static const bool has_column_pairings = barcode;
 };
@@ -269,6 +270,7 @@ struct RU_vine_options_with_row_access{
 
 	static const bool is_z2 = true;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool is_of_boundary_type = true;
 	static const bool has_column_compression = false;
@@ -285,7 +287,6 @@ struct RU_vine_options_with_row_access{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 	static const bool has_column_pairings = barcode;
 };
@@ -300,6 +301,7 @@ struct RU_rep_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::CONTAINER : Column_indexation_types::IDENTIFIER;
 
 	static const bool is_of_boundary_type = true;
 	static const bool has_column_compression = false;
@@ -316,7 +318,6 @@ struct RU_rep_options_with_row_access{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 	static const bool has_column_pairings = barcode;
 };
@@ -331,6 +332,7 @@ struct Chain_barcode_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -348,7 +350,6 @@ struct Chain_barcode_options{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 
@@ -362,6 +363,7 @@ struct Chain_vine_options{
 
 	static const bool is_z2 = true;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -379,7 +381,6 @@ struct Chain_vine_options{
 	static const bool has_removable_columns = rem_col;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 
@@ -393,6 +394,7 @@ struct Chain_rep_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -410,7 +412,6 @@ struct Chain_rep_options{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 
@@ -424,6 +425,7 @@ struct Chain_barcode_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -441,7 +443,6 @@ struct Chain_barcode_options_with_row_access{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 
@@ -455,6 +456,7 @@ struct Chain_vine_options_with_row_access{
 
 	static const bool is_z2 = true;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -472,7 +474,6 @@ struct Chain_vine_options_with_row_access{
 	static const bool has_removable_columns = rem_col;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 
@@ -486,6 +487,7 @@ struct Chain_rep_options_with_row_access{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+	static const Column_indexation_types column_indexation_type = pos_idx ? Column_indexation_types::POSITION : Column_indexation_types::CONTAINER;
 
 	static const bool is_of_boundary_type = false;
 	static const bool has_column_compression = false;
@@ -503,7 +505,6 @@ struct Chain_rep_options_with_row_access{
 	static const bool has_removable_columns = true;
 
 	static const bool has_map_column_container = rem_col;
-	static const bool is_indexed_by_position = pos_idx;
 	static const bool has_matrix_maximal_dimension_access = dim;
 };
 

@@ -635,7 +635,7 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2){
 	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); ++i){
-		if constexpr (Matrix::Option_list::is_indexed_by_position) m1.insert_boundary(orderedBoundaries[i]);
+		if constexpr (is_indexed_by_position<Matrix>()) m1.insert_boundary(orderedBoundaries[i]);
 		else m1.insert_boundary(i, orderedBoundaries[i]);
 	}
 	BOOST_CHECK_EQUAL(m1.get_number_of_columns(), 7);
@@ -1326,7 +1326,7 @@ void test_ru_operation(){
 
 	test_content_equality(columns, m);
 	unsigned int i = 0;
-	if constexpr (Matrix::Option_list::is_indexed_by_position){
+	if constexpr (is_indexed_by_position<Matrix>()){
 		for (auto& b : uColumns){
 			test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
 		}
@@ -1344,7 +1344,7 @@ void test_ru_operation(){
 		uColumns[5] = {{3,2},{4,1},{5,4}};
 	}
 	test_content_equality(columns, m);
-	if constexpr (Matrix::Option_list::is_indexed_by_position){
+	if constexpr (is_indexed_by_position<Matrix>()){
 		i = 0;
 		for (auto& b : uColumns){
 			test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
@@ -1363,7 +1363,7 @@ void test_ru_operation(){
 		uColumns[5] = {{3,2},{4,2},{5,4}};
 	}
 	test_content_equality(columns, m);
-	if constexpr (Matrix::Option_list::is_indexed_by_position){
+	if constexpr (is_indexed_by_position<Matrix>()){
 		i = 0;
 		for (auto& b : uColumns){
 			test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
@@ -1380,7 +1380,7 @@ void test_ru_operation(){
 			uColumns[3] = {{4,2},{5,4}};
 		}
 		test_content_equality(columns, m);
-		if constexpr (Matrix::Option_list::is_indexed_by_position){
+		if constexpr (is_indexed_by_position<Matrix>()){
 			i = 0;
 			for (auto& b : uColumns){
 				test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
@@ -1396,7 +1396,7 @@ void test_ru_operation(){
 			uColumns[4] = {{3,3},{4,4},{5,1}};
 		}
 		test_content_equality(columns, m);
-		if constexpr (Matrix::Option_list::is_indexed_by_position){
+		if constexpr (is_indexed_by_position<Matrix>()){
 			i = 0;
 			for (auto& b : uColumns){
 				test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));

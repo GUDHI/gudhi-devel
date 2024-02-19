@@ -32,6 +32,12 @@ enum Column_types {
 	INTRUSIVE_SET
 };
 
+enum Column_indexation_types {
+	CONTAINER,
+	POSITION,
+	IDENTIFIER
+};
+
 template<bool is_z2_only = true, class Field_type = Z2_field_element, Column_types col_type = Column_types::INTRUSIVE_SET, bool parallelizable = false>
 struct Default_options{
 	using field_coeff_type = Field_type;
@@ -43,6 +49,8 @@ struct Default_options{
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
+
+	static const Column_indexation_types column_indexation_type = Column_indexation_types::CONTAINER;
 
 	static const bool is_separated_by_dimension = false;					//not implemented yet
 	static const bool is_parallelizable = parallelizable;					//not implemented yet
@@ -58,8 +66,6 @@ struct Default_options{
 	static const bool has_map_column_container = false;
 	static const bool has_removable_columns = false;
 	static const bool is_of_boundary_type = true;							//ignored if not at least one specialised method is enabled: has_column_pairings, has_vine_update, can_retrieve_representative_cycles
-	//rename to columns_are_indexed_by_position
-	static const bool is_indexed_by_position = is_of_boundary_type;			//useless if has_vine_update = false, as the two indexing strategies only differ when swaps occur.
 	static const bool has_column_compression = false;						//can be enabled only if no specialised method is enabled: has_column_pairings, has_vine_update, can_retrieve_representative_cycles, has_map_column_container
 	static const bool has_column_and_row_swaps = false;						//ignored if has_vine_update or can_retrieve_representative_cycles is true.
 };
@@ -70,7 +76,6 @@ struct Zigzag_options : Default_options<true, Z2_field_element, column_type, par
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = true;
 	static const bool is_of_boundary_type = false;
-	static const bool is_indexed_by_position = false;
 	static const bool has_map_column_container = true;
 	static const bool has_removable_rows = true;
 };

@@ -288,7 +288,7 @@ class Matrix {
         Options::column_type == Column_types::HEAP, 
         Heap_column_type,
         typename std::conditional<
-             Options::column_type == Column_types::LIST, 
+            Options::column_type == Column_types::LIST, 
             List_column_type,
             typename std::conditional<
                 Options::column_type == Column_types::SET, 
@@ -932,27 +932,36 @@ class Matrix {
   const cycle_type& get_representative_cycle(const Bar& bar);
 
  private:
-  using matrix_type = typename std::conditional<
-      isNonBasic,
-      typename std::conditional<
-          Options::is_of_boundary_type,
-          typename std::conditional<
-              Options::has_vine_update || Options::can_retrieve_representative_cycles,
-              typename std::conditional<Options::is_indexed_by_position, 
-                                        RU_matrix_type,
-                                        Id_to_index_overlay<RU_matrix_type, Matrix<Options> >
-                                       >::type,
-              typename std::conditional<Options::is_indexed_by_position, 
-                                        Boundary_matrix_type,
-                                        Id_to_index_overlay<Boundary_matrix_type, Matrix<Options>>
-                                       >::type
-          >::type,
-          typename std::conditional<Options::is_indexed_by_position,
-                                    Position_to_index_overlay<Chain_matrix_type, Matrix<Options>>,
-                                    Chain_matrix_type
-                                   >::type
-      >::type,
-      Base_matrix_type
+  using matrix_type = 
+    typename std::conditional<
+        isNonBasic,
+        typename std::conditional<
+            Options::is_of_boundary_type,
+            typename std::conditional<
+                Options::has_vine_update || Options::can_retrieve_representative_cycles,
+                typename std::conditional<
+                    Options::column_indexation_type == Column_indexation_types::CONTAINER || 
+                      Options::column_indexation_type == Column_indexation_types::POSITION,
+                    RU_matrix_type, Id_to_index_overlay<RU_matrix_type, Matrix<Options> >
+                >::type,
+                typename std::conditional<
+                    Options::column_indexation_type == Column_indexation_types::CONTAINER || 
+                      Options::column_indexation_type == Column_indexation_types::POSITION,
+                    Boundary_matrix_type,
+                    Id_to_index_overlay<Boundary_matrix_type, Matrix<Options> >
+                >::type
+            >::type,
+            typename std::conditional<
+                Options::column_indexation_type == Column_indexation_types::CONTAINER, 
+                Chain_matrix_type,
+                typename std::conditional<
+                    Options::column_indexation_type == Column_indexation_types::POSITION,
+                    Position_to_index_overlay<Chain_matrix_type, Matrix<Options> >,
+                    Id_to_index_overlay<Chain_matrix_type, Matrix<Options> >
+                >::type
+            >::type
+        >::type,
+        Base_matrix_type
     >::type;
 
   matrix_type matrix_;
@@ -1106,10 +1115,11 @@ inline const typename Matrix<Options>::Column_type& Matrix<Options>::get_column(
 
 template <class Options>
 inline const typename Matrix<Options>::Column_type& Matrix<Options>::get_column(index columnIndex, bool inR) {
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && 
                     Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for position indexed RU matrices.");
 
   return matrix_.get_column(columnIndex, inR);
@@ -1132,9 +1142,10 @@ inline const typename Matrix<Options>::Row_type& Matrix<Options>::get_row(id_ind
 template <class Options>
 inline const typename Matrix<Options>::Row_type& Matrix<Options>::get_row(id_index rowIndex, bool inR) {
   static_assert(Options::has_row_access, "'get_row' is not available for the chosen options.");
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for position indexed RU matrices.");
 
   return matrix_.get_row(rowIndex, inR);
@@ -1278,10 +1289,11 @@ inline void Matrix<Options>::zero_cell(index columnIndex, id_index rowIndex) {
 
 template <class Options>
 inline void Matrix<Options>::zero_cell(index columnIndex, id_index rowIndex, bool inR) {
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && 
                     Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for RU matrices.");
 
   return matrix_.zero_cell(columnIndex, rowIndex, inR);
@@ -1297,9 +1309,10 @@ inline void Matrix<Options>::zero_column(index columnIndex) {
 
 template <class Options>
 inline void Matrix<Options>::zero_column(index columnIndex, bool inR) {
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for RU matrices.");
 
   return matrix_.zero_column(columnIndex, inR);
@@ -1312,9 +1325,10 @@ inline bool Matrix<Options>::is_zero_cell(index columnIndex, id_index rowIndex) 
 
 template <class Options>
 inline bool Matrix<Options>::is_zero_cell(index columnIndex, id_index rowIndex, bool inR) const {
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for RU matrices.");
 
   return matrix_.is_zero_cell(columnIndex, rowIndex, inR);
@@ -1327,9 +1341,10 @@ inline bool Matrix<Options>::is_zero_column(index columnIndex) {
 
 template <class Options>
 inline bool Matrix<Options>::is_zero_column(index columnIndex, bool inR) {
+  //TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(isNonBasic && Options::is_of_boundary_type &&
                     (Options::has_vine_update || Options::can_retrieve_representative_cycles) &&
-                    Options::is_indexed_by_position,
+                    Options::column_indexation_type != Column_indexation_types::IDENTIFIER,
                 "Only enabled for RU matrices.");
 
   return matrix_.is_zero_column(columnIndex, inR);
@@ -1384,7 +1399,8 @@ inline const typename Matrix<Options>::barcode_type& Matrix<Options>::get_curren
 template <class Options>
 inline void Matrix<Options>::swap_columns(index columnIndex1, index columnIndex2) {
   static_assert((!isNonBasic && !Options::has_column_compression) ||
-                    (isNonBasic && Options::is_of_boundary_type && Options::is_indexed_by_position &&
+                    (isNonBasic && Options::is_of_boundary_type && 
+                     Options::column_indexation_type != Column_indexation_types::IDENTIFIER &&
                      !Options::has_vine_update && !Options::can_retrieve_representative_cycles),
                 "This method was not enabled.");
   return matrix_.swap_columns(columnIndex1, columnIndex2);
@@ -1393,7 +1409,8 @@ inline void Matrix<Options>::swap_columns(index columnIndex1, index columnIndex2
 template <class Options>
 inline void Matrix<Options>::swap_rows(index rowIndex1, index rowIndex2) {
   static_assert((!isNonBasic && !Options::has_column_compression) ||
-                    (isNonBasic && Options::is_of_boundary_type && Options::is_indexed_by_position &&
+                    (isNonBasic && Options::is_of_boundary_type && 
+                     Options::column_indexation_type != Column_indexation_types::IDENTIFIER &&
                      !Options::has_vine_update && !Options::can_retrieve_representative_cycles),
                 "This method was not enabled.");
   return matrix_.swap_rows(rowIndex1, rowIndex2);
@@ -1410,26 +1427,46 @@ inline void Matrix<Options>::swap_at_indices(index index1, index index2) {
 
 template <class Options>
 inline bool Matrix<Options>::vine_swap_with_z_eq_1_case(pos_index index) {
-  static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
+  static_assert(Options::has_vine_update, 
+                "This method was not enabled.");
+  static_assert(Options::column_indexation_type == Column_indexation_types::POSITION || 
+                (Options::is_of_boundary_type && 
+                Options::column_indexation_type == Column_indexation_types::CONTAINER), 
+                "This method was not enabled.");
   return matrix_.vine_swap_with_z_eq_1_case(index);
 }
 
 template <class Options>
 inline typename Matrix<Options>::index Matrix<Options>::vine_swap_with_z_eq_1_case(index columnIndex1,
                                                                                    index columnIndex2) {
-  static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
+  static_assert(Options::has_vine_update, 
+                "This method was not enabled.");
+  static_assert(Options::column_indexation_type == Column_indexation_types::IDENTIFIER || 
+                (!Options::is_of_boundary_type && 
+                Options::column_indexation_type == Column_indexation_types::CONTAINER), 
+                "This method was not enabled.");
   return matrix_.vine_swap_with_z_eq_1_case(columnIndex1, columnIndex2);
 }
 
 template <class Options>
 inline bool Matrix<Options>::vine_swap(pos_index index) {
-  static_assert(Options::has_vine_update && Options::is_indexed_by_position, "This method was not enabled.");
+  static_assert(Options::has_vine_update, 
+                "This method was not enabled.");
+  static_assert(Options::column_indexation_type == Column_indexation_types::POSITION || 
+                (Options::is_of_boundary_type && 
+                Options::column_indexation_type == Column_indexation_types::CONTAINER), 
+                "This method was not enabled.");
   return matrix_.vine_swap(index);
 }
 
 template <class Options>
 inline typename Matrix<Options>::index Matrix<Options>::vine_swap(index columnIndex1, index columnIndex2) {
-  static_assert(Options::has_vine_update && !Options::is_indexed_by_position, "This method was not enabled.");
+  static_assert(Options::has_vine_update, 
+                "This method was not enabled.");
+  static_assert(Options::column_indexation_type == Column_indexation_types::IDENTIFIER || 
+                (!Options::is_of_boundary_type && 
+                Options::column_indexation_type == Column_indexation_types::CONTAINER), 
+                "This method was not enabled.");
   return matrix_.vine_swap(columnIndex1, columnIndex2);
 }
 

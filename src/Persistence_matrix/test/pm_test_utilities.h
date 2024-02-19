@@ -15,11 +15,13 @@
 #include <set>
 
 #include <boost/test/test_tools.hpp>
+#include "gudhi/persistence_matrix_options.h"
 #include <gudhi/Persistence_matrix/columns/heap_column.h>
 #include <gudhi/matrix.h>
 
 using Gudhi::persistence_matrix::Heap_column;
 using Gudhi::persistence_matrix::Matrix;
+using Gudhi::persistence_matrix::Column_indexation_types;
 
 template<class Column>
 constexpr bool is_z2(){
@@ -44,6 +46,12 @@ constexpr bool is_RU(){
 template<class Matrix>
 constexpr bool is_Chain(){
 	return Matrix::isNonBasic && !Matrix::Option_list::is_of_boundary_type;
+}
+
+template<class Matrix>
+constexpr bool is_indexed_by_position(){
+	return Matrix::Option_list::column_indexation_type == Column_indexation_types::POSITION || 
+			(!is_Chain<Matrix>() && Matrix::Option_list::column_indexation_type == Column_indexation_types::CONTAINER);
 }
 
 template<class Column>
