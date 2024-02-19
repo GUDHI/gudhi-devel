@@ -32,16 +32,17 @@ template<class Master_matrix>
 class Chain_column_extra_properties{
 public:
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 
 	Chain_column_extra_properties() : pivot_(-1), pairedColumn_(-1) {}
-	Chain_column_extra_properties(int pivot) : pivot_(pivot), pairedColumn_(-1) {}
-	Chain_column_extra_properties(int pivot, int pair) : pivot_(pivot), pairedColumn_(pair) {}
+	Chain_column_extra_properties(id_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
+	Chain_column_extra_properties(id_index pivot, index pair) : pivot_(pivot), pairedColumn_(pair) {}
 	Chain_column_extra_properties(const Chain_column_extra_properties& col) 
 		: pivot_(col.pivot_), pairedColumn_(col.pairedColumn_) {}
 	Chain_column_extra_properties(Chain_column_extra_properties&& col) 
 		: pivot_(std::exchange(col.pivot_, -1)), pairedColumn_(std::exchange(col.pairedColumn_, -1)) {}
 
-	int get_paired_chain_index() const { return pairedColumn_; }
+	index get_paired_chain_index() const { return pairedColumn_; }
 	bool is_paired() const { return pairedColumn_ != -1; }
 	void assign_paired_chain(index other_col){ pairedColumn_ = other_col; }
 	void unassign_paired_chain() { pairedColumn_ = -1; };
@@ -58,12 +59,12 @@ public:
 	}
 
 protected:
-	int get_pivot() const { return pivot_; }
+	id_index get_pivot() const { return pivot_; }
 	void swap_pivots(Chain_column_extra_properties& other) { std::swap(pivot_, other.pivot_); }
 
 private:
-	int pivot_;			//simplex index associated to the chain
-	int pairedColumn_;	//represents the (F, G x H) partition of the columns
+	id_index pivot_;		//simplex index associated to the chain
+	index pairedColumn_;	//represents the (F, G x H) partition of the columns
 };
 
 } //namespace persistence_matrix

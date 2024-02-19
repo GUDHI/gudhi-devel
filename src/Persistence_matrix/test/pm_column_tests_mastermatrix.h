@@ -48,6 +48,8 @@ struct Column_mini_matrix
 	using Option_list = Options;
 	using Field_type = typename Options::field_coeff_type;
 	using index = typename Options::index_type;
+	using id_index = typename Options::id_type;
+	using pos_index = typename Options::pos_type;
 	using dimension_type = typename Options::dimension_type;
 
 	struct matrix_row_tag;
@@ -111,7 +113,7 @@ struct Column_mini_matrix
 
 	using row_container_type = typename std::conditional<
 											Options::has_removable_rows,
-											std::map<index,Row_type>,
+											std::map<id_index,Row_type>,
 											std::vector<Row_type>
 										>::type;
 
@@ -137,15 +139,17 @@ struct Column_mini_matrix
 
 	using boundary_type = typename std::conditional<
 									Options::is_z2,
-									std::initializer_list<index>,
-									std::initializer_list<std::pair<index,Field_type> >
+									std::initializer_list<id_index>,
+									std::initializer_list<std::pair<id_index,Field_type> >
 								>::type;
 };
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Base_col_options{
 	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
-	using index_type = unsigned int;
+	using id_type = unsigned int;
+	using index_type = id_type;
+	using pos_type = id_type;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = true;	//exists just for the tests
@@ -162,7 +166,9 @@ struct Base_col_options{
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Boundary_col_options{
 	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
-	using index_type = unsigned int;
+	using id_type = unsigned int;
+	using index_type = id_type;
+	using pos_type = id_type;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = false;	//exists just for the tests
@@ -179,7 +185,9 @@ struct Boundary_col_options{
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Chain_col_options{
 	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
-	using index_type = unsigned int;
+	using id_type = unsigned int;
+	using index_type = id_type;
+	using pos_type = id_type;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = false;	//exists just for the tests

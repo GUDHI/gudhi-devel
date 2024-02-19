@@ -1011,8 +1011,8 @@ void test_chain_row_removal(Matrix& m){
 	m.erase_row(6);	//not empty, so ignored
 	BOOST_CHECK_NO_THROW(m.get_row(6));
 
-	if constexpr (Matrix::Option_list::has_removable_columns){
-		m.remove_maximal_simplex(6);	//calls erase_row(6)
+	if constexpr (Matrix::Option_list::has_map_column_container || !Matrix::Option_list::has_vine_update){
+		m.remove_last();	//calls erase_row(6)
 		BOOST_CHECK_THROW(m.get_row(6), std::logic_error);
 	}
 }
@@ -1024,7 +1024,7 @@ void test_chain_row_removal(Matrix& m){
 	// 	void insert_column(const Container_type& column, int columnIndex);
 	// 	//*******************
 	// 	//base: (as direct link between column and row is not guaranteed)
-	// 	void erase_column(index columnIndex);
+	// 	void remove_column(index columnIndex);
 	// 	//*******************
 
 template<class Matrix>
@@ -1034,8 +1034,8 @@ void test_column_removal(){
 
 	test_content_equality(columns, m);
 
-	m.erase_column(2);
-	m.erase_column(4);
+	m.remove_column(2);
+	m.remove_column(4);
 	BOOST_CHECK_THROW(m.get_column(2), std::logic_error);
 	BOOST_CHECK_THROW(m.get_column(4), std::logic_error);
 
@@ -1050,8 +1050,6 @@ void test_column_removal(){
 	m.insert_column(witness_content<typename Matrix::Column_type>{}, 2);
 	BOOST_CHECK_NO_THROW(m.get_column(2));
 	BOOST_CHECK_THROW(m.get_column(4), std::logic_error);
-
-	BOOST_CHECK_THROW(m.insert_column(witness_content<typename Matrix::Column_type>{}, 2), std::invalid_argument);
 }
 
 	// //boundary: update barcode if already computed, does not verify if it really was maximal
@@ -1059,7 +1057,7 @@ void test_column_removal(){
 	// //chain
 	// //id to pos
 	// //pos to id
-	// void remove_maximal_simplex(index columnIndex);
+	// void remove_maximal_face(index columnIndex);
 	// //*******************
 
 template<class Matrix>
@@ -1069,16 +1067,16 @@ void test_boundary_maximal_simplex_removal(){
 
 	test_content_equality(columns, m);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-	BOOST_CHECK_EQUAL(m.get_current_barcode().front().death, 6);	//pairing always true for boundary for now (only thing differenciating it from base)
+	BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);	//pairing always true for boundary for now (only thing differenciating it from base)
 
-	m.remove_maximal_simplex(6);
+	m.remove_last();
 
 	columns.pop_back();
 	columns[5].clear();	//was reduced
 
 	test_content_equality(columns, m);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
-	BOOST_CHECK_EQUAL(m.get_current_barcode().front().death, -1);
+	BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, -1);
 }
 
 template<class Matrix>
@@ -1094,7 +1092,11 @@ void test_ru_maximal_simplex_removal(){
 		BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 	}
 
-	m.remove_maximal_simplex(6);
+	if constexpr (Matrix::Option_list::has_vine_update){
+		m.remove_maximal_face(6);
+	} else {
+		m.remove_last();
+	}
 
 	columns.pop_back();
 	test_content_equality(columns, m);
@@ -1114,7 +1116,11 @@ void test_chain_maximal_simplex_removal(Matrix& m){
 		BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 	}
 
-	m.remove_maximal_simplex(6);
+	if constexpr (Matrix::Option_list::has_vine_update && Matrix::Option_list::has_map_column_container && Matrix::Option_list::has_column_pairings){
+		m.remove_maximal_face(6);
+	} else {
+		m.remove_last();
+	}
 
 	columns.pop_back();
 	test_content_equality(columns, m);
@@ -1148,8 +1154,8 @@ void test_maximal_dimension(Matrix& m){
 
 	BOOST_CHECK_EQUAL(m.get_max_dimension(), 5);
 
-	if constexpr (Matrix::Option_list::has_removable_columns){
-		m.remove_maximal_simplex(7);
+	if constexpr (Matrix::Option_list::has_vine_update && (Matrix::Option_list::is_of_boundary_type || (Matrix::Option_list::has_map_column_container && Matrix::Option_list::has_column_pairings))){
+		m.remove_maximal_face(7);
 		BOOST_CHECK_EQUAL(m.get_max_dimension(), 3);
 	}
 }

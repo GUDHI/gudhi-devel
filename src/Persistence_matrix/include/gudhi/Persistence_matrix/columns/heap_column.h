@@ -36,6 +36,7 @@ public:
 								  typename Master_matrix::Field_type
 							   >::type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
 	using Cell = typename Master_matrix::Cell_type;
@@ -64,7 +65,7 @@ public:
 	Heap_column(const Heap_column& column, index columnIndex, Row_container_type &rowContainer);
 
 	std::vector<Field_element_type> get_content(int columnLength = -1) const;
-	bool is_non_zero(index rowIndex) const;
+	bool is_non_zero(id_index rowIndex) const;
 	bool is_empty();
 	std::size_t size() const;	//size of the underlying vector, not the number of non zero row cells.
 
@@ -73,12 +74,12 @@ public:
 	template<class Map_type>
 	void reorder(const Map_type& valueMap);	//used for lazy row swaps
 	void clear();
-	void clear(index rowIndex);
+	void clear(id_index rowIndex);
 	//****************
 
 	//****************
 	//only for chain and boundary
-	int get_pivot();
+	id_index get_pivot();
 	Field_element_type get_pivot_value();
 	//****************
 
@@ -188,9 +189,9 @@ inline Heap_column<Master_matrix>::Heap_column(const Container_type &nonZeroRowI
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			column_[i++] = cellPool_.construct(id);
 		}
 	} else {
@@ -216,9 +217,9 @@ inline Heap_column<Master_matrix>::Heap_column(
 	  column_(nonZeroRowIndices.size(), nullptr), 
 	  insertsSinceLastPrune_(0)
 {
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			column_[i++] = cellPool_.construct(id);
 		}
 	} else {
@@ -239,7 +240,7 @@ inline Heap_column<Master_matrix>::Heap_column(const Heap_column &column)
 	static_assert(!Master_matrix::Option_list::has_row_access,
 			"Simple copy constructor not available when row access option enabled. Please specify the new column index and the row container.");
 
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : column.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			column_[i++] = cellPool_.construct(cell->get_row_index());
@@ -276,9 +277,9 @@ inline Heap_column<Master_matrix>::Heap_column(
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			column_[i++] = cellPool_.construct(id);
 		}
 	} else {
@@ -304,9 +305,9 @@ inline Heap_column<Master_matrix>::Heap_column(
 	  column_(nonZeroRowIndices.size(), nullptr), 
 	  insertsSinceLastPrune_(0)
 {
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			column_[i++] = cellPool_.construct(id);
 		}
 	} else {
@@ -326,7 +327,7 @@ inline Heap_column<Master_matrix>::Heap_column(
 	  column_(column.column_.size(), nullptr), 
 	  insertsSinceLastPrune_(0)
 {
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : column.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			column_[i++] = cellPool_.construct(cell->get_row_index());
@@ -355,7 +356,7 @@ Heap_column<Master_matrix>::get_content(int columnLength) const
 
 	std::vector<Field_element_type> container(columnLength, 0);
 	for (auto it = column_.begin(); it != column_.end(); ++it){
-		if ((*it)->get_row_index() < static_cast<index>(columnLength)){
+		if ((*it)->get_row_index() < static_cast<id_index>(columnLength)){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				container[(*it)->get_row_index()] = !container[(*it)->get_row_index()];
 			} else {
@@ -372,7 +373,7 @@ Heap_column<Master_matrix>::get_content(int columnLength) const
 }
 
 template<class Master_matrix>
-inline bool Heap_column<Master_matrix>::is_non_zero(index rowIndex) const
+inline bool Heap_column<Master_matrix>::is_non_zero(id_index rowIndex) const
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
 		bool c = false;
@@ -441,7 +442,7 @@ inline void Heap_column<Master_matrix>::clear()
 }
 
 template<class Master_matrix>
-inline void Heap_column<Master_matrix>::clear(index rowIndex)
+inline void Heap_column<Master_matrix>::clear(id_index rowIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");
@@ -454,7 +455,7 @@ inline void Heap_column<Master_matrix>::clear(index rowIndex)
 }
 
 template<class Master_matrix>
-inline int Heap_column<Master_matrix>::get_pivot()
+inline typename Heap_column<Master_matrix>::id_index Heap_column<Master_matrix>::get_pivot()
 {
 	static_assert(Master_matrix::isNonBasic, "Method not available for base columns.");	//could technically be, but is the notion usefull then?
 
@@ -491,7 +492,7 @@ inline typename Heap_column<Master_matrix>::Field_element_type Heap_column<Maste
 			Field_element_type sum(0);
 			if (chain_opt::get_pivot() == -1) return sum;
 			for (const Cell* cell : column_){
-				if (cell->get_row_index() == static_cast<unsigned int>(chain_opt::get_pivot())) sum += cell->get_element();
+				if (cell->get_row_index() == chain_opt::get_pivot()) sum += cell->get_element();
 			}
 			return sum;	//should not be 0 if properly used.
 		}
@@ -575,7 +576,10 @@ Heap_column<Master_matrix>::operator+=(Heap_column &column)
 {
 	if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 		//assumes that the addition never zeros out this column. 
-		if (_add(column)) chain_opt::swap_pivots(column);
+		if (_add(column)){
+			chain_opt::swap_pivots(column);
+			dim_opt::swap_dimension(column);
+		}
 	} else {
 		_add(column);
 	}
@@ -650,12 +654,18 @@ Heap_column<Master_matrix>::multiply_and_add(const Field_element_type& val, Heap
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)) {
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			} else {
 				throw std::invalid_argument("A chain column should not be multiplied by 0.");
 			}
 		} else {
-			if (_multiply_and_add(val, column)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(val, column)) {
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -702,10 +712,16 @@ Heap_column<Master_matrix>::multiply_and_add(Heap_column& column, const Field_el
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)){
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			}
 		} else {
-			if (_multiply_and_add(column, val)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(column, val)){
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -735,7 +751,7 @@ Heap_column<Master_matrix>::operator=(const Heap_column& other)
 	}
 	
 	column_.resize(other.column_.size(), nullptr);
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : other.column_){
 		if (column_[i] != nullptr){
 			cellPool_.destroy(column_[i]);
@@ -812,7 +828,7 @@ inline bool Heap_column<Master_matrix>::_add(const Cell_range &column)
 	if (column.begin() == column.end()) return false;
 	if (column_.empty()){	//chain should never enter here.
 		column_.resize(column.size());
-		unsigned int i = 0;
+		index i = 0;
 		for (const Cell& cell : column){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				column_[i++] = cellPool_.construct(cell.get_row_index());
@@ -833,12 +849,12 @@ inline bool Heap_column<Master_matrix>::_add(const Cell_range &column)
 		++insertsSinceLastPrune_;
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-				if (static_cast<int>(cell.get_row_index()) == chain_opt::get_pivot()) pivotVal = !pivotVal;
+				if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal = !pivotVal;
 			}
 			column_.push_back(cellPool_.construct(cell.get_row_index()));
 		} else {
 			if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-				if (static_cast<int>(cell.get_row_index()) == chain_opt::get_pivot()) pivotVal += cell.get_element();
+				if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal += cell.get_element();
 			}
 			column_.push_back(cellPool_.construct(cell.get_element(), cell.get_row_index()));
 		}
@@ -864,7 +880,7 @@ inline bool Heap_column<Master_matrix>::_multiply_and_add(const Field_element_ty
 	}
 	if (column_.empty()){	//chain should never enter here.
 		column_.resize(column.size());
-		unsigned int i = 0;
+		index i = 0;
 		for (const Cell& cell : column){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				column_[i++] = cellPool_.construct(cell.get_row_index());
@@ -881,14 +897,14 @@ inline bool Heap_column<Master_matrix>::_multiply_and_add(const Field_element_ty
 	for (Cell* cell : column_){
 		cell->get_element() *= val;
 		if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-			if (static_cast<int>(cell->get_row_index()) == chain_opt::get_pivot()) pivotVal += cell->get_element();
+			if (cell->get_row_index() == chain_opt::get_pivot()) pivotVal += cell->get_element();
 		}
 	}
 
 	for (const Cell& cell : column) {
 		++insertsSinceLastPrune_;
 		if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-			if (static_cast<int>(cell.get_row_index()) == chain_opt::get_pivot()) pivotVal += cell.get_element();
+			if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal += cell.get_element();
 		}
 		column_.push_back(cellPool_.construct(cell.get_element(), cell.get_row_index()));
 		std::push_heap(column_.begin(), column_.end(), cellPointerComp_);
@@ -908,7 +924,7 @@ inline bool Heap_column<Master_matrix>::_multiply_and_add(const Cell_range& colu
 	}
 	if (column_.empty()){	//chain should never enter here.
 		column_.resize(column.size());
-		unsigned int i = 0;
+		index i = 0;
 		for (const Cell& cell : column){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				column_[i++] = cellPool_.construct(cell.get_row_index());
@@ -928,7 +944,7 @@ inline bool Heap_column<Master_matrix>::_multiply_and_add(const Cell_range& colu
 	for (const Cell& cell : column) {
 		++insertsSinceLastPrune_;
 		if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-			if (static_cast<int>(cell.get_row_index()) == chain_opt::get_pivot()) pivotVal += (cell.get_element() * val);
+			if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal += (cell.get_element() * val);
 		}
 		column_.push_back(cellPool_.construct(cell.get_element() * val, cell.get_row_index()));
 		std::push_heap(column_.begin(), column_.end(), cellPointerComp_);

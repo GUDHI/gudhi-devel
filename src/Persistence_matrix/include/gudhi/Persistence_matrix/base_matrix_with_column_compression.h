@@ -106,7 +106,7 @@ public:
 	const Row_type& get_row(index rowIndex) const;
 	void erase_row(index rowIndex);		//assumes the row is empty, just thought as index a cleanup
 
-	unsigned int get_number_of_columns() const;
+	index get_number_of_columns() const;
 
 	template<class Cell_range_or_column_index>
 	void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
@@ -165,7 +165,7 @@ private:
 	boost::disjoint_sets_with_storage<> columnClasses_;
 	// Union_find columnClasses_;
 	std::vector<Column_type*> repToColumn_;
-	unsigned int nextColumnIndex_;
+	index nextColumnIndex_;
 	inline static Simple_object_pool<Column_type> columnPool_;
 	inline static const Column_type empty_column_;
 
@@ -257,7 +257,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
 
 	if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows){
 		if (boundary.begin() != boundary.end()){
-			unsigned int pivot;
+			index pivot;
 			if constexpr (Master_matrix::Option_list::is_z2){
 				pivot = *std::prev(boundary.end());
 			} else {
@@ -299,11 +299,11 @@ Base_matrix_with_column_compression<Master_matrix>::get_column(index columnIndex
 
 template<class Master_matrix>
 inline const typename Base_matrix_with_column_compression<Master_matrix>::Row_type&
-Base_matrix_with_column_compression<Master_matrix>::get_row(index columnIndex) const
+Base_matrix_with_column_compression<Master_matrix>::get_row(index rowIndex) const
 {
 	static_assert(Master_matrix::Option_list::has_row_access, "Row access has to be enabled for this method.");
 
-	return ra_opt::get_row(columnIndex);
+	return ra_opt::get_row(rowIndex);
 }
 
 template<class Master_matrix>
@@ -315,7 +315,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::erase_row(index 
 }
 
 template<class Master_matrix>
-inline unsigned int Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() const
+inline typename Base_matrix_with_column_compression<Master_matrix>::index Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() const
 {
 	return nextColumnIndex_;
 }
@@ -427,7 +427,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
 			else std::cout << e << " ";
 		}
 		std::cout << "(";
-		for (unsigned int i = 0; i < nextColumnIndex_; ++i){
+		for (index i = 0; i < nextColumnIndex_; ++i){
 			// if (columnClasses_.find(i) == col.get_rep())
 			if (columnClasses_.find_set(i) == col.get_rep())
 				std::cout << i << " ";
@@ -436,7 +436,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
 	}
 	std::cout << "\n";
 	std::cout << "Row Matrix:\n";
-	for (unsigned int i = 0; i < ra_opt::rows_.size(); ++i){
+	for (index i = 0; i < ra_opt::rows_.size(); ++i){
 		const Row_type& row = ra_opt::rows_[i];
 		for (const auto &cell : row){
 			std::cout << cell.get_column_index() << " ";

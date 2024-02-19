@@ -111,27 +111,28 @@ private:
 
 public:
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 	using Field_element_type = typename Master_matrix::Field_type;
 
 	// using base_hook_matrix_row = typename Master_matrix::row_hook_type;	//temporary during factorization process
 
 	Cell(){};
-	Cell(index rowIndex) 
+	Cell(id_index rowIndex) 
 		: col_opt(),
 		  field_opt(),
 		  rowIndex_(rowIndex)
 	{};
-	Cell(index columnIndex, index rowIndex) 
+	Cell(index columnIndex, id_index rowIndex) 
 		: col_opt(columnIndex),
 		  field_opt(),
 		  rowIndex_(rowIndex)
 	{};
-	Cell(Field_element_type element, index rowIndex) 
+	Cell(Field_element_type element, id_index rowIndex) 
 		: col_opt(),
 		  field_opt(element),
 		  rowIndex_(rowIndex)
 	{};
-	Cell(Field_element_type element, index columnIndex, index rowIndex) 
+	Cell(Field_element_type element, index columnIndex, id_index rowIndex) 
 		: col_opt(columnIndex),
 		  field_opt(element),
 		  rowIndex_(rowIndex)
@@ -147,10 +148,10 @@ public:
 		  rowIndex_(std::exchange(cell.rowIndex_, 0))
 	{};
 
-	index get_row_index() const{
+	id_index get_row_index() const{
 		return rowIndex_;
 	};
-	void set_row_index(const index &rowIndex){
+	void set_row_index(id_index rowIndex){
 		rowIndex_ = rowIndex;
 	};
 
@@ -168,10 +169,20 @@ public:
 		return c1.get_row_index() == c2.get_row_index();
 	}
 
-	operator unsigned int() const{
+	// operator unsigned int() const{
+	// 	return rowIndex_;
+	// }
+	// operator std::pair<unsigned int,Field_element_type>() const{
+	// 	if constexpr (Master_matrix::Option_list::is_z2){
+	// 		return {rowIndex_, 1};
+	// 	} else {
+	// 		return {rowIndex_, field_opt::element_};
+	// 	}
+	// }
+	operator id_index() const{
 		return rowIndex_;
 	}
-	operator std::pair<unsigned int,Field_element_type>() const{
+	operator std::pair<id_index,Field_element_type>() const{
 		if constexpr (Master_matrix::Option_list::is_z2){
 			return {rowIndex_, 1};
 		} else {
@@ -180,7 +191,7 @@ public:
 	}
 
 private:
-	index rowIndex_;
+	id_index rowIndex_;
 };
 
 } //namespace persistence_matrix

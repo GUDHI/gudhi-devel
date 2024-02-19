@@ -30,11 +30,11 @@ template<class Master_matrix>
 class Chain_representative_cycles
 {
 public:
-	using index = typename Master_matrix::index;
+	// using index = typename Master_matrix::index;
 	using Bar = typename Master_matrix::Bar;
-	using cycle_type = std::vector<index>;	//TODO: add coefficients
+	using cycle_type = typename Master_matrix::cycle_type;	//TODO: add coefficients
 	using matrix_type = typename Master_matrix::column_container_type;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	// using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 
 	Chain_representative_cycles();
 	Chain_representative_cycles(const Chain_representative_cycles& matrixToCopy);
@@ -56,7 +56,7 @@ private:
 	using chain_matrix = typename Master_matrix::Chain_matrix_type;
 
 	std::vector<cycle_type> representativeCycles_;
-	std::vector<int> birthToCycle_;
+	std::vector<typename Master_matrix::index> birthToCycle_;
 
 	constexpr chain_matrix* _matrix() { return static_cast<chain_matrix*>(this); }
 	constexpr const chain_matrix* _matrix() const { return static_cast<const chain_matrix*>(this); }
@@ -85,9 +85,11 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 	birthToCycle_.resize(_matrix()->get_number_of_columns(), -1);
 	representativeCycles_.clear();
 
-	for (index i = 0; i < _matrix()->get_number_of_columns(); i++){
+	//assumes that PosIdx == IDIdx, ie pivot == birth index... which is not true with vineyards 
+	//TODO: with vineyard, there is a IDIdx --> PosIdx map stored. somehow get access to it here
+	for (typename Master_matrix::id_index i = 0; i < _matrix()->get_number_of_columns(); i++){
 		auto &col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-		if (!col.is_paired() || static_cast<int>(i) < col.get_paired_chain_index()){
+		if (!col.is_paired() || i < col.get_paired_chain_index()){
 			cycle_type cycle;
 			for (auto& c : col){
 				cycle.push_back(c.get_row_index());

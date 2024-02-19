@@ -37,6 +37,7 @@ public:
 								  typename Master_matrix::Field_type
 							   >::type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
 	using Cell = typename Master_matrix::Cell_type;
@@ -62,7 +63,7 @@ public:
 	~Naive_vector_column();
 
 	std::vector<Field_element_type> get_content(int columnLength = -1) const;
-	bool is_non_zero(index rowIndex) const;
+	bool is_non_zero(id_index rowIndex) const;
 	bool is_empty() const;
 	std::size_t size() const;
 
@@ -71,12 +72,12 @@ public:
 	template<class Map_type>
 	void reorder(const Map_type& valueMap);	//used for lazy row swaps
 	void clear();
-	void clear(index rowIndex);
+	void clear(id_index rowIndex);
 	//****************
 
 	//****************
 	//only for chain and boundary
-	int get_pivot() const;
+	id_index get_pivot() const;
 	Field_element_type get_pivot_value() const;
 	//****************
 
@@ -169,10 +170,10 @@ protected:
 	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(Cell* cell);
-	void _insert_cell(const Field_element_type& value, index rowIndex, Column_type& column);
-	void _insert_cell(index rowIndex, Column_type& column);
-	void _update_cell(const Field_element_type& value, index rowIndex, index position);
-	void _update_cell(index rowIndex, index position);
+	void _insert_cell(const Field_element_type& value, id_index rowIndex, Column_type& column);
+	void _insert_cell(id_index rowIndex, Column_type& column);
+	void _update_cell(const Field_element_type& value, id_index rowIndex, index position);
+	void _update_cell(id_index rowIndex, index position);
 	template<class Cell_range>
 	bool _add(const Cell_range& column);
 	template<class Cell_range>
@@ -201,9 +202,9 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(const Container_t
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_update_cell(id, i++);
 		}
 	} else {
@@ -231,9 +232,9 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_update_cell(id, i++);
 		}
 	} else {
@@ -258,9 +259,9 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(
 		}()), 
 	  column_(nonZeroRowIndices.size(), nullptr)
 {
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_update_cell(id, i++);
 		}
 	} else {
@@ -285,9 +286,9 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(
 		}()), 
 	  column_(nonZeroRowIndices.size(), nullptr)
 {
-	unsigned int i = 0;
+	index i = 0;
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_update_cell(id, i++);
 		}
 	} else {
@@ -307,7 +308,7 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(const Naive_vecto
 	static_assert(!Master_matrix::Option_list::has_row_access,
 			"Simple copy constructor not available when row access option enabled. Please specify the new column index and the row container.");
 
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : column.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			_update_cell(cell->get_row_index(), i++);
@@ -326,7 +327,7 @@ inline Naive_vector_column<Master_matrix>::Naive_vector_column(
 	  chain_opt(static_cast<const chain_opt&>(column)),
 	  column_(column.column_.size(), nullptr)
 {
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : column.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			_update_cell(cell->get_row_index(), i++);
@@ -360,7 +361,7 @@ Naive_vector_column<Master_matrix>::get_content(int columnLength) const
 	else if (columnLength < 0) return std::vector<Field_element_type>();
 
 	std::vector<Field_element_type> container(columnLength, 0);
-	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<index>(columnLength); ++it){
+	for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<id_index>(columnLength); ++it){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			container[(*it)->get_row_index()] = 1;
 		} else {
@@ -371,7 +372,7 @@ Naive_vector_column<Master_matrix>::get_content(int columnLength) const
 }
 
 template<class Master_matrix>
-inline bool Naive_vector_column<Master_matrix>::is_non_zero(index rowIndex) const
+inline bool Naive_vector_column<Master_matrix>::is_non_zero(id_index rowIndex) const
 {
 	return std::binary_search(column_.begin(), column_.end(), 
 							  cellPool_.construct(rowIndex), 	//cell gets destroyed with the pool at the end, but I don't know if that's a good solution
@@ -430,7 +431,7 @@ inline void Naive_vector_column<Master_matrix>::clear()
 }
 
 template<class Master_matrix>
-inline void Naive_vector_column<Master_matrix>::clear(index rowIndex)
+inline void Naive_vector_column<Master_matrix>::clear(id_index rowIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");
@@ -444,13 +445,12 @@ inline void Naive_vector_column<Master_matrix>::clear(index rowIndex)
 }
 
 template<class Master_matrix>
-inline int Naive_vector_column<Master_matrix>::get_pivot() const
+inline typename Naive_vector_column<Master_matrix>::id_index Naive_vector_column<Master_matrix>::get_pivot() const
 {
 	static_assert(Master_matrix::isNonBasic, "Method not available for base columns.");	//could technically be, but is the notion usefull then?
 
 	if constexpr (Master_matrix::Option_list::is_of_boundary_type){
-		if (column_.empty()) return -1;
-		return column_.back()->get_row_index();
+		return column_.empty() ? -1 : column_.back()->get_row_index();
 	} else {
 		return chain_opt::get_pivot();
 	}
@@ -465,12 +465,11 @@ inline typename Naive_vector_column<Master_matrix>::Field_element_type Naive_vec
 		return 1;
 	} else {
 		if constexpr (Master_matrix::Option_list::is_of_boundary_type){
-			if (column_.empty()) return 0;
-			return column_.back()->get_element();
+			return column_.empty() ? Field_element_type() : column_.back()->get_element();
 		} else {
 			if (chain_opt::get_pivot() == -1) return Field_element_type();
 			for (const Cell* cell : column_){
-				if (cell->get_row_index() == static_cast<unsigned int>(chain_opt::get_pivot())) return cell->get_element();
+				if (cell->get_row_index() == chain_opt::get_pivot()) return cell->get_element();
 			}
 			return Field_element_type();	//should never happen if chain column is used properly
 		}
@@ -554,7 +553,10 @@ Naive_vector_column<Master_matrix>::operator+=(Naive_vector_column &column)
 {
 	if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 		//assumes that the addition never zeros out this column. 
-		if (_add(column)) chain_opt::swap_pivots(column);
+		if (_add(column)){
+			chain_opt::swap_pivots(column);
+			dim_opt::swap_dimension(column);
+		}
 	} else {
 		_add(column);
 	}
@@ -631,12 +633,18 @@ Naive_vector_column<Master_matrix>::multiply_and_add(const Field_element_type& v
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)){
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			} else {
 				throw std::invalid_argument("A chain column should not be multiplied by 0.");
 			}
 		} else {
-			if (_multiply_and_add(val, column)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(val, column)){
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -683,10 +691,16 @@ Naive_vector_column<Master_matrix>::multiply_and_add(Naive_vector_column& column
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)){
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			}
 		} else {
-			if (_multiply_and_add(column, val)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(column, val)){
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -717,7 +731,7 @@ Naive_vector_column<Master_matrix>::operator=(const Naive_vector_column& other)
 	}
 	
 	column_.resize(other.column_.size(), nullptr);
-	unsigned int i = 0;
+	index i = 0;
 	for (const Cell* cell : other.column_){
 		if (column_[i] != nullptr){
 			if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(column_[i]);
@@ -742,7 +756,7 @@ inline void Naive_vector_column<Master_matrix>::_delete_cell(Cell* cell)
 
 template<class Master_matrix>
 inline void Naive_vector_column<Master_matrix>::_insert_cell(
-		const Field_element_type &value, index rowIndex, Column_type &column)
+		const Field_element_type &value, id_index rowIndex, Column_type &column)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(value, ra_opt::columnIndex_, rowIndex);
@@ -755,7 +769,7 @@ inline void Naive_vector_column<Master_matrix>::_insert_cell(
 
 template<class Master_matrix>
 inline void Naive_vector_column<Master_matrix>::_insert_cell(
-		index rowIndex, Column_type &column)
+		id_index rowIndex, Column_type &column)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(ra_opt::columnIndex_, rowIndex);
@@ -768,7 +782,7 @@ inline void Naive_vector_column<Master_matrix>::_insert_cell(
 
 template<class Master_matrix>
 inline void Naive_vector_column<Master_matrix>::_update_cell(
-		const Field_element_type &value, index rowIndex, index position)
+		const Field_element_type &value, id_index rowIndex, index position)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(value, ra_opt::columnIndex_, rowIndex);
@@ -781,7 +795,7 @@ inline void Naive_vector_column<Master_matrix>::_update_cell(
 
 template<class Master_matrix>
 inline void Naive_vector_column<Master_matrix>::_update_cell(
-		index rowIndex, index position)
+		id_index rowIndex, index position)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(ra_opt::columnIndex_, rowIndex);
@@ -799,7 +813,7 @@ inline bool Naive_vector_column<Master_matrix>::_add(const Cell_range &column)
 	if (column.begin() == column.end()) return false;
 	if (column_.empty()){	//chain should never enter here.
 		column_.resize(column.size());
-		unsigned int i = 0;
+		index i = 0;
 		for (const Cell& cell : column){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				_update_cell(cell.get_row_index(), i++);
@@ -833,14 +847,14 @@ inline bool Naive_vector_column<Master_matrix>::_add(const Cell_range &column)
 		} else {
 			if constexpr (Master_matrix::Option_list::is_z2){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(cellTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(cellTarget);
 			} else {
 				cellTarget->get_element() += cellSource.get_element();
 				if (cellTarget->get_element() == Field_element_type::get_additive_identity()){
 					if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-						if (static_cast<int>(cellTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+						if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 					}
 					_delete_cell(cellTarget);
 				} else {
@@ -889,7 +903,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_and_add(const Field_el
 	}
 	if (column_.empty()){	//chain should never enter here.
 		column_.resize(column.size());
-		unsigned int i = 0;
+		index i = 0;
 		for (const Cell& cell : column){
 			if constexpr (Master_matrix::Option_list::is_z2){
 				_update_cell(cell.get_row_index(), i++);
@@ -923,7 +937,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_and_add(const Field_el
 			cellTarget->get_element() += cellSource.get_element();
 			if (cellTarget->get_element() == Field_element_type::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(cellTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(cellTarget);
 			} else {
@@ -982,7 +996,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_and_add(const Cell_ran
 			cellTarget->get_element() += (cellSource.get_element() * val);
 			if (cellTarget->get_element() == Field_element_type::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(cellTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(cellTarget);
 			} else {

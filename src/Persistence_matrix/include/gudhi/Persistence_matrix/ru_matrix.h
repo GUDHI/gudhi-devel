@@ -30,6 +30,8 @@ public:
 	using Row_type = typename Master_matrix::Row_type;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
+	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
 	RU_matrix();
@@ -41,14 +43,17 @@ public:
 
 	template<class Boundary_type = boundary_type>
 	void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
+	template<class Boundary_type = boundary_type>
+	void insert_boundary(id_index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex, bool inR = true);
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
-	Row_type& get_row(index rowIndex, bool inR = true);
-	void erase_row(index rowIndex);	//only erase row in R, as U will never have an empty row
-	void remove_maximal_simplex(index columnIndex);
+	Row_type& get_row(id_index rowIndex, bool inR = true);
+	void erase_row(id_index rowIndex);	//only erase row in R, as U will never have an empty row
+	void remove_maximal_face(index columnIndex);
+	void remove_last();
 
 	dimension_type get_max_dimension() const;
-	unsigned int get_number_of_columns() const;
+	index get_number_of_columns() const;
 
 	dimension_type get_column_dimension(index columnIndex) const;
 
@@ -58,14 +63,14 @@ public:
 	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);	//do not call with vine updates
 	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);	//do not call with vine updates
 
-	void zero_cell(index columnIndex, index rowIndex, bool inR = true);
+	void zero_cell(index columnIndex, id_index rowIndex, bool inR = true);
 	void zero_column(index columnIndex, bool inR = true);
 	//=================================================================
-	bool is_zero_cell(index columnIndex, index rowIndex, bool inR = true) const;
+	bool is_zero_cell(index columnIndex, id_index rowIndex, bool inR = true) const;
 	bool is_zero_column(index columnIndex, bool inR = true);
 
-	index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
-	int get_pivot(index columnIndex);
+	index get_column_with_pivot(id_index simplexIndex) const;	//assumes that pivot exists
+	id_index get_pivot(index columnIndex);
 
 	RU_matrix& operator=(RU_matrix other);
 	friend void swap(RU_matrix& matrix1, RU_matrix& matrix2){
@@ -78,7 +83,7 @@ public:
 		swap(matrix1.reducedMatrixR_, matrix2.reducedMatrixR_);
 		swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
 		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
-		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+		std::swap(matrix1.nextEventIndex_, matrix2.nextEventIndex_);
 	}
 
 	void print();  //for debug
@@ -87,7 +92,7 @@ private:
 	using swap_opt = typename Master_matrix::RU_vine_swap_option;
 	using pair_opt = typename Master_matrix::RU_pairing_option;
 	using rep_opt = typename Master_matrix::RU_representative_cycles_option;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using barcode_type = typename Master_matrix::barcode_type;
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 	using r_matrix_type = typename Master_matrix::Boundary_matrix_type;
@@ -99,11 +104,13 @@ private:
 	r_matrix_type reducedMatrixR_;
 	u_matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
-	index nextInsertIndex_;
+	pos_index nextEventIndex_;
 
 	void _initialize_U();
 	void _reduce();
-	void _reduce_last_column();
+	void _reduce_last_column(index lastIndex);
+	void _update_barcode(pos_index birth, pos_index death);
+	void _add_bar(dimension_type dim, pos_index birth);
 
 	constexpr barcode_type& _barcode();
 	constexpr bar_dictionnary_type& _indexToBar();
@@ -114,7 +121,7 @@ inline RU_matrix<Master_matrix>::RU_matrix()
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  nextInsertIndex_(0)
+	  nextEventIndex_(0)
 {}
 
 template<class Master_matrix>
@@ -125,9 +132,9 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &ord
 	  rep_opt(),
 	  reducedMatrixR_(orderedBoundaries),
 	  mirrorMatrixU_(orderedBoundaries.size()),
-	  nextInsertIndex_(orderedBoundaries.size())
+	  nextEventIndex_(orderedBoundaries.size())
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(orderedBoundaries.size());
 	} else {
 		pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
@@ -144,12 +151,15 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
 	  rep_opt(),
 	  reducedMatrixR_(numberOfColumns),
 	  mirrorMatrixU_(numberOfColumns),
-	  nextInsertIndex_(0)
+	  nextEventIndex_(0)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(numberOfColumns);
 	} else {
 		pivotToColumnIndex_.resize(numberOfColumns, -1);
+	}
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		_indexToBar().reserve(numberOfColumns);
 	}
 }
 
@@ -161,7 +171,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy)
 	  reducedMatrixR_(matrixToCopy.reducedMatrixR_),
 	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
-	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
+	  nextEventIndex_(matrixToCopy.nextEventIndex_)
 {}
 
 template<class Master_matrix>
@@ -172,28 +182,34 @@ inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix &&other) noexcept
 	  reducedMatrixR_(std::move(other.reducedMatrixR_)),
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
+	  nextEventIndex_(std::exchange(other.nextEventIndex_, 0))
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
-	reducedMatrixR_.insert_boundary(boundary, dim);
+	index currentIndex = reducedMatrixR_.insert_boundary(boundary, dim);
 
 	if constexpr (Master_matrix::Option_list::is_z2) {
-		mirrorMatrixU_.insert_column({nextInsertIndex_});
+		mirrorMatrixU_.insert_column({currentIndex});
 	} else {
-		mirrorMatrixU_.insert_column({{nextInsertIndex_, 1}});
+		mirrorMatrixU_.insert_column({{currentIndex, 1}});
 	}
 
-	if constexpr (!Master_matrix::Option_list::has_removable_columns){
-		while (pivotToColumnIndex_.size() <= nextInsertIndex_)
+	if constexpr (!Master_matrix::Option_list::has_map_column_container){
+		while (pivotToColumnIndex_.size() <= currentIndex)
 			pivotToColumnIndex_.resize(pivotToColumnIndex_.size()*2, -1);
 	}
 	
-	_reduce_last_column();
-	++nextInsertIndex_;
+	_reduce_last_column(currentIndex);
+	++nextEventIndex_;
+}
+
+template<class Master_matrix>
+template<class Boundary_type>
+inline void RU_matrix<Master_matrix>::insert_boundary([[maybe_unused]] id_index simplexIndex, const Boundary_type& boundary, dimension_type dim){
+	insert_boundary(boundary, dim);
 }
 
 template<class Master_matrix>
@@ -208,7 +224,7 @@ RU_matrix<Master_matrix>::get_column(index columnIndex, bool inR)
 
 template<class Master_matrix>
 inline typename RU_matrix<Master_matrix>::Row_type&
-RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR)
+RU_matrix<Master_matrix>::get_row(id_index rowIndex, bool inR)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
@@ -220,32 +236,62 @@ RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::erase_row(index rowIndex)
+inline void RU_matrix<Master_matrix>::erase_row(id_index rowIndex)
 {
 	reducedMatrixR_.erase_row(rowIndex);
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::remove_maximal_simplex(index columnIndex)
+inline void RU_matrix<Master_matrix>::remove_maximal_face(index columnIndex)
 {
-	static_assert(Master_matrix::Option_list::has_removable_columns,
-			"'remove_maximal_simplex' is not implemented for the chosen options.");
+	static_assert(Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_vine_update,
+			"'remove_maximal_face' is not implemented for the chosen options.");
 
-	if (columnIndex == nextInsertIndex_ - 1) --nextInsertIndex_;
+	//TODO: is there an easy test to verify maximality even without row access?
 
-	if constexpr (Master_matrix::Option_list::has_column_pairings){
-		typename barcode_type::iterator bar = _indexToBar().at(columnIndex);
-
-		if (bar->death == -1) _barcode().erase(bar);
-		else bar->death = -1;
-
-		_indexToBar().erase(columnIndex);
+	for (index curr = columnIndex; curr < nextEventIndex_ - 1; ++curr) {
+		swap_opt::vine_swap(curr);
 	}
 
-	pivotToColumnIndex_.erase(reducedMatrixR_.get_column(columnIndex).get_pivot());
+	remove_last();
+}
 
-	reducedMatrixR_.remove_maximal_simplex(columnIndex);
-	mirrorMatrixU_.erase_column(columnIndex);
+template<class Master_matrix>
+inline void RU_matrix<Master_matrix>::remove_last()
+{
+	static_assert(Master_matrix::Option_list::has_removable_columns,
+			"'remove_last' is not implemented for the chosen options.");
+
+	--nextEventIndex_;
+
+	//assumes PosIdx == MatIdx for boundary matrices.
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		if constexpr (Master_matrix::hasFixedBarcode){
+			auto& bar = _barcode()[_indexToBar()[nextEventIndex_]];
+			if (bar.death == -1) {	//birth
+				_barcode().pop_back();	//sorted by birth and nextEventIndex_ has to be the heighest one
+			} else {				//death
+				bar.death = -1;
+			};
+			_indexToBar().pop_back();
+		} else {	//birth order eventually shuffled by vine updates. No sort possible to keep the matchings.
+			auto it = _indexToBar().find(nextEventIndex_);
+			typename barcode_type::iterator bar = it->second;
+
+			if (bar->death == -1) _barcode().erase(bar);
+			else bar->death = -1;
+
+			_indexToBar().erase(it);
+		}
+	}
+
+	mirrorMatrixU_.remove_last();
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		pivotToColumnIndex_.erase(reducedMatrixR_.remove_last());
+	} else {
+		id_index lastPivot = reducedMatrixR_.remove_last();
+		if (lastPivot != -1) pivotToColumnIndex_[lastPivot] = -1;
+	}
 }
 
 template<class Master_matrix>
@@ -255,7 +301,7 @@ inline typename RU_matrix<Master_matrix>::dimension_type RU_matrix<Master_matrix
 }
 
 template<class Master_matrix>
-inline unsigned int RU_matrix<Master_matrix>::get_number_of_columns() const
+inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_number_of_columns() const
 {
 	return reducedMatrixR_.get_number_of_columns();
 }
@@ -291,7 +337,7 @@ inline void RU_matrix<Master_matrix>::add_to(const Field_element_type& coefficie
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex, bool inR)
+inline void RU_matrix<Master_matrix>::zero_cell(index columnIndex, id_index rowIndex, bool inR)
 {
 	if (inR){
 		return reducedMatrixR_.zero_cell(columnIndex, rowIndex);
@@ -309,7 +355,7 @@ inline void RU_matrix<Master_matrix>::zero_column(index columnIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline bool RU_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex, bool inR) const
+inline bool RU_matrix<Master_matrix>::is_zero_cell(index columnIndex, id_index rowIndex, bool inR) const
 {
 	if (inR){
 		return reducedMatrixR_.is_zero_cell(columnIndex, rowIndex);
@@ -327,9 +373,9 @@ inline bool RU_matrix<Master_matrix>::is_zero_column(index columnIndex, bool inR
 }
 
 template<class Master_matrix>
-inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
+inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_column_with_pivot(id_index simplexIndex) const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return pivotToColumnIndex_.at(simplexIndex);
 	} else {
 		return pivotToColumnIndex_[simplexIndex];
@@ -337,7 +383,7 @@ inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_co
 }
 
 template<class Master_matrix>
-inline int RU_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline typename RU_matrix<Master_matrix>::id_index RU_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	return reducedMatrixR_.get_column(columnIndex).get_pivot();
 }
@@ -351,7 +397,7 @@ inline RU_matrix<Master_matrix> &RU_matrix<Master_matrix>::operator=(RU_matrix o
 	swap(reducedMatrixR_, other.reducedMatrixR_);
 	swap(mirrorMatrixU_, other.mirrorMatrixU_);
 	pivotToColumnIndex_.swap(other.pivotToColumnIndex_);
-	std::swap(nextInsertIndex_, other.nextInsertIndex_);
+	std::swap(nextEventIndex_, other.nextEventIndex_);
 	return *this;
 }
 
@@ -370,7 +416,7 @@ inline void RU_matrix<Master_matrix>::_initialize_U()
 	typename std::conditional<Master_matrix::Option_list::is_z2, index, std::pair<index,Field_element_type> >::type id;
 	if constexpr (!Master_matrix::Option_list::is_z2) id.second = 1;
 
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
+	for (id_index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
 		if constexpr (Master_matrix::Option_list::is_z2) id = i;
 		else id.first = i;
 		mirrorMatrixU_.insert_column({id});
@@ -380,9 +426,9 @@ inline void RU_matrix<Master_matrix>::_initialize_U()
 template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce()
 {
-	auto get_column_with_pivot_ = [&](int pivot)->int{
+	auto get_column_with_pivot_ = [&](id_index pivot)->index{
 		if (pivot == -1) return -1;
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			auto it = pivotToColumnIndex_.find(pivot);
 			if (it == pivotToColumnIndex_.end()) return -1;
 			else return it->second;
@@ -392,19 +438,15 @@ inline void RU_matrix<Master_matrix>::_reduce()
 	};
 
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
-			_indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
-		} else {
-			_indexToBar().resize(reducedMatrixR_.get_number_of_columns(), -1);
-		}
+		_indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
 	}
 
-	for (unsigned int i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
+	for (index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
 		if (!(reducedMatrixR_.is_zero_column(i)))
 		{
 			Column_type &curr = reducedMatrixR_.get_column(i);
-			int pivot = curr.get_pivot();
-			int currIndex = get_column_with_pivot_(pivot);
+			id_index pivot = curr.get_pivot();
+			index currIndex = get_column_with_pivot_(pivot);
 
 			while (pivot != -1 && currIndex != -1){
 				if constexpr (Master_matrix::Option_list::is_z2){
@@ -428,46 +470,27 @@ inline void RU_matrix<Master_matrix>::_reduce()
 			}
 
 			if (pivot != -1){
-				if constexpr (Master_matrix::Option_list::has_removable_columns){
+				if constexpr (Master_matrix::Option_list::has_map_column_container){
 					pivotToColumnIndex_.try_emplace(pivot, i);
-					if constexpr (Master_matrix::Option_list::has_column_pairings){
-						_indexToBar().at(pivot)->death = i;
-						_indexToBar().try_emplace(i, _indexToBar().at(pivot));
-					}
 				} else {
 					pivotToColumnIndex_[pivot] = i;
-					if constexpr (Master_matrix::Option_list::has_column_pairings){
-						_barcode()[_indexToBar()[pivot]].death = i;
-						_indexToBar()[i] = _indexToBar()[pivot];
-					}
 				}
-			} else if constexpr (Master_matrix::Option_list::has_column_pairings){
-				if constexpr (Master_matrix::Option_list::has_removable_columns){
-					_barcode().emplace_back(get_column_dimension(i), i, -1);
-					_indexToBar().try_emplace(i, --_barcode().end());
-				} else {
-					_barcode().emplace_back(get_column_dimension(i), i, -1);
-					_indexToBar()[i] = _barcode().size() - 1;
-				}
-			}
-		} else if constexpr (Master_matrix::Option_list::has_column_pairings){
-			if constexpr (Master_matrix::Option_list::has_removable_columns){
-				_barcode().emplace_back(0, i, -1);
-				_indexToBar().try_emplace(i, --_barcode().end());
+				_update_barcode(pivot, i);
 			} else {
-				_barcode().emplace_back(0, i, -1);
-				_indexToBar()[i] = _barcode().size() - 1;
+				_add_bar(get_column_dimension(i), i);
 			}
+		} else {
+			_add_bar(0, i);
 		}
 	}
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::_reduce_last_column()
+inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 {
-	auto get_column_with_pivot_ = [&](int pivot)->int{
+	auto get_column_with_pivot_ = [&](id_index pivot)->index{
 		if (pivot == -1) return -1;
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			auto it = pivotToColumnIndex_.find(pivot);
 			if (it == pivotToColumnIndex_.end()) return -1;
 			else return it->second;
@@ -476,32 +499,22 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 		}
 	};
 
-	Column_type &curr = reducedMatrixR_.get_column(nextInsertIndex_);
+	Column_type &curr = reducedMatrixR_.get_column(lastIndex);
 	if (curr.is_empty()) {
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
-			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				_barcode().emplace_back(0, nextInsertIndex_, -1);
-				_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
-			}
-		} else {
-			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				_barcode().emplace_back(0, nextInsertIndex_, -1);
-				_indexToBar().push_back(_barcode().size() - 1);
-			}
-		}
+		_add_bar(0, nextEventIndex_);
 		return;
 	}
 
-	int pivot = curr.get_pivot();
-	int currIndex = get_column_with_pivot_(pivot);
+	id_index pivot = curr.get_pivot();
+	index currIndex = get_column_with_pivot_(pivot);
 
 	while (pivot != -1 && currIndex != -1){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			curr += reducedMatrixR_.get_column(currIndex);
 			if constexpr (Master_matrix::Option_list::has_vine_update)
-				mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(nextInsertIndex_);
+				mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(lastIndex);
 			else
-				mirrorMatrixU_.get_column(nextInsertIndex_) += mirrorMatrixU_.get_column(currIndex);
+				mirrorMatrixU_.get_column(lastIndex) += mirrorMatrixU_.get_column(currIndex);
 		} else {
 			Column_type &toadd = reducedMatrixR_.get_column(currIndex);
 			typename Master_matrix::Field_type coef = curr.get_pivot_value();
@@ -509,7 +522,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
 
 			curr.multiply_and_add(coef, toadd);
-			mirrorMatrixU_.get_column(nextInsertIndex_).multiply_and_add(coef, mirrorMatrixU_.get_column(currIndex));
+			mirrorMatrixU_.get_column(lastIndex).multiply_and_add(coef, mirrorMatrixU_.get_column(currIndex));
 		}
 
 		pivot = curr.get_pivot();
@@ -517,26 +530,41 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column()
 	}
 
 	if (pivot != -1){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
-			pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
-			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				_indexToBar().at(pivot)->death = nextInsertIndex_;
-				_indexToBar().try_emplace(nextInsertIndex_, _indexToBar().at(pivot));
-			}
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
+			pivotToColumnIndex_.try_emplace(pivot, lastIndex);
 		} else {
-			pivotToColumnIndex_[pivot] = nextInsertIndex_;
-			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				_barcode()[_indexToBar()[pivot]].death = nextInsertIndex_;
-				_indexToBar().push_back(_indexToBar()[pivot]);
-			}
+			pivotToColumnIndex_[pivot] = lastIndex;
 		}
-	} else if constexpr (Master_matrix::Option_list::has_column_pairings){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
-			_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);
-			_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
+		_update_barcode(pivot, nextEventIndex_);
+	} else {
+		_add_bar(get_column_dimension(lastIndex), nextEventIndex_);
+	}
+}
+
+template<class Master_matrix>
+inline void RU_matrix<Master_matrix>::_update_barcode(pos_index birth, pos_index death)
+{
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns){
+			_barcode()[_indexToBar()[birth]].death = death;
+			_indexToBar().push_back(_indexToBar()[birth]);
 		} else {
-			_barcode().emplace_back(get_column_dimension(nextInsertIndex_), nextInsertIndex_, -1);
+			auto& barIt = _indexToBar().at(birth);
+			barIt->death = death;
+			_indexToBar().try_emplace(death, barIt);	//list so iterators are stable
+		}
+	}
+}
+
+template<class Master_matrix>
+inline void RU_matrix<Master_matrix>::_add_bar(dimension_type dim, pos_index birth)
+{
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		_barcode().emplace_back(dim, birth, -1);
+		if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns){
 			_indexToBar().push_back(_barcode().size() - 1);
+		} else {
+			_indexToBar().try_emplace(birth, --_barcode().end());
 		}
 	}
 }

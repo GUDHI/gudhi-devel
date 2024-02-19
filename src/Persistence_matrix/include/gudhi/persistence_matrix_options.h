@@ -35,8 +35,11 @@ enum Column_types {
 template<bool is_z2_only = true, class Field_type = Z2_field_element, Column_types col_type = Column_types::INTRUSIVE_SET, bool parallelizable = false>
 struct Default_options{
 	using field_coeff_type = Field_type;
-	using index_type = unsigned int;
-	using dimension_type = int;	//needs to be signed.
+	using dimension_type = int;			//if not signed, max value should not be used.
+	//index type differenciation for input clarity, but it does not make much sense to have different types for them.
+	using id_type = unsigned int;			//index in the boundaries, if unsigned, the max value is reserved.
+	using index_type = id_type;	//index in the underlying container, if unsigned, the max value is reserved.
+	using pos_type = id_type;		//relative position in the filtration of all simplices currently represented in the matrix. If unsigned, the max value is reserved.
 
 	static const bool is_z2 = is_z2_only;
 	static const Column_types column_type = col_type;
@@ -52,10 +55,12 @@ struct Default_options{
 	static const bool has_column_pairings = false;
 	static const bool has_vine_update = false;
 	static const bool can_retrieve_representative_cycles = false;
+	static const bool has_map_column_container = false;
 	static const bool has_removable_columns = false;
 	static const bool is_of_boundary_type = true;							//ignored if not at least one specialised method is enabled: has_column_pairings, has_vine_update, can_retrieve_representative_cycles
+	//rename to columns_are_indexed_by_position
 	static const bool is_indexed_by_position = is_of_boundary_type;			//useless if has_vine_update = false, as the two indexing strategies only differ when swaps occur.
-	static const bool has_column_compression = false;						//can be enabled only if no specialised method is enabled: has_column_pairings, has_vine_update, can_retrieve_representative_cycles, has_removable_columns
+	static const bool has_column_compression = false;						//can be enabled only if no specialised method is enabled: has_column_pairings, has_vine_update, can_retrieve_representative_cycles, has_map_column_container
 	static const bool has_column_and_row_swaps = false;						//ignored if has_vine_update or can_retrieve_representative_cycles is true.
 };
 
@@ -66,7 +71,7 @@ struct Zigzag_options : Default_options<true, Z2_field_element, column_type, par
 	static const bool has_vine_update = true;
 	static const bool is_of_boundary_type = false;
 	static const bool is_indexed_by_position = false;
-	static const bool has_removable_columns = true;
+	static const bool has_map_column_container = true;
 	static const bool has_removable_rows = true;
 };
 

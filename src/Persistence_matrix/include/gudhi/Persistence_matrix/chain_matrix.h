@@ -11,10 +11,13 @@
 #ifndef PM_CHAIN_MATRIX_H
 #define PM_CHAIN_MATRIX_H
 
+#include <algorithm>
 #include <iostream>	//print() only
 #include <set>
 #include <vector>
 #include <utility>	//std::swap, std::move & std::exchange
+
+#include <gudhi/Persistence_matrix/overlay_ididx_to_matidx.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -35,6 +38,8 @@ public:
 	using boundary_type = typename Master_matrix::boundary_type;
 	using cell_rep_type = typename Master_matrix::cell_rep_type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
+	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
 	Chain_matrix();
@@ -62,12 +67,14 @@ public:
 	template<class Boundary_type = boundary_type>
 	std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
 	template<class Boundary_type = boundary_type>
-	std::vector<cell_rep_type> insert_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
+	std::vector<cell_rep_type> insert_boundary(id_index faceID, const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
-	void remove_maximal_simplex(index simplexIndex);
+	void remove_maximal_face(id_index faceID);
+	void remove_maximal_face(id_index faceID, const std::vector<index>& columnsToSwap);
+	void remove_last();
 
-	unsigned int get_number_of_columns() const;
+	index get_number_of_columns() const;
 
 	dimension_type get_column_dimension(index columnIndex) const;
 
@@ -78,11 +85,11 @@ public:
 	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 	//=================================================================
 
-	bool is_zero_cell(index columnIndex, index rowIndex) const;
+	bool is_zero_cell(index columnIndex, id_index rowIndex) const;
 	bool is_zero_column(index columnIndex);	//just for sanity checks as a valid chain matrix never has an empty column.
 
-	index get_column_with_pivot(index simplexIndex) const;
-	int get_pivot(index columnIndex);
+	index get_column_with_pivot(id_index faceID) const;
+	id_index get_pivot(index columnIndex);
 
 	Chain_matrix& operator=(const Chain_matrix& other);
 	friend void swap(Chain_matrix& matrix1,
@@ -97,12 +104,12 @@ public:
 			 static_cast<typename Master_matrix::Chain_representative_cycles_option&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
 		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
-		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+		std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
 			swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
 				 static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
-			if constexpr (Master_matrix::Option_list::has_removable_columns){
+			if constexpr (Master_matrix::Option_list::has_map_column_container){
 				for (auto& p : matrix1.matrix_){
 					p.second.set_rows(&matrix1.rows_);
 				}
@@ -122,6 +129,8 @@ public:
 
 	void print() const;  //for debug
 
+	friend class Id_to_index_overlay<Chain_matrix<Master_matrix>, Master_matrix>;
+
 private:
 	using dim_opt = typename Master_matrix::Matrix_dimension_option;
 	using swap_opt = typename Master_matrix::Chain_vine_swap_option;
@@ -134,23 +143,23 @@ private:
 	using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
 	using tmp_column_type = typename std::conditional<
 								Master_matrix::Option_list::is_z2,
-								std::set<index>,
-								std::set<std::pair<index,Field_element_type>,typename Master_matrix::CellPairComparator>
+								std::set<id_index>,
+								std::set<std::pair<id_index,Field_element_type>,typename Master_matrix::CellPairComparator>
 							>::type;
 
 	matrix_type matrix_;
 	dictionnary_type pivotToColumnIndex_;
-	index nextInsertIndex_;
+	index nextIndex_;
 
 	template<class Boundary_type>
-	std::vector<cell_rep_type> _reduce_boundary(index simplexIndex, const Boundary_type& boundary, dimension_type dim);
+	std::vector<cell_rep_type> _reduce_boundary(id_index faceID, const Boundary_type& boundary, dimension_type dim);
 	void _reduce_by_G(tmp_column_type& column,
 					  std::vector<cell_rep_type>& chainsInH,
 					  index currentPivot);
 	void _reduce_by_F(tmp_column_type& column,
 					  std::vector<cell_rep_type>& chainsInF,
 					  index currentPivot);
-	void _build_from_H(index simplexIndex, 
+	void _build_from_H(id_index faceID, 
 					   tmp_column_type& column,
 					   std::vector<cell_rep_type>& chainsInH);
 	void _update_largest_death_in_F(const std::vector<cell_rep_type>& chainsInF);
@@ -159,9 +168,13 @@ private:
 	void _add_to(const Column_type& column, tmp_column_type& set, unsigned int coef);
 	template<typename F>
 	void _add_to(Column_type& target, F&& addition);
+	void _remove_last(index lastIndex);
+	void _update_barcode(pos_index birth);
+	void _add_bar(dimension_type dim);
 
 	constexpr barcode_type& _barcode();
 	constexpr bar_dictionnary_type& _indexToBar();
+	constexpr pos_index& _nextPosition();
 };
 
 template<class Master_matrix>
@@ -171,7 +184,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix()
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {}
 
 template<class Master_matrix>
@@ -182,10 +195,10 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {
 	matrix_.reserve(orderedBoundaries.size());
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(orderedBoundaries.size());
 	} else {
 		pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
@@ -203,10 +216,10 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns)
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {
 	matrix_.reserve(numberOfColumns);
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(numberOfColumns);
 	} else {
 		pivotToColumnIndex_.resize(numberOfColumns, -1);
@@ -223,7 +236,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {}
 
 template<class Master_matrix>
@@ -237,10 +250,10 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {
 	matrix_.reserve(orderedBoundaries.size());
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(orderedBoundaries.size());
 	} else {
 		pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
@@ -261,10 +274,10 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
-	  nextInsertIndex_(0)
+	  nextIndex_(0)
 {
 	matrix_.reserve(numberOfColumns);
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(numberOfColumns);
 	} else {
 		pivotToColumnIndex_.resize(numberOfColumns, -1);
@@ -279,11 +292,11 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCop
 	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
 	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
-	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
+	  nextIndex_(matrixToCopy.nextIndex_)
 {
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
 				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
@@ -294,7 +307,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCop
 			}
 		}
 	} else {
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
 				matrix_.try_emplace(p.first, Column_type(col));
@@ -317,9 +330,9 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
+	  nextIndex_(std::exchange(other.nextIndex_, 0))
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		for (auto& p : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
 				p.second.set_rows(&this->rows_);
@@ -339,27 +352,28 @@ template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::insert_boundary(
 		const Boundary_type &boundary, dimension_type dim)
 {
-	return insert_boundary(nextInsertIndex_, boundary, dim);
+	return insert_boundary(nextIndex_, boundary, dim);
 }
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::insert_boundary(
-		index simplexIndex, const Boundary_type &boundary, dimension_type dim)
+		id_index faceID, const Boundary_type &boundary, dimension_type dim)
 {
-	if constexpr (!Master_matrix::Option_list::has_removable_columns){
-		if (pivotToColumnIndex_.size() <= simplexIndex){
-			pivotToColumnIndex_.resize(simplexIndex * 2 + 1, -1);
+	if constexpr (!Master_matrix::Option_list::has_map_column_container){
+		if (pivotToColumnIndex_.size() <= faceID){
+			pivotToColumnIndex_.resize(faceID * 2 + 1, -1);
 		}
 	}
 
+	//TODO: wrong position
 	if constexpr (Master_matrix::Option_list::has_vine_update && Master_matrix::Option_list::has_column_pairings){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
-			swap_opt::pivotToPosition_.try_emplace(simplexIndex, simplexIndex);
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
+			swap_opt::CP::pivotToPosition_.try_emplace(faceID, _nextPosition());
 		} else {
-			if (swap_opt::pivotToPosition_.size() <= simplexIndex)
-				swap_opt::pivotToPosition_.resize(pivotToColumnIndex_.size());
-			swap_opt::pivotToPosition_[simplexIndex] = simplexIndex;
+			if (swap_opt::CP::pivotToPosition_.size() <= faceID)
+				swap_opt::CP::pivotToPosition_.resize(pivotToColumnIndex_.size(), -1);
+			swap_opt::CP::pivotToPosition_[faceID] = _nextPosition();
 		}
 	}
 
@@ -367,14 +381,14 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 		dim_opt::update_up(dim == -1 ? (boundary.size() == 0 ? 0 : boundary.size() - 1) : dim);
 	}
 
-	return _reduce_boundary(simplexIndex, boundary, dim);
+	return _reduce_boundary(faceID, boundary, dim);
 }
 
 template<class Master_matrix>
 inline typename Chain_matrix<Master_matrix>::Column_type &
 Chain_matrix<Master_matrix>::get_column(index columnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return matrix_.at(columnIndex);
 	} else {
 		return matrix_[columnIndex];
@@ -385,7 +399,7 @@ template<class Master_matrix>
 inline const typename Chain_matrix<Master_matrix>::Column_type &
 Chain_matrix<Master_matrix>::get_column(index columnIndex) const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return matrix_.at(columnIndex);
 	} else {
 		return matrix_[columnIndex];
@@ -393,63 +407,106 @@ Chain_matrix<Master_matrix>::get_column(index columnIndex) const
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::remove_maximal_simplex(index simplexIndex)
+inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
-			"'remove_maximal_simplex' is not implemented for the chosen options.");
+			"'remove_maximal_face' is not implemented for the chosen options.");
+	static_assert(Master_matrix::Option_list::has_map_column_container && 
+					Master_matrix::Option_list::has_vine_update &&
+					Master_matrix::Option_list::has_column_pairings,
+			"'remove_maximal_face' is not implemented for the chosen options.");
 
-	index toErase = pivotToColumnIndex_.at(simplexIndex);
+	//TODO: find simple test to verify that col at columnIndex is maximal even without row access.
 
-	//TODO: find simple test to verify that col at columnIndex is maximal.
+	const auto& pivotToPosition = swap_opt::CP::pivotToPosition_;
+	auto it = pivotToPosition.find(faceID);
+	if (it == pivotToPosition.end()) return;	//face does not exists. put an assert instead?
+	pos_index startPos = it->second;
+	index startIndex = pivotToColumnIndex_.at(faceID);
 
-	if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
-		dim_opt::update_down(matrix_.at(toErase).get_dimension());
+	if (startPos != _nextPosition() - 1){
+		std::vector<index> colToSwap;
+		colToSwap.reserve(matrix_.size());
+
+		for (auto& p : pivotToPosition){
+			if (p.second > startPos) colToSwap.push_back(pivotToColumnIndex_.at(p.first));
+		}
+		std::sort(colToSwap.begin(), colToSwap.end(), 
+					[&](index c1, index c2){ 
+						return pivotToPosition.at(get_pivot(c1)) < pivotToPosition.at(get_pivot(c2));
+					});
+
+		for (index i : colToSwap){
+			startIndex = swap_opt::vine_swap(startIndex, i);
+		}
 	}
 
-	if constexpr (Master_matrix::Option_list::has_column_pairings){
-		index timeStamp;
-		if constexpr (Master_matrix::Option_list::has_vine_update) timeStamp = swap_opt::pivotToPosition_.at(simplexIndex);
-		else timeStamp = simplexIndex;
+	_remove_last(startIndex);
+}
 
-		typename barcode_type::iterator bar = _indexToBar().at(timeStamp);
+template<class Master_matrix>
+inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID, const std::vector<index>& columnsToSwap)
+{
+	static_assert(Master_matrix::Option_list::has_removable_columns,
+			"'remove_maximal_face' is not implemented for the chosen options.");
+	static_assert(Master_matrix::Option_list::has_map_column_container && 
+					Master_matrix::Option_list::has_vine_update,
+			"'remove_maximal_face' is not implemented for the chosen options.");
 
-		if (bar->death == -1) _barcode().erase(bar);
-		else bar->death = -1;
+	//TODO: find simple test to verify that col at columnIndex is maximal even without row access.
 
-		_indexToBar().erase(timeStamp);
-		if constexpr (Master_matrix::Option_list::has_vine_update) swap_opt::pivotToPosition_.erase(simplexIndex);
+	index startIndex = pivotToColumnIndex_.at(faceID);
+
+	for (index i : columnsToSwap){
+		startIndex = swap_opt::vine_swap(startIndex, i);
 	}
 
-	Column_type& c = matrix_.at(toErase);
+	_remove_last(startIndex);
+}
 
-	if constexpr (Master_matrix::Option_list::has_row_access){
-		assert(ra_opt::get_row(c.get_pivot()).size() == 1 && "Column asked to be removed do not corresponds to a maximal simplex.");
-	}
+template<class Master_matrix>
+inline void Chain_matrix<Master_matrix>::remove_last()
+{
+	static_assert(Master_matrix::Option_list::has_removable_columns,
+			"'remove_last' is not implemented for the chosen options.");
+	static_assert(Master_matrix::Option_list::has_map_column_container || 
+					!Master_matrix::Option_list::has_vine_update,
+			"'remove_last' is not implemented for the chosen options.");
 
-	if (c.is_paired()) matrix_.at(c.get_paired_chain_index()).unassign_paired_chain();
-	pivotToColumnIndex_.erase(simplexIndex);
-	matrix_.erase(toErase);
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		//carefull: linear because of the search of the last index. It is better to keep track of the IDIdx index
+		//of the last column while performing swaps (or the MatIdx with the return values of `vine_swap` + get_pivot) 
+		//and then call `remove_maximal_face` with it and an empty `columnsToSwap`.
 
-	if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows){
-		ra_opt::erase_row(c.get_pivot());
+		id_index pivot = 0;
+		index colIndex;
+		for (auto& p : pivotToColumnIndex_){
+			if (p.first > pivot){	//pivots have to be strictly increasing in order of filtration
+				pivot = p.first;
+				colIndex = p.second;
+			}
+		}
+		_remove_last(colIndex);
+	} else {
+		_remove_last(nextIndex_ - 1);
 	}
 }
 
 template<class Master_matrix>
-inline unsigned int Chain_matrix<Master_matrix>::get_number_of_columns() const
+inline typename Chain_matrix<Master_matrix>::index Chain_matrix<Master_matrix>::get_number_of_columns() const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 //		return nextInsertIndex_;	//if erased columns are viewed as zero columns, otherwise use matrix size.
 		return matrix_.size();
 	} else {
-		return nextInsertIndex_;	//matrix could have been resized much bigger while insert
+		return nextIndex_;	//matrix could have been resized much bigger while insert
 	}
 }
 
 template<class Master_matrix>
 inline typename Chain_matrix<Master_matrix>::dimension_type Chain_matrix<Master_matrix>::get_column_dimension(index columnIndex) const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return matrix_.at(columnIndex).get_dimension();
 	} else {
 		return matrix_[columnIndex].get_dimension();
@@ -459,7 +516,7 @@ inline typename Chain_matrix<Master_matrix>::dimension_type Chain_matrix<Master_
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto& col = matrix_.at(targetColumnIndex);
 		_add_to(col, [&](){col += matrix_.at(sourceColumnIndex);});
 	} else {
@@ -471,7 +528,7 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index t
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto& col = matrix_.at(targetColumnIndex);
 		_add_to(col, [&](){col.multiply_and_add(coefficient, matrix_.at(sourceColumnIndex));});
 	} else {
@@ -483,7 +540,7 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, const F
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto& col = matrix_.at(targetColumnIndex);
 		_add_to(col, [&](){col.multiply_and_add(matrix_.at(sourceColumnIndex), coefficient);});
 	} else {
@@ -493,9 +550,9 @@ inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coeffi
 }
 
 template<class Master_matrix>
-inline bool Chain_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
+inline bool Chain_matrix<Master_matrix>::is_zero_cell(index columnIndex, id_index rowIndex) const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return !matrix_.at(columnIndex).is_non_zero(rowIndex);
 	} else {
 		return !matrix_[columnIndex].is_non_zero(rowIndex);
@@ -505,7 +562,7 @@ inline bool Chain_matrix<Master_matrix>::is_zero_cell(index columnIndex, index r
 template<class Master_matrix>
 inline bool Chain_matrix<Master_matrix>::is_zero_column(index columnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return matrix_.at(columnIndex).is_empty();
 	} else {
 		return matrix_[columnIndex].is_empty();
@@ -513,19 +570,19 @@ inline bool Chain_matrix<Master_matrix>::is_zero_column(index columnIndex)
 }
 
 template<class Master_matrix>
-inline typename Chain_matrix<Master_matrix>::index Chain_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
+inline typename Chain_matrix<Master_matrix>::index Chain_matrix<Master_matrix>::get_column_with_pivot(id_index faceID) const
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		return pivotToColumnIndex_.at(simplexIndex);
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		return pivotToColumnIndex_.at(faceID);
 	} else {
-		return pivotToColumnIndex_[simplexIndex];
+		return pivotToColumnIndex_[faceID];
 	}
 }
 
 template<class Master_matrix>
-inline int Chain_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline typename Chain_matrix<Master_matrix>::id_index Chain_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return matrix_.at(columnIndex).get_pivot();
 	} else {
 		return matrix_[columnIndex].get_pivot();
@@ -541,12 +598,12 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
 	pivotToColumnIndex_ = other.pivotToColumnIndex_;
-	nextInsertIndex_ = other.nextInsertIndex_;
+	nextIndex_ = other.nextIndex_;
 
 	matrix_.reserve(other.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		ra_opt::operator=(other);
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
 				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
@@ -557,7 +614,7 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 			}
 		}
 	} else {
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
 				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index()));
@@ -576,8 +633,8 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::print() const
 {
 	std::cout << "Column Matrix:\n";
-	if constexpr (!Master_matrix::Option_list::has_removable_columns){
-		for (unsigned int i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != -1; ++i){
+	if constexpr (!Master_matrix::Option_list::has_map_column_container){
+		for (id_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != -1; ++i){
 			index pos = pivotToColumnIndex_[i];
 			const Column_type& col = matrix_[pos];
 			for (const auto &cell : col){
@@ -588,7 +645,7 @@ inline void Chain_matrix<Master_matrix>::print() const
 		if constexpr (Master_matrix::Option_list::has_row_access){
 			std::cout << "\n";
 			std::cout << "Row Matrix:\n";
-			for (unsigned int i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != -1; ++i){
+			for (id_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != -1; ++i){
 				index pos = pivotToColumnIndex_[i];
 				const Row_type& row = ra_opt::get_row(pos);
 				for (const auto &cell : row){
@@ -623,7 +680,7 @@ inline void Chain_matrix<Master_matrix>::print() const
 template<class Master_matrix>
 template<class Boundary_type>
 inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_matrix>::_reduce_boundary(
-		index simplexIndex, const Boundary_type& boundary, dimension_type dim)
+		id_index faceID, const Boundary_type& boundary, dimension_type dim)
 {
 	tmp_column_type column(boundary.begin(), boundary.end());
 	if (dim == -1) dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
@@ -640,46 +697,46 @@ inline std::vector<typename Master_matrix::cell_rep_type> Chain_matrix<Master_ma
 	if (boundary.begin() == boundary.end())
 	{
 		if constexpr (Master_matrix::Option_list::is_z2)
-			column.insert(simplexIndex);
+			column.insert(faceID);
 		else
-			column.emplace(simplexIndex, 1);
+			column.emplace(faceID, 1);
 		_insert_chain(column, dim);
 		return chainsInF;
 	}
 
-	index currentPivot = get_column_with_pivot(get_last());
+	index currentIndex = get_column_with_pivot(get_last());
 
-	while (get_column(currentPivot).is_paired())
+	while (get_column(currentIndex).is_paired())
 	{
-		_reduce_by_G(column, chainsInH, currentPivot);
+		_reduce_by_G(column, chainsInH, currentIndex);
 
 		if (column.empty()) {
 			//produce the sum of all col_h in chains_in_H
-			_build_from_H(simplexIndex, column, chainsInH);
+			_build_from_H(faceID, column, chainsInH);
 			//create a new cycle (in F) sigma - \sum col_h
 			_insert_chain(column, dim);
 			return chainsInF;
 		}
 
-		currentPivot = get_column_with_pivot(get_last());
+		currentIndex = get_column_with_pivot(get_last());
 	}
 
 	while (!column.empty())
 	{
-		currentPivot = get_column_with_pivot(get_last());
+		currentIndex = get_column_with_pivot(get_last());
 
-		if (!get_column(currentPivot).is_paired()) {
+		if (!get_column(currentIndex).is_paired()) {
 			//only fills currentEssentialCycleIndices if Z2 coefficients, so chainsInF remains empty
-			_reduce_by_F(column, chainsInF, currentPivot);
+			_reduce_by_F(column, chainsInF, currentIndex);
 		} else {
-			_reduce_by_G(column, chainsInH, currentPivot);
+			_reduce_by_G(column, chainsInH, currentIndex);
 		}
 	}
 
 	_update_largest_death_in_F(chainsInF);
 
 	//Compute the new column zzsh + \sum col_h, for col_h in chains_in_H
-	_build_from_H(simplexIndex, column, chainsInH);
+	_build_from_H(faceID, column, chainsInH);
 
 	//Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
 	if constexpr (Master_matrix::Option_list::is_z2)
@@ -694,9 +751,9 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_reduce_by_G(
 		tmp_column_type &column,
 		std::vector<cell_rep_type>& chainsInH,
-		index currentPivot)
+		index currentIndex)
 {
-	Column_type& col = get_column(currentPivot);
+	Column_type& col = get_column(currentIndex);
 	if constexpr (Master_matrix::Option_list::is_z2){
 		_add_to(col, column, 1u);	//Reduce with the column col_g
 		chainsInH.push_back(col.get_paired_chain_index());//keep the col_h with which col_g is paired
@@ -714,35 +771,35 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_reduce_by_F(
 		tmp_column_type& column,
 		std::vector<cell_rep_type>& chainsInF,
-		index currentPivot)
+		index currentIndex)
 {
-	Column_type& col = get_column(currentPivot);
+	Column_type& col = get_column(currentIndex);
 	if constexpr (Master_matrix::Option_list::is_z2){
 		_add_to(col, column, 1u);	//Reduce with the column col_g
-		chainsInF.push_back(currentPivot);
+		chainsInF.push_back(currentIndex);
 	} else {
 		Field_element_type coef = col.get_pivot_value();
 		coef = coef.get_inverse();
 		coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
 
 		_add_to(col, column, coef);	//Reduce with the column col_g
-		chainsInF.emplace_back(currentPivot, Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(coef));
+		chainsInF.emplace_back(currentIndex, Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(coef));
 	}
 }
 
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_build_from_H(
-		index simplexIndex, 
+		id_index faceID, 
 		tmp_column_type& column,
 		std::vector<cell_rep_type>& chainsInH)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		column.insert(simplexIndex);
+		column.insert(faceID);
 		for (index idx_h : chainsInH) {
 			_add_to(get_column(idx_h), column, 1u);
 		}
 	} else {
-		column.emplace(simplexIndex, 1);
+		column.emplace(faceID, 1);
 		for (std::pair<index,Field_element_type>& idx_h : chainsInH) {
 			_add_to(get_column(idx_h.first), column, idx_h.second);
 		}
@@ -777,96 +834,85 @@ template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		if constexpr (Master_matrix::Option_list::is_z2){
-			pivotToColumnIndex_.try_emplace(*(column.rbegin()), nextInsertIndex_);
-		} else {
-			pivotToColumnIndex_.try_emplace(column.rbegin()->first, nextInsertIndex_);
-		}
+	id_index pivot;
+	if constexpr (Master_matrix::Option_list::is_z2){
+		pivot = *(column.rbegin());
+	} else {
+		pivot = column.rbegin()->first;
+	}
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_));
 		} else {
-			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension));
-		}
-
-		if constexpr (Master_matrix::Option_list::has_column_pairings){
-			_barcode().emplace_back(dimension, nextInsertIndex_, -1);
-			_indexToBar().try_emplace(nextInsertIndex_, --_barcode().end());
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension));
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_);
 		} else {
 			matrix_.emplace_back(column, dimension);
 		}
 		
-		pivotToColumnIndex_[nextInsertIndex_] = nextInsertIndex_;
-
-		if constexpr (Master_matrix::Option_list::has_column_pairings){
-			_barcode().emplace_back(dimension, nextInsertIndex_, -1);
-			_indexToBar().push_back(_barcode().size() - 1);
-		}
+		pivotToColumnIndex_[pivot] = nextIndex_;
 	}
+
+	_add_bar(dimension);
 	
-	++nextInsertIndex_;
+	++nextIndex_;
 }
 
 template<class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_insert_chain(
 		const tmp_column_type &column, dimension_type dimension, index pair)
 {
-	index pivot;
+	//true when no vine updates and if nextIndex_ is updated in remove_last for special case of no vines
+	//because then PosIdx == MatIdx
+	pos_index pairPos = pair;
+
+	id_index pivot;
 	if constexpr (Master_matrix::Option_list::is_z2){
 		pivot = *(column.rbegin());
 	} else {
 		pivot = column.rbegin()->first;
 	}
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
-		pivotToColumnIndex_.try_emplace(pivot, nextInsertIndex_);
+
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, column, dimension, ra_opt::rows_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_));
 		} else {
-			matrix_.try_emplace(nextInsertIndex_, Column_type(column, dimension));
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension));
 		}
 
-		matrix_.at(nextInsertIndex_).assign_paired_chain(pair);
+		matrix_.at(nextIndex_).assign_paired_chain(pair);
 		auto& p = matrix_.at(pair);
-		p.assign_paired_chain(nextInsertIndex_);
+		p.assign_paired_chain(nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_vine_update){
-			auto barIt = _indexToBar().at(swap_opt::pivotToPosition_[p.get_pivot()]);
-			barIt->death = pivot;
-			_indexToBar().try_emplace(pivot, barIt);
-		} else if constexpr (Master_matrix::Option_list::has_column_pairings){
-			auto barIt = _indexToBar().at(p.get_pivot());
-			barIt->death = pivot;
-			_indexToBar().try_emplace(pivot, barIt);
+			pairPos = swap_opt::CP::pivotToPosition_[p.get_pivot()];
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_, column, dimension, ra_opt::rows_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_);
 		} else {
 			matrix_.emplace_back(column, dimension);
 		}
 
-		matrix_[nextInsertIndex_].assign_paired_chain(pair);
-		matrix_[pair].assign_paired_chain(nextInsertIndex_);
-		pivotToColumnIndex_[nextInsertIndex_] = nextInsertIndex_;
+		matrix_[nextIndex_].assign_paired_chain(pair);
+		matrix_[pair].assign_paired_chain(nextIndex_);
+		pivotToColumnIndex_[pivot] = nextIndex_;
 
 		if constexpr (Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_vine_update){
-			auto pos = swap_opt::pivotToPosition_[matrix_[pair].get_pivot()];
-			_barcode()[_indexToBar()[pos]].death = pivot;
-			_indexToBar().push_back(_indexToBar()[pos]);
-		} else if constexpr (Master_matrix::Option_list::has_column_pairings){
-			auto pos = matrix_[pair].get_pivot();
-			_barcode()[_indexToBar()[pos]].death = pivot;
-			_indexToBar().push_back(_indexToBar()[pos]);
+			pairPos = swap_opt::CP::pivotToPosition_[matrix_[pair].get_pivot()];
 		}
 	}
+
+	_update_barcode(pairPos);
 	
-	++nextInsertIndex_;
+	++nextIndex_;
 }
 
 template<class Master_matrix>
@@ -911,11 +957,102 @@ inline void Chain_matrix<Master_matrix>::_add_to(Column_type& target, F&& additi
 	addition();
 
 	if (pivot != target.get_pivot()){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			std::swap(pivotToColumnIndex_.at(pivot), pivotToColumnIndex_.at(target.get_pivot()));
 		} else {
 			std::swap(pivotToColumnIndex_[pivot], pivotToColumnIndex_[target.get_pivot()]);
 		}
+	}
+}
+
+template<class Master_matrix>
+inline void Chain_matrix<Master_matrix>::_remove_last(index lastIndex)
+{
+	static_assert(Master_matrix::Option_list::has_removable_columns,
+			"'_remove_last' is not implemented for the chosen options.");
+	static_assert(Master_matrix::Option_list::has_map_column_container || !Master_matrix::Option_list::has_vine_update,
+			"'_remove_last' is not implemented for the chosen options.");
+
+	id_index pivot;
+
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		auto itToErase = matrix_.find(lastIndex);
+		Column_type& colToErase = itToErase->second;
+		pivot = colToErase.get_pivot();
+
+		if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
+			dim_opt::update_down(colToErase.get_dimension());
+		}
+
+		if (colToErase.is_paired()) matrix_.at(colToErase.get_paired_chain_index()).unassign_paired_chain();
+		pivotToColumnIndex_.erase(pivot);
+		matrix_.erase(itToErase);
+	} else {
+		assert(lastIndex == nextIndex_ - 1 && nextIndex_ == matrix_.size() && "Indexation problem.");
+
+		Column_type& colToErase = matrix_[lastIndex];
+		pivot = colToErase.get_pivot();
+
+		if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access){
+			dim_opt::update_down(colToErase.get_dimension());
+		}
+
+		if (colToErase.is_paired()) matrix_.at(colToErase.get_paired_chain_index()).unassign_paired_chain();
+		pivotToColumnIndex_[pivot] = -1;
+		matrix_.pop_back();
+		//TODO: resize matrix_ when a lot is removed? Could be not the best strategy if user inserts a lot back afterwards.
+	}
+
+	if constexpr (!Master_matrix::Option_list::has_vine_update){
+		--nextIndex_;	//should not be updated when there are vine updates, as possibly lastIndex != nextIndex - 1 
+	}
+
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		auto it = _indexToBar().find(--_nextPosition());
+		typename barcode_type::iterator bar = it->second;
+
+		if (bar->death == -1) _barcode().erase(bar);
+		else bar->death = -1;
+
+		_indexToBar().erase(it);
+		if constexpr (Master_matrix::Option_list::has_vine_update) swap_opt::CP::pivotToPosition_.erase(pivot);
+	}
+
+	if constexpr (Master_matrix::Option_list::has_row_access){
+		assert(ra_opt::get_row(pivot).size() == 0 && "Column asked to be removed do not corresponds to a maximal simplex.");
+		if constexpr (Master_matrix::Option_list::has_removable_rows){
+			ra_opt::erase_row(pivot);
+		}
+	}
+}
+
+template<class Master_matrix>
+inline void Chain_matrix<Master_matrix>::_update_barcode(pos_index birth)
+{
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			auto& barIt = _indexToBar().at(birth);
+			barIt->death = _nextPosition();
+			_indexToBar().try_emplace(_nextPosition(), barIt);	//list so iterators are stable
+		} else {
+			_barcode()[_indexToBar()[birth]].death = _nextPosition();
+			_indexToBar().push_back(_indexToBar()[birth]);
+		}
+		++_nextPosition();
+	}
+}
+
+template<class Master_matrix>
+inline void Chain_matrix<Master_matrix>::_add_bar(dimension_type dim)
+{
+	if constexpr (Master_matrix::Option_list::has_column_pairings){
+		_barcode().emplace_back(dim, _nextPosition(), -1);
+		if constexpr (Master_matrix::Option_list::has_removable_columns){
+			_indexToBar().try_emplace(_nextPosition(), --_barcode().end());
+		} else {
+			_indexToBar().push_back(_barcode().size() - 1);
+		}
+		++_nextPosition();
 	}
 }
 
@@ -937,6 +1074,16 @@ Chain_matrix<Master_matrix>::_indexToBar()
 		return swap_opt::template Chain_pairing<Master_matrix>::indexToBar_;
 	else
 		return pair_opt::indexToBar_;
+}
+
+template<class Master_matrix>
+inline constexpr typename Chain_matrix<Master_matrix>::pos_index &
+Chain_matrix<Master_matrix>::_nextPosition()
+{
+	if constexpr (Master_matrix::Option_list::has_vine_update)
+		return swap_opt::template Chain_pairing<Master_matrix>::nextPosition_;
+	else
+		return pair_opt::nextPosition_;
 }
 
 } //namespace persistence_matrix

@@ -46,15 +46,16 @@ class RU_vine_swap : public std::conditional<
 public:
 	using Boundary_matrix = typename Master_matrix::Boundary_matrix_type;
 	using Base_matrix = typename Master_matrix::Base_matrix_type;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
+	// using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using index = typename Master_matrix::index;
+	using pos_index = typename Master_matrix::pos_index;
 
 	RU_vine_swap();
 	RU_vine_swap(const RU_vine_swap &matrixToCopy);
 	RU_vine_swap(RU_vine_swap&& other) noexcept;
 
-	bool vine_swap_with_z_eq_1_case(index index);	//returns true if barcode was changed
-	bool vine_swap(index index);					//returns true if barcode was changed
+	bool vine_swap_with_z_eq_1_case(pos_index index);	//returns true if barcode was changed
+	bool vine_swap(pos_index index);					//returns true if barcode was changed
 
 	RU_vine_swap& operator=(RU_vine_swap other);
 	friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2){
@@ -72,7 +73,7 @@ private:
 	using ru_matrix = typename Master_matrix::RU_matrix_type;
 
 	bool _is_paired(index index);
-	int _get_pair(index index);
+	// int _get_pair(index index);
 
 	void _swap_at_index(index index);
 	void _add_to(index sourceIndex, index targetIndex);
@@ -85,10 +86,10 @@ private:
 	bool _positive_negative_vine_swap(index index);
 	bool _negative_positive_vine_swap(index index);
 
-	int& _death(index simplexIndex);
-	int& _birth(index simplexIndex);
-	int _get_death(index simplexIndex);
-	int _get_birth(index simplexIndex);
+	pos_index& _death(pos_index simplexIndex);
+	pos_index& _birth(pos_index simplexIndex);
+	pos_index _get_death(index simplexIndex);
+	pos_index _get_birth(index simplexIndex);
 
 	constexpr ru_matrix* _matrix() { return static_cast<ru_matrix*>(this); }
 	constexpr const ru_matrix* _matrix() const { return static_cast<const ru_matrix*>(this); }
@@ -111,7 +112,7 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&o
 {}
 
 template<class Master_matrix>
-inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
+inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(pos_index index)
 {
 	assert(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1 && "Index to swap out of bound.");
 
@@ -130,7 +131,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(index index)
 }
 
 template<class Master_matrix>
-inline bool RU_vine_swap<Master_matrix>::vine_swap(index index)
+inline bool RU_vine_swap<Master_matrix>::vine_swap(pos_index index)
 {
 	assert(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1 && "Index to swap out of bound.");
 
@@ -186,7 +187,7 @@ inline bool RU_vine_swap<Master_matrix>::_is_paired(index index){
 	} else {
 		if (!_matrix()->reducedMatrixR_.is_zero_column(index)) return true;
 
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			if (_matrix()->pivotToColumnIndex_.find(index) == _matrix()->pivotToColumnIndex_.end()) return false;
 		} else {
 			if (_matrix()->pivotToColumnIndex_.operator[](index) == -1) return false;
@@ -196,19 +197,19 @@ inline bool RU_vine_swap<Master_matrix>::_is_paired(index index){
 	}
 }
 
-template <class Master_matrix>
-inline int RU_vine_swap<Master_matrix>::_get_pair(index index) {
-	if (!_matrix()->reducedMatrixR_.is_zero_column(index)) 
-		return _matrix()->reducedMatrixR_.get_column(index).get_pivot();
+// template <class Master_matrix>
+// inline int RU_vine_swap<Master_matrix>::_get_pair(index index) {
+// 	if (!_matrix()->reducedMatrixR_.is_zero_column(index)) 
+// 		return _matrix()->reducedMatrixR_.get_column(index).get_pivot();
 
-	if constexpr (Master_matrix::Option_list::has_removable_columns) {
-		auto it = _matrix()->pivotToColumnIndex_.find(index);
-		if (it == _matrix()->pivotToColumnIndex_.end()) return -1;
-		return *it;
-	} else {
-		return _matrix()->pivotToColumnIndex_.operator[](index);
-	}
-}
+// 	if constexpr (Master_matrix::Option_list::has_map_column_container) {
+// 		auto it = _matrix()->pivotToColumnIndex_.find(index);
+// 		if (it == _matrix()->pivotToColumnIndex_.end()) return -1;
+// 		return *it;
+// 	} else {
+// 		return _matrix()->pivotToColumnIndex_.operator[](index);
+// 	}
+// }
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_swap_at_index(index index){
@@ -226,7 +227,7 @@ inline void RU_vine_swap<Master_matrix>::_add_to(index sourceIndex, index target
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_transpose(index index)
 {
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		if (_is_paired(index) && _is_paired(index + 1)){
 			std::swap(_matrix()->pivotToColumnIndex_.at(index), _matrix()->pivotToColumnIndex_.at(index + 1));
 		} else if (_is_paired(index)){
@@ -262,7 +263,7 @@ template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(index index)
 {
 	_matrix()->pivotToColumnIndex_.at(_get_birth(index + 1)) = index;
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		if (_is_paired(index)){
 			_matrix()->pivotToColumnIndex_.emplace(index + 1, _matrix()->pivotToColumnIndex_.at(index));
 			_matrix()->pivotToColumnIndex_.erase(index);
@@ -283,7 +284,7 @@ template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(index index)
 {
 	_matrix()->pivotToColumnIndex_.at(_get_birth(index)) = index + 1;
-	if constexpr (Master_matrix::Option_list::has_removable_columns){
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		if (_is_paired(index + 1)){
 			_matrix()->pivotToColumnIndex_.emplace(index, _matrix()->pivotToColumnIndex_.at(index + 1));
 			_matrix()->pivotToColumnIndex_.erase(index + 1);
@@ -303,8 +304,8 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(index inde
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 {
-	const int iDeath = _get_death(index);
-	const int iiDeath = _get_death(index + 1);
+	const pos_index iDeath = _get_death(index);
+	const pos_index iiDeath = _get_death(index + 1);
 
 	if (iDeath != -1 && iiDeath != -1 && !(_matrix()->reducedMatrixR_.is_zero_cell(iiDeath, index)))
 	{
@@ -332,8 +333,8 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_negative_vine_swap(index index)
 {
-	const int iBirth = _get_birth(index);
-	const int iiBirth = _get_birth(index + 1);
+	const pos_index iBirth = _get_birth(index);
+	const pos_index iiBirth = _get_birth(index + 1);
 
 	_add_to(index, index + 1);
 	_swap_at_index(index);
@@ -371,7 +372,7 @@ inline bool RU_vine_swap<Master_matrix>::_negative_positive_vine_swap(index inde
 }
 
 template<class Master_matrix>
-inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
+inline typename RU_vine_swap<Master_matrix>::pos_index& RU_vine_swap<Master_matrix>::_death(pos_index simplexIndex)
 {
 	static_assert(Master_matrix::Option_list::has_column_pairings, "Pairing necessary to modify death value.");
 
@@ -383,7 +384,7 @@ inline int& RU_vine_swap<Master_matrix>::_death(index simplexIndex)
 }
 
 template<class Master_matrix>
-inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
+inline typename RU_vine_swap<Master_matrix>::pos_index& RU_vine_swap<Master_matrix>::_birth(pos_index simplexIndex)
 {
 	static_assert(Master_matrix::Option_list::has_column_pairings, "Pairing necessary to modify birth value.");
 
@@ -395,7 +396,7 @@ inline int& RU_vine_swap<Master_matrix>::_birth(index simplexIndex)
 }
 
 template<class Master_matrix>
-inline int RU_vine_swap<Master_matrix>::_get_death(index simplexIndex)
+inline typename RU_vine_swap<Master_matrix>::pos_index RU_vine_swap<Master_matrix>::_get_death(index simplexIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
@@ -407,7 +408,7 @@ inline int RU_vine_swap<Master_matrix>::_get_death(index simplexIndex)
 		if (!_matrix()->reducedMatrixR_.is_zero_column(simplexIndex)) 
 			return _matrix()->reducedMatrixR_.get_column(simplexIndex).get_pivot();
 
-		if constexpr (Master_matrix::Option_list::has_removable_columns) {
+		if constexpr (Master_matrix::Option_list::has_map_column_container) {
 			auto it = _matrix()->pivotToColumnIndex_.find(simplexIndex);
 			if (it == _matrix()->pivotToColumnIndex_.end()) return -1;
 			return it->second;
@@ -418,7 +419,7 @@ inline int RU_vine_swap<Master_matrix>::_get_death(index simplexIndex)
 }
 
 template<class Master_matrix>
-inline int RU_vine_swap<Master_matrix>::_get_birth(index negativeSimplexIndex)
+inline typename RU_vine_swap<Master_matrix>::pos_index RU_vine_swap<Master_matrix>::_get_birth(index negativeSimplexIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		if constexpr (Master_matrix::Option_list::has_removable_columns){

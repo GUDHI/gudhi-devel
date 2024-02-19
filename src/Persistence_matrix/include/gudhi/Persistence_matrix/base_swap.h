@@ -32,6 +32,7 @@ class Base_swap
 public:
 	using matrix_type = typename Master_matrix::column_container_type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 
 	Base_swap();
 	Base_swap(unsigned int numberOfColumns);
@@ -39,7 +40,7 @@ public:
 	Base_swap(Base_swap&& other) noexcept;
 
 	void swap_columns(index columnIndex1, index columnIndex2);
-	void swap_rows(index rowIndex1, index rowIndex2);
+	void swap_rows(id_index rowIndex1, id_index rowIndex2);
 	void swap_at_indices(index index1, index index2);
 
 	Base_swap& operator=(Base_swap other);
@@ -50,8 +51,8 @@ public:
 	}
 
 protected:
-	using index_dictionnary_type = typename Master_matrix::template dictionnary_type<unsigned int>;
-	using row_dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	using index_dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	using row_dictionnary_type = typename Master_matrix::template dictionnary_type<id_index>;
 
 	index_dictionnary_type indexToRow_;
 	row_dictionnary_type rowToIndex_;
@@ -74,7 +75,7 @@ inline Base_swap<Master_matrix,Base_matrix>::Base_swap(unsigned int numberOfColu
 	  rowToIndex_(numberOfColumns),
 	  rowSwapped_(false)
 {
-	for (unsigned int i = 0; i < numberOfColumns; i++){
+	for (index i = 0; i < numberOfColumns; i++){
 		indexToRow_[i] = i;
 		rowToIndex_[i] = i;
 	}
@@ -101,7 +102,7 @@ inline void Base_swap<Master_matrix,Base_matrix>::swap_columns(index columnIndex
 }
 
 template<class Master_matrix, class Base_matrix>
-inline void Base_swap<Master_matrix,Base_matrix>::swap_rows(index rowIndex1, index rowIndex2)
+inline void Base_swap<Master_matrix,Base_matrix>::swap_rows(id_index rowIndex1, id_index rowIndex2)
 {
 	rowSwapped_ = true;
 	std::swap(rowToIndex_[indexToRow_[rowIndex1]], rowToIndex_[indexToRow_[rowIndex2]]);
@@ -130,7 +131,7 @@ inline void Base_swap<Master_matrix,Base_matrix>::_orderRows()
 	for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
 		_matrix()->matrix_.at(i).reorder(rowToIndex_);
 	}
-	for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
+	for (index i = 0; i < _matrix()->get_number_of_columns(); i++){
 		indexToRow_[i] = i;
 		rowToIndex_[i] = i;
 	}

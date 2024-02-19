@@ -12,9 +12,7 @@
 #define PM_CHAIN_VINE_SWAP_H
 
 #include <utility>	//std::swap & std::move
-#include <cmath>	//std::abs
 #include <cassert>
-#include <set>
 
 #include <iostream> 	//for debug
 
@@ -47,7 +45,8 @@ template<typename Master_matrix>
 class Chain_barcode_swap : public Chain_pairing<Master_matrix>
 {
 public:
-	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
+	using pos_index = typename Master_matrix::pos_index;
 	using CP = Chain_pairing<Master_matrix>;
 
 	Chain_barcode_swap(){};
@@ -59,67 +58,68 @@ public:
 		  pivotToPosition_(std::move(other.pivotToPosition_)) {};
 
 protected:
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	using dictionnary_type = typename Master_matrix::template dictionnary_type<pos_index>;
 
 	dictionnary_type pivotToPosition_;	//necessary to keep track of the barcode changes
 	
-	void swap_positions(index pivot1, index pivot2){
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+	void swap_positions(id_index pivot1, id_index pivot2){
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			std::swap(pivotToPosition_.at(pivot1), pivotToPosition_.at(pivot2));
 		} else {
 			std::swap(pivotToPosition_[pivot1], pivotToPosition_[pivot2]);
 		}
 	}
 
-	bool is_negative_in_pair(index pivot) const
+	bool is_negative_in_pair(id_index pivot) const
 	{
-		index pos = _get_pivot_position(pivot);
-		return death(pivot) == static_cast<int>(pos);
+		pos_index pos = _get_pivot_position(pivot);
+		return death(pivot) == pos;
 	}
 
-	void positive_transpose(index pivot1, index pivot2)
+	void positive_transpose(id_index pivot1, id_index pivot2)
 	{
-		index simplexIndex1 = _get_pivot_position(pivot1);
-		index simplexIndex2 = _get_pivot_position(pivot2);
+		pos_index pos1 = _get_pivot_position(pivot1);
+		pos_index pos2 = _get_pivot_position(pivot2);
 
-		_birth(simplexIndex1) = simplexIndex2;
-		_birth(simplexIndex2) = simplexIndex1;
-		std::swap(CP::indexToBar_.at(simplexIndex1), CP::indexToBar_.at(simplexIndex2));
+		_birth(pos1) = pos2;
+		_birth(pos2) = pos1;
+		std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
 	}
 
-	void negative_transpose(index pivot1, index pivot2)
+	void negative_transpose(id_index pivot1, id_index pivot2)
 	{
-		index simplexIndex1 = _get_pivot_position(pivot1);
-		index simplexIndex2 = _get_pivot_position(pivot2);
+		pos_index pos1 = _get_pivot_position(pivot1);
+		pos_index pos2 = _get_pivot_position(pivot2);
 
-		_death(simplexIndex1) = simplexIndex2;
-		_death(simplexIndex2) = simplexIndex1;
-		std::swap(CP::indexToBar_.at(simplexIndex1), CP::indexToBar_.at(simplexIndex2));
+		_death(pos1) = pos2;
+		_death(pos2) = pos1;
+		std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
 	}
 
-	void positive_negative_transpose(index pivot1, index pivot2)
+	void positive_negative_transpose(id_index pivot1, id_index pivot2)
 	{
-		index simplexIndex1 = _get_pivot_position(pivot1);
-		index simplexIndex2 = _get_pivot_position(pivot2);
+		pos_index pos1 = _get_pivot_position(pivot1);
+		pos_index pos2 = _get_pivot_position(pivot2);
 
-		_birth(simplexIndex1) = simplexIndex2;
-		_death(simplexIndex2) = simplexIndex1;
-		std::swap(CP::indexToBar_.at(simplexIndex1), CP::indexToBar_.at(simplexIndex2));
+		_birth(pos1) = pos2;
+		_death(pos2) = pos1;
+		std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
 	}
 
-	void negative_positive_transpose(index pivot1, index pivot2)
+	void negative_positive_transpose(id_index pivot1, id_index pivot2)
 	{
-		index simplexIndex1 = _get_pivot_position(pivot1);
-		index simplexIndex2 = _get_pivot_position(pivot2);
+		pos_index pos1 = _get_pivot_position(pivot1);
+		pos_index pos2 = _get_pivot_position(pivot2);
 
-		_death(simplexIndex1) = simplexIndex2;
-		_birth(simplexIndex2) = simplexIndex1;
-		std::swap(CP::indexToBar_.at(simplexIndex1), CP::indexToBar_.at(simplexIndex2));
+		_death(pos1) = pos2;
+		_birth(pos2) = pos1;
+		std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
 	}
 
-	bool are_adjacent(index pivot1, index pivot2) const{
-		return std::abs(static_cast<int>(CP::_get_pivot_position(pivot2)) 
-						- static_cast<int>(CP::_get_pivot_position(pivot1))) == 1;
+	bool are_adjacent(id_index pivot1, id_index pivot2) const{
+		pos_index pos1 = _get_pivot_position(pivot1);
+		pos_index pos2 = _get_pivot_position(pivot2);
+		return pos1 < pos2 ? (pos2 - pos1) == 1 : (pos1 - pos2) == 1;
 	}
 
 	Chain_barcode_swap& operator=(Chain_barcode_swap other){
@@ -132,9 +132,9 @@ protected:
 		swap1.pivotToPosition_.swap(swap2.pivotToPosition_);
 	}
 
-	int death(index pivot) const
+	pos_index death(id_index pivot) const
 	{
-		index simplexIndex = _get_pivot_position(pivot);
+		pos_index simplexIndex = _get_pivot_position(pivot);
 
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			return CP::indexToBar_.at(simplexIndex)->death;
@@ -143,9 +143,9 @@ protected:
 		}
 	}
 
-	int birth(index pivot) const
+	pos_index birth(id_index pivot) const
 	{
-		index simplexIndex = _get_pivot_position(pivot);
+		pos_index simplexIndex = _get_pivot_position(pivot);
 
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			return CP::indexToBar_.at(simplexIndex)->birth;
@@ -155,15 +155,15 @@ protected:
 	}
 
 private:
-	index _get_pivot_position(index pivot) const{
-		if constexpr (Master_matrix::Option_list::has_removable_columns){
+	pos_index _get_pivot_position(id_index pivot) const{
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			return pivotToPosition_.at(pivot);		//quite often called, make public and pass position instead of pivot to avoid find() everytime?
 		} else {
 			return pivotToPosition_[pivot];
 		}
 	}
 
-	int& _death(index simplexIndex)
+	pos_index& _death(pos_index simplexIndex)
 	{
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			return CP::indexToBar_.at(simplexIndex)->death;
@@ -172,7 +172,7 @@ private:
 		}
 	}
 
-	int& _birth(index simplexIndex)
+	pos_index& _birth(pos_index simplexIndex)
 	{
 		if constexpr (Master_matrix::Option_list::has_removable_columns){
 			return CP::indexToBar_.at(simplexIndex)->birth;
@@ -191,11 +191,13 @@ class Chain_vine_swap : public std::conditional<
 {
 public:
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
+	using pos_index = typename Master_matrix::pos_index;
 	using matrix_type = typename Master_matrix::column_container_type;
-	using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+	// using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using Column_type = typename Master_matrix::Column_type;
-	typedef bool (*BirthCompFuncPointer)(index,index);
-	typedef bool (*DeathCompFuncPointer)(index,index);
+	typedef bool (*BirthCompFuncPointer)(pos_index,pos_index);
+	typedef bool (*DeathCompFuncPointer)(pos_index,pos_index);
 
 	Chain_vine_swap();
 	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
@@ -217,12 +219,14 @@ public:
 		std::swap(swap1.deathComp_, swap2.deathComp_);
 	}
 
-private:
+protected:
 	using CP = typename std::conditional<
 							Master_matrix::Option_list::has_column_pairings,
 							Chain_barcode_swap<Master_matrix>,
 							Dummy_chain_vine_pairing
 						>::type;
+
+private:
 	using chain_matrix = typename Master_matrix::Chain_matrix_type;
 
 	BirthCompFuncPointer birthComp_;	// for F x F & H x H
@@ -306,8 +310,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	if (col1IsNeg && col2IsNeg){
 		if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))){
 			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				index pivot1 = _matrix()->get_pivot(columnIndex1);
-				index pivot2 = _matrix()->get_pivot(columnIndex2);
+				id_index pivot1 = _matrix()->get_pivot(columnIndex1);
+				id_index pivot2 = _matrix()->get_pivot(columnIndex2);
 
 				CP::negative_transpose(pivot1, pivot2);
 				CP::swap_positions(pivot1, pivot2);
@@ -320,8 +324,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	if (col1IsNeg){
 		if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))){
 			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				index pivot1 = _matrix()->get_pivot(columnIndex1);
-				index pivot2 = _matrix()->get_pivot(columnIndex2);
+				id_index pivot1 = _matrix()->get_pivot(columnIndex1);
+				id_index pivot2 = _matrix()->get_pivot(columnIndex2);
 
 				CP::negative_positive_transpose(pivot1, pivot2);
 				CP::swap_positions(pivot1, pivot2);
@@ -334,8 +338,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	if (col2IsNeg){
 		if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))){
 			if constexpr (Master_matrix::Option_list::has_column_pairings){
-				index pivot1 = _matrix()->get_pivot(columnIndex1);
-				index pivot2 = _matrix()->get_pivot(columnIndex2);
+				id_index pivot1 = _matrix()->get_pivot(columnIndex1);
+				id_index pivot2 = _matrix()->get_pivot(columnIndex2);
 
 				CP::positive_negative_transpose(pivot1, pivot2);
 				CP::swap_positions(pivot1, pivot2);
@@ -347,8 +351,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 
 	if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))){
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
-			index pivot1 = _matrix()->get_pivot(columnIndex1);
-			index pivot2 = _matrix()->get_pivot(columnIndex2);
+			id_index pivot1 = _matrix()->get_pivot(columnIndex1);
+			id_index pivot2 = _matrix()->get_pivot(columnIndex2);
 
 			CP::positive_transpose(pivot1, pivot2);
 			CP::swap_positions(pivot1, pivot2);
@@ -448,8 +452,8 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
 	_matrix()->add_to(columnIndex1, columnIndex2);
 
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
-		index pivot1 = _matrix()->get_pivot(columnIndex1);
-		index pivot2 = _matrix()->get_pivot(columnIndex2);
+		id_index pivot1 = _matrix()->get_pivot(columnIndex1);
+		id_index pivot2 = _matrix()->get_pivot(columnIndex2);
 
 		CP::positive_negative_transpose(pivot1, pivot2);
 		CP::swap_positions(pivot1, pivot2);

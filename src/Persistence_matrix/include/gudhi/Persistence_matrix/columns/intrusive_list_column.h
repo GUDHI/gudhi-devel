@@ -36,6 +36,7 @@ public:
 								  typename Master_matrix::Field_type
 							   >::type;
 	using index = typename Master_matrix::index;
+	using id_index = typename Master_matrix::id_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
 	using Cell = typename Master_matrix::Cell_type;
@@ -65,7 +66,7 @@ public:
 	~Intrusive_list_column();
 
 	std::vector<Field_element_type> get_content(int columnLength = -1) const;
-	bool is_non_zero(index rowIndex) const;
+	bool is_non_zero(id_index rowIndex) const;
 	bool is_empty() const;
 	std::size_t size() const;
 
@@ -74,12 +75,12 @@ public:
 	template<class Map_type>
 	void reorder(const Map_type& valueMap);	//used for lazy row swaps
 	void clear();
-	void clear(index rowIndex);
+	void clear(id_index rowIndex);
 	//****************
 
 	//****************
 	//only for chain and boundary
-	int get_pivot() const;
+	id_index get_pivot() const;
 	Field_element_type get_pivot_value() const;
 	//****************
 
@@ -173,8 +174,8 @@ protected:
 	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(iterator& it);
-	void _insert_cell(const Field_element_type& value, index rowIndex, const iterator& position);
-	void _insert_cell(index rowIndex, const iterator& position);
+	void _insert_cell(const Field_element_type& value, id_index rowIndex, const iterator& position);
+	void _insert_cell(id_index rowIndex, const iterator& position);
 	template<class Cell_range>
 	bool _add(const Cell_range& column);
 	template<class Cell_range>
@@ -229,7 +230,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Contain
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_insert_cell(id, column_.end());
 		}
 	} else {
@@ -257,7 +258,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
 
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_insert_cell(id, column_.end());
 		}
 	} else {
@@ -282,7 +283,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(
 		}())
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_insert_cell(id, column_.end());
 		}
 	} else {
@@ -307,7 +308,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(
 		}())
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
-		for (index id : nonZeroRowIndices){
+		for (id_index id : nonZeroRowIndices){
 			_insert_cell(id, column_.end());
 		}
 	} else {
@@ -368,7 +369,7 @@ Intrusive_list_column<Master_matrix>::get_content(int columnLength) const
 	else if (columnLength < 0) return std::vector<Field_element_type>();
 
 	std::vector<Field_element_type> container(columnLength);
-	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<index>(columnLength); ++it){
+	for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<id_index>(columnLength); ++it){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			container[it->get_row_index()] = 1;
 		} else {
@@ -379,7 +380,7 @@ Intrusive_list_column<Master_matrix>::get_content(int columnLength) const
 }
 
 template<class Master_matrix>
-inline bool Intrusive_list_column<Master_matrix>::is_non_zero(index rowIndex) const
+inline bool Intrusive_list_column<Master_matrix>::is_non_zero(id_index rowIndex) const
 {
 	//could be changed to dichotomic search as column is ordered by row index, 
 	//but I am not sure if it is really worth it as there is no random access
@@ -437,7 +438,7 @@ inline void Intrusive_list_column<Master_matrix>::clear()
 }
 
 template<class Master_matrix>
-inline void Intrusive_list_column<Master_matrix>::clear(index rowIndex)
+inline void Intrusive_list_column<Master_matrix>::clear(id_index rowIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");
@@ -448,7 +449,7 @@ inline void Intrusive_list_column<Master_matrix>::clear(index rowIndex)
 }
 
 template<class Master_matrix>
-inline int Intrusive_list_column<Master_matrix>::get_pivot() const
+inline typename Intrusive_list_column<Master_matrix>::id_index Intrusive_list_column<Master_matrix>::get_pivot() const
 {
 	static_assert(Master_matrix::isNonBasic, "Method not available for base columns.");	//could technically be, but is the notion usefull then?
 
@@ -474,7 +475,7 @@ inline typename Intrusive_list_column<Master_matrix>::Field_element_type Intrusi
 		} else {
 			if (chain_opt::get_pivot() == -1) return Field_element_type();
 			for (const Cell& cell : column_){
-				if (cell.get_row_index() == static_cast<unsigned int>(chain_opt::get_pivot())) return cell.get_element();
+				if (cell.get_row_index() == chain_opt::get_pivot()) return cell.get_element();
 			}
 			return Field_element_type();	//should never happen if chain column is used properly
 		}
@@ -558,7 +559,10 @@ Intrusive_list_column<Master_matrix>::operator+=(Intrusive_list_column &column)
 {
 	if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 		//assumes that the addition never zeros out this column. 
-		if (_add(column)) chain_opt::swap_pivots(column);
+		if (_add(column)) {
+			chain_opt::swap_pivots(column);
+			dim_opt::swap_dimension(column);
+		}
 	} else {
 		_add(column);
 	}
@@ -635,12 +639,18 @@ Intrusive_list_column<Master_matrix>::multiply_and_add(const Field_element_type&
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)){
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			} else {
 				throw std::invalid_argument("A chain column should not be multiplied by 0.");
 			}
 		} else {
-			if (_multiply_and_add(val, column)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(val, column)){
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -687,10 +697,16 @@ Intrusive_list_column<Master_matrix>::multiply_and_add(Intrusive_list_column& co
 		//assumes that the addition never zeros out this column. 
 		if constexpr (Master_matrix::Option_list::is_z2){
 			if (val){
-				if (_add(column)) chain_opt::swap_pivots(column);
+				if (_add(column)){
+					chain_opt::swap_pivots(column);
+					dim_opt::swap_dimension(column);
+				}
 			}
 		} else {
-			if (_multiply_and_add(column, val)) chain_opt::swap_pivots(column);
+			if (_multiply_and_add(column, val)){
+				chain_opt::swap_pivots(column);
+				dim_opt::swap_dimension(column);
+			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -727,7 +743,7 @@ inline void Intrusive_list_column<Master_matrix>::_delete_cell(iterator &it)
 
 template<class Master_matrix>
 inline void Intrusive_list_column<Master_matrix>::_insert_cell(
-		const Field_element_type &value, index rowIndex, const iterator &position)
+		const Field_element_type &value, id_index rowIndex, const iterator &position)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(value, ra_opt::columnIndex_, rowIndex);
@@ -741,7 +757,7 @@ inline void Intrusive_list_column<Master_matrix>::_insert_cell(
 
 template<class Master_matrix>
 inline void Intrusive_list_column<Master_matrix>::_insert_cell(
-		index rowIndex, const iterator &position)
+		id_index rowIndex, const iterator &position)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		Cell *new_cell = cellPool_.construct(ra_opt::columnIndex_, rowIndex);
@@ -775,14 +791,14 @@ inline bool Intrusive_list_column<Master_matrix>::_add(const Cell_range &column)
 		} else {
 			if constexpr (Master_matrix::Option_list::is_z2){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(itTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(itTarget);
 			} else {
 				itTarget->get_element() += itSource->get_element();
 				if (itTarget->get_element() == Field_element_type::get_additive_identity()){
 					if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-						if (static_cast<int>(itTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+						if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 					}
 					_delete_cell(itTarget);
 				} else {
@@ -839,7 +855,7 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_and_add(const Field_
 			itTarget->get_element() += itSource->get_element();
 			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(itTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(itTarget);
 			} else {
@@ -889,7 +905,7 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_and_add(const Cell_r
 			itTarget->get_element() += (itSource->get_element() * val);
 			if (itTarget->get_element() == Field_element_type::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
-					if (static_cast<int>(itTarget->get_row_index()) == chain_opt::get_pivot()) pivotIsZeroed = true;
+					if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
 				_delete_cell(itTarget);
 			} else {
