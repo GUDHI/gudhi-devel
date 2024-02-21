@@ -101,6 +101,10 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
         Point_d c = k.construct_circumcenter_d_object()(pts.begin(), pts.end());
         FT r = k.squared_distance_d_object()(c, pts.front());
         if (exact) CGAL::exact(r);
+        // For Epick_d, if the circumcenter computation is too unstable, we could compute
+        //   int d2 = dim * dim;
+        //   Filtration_value max_sanity = maxf * d2 / (d2 - 1);
+        // and use min(max_sanity, ...), which would limit how bad numerical errors can be.
         maxf = max(maxf, cvt(r)); // maxf = cvt(r) except for rounding errors
         complex.assign_key(sh, cache_.size());
         // We could check if the simplex is maximal and avoiding adding it to the cache in that case.
