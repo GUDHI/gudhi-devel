@@ -46,7 +46,15 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
   std::vector<Point_d> pts;
   CGAL::NT_converter<FT, Filtration_value> cvt;
 
+  // This block is only needed to get ambient_dim
+  if(std::begin(points) == std::end(points)) {
+    // assert(complex.is_empty());
+    return;
+  }
+  int ambient_dim = k.point_dimension_d_object()(*std::begin(points));
+
   auto fun = [&](Simplex_handle sh, int dim){
+    using std::max;
     if (dim == 0) complex.assign_filtration(sh, 0);
     else if (dim == 1) {
       // For a Simplex_tree, this would be a bit faster, but that's probably negligible
@@ -60,12 +68,18 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       FT r = k.squared_distance_d_object()(m, pu);
       if (exact) CGAL::exact(r);
       complex.assign_key(sh, cache_.size());
-      complex.assign_filtration(sh, std::max(cvt(r), Filtration_value(0)));
+      complex.assign_filtration(sh, max(cvt(r), Filtration_value(0)));
       cache_.emplace_back(std::move(m), std::move(r));
+    } else if (dim > ambient_dim) {
+      // The sphere is always defined by at most d+1 points
+      Filtration_value maxf = 0; // max filtration of the faces
+      for (auto face : complex.boundary_simplex_range(sh)) {
+	maxf = max(maxf, complex.filtration(face));
+      }
+      complex.assign_filtration(sh, maxf);
     } else {
       Filtration_value maxf = 0; // max filtration of the faces
       bool found = false;
-      using std::max;
       for (auto face_opposite_vertex : complex.boundary_opposite_vertex_simplex_range(sh)) {
         maxf = max(maxf, complex.filtration(face_opposite_vertex.first));
         if (!found) {
