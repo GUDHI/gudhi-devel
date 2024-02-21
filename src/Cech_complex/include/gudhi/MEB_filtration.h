@@ -33,7 +33,7 @@ namespace Gudhi::cech_complex {
  */
 
 template<typename Kernel, typename SimplicialComplexForMEB, typename PointRange>
-void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRange points, bool exact = false) {
+void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRange const& points, bool exact = false) {
   using Point_d = typename Kernel::Point_d;
   using FT = typename Kernel::FT;
   using Sphere = std::pair<Point_d, FT>;
