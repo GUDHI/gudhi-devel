@@ -196,13 +196,12 @@ public:
 	using matrix_type = typename Master_matrix::column_container_type;
 	// using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
 	using Column_type = typename Master_matrix::Column_type;
-	typedef bool (*BirthCompFuncPointer)(pos_index,pos_index);
-	typedef bool (*DeathCompFuncPointer)(pos_index,pos_index);
+	typedef bool (*EventCompFuncPointer)(pos_index,pos_index);
 
 	Chain_vine_swap();
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
-	Chain_vine_swap(BirthComparatorFunction&& birthComparator, 
-					DeathComparatorFunction&& deathComparator = _no_G_death_comparator);
+	template<typename EventComparatorFunction>
+	Chain_vine_swap(EventComparatorFunction&& birthComparator, 
+					EventComparatorFunction&& deathComparator = _no_G_death_comparator);
 	Chain_vine_swap(const Chain_vine_swap &matrixToCopy);
 	Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
@@ -229,8 +228,8 @@ protected:
 private:
 	using chain_matrix = typename Master_matrix::Chain_matrix_type;
 
-	BirthCompFuncPointer birthComp_;	// for F x F & H x H
-	DeathCompFuncPointer deathComp_;	// for G x G
+	EventCompFuncPointer birthComp_;	// for F x F & H x H
+	EventCompFuncPointer deathComp_;	// for G x G
 
 	bool _is_negative_in_pair(index columnIndex);
 
@@ -252,10 +251,10 @@ inline Chain_vine_swap<Master_matrix>::Chain_vine_swap()
 }
 
 template<class Master_matrix>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+template<typename EventComparatorFunction>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(
-	BirthComparatorFunction&& birthComparator, 
-	DeathComparatorFunction&& deathComparator)
+	EventComparatorFunction&& birthComparator, 
+	EventComparatorFunction&& deathComparator)
 	: CP(), birthComp_(&birthComparator), deathComp_(&deathComparator)
 {}
 

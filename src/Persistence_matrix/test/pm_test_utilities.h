@@ -15,13 +15,17 @@
 #include <set>
 
 #include <boost/test/test_tools.hpp>
-#include "gudhi/persistence_matrix_options.h"
+#include <gudhi/persistence_matrix_options.h>
 #include <gudhi/Persistence_matrix/columns/heap_column.h>
 #include <gudhi/matrix.h>
+#include <gudhi/Fields/Zp_field_operators.h>
 
 using Gudhi::persistence_matrix::Heap_column;
 using Gudhi::persistence_matrix::Matrix;
 using Gudhi::persistence_matrix::Column_indexation_types;
+using Zp = Gudhi::persistence_matrix::Zp_field_operators<> ;
+
+inline Zp _g_operators = Zp(5);
 
 template<class Column>
 constexpr bool is_z2(){
@@ -98,7 +102,7 @@ column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap
 			}
 		} else {
 			if (cont.size() <= c.get_row_index()) cont.resize(c.get_row_index() + 1, 0u);
-			cont[c.get_row_index()] += c.get_element();
+			cont[c.get_row_index()] = _g_operators.add(cont[c.get_row_index()], c.get_element());
 		}
 	}
 	if constexpr (!is_z2<Heap_column<Matrix> >()){

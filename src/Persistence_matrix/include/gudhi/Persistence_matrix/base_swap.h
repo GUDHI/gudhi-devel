@@ -11,7 +11,8 @@
 #ifndef PM_BASE_SWAP_H
 #define PM_BASE_SWAP_H
 
-#include <utility>	//std::swap, std::move & std::exchange
+#include <utility>		//std::swap, std::move & std::exchange
+#include <algorithm>	//std::max
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -105,8 +106,35 @@ template<class Master_matrix, class Base_matrix>
 inline void Base_swap<Master_matrix,Base_matrix>::swap_rows(id_index rowIndex1, id_index rowIndex2)
 {
 	rowSwapped_ = true;
-	std::swap(rowToIndex_[indexToRow_[rowIndex1]], rowToIndex_[indexToRow_[rowIndex2]]);
-	std::swap(indexToRow_[rowIndex1], indexToRow_[rowIndex2]);
+
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		auto it1 = indexToRow_.find(rowIndex1);
+		auto it2 = indexToRow_.find(rowIndex2);
+
+		if (it1 == indexToRow_.end() && it2 == indexToRow_.end()) return;
+
+		if (it1 == indexToRow_.end()) {
+			indexToRow_.emplace(rowIndex1, it2->second);
+			rowToIndex_.at(it2->second) = rowIndex1;
+			indexToRow_.erase(it2->second);
+			return;
+		}
+
+		if (it2 == indexToRow_.end()) {
+			indexToRow_.emplace(rowIndex2, it1->second);
+			rowToIndex_.at(it1->second) = rowIndex2;
+			indexToRow_.erase(it1);
+			return;
+		}
+
+		std::swap(rowToIndex_.at(it1->second), rowToIndex_.at(it2->second));
+		std::swap(it1->second, it2->second);
+	} else {
+		for (auto i = indexToRow_.size(); i <= std::max(rowIndex1, rowIndex2); ++i) indexToRow_.push_back(i);
+
+		std::swap(rowToIndex_[indexToRow_[rowIndex1]], rowToIndex_[indexToRow_[rowIndex2]]);
+		std::swap(indexToRow_[rowIndex1], indexToRow_[rowIndex2]);
+	}
 }
 
 template<class Master_matrix, class Base_matrix>

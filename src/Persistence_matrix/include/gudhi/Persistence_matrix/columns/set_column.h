@@ -31,11 +31,8 @@ class Set_column : public Master_matrix::Row_access_option,
 {
 public:
 	using Master = Master_matrix;
-	using Field_element_type = typename std::conditional<
-								  Master_matrix::Option_list::is_z2,
-								  bool,
-								  typename Master_matrix::Field_type
-							   >::type;
+	using Field_operators = typename Master_matrix::Field_operators;
+	using Field_element_type = typename Master_matrix::element_type;
 	using index = typename Master_matrix::index;
 	using id_index = typename Master_matrix::id_index;
 	using dimension_type = typename Master_matrix::dimension_type;
@@ -54,18 +51,18 @@ public:
 	using reverse_iterator = boost::indirect_iterator<typename Column_type::reverse_iterator>;
 	using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
-	Set_column();
+	Set_column(Field_operators* operators = nullptr);
 	template<class Container_type = typename Master_matrix::boundary_type>
-	Set_column(const Container_type& nonZeroRowIndices);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
+	Set_column(const Container_type& nonZeroRowIndices, Field_operators* operators);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
 	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
-	Set_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
+	Set_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer, Field_operators* operators);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
 	template<class Container_type = typename Master_matrix::boundary_type>
-	Set_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension);	//dimension gets ignored for base
+	Set_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension, Field_operators* operators);	//dimension gets ignored for base
 	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
-	Set_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type &rowContainer);	//dimension gets ignored for base
-	Set_column(const Set_column& column);
+	Set_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type &rowContainer, Field_operators* operators);	//dimension gets ignored for base
+	Set_column(const Set_column& column, Field_operators* operators = nullptr);
 	template<class Row_container_type>
-	Set_column(const Set_column& column, index columnIndex, Row_container_type &rowContainer);
+	Set_column(const Set_column& column, index columnIndex, Row_container_type &rowContainer, Field_operators* operators = nullptr);
 	Set_column(Set_column&& column) noexcept;
 	~Set_column();
 
@@ -100,20 +97,8 @@ public:
 	template<class Cell_range>
 	Set_column& operator+=(const Cell_range& column);	//for base & boundary except vector
 	Set_column& operator+=(Set_column &column);	//for chain and vector
-	friend Set_column operator+(Set_column column1, Set_column& column2){
-		column1 += column2;
-		return column1;
-	}
 
 	Set_column& operator*=(unsigned int v);
-	friend Set_column operator*(Set_column column, unsigned int const& v){
-		column *= v;
-		return column;
-	}
-	friend Set_column operator*(unsigned int const& v, Set_column column){
-		column *= v;
-		return column;
-	}
 
 	//this = v * this + column
 	template<class Cell_range>
@@ -159,6 +144,8 @@ public:
 		return it2 != c2.column_.end();
 	}
 
+	void set_operators(Field_operators* operators){ operators_ = operators; }
+
 	//Disabled with row access.
 	Set_column& operator=(const Set_column& other);
 
@@ -172,8 +159,13 @@ public:
 		col1.column_.swap(col2.column_);
 	}
 
-protected:
+private:
+	using ra_opt = typename Master_matrix::Row_access_option;
+	using dim_opt = typename Master_matrix::Column_dimension_option;
+	using chain_opt = typename Master_matrix::Chain_column_option;
+
 	Column_type column_;
+	Field_operators* operators_;
 	inline static Simple_object_pool<Cell> cellPool_;
 
 	void _delete_cell(typename Column_type::iterator& it);
@@ -185,23 +177,20 @@ protected:
 	bool _multiply_and_add(const Field_element_type& val, const Cell_range& column);
 	template<class Cell_range>
 	bool _multiply_and_add(const Cell_range& column, const Field_element_type& val);
-
-private:
-	using ra_opt = typename Master_matrix::Row_access_option;
-	using dim_opt = typename Master_matrix::Column_dimension_option;
-	using chain_opt = typename Master_matrix::Chain_column_option;
 };
 
 template<class Master_matrix>
-inline Set_column<Master_matrix>::Set_column() : ra_opt(), dim_opt(), chain_opt()
+inline Set_column<Master_matrix>::Set_column(Field_operators* operators) 
+	: ra_opt(), dim_opt(), chain_opt(), operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Container_type>
-inline Set_column<Master_matrix>::Set_column(const Container_type &nonZeroRowIndices)
+inline Set_column<Master_matrix>::Set_column(const Container_type &nonZeroRowIndices, Field_operators* operators)
 	: ra_opt(), 
 	  dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1), 
-	  chain_opt()
+	  chain_opt(),
+	  operators_(operators)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
@@ -212,7 +201,7 @@ inline Set_column<Master_matrix>::Set_column(const Container_type &nonZeroRowInd
 		}
 	} else {
 		for (const auto& p : nonZeroRowIndices){
-			_insert_cell(p.second, p.first, column_.end());
+			_insert_cell(operators_->get_value(p.second), p.first, column_.end());
 		}
 	}
 }
@@ -220,7 +209,7 @@ inline Set_column<Master_matrix>::Set_column(const Container_type &nonZeroRowInd
 template<class Master_matrix>
 template<class Container_type, class Row_container_type>
 inline Set_column<Master_matrix>::Set_column(
-	index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer) 
+	index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type &rowContainer, Field_operators* operators) 
 	: ra_opt(columnIndex, rowContainer), 
 	  dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
 	  chain_opt([&]{
@@ -229,7 +218,8 @@ inline Set_column<Master_matrix>::Set_column(
 			} else {
 				return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
 			}
-		}())
+		}()),
+	  operators_(operators)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Constructor not available for chain columns, please specify the dimension of the chain.");
@@ -240,7 +230,7 @@ inline Set_column<Master_matrix>::Set_column(
 		}
 	} else {
 		for (const auto& p : nonZeroRowIndices){
-			_insert_cell(p.second, p.first, column_.end());
+			_insert_cell(operators_->get_value(p.second), p.first, column_.end());
 		}
 	}
 }
@@ -248,7 +238,7 @@ inline Set_column<Master_matrix>::Set_column(
 template<class Master_matrix>
 template<class Container_type>
 inline Set_column<Master_matrix>::Set_column(
-	const Container_type &nonZeroRowIndices, dimension_type dimension) 
+	const Container_type &nonZeroRowIndices, dimension_type dimension, Field_operators* operators) 
 	: ra_opt(), 
 	  dim_opt(dimension),
 	  chain_opt([&]{
@@ -257,7 +247,8 @@ inline Set_column<Master_matrix>::Set_column(
 			} else {
 				return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
 			}
-		}())
+		}()),
+	  operators_(operators)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
 		for (id_index id : nonZeroRowIndices){
@@ -265,7 +256,7 @@ inline Set_column<Master_matrix>::Set_column(
 		}
 	} else {
 		for (const auto& p : nonZeroRowIndices){
-			_insert_cell(p.second, p.first, column_.end());
+			_insert_cell(operators_->get_value(p.second), p.first, column_.end());
 		}
 	}
 }
@@ -273,7 +264,7 @@ inline Set_column<Master_matrix>::Set_column(
 template<class Master_matrix>
 template<class Container_type, class Row_container_type>
 inline Set_column<Master_matrix>::Set_column(
-	index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer) 
+	index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer, Field_operators* operators) 
 	: ra_opt(columnIndex, rowContainer), 
 	  dim_opt(dimension),
 	  chain_opt([&]{
@@ -282,7 +273,8 @@ inline Set_column<Master_matrix>::Set_column(
 			} else {
 				return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
 			}
-		}())
+		}()),
+	  operators_(operators)
 {
 	if constexpr (Master_matrix::Option_list::is_z2){
 		for (id_index id : nonZeroRowIndices){
@@ -290,16 +282,17 @@ inline Set_column<Master_matrix>::Set_column(
 		}
 	} else {
 		for (const auto& p : nonZeroRowIndices){
-			_insert_cell(p.second, p.first, column_.end());
+			_insert_cell(operators_->get_value(p.second), p.first, column_.end());
 		}
 	}
 }
 
 template<class Master_matrix>
-inline Set_column<Master_matrix>::Set_column(const Set_column &column) 
+inline Set_column<Master_matrix>::Set_column(const Set_column &column, Field_operators* operators) 
 	: ra_opt(), 
 	  dim_opt(static_cast<const dim_opt&>(column)), 
-	  chain_opt(static_cast<const chain_opt&>(column))
+	  chain_opt(static_cast<const chain_opt&>(column)),
+	  operators_(operators == nullptr ? column.operators_ : operators)
 {
 	static_assert(!Master_matrix::Option_list::has_row_access,
 			"Simple copy constructor not available when row access option enabled. Please specify the new column index and the row container.");
@@ -316,10 +309,11 @@ inline Set_column<Master_matrix>::Set_column(const Set_column &column)
 template<class Master_matrix>
 template<class Row_container_type>
 inline Set_column<Master_matrix>::Set_column(
-	const Set_column &column, index columnIndex, Row_container_type &rowContainer) 
+	const Set_column &column, index columnIndex, Row_container_type &rowContainer, Field_operators* operators) 
 	: ra_opt(columnIndex, rowContainer), 
 	  dim_opt(static_cast<const dim_opt&>(column)), 
-	  chain_opt(static_cast<const chain_opt&>(column))
+	  chain_opt(static_cast<const chain_opt&>(column)),
+	  operators_(operators == nullptr ? column.operators_ : operators)
 {
 	for (const Cell* cell : column.column_){
 		if constexpr (Master_matrix::Option_list::is_z2){
@@ -335,7 +329,8 @@ inline Set_column<Master_matrix>::Set_column(Set_column &&column) noexcept
 	: ra_opt(std::move(static_cast<ra_opt&>(column))), 
 	  dim_opt(std::move(static_cast<dim_opt&>(column))), 
 	  chain_opt(std::move(static_cast<chain_opt&>(column))), 
-	  column_(std::move(column.column_))
+	  column_(std::move(column.column_)),
+	  operators_(std::exchange(column.operators_, nullptr))
 {}
 
 template<class Master_matrix>
@@ -570,10 +565,9 @@ Set_column<Master_matrix>::operator*=(unsigned int v)
 			}
 		}
 	} else {
-	//	v %= Field_element_type::get_characteristic();		//don't work because of multifields...
-		Field_element_type val(v);
+		Field_element_type val = operators_->get_value(v);
 
-		if (val == 0u) {
+		if (val == Field_operators::get_additive_identity()) {
 			if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 				throw std::invalid_argument("A chain column should not be multiplied by 0.");
 			} else {
@@ -582,10 +576,10 @@ Set_column<Master_matrix>::operator*=(unsigned int v)
 			return *this;
 		}
 
-		if (val == 1u) return *this;
+		if (val == Field_operators::get_multiplicative_identity()) return *this;
 
 		for (Cell* cell : column_){
-			cell->get_element() *= val;
+			cell->get_element() = operators_->multiply(cell->get_element(), val);
 			if constexpr (Master_matrix::Option_list::has_row_access)
 				ra_opt::update_cell(*cell);
 		}
@@ -730,6 +724,8 @@ Set_column<Master_matrix>::operator=(const Set_column& other)
 			_insert_cell(cell->get_element(), cell->get_row_index(), column_.end());
 		}
 	}
+
+	operators_ = other.operators_;
 	
 	return *this;
 }
@@ -747,11 +743,13 @@ inline void Set_column<Master_matrix>::_insert_cell(
 		const Field_element_type &value, id_index rowIndex, const typename Column_type::iterator &position)
 {
 	if constexpr (Master_matrix::Option_list::has_row_access){
-		Cell *new_cell = cellPool_.construct(value, ra_opt::columnIndex_, rowIndex);
+		Cell *new_cell = cellPool_.construct(ra_opt::columnIndex_, rowIndex);
+		new_cell->set_element(value);
 		column_.insert(position, new_cell);
 		ra_opt::insert_cell(rowIndex, new_cell);
 	} else {
-		Cell *new_cell = cellPool_.construct(value, rowIndex);
+		Cell *new_cell = cellPool_.construct(rowIndex);
+		new_cell->set_element(value);
 		column_.insert(position, new_cell);
 	}
 }
@@ -785,8 +783,8 @@ inline bool Set_column<Master_matrix>::_add(const Cell_range &column)
 				}
 				_delete_cell(it1);
 			} else {
-				(*it1)->get_element() += cell.get_element();
-				if ((*it1)->get_element() == Field_element_type::get_additive_identity()){
+				(*it1)->get_element() = operators_->add((*it1)->get_element(), cell.get_element());
+				if ((*it1)->get_element() == Field_operators::get_additive_identity()){
 					if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 						if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 					}
@@ -832,7 +830,7 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Field_element_typ
 		Cell* cellTarget = *itTarget;
 		const Cell& cellSource = *itSource;
 		if (cellTarget->get_row_index() < cellSource.get_row_index()) {
-			cellTarget->get_element() *= val;
+			cellTarget->get_element() = operators_->multiply(cellTarget->get_element(), val);
 			if constexpr (Master_matrix::Option_list::has_row_access)
 				ra_opt::update_cell(**itTarget);
 			++itTarget;
@@ -840,9 +838,8 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Field_element_typ
 			_insert_cell(cellSource.get_element(), cellSource.get_row_index(), itTarget);
 			++itSource;
 		} else {
-			cellTarget->get_element() *= val;
-			cellTarget->get_element() += cellSource.get_element();
-			if (cellTarget->get_element() == Field_element_type::get_additive_identity()){
+			cellTarget->get_element() = operators_->multiply_and_add(cellTarget->get_element(), val, cellSource.get_element());
+			if (cellTarget->get_element() == Field_operators::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 					if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
@@ -857,7 +854,7 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Field_element_typ
 	}
 
 	while (itTarget != column_.end()){
-		(*itTarget)->get_element() *= val;
+		(*itTarget)->get_element() = operators_->multiply((*itTarget)->get_element(), val);
 		if constexpr (Master_matrix::Option_list::has_row_access)
 			ra_opt::update_cell(**itTarget);
 		itTarget++;
@@ -884,8 +881,8 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Cell_range& colum
 	for (const Cell &cell : column) {
 		auto it1 = column_.find(const_cast<Cell*>(&cell));
 		if (it1 != column_.end()) {
-			(*it1)->get_element() += (cell.get_element() * val);
-			if ((*it1)->get_element() == Field_element_type::get_additive_identity()){
+			(*it1)->get_element() = operators_->multiply_and_add(cell.get_element(), val, (*it1)->get_element());
+			if ((*it1)->get_element() == Field_operators::get_additive_identity()){
 				if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type){
 					if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
 				}
@@ -895,7 +892,7 @@ inline bool Set_column<Master_matrix>::_multiply_and_add(const Cell_range& colum
 					ra_opt::update_cell(**it1);
 			}
 		} else {
-			_insert_cell(cell.get_element() * val, cell.get_row_index(), column_.end());
+			_insert_cell(operators_->multiply(cell.get_element(), val), cell.get_row_index(), column_.end());
 		}
 	}
 

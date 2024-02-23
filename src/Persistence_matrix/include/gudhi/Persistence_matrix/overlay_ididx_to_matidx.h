@@ -26,7 +26,8 @@ public:
 	using index = typename Master_matrix_type::index;
 	using id_index = typename Master_matrix_type::id_index;
 	using dimension_type = typename Master_matrix_type::dimension_type;
-	using Field_element_type = typename Master_matrix_type::Field_type;
+	using Field_operators = typename Master_matrix_type::Field_operators;
+	using Field_element_type = typename Master_matrix_type::element_type;
 	using boundary_type = typename Master_matrix_type::boundary_type;
 	using Column_type = typename Master_matrix_type::Column_type;
 	using Row_type = typename Master_matrix_type::Row_type;
@@ -34,11 +35,11 @@ public:
 	using barcode_type = typename Master_matrix_type::barcode_type;
 	using cycle_type = typename Master_matrix_type::cycle_type;
 
-	Id_to_index_overlay();
+	Id_to_index_overlay(Field_operators* operators);
 	template<class Boundary_type = boundary_type>
-	Id_to_index_overlay(const std::vector<Boundary_type>& boundaries);
-	Id_to_index_overlay(unsigned int numberOfColumns);
-	Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy);
+	Id_to_index_overlay(const std::vector<Boundary_type>& boundaries, Field_operators* operators);
+	Id_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators);
+	Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy, Field_operators* operators = nullptr);
 	Id_to_index_overlay(Id_to_index_overlay&& other) noexcept;
 	~Id_to_index_overlay();
 
@@ -95,10 +96,10 @@ public:
 	void add_to(id_index sourceFaceID, id_index targetFaceID);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID);
+	void multiply_target_and_add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Field_element_type& coefficient, id_index sourceFaceID, id_index targetFaceID);
+	void multiply_source_and_add_to(const Field_element_type& coefficient, id_index sourceFaceID, id_index targetFaceID);
 
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
@@ -123,7 +124,11 @@ public:
 	//chain
 	id_index get_pivot(id_index faceID);
 
-	Id_to_index_overlay& operator=(Id_to_index_overlay other);
+	void set_operators(Field_operators* operators){ 
+		matrix_.set_operators(operators);
+	}
+
+	Id_to_index_overlay& operator=(const Id_to_index_overlay& other);
 	friend void swap(Id_to_index_overlay& matrix1,
 					 Id_to_index_overlay& matrix2){
 		swap(matrix1.matrix_, matrix2.matrix_);
@@ -172,8 +177,8 @@ private:
 };
 
 template<class Matrix_type, class Master_matrix_type>
-inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay()
-	: matrix_(), idToIndex_(nullptr), nextIndex_(0)
+inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(Field_operators* operators)
+	: matrix_(operators), idToIndex_(nullptr), nextIndex_(0)
 {
 	_initialize_map(0);
 }
@@ -181,8 +186,8 @@ inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		const std::vector<Boundary_type> &boundaries)
-	: matrix_(boundaries),
+		const std::vector<Boundary_type> &boundaries, Field_operators* operators)
+	: matrix_(boundaries, operators),
 	  idToIndex_(nullptr),
 	  nextIndex_(boundaries.size())
 {
@@ -196,16 +201,16 @@ inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
 
 template<class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		unsigned int numberOfColumns)
-	: matrix_(numberOfColumns), idToIndex_(nullptr), nextIndex_(0)
+		unsigned int numberOfColumns, Field_operators* operators)
+	: matrix_(numberOfColumns, operators), idToIndex_(nullptr), nextIndex_(0)
 {
 	_initialize_map(numberOfColumns);
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		const Id_to_index_overlay &matrixToCopy)
-	: matrix_(matrixToCopy.matrix_),
+		const Id_to_index_overlay &matrixToCopy, Field_operators* operators)
+	: matrix_(matrixToCopy.matrix_, operators),
 	  idToIndex_(nullptr),
 	  nextIndex_(matrixToCopy.nextIndex_)
 {
@@ -384,15 +389,15 @@ inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(id_index
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID)
+inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::multiply_target_and_add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID)
 {
-	return matrix_.add_to(_id_to_index(sourceFaceID), coefficient, _id_to_index(targetFaceID));
+	return matrix_.multiply_target_and_add_to(_id_to_index(sourceFaceID), coefficient, _id_to_index(targetFaceID));
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, id_index sourceFaceID, id_index targetFaceID)
+inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::multiply_source_and_add_to(const Field_element_type& coefficient, id_index sourceFaceID, id_index targetFaceID)
 {
-	return matrix_.add_to(coefficient, _id_to_index(sourceFaceID), _id_to_index(targetFaceID));
+	return matrix_.multiply_source_and_add_to(coefficient, _id_to_index(sourceFaceID), _id_to_index(targetFaceID));
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -445,14 +450,14 @@ inline typename Id_to_index_overlay<Matrix_type,Master_matrix_type>::id_index Id
 
 template<class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>&
-Id_to_index_overlay<Matrix_type,Master_matrix_type>::operator=(Id_to_index_overlay other)
+Id_to_index_overlay<Matrix_type,Master_matrix_type>::operator=(const Id_to_index_overlay& other)
 {
-	swap(matrix_, other.matrix_);
+	matrix_ = other.matrix_;
 	if (Master_matrix_type::Option_list::is_of_boundary_type) 
-		std::swap(idToIndex_, other.idToIndex_);
+		idToIndex_ = other.idToIndex_;
 	else
 		idToIndex_ = &matrix_.pivotToColumnIndex_;
-	std::swap(nextIndex_, other.nextIndex_);
+	nextIndex_ = other.nextIndex_;
 
 	return *this;
 }

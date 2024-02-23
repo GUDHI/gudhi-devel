@@ -241,8 +241,8 @@ void test_z2_standart_field_properties(){
 
 	BOOST_CHECK_EQUAL(z21.get_multiplicative_identity(), 1);
 	BOOST_CHECK_EQUAL(z22.get_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z21.get_partial_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z22.get_partial_multiplicative_identity(), 1);
+	BOOST_CHECK_EQUAL(z21.get_partial_multiplicative_identity(7), 1);
+	BOOST_CHECK_EQUAL(z22.get_partial_multiplicative_identity(7), 1);
 
 	BOOST_CHECK_EQUAL(z21.get_characteristic(), 2);
 	BOOST_CHECK_EQUAL(z22.get_characteristic(), 2);
@@ -266,8 +266,8 @@ void test_z5_standart_field_properties(){
 
 	BOOST_CHECK_EQUAL(z51.get_multiplicative_identity(), 1);
 	BOOST_CHECK_EQUAL(z52.get_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z51.get_partial_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z52.get_partial_multiplicative_identity(), 1);
+	BOOST_CHECK_EQUAL(z51.get_partial_multiplicative_identity(7), 1);
+	BOOST_CHECK_EQUAL(z52.get_partial_multiplicative_identity(7), 1);
 
 	BOOST_CHECK_EQUAL(z51.get_characteristic(), 5);
 	BOOST_CHECK_EQUAL(z52.get_characteristic(), 5);
@@ -291,8 +291,8 @@ void test_z7_standart_field_properties(){
 
 	BOOST_CHECK_EQUAL(z71.get_multiplicative_identity(), 1);
 	BOOST_CHECK_EQUAL(z72.get_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z71.get_partial_multiplicative_identity(), 1);
-	BOOST_CHECK_EQUAL(z72.get_partial_multiplicative_identity(), 1);
+	BOOST_CHECK_EQUAL(z71.get_partial_multiplicative_identity(7), 1);
+	BOOST_CHECK_EQUAL(z72.get_partial_multiplicative_identity(7), 1);
 
 	BOOST_CHECK_EQUAL(z71.get_characteristic(), 7);
 	BOOST_CHECK_EQUAL(z72.get_characteristic(), 7);
@@ -460,8 +460,8 @@ void test_multi_field_properties(){
 	BOOST_CHECK_EQUAL(m2.get_additive_identity(), T(0));
 	BOOST_CHECK_EQUAL(m1.get_multiplicative_identity(), T(1));
 	BOOST_CHECK_EQUAL(m2.get_multiplicative_identity(), T(1));
-	BOOST_CHECK_EQUAL(m1.get_partial_multiplicative_identity(), T(0));
-	BOOST_CHECK_EQUAL(m2.get_partial_multiplicative_identity(), T(715));
+	BOOST_CHECK_EQUAL(m1.get_partial_multiplicative_identity(7), T(715));
+	BOOST_CHECK_EQUAL(m2.get_partial_multiplicative_identity(7), T(715));
 
 	BOOST_CHECK_EQUAL(m1.get_characteristic(), 5005);
 	BOOST_CHECK_EQUAL(m2.get_characteristic(), 5005);

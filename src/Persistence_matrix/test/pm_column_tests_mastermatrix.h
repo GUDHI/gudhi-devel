@@ -23,8 +23,8 @@
 #include <gudhi/Persistence_matrix/columns/chain_column_extra_properties.h>
 #include <gudhi/Persistence_matrix/columns/cell_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
-#include <gudhi/Fields/Z2_field.h>
-#include <gudhi/Fields/Zp_field.h>
+#include <gudhi/Fields/Z2_field_operators.h>
+#include <gudhi/Fields/Zp_field_operators.h>
 
 using Gudhi::persistence_matrix::Column_types;
 using Gudhi::persistence_matrix::Column_dimension_holder;
@@ -39,18 +39,19 @@ using Gudhi::persistence_matrix::Dummy_cell_field_element_mixin;
 using Gudhi::persistence_matrix::Row_access;
 using Gudhi::persistence_matrix::Dummy_row_access;
 
-using Z5 = Gudhi::persistence_matrix::Zp_field_element<5>;
-using Z2 = Gudhi::persistence_matrix::Z2_field_element;
+using Zp = Gudhi::persistence_matrix::Zp_field_operators<>;
+using Z2 = Gudhi::persistence_matrix::Z2_field_operators;
 
 template<class Options>
 struct Column_mini_matrix
 {
 	using Option_list = Options;
-	using Field_type = typename Options::field_coeff_type;
+	using Field_operators = typename Options::field_coeff_operators;
 	using index = typename Options::index_type;
 	using id_index = typename Options::id_type;
 	using pos_index = typename Options::pos_type;
 	using dimension_type = typename Options::dimension_type;
+	using element_type = typename std::conditional<Options::is_z2, bool, typename Field_operators::element_type>::type;
 
 	struct matrix_row_tag;
 	struct matrix_column_tag;
@@ -93,7 +94,7 @@ struct Column_mini_matrix
 	using Cell_field_element_option = typename std::conditional<
 										Options::is_z2,
 										Dummy_cell_field_element_mixin,
-										Cell_field_element<Field_type>
+										Cell_field_element<element_type>
 									>::type;
 	using Cell_type = Cell<Column_mini_matrix<Options> >;
 
@@ -140,13 +141,13 @@ struct Column_mini_matrix
 	using boundary_type = typename std::conditional<
 									Options::is_z2,
 									std::initializer_list<id_index>,
-									std::initializer_list<std::pair<id_index,Field_type> >
+									std::initializer_list<std::pair<id_index,element_type> >
 								>::type;
 };
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Base_col_options{
-	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
+	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using id_type = unsigned int;
 	using index_type = id_type;
 	using pos_type = id_type;
@@ -165,7 +166,7 @@ struct Base_col_options{
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Boundary_col_options{
-	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
+	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using id_type = unsigned int;
 	using index_type = id_type;
 	using pos_type = id_type;
@@ -184,7 +185,7 @@ struct Boundary_col_options{
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Chain_col_options{
-	using field_coeff_type = typename std::conditional<is_z2_only, Z2, Z5>::type;
+	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using id_type = unsigned int;
 	using index_type = id_type;
 	using pos_type = id_type;

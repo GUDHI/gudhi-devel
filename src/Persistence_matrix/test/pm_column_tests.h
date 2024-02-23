@@ -69,19 +69,19 @@ std::vector<Column> build_column_matrix(){
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(cont{0,1,3,5}, 4);
-		matrix.emplace_back(cont{0,1,2,5,6}, 4);
-		matrix.emplace_back(cont{0,1,2,5,6}, 4);
-		matrix.emplace_back(cont{}, 4);
-		matrix.emplace_back(cont{0,1,3,5}, 4);
+		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr);
+		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr);
+		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr);
+		matrix.emplace_back(cont{}, 4, nullptr);
+		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr);
 		matrix.emplace_back(matrix[1]);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4);
-		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4);
-		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4);
-		matrix.emplace_back(cont{}, 4);
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators);
+		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, &_g_operators);
+		matrix.emplace_back(cont{}, 4, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators);
 		matrix.emplace_back(matrix[1]);
 	}
 
@@ -94,19 +94,19 @@ std::vector<Column> build_column_matrix(Rows &rows){
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(0, cont{0,1,3,5}, 4, rows);
-		matrix.emplace_back(1, cont{0,1,2,5,6}, 4, rows);
-		matrix.emplace_back(2, cont{0,1,2,5,6}, 4, rows);
-		matrix.emplace_back(3, cont{}, 4, rows);
-		matrix.emplace_back(4, cont{0,1,3,5}, 4, rows);
+		matrix.emplace_back(0, cont{0,1,3,5}, 4, rows, nullptr);
+		matrix.emplace_back(1, cont{0,1,2,5,6}, 4, rows, nullptr);
+		matrix.emplace_back(2, cont{0,1,2,5,6}, 4, rows, nullptr);
+		matrix.emplace_back(3, cont{}, 4, rows, nullptr);
+		matrix.emplace_back(4, cont{0,1,3,5}, 4, rows, nullptr);
 		matrix.emplace_back(matrix[1], 5, rows);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows);
-		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, rows);
-		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, rows);
-		matrix.emplace_back(3, cont{}, 4, rows);
-		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows);
+		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows, &_g_operators);
+		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, rows, &_g_operators);
+		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, rows, &_g_operators);
+		matrix.emplace_back(3, cont{}, 4, rows, &_g_operators);
+		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows, &_g_operators);
 		matrix.emplace_back(matrix[1], 5, rows);
 	}
 
@@ -119,19 +119,19 @@ std::vector<Column> build_base_boundary_column_matrix(Rows &rows){
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(0, cont{0,1,3,5}, rows);
-		matrix.emplace_back(1, cont{0,1,2,5,6}, rows);
-		matrix.emplace_back(2, cont{0,1,2,5,6}, rows);
-		matrix.emplace_back(3, cont{}, rows);
-		matrix.emplace_back(4, cont{0,1,3,5}, rows);
+		matrix.emplace_back(0, cont{0,1,3,5}, rows, nullptr);
+		matrix.emplace_back(1, cont{0,1,2,5,6}, rows, nullptr);
+		matrix.emplace_back(2, cont{0,1,2,5,6}, rows, nullptr);
+		matrix.emplace_back(3, cont{}, rows, nullptr);
+		matrix.emplace_back(4, cont{0,1,3,5}, rows, nullptr);
 		matrix.emplace_back(matrix[1], 5, rows);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, rows);
-		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, rows);
-		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, rows);
-		matrix.emplace_back(3, cont{}, rows);
-		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, rows);
+		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, rows, &_g_operators);
+		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, rows, &_g_operators);
+		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, rows, &_g_operators);
+		matrix.emplace_back(3, cont{}, rows, &_g_operators);
+		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, rows, &_g_operators);
 		matrix.emplace_back(matrix[1], 5, rows);
 	}
 
@@ -144,19 +144,19 @@ std::vector<Column> build_base_boundary_column_matrix(){
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(cont{0,1,3,5});
-		matrix.emplace_back(cont{0,1,2,5,6});
-		matrix.emplace_back(cont{0,1,2,5,6});
-		matrix.emplace_back(cont{});
-		matrix.emplace_back(cont{0,1,3,5});
+		matrix.emplace_back(cont{0,1,3,5}, nullptr);
+		matrix.emplace_back(cont{0,1,2,5,6}, nullptr);
+		matrix.emplace_back(cont{0,1,2,5,6}, nullptr);
+		matrix.emplace_back(cont{}, nullptr);
+		matrix.emplace_back(cont{0,1,3,5}, nullptr);
 		matrix.emplace_back(matrix[1]);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}});
-		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}});
-		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}});
-		matrix.emplace_back(cont{});
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}});
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators);
+		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators);
+		matrix.emplace_back(cont{}, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators);
 		matrix.emplace_back(matrix[1]);
 	}
 
@@ -260,6 +260,8 @@ void column_test_common_constructors(){
 	using container_type = std::vector<cell_type>;
 
 	container_type cont1, cont2;
+	typename Column::Field_operators *op = nullptr;
+	if constexpr (!is_z2<Column>()) op = &_g_operators;
 
 	if constexpr (is_z2<Column>()){
 		cont1 = {0,2,4};
@@ -269,14 +271,14 @@ void column_test_common_constructors(){
 		cont2 = {{0, 1u},{5, 2u},{6, 3u}};
 	}
 
-	Column emptyCol;
+	Column emptyCol(op);
 	BOOST_CHECK_EQUAL(emptyCol.size(), 0);
 
-	Column col(cont1, 2);
+	Column col(cont1, 2, op);
 	BOOST_CHECK_EQUAL(col.size(), 3);
 
 	std::vector<int> rows;	//type doesn't matter, as the row option is not enabled.
-	Column rowCol(2, cont2, 2, rows);
+	Column rowCol(2, cont2, 2, rows, op);
 	BOOST_CHECK_EQUAL(rowCol.size(), 3);
 
 	Column copyCol(col);
@@ -415,37 +417,18 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	std::set<std::pair<unsigned int,typename Column::Field_element_type> > setcont;
 	std::vector<typename Column::Field_element_type> veccont;
 
-	Column add1, add2;
-	if constexpr (!has_row_access<Column>()){
-		add1 = matrix[0] + matrix[1];
-		add2 = matrix[1] + matrix[2];
-	}
 	matrix[0] += matrix[1];
 	matrix[1] += matrix[2];
 
 	setcont = {{1,4},{2,1},{3,3},{6,1}};
 	veccont = {0, 4, 1, 3, 0, 0, 1};
 	column_test_common_content_access(matrix[0], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(add1, setcont, veccont);
-		BOOST_CHECK(add1 == matrix[0]);
-		BOOST_CHECK(add2 == matrix[1]);
-	}
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
 	BOOST_CHECK(matrix[2] < matrix[0]);
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
-	Column mul1, mul2, mul3, mul4, mul5, mul6;
-	if constexpr (!has_row_access<Column>()){
-		mul1 = matrix[0] * 4;
-		mul2 = 4 * matrix[0];
-		mul3 = matrix[1] * 2;
-		mul4 = 2 * matrix[1];
-		mul5 = matrix[2] * 1;
-		mul6 = 1 * matrix[2];
-	}
 	matrix[0] *= 4;
 	matrix[1] *= 2;
 	matrix[2] *= 1;
@@ -453,23 +436,9 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	setcont = {{1,1},{2,4},{3,2},{6,4}};
 	veccont = {0, 1, 4, 2, 0, 0, 4};
 	column_test_common_content_access(matrix[0], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(mul1, setcont, veccont);
-		column_test_common_content_access(mul2, setcont, veccont);
-	}
 	setcont = {{0,1},{1,3},{2,4},{5,4},{6,4}};
 	veccont = {1, 3, 4, 0, 0, 4, 4};
 	column_test_common_content_access(matrix[2], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(mul5, setcont, veccont);
-		column_test_common_content_access(mul6, setcont, veccont);
-		BOOST_CHECK(mul1 == mul2);
-		BOOST_CHECK(mul3 == mul4);
-		BOOST_CHECK(mul5 == mul6);
-		BOOST_CHECK(mul1 == matrix[0]);
-		BOOST_CHECK(mul3 == matrix[1]);
-		BOOST_CHECK(mul5 == matrix[2]);
-	}
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
@@ -510,56 +479,27 @@ void column_test_common_z2_operators(std::vector<Column> &matrix){
 	std::set<unsigned int> setcont;
 	std::vector<typename Column::Field_element_type> veccont;
 
-	Column add1, add2;
-	if constexpr (!has_row_access<Column>()){
-		add1 = matrix[0] + matrix[1];
-		add2 = matrix[1] + matrix[2];
-	}
 	matrix[0] += matrix[1];
 	matrix[1] += matrix[2];
 
 	setcont = {2,3,6};
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	column_test_common_content_access(matrix[0], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(add1, setcont, veccont);
-		BOOST_CHECK(add1 == matrix[0]);
-		BOOST_CHECK(add2 == matrix[1]);
-	}
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
 	BOOST_CHECK(matrix[2] < matrix[0]);
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
-	Column mul1, mul2, mul5, mul6;
-	if constexpr (!has_row_access<Column>()){
-		mul1 = matrix[0] * 5;
-		mul2 = 5 * matrix[0];
-		mul5 = matrix[2] * 1;
-		mul6 = 1 * matrix[2];
-	}
 	matrix[0] *= 5;
 	matrix[2] *= 1;
 
 	setcont = {2,3,6};
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	column_test_common_content_access(matrix[0], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(mul1, setcont, veccont);
-		column_test_common_content_access(mul2, setcont, veccont);
-	}
 	setcont = {0,1,2,5,6};
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	column_test_common_content_access(matrix[2], setcont, veccont);
-	if constexpr (!has_row_access<Column>()){
-		column_test_common_content_access(mul5, setcont, veccont);
-		column_test_common_content_access(mul6, setcont, veccont);
-		BOOST_CHECK(mul1 == mul2);
-		BOOST_CHECK(mul5 == mul6);
-		BOOST_CHECK(mul1 == matrix[0]);
-		BOOST_CHECK(mul5 == matrix[2]);
-	}
 	BOOST_CHECK(!(matrix[0] == matrix[2]));
 	BOOST_CHECK(matrix[2] == matrix[2]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
@@ -688,6 +628,9 @@ void column_test_base_boundary_constructors(){
 							   >::type;
 	using container_type = std::vector<cell_type>;
 
+	typename Column::Field_operators *op = nullptr;
+	if constexpr (!is_z2<Column>()) op = &_g_operators;
+
 	container_type cont1, cont2;
 
 	if constexpr (is_z2<Column>()){
@@ -698,11 +641,11 @@ void column_test_base_boundary_constructors(){
 		cont2 = {{0, 1u},{5, 2u},{6, 3u}};
 	}
 
-	Column col(cont1);
+	Column col(cont1, op);
 	BOOST_CHECK_EQUAL(col.size(), 3);
 
 	std::vector<int> rows;	//type doesn't matter, as the row option is not enabled.
-	Column rowCol(2, cont2, rows);
+	Column rowCol(2, cont2, rows, op);
 	BOOST_CHECK_EQUAL(rowCol.size(), 3);
 
 	BOOST_CHECK(!(col == rowCol));
@@ -720,7 +663,7 @@ template<class Column>
 void column_test_base_boundary_z5_methods(){
 	std::vector<typename Column::Field_element_type> veccont;
 
-	Column col(std::vector<std::pair<unsigned int,typename Column::Field_element_type> >{{0,4},{1,2},{2,1},{5,1},{6,1}});
+	Column col(std::vector<std::pair<unsigned int,typename Column::Field_element_type> >{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(col.get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(col.size(), 5);
@@ -747,7 +690,7 @@ template<class Column>
 void column_test_base_boundary_z2_methods(){
 	std::vector<typename Column::Field_element_type> veccont;
 
-	Column col(std::vector<unsigned int>{0,1,2,5,6});
+	Column col(std::vector<unsigned int>{0,1,2,5,6}, nullptr);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(col.get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(col.size(), 5);
@@ -783,12 +726,25 @@ void column_test_base_boundary_z2_methods(){
 //assumes that matrix was build with build_column_matrix and was not modified since.
 template<class Column>
 void column_test_base_z5_operators(std::vector<Column> &matrix){
-	using F = typename Column::Field_element_type;
 	using Cell = typename Column::Cell;
 	std::set<Cell> setcont;
-	std::vector<F> veccont;
+	std::vector<typename Column::Field_element_type> veccont;
 
-	setcont = {Cell(F(4),0),Cell(F(2),1),Cell(F(1),2),Cell(F(1),5),Cell(F(1),6)};
+	Cell cell(0);
+	cell.set_element(4);
+	setcont.insert(cell);
+	cell = Cell(1);
+	cell.set_element(2);
+	setcont.insert(cell);
+	cell = Cell(2);
+	cell.set_element(1);
+	setcont.insert(cell);
+	cell = Cell(5);
+	cell.set_element(1);
+	setcont.insert(cell);
+	cell = Cell(6);
+	cell.set_element(1);
+	setcont.insert(cell);
 	matrix[0] += setcont;
 
 	veccont = {0, 4, 1, 3, 0, 0, 1};
@@ -797,7 +753,22 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[0].size(), 4);
 	}
 
-	setcont = {Cell(F(1),0),Cell(F(3),1),Cell(F(4),2),Cell(F(4),5),Cell(F(4),6)};
+	setcont.clear();
+	cell = Cell(0);
+	cell.set_element(1);
+	setcont.insert(cell);
+	cell = Cell(1);
+	cell.set_element(3);
+	setcont.insert(cell);
+	cell = Cell(2);
+	cell.set_element(4);
+	setcont.insert(cell);
+	cell = Cell(5);
+	cell.set_element(4);
+	setcont.insert(cell);
+	cell = Cell(6);
+	cell.set_element(4);
+	setcont.insert(cell);
 	matrix[1] += setcont;
 
 	veccont = {};
@@ -822,7 +793,22 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	}
 	//this = this + column * v
-	setcont = {Cell(F(3),0),Cell(F(1),2),Cell(F(2),3),Cell(F(2),5),Cell(F(1),6)};
+	setcont.clear();
+	cell = Cell(0);
+	cell.set_element(3);
+	setcont.insert(cell);
+	cell = Cell(2);
+	cell.set_element(1);
+	setcont.insert(cell);
+	cell = Cell(3);
+	cell.set_element(2);
+	setcont.insert(cell);
+	cell = Cell(5);
+	cell.set_element(2);
+	setcont.insert(cell);
+	cell = Cell(6);
+	cell.set_element(1);
+	setcont.insert(cell);
 	matrix[5].multiply_and_add(setcont, 3);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -830,7 +816,25 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 6);
 	}
 	//this = v * this + column
-	setcont = {Cell(F(3),0),Cell(F(2),1),Cell(F(4),2),Cell(F(1),3),Cell(F(2),5),Cell(F(4),6)};
+	setcont.clear();
+	cell = Cell(0);
+	cell.set_element(3);
+	setcont.insert(cell);
+	cell = Cell(1);
+	cell.set_element(2);
+	setcont.insert(cell);
+	cell = Cell(2);
+	cell.set_element(4);
+	setcont.insert(cell);
+	cell = Cell(3);
+	cell.set_element(1);
+	setcont.insert(cell);
+	cell = Cell(5);
+	cell.set_element(2);
+	setcont.insert(cell);
+	cell = Cell(6);
+	cell.set_element(4);
+	setcont.insert(cell);
 	matrix[3].multiply_and_add(4, setcont);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -971,7 +975,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 
 	std::vector<typename Column::Field_element_type> veccont;
 
-	const Column col0(cont{{0,4},{1,2},{2,1},{5,1},{6,1}});
+	const Column col0(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
 	matrix[0] += col0;
 
 	veccont = {0, 4, 1, 3, 0, 0, 1};
@@ -980,7 +984,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[0].size(), 4);
 	}
 
-	const Column col1(cont{{0,1},{1,3},{2,4},{5,4},{6,4}});
+	const Column col1(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators);
 	matrix[1] += col1;
 
 	veccont = {};
@@ -997,13 +1001,13 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[4].size(), 4);
 	}
 	//this = this + column * v
-	const Column col2(cont{});
+	const Column col2(cont{}, &_g_operators);
 	matrix[5].multiply_and_add(col2, 3);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	//this = this + column * v
-	const Column col3(cont{{0,3},{2,1},{3,2},{5,2},{6,1}});
+	const Column col3(cont{{0,3},{2,1},{3,2},{5,2},{6,1}}, &_g_operators);
 	matrix[5].multiply_and_add(col3, 3);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1011,7 +1015,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 6);
 	}
 	//this = v * this + column
-	const Column col4(cont{{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}});
+	const Column col4(cont{{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}}, &_g_operators);
 	matrix[3].multiply_and_add(4, col4);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -1027,7 +1031,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 
 	std::vector<bool> veccont;
 
-	const Column col0(cont{0,1,2,5,6});
+	const Column col0(cont{0,1,2,5,6}, nullptr);
 	matrix[0] += col0;
 
 	veccont = {0, 0, 1, 1, 0, 0, 1};
@@ -1036,7 +1040,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[0].size(), 3);
 	}
 
-	const Column col1(cont{0,1,2,5,6});
+	const Column col1(cont{0,1,2,5,6}, nullptr);
 	matrix[1] += col1;
 
 	veccont = {};
@@ -1053,7 +1057,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[4].size(), 3);
 	}
 	//this = this + column * v
-	const Column col2(cont{});
+	const Column col2(cont{}, nullptr);
 	matrix[5].multiply_and_add(col2, 3);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1061,7 +1065,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	}
 	//this = this + column * v
-	const Column col3(cont{2,3,6});
+	const Column col3(cont{2,3,6}, nullptr);
 	matrix[5].multiply_and_add(col3, 3);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1069,7 +1073,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 4);
 	}
 	//this = v * this + column
-	const Column col4(cont{0,1,3,5});
+	const Column col4(cont{0,1,3,5}, nullptr);
 	matrix[3].multiply_and_add(4, col4);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -1099,7 +1103,10 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 
 template<class Column>
 void column_test_chain_methods(){
-	Column col;
+	typename Column::Field_operators *op = nullptr;
+	if constexpr (!is_z2<Column>()) op = &_g_operators;
+
+	Column col(op);
 
 	BOOST_CHECK(!col.is_paired());
 	BOOST_CHECK(col.get_paired_chain_index() == -1);

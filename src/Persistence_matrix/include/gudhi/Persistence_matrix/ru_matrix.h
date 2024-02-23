@@ -25,7 +25,8 @@ class RU_matrix
 		  public Master_matrix::RU_representative_cycles_option
 {
 public:
-	using Field_element_type = typename Master_matrix::Field_type;
+	using Field_operators = typename Master_matrix::Field_operators;
+	using Field_element_type = typename Master_matrix::element_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 	using boundary_type = typename Master_matrix::boundary_type;
@@ -34,11 +35,11 @@ public:
 	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
-	RU_matrix();
+	RU_matrix(Field_operators* operators);
 	template<class Boundary_type = boundary_type>
-	RU_matrix(const std::vector<Boundary_type>& orderedBoundaries);
-	RU_matrix(unsigned int numberOfColumns);
-	RU_matrix(const RU_matrix& matrixToCopy);
+	RU_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
+	RU_matrix(unsigned int numberOfColumns, Field_operators* operators);
+	RU_matrix(const RU_matrix& matrixToCopy, Field_operators* operators = nullptr);
 	RU_matrix(RU_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -60,8 +61,8 @@ public:
 	//avoid calling with specialized options or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);	//do not call with vine updates
-	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);	//do not call with vine updates
+	void multiply_target_and_add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);	//do not call with vine updates
+	void multiply_source_and_add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);	//do not call with vine updates
 
 	void zero_cell(index columnIndex, id_index rowIndex, bool inR = true);
 	void zero_column(index columnIndex, bool inR = true);
@@ -72,7 +73,13 @@ public:
 	index get_column_with_pivot(id_index simplexIndex) const;	//assumes that pivot exists
 	id_index get_pivot(index columnIndex);
 
-	RU_matrix& operator=(RU_matrix other);
+	void set_operators(Field_operators* operators){ 
+		operators_ = operators;
+		reducedMatrixR_.set_operators(operators);
+		mirrorMatrixU_.set_operators(operators);
+	}
+
+	RU_matrix& operator=(const RU_matrix& other);
 	friend void swap(RU_matrix& matrix1, RU_matrix& matrix2){
 		swap(static_cast<typename Master_matrix::RU_pairing_option&>(matrix1),
 			 static_cast<typename Master_matrix::RU_pairing_option&>(matrix2));
@@ -105,7 +112,9 @@ private:
 	u_matrix_type mirrorMatrixU_;	//make U not accessible by default and add option to enable access? Inaccessible, it needs less options and we could avoid some ifs.
 	dictionnary_type pivotToColumnIndex_;
 	pos_index nextEventIndex_;
+	Field_operators* operators_;
 
+	void _insert_boundary(index currentIndex);
 	void _initialize_U();
 	void _reduce();
 	void _reduce_last_column(index lastIndex);
@@ -117,22 +126,26 @@ private:
 };
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix()
+inline RU_matrix<Master_matrix>::RU_matrix(Field_operators* operators)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  nextEventIndex_(0)
+	  reducedMatrixR_(operators),
+	  mirrorMatrixU_(operators),
+	  nextEventIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &orderedBoundaries)
+inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  reducedMatrixR_(orderedBoundaries),
-	  mirrorMatrixU_(orderedBoundaries.size()),
-	  nextEventIndex_(orderedBoundaries.size())
+	  reducedMatrixR_(orderedBoundaries, operators),
+	  mirrorMatrixU_(orderedBoundaries.size(), operators),
+	  nextEventIndex_(orderedBoundaries.size()),
+	  operators_(operators)
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(orderedBoundaries.size());
@@ -145,13 +158,14 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &ord
 }
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
+inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Field_operators* operators)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  reducedMatrixR_(numberOfColumns),
-	  mirrorMatrixU_(numberOfColumns),
-	  nextEventIndex_(0)
+	  reducedMatrixR_(numberOfColumns, operators),
+	  mirrorMatrixU_(numberOfColumns, operators),
+	  nextEventIndex_(0),
+	  operators_(operators)
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		pivotToColumnIndex_.reserve(numberOfColumns);
@@ -164,14 +178,15 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns)
 }
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy)
+inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy, Field_operators* operators)
 	: pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
 	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
 	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
-	  reducedMatrixR_(matrixToCopy.reducedMatrixR_),
-	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_),
+	  reducedMatrixR_(matrixToCopy.reducedMatrixR_, operators),
+	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, operators),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
-	  nextEventIndex_(matrixToCopy.nextEventIndex_)
+	  nextEventIndex_(matrixToCopy.nextEventIndex_),
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
 {}
 
 template<class Master_matrix>
@@ -182,34 +197,21 @@ inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix &&other) noexcept
 	  reducedMatrixR_(std::move(other.reducedMatrixR_)),
 	  mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextEventIndex_(std::exchange(other.nextEventIndex_, 0))
+	  nextEventIndex_(std::exchange(other.nextEventIndex_, 0)),
+	  operators_(std::exchange(other.operators_, nullptr))
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
-	index currentIndex = reducedMatrixR_.insert_boundary(boundary, dim);
-
-	if constexpr (Master_matrix::Option_list::is_z2) {
-		mirrorMatrixU_.insert_column({currentIndex});
-	} else {
-		mirrorMatrixU_.insert_column({{currentIndex, 1}});
-	}
-
-	if constexpr (!Master_matrix::Option_list::has_map_column_container){
-		while (pivotToColumnIndex_.size() <= currentIndex)
-			pivotToColumnIndex_.resize(pivotToColumnIndex_.size()*2, -1);
-	}
-	
-	_reduce_last_column(currentIndex);
-	++nextEventIndex_;
+	_insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
 }
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline void RU_matrix<Master_matrix>::insert_boundary([[maybe_unused]] id_index simplexIndex, const Boundary_type& boundary, dimension_type dim){
-	insert_boundary(boundary, dim);
+inline void RU_matrix<Master_matrix>::insert_boundary(id_index simplexIndex, const Boundary_type& boundary, dimension_type dim){
+	_insert_boundary(reducedMatrixR_.insert_boundary(simplexIndex, boundary, dim));
 }
 
 template<class Master_matrix>
@@ -323,17 +325,17 @@ inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targ
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
+inline void RU_matrix<Master_matrix>::multiply_target_and_add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
-	reducedMatrixR_.add_to(sourceColumnIndex, coefficient, targetColumnIndex);
-	mirrorMatrixU_.add_to(sourceColumnIndex, coefficient, targetColumnIndex);
+	reducedMatrixR_.multiply_target_and_add_to(sourceColumnIndex, coefficient, targetColumnIndex);
+	mirrorMatrixU_.multiply_target_and_add_to(sourceColumnIndex, coefficient, targetColumnIndex);
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
+inline void RU_matrix<Master_matrix>::multiply_source_and_add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
-	reducedMatrixR_.add_to(coefficient, sourceColumnIndex, targetColumnIndex);
-	mirrorMatrixU_.add_to(coefficient, sourceColumnIndex, targetColumnIndex);
+	reducedMatrixR_.multiply_source_and_add_to(coefficient, sourceColumnIndex, targetColumnIndex);
+	mirrorMatrixU_.multiply_source_and_add_to(coefficient, sourceColumnIndex, targetColumnIndex);
 }
 
 template<class Master_matrix>
@@ -389,15 +391,16 @@ inline typename RU_matrix<Master_matrix>::id_index RU_matrix<Master_matrix>::get
 }
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix> &RU_matrix<Master_matrix>::operator=(RU_matrix other)
+inline RU_matrix<Master_matrix> &RU_matrix<Master_matrix>::operator=(const RU_matrix& other)
 {
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
-	swap(reducedMatrixR_, other.reducedMatrixR_);
-	swap(mirrorMatrixU_, other.mirrorMatrixU_);
-	pivotToColumnIndex_.swap(other.pivotToColumnIndex_);
-	std::swap(nextEventIndex_, other.nextEventIndex_);
+	reducedMatrixR_ = other.reducedMatrixR_;
+	mirrorMatrixU_ = other.mirrorMatrixU_;
+	pivotToColumnIndex_ = other.pivotToColumnIndex_;
+	nextEventIndex_ = other.nextEventIndex_;
+	operators_ = other.operators_;
 	return *this;
 }
 
@@ -408,6 +411,24 @@ inline void RU_matrix<Master_matrix>::print()
 	reducedMatrixR_.print();
 	std::cout << "U_matrix:\n";
 	mirrorMatrixU_.print();
+}
+
+template<class Master_matrix>
+inline void RU_matrix<Master_matrix>::_insert_boundary(index currentIndex)
+{
+	if constexpr (Master_matrix::Option_list::is_z2) {
+		mirrorMatrixU_.insert_column({currentIndex});
+	} else {
+		mirrorMatrixU_.insert_column({{currentIndex, 1}});
+	}
+
+	if constexpr (!Master_matrix::Option_list::has_map_column_container){
+		while (pivotToColumnIndex_.size() <= currentIndex)
+			pivotToColumnIndex_.resize(pivotToColumnIndex_.size()*2, -1);
+	}
+	
+	_reduce_last_column(currentIndex);
+	++nextEventIndex_;
 }
 
 template<class Master_matrix>
@@ -457,12 +478,12 @@ inline void RU_matrix<Master_matrix>::_reduce()
 						mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(currIndex);
 				} else {
 					Column_type &toadd = reducedMatrixR_.get_column(currIndex);
-					typename Master_matrix::Field_type coef = curr.get_pivot_value();
-					coef = coef.get_inverse();
-					coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
+					Field_element_type coef = curr.get_pivot_value();
+					coef = operators_->get_inverse(coef);
+					coef = operators_->multiply(coef, operators_->get_characteristic() - toadd.get_pivot_value());
 
 					curr.multiply_and_add(coef, toadd);
-					mirrorMatrixU_.add_to(currIndex, coef, i);
+					mirrorMatrixU_.multiply_target_and_add_to(currIndex, coef, i);
 				}
 
 				pivot = curr.get_pivot();
@@ -517,9 +538,9 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 				mirrorMatrixU_.get_column(lastIndex) += mirrorMatrixU_.get_column(currIndex);
 		} else {
 			Column_type &toadd = reducedMatrixR_.get_column(currIndex);
-			typename Master_matrix::Field_type coef = curr.get_pivot_value();
-			coef = coef.get_inverse();
-			coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(toadd.get_pivot_value()));
+			Field_element_type coef = curr.get_pivot_value();
+			coef = operators_->get_inverse(coef);
+			coef = operators_->multiply(coef, operators_->get_characteristic() - toadd.get_pivot_value());
 
 			curr.multiply_and_add(coef, toadd);
 			mirrorMatrixU_.get_column(lastIndex).multiply_and_add(coef, mirrorMatrixU_.get_column(currIndex));

@@ -91,7 +91,7 @@ public:
 	}
 
 	Cell_field_element& operator=(Cell_field_element other){
-		swap(element_, other.element_);
+		std::swap(element_, other.element_);
 		return *this;
 	};
 
@@ -112,7 +112,7 @@ private:
 public:
 	using index = typename Master_matrix::index;
 	using id_index = typename Master_matrix::id_index;
-	using Field_element_type = typename Master_matrix::Field_type;
+	using Field_element_type = typename Master_matrix::element_type;
 
 	// using base_hook_matrix_row = typename Master_matrix::row_hook_type;	//temporary during factorization process
 
@@ -125,16 +125,6 @@ public:
 	Cell(index columnIndex, id_index rowIndex) 
 		: col_opt(columnIndex),
 		  field_opt(),
-		  rowIndex_(rowIndex)
-	{};
-	Cell(Field_element_type element, id_index rowIndex) 
-		: col_opt(),
-		  field_opt(element),
-		  rowIndex_(rowIndex)
-	{};
-	Cell(Field_element_type element, index columnIndex, id_index rowIndex) 
-		: col_opt(columnIndex),
-		  field_opt(element),
 		  rowIndex_(rowIndex)
 	{};
 	Cell(const Cell& cell) 

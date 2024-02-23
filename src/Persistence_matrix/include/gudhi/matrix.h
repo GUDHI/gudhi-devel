@@ -117,11 +117,36 @@ template <class Options = Default_options<> >
 class Matrix {
  public:
   using Option_list = Options;	//to make it accessible from the other classes
-  using Field_type = typename Options::field_coeff_type;    /**< Coefficiants field type. */
-  using index = typename Options::index_type;               /**< Type of MatIdx index. */
-  using id_index = typename Options::id_type;               /**< Type of IDIdx index or row index. */
-  using pos_index = typename Options::pos_type;             /**< Type of PosIdx index. */
-  using dimension_type = typename Options::dimension_type;  /**< Type for dimension. */
+  using index = typename Options::index_type;                 /**< Type of MatIdx index. */
+  using id_index = typename Options::id_type;                 /**< Type of IDIdx index or row index. */
+  using pos_index = typename Options::pos_type;               /**< Type of PosIdx index. */
+  using dimension_type = typename Options::dimension_type;    /**< Type for dimension. */
+
+  struct Dummy_field_operators{
+    using element_type = unsigned int;
+    using characteristic_type = element_type;
+
+    Dummy_field_operators([[maybe_unused]] characteristic_type characteristic = 0){}
+
+    friend void swap([[maybe_unused]] Dummy_field_operators& d1, [[maybe_unused]] Dummy_field_operators& d2){}
+
+    static constexpr characteristic_type get_characteristic() { return 2; }
+  };
+
+  using Field_operators =
+      typename std::conditional<Options::is_z2, 
+                                Dummy_field_operators, 
+                                typename Options::field_coeff_operators
+                               >::type;                       /**< Coefficiants field type. */
+  using element_type = typename std::conditional<Options::is_z2, 
+                                                 bool, 
+                                                 typename Field_operators::element_type
+                                                >::type;
+  using characteristic_type =
+      typename std::conditional<Options::is_z2, 
+                                unsigned int, 
+                                typename Field_operators::characteristic_type
+                               >::type;
 
   // TODO: move outside? unify with other bar types in Gudhi?
   /**
@@ -185,7 +210,7 @@ class Matrix {
   using Cell_field_element_option =
       typename std::conditional<Options::is_z2,
                                 Dummy_cell_field_element_mixin,
-                                Cell_field_element<Field_type>
+                                Cell_field_element<element_type>
                                >::type;
   /**
    * @brief Type of a matrix cell. See @ref Cell for a more detailed description.
@@ -194,7 +219,7 @@ class Matrix {
 
   using cell_rep_type = typename std::conditional<Options::is_z2,
                                                   id_index,
-                                                  std::pair<id_index, Field_type>
+                                                  std::pair<id_index, element_type>
                                                  >::type;
 
   /**
@@ -203,7 +228,7 @@ class Matrix {
    * The two represented cells are therefore assumed to be in the same column.
    */
   struct CellPairComparator {
-    bool operator()(const std::pair<id_index, Field_type>& p1, const std::pair<id_index, Field_type>& p2) const {
+    bool operator()(const std::pair<id_index, element_type>& p1, const std::pair<id_index, element_type>& p2) const {
       return p1.first < p2.first;
     };
   };
@@ -348,7 +373,7 @@ class Matrix {
   //default type for boundaries to permit list initialization directly in function parameters
   using boundary_type = typename std::conditional<Options::is_z2, 
                                                   std::initializer_list<id_index>,
-                                                  std::initializer_list<std::pair<id_index, Field_type> >
+                                                  std::initializer_list<std::pair<id_index, element_type> >
                                                  >::type;
 
   static const bool dimensionIsNeeded = Options::has_column_pairings && Options::is_of_boundary_type &&
@@ -467,13 +492,13 @@ class Matrix {
    * or converted into a chain complex base, so the new matrix is not always identical to the old one.
    */
   template <class Container_type = boundary_type>
-  Matrix(const std::vector<Container_type>& columns);
+  Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic = 11);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
    */
-  Matrix(int numberOfColumns);
+  Matrix(int numberOfColumns, characteristic_type characteristic = 0);
   /**
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators 
    * are necessary, i.e., when **all** following options have following values:
@@ -487,15 +512,16 @@ class Matrix {
    * outside of the matrix about the barcode to provide a better suited comparator adapted to the situation 
    * (as in the implementation of the Zigzag algorithm for example TODO: ref to zigzag module.)
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
    * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
    * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
    */
-  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
-  Matrix(BirthComparatorFunction&& birthComparator, DeathComparatorFunction&& deathComparator);
+  template <typename EventComparatorFunction>
+  Matrix(EventComparatorFunction&& birthComparator, 
+         EventComparatorFunction&& deathComparator);
   /**
    * @brief Constructs a new matrix from the given matrix with the given comparator functions. 
    * Only available when those comparators are necessary, i.e., when **all** following options have following values:
@@ -505,11 +531,11 @@ class Matrix {
    *
    * See description of @ref Matrix(const std::vector<Container_type>& columns) for more information about 
    * @p orderedBoundaries and 
-   * @ref Matrix(BirthComparatorFunction&& birthComparator, DeathComparatorFunction&& deathComparator) 
+   * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator) 
    * for more information about the comparators.
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
    * @tparam Boundary_type Range type for a column. Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continously starting at 0.
    * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
@@ -517,10 +543,11 @@ class Matrix {
    * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
    */
-  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type = boundary_type>
+  template <typename EventComparatorFunction, class Boundary_type = boundary_type>
   Matrix(const std::vector<Boundary_type>& orderedBoundaries, 
-         BirthComparatorFunction&& birthComparator,
-         DeathComparatorFunction&& deathComparator);
+         EventComparatorFunction&& birthComparator,
+         EventComparatorFunction&& deathComparator, 
+         characteristic_type characteristic = 11);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * Only available when those comparators are necessary, i.e., when **all** following options have following values:
@@ -529,21 +556,22 @@ class Matrix {
    *   - @ref has_column_pairings = false
    *
    * See description of 
-   * @ref Matrix(BirthComparatorFunction&& birthComparator, DeathComparatorFunction&& deathComparator) 
+   * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator) 
    * for more information about the comparators.
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
    * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
    */
-  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
+  template <typename EventComparatorFunction>
   Matrix(unsigned int numberOfColumns, 
-         BirthComparatorFunction&& birthComparator,
-         DeathComparatorFunction&& deathComparator);
+         EventComparatorFunction&& birthComparator,
+         EventComparatorFunction&& deathComparator, 
+         characteristic_type characteristic = 0);
   /**
    * @brief Copy constructor.
    * 
@@ -557,6 +585,11 @@ class Matrix {
    * @param other Matrix to move.
    */
   Matrix(Matrix&& other) noexcept;
+
+  //TODO: compatibily with multi fields:
+  //  - set_characteristic(characteristic_type min, characteristic_type max)
+  //  - readapt reduction?
+  void set_characteristic(characteristic_type characteristic);
 
   // (TODO: if there is no row access and the column type corresponds to the internal column type of the matrix, 
   // moving the column instead of copying it should be possible. Is it worth implementing it?)
@@ -794,15 +827,15 @@ class Matrix {
   // id to pos
   // pos to id
   template <typename Index_type>
-  std::enable_if_t<std::is_integral_v<Index_type>> add_to(Index_type sourceColumnIndex,
-                                                          const Field_type& coefficient,
-                                                          Index_type targetColumnIndex);
+  std::enable_if_t<std::is_integral_v<Index_type>> multiply_target_and_add_to(Index_type sourceColumnIndex,
+                                                                              int coefficient,
+                                                                              Index_type targetColumnIndex);
   // base
   // base comp
   template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range>> add_to(const Cell_range& sourceColumn,
-                                                           const Field_type& coefficient,
-                                                           index targetColumnIndex);
+  std::enable_if_t<!std::is_integral_v<Cell_range>> multiply_target_and_add_to(const Cell_range& sourceColumn,
+                                                                               int coefficient,
+                                                                               index targetColumnIndex);
 
   //*** targetColumn += (coefficient * sourceColumn)
   // base
@@ -813,15 +846,15 @@ class Matrix {
   // id to pos
   // pos to id
   template <typename Index_type>
-  std::enable_if_t<std::is_integral_v<Index_type>> add_to(const Field_type& coefficient,
-                                                          Index_type sourceColumnIndex,
-                                                          Index_type targetColumnIndex);
+  std::enable_if_t<std::is_integral_v<Index_type>> multiply_source_and_add_to(int coefficient,
+                                                                              Index_type sourceColumnIndex,
+                                                                              Index_type targetColumnIndex);
   // base
   // base comp
   template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range>> add_to(const Field_type& coefficient,
-                                                           const Cell_range& sourceColumn,
-                                                           index targetColumnIndex);
+  std::enable_if_t<!std::is_integral_v<Cell_range>> multiply_source_and_add_to(int coefficient,
+                                                                               const Cell_range& sourceColumn,
+                                                                               index targetColumnIndex);
 
   // base
   // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
@@ -871,7 +904,12 @@ class Matrix {
   id_index get_pivot(index columnIndex);
 
   Matrix& operator=(Matrix other);
-  friend void swap(Matrix& matrix1, Matrix& matrix2) { swap(matrix1.matrix_, matrix2.matrix_); }
+  friend void swap(Matrix& matrix1, Matrix& matrix2) { 
+    swap(matrix1.matrix_, matrix2.matrix_);
+    swap(matrix1.operators_, matrix2.operators_);
+    matrix1.matrix_.set_operators(&matrix1.operators_);
+    matrix2.matrix_.set_operators(&matrix2.operators_);
+  }
 
   void print();  // for debug
 
@@ -964,13 +1002,14 @@ class Matrix {
         Base_matrix_type
     >::type;
 
+  Field_operators operators_;
   matrix_type matrix_;
 
   static constexpr void _assert_options();
 };
 
 template <class Options>
-inline Matrix<Options>::Matrix() 
+inline Matrix<Options>::Matrix() : operators_(0), matrix_(&operators_)
 {
   static_assert(
       Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
@@ -980,20 +1019,8 @@ inline Matrix<Options>::Matrix()
 
 template <class Options>
 template <class Container_type>
-inline Matrix<Options>::Matrix(const std::vector<Container_type>& columns) : matrix_(columns) 
-{
-  static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
-                "When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns "
-                "have to be provided.");
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or use another constructor and call coefficient "
-         "initializer of the chosen field class.");
-  _assert_options();
-}
-
-template <class Options>
-inline Matrix<Options>::Matrix(int numberOfColumns) : matrix_(numberOfColumns) 
+inline Matrix<Options>::Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic)
+    : operators_(characteristic), matrix_(columns, &operators_)
 {
   static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
                 "When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns "
@@ -1002,9 +1029,20 @@ inline Matrix<Options>::Matrix(int numberOfColumns) : matrix_(numberOfColumns)
 }
 
 template <class Options>
-template <typename BirthComparatorFunction, typename DeathComparatorFunction>
-inline Matrix<Options>::Matrix(BirthComparatorFunction&& birthComparator, DeathComparatorFunction&& deathComparator)
-    : matrix_(birthComparator, deathComparator) 
+inline Matrix<Options>::Matrix(int numberOfColumns, characteristic_type characteristic)
+    : operators_(characteristic), matrix_(numberOfColumns, &operators_)
+{
+  static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
+                "When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns "
+                "have to be provided.");
+  _assert_options();
+}
+
+template <class Options>
+template <typename EventComparatorFunction>
+inline Matrix<Options>::Matrix(EventComparatorFunction&& birthComparator, 
+                               EventComparatorFunction&& deathComparator)
+    : operators_(0), matrix_(&operators_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
@@ -1013,28 +1051,26 @@ inline Matrix<Options>::Matrix(BirthComparatorFunction&& birthComparator, DeathC
 }
 
 template <class Options>
-template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
+template <typename EventComparatorFunction, class Boundary_type>
 inline Matrix<Options>::Matrix(const std::vector<Boundary_type>& orderedBoundaries,
-                               BirthComparatorFunction&& birthComparator, 
-                               DeathComparatorFunction&& deathComparator)
-    : matrix_(orderedBoundaries, birthComparator, deathComparator) 
+                               EventComparatorFunction&& birthComparator, 
+                               EventComparatorFunction&& deathComparator, 
+                               characteristic_type characteristic)
+    : operators_(characteristic), matrix_(orderedBoundaries, &operators_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
       "Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or use another constructor and call coefficient "
-         "initializer of the chosen field class.");
   _assert_options();
 }
 
 template <class Options>
-template <typename BirthComparatorFunction, typename DeathComparatorFunction>
+template <typename EventComparatorFunction>
 inline Matrix<Options>::Matrix(unsigned int numberOfColumns, 
-                               BirthComparatorFunction&& birthComparator,
-                               DeathComparatorFunction&& deathComparator)
-    : matrix_(numberOfColumns, birthComparator, deathComparator) 
+                               EventComparatorFunction&& birthComparator,
+                               EventComparatorFunction&& deathComparator,
+                               characteristic_type characteristic)
+    : operators_(characteristic), matrix_(numberOfColumns, &operators_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
@@ -1043,22 +1079,38 @@ inline Matrix<Options>::Matrix(unsigned int numberOfColumns,
 }
 
 template <class Options>
-inline Matrix<Options>::Matrix(const Matrix& matrixToCopy) : matrix_(matrixToCopy.matrix_) {
+inline Matrix<Options>::Matrix(const Matrix& matrixToCopy) 
+    : operators_(matrixToCopy.operators_), matrix_(matrixToCopy.matrix_, &operators_)
+{
   _assert_options();
 }
 
 template <class Options>
-inline Matrix<Options>::Matrix(Matrix&& other) noexcept : matrix_(std::move(other.matrix_)) {
+inline Matrix<Options>::Matrix(Matrix&& other) noexcept 
+    : operators_(std::move(other.operators_)), matrix_(std::move(other.matrix_))
+{
+  //TODO: verify that the address of operators_ == address of other.operators_ after move
+  //and that therefore the addresses stored in matrix_ are correct.
   _assert_options();
+}
+
+template <class Options>
+inline void Matrix<Options>::set_characteristic(characteristic_type characteristic){
+  static_assert(!Options::is_z2, "The characteristic is definitely set to 2.");
+
+  if (operators_.get_characteristic() != 0) {
+    std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
+                 "as the modulo was already applied to values in existing columns.";
+  }
+
+  operators_.set_characteristic(characteristic);
 }
 
 template <class Options>
 template <class Container_type>
 inline void Matrix<Options>::insert_column(const Container_type& column) {
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
-         "class.");
+  assert(operators_.get_characteristic() != 0 &&
+         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(
       !isNonBasic,
       "'insert_column' not available for the chosen options. The input has to be in the form of a face boundary.");
@@ -1068,10 +1120,8 @@ inline void Matrix<Options>::insert_column(const Container_type& column) {
 template <class Options>
 template <class Container_type>
 inline void Matrix<Options>::insert_column(const Container_type& column, index columnIndex) {
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
-         "class.");
+ assert(operators_.get_characteristic() != 0 &&
+         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(!isNonBasic && !Options::has_column_compression,
                 "'insert_column' with those parameters is not available for the chosen options.");
   matrix_.insert_column(column, columnIndex);
@@ -1081,10 +1131,8 @@ template <class Options>
 template <class Boundary_type>
 inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(const Boundary_type& boundary,
                                                                                         dimension_type dim) {
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
-         "class.");
+  assert(operators_.get_characteristic() != 0 &&
+         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   if constexpr (isNonBasic && !Options::is_of_boundary_type) return matrix_.insert_boundary(boundary, dim);
   else matrix_.insert_boundary(boundary, dim);
 }
@@ -1094,10 +1142,8 @@ template <class Boundary_type>
 inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(id_index faceIndex,
                                                                                         const Boundary_type& boundary,
                                                                                         dimension_type dim) {
-  assert(Field_type::get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified. "
-         "Use a compile-time characteristic initialized field type or call coefficient initializer of the chosen field "
-         "class.");
+  assert(operators_.get_characteristic() != 0 &&
+         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(isNonBasic, "Only enabled for non-basic matrices.");
   if constexpr (!Options::is_of_boundary_type) return matrix_.insert_boundary(faceIndex, boundary, dim);
   else matrix_.insert_boundary(faceIndex, boundary, dim);
@@ -1241,42 +1287,61 @@ inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::add_to
 
 template <class Options>
 template <typename Index_type>
-inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::add_to(Index_type sourceColumnIndex,
-                                                                                const Field_type& coefficient,
-                                                                                Index_type targetColumnIndex) {
-  return matrix_.add_to(sourceColumnIndex, coefficient, targetColumnIndex);
+inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::multiply_target_and_add_to(
+    Index_type sourceColumnIndex, int coefficient, Index_type targetColumnIndex) 
+{
+  if constexpr (Options::is_z2){
+    return matrix_.multiply_target_and_add_to(sourceColumnIndex, coefficient % 2, targetColumnIndex); //will be converted to bool
+  } else {
+    return matrix_.multiply_target_and_add_to(sourceColumnIndex, operators_.get_value(coefficient), targetColumnIndex);
+  }
 }
 
 template <class Options>
 template <class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::add_to(const Cell_range& sourceColumn,
-                                                                                 const Field_type& coefficient,
-                                                                                 index targetColumnIndex) {
+inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::multiply_target_and_add_to(
+    const Cell_range& sourceColumn, int coefficient, index targetColumnIndex) 
+{
   static_assert(!isNonBasic,
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  return matrix_.add_to(sourceColumn, coefficient, targetColumnIndex);
+  if constexpr (Options::is_z2){
+    //coef will be converted to bool, because of element_type
+    return matrix_.multiply_target_and_add_to(sourceColumn, coefficient % 2, targetColumnIndex);
+  } else {
+    return matrix_.multiply_target_and_add_to(sourceColumn, operators_.get_value(coefficient), targetColumnIndex);
+  }
 }
 
 template <class Options>
 template <typename Index_type>
-inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::add_to(const Field_type& coefficient,
-                                                                                Index_type sourceColumnIndex,
-                                                                                Index_type targetColumnIndex) {
-  return matrix_.add_to(coefficient, sourceColumnIndex, targetColumnIndex);
+inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::multiply_source_and_add_to(
+    int coefficient, Index_type sourceColumnIndex, Index_type targetColumnIndex) 
+{
+  if constexpr (Options::is_z2){
+    //coef will be converted to bool, because of element_type
+    return matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumnIndex, targetColumnIndex);
+  } else {
+    return matrix_.multiply_source_and_add_to(operators_.get_value(coefficient), sourceColumnIndex, targetColumnIndex);
+  }
 }
 
 template <class Options>
 template <class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::add_to(const Field_type& coefficient,
-                                                                                 const Cell_range& sourceColumn,
-                                                                                 index targetColumnIndex) {
+inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::multiply_source_and_add_to(
+    int coefficient, const Cell_range& sourceColumn, index targetColumnIndex) 
+{
   static_assert(!isNonBasic,
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  return matrix_.add_to(coefficient, sourceColumn, targetColumnIndex);
+  if constexpr (Options::is_z2){
+    //coef will be converted to bool, because of element_type
+    return matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumn, targetColumnIndex);
+  } else {
+    return matrix_.multiply_source_and_add_to(operators_.get_value(coefficient), sourceColumn, targetColumnIndex);
+  }
 }
 
 template <class Options>
@@ -1369,6 +1434,8 @@ inline typename Matrix<Options>::id_index Matrix<Options>::get_pivot(index colum
 template <class Options>
 inline Matrix<Options>& Matrix<Options>::operator=(Matrix other) {
   swap(matrix_, other.matrix_);
+  swap(operators_, other.operators_);
+  matrix_.set_operators(&operators_);
 
   return *this;
 }

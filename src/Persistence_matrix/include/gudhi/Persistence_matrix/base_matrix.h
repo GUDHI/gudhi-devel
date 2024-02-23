@@ -27,16 +27,17 @@ class Base_matrix
 public:
 	using index = typename Master_matrix::index;
 	using dimension_type = typename Master_matrix::dimension_type;
-	using Field_element_type = typename Master_matrix::Field_type;
+	using Field_operators = typename Master_matrix::Field_operators;
+	using Field_element_type = typename Master_matrix::element_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using container_type = typename Master_matrix::boundary_type;
 	using Row_type = typename Master_matrix::Row_type;
 
-	Base_matrix();
+	Base_matrix(Field_operators* operators);
 	template<class Container_type = container_type>
-	Base_matrix(const std::vector<Container_type>& columns);
-	Base_matrix(unsigned int numberOfColumns);
-	Base_matrix(const Base_matrix& matrixToCopy);
+	Base_matrix(const std::vector<Container_type>& columns, Field_operators* operators);
+	Base_matrix(unsigned int numberOfColumns, Field_operators* operators);
+	Base_matrix(const Base_matrix& matrixToCopy, Field_operators* operators = nullptr);
 	Base_matrix(Base_matrix&& other) noexcept;
 
 	template<class Container_type = container_type>
@@ -57,14 +58,27 @@ public:
 	template<class Cell_range_or_column_index>
 	void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 	template<class Cell_range_or_column_index>
-	void add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	template<class Cell_range_or_column_index>
-	void add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
+	void multiply_source_and_add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 
 	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
 	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
+
+	void set_operators(Field_operators* operators){ 
+		operators_ = operators;
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
+			for (auto& p : matrix_){
+				p.second.set_operators(operators);
+			}
+		} else {
+			for (auto& col : matrix_){
+				col.set_operators(operators);
+			}
+		}
+	}
 
 	Base_matrix& operator=(const Base_matrix& other);
 	friend void swap(Base_matrix& matrix1, Base_matrix& matrix2){
@@ -110,6 +124,7 @@ private:
 
 	matrix_type matrix_;
 	index nextInsertIndex_;
+	Field_operators* operators_;
 
 	template<class Container_type = container_type>
 	void _insert(const Container_type& column, index columnIndex, dimension_type dim);
@@ -117,19 +132,21 @@ private:
 };
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix()
+inline Base_matrix<Master_matrix>::Base_matrix(Field_operators* operators)
 	: swap_opt(),
 	  ra_opt(),
-	  nextInsertIndex_(0)
+	  nextInsertIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Container_type>
-inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type> &columns)
+inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type> &columns, Field_operators* operators)
 	: swap_opt(columns.size()),
 	  ra_opt(columns.size()),	//not ideal if max row index is much smaller than max column index, does that happen often?
 	  matrix_(!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access ? 0 : columns.size()),
-	  nextInsertIndex_(columns.size())
+	  nextInsertIndex_(columns.size()),
+	  operators_(operators)
 {
 	if constexpr (!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access)
 		matrix_.reserve(columns.size());
@@ -137,51 +154,57 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
 	for (index i = 0; i < columns.size(); i++){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.try_emplace(i, Column_type(i, columns[i], ra_opt::rows_));
+				matrix_.try_emplace(i, Column_type(i, columns[i], ra_opt::rows_, operators));
 			} else {
-				matrix_.try_emplace(i, Column_type(columns[i]));
+				matrix_.try_emplace(i, Column_type(columns[i], operators));
 			}
 		} else {
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.emplace_back(i, columns[i], ra_opt::rows_);
+				matrix_.emplace_back(i, columns[i], ra_opt::rows_, operators);
 			} else {
-				matrix_[i] = Column_type(columns[i]);
+				matrix_[i] = Column_type(columns[i], operators);
 			}
 		}
 	}
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns)
+inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns, Field_operators* operators)
 	: swap_opt(numberOfColumns),
 	  ra_opt(numberOfColumns),
 	  matrix_(!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access ? 0 : numberOfColumns),
-	  nextInsertIndex_(0)
+	  nextInsertIndex_(0),
+	  operators_(operators)
 {
 	if constexpr (!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access)
 		matrix_.reserve(numberOfColumns);
 }
 
 template<class Master_matrix>
-inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy)
+inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix &matrixToCopy, Field_operators* operators)
 	: swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
 	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
-	  nextInsertIndex_(matrixToCopy.nextInsertIndex_)
+	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
 {
-	if constexpr (Master_matrix::Option_list::has_row_access){
-		matrix_.reserve(matrixToCopy.matrix_.size());
-		if constexpr (Master_matrix::Option_list::has_map_column_container){
-			for (const auto& p : matrixToCopy.matrix_){
-				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
-			}
-		} else {
-			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
+	matrix_.reserve(matrixToCopy.matrix_.size());
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		for (const auto& p : matrixToCopy.matrix_){
+			const Column_type& col = p.second;
+			if constexpr (Master_matrix::Option_list::has_row_access){
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators));
+			} else {
+				matrix_.try_emplace(p.first, Column_type(col, operators));
 			}
 		}
 	} else {
-		matrix_ = matrix_type(matrixToCopy.matrix_);
+		for (const auto& col : matrixToCopy.matrix_){
+			if constexpr (Master_matrix::Option_list::has_row_access){
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators);
+			} else {
+				matrix_.emplace_back(col, operators);
+			}
+		}
 	}
 }
 
@@ -190,8 +213,10 @@ inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix &&other) noexcept
 	: swap_opt(std::move(static_cast<swap_opt&>(other))),
 	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
-	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0))
+	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
+	  operators_(std::exchange(other.operators_, nullptr))
 {
+	//TODO: not sure this is necessary, as the address of rows_ should be "moved" too, no?
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (auto& p : matrix_){
@@ -327,7 +352,7 @@ inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index&
 
 template<class Master_matrix>
 template<class Cell_range_or_column_index>
-inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Base_matrix<Master_matrix>::multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -346,7 +371,7 @@ inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index&
 
 template<class Master_matrix>
 template<class Cell_range_or_column_index>
-inline void Base_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
+inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
 	if constexpr (std::is_integral_v<Cell_range_or_column_index>){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -424,6 +449,7 @@ inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(const B
 {
 	swap_opt::operator=(other);
 	nextInsertIndex_ = other.nextInsertIndex_;
+	operators_ = other.operators_;
 
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		ra_opt::operator=(other);
@@ -431,11 +457,11 @@ inline Base_matrix<Master_matrix> &Base_matrix<Master_matrix>::operator=(const B
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
 			}
 		}
 	} else {
@@ -479,15 +505,14 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
 	_orderRowsIfNecessary();
 
 	index pivot = 0;
-	if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows){
-		if (column.begin() != column.end()){
-			if constexpr (Master_matrix::Option_list::is_z2){
-				pivot = *std::prev(column.end());
-			} else {
-				pivot = std::prev(column.end())->first;
-			}
-			if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
+	if (column.begin() != column.end()){
+		if constexpr (Master_matrix::Option_list::is_z2){
+			pivot = *std::prev(column.end());
+		} else {
+			pivot = std::prev(column.end())->first;
 		}
+		if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows)
+			if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
 	}
 	
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -505,27 +530,27 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
 		}
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(columnIndex, Column_type(columnIndex, column, dim, ra_opt::rows_));
+			matrix_.try_emplace(columnIndex, Column_type(columnIndex, column, dim, ra_opt::rows_, operators_));
 		} else {
-			matrix_.try_emplace(columnIndex, column, dim);
+			matrix_.try_emplace(columnIndex, column, dim, operators_);
 		}
 	} else {
-		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(columnIndex, column, dim, ra_opt::rows_);
-		} else {
-			if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
-				index size = swap_opt::indexToRow_.size();
-				if (size <= pivot){
-					for (index i = size; i <= pivot; i++){
-						swap_opt::indexToRow_.push_back(i);
-						swap_opt::rowToIndex_.push_back(i);
-					}
+		if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update){
+			index size = swap_opt::indexToRow_.size();
+			if (size <= pivot){
+				for (index i = size; i <= pivot; i++){
+					swap_opt::indexToRow_.push_back(i);
+					swap_opt::rowToIndex_.push_back(i);
 				}
 			}
+		}
+		if constexpr (Master_matrix::Option_list::has_row_access){
+			matrix_.emplace_back(columnIndex, column, dim, ra_opt::rows_, operators_);
+		} else {
 			if (matrix_.size() <= columnIndex) {
 				matrix_.resize(columnIndex + 1);
 			}
-			matrix_[columnIndex] = Column_type(column, dim);
+			matrix_[columnIndex] = Column_type(column, dim, operators_);
 		}
 	}
 }

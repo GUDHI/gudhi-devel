@@ -31,7 +31,8 @@ class Chain_matrix
 		  public Master_matrix::Matrix_row_access_option
 {
 public:
-	using Field_element_type = typename Master_matrix::Field_type;
+	using Field_operators = typename Master_matrix::Field_operators;
+	using Field_element_type = typename Master_matrix::element_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 	using Cell = typename Master_matrix::Cell_type;
@@ -42,25 +43,28 @@ public:
 	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
-	Chain_matrix();
+	Chain_matrix(Field_operators* operators);
 	template<class Boundary_type = boundary_type>
-	Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries);
-	Chain_matrix(unsigned int numberOfColumns);
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+	Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
+	Chain_matrix(unsigned int numberOfColumns, Field_operators* operators);
+	template<typename EventComparatorFunction>
 	Chain_matrix(
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type = boundary_type>
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
+	template<typename EventComparatorFunction, class Boundary_type = boundary_type>
 	Chain_matrix(
-		const std::vector<Boundary_type>& orderedBoundaries,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+		const std::vector<Boundary_type>& orderedBoundaries, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
+	template<typename EventComparatorFunction>
 	Chain_matrix(
-		unsigned int numberOfColumns,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
-	Chain_matrix(const Chain_matrix& matrixToCopy);
+		unsigned int numberOfColumns, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
+	Chain_matrix(const Chain_matrix& matrixToCopy, Field_operators* operators = nullptr);
 	Chain_matrix(Chain_matrix&& other) noexcept;
 
 	//new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
@@ -81,8 +85,8 @@ public:
 	//avoid calling with specialized options or make it such that it makes sense for persistence
 	//=================================================================
 	void add_to(index sourceColumnIndex, index targetColumnIndex);
-	void add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
-	void add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
+	void multiply_target_and_add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);
+	void multiply_source_and_add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);
 	//=================================================================
 
 	bool is_zero_cell(index columnIndex, id_index rowIndex) const;
@@ -90,6 +94,19 @@ public:
 
 	index get_column_with_pivot(id_index faceID) const;
 	id_index get_pivot(index columnIndex);
+
+	void set_operators(Field_operators* operators){ 
+		operators_ = operators;
+		if constexpr (Master_matrix::Option_list::has_map_column_container){
+			for (auto& p : matrix_){
+				p.second.set_operators(operators);
+			}
+		} else {
+			for (auto& col : matrix_){
+				col.set_operators(operators);
+			}
+		}
+	}
 
 	Chain_matrix& operator=(const Chain_matrix& other);
 	friend void swap(Chain_matrix& matrix1,
@@ -150,6 +167,7 @@ private:
 	matrix_type matrix_;
 	dictionnary_type pivotToColumnIndex_;
 	index nextIndex_;
+	Field_operators* operators_;
 
 	template<class Boundary_type>
 	std::vector<cell_rep_type> _reduce_boundary(id_index faceID, const Boundary_type& boundary, dimension_type dim);
@@ -178,24 +196,26 @@ private:
 };
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix()
+inline Chain_matrix<Master_matrix>::Chain_matrix(Field_operators* operators)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type> &orderedBoundaries)
+inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {
 	matrix_.reserve(orderedBoundaries.size());
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -210,13 +230,14 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type
 }
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns)
+inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, Field_operators* operators)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {
 	matrix_.reserve(numberOfColumns);
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -227,30 +248,34 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns)
 }
 
 template<class Master_matrix>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+template<typename EventComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator)
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
+template<typename EventComparatorFunction, class Boundary_type>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
-		const std::vector<Boundary_type> &orderedBoundaries,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator)
+		const std::vector<Boundary_type> &orderedBoundaries, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {
 	matrix_.reserve(orderedBoundaries.size());
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -264,17 +289,19 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 }
 
 template<class Master_matrix>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+template<typename EventComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
-		unsigned int numberOfColumns,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator)
+		unsigned int numberOfColumns, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(birthComparator, deathComparator),
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
-	  nextIndex_(0)
+	  nextIndex_(0),
+	  operators_(operators)
 {
 	matrix_.reserve(numberOfColumns);
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -285,36 +312,37 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 }
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy)
+inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy, Field_operators* operators)
 	: dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
 	  pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
 	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
 	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
 	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
-	  nextIndex_(matrixToCopy.nextIndex_)
+	  nextIndex_(matrixToCopy.nextIndex_),
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
 {
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col));
+				matrix_.try_emplace(p.first, Column_type(col, operators_));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col);
+				matrix_.emplace_back(col, operators_);
 			}
 		}
 	}
@@ -330,8 +358,10 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
-	  nextIndex_(std::exchange(other.nextIndex_, 0))
+	  nextIndex_(std::exchange(other.nextIndex_, 0)),
+	  operators_(std::exchange(other.operators_, nullptr))
 {
+	//TODO: not sur this is necessary, as the address of rows_ should be moved too, no?
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		for (auto& p : matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
@@ -526,7 +556,7 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, index t
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::multiply_target_and_add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto& col = matrix_.at(targetColumnIndex);
@@ -538,7 +568,7 @@ inline void Chain_matrix<Master_matrix>::add_to(index sourceColumnIndex, const F
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
+inline void Chain_matrix<Master_matrix>::multiply_source_and_add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto& col = matrix_.at(targetColumnIndex);
@@ -599,6 +629,7 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 	rep_opt::operator=(other);
 	pivotToColumnIndex_ = other.pivotToColumnIndex_;
 	nextIndex_ = other.nextIndex_;
+	operators_ = other.operators_;
 
 	matrix_.reserve(other.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
@@ -606,22 +637,22 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index()));
+				matrix_.try_emplace(p.first, Column_type(col, operators_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index());
+				matrix_.emplace_back(col, operators_);
 			}
 		}
 	}
@@ -759,8 +790,8 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_G(
 		chainsInH.push_back(col.get_paired_chain_index());//keep the col_h with which col_g is paired
 	} else {
 		Field_element_type coef = col.get_pivot_value();
-		coef = coef.get_inverse();
-		coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
+		coef = operators_->get_inverse(coef);
+		coef = operators_->multiply(coef, operators_->get_characteristic() - column.rbegin()->second);
 
 		_add_to(col, column, coef);	//Reduce with the column col_g
 		chainsInH.emplace_back(col.get_paired_chain_index(), coef);//keep the col_h with which col_g is paired
@@ -779,11 +810,11 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_F(
 		chainsInF.push_back(currentIndex);
 	} else {
 		Field_element_type coef = col.get_pivot_value();
-		coef = coef.get_inverse();
-		coef *= (Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(column.rbegin()->second));
+		coef = operators_->get_inverse(coef);
+		coef = operators_->multiply(coef, operators_->get_characteristic() - column.rbegin()->second);
 
 		_add_to(col, column, coef);	//Reduce with the column col_g
-		chainsInF.emplace_back(currentIndex, Master_matrix::Field_type::get_characteristic() - static_cast<unsigned int>(coef));
+		chainsInF.emplace_back(currentIndex, operators_->get_characteristic() - coef);
 	}
 }
 
@@ -825,7 +856,7 @@ inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(
 			other_col_it != chainsInF.end();
 			 ++other_col_it)
 		{
-			add_to(other_col_it->second, other_col_it->first, toUpdate);
+			multiply_source_and_add_to(other_col_it->second, other_col_it->first, toUpdate);
 		}
 	}
 }
@@ -844,15 +875,15 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_));
 		} else {
-			matrix_.try_emplace(nextIndex_, Column_type(column, dimension));
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_));
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_);
 		} else {
-			matrix_.emplace_back(column, dimension);
+			matrix_.emplace_back(column, dimension, operators_);
 		}
 		
 		pivotToColumnIndex_[pivot] = nextIndex_;
@@ -882,9 +913,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_));
 		} else {
-			matrix_.try_emplace(nextIndex_, Column_type(column, dimension));
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_));
 		}
 
 		matrix_.at(nextIndex_).assign_paired_chain(pair);
@@ -896,9 +927,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_);
 		} else {
-			matrix_.emplace_back(column, dimension);
+			matrix_.emplace_back(column, dimension, operators_);
 		}
 
 		matrix_[nextIndex_].assign_paired_chain(pair);
@@ -935,14 +966,13 @@ inline void Chain_matrix<Master_matrix>::_add_to(
 			auto res_it = set.find(p);
 
 			if (res_it != set.end()){
-				p.second *= coef;
-				p.second += res_it->second;
+				p.second = operators_->multiply_and_add(p.second, coef, res_it->second);
 				set.erase(res_it);
-				if (p.second != Field_element_type::get_additive_identity()){
+				if (p.second != Field_operators::get_additive_identity()){
 					set.insert(p);
 				}
 			} else {
-				p.second *= coef;
+				p.second = operators_->multiply(p.second, coef);
 				set.insert(p);
 			}
 		}

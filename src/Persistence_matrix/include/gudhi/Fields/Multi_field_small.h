@@ -14,9 +14,7 @@
 #include <utility>
 #include <vector>
 #include <limits.h>
-#include <iostream>
 #include <gmpxx.h>
-#include <cmath>
 #include <numeric>
 
 namespace Gudhi {
@@ -165,7 +163,7 @@ public:
 
 	static Multi_field_element_with_small_characteristics get_additive_identity();
 	static Multi_field_element_with_small_characteristics get_multiplicative_identity();
-	Multi_field_element_with_small_characteristics get_partial_multiplicative_identity();
+	static Multi_field_element_with_small_characteristics get_partial_multiplicative_identity(const mpz_class& productOfCharacteristics);
 	static constexpr unsigned int get_characteristic();
 
 	unsigned int get_value() const;
@@ -352,11 +350,10 @@ inline std::pair<Multi_field_element_with_small_characteristics<minimum,maximum>
 		return {Multi_field_element_with_small_characteristics(), multiplicativeID_};  // partial inverse is 0
 
 	unsigned int QT = productOfCharacteristics / gcd;
-	Multi_field_element_with_small_characteristics res(QT);
 
 	const unsigned int inv_qt = _get_inverse(element_, QT);
 
-	res = res.get_partial_multiplicative_identity();
+	auto res = get_partial_multiplicative_identity(QT);
 	res *= inv_qt;
 
 	return {res, QT};
@@ -375,14 +372,14 @@ inline Multi_field_element_with_small_characteristics<minimum,maximum> Multi_fie
 }
 
 template<unsigned int minimum, unsigned int maximum>
-inline Multi_field_element_with_small_characteristics<minimum,maximum> Multi_field_element_with_small_characteristics<minimum,maximum>::get_partial_multiplicative_identity()
+inline Multi_field_element_with_small_characteristics<minimum,maximum> Multi_field_element_with_small_characteristics<minimum,maximum>::get_partial_multiplicative_identity(const mpz_class& productOfCharacteristics)
 {
-	if (element_ == 0) {
+	if (productOfCharacteristics == 0) {
 		return Multi_field_element_with_small_characteristics<minimum,maximum>(multiplicativeID_);
 	}
 	Multi_field_element_with_small_characteristics<minimum,maximum> mult;
 	for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
-		if ((element_ % primes_[idx]) == 0) {
+		if ((productOfCharacteristics % primes_[idx]) == 0) {
 			mult += partials_[idx];
 		}
 	}

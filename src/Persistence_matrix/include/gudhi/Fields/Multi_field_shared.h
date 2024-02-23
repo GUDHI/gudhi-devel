@@ -13,8 +13,6 @@
 
 #include <utility>
 #include <vector>
-#include <limits.h>
-#include <iostream>
 #include <gmpxx.h>
 #include <stdexcept>
 
@@ -160,7 +158,7 @@ public:
 
 	static Shared_multi_field_element get_additive_identity();
 	static Shared_multi_field_element get_multiplicative_identity();
-	Shared_multi_field_element get_partial_multiplicative_identity();
+	static Shared_multi_field_element get_partial_multiplicative_identity(const mpz_class& productOfCharacteristics);
 	static mpz_class get_characteristic();
 
 	mpz_class get_value() const;
@@ -326,12 +324,11 @@ inline std::pair<Shared_multi_field_element,mpz_class> Shared_multi_field_elemen
 		return {Shared_multi_field_element(), multiplicativeID_};  // partial inverse is 0
 
 	mpz_class QT = productOfCharacteristics / QR;
-	Shared_multi_field_element res(QT);
 
 	mpz_class inv_qt;
 	mpz_invert(inv_qt.get_mpz_t(), element_.get_mpz_t(), QT.get_mpz_t());
 
-	res = res.get_partial_multiplicative_identity();
+	auto res = get_partial_multiplicative_identity(QT);
 	res *= inv_qt;
 
 	return {res, QT};
@@ -347,14 +344,14 @@ inline Shared_multi_field_element Shared_multi_field_element::get_multiplicative
 	return Shared_multi_field_element(multiplicativeID_);
 }
 
-inline Shared_multi_field_element Shared_multi_field_element::get_partial_multiplicative_identity()
+inline Shared_multi_field_element Shared_multi_field_element::get_partial_multiplicative_identity(const mpz_class& productOfCharacteristics)
 {
-	if (element_ == 0) {
+	if (productOfCharacteristics == 0) {
 		return Shared_multi_field_element(multiplicativeID_);
 	}
 	Shared_multi_field_element mult;
 	for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
-		if ((element_ % primes_[idx]) == 0) {
+		if ((productOfCharacteristics % primes_[idx]) == 0) {
 			mult += partials_[idx];
 		}
 	}

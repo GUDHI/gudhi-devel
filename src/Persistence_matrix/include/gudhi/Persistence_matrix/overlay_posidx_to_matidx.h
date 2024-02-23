@@ -26,7 +26,8 @@ public:
 	using id_index = typename Master_matrix_type::id_index;
 	using pos_index = typename Master_matrix_type::pos_index;
 	using dimension_type = typename Master_matrix_type::dimension_type;
-	using Field_element_type = typename Master_matrix_type::Field_type;
+	using Field_operators = typename Master_matrix_type::Field_operators;
+	using Field_element_type = typename Master_matrix_type::element_type;
 	using boundary_type = typename Master_matrix_type::boundary_type;
 	using Column_type = typename Master_matrix_type::Column_type;
 	using Row_type = typename Master_matrix_type::Row_type;
@@ -35,28 +36,31 @@ public:
 	using cycle_type = typename Master_matrix_type::cycle_type;
 	using cell_rep_type = typename Master_matrix_type::cell_rep_type;
 
-	Position_to_index_overlay();
+	Position_to_index_overlay(Field_operators* operators);
 	template<class Boundary_type = boundary_type>
-	Position_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries);
-	Position_to_index_overlay(unsigned int numberOfColumns);
+	Position_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
+	Position_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators);
 	//chain
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+	template<typename EventComparatorFunction>
 	Position_to_index_overlay(
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
 	//chain
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
+	template<typename EventComparatorFunction, class Boundary_type>
 	Position_to_index_overlay(
-		const std::vector<Boundary_type>& orderedBoundaries,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
+		const std::vector<Boundary_type>& orderedBoundaries, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
 	//chain
-	template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+	template<typename EventComparatorFunction>
 	Position_to_index_overlay(
-		unsigned int numberOfColumns,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator);
-	Position_to_index_overlay(const Position_to_index_overlay& matrixToCopy);
+		unsigned int numberOfColumns, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator);
+	Position_to_index_overlay(const Position_to_index_overlay& matrixToCopy, Field_operators* operators = nullptr);
 	Position_to_index_overlay(Position_to_index_overlay&& other) noexcept;
 
 	//chain: new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
@@ -111,11 +115,11 @@ public:
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
 	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(pos_index sourcePosition, const Field_element_type& coefficient, pos_index targetPosition);
+	void multiply_target_and_add_to(pos_index sourcePosition, const Field_element_type& coefficient, pos_index targetPosition);
 	//boundary: avoid calling with pairing option or make it such that it makes sense for persistence
 	//ru: avoid calling with specialized options or make it such that it makes sense for persistence
 	//chain: avoid calling with specialized options or make it such that it makes sense for persistence
-	void add_to(const Field_element_type& coefficient, pos_index sourcePosition, pos_index targetPosition);
+	void multiply_source_and_add_to(const Field_element_type& coefficient, pos_index sourcePosition, pos_index targetPosition);
 
 	//boundary
 	//ru: inR = true forced
@@ -134,7 +138,11 @@ public:
 	//chain
 	id_index get_pivot(pos_index position);
 
-	Position_to_index_overlay& operator=(Position_to_index_overlay other);
+	void set_operators(Field_operators* operators){ 
+		matrix_.set_operators(operators);
+	}
+
+	Position_to_index_overlay& operator=(const Position_to_index_overlay& other);
 	friend void swap(Position_to_index_overlay& matrix1,
 					 Position_to_index_overlay& matrix2){
 		swap(matrix1.matrix_, matrix2.matrix_);
@@ -173,16 +181,17 @@ private:
 };
 
 template<class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay()
-	: nextPosition_(0),
+inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(Field_operators* operators)
+	: matrix_(operators),
+	  nextPosition_(0),
 	  nextIndex_(0)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		const std::vector<Boundary_type>& orderedBoundaries)
-	: matrix_(orderedBoundaries),
+		const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators)
+	: matrix_(orderedBoundaries, operators),
 	  positionToIndex_(orderedBoundaries.size()),
 	  nextPosition_(orderedBoundaries.size()),
 	  nextIndex_(orderedBoundaries.size())
@@ -194,27 +203,29 @@ inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_in
 
 template<class Matrix_type, class Master_matrix_type>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		unsigned int numberOfColumns)
-	: matrix_(numberOfColumns), positionToIndex_(numberOfColumns), nextPosition_(0), nextIndex_(0)
+		unsigned int numberOfColumns, Field_operators* operators)
+	: matrix_(numberOfColumns, operators), positionToIndex_(numberOfColumns), nextPosition_(0), nextIndex_(0)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+template<typename EventComparatorFunction>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator) 
-	: matrix_(birthComparator, deathComparator), 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator) 
+	: matrix_(operators, birthComparator, deathComparator), 
 	  nextPosition_(0), 
 	  nextIndex_(0)
 {}
 
 template<class Matrix_type, class Master_matrix_type>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
+template<typename EventComparatorFunction, class Boundary_type>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		const std::vector<Boundary_type>& orderedBoundaries,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator)
-	: matrix_(orderedBoundaries, birthComparator, deathComparator),
+		const std::vector<Boundary_type>& orderedBoundaries, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator)
+	: matrix_(orderedBoundaries, operators, birthComparator, deathComparator),
 	  positionToIndex_(orderedBoundaries.size()),
 	  nextPosition_(orderedBoundaries.size()),
 	  nextIndex_(orderedBoundaries.size())
@@ -225,12 +236,13 @@ inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_in
 }
 
 template<class Matrix_type, class Master_matrix_type>
-template<typename BirthComparatorFunction, typename DeathComparatorFunction>
+template<typename EventComparatorFunction>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		unsigned int numberOfColumns,
-		BirthComparatorFunction&& birthComparator, 
-		DeathComparatorFunction&& deathComparator)
-	: matrix_(numberOfColumns, birthComparator, deathComparator), 
+		unsigned int numberOfColumns, 
+		Field_operators* operators,
+		EventComparatorFunction&& birthComparator, 
+		EventComparatorFunction&& deathComparator)
+	: matrix_(numberOfColumns, operators, birthComparator, deathComparator), 
 	  positionToIndex_(numberOfColumns), 
 	  nextPosition_(0), 
 	  nextIndex_(0)
@@ -238,8 +250,8 @@ inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_in
 
 template<class Matrix_type, class Master_matrix_type>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>::Position_to_index_overlay(
-		const Position_to_index_overlay &matrixToCopy)
-	: matrix_(matrixToCopy.matrix_),
+		const Position_to_index_overlay &matrixToCopy, Field_operators* operators)
+	: matrix_(matrixToCopy.matrix_, operators),
 	  positionToIndex_(matrixToCopy.positionToIndex_),
 	  nextPosition_(matrixToCopy.nextPosition_),
 	  nextIndex_(matrixToCopy.nextIndex_)
@@ -374,15 +386,15 @@ inline void Position_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(po
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(pos_index sourcePosition, const Field_element_type& coefficient, pos_index targetPosition)
+inline void Position_to_index_overlay<Matrix_type,Master_matrix_type>::multiply_target_and_add_to(pos_index sourcePosition, const Field_element_type& coefficient, pos_index targetPosition)
 {
-	return matrix_.add_to(positionToIndex_[sourcePosition], coefficient, positionToIndex_[targetPosition]);
+	return matrix_.multiply_target_and_add_to(positionToIndex_[sourcePosition], coefficient, positionToIndex_[targetPosition]);
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type,Master_matrix_type>::add_to(const Field_element_type& coefficient, pos_index sourcePosition, pos_index targetPosition)
+inline void Position_to_index_overlay<Matrix_type,Master_matrix_type>::multiply_source_and_add_to(const Field_element_type& coefficient, pos_index sourcePosition, pos_index targetPosition)
 {
-	return matrix_.add_to(coefficient, positionToIndex_[sourcePosition], positionToIndex_[targetPosition]);
+	return matrix_.multiply_source_and_add_to(coefficient, positionToIndex_[sourcePosition], positionToIndex_[targetPosition]);
 }
 
 template<class Matrix_type, class Master_matrix_type>
@@ -415,12 +427,12 @@ inline typename Position_to_index_overlay<Matrix_type,Master_matrix_type>::id_in
 
 template<class Matrix_type, class Master_matrix_type>
 inline Position_to_index_overlay<Matrix_type,Master_matrix_type>&
-Position_to_index_overlay<Matrix_type,Master_matrix_type>::operator=(Position_to_index_overlay other)
+Position_to_index_overlay<Matrix_type,Master_matrix_type>::operator=(const Position_to_index_overlay& other)
 {
-	swap(matrix_, other.matrix_);
-	positionToIndex_.swap(other.positionToIndex_);
-	std::swap(nextPosition_, other.nextPosition_);
-	std::swap(nextIndex_, other.nextIndex_);
+	matrix_ = other.matrix_;
+	positionToIndex_ = other.positionToIndex_;
+	nextPosition_ = other.nextPosition_;
+	nextIndex_ = other.nextIndex_;
 
 	return *this;
 }

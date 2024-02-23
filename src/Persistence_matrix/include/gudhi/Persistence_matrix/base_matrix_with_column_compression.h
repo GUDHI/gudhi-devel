@@ -31,7 +31,8 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 public:
 	using index = typename Master_matrix::index;
 	using dimension_type = typename Master_matrix::dimension_type;
-	using Field_element_type = typename Master_matrix::Field_type;
+	using Field_operators = typename Master_matrix::Field_operators;
+	using Field_element_type = typename Master_matrix::element_type;
 	using Row_type = typename Master_matrix::Row_type;
 	// using Column_type = typename Master_matrix::Column_type;
 
@@ -41,31 +42,31 @@ public:
 	public:
 		using Base = typename Master_matrix::Column_type;
 
-		Column_type()
-			: Base()
+		Column_type(Field_operators* operators = nullptr)
+			: Base(operators)
 		{}
 		template<class Container_type>
-		Column_type(const Container_type& nonZeroRowIndices)
-			: Base(nonZeroRowIndices)
+		Column_type(const Container_type& nonZeroRowIndices, Field_operators* operators)
+			: Base(nonZeroRowIndices, operators)
 		{}
 		template<class Container_type, class Row_container_type>
-		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer)
-			: Base(columnIndex, nonZeroRowIndices, rowContainer)
+		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer, Field_operators* operators)
+			: Base(columnIndex, nonZeroRowIndices, rowContainer, operators)
 		{}
 		template<class Container_type>
-		Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension)
-			: Base(nonZeroRowIndices, dimension)
+		Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension, Field_operators* operators)
+			: Base(nonZeroRowIndices, dimension, operators)
 		{}
 		template<class Container_type, class Row_container_type>
-		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer)
-			: Base(columnIndex, nonZeroRowIndices, dimension, rowContainer)
+		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer, Field_operators* operators)
+			: Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, operators)
 		{}
-		Column_type(const Column_type& column)
-			: Base(static_cast<const Base&>(column))
+		Column_type(const Column_type& column, Field_operators* operators = nullptr)
+			: Base(static_cast<const Base&>(column), operators)
 		{}
 		template<class Row_container_type>
-		Column_type(const Column_type& column, index columnIndex, Row_container_type &rowContainer)
-			: Base(static_cast<const Base&>(column), columnIndex, rowContainer)
+		Column_type(const Column_type& column, index columnIndex, Row_container_type &rowContainer, Field_operators* operators = nullptr)
+			: Base(static_cast<const Base&>(column), columnIndex, rowContainer, operators)
 		{}
 		Column_type(Column_type&& column) noexcept
 			: Base(std::move(static_cast<Base&>(column)))
@@ -89,11 +90,11 @@ public:
 		index rep_;
 	};
 
-	Base_matrix_with_column_compression();
+	Base_matrix_with_column_compression(Field_operators* operators);
 	template<class Container_type>
-	Base_matrix_with_column_compression(const std::vector<Container_type>& columns);
-	Base_matrix_with_column_compression(unsigned int numberOfColumns);
-	Base_matrix_with_column_compression(const Base_matrix_with_column_compression& matrixToCopy);
+	Base_matrix_with_column_compression(const std::vector<Container_type>& columns, Field_operators* operators);
+	Base_matrix_with_column_compression(unsigned int numberOfColumns, Field_operators* operators);
+	Base_matrix_with_column_compression(const Base_matrix_with_column_compression& matrixToCopy, Field_operators* operators = nullptr);
 	Base_matrix_with_column_compression(Base_matrix_with_column_compression&& other) noexcept;
 	~Base_matrix_with_column_compression();
 
@@ -111,12 +112,19 @@ public:
 	template<class Cell_range_or_column_index>
 	void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 	template<class Cell_range_or_column_index>
-	void add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
+	void multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	template<class Cell_range_or_column_index>
-	void add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
+	void multiply_source_and_add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
 
 	bool is_zero_cell(index columnIndex, index rowIndex);
 	bool is_zero_column(index columnIndex);
+
+	void set_operators(Field_operators* operators){ 
+		operators_ = operators; 
+		for (auto& col : columnToRep_){
+			col.set_operators(operators);
+		}
+	}
 
 	Base_matrix_with_column_compression& operator=(const Base_matrix_with_column_compression& other);
 	friend void swap(Base_matrix_with_column_compression& matrix1, Base_matrix_with_column_compression& matrix2){
@@ -166,6 +174,7 @@ private:
 	// Union_find columnClasses_;
 	std::vector<Column_type*> repToColumn_;
 	index nextColumnIndex_;
+	Field_operators* operators_;
 	inline static Simple_object_pool<Column_type> columnPool_;
 	inline static const Column_type empty_column_;
 
@@ -174,18 +183,20 @@ private:
 };
 
 template<class Master_matrix>
-inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression()
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(Field_operators* operators)
 	: ra_opt(),
-	  nextColumnIndex_(0)
+	  nextColumnIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Container_type>
-inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const std::vector<Container_type> &columns)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const std::vector<Container_type> &columns, Field_operators* operators)
 	: ra_opt(columns.size()),
 	  columnClasses_(columns.size()),
 	  repToColumn_(columns.size(), nullptr),
-	  nextColumnIndex_(0)
+	  nextColumnIndex_(0),
+	  operators_(operators)
 {
 	for (const Container_type& c : columns){
 		insert_column(c);
@@ -193,26 +204,28 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 }
 
 template<class Master_matrix>
-inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(unsigned int numberOfColumns)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(unsigned int numberOfColumns, Field_operators* operators)
 	: ra_opt(numberOfColumns),
 	  columnClasses_(numberOfColumns),
 	  repToColumn_(numberOfColumns, nullptr),
-	  nextColumnIndex_(0)
+	  nextColumnIndex_(0),
+	  operators_(operators)
 {}
 
 template<class Master_matrix>
-inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const Base_matrix_with_column_compression &matrixToCopy)
+inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(const Base_matrix_with_column_compression &matrixToCopy, Field_operators* operators)
 	: ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  columnClasses_(matrixToCopy.columnClasses_),
 	  repToColumn_(matrixToCopy.repToColumn_.size(), nullptr),
-	  nextColumnIndex_(0)
+	  nextColumnIndex_(0),
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
 {
 	for (const Column_type* col : matrixToCopy.repToColumn_){
 		if (col != nullptr){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_);
+				repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, operators_);
 			} else {
-				repToColumn_[nextColumnIndex_] = columnPool_.construct(*col);
+				repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, operators_);
 			}
 			columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
 			repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);
@@ -227,8 +240,10 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 	  columnToRep_(std::move(other.columnToRep_)),
 	  columnClasses_(std::move(other.columnClasses_)),
 	  repToColumn_(std::move(other.repToColumn_)),
-	  nextColumnIndex_(std::exchange(other.nextColumnIndex_, 0))
+	  nextColumnIndex_(std::exchange(other.nextColumnIndex_, 0)),
+	  operators_(std::exchange(other.operators_, nullptr))
 {
+	//TODO: not sur this is necessary, as the address of rows_ should be moved too, no?
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		for (Column_type& col : columnToRep_){
 			col.set_rows(&this->rows_);
@@ -271,15 +286,15 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
 	if (repToColumn_.size() == nextColumnIndex_){
 		columnClasses_.link(nextColumnIndex_, nextColumnIndex_);	//could perhaps be avoided, if find_set returns something special when it does not find
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			repToColumn_.push_back(columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_));
+			repToColumn_.push_back(columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, operators_));
 		} else {
-			repToColumn_.push_back(columnPool_.construct(boundary, dim));
+			repToColumn_.push_back(columnPool_.construct(boundary, dim, operators_));
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, operators_);
 		} else {
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim, operators_);
 		}
 	}
 	_insert_column(nextColumnIndex_);
@@ -339,7 +354,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cel
 
 template<class Master_matrix>
 template<class Cell_range_or_column_index>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex)
 {
 	//handle case where targetRep == sourceRep?
 	// index targetRep = columnClasses_.find(targetColumnIndex);
@@ -356,7 +371,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Cel
 
 template<class Master_matrix>
 template<class Cell_range_or_column_index>
-inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
+inline void Base_matrix_with_column_compression<Master_matrix>::multiply_source_and_add_to(const Field_element_type& coefficient, const Cell_range_or_column_index& sourceColumn, index targetColumnIndex)
 {
 	//handle case where targetRep == sourceRep?
 	// index targetRep = columnClasses_.find(targetColumnIndex);
@@ -404,11 +419,12 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
 	columnToRep_.reserve(other.columnToRep_.size());
 	repToColumn_.resize(other.repToColumn_.size(), nullptr);
 	nextColumnIndex_ = 0;
+	operators_ = other.operators_;
 	for (const Column_type* col : other.repToColumn_){
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, operators_);
 		} else {
-			repToColumn_[nextColumnIndex_] = columnPool_.construct(*col);
+			repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, operators_);
 		}
 		columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
 		repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);

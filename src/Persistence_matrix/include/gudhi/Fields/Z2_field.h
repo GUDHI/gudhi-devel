@@ -122,11 +122,11 @@ public:
 	}
 
 	Z2_field_element get_inverse() const;
-	std::pair<Z2_field_element, unsigned int> get_partial_inverse(unsigned int product_of_characteristics) const;
+	std::pair<Z2_field_element, unsigned int> get_partial_inverse(unsigned int productOfCharacteristics) const;
 
 	static Z2_field_element get_additive_identity();
 	static Z2_field_element get_multiplicative_identity();
-	static Z2_field_element get_partial_multiplicative_identity();
+	static Z2_field_element get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics);
 	static constexpr unsigned int get_characteristic();
 
 	unsigned int get_value() const;
@@ -159,42 +159,6 @@ inline Z2_field_element::Z2_field_element(Z2_field_element &&toMove) noexcept
 	: element_(std::exchange(toMove.element_, 0))
 {}
 
-//inline Z2_field_element &Z2_field_element::operator+=(Z2_field_element const &f)
-//{
-//	element_ = (element_ != f.element_);
-//	return *this;
-//}
-
-//inline Z2_field_element &Z2_field_element::operator+=(unsigned int const v)
-//{
-//	element_ = (element_ != (v % 2));
-//	return *this;
-//}
-
-//inline Z2_field_element &Z2_field_element::operator-=(const Z2_field_element &f)
-//{
-//	element_ = (element_ != f.element_);
-//	return *this;
-//}
-
-//inline Z2_field_element &Z2_field_element::operator-=(unsigned int const v)
-//{
-//	element_ = (element_ != (v % 2));
-//	return *this;
-//}
-
-//inline Z2_field_element &Z2_field_element::operator*=(const Z2_field_element &f)
-//{
-//	element_ = (element_ && f.element_);
-//	return *this;
-//}
-
-//inline Z2_field_element &Z2_field_element::operator*=(unsigned int const v)
-//{
-//	element_ = (element_ && (v % 2));
-//	return *this;
-//}
-
 inline Z2_field_element &Z2_field_element::operator=(Z2_field_element other)
 {
 	std::swap(element_, other.element_);
@@ -218,9 +182,9 @@ inline Z2_field_element Z2_field_element::get_inverse() const
 }
 
 inline std::pair<Z2_field_element, unsigned int>
-Z2_field_element::get_partial_inverse(unsigned int product_of_characteristics) const
+Z2_field_element::get_partial_inverse(unsigned int productOfCharacteristics) const
 {
-	return {get_inverse(), product_of_characteristics};
+	return {get_inverse(), productOfCharacteristics};
 }
 
 inline Z2_field_element Z2_field_element::get_additive_identity()
@@ -233,7 +197,7 @@ inline Z2_field_element Z2_field_element::get_multiplicative_identity()
 	return Z2_field_element(1);
 }
 
-inline Z2_field_element Z2_field_element::get_partial_multiplicative_identity()
+inline Z2_field_element Z2_field_element::get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics)
 {
 	return Z2_field_element(1);
 }

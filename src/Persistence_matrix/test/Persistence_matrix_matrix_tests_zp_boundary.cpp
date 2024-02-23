@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_zeroing, Matrix, full_matrices)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_row_access, Matrix, row_access_matrices) {
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 	test_non_base_row_access<Matrix>(m);
 }
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_column_removal, Matrix, removab
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_max_dimension, Matrix, max_dim_matrices) {
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 	test_maximal_dimension<Matrix>(m);
 }
 

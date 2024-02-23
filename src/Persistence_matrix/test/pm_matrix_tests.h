@@ -330,7 +330,7 @@ void test_constructors(){
 	test_content_equality(empty, m);
 
 	//constructor from given boundary matrix
-	Matrix mb(columns);
+	Matrix mb(columns, 5);
 	if constexpr (is_RU<Matrix>()){
 		columns[5].clear();
 	} else if constexpr (is_Chain<Matrix>()){
@@ -380,7 +380,7 @@ void test_chain_constructors(){
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 0);
 
 	//constructor from given boundary matrix
-	Matrix mb(ordered_boundaries, birth_comp, death_comp);
+	Matrix mb(ordered_boundaries, birth_comp, death_comp, 5);
 	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
 	BOOST_CHECK_EQUAL(mb.get_column_dimension(2), 0);
 	BOOST_CHECK_EQUAL(mb.get_column_dimension(6), 2);
@@ -458,7 +458,7 @@ void test_general_insertion(){
 	auto col1 = columns.back();
 	columns.pop_back();
 
-	Matrix m(columns);
+	Matrix m(columns, 5);
 	BOOST_CHECK(m.is_zero_cell(1,0));
 	BOOST_CHECK(!m.is_zero_cell(3,0));
 	BOOST_CHECK(m.is_zero_column(0));
@@ -531,7 +531,7 @@ void test_boundary_insertion(){
 	auto boundary1 = orderedBoundaries.back();
 	orderedBoundaries.pop_back();
 
-	Matrix m(orderedBoundaries);
+	Matrix m(orderedBoundaries, 5);
 	BOOST_CHECK(m.is_zero_cell(1,0));
 	BOOST_CHECK(!m.is_zero_cell(3,0));
 	BOOST_CHECK(m.is_zero_column(0));
@@ -689,7 +689,7 @@ void test_base_access(){
 	auto col1 = columns.back();
 	columns.pop_back();
 
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -704,7 +704,7 @@ void test_base_access(){
 template<class Matrix>
 void test_boundary_access(){
 	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(orderedBoundaries);
+	Matrix m(orderedBoundaries, 5);
 
 	for (unsigned int i = 0; i < orderedBoundaries.size(); ++i){
 		if constexpr (is_RU<Matrix>()){
@@ -743,7 +743,7 @@ template<class Matrix>
 void test_zeroing(){
 	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
 
-	Matrix m(orderedBoundaries);
+	Matrix m(orderedBoundaries, 5);
 
 	BOOST_CHECK(!m.is_zero_cell(3,1));
 	BOOST_CHECK(!m.is_zero_column(3));
@@ -772,7 +772,7 @@ void test_zeroing(){
 template<class Matrix>
 void test_ru_u_access(){
 	auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(orderedBoundaries);
+	Matrix m(orderedBoundaries, 5);
 
 	std::vector<witness_content<typename Matrix::Column_type> > uColumns(7);
 	if constexpr (Matrix::Option_list::is_z2){
@@ -852,7 +852,7 @@ void test_ru_u_access(){
 template<class Matrix>
 void test_base_z2_row_access(){
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	std::vector<std::vector<unsigned int> > rows;
 	if constexpr (Matrix::Option_list::has_column_compression){
@@ -881,9 +881,9 @@ void test_base_z2_row_access(){
 template<class Matrix>
 void test_base_z5_row_access(){
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
-	std::vector<std::vector<std::pair<unsigned int,typename Matrix::Field_type> > > rows;
+	std::vector<std::vector<std::pair<unsigned int,typename Matrix::element_type> > > rows;
 	if constexpr (Matrix::Option_list::has_column_compression){
 		//if the union find structure changes, the column_index values of de cells could also change. Change the test with all possibilities?
 		rows.push_back({{3,1},{6,1}});
@@ -936,7 +936,7 @@ void test_non_base_row_access(Matrix& m){
 template<class Matrix>
 void test_ru_u_row_access(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	std::vector<witness_content<typename Matrix::Column_type> > rows;
 	if constexpr (Matrix::Option_list::is_z2){
@@ -999,7 +999,7 @@ void test_row_removal(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
 	columns[6].pop_back();	//empties row 5. Not a legit boundary matrix anymore, but for the test, should be fine, except for chain.
 
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	m.erase_row(5);
 
@@ -1030,7 +1030,7 @@ void test_chain_row_removal(Matrix& m){
 template<class Matrix>
 void test_column_removal(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -1063,7 +1063,7 @@ void test_column_removal(){
 template<class Matrix>
 void test_boundary_maximal_simplex_removal(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
@@ -1082,7 +1082,7 @@ void test_boundary_maximal_simplex_removal(){
 template<class Matrix>
 void test_ru_maximal_simplex_removal(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	columns[5].clear();
 
@@ -1199,9 +1199,8 @@ void test_maximal_dimension(Matrix& m){
 
 template<class Matrix>
 void test_base_operation(){
-	using F = typename Matrix::Field_type;
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -1223,7 +1222,7 @@ void test_base_operation(){
 		test_content_equality(columns, m);
 	}
 
-	m.add_to(3, F(3), 5);
+	m.multiply_target_and_add_to(3, 3, 5);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
 	} else {
@@ -1231,7 +1230,7 @@ void test_base_operation(){
 	}
 	test_content_equality(columns, m);
 
-	m.add_to(F(3), 3, 6);
+	m.multiply_source_and_add_to(3, 3, 6);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
 	} else {
@@ -1243,7 +1242,7 @@ void test_base_operation(){
 template<class Matrix>
 void test_base_col_comp_operation(){
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -1265,7 +1264,7 @@ void test_base_col_comp_operation(){
 	}
 	test_content_equality(columns, m);
 
-	m.add_to(m.get_column(3), 3, 5);
+	m.multiply_target_and_add_to(m.get_column(3), 3, 5);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
 		columns[8] = {0,2,4};
@@ -1275,7 +1274,7 @@ void test_base_col_comp_operation(){
 	}
 	test_content_equality(columns, m);
 
-	m.add_to(3, m.get_column(3), 6);
+	m.multiply_source_and_add_to(3, m.get_column(3), 6);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {0,4};
 		columns[10] = {0,4};
@@ -1288,10 +1287,8 @@ void test_base_col_comp_operation(){
 
 template<class Matrix>
 void test_ru_operation(){
-	using F = typename Matrix::Field_type;
-
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	columns[5].clear();
 
@@ -1371,7 +1368,7 @@ void test_ru_operation(){
 	}
 
 	if constexpr (!Matrix::Option_list::has_vine_update){
-		m.add_to(5, F(3), 3);
+		m.multiply_target_and_add_to(5, 3, 3);
 		if constexpr (Matrix::Option_list::is_z2){
 			columns[3] = {1,2};
 			uColumns[3] = {3,5};
@@ -1387,7 +1384,7 @@ void test_ru_operation(){
 			}
 		}
 
-		m.add_to(F(4), 5, 4);
+		m.multiply_source_and_add_to(4, 5, 4);
 		if constexpr (Matrix::Option_list::is_z2){
 			columns[4] = {1,2};
 			uColumns[4] = {4};
@@ -1407,8 +1404,6 @@ void test_ru_operation(){
 
 template<class Matrix>
 void test_chain_operation(Matrix& m){
-	using F = typename Matrix::Field_type;
-
 	auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
 
 	test_content_equality(columns, m);
@@ -1429,7 +1424,7 @@ void test_chain_operation(Matrix& m){
 	}
 	test_content_equality(columns, m);
 
-	m.add_to(5, F(3), 3);
+	m.multiply_target_and_add_to(5, 3, 3);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[3] = {5};
 	} else {
@@ -1437,7 +1432,7 @@ void test_chain_operation(Matrix& m){
 	}
 	test_content_equality(columns, m);
 
-	m.add_to(F(4), 5, 4);
+	m.multiply_source_and_add_to(4, 5, 4);
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[4] = {3,4};
 	} else {
@@ -1462,17 +1457,17 @@ void test_chain_operation(Matrix& m){
 
 template<class Matrix>
 void test_base_cell_range_operation(){
-	using F = typename Matrix::Field_type;
 	using Cell = typename Matrix::Cell_type;
 
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	std::vector<Cell> range;
-	if constexpr (Matrix::Option_list::is_z2){
-		range = {Cell(0),Cell(1),Cell(4)};
-	} else {
-		range = {Cell(F(1),0),Cell(F(4),1),Cell(F(1),4)};
+	range = {Cell(0),Cell(1),Cell(4)};
+	if constexpr (!Matrix::Option_list::is_z2){
+		range[0].set_element(1);
+		range[1].set_element(4);
+		range[2].set_element(1);
 	}
 
 	test_content_equality(columns, m);
@@ -1490,7 +1485,7 @@ void test_base_cell_range_operation(){
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
 	}
-	m.add_to(range, 3, 5);
+	m.multiply_target_and_add_to(range, 3, 5);
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
@@ -1498,23 +1493,23 @@ void test_base_cell_range_operation(){
 	} else {
 		columns[6] = {{0,4},{1,2},{4,2}};
 	}
-	m.add_to(3, range, 6);
+	m.multiply_source_and_add_to(3, range, 6);
 	test_content_equality(columns, m);
 }
 
 template<class Matrix>
 void test_base_col_comp_cell_range_operation(){
-	using F = typename Matrix::Field_type;
 	using Cell = typename Matrix::Cell_type;
 
 	auto columns = build_general_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	std::vector<Cell> range;
-	if constexpr (Matrix::Option_list::is_z2){
-		range = {Cell(0),Cell(1),Cell(4)};
-	} else {
-		range = {Cell(F(1),0),Cell(F(4),1),Cell(F(1),4)};
+	range = {Cell(0),Cell(1),Cell(4)};
+	if constexpr (!Matrix::Option_list::is_z2){
+		range[0].set_element(1);
+		range[1].set_element(4);
+		range[2].set_element(1);
 	}
 
 	test_content_equality(columns, m);
@@ -1536,7 +1531,7 @@ void test_base_col_comp_cell_range_operation(){
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
 		columns[8] = {{0,1},{1,2},{2,2},{4,1}};
 	}
-	m.add_to(range, 3, 5);
+	m.multiply_target_and_add_to(range, 3, 5);
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
@@ -1546,7 +1541,7 @@ void test_base_col_comp_cell_range_operation(){
 		columns[6] = {{1,1},{4,3}};
 		columns[10] = {{1,1},{4,3}};
 	}
-	m.add_to(3, range, 6);
+	m.multiply_source_and_add_to(3, range, 6);
 	test_content_equality(columns, m);
 }
 
@@ -1572,36 +1567,37 @@ void test_base_col_comp_cell_range_operation(){
 template<class Matrix>
 void test_const_operation(){
 	using C = typename Matrix::Column_type;
+	typename Matrix::Field_operators op(5);
 
 	auto columns = build_general_matrix<C>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[10] = {1};
-		m.add_to(C({0,1,4}), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, nullptr), 10);	//only works with the const version because of reference
 	} else {
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &op), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
-		m.add_to(C({0,1,4}), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, nullptr), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
-		m.add_to(C({{0,1},{1,4},{4,1}}), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
-		m.add_to(3, C({0,1,4}), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr), 6);
 	} else {
 		columns[6] = {{0,4},{1,2},{4,2}};
-		m.add_to(3, C({{0,1},{1,4},{4,1}}), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op), 6);
 	}
 	test_content_equality(columns, m);
 }
@@ -1609,42 +1605,43 @@ void test_const_operation(){
 template<class Matrix>
 void test_base_col_comp_const_operation(){
 	using C = typename Matrix::Column_type;
+	typename Matrix::Field_operators op(5);
 
 	auto columns = build_general_matrix<C>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
 		columns[10] = {1};
-		m.add_to(C({0,1,4}), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, nullptr), 10);	//only works with the const version because of reference
 	} else {
 		columns[6] = {{0,2},{1,4}};
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &op), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
 		columns[8] = {0,2,4};
-		m.add_to(C({0,1,4}), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, nullptr), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
 		columns[8] = {{0,1},{1,2},{2,2},{4,1}};
-		m.add_to(C({{0,1},{1,4},{4,1}}), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {0,4};
 		columns[10] = {0,4};
-		m.add_to(3, C({0,1,4}), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr), 6);
 	} else {
 		columns[6] = {{1,1},{4,3}};
 		columns[10] = {{1,1},{4,3}};
-		m.add_to(3, C({{0,1},{1,4},{4,1}}), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op), 6);
 	}
 	test_content_equality(columns, m);
 }
@@ -1674,7 +1671,7 @@ void test_barcode(){
 	};
 
 	auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	const auto& barcode = m.get_current_barcode();
 
@@ -1743,7 +1740,7 @@ void test_barcode(){
 template<class Matrix>
 void test_base_swaps(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -1778,7 +1775,7 @@ void test_base_swaps(){
 template<class Matrix>
 void test_base_index_swaps(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 
@@ -1803,7 +1800,7 @@ void test_base_index_swaps(){
 template<class Matrix>
 void test_base_indexed_by_id_index_swaps(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns);
+	Matrix m(columns, 5);
 
 	test_content_equality(columns, m);
 

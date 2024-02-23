@@ -14,7 +14,6 @@
 #include <utility>
 #include <array>
 #include <limits.h>
-#include <iostream>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -157,11 +156,11 @@ public:
 	}
 
 	Zp_field_element get_inverse() const;
-	std::pair<Zp_field_element, unsigned int> get_partial_inverse(unsigned int product_of_characteristics) const;
+	std::pair<Zp_field_element, unsigned int> get_partial_inverse(unsigned int productOfCharacteristics) const;
 
 	static Zp_field_element get_additive_identity();
 	static Zp_field_element get_multiplicative_identity();
-	static Zp_field_element get_partial_multiplicative_identity();
+	static Zp_field_element get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics);
 	static constexpr unsigned int get_characteristic();
 
 	unsigned int get_value() const;
@@ -248,9 +247,9 @@ inline Zp_field_element<characteristic> Zp_field_element<characteristic>::get_in
 
 template<unsigned int characteristic>
 inline std::pair<Zp_field_element<characteristic>, unsigned int>
-Zp_field_element<characteristic>::get_partial_inverse(unsigned int product_of_characteristics) const
+Zp_field_element<characteristic>::get_partial_inverse(unsigned int productOfCharacteristics) const
 {
-	return {get_inverse(), product_of_characteristics};
+	return {get_inverse(), productOfCharacteristics};
 }
 
 template<unsigned int characteristic>
@@ -266,7 +265,7 @@ inline Zp_field_element<characteristic> Zp_field_element<characteristic>::get_mu
 }
 
 template<unsigned int characteristic>
-inline Zp_field_element<characteristic> Zp_field_element<characteristic>::get_partial_multiplicative_identity()
+inline Zp_field_element<characteristic> Zp_field_element<characteristic>::get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics)
 {
 	return Zp_field_element<characteristic>(1);
 }

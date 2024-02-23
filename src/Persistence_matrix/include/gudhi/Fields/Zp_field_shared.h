@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 #include <limits.h>
-#include <iostream>
+#include <stdexcept>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -159,11 +159,11 @@ public:
 	}
 
 	Shared_Zp_field_element get_inverse() const;
-	std::pair<Shared_Zp_field_element, unsigned int> get_partial_inverse(unsigned int product_of_characteristics) const;
+	std::pair<Shared_Zp_field_element, unsigned int> get_partial_inverse(unsigned int productOfCharacteristics) const;
 
 	static Shared_Zp_field_element get_additive_identity();
 	static Shared_Zp_field_element get_multiplicative_identity();
-	static Shared_Zp_field_element get_partial_multiplicative_identity();
+	static Shared_Zp_field_element get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics);
 	static unsigned int get_characteristic();
 
 	unsigned int get_value() const;
@@ -182,19 +182,13 @@ private:
 	static unsigned int _multiply(unsigned int element, unsigned int v);
 };
 
-//unsigned int Shared_Zp_field_element::characteristic_;
-//std::vector<unsigned int> Shared_Zp_field_element::inverse_;
-
 inline Shared_Zp_field_element::Shared_Zp_field_element()
 	: element_(0)
 {}
 
 inline Shared_Zp_field_element::Shared_Zp_field_element(unsigned int element)
 	: element_(element < characteristic_ ? element : element % characteristic_)
-{
-//	if (characteristic_ != 0)
-//		element_ %= characteristic_;
-}
+{}
 
 inline Shared_Zp_field_element::Shared_Zp_field_element(int element)
 	: element_()
@@ -214,7 +208,6 @@ inline Shared_Zp_field_element::Shared_Zp_field_element(Shared_Zp_field_element 
 
 inline void Shared_Zp_field_element::initialize(unsigned int characteristic)
 {
-//	std::cout << "charac: " << characteristic << " ";
 	if (characteristic <= 1)
 		throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
 
@@ -233,44 +226,7 @@ inline void Shared_Zp_field_element::initialize(unsigned int characteristic)
 	}
 
 	characteristic_ = characteristic;
-//	std::cout << characteristic_ << "\n";
 }
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(Shared_Zp_field_element const &f)
-//{
-//	element_ = _add(element_, f.element_);
-//	return *this;
-//}
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator+=(unsigned int const v)
-//{
-//	element_ = _add(element_, v % characteristic_);
-//	return *this;
-//}
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(Shared_Zp_field_element const &f)
-//{
-//	element_ = _substract(element_, f.element_);
-//	return *this;
-//}
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator-=(unsigned int const v)
-//{
-//	element_ = _substract(element_, v % characteristic_);
-//	return *this;
-//}
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(Shared_Zp_field_element const &f)
-//{
-//	element_ = _multiply(element_, f.element_);
-//	return *this;
-//}
-
-//inline Shared_Zp_field_element &Shared_Zp_field_element::operator*=(unsigned int const v)
-//{
-//	element_ = _multiply(element_, v % characteristic_);
-//	return *this;
-//}
 
 inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(Shared_Zp_field_element other)
 {
@@ -295,9 +251,9 @@ inline Shared_Zp_field_element Shared_Zp_field_element::get_inverse() const
 }
 
 inline std::pair<Shared_Zp_field_element, unsigned int>
-Shared_Zp_field_element::get_partial_inverse(unsigned int product_of_characteristics) const
+Shared_Zp_field_element::get_partial_inverse(unsigned int productOfCharacteristics) const
 {
-	return {get_inverse(), product_of_characteristics};
+	return {get_inverse(), productOfCharacteristics};
 }
 
 inline Shared_Zp_field_element Shared_Zp_field_element::get_additive_identity()
@@ -310,7 +266,7 @@ inline Shared_Zp_field_element Shared_Zp_field_element::get_multiplicative_ident
 	return Shared_Zp_field_element(1);
 }
 
-inline Shared_Zp_field_element Shared_Zp_field_element::get_partial_multiplicative_identity()
+inline Shared_Zp_field_element Shared_Zp_field_element::get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics)
 {
 	return Shared_Zp_field_element(1);
 }
