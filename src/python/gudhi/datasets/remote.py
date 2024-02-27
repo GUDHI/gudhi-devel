@@ -18,8 +18,6 @@ import shutil
 from functools import lru_cache
 
 import numpy as np
-from numpy.lib import recfunctions as rfn
-
 
 def _get_data_home(data_home=None):
     """
@@ -285,11 +283,16 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
 
     subset : string
         This argument allows to download the following subsets:
-         * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1. It contains 7.500 vertices in dimension 3.
-         * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1. It contains 7.500 vertices in dimension 3.
-         * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1. It contains 7.500 vertices in dimension 3.
-         * 'walking' Only left leg magnetometer of walking activity performed by the person 1. It contains 7.500 vertices in dimension 3.
-         * None (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column (`14.` for 'cross_training', `18.` for 'jumping', `13.` for 'stepper', or `9.` for 'walking')
+         * 'cross_training' Only left leg magnetometer of cross training activity performed by the person 1.
+           It contains 7.500 vertices in dimension 3.
+         * 'jumping' Only left leg magnetometer of jumping activity performed by the person 1.
+           It contains 7.500 vertices in dimension 3.
+         * 'stepper' Only left leg magnetometer of stepper activity performed by the person 1.
+           It contains 7.500 vertices in dimension 3.
+         * 'walking' Only left leg magnetometer of walking activity performed by the person 1.
+           It contains 7.500 vertices in dimension 3.
+         * None (default value) This dataset contains 30.000 vertices in dimension 3 + activity type column
+           (`14.` for 'cross_training', `18.` for 'jumping', `13.` for 'stepper', or `9.` for 'walking')
 
     accept_license : boolean
         Flag to specify if user accepts the file LICENSE and prevents from printing the corresponding license terms.

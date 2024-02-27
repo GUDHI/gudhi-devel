@@ -10,21 +10,22 @@
 from .. import RipsComplex
 from sklearn.base import BaseEstimator, TransformerMixin
 
-import numpy as np
 # joblib is required by scikit-learn
 from joblib import Parallel, delayed
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
-#     USER->>RipsPersistence: fit_transform(X)
-#     Note right of RipsPersistence: homology_dimensions=[i,j]
-#     RipsPersistence->>thread1: _tranform(X[0])
-#     RipsPersistence->>thread2: _tranform(X[1])
-#     Note right of RipsPersistence: ...
-#     thread1->>RipsPersistence: [array( Hi(X[0]) ), array( Hj(X[0]) )]
-#     thread2->>RipsPersistence: [array( Hi(X[1]) ), array( Hj(X[1]) )]
-#     Note right of RipsPersistence: ...
-#     RipsPersistence->>USER: [[array( Hi(X[0]) ), array( Hj(X[0]) )],<br/> [array( Hi(X[1]) ), array( Hj(X[1]) )],<br/> ...]
+#   participant USER
+#   participant R as RipsPersistence
+#   USER->>R: fit_transform(X)
+#   Note right of R: homology_dimensions=[i,j]
+#   R->>thread1: _tranform(X[0])
+#   R->>thread2: _tranform(X[1])
+#   Note right of R: ...
+#   thread1->>R: [array( Hi(X[0]) ), array( Hj(X[0]) )]
+#   thread2->>R: [array( Hi(X[1]) ), array( Hj(X[1]) )]
+#   Note right of R: ...
+#   R->>USER: [[array( Hi(X[0]) ), array( Hj(X[0]) )],<br/> [array( Hi(X[1]) ), array( Hj(X[1]) )],<br/>...]
 
 
 class RipsPersistence(BaseEstimator, TransformerMixin):
@@ -112,7 +113,8 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         :return: Persistence diagrams in the format:
 
               - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
-              - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
+              - If `homology_dimensions` was set to `[i, j]`:
+                `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)
         """
         # Depends on homology_dimensions is an integer or a list of integer (else case)

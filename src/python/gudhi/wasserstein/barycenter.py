@@ -8,9 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 
-import ot
 import numpy as np
-import scipy.spatial.distance as sc
 import warnings
 
 from gudhi.wasserstein import wasserstein_distance
@@ -48,9 +46,12 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         If verbose, returns a couple ``(Y, log)`` where ``Y`` is the barycenter estimate,
         and ``log`` is a ``dict`` that contains additional information:
 
-        - `"groupings"`, a list of list of pairs ``(i,j)``. Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)`` indicates that `pdiagset[k][i]`` is matched to ``Y[j]`` if ``i = -1`` or ``j = -1``, it means they represent the diagonal.
+        - `"groupings"`, a list of list of pairs ``(i,j)``. Namely, ``G[k] = [...(i, j)...]``, where ``(i,j)``
+          indicates that `pdiagset[k][i]` is matched to ``Y[j]`` if ``i = -1`` or ``j = -1``, it means they represent
+          the diagonal.
 
-        - `"energy"`, ``float`` representing the Frechet energy value obtained. It is the mean of squared distances of observations to the output.
+        - `"energy"`, ``float`` representing the Frechet energy value obtained. It is the mean of squared distances of
+          observations to the output.
 
         - `"nb_iter"`, ``int`` number of iterations performed before convergence of the algorithm.
     '''
@@ -60,14 +61,12 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         warnings.warn("Computing barycenter of empty diag set. Returns None.")
         return None
 
-    # store the number of off-diagonal point for each of the X_i
-    nb_off_diag = np.array([len(X_i) for X_i in X])
     # Initialisation of barycenter
     if init is None:
         i0 = np.random.randint(m)  # Index of first state for the barycenter
         Y = X[i0].copy()
     else:
-        if type(init)==int:
+        if isinstance(init, int):
             Y = X[init].copy()
         else:
             Y = init.copy()
@@ -132,7 +131,6 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         groupings = []
         energy = 0
         log = {}
-        n_y = len(Y)
         for i in range(m):
             cost, edges = wasserstein_distance(Y, X[i], matching=True, order=2., internal_p=2.)
             groupings.append(edges)

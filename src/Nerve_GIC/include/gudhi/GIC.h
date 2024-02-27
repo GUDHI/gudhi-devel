@@ -483,7 +483,6 @@ class Cover_complex {
            *
            */
   void set_function_from_file(const std::string& func_file_name) {
-    int i = 0;
     std::ifstream input(func_file_name);
     std::string line;
     double f;
@@ -491,7 +490,6 @@ class Cover_complex {
       std::stringstream stream(line);
       stream >> f;
       func.push_back(f);
-      i++;
     }
     functional_cover = true;
     cover_name = func_file_name;
@@ -987,7 +985,6 @@ class Cover_complex {
    *
    */
   void set_color_from_file(const std::string& color_file_name) {
-    int i = 0;
     std::ifstream input(color_file_name);
     std::string line;
     double f;
@@ -995,7 +992,6 @@ class Cover_complex {
       std::stringstream stream(line);
       stream >> f;
       func_color.push_back(f);
-      i++;
     }
     color_name = color_file_name;
   }
@@ -1046,7 +1042,6 @@ class Cover_complex {
       minv = (std::min)(minv, iit->second.second);
     }
 
-    int k = 0;
     std::vector<int> nodes;
     nodes.clear();
 
@@ -1061,17 +1056,14 @@ class Cover_complex {
         graphic << name2id[iit->first] << "[shape=circle fontcolor=black color=black label=\"" << name2id[iit->first]
                 << ":" << iit->second.first << "\" style=filled fillcolor=\""
                 << (1 - (maxv - iit->second.second) / (maxv - minv)) * 0.6 << ", 1, 1\"]" << std::endl;
-        k++;
       }
     }
-    int ke = 0;
     int num_simplices = simplices.size();
     for (int i = 0; i < num_simplices; i++)
       if (simplices[i].size() == 2) {
         if (cover_color[simplices[i][0]].first > mask && cover_color[simplices[i][1]].first > mask) {
           graphic << "  " << name2id[simplices[i][0]] << " -- " << name2id[simplices[i][1]] << " [weight=15];"
                   << std::endl;
-          ke++;
         }
       }
     graphic << "}";

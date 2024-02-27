@@ -11,7 +11,6 @@
 #   - YYYY/MM Author: Description of the modification
 
 from os import path
-from math import isfinite
 import numpy as np
 from functools import lru_cache
 import warnings
@@ -167,7 +166,6 @@ def plot_persistence_barcode(
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
-    from matplotlib import rc
 
     if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
         plt.rc("text", usetex=True)
@@ -290,7 +288,6 @@ def plot_persistence_diagram(
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
-    from matplotlib import rc
 
     if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
         plt.rc("text", usetex=True)
@@ -439,7 +436,6 @@ def plot_persistence_density(
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
     from scipy.stats import kde
-    from matplotlib import rc
 
     if _gudhi_matplotlib_use_tex and _matplotlib_can_use_tex():
         plt.rc("text", usetex=True)

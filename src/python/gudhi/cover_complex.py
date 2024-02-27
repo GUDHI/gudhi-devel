@@ -124,8 +124,8 @@ class CoverComplexPy(BaseEstimator):
         st = self.simplex_tree_
         node_info_ = self.node_info_
 
-        maxv, minv = max([node_info_[k]["colors"][0] for k in node_info_.keys()]), min([node_info_[k]["colors"][0] for k in node_info_.keys()])
-        maxs, mins = max([node_info_[k]["size"]      for k in node_info_.keys()]), min([node_info_[k]["size"]      for k in node_info_.keys()])
+        maxv, minv = max(node_info_[k]["colors"][0] for k in node_info_.keys()), min(node_info_[k]["colors"][0] for k in node_info_.keys())
+        maxs, mins = max(node_info_[k]["size"]      for k in node_info_.keys()), min(node_info_[k]["size"]      for k in node_info_.keys())
 
         if not file_name.lower().endswith(".dot"):
             file_name += ".dot"

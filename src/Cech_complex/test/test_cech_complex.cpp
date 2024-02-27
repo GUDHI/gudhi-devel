@@ -169,12 +169,16 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   BOOST_CHECK((st2.find({6, 7, 8}) == st2.null_simplex()));
   BOOST_CHECK((st2.find({3, 5, 7}) == st2.null_simplex()));
 
-  auto st2_save = st2;
-  st2.reset_filtration(-1); // unnecessary, but ensures we don't cheat
-  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), st2, points);
-  for (auto sh : st2.complex_simplex_range())
-    st2.assign_filtration(sh, std::sqrt(st2.filtration(sh)));
-  BOOST_CHECK(st2 == st2_save); // Should only be an approximate test
+  Simplex_tree st3;
+  Cech_complex cech5(points, 1e50);
+  cech5.create_complex(st3, 5);
+  BOOST_CHECK(st3.dimension() == 5);
+  auto st3_save = st3;
+  st3.reset_filtration(-1); // unnecessary, but ensures we don't cheat
+  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), st3, points);
+  for (auto sh : st3.complex_simplex_range())
+    st3.assign_filtration(sh, std::sqrt(st3.filtration(sh)));
+  BOOST_CHECK(st3 == st3_save); // Should only be an approximate test
 }
 
 BOOST_AUTO_TEST_CASE(Cech_complex_from_points) {
