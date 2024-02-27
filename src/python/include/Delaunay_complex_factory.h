@@ -116,7 +116,7 @@ class Exact_delaunay_complex_dD final : public Abstract_delaunay_complex {
                                        false);
       if (result == true)
         // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-        Gudhi::cech_complex::assign_MEB_filtration(delaunay_complex_.get_kernel(), *simplex_tree,
+        Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
                                                    delaunay_complex_.get_point_cloud());
       return result;
     }
@@ -163,10 +163,13 @@ class Inexact_delaunay_complex_dD final : public Abstract_delaunay_complex {
       bool result = delaunay_complex_.create_complex(*simplex_tree,
                                        std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
                                        false, false);
-      if (result == true)
-        // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-        Gudhi::cech_complex::assign_MEB_filtration(delaunay_complex_.get_kernel(), *simplex_tree,
-                                                   delaunay_complex_.get_point_cloud());
+      if (result == true) {
+        if constexpr(Weighted) {
+          // Construct the Delaunay-Cech complex by assigning filtration values with MEB
+          Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
+                                                     delaunay_complex_.get_point_cloud());
+        }
+      }
       return result;
     }
   }

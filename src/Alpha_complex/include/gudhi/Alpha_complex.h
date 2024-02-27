@@ -532,10 +532,6 @@ class Alpha_complex {
   }
 
  public:
-  Kernel get_kernel() {
-    return kernel_.get_kernel();
-  }
-
   // Kernel::Point_d are not weighted points
   std::vector<typename Kernel::Point_d> get_point_cloud() {
     std::vector<typename Kernel::Point_d> point_cloud;

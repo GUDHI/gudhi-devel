@@ -81,10 +81,6 @@ class Alpha_kernel_d<Kernel, false> {
   bool is_gabriel(const Sphere& circumcenter, const Point_d& point) {
     return kernel_.squared_distance_d_object()(circumcenter.first, point) >= circumcenter.second;
   }
-
-  Kernel get_kernel() {
-    return kernel_;
-  }
 };
 
 // Weighted Kernel_d version
@@ -134,10 +130,6 @@ class Alpha_kernel_d<Kernel, true> {
 #else
     return kernel_.compute_power_product_d_object()(circumcenter, point) >= 0;
 #endif
-  }
-
-  Kernel get_kernel() {
-    return kernel_;
   }
 };
 
