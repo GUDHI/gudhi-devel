@@ -74,7 +74,7 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       // The sphere is always defined by at most d+1 points
       Filtration_value maxf = 0; // max filtration of the faces
       for (auto face : complex.boundary_simplex_range(sh)) {
-	maxf = max(maxf, complex.filtration(face));
+        maxf = max(maxf, complex.filtration(face));
       }
       complex.assign_filtration(sh, maxf);
     } else {
