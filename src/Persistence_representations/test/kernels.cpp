@@ -43,7 +43,55 @@ BOOST_AUTO_TEST_CASE(check_PWG) {
 
 BOOST_AUTO_TEST_CASE(check_SW) {
   Persistence_diagram v1, v2; v1.emplace_back(0,1); v2.emplace_back(0,2);
-  SW sw1(v1, 1.0, 100); SW swex1(v1, 1.0, -1);
-  SW sw2(v2, 1.0, 100); SW swex2(v2, 1.0, -1);
-  BOOST_CHECK(std::abs(sw1.compute_scalar_product(sw2) - swex1.compute_scalar_product(swex2)) <= 1e-1);
+  SW sw1(v1, 1.0, 1000); SW swex1(v1, 1.0, -1);
+  SW sw2(v2, 1.0, 1000); SW swex2(v2, 1.0, -1);
+  std::cout << sw1.sw_distance(sw2) << std::endl;
+  std::cout << swex1.sw_distance(swex2) << std::endl; 
+  std::cout << sw1.compute_scalar_product(sw2) << std::endl;
+  std::cout << swex1.compute_scalar_product(swex2) << std::endl;
+  BOOST_CHECK(std::abs(sw1.compute_scalar_product(sw2) - swex1.compute_scalar_product(swex2)) <= 1e-3);
+}
+
+BOOST_AUTO_TEST_CASE(check_multiplicity_SW) {
+  Persistence_diagram v1, v2; 
+  v1.emplace_back(0,1); v2.emplace_back(0,2);
+  v1.emplace_back(2,5); v2.emplace_back(1,4);
+  v1.emplace_back(3,5); v2.emplace_back(1,3);
+  v1.emplace_back(0,1); v2.emplace_back(1,3);
+  SW sw1(v1, 1.0, 10000); SW swex1(v1, 1.0, -1);
+  SW sw2(v2, 1.0, 10000); SW swex2(v2, 1.0, -1);
+  std::cout << sw1.sw_distance(sw2) << std::endl;
+  std::cout << swex1.sw_distance(swex2) << std::endl; 
+  std::cout << sw1.compute_scalar_product(sw2) << std::endl;
+  std::cout << swex1.compute_scalar_product(swex2) << std::endl;
+  BOOST_CHECK(std::abs(sw1.compute_scalar_product(sw2) - swex1.compute_scalar_product(swex2)) <= 1e-3);
+}
+
+
+BOOST_AUTO_TEST_CASE(check_generic_SW) {
+  Persistence_diagram v1, v2;
+  double lower_bound = 0;
+  double upper_bound = 100;
+  std::random_device rd;  // Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
+  for (int i = 0; i < 10; i++){
+    double ax_random_double = unif(gen);
+    double ay_random_double = unif(gen);
+    //std::cout << ax_random_double << " " << ax_random_double+ay_random_double << std::endl;
+    v1.emplace_back(ax_random_double,ax_random_double+ay_random_double);
+  }
+  for (int i = 0; i < 10; i++){
+    double ax_random_double = unif(gen);
+    double ay_random_double = unif(gen);
+    //std::cout << ax_random_double << " " << ax_random_double+ay_random_double << std::endl;
+    v2.emplace_back(ax_random_double,ax_random_double+ay_random_double);
+  }
+  SW sw1(v1, 100.0, 10000); SW swex1(v1, 100.0, -1);
+  SW sw2(v2, 100.0, 10000); SW swex2(v2, 100.0, -1);
+  std::cout << sw1.sw_distance(sw2) << std::endl;
+  std::cout << swex1.sw_distance(swex2) << std::endl; 
+  std::cout << sw1.compute_scalar_product(sw2) << std::endl;
+  std::cout << swex1.compute_scalar_product(swex2) << std::endl;
+  BOOST_CHECK(std::abs(sw1.compute_scalar_product(sw2) - swex1.compute_scalar_product(swex2)) <= 1e-3);
 }

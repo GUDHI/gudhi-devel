@@ -22,6 +22,8 @@
 #include <cmath>      // for std::abs, std::sqrt
 #include <stdexcept>  // for std::invalid_argument
 #include <random>     // for std::random_device
+#include <math.h>     // for nextafter
+#include <climits>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -64,6 +66,7 @@ class Sliced_Wasserstein {
   Persistence_diagram diagram;
   int approx;
   double sigma;
+  double genericity_factor;
   std::vector<std::vector<double> > projections, projections_diagonal;
 
   // **********************************
@@ -72,26 +75,22 @@ class Sliced_Wasserstein {
 
   void build_rep() {
     if (approx > 0) {
-      double step = pi / this->approx;
       int n = diagram.size();
-
+      double step = pi / this->approx;
       for (int i = 0; i < this->approx; i++) {
         std::vector<double> l, l_diag;
         for (int j = 0; j < n; j++) {
           double px = diagram[j].first;
           double py = diagram[j].second;
           double proj_diag = (px + py) / 2;
-
           l.push_back(px * cos(-pi / 2 + i * step) + py * sin(-pi / 2 + i * step));
           l_diag.push_back(proj_diag * cos(-pi / 2 + i * step) + proj_diag * sin(-pi / 2 + i * step));
         }
-
         std::sort(l.begin(), l.end());
         std::sort(l_diag.begin(), l_diag.end());
         projections.push_back(std::move(l));
         projections_diagonal.push_back(std::move(l_diag));
       }
-
       diagram.clear();
     }
   }
@@ -115,73 +114,11 @@ class Sliced_Wasserstein {
         return std::pair<double,int>(atan((diag2[j].first - diag1[i].first) / (diag1[i].second - diag2[j].second)), -1);
   }
 
-
-//  // Compute the integral of |cos()| between alpha and beta, valid only if alpha is in [-pi,pi] and beta-alpha is in
-//  // [0,pi]
-//  double compute_int_cos(double alpha, double beta) const {
-//    double res = 0;
-//    if (alpha >= 0 && alpha <= pi) {
-//      if (cos(alpha) >= 0) {
-//        if (pi / 2 <= beta) {
-//          res = 2 - sin(alpha) - sin(beta);
-//        } else {
-//          res = sin(beta) - sin(alpha);
-//        }
-//      } else {
-//        if (1.5 * pi <= beta) {
-//          res = 2 + sin(alpha) + sin(beta);
-//        } else {
-//          res = sin(alpha) - sin(beta);
-//        }
-//      }
-//    }
-//    if (alpha >= -pi && alpha <= 0) {
-//      if (cos(alpha) <= 0) {
-//        if (-pi / 2 <= beta) {
-//          res = 2 + sin(alpha) + sin(beta);
-//        } else {
-//          res = sin(alpha) - sin(beta);
-//        }
-//      } else {
-//        if (pi / 2 <= beta) {
-//          res = 2 - sin(alpha) - sin(beta);
-//        } else {
-//          res = sin(beta) - sin(alpha);
-//        }
-//      }
-//    }
-//    return res;
-//  }
-//
-//  double compute_int(double theta1, double theta2, int p, int q, const Persistence_diagram& diag1,
-//                     const Persistence_diagram& diag2) const {
-//    double norm = std::sqrt((diag1[p].first - diag2[q].first) * (diag1[p].first - diag2[q].first) +
-//                            (diag1[p].second - diag2[q].second) * (diag1[p].second - diag2[q].second));
-//    double angle1;
-//    if (diag1[p].first == diag2[q].first)
-//      angle1 = theta1 - pi / 2;
-//    else
-//      angle1 = theta1 - atan((diag1[p].second - diag2[q].second) / (diag1[p].first - diag2[q].first));
-//    double angle2 = angle1 + theta2 - theta1;
-//    double integral = compute_int_cos(angle1, angle2);
-//    return norm * integral;
-//  }
-
-  // compute the integral of |<diff|e_theta> * cos(theta)| + |<diff|e_theta> * sin(theta)| between theta1 and theta2 depending on the sign of sin() and <diff|e_theta> (cos() is always positive)
-  double close_form_integral(int sign_case, double theta1, double theta2, double diff_x, double diff_y){
-    double formula;
-    double pos_cos = (  (1+cos(2*theta2))/2 - (1+cos(2*theta1))/2);
-    double neg_cos = (  (1-cos(2*theta2))/2 - (1-cos(2*theta1))/2);
-    double sin_sq = (sin(theta2)*sin(theta2) - sin(theta1)*sin(theta1))/2;
-    if (sign_case == 1)
-      formula = diff_x * pos_cos + diff_y * sin_sq + diff_y * neg_cos + diff_x * sin_sq;
-    if (sign_case == 2)
-      formula = diff_x * pos_cos + diff_y * sin_sq - diff_y * neg_cos - diff_x * sin_sq;
-    if (sign_case == 3)
-      formula = - diff_x * pos_cos - diff_y * sin_sq - diff_y * neg_cos - diff_x * sin_sq;
-    if (sign_case == 4)
-      formula = - diff_x * pos_cos - diff_y * sin_sq + diff_y * neg_cos + diff_x * sin_sq;
-    return formula;
+  // compute the integral of <diff|e_theta> between theta1 and theta2
+  double close_form_integral(double theta1, double theta2, double diff_x, double diff_y) const {
+    double int_cos = sin(theta2) - sin(theta1);
+    double int_sin = cos(theta1) - cos(theta2);
+    return diff_x * int_cos + diff_y * int_sin;
   }
 
   double compute_integral(double theta1, double theta2, std::vector<int> orderp1, std::vector<int> orderp2, std::vector<std::vector<std::pair<double,int> > > angles12, const Persistence_diagram& diag1,
@@ -191,117 +128,50 @@ class Sliced_Wasserstein {
 
       int dgm1_idx = orderp1[i];
       int dgm2_idx = orderp2[i];
-      double diff_x = diagram1[dgm1_idx].first - diagram2[dgm2_idx].first;
-      double diff_y = diagram1[dgm1_idx].second - diagram2[dgm2_idx].second;
+      double diff_x = diag1[dgm1_idx].first - diag2[dgm2_idx].first;
+      double diff_y = diag1[dgm1_idx].second - diag2[dgm2_idx].second;
       double angle12 = angles12[dgm1_idx][dgm2_idx].first;
       int sign12 = angles12[dgm1_idx][dgm2_idx].second;
       double small_integral;
 
-      if (0 < theta1){ // |sin()| = sin() within [theta1, theta2]
-        if (sign12 == 1){
-          if (angle12 < theta1){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]        
-            small_integral = close_form_integral(1, theta1, theta2, diff_x, diff_y);
-          }
-          else{
-            if (theta2 < angle12){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-              small_integral = close_form_integral(3, theta1, theta2, diff_x, diff_y);
-            }
-            else{ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = <p-q|e_theta> within [angle12, theta2]
-              small_integral = close_form_integral(3, theta1, angle12, diff_x, diff_y) + close_form_integral(1, angle12, theta2, diff_x, diff_y);
-            }
-          }
+      //std::cout << theta1 << " " << theta2 << " " << sign12 << " " << angle12 << std::endl;
+
+      if (sign12 == 1){
+        if (angle12 < theta1){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]        
+          small_integral = this->close_form_integral(theta1, theta2, diff_x, diff_y);
         }
         else{
-          if (sign12 == -1){
-            if (angle12 < theta1){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-              small_integral = close_form_integral(3, theta1, theta2, diff_x, diff_y);
-            }
-            else{
-              if (theta2 < angle12){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]
-                small_integral = close_form_integral(1, theta1, theta2, diff_x, diff_y);
-              }
-              else{ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = -<p-q|e_theta> within [angle12, theta2]
-                small_integral = close_form_integral(1, theta1, angle12, diff_x, diff_y) + close_form_integral(3, angle12, theta2, diff_x, diff_y);
-              }
-            }
+          if (theta2 < angle12){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
+            small_integral = -this->close_form_integral(theta1, theta2, diff_x, diff_y);
+          }
+          else{ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = <p-q|e_theta> within [angle12, theta2]
+            //std::cout << "breakdown: " << -this->close_form_integral(theta1, angle12, diff_x, diff_y) << " + " << this->close_form_integral(angle12, theta2, diff_x, diff_y) << std::endl;            
+            small_integral = -this->close_form_integral(theta1, angle12, diff_x, diff_y) + this->close_form_integral(angle12, theta2, diff_x, diff_y);
           }
         }
       }
       else{
-        if (theta2 < 0){ // |sin()| = -sin() within [theta1, theta2]
-          if (sign12 == 1){
-            if (angle12 < theta1){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]        
-              small_integral = close_form_integral(2, theta1, theta2, diff_x, diff_y);
-            }
-            else{
-              if (theta2 < angle12){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-                small_integral = close_form_integral(4, theta1, theta2, diff_x, diff_y);
-              }
-              else{ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = <p-q|e_theta> within [angle12, theta2]
-                small_integral = close_form_integral(4, theta1, angle12, diff_x, diff_y) + close_form_integral(2, angle12, theta2, diff_x, diff_y);
-              }
-            }
-          }
-          else{
-            if (sign12 == -1){
-              if (angle12 < theta1){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-                small_integral = close_form_integral(4, theta1, theta2, diff_x, diff_y);
-              }
-              else{
-                if (theta2 < angle12){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]
-                  small_integral = close_form_integral(2, theta1, theta2, diff_x, diff_y);
-                }
-                else{ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = -<p-q|e_theta> within [angle12, theta2]
-                  small_integral = close_form_integral(2, theta1, angle12, diff_x, diff_y) + close_form_integral(4, angle12, theta2, diff_x, diff_y);
-                }
-              }
-            }
-          }
+        if (angle12 < theta1){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
+          small_integral = -this->close_form_integral(theta1, theta2, diff_x, diff_y);
         }
-        else{ // |sin()| = -sin() within [theta1, 0] and |sin()| = sin() within [0, theta2]
-          if (sign12 == 1){
-            if (angle12 < theta1){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]
-              small_integral = close_form_integral(2, theta1, 0, diff_x, diff_y) + close_form_integral(1, 0, theta2, diff_x, diff_y);
-            }
-            else{
-              if (theta2 < angle12){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-                small_integral = close_form_integral(4, theta1, 0, diff_x, diff_y) + close_form_integral(3, 0, theta2, diff_x, diff_y);
-              }
-              else{ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = <p-q|e_theta> within [angle12, theta2]
-                if (0 < angle12){
-                  small_integral = close_form_integral(4, theta1, 0, diff_x, diff_y) + close_form_integral(3, 0, angle12, diff_x, diff_y) + close_form_integral(1, angle12, theta2, diff_x, diff_y);
-                }
-                else{
-                  small_integral = close_form_integral(4, theta1, angle12, diff_x, diff_y) + close_form_integral(2, angle12, 0, diff_x, diff_y) + close_form_integral(1, 0, theta2, diff_x, diff_y);
-                }
-              }
-            }
+        else{
+          if (theta2 < angle12){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]
+            small_integral = this->close_form_integral(theta1, theta2, diff_x, diff_y);
           }
-          else{
-            if (sign12 == -1){
-              if (angle12 < theta1){ // |<p-q|e_theta>| = -<p-q|e_theta> within [theta1, theta2]
-                small_integral = close_form_integral(4, theta1, 0, diff_x, diff_y) + close_form_integral(3, 0, theta2, diff_x, diff_y);     
-              }
-              else{
-                if (theta2 < angle12){ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, theta2]
-                  small_integral = close_form_integral(2, theta1, 0, diff_x, diff_y) + close_form_integral(1, 0, theta2, diff_x, diff_y);     
-                }
-                else{ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = -<p-q|e_theta> within [angle12, theta2]
-                  if (0 < angle12){
-                    small_integral = close_form_integral(2, theta1, 0, diff_x, diff_y) + close_form_integral(1, 0, angle12, diff_x, diff_y) + close_form_integral(3, angle12, theta2, diff_x, diff_y);
-                  }
-                  else{
-                    small_integral = close_form_integral(2, theta1, angle12, diff_x, diff_y) + close_form_integral(4, angle12, 0, diff_x, diff_y) + close_form_integral(3, 0, theta2, diff_x, diff_y);
-                  }
-                }
-              }
-            }
+          else{ // |<p-q|e_theta>| = <p-q|e_theta> within [theta1, angle12] and |<p-q|e_theta>| = -<p-q|e_theta> within [angle12, theta2]
+            //std::cout << "breakdown: " << this->close_form_integral(theta1, angle12, diff_x, diff_y) << " + " << - this->close_form_integral(angle12, theta2, diff_x, diff_y) << std::endl;            
+            small_integral = this->close_form_integral(theta1, angle12, diff_x, diff_y) - this->close_form_integral(angle12, theta2, diff_x, diff_y);
           }
         }
       }
+
+      //std::cout << "small int = " << small_integral << std::endl; 
       integral += small_integral;
+
     }
+
     return integral;
+
   }
 
   // Evaluation of the Sliced Wasserstein Distance between a pair of diagrams.
@@ -311,59 +181,44 @@ class Sliced_Wasserstein {
 
     Persistence_diagram diagram1 = this->diagram;
     Persistence_diagram diagram2 = second.diagram;
+
     double sw = 0;
 
     if (this->approx == -1) {
 
-      // Add projections onto diagonal.
       int n1, n2;
       n1 = diagram1.size();
       n2 = diagram2.size();
-//      double min_ordinate = std::numeric_limits<double>::max();
-//      double min_abscissa = std::numeric_limits<double>::max();
-//      double max_ordinate = std::numeric_limits<double>::lowest();
-//      double max_abscissa = std::numeric_limits<double>::lowest();
+
+      // Put diagrams in generic positions.
+      for (int i = 0; i < n1; i++) {diagram1[i].first += (2*i)*genericity_factor*DBL_EPSILON; diagram1[i].second += (2*i+1)*genericity_factor*DBL_EPSILON;}
+      for (int i = n1; i < n1+n2; i++) {diagram2[i-n1].first += (2*i)*genericity_factor*DBL_EPSILON; diagram2[i-n1].second += (2*i+1)*genericity_factor*DBL_EPSILON;}
+//      std::cout << (2*(n1+n2-1)+1)*10*DBL_EPSILON << std::endl;
+
+      // Add projections onto diagonal.
       for (int i = 0; i < n2; i++) {
-//        min_ordinate = std::min(min_ordinate, diagram2[i].second);
-//        min_abscissa = std::min(min_abscissa, diagram2[i].first);
-//        max_ordinate = std::max(max_ordinate, diagram2[i].second);
-//        max_abscissa = std::max(max_abscissa, diagram2[i].first);
-        double proj_i = (diagram2[i].first + diagram2[i].second) / 2
+        double proj_i = (diagram2[i].first + diagram2[i].second) / 2;
         diagram1.emplace_back(proj_i,proj_i);
       }
       for (int i = 0; i < n1; i++) {
-//        min_ordinate = std::min(min_ordinate, diagram1[i].second);
-//        min_abscissa = std::min(min_abscissa, diagram1[i].first);
-//        max_ordinate = std::max(max_ordinate, diagram1[i].second);
-//        max_abscissa = std::max(max_abscissa, diagram1[i].first);
-        double proj_i = (diagram1[i].first + diagram1[i].second) / 2
+        double proj_i = (diagram1[i].first + diagram1[i].second) / 2;
         diagram2.emplace_back(proj_i, proj_i);
       }
       int num_pts_dgm = diagram1.size();
 
-//      // Slightly perturb the points so that the PDs are in generic positions.
-//      double epsilon = 0.0001;
-//      double thresh_y = (max_ordinate - min_ordinate) * epsilon;
-//      double thresh_x = (max_abscissa - min_abscissa) * epsilon;
-//      std::random_device rd;
-//      std::default_random_engine re(rd());
-//      std::uniform_real_distribution<double> uni(-1, 1);
-//      for (int i = 0; i < num_pts_dgm; i++) {
-//        double u = uni(re);
-//        diagram1[i].first += u * thresh_x;
-//        diagram1[i].second += u * thresh_y;
-//        diagram2[i].first += u * thresh_x;
-//        diagram2[i].second += u * thresh_y;
-//      }
-
-      // Compute all intra-PD angles.
-      std::vector<std::pair<double, std::pair<int, int> > > angles1, angles2;
+      // Compute all intra-PD angles with the norms of the corresponding points (for sorting these angles later).
+      std::vector<std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double> > > > angles1, angles2;
       for (int i = 0; i < num_pts_dgm; i++) {
         for (int j = i + 1; j < num_pts_dgm; j++) {
           double theta1 = compute_angle(diagram1, i, j);
           double theta2 = compute_angle(diagram2, i, j);
-          angles1.emplace_back(theta1, std::pair<int, int>(i, j));
-          angles2.emplace_back(theta2, std::pair<int, int>(i, j));
+          double p1ix = diagram1[i].first; double p1iy = diagram1[i].second; double p1jx = diagram1[j].first; double p1jy = diagram1[j].second; 
+          double p2ix = diagram2[i].first; double p2iy = diagram2[i].second; double p2jx = diagram2[j].first; double p2jy = diagram2[j].second; 
+          double n1i = p1ix*p1ix + p1iy*p1iy; double n1j = p1jx*p1jx + p1jy*p1jy; double n2i = p2ix*p2ix + p2iy*p2iy; double n2j = p2jx*p2jx + p2jy*p2jy;
+          double m1 = std::min(n1i,n1j); double M1 = std::max(n1i,n1j); double m2 = std::min(n2i,n2j); double M2 = std::max(n2i,n2j);
+          std::pair<int,double> iM1(i,M1); std::pair<int,double> jm1(j,m1); std::pair<int,double> iM2(i,M2); std::pair<int,double> jm2(j,m2);
+          angles1.emplace_back(theta1, std::pair<std::pair<int,double>, std::pair<int,double>>(iM1, jm1));
+          angles2.emplace_back(theta2, std::pair<std::pair<int,double>, std::pair<int,double>>(iM2, jm2));
         }
       }
       int num_angles = angles1.size();
@@ -379,11 +234,27 @@ class Sliced_Wasserstein {
 
       // Sort angles.
       std::sort(angles1.begin(), angles1.end(),
-                [](const std::pair<double, std::pair<int, int> >& p1,
-                   const std::pair<double, std::pair<int, int> >& p2) { return (p1.first < p2.first); });
+                [](const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p1,
+                   const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p2) {
+        if (p1.first == p2.first){
+          if (p1.second.first.second == p2.second.first.second)
+            return (p1.second.second.second < p2.second.second.second);
+          else
+            return (p1.second.first.second < p2.second.first.second);
+        } else 
+          return (p1.first < p2.first); 
+      });
       std::sort(angles2.begin(), angles2.end(),
-                [](const std::pair<double, std::pair<int, int> >& p1,
-                   const std::pair<double, std::pair<int, int> >& p2) { return (p1.first < p2.first); });
+                [](const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p1,
+                   const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p2) { 
+        if (p1.first == p2.first){
+          if (p1.second.first.second == p2.second.first.second)
+            return (p1.second.second.second < p2.second.second.second);
+          else
+            return (p1.second.first.second < p2.second.first.second);
+        } else
+          return (p1.first < p2.first); 
+      });
 
       // Initialize orders of the points of both PDs (given by ordinates when theta = -pi/2).
       std::vector<int> orderp1, orderp2;
@@ -393,15 +264,15 @@ class Sliced_Wasserstein {
       }
       std::sort(orderp1.begin(), orderp1.end(), [&](int i, int j) {
         if (diagram1[i].second != diagram1[j].second)
-          return (diagram1[i].second < diagram1[j].second);
+          return (diagram1[i].second > diagram1[j].second);
         else
-          return (diagram1[i].first > diagram1[j].first);
+          return (diagram1[i].first < diagram1[j].first);
       });
       std::sort(orderp2.begin(), orderp2.end(), [&](int i, int j) {
         if (diagram2[i].second != diagram2[j].second)
-          return (diagram2[i].second < diagram2[j].second);
+          return (diagram2[i].second > diagram2[j].second);
         else
-          return (diagram2[i].first > diagram2[j].first);
+          return (diagram2[i].first < diagram2[j].first);
       });
 
       // Find the inverses of the orders.
@@ -418,27 +289,57 @@ class Sliced_Wasserstein {
       int try_idx2 = 0;
       int order_to_swap, i_to_swap, j_to_swap;
 
-      while( (try_idx1 < num_angles-1) && (try_idx2 < num_angles-1)){
+      while( (try_idx1 < num_angles) || (try_idx2 < num_angles)){
 
         // Find theta2 + next indices to swap
-        if angles1[try_idx1].first < angles2[try_idx2].first
-          theta2 = angles1[try_idx1].first;
-          order_to_swap = 1;
-          i_to_swap = angles1[try_idx1].second.first;
-          j_to_swap = angles1[try_idx1].second.second;
-          try_idx1 += 1;
-        else
-          theta2 = angles2[try_idx2].first;
-          order_to_swap = 2;
-          i_to_swap = angles2[try_idx2].second.first;
-          j_to_swap = angles2[try_idx2].second.second;
-          try_idx2 += 1;
+        if ((try_idx1 < num_angles) && (try_idx2 < num_angles)){
+          if ((angles1[try_idx1].first < angles2[try_idx2].first) && (try_idx1 < num_angles)){
+            theta2 = angles1[try_idx1].first;
+            order_to_swap = 1;
+            i_to_swap = angles1[try_idx1].second.first.first;
+            j_to_swap = angles1[try_idx1].second.second.first;
+            try_idx1 += 1;
+          }
+          else{
+            theta2 = angles2[try_idx2].first;
+            order_to_swap = 2;
+            i_to_swap = angles2[try_idx2].second.first.first;
+            j_to_swap = angles2[try_idx2].second.second.first;
+            try_idx2 += 1;
+          }
+        }
+        else{
+          if (try_idx1 == num_angles){
+            theta2 = angles2[try_idx2].first;
+            order_to_swap = 2;
+            i_to_swap = angles2[try_idx2].second.first.first;
+            j_to_swap = angles2[try_idx2].second.second.first;
+            try_idx2 += 1;
+          }
+          else{
+            theta2 = angles1[try_idx1].first;
+            order_to_swap = 1;
+            i_to_swap = angles1[try_idx1].second.first.first;
+            j_to_swap = angles1[try_idx1].second.second.first;
+            try_idx1 += 1;
+          }
+        }
 
         // compute integral
-        sw += compute_integral(theta1, theta2, orderp1, orderp2, angles12, diagram1, diagram2);
+        double integral_value = compute_integral(theta1, theta2, orderp1, orderp2, angles12, diagram1, diagram2);
+        sw += integral_value;
+
+//        std::cout << theta1 << " " << theta2 << std::endl;
+//        std::cout << "orderp1 = [ ";
+//        for (int i = 0; i < orderp1.size(); i++)  std::cout << orderp1[i] << " ";
+//        std::cout << "]" << std::endl;
+//        std::cout << "orderp2 = [ ";
+//        for (int i = 0; i < orderp2.size(); i++)  std::cout << orderp2[i] << " ";
+//        std::cout << "]" << std::endl;
+//        std::cout << "int = " << integral_value << std::endl;
 
         // swap order
-        if order_to_swap == 1{
+        if (order_to_swap == 1){
           orderp1[order1[i_to_swap]] = j_to_swap;
           orderp1[order1[j_to_swap]] = i_to_swap;
           int tmp_pos = order1[i_to_swap];
@@ -459,62 +360,19 @@ class Sliced_Wasserstein {
 
       }
 
-//      // Record all inversions of points in the orders as theta varies along the positive half-disk.
-//      std::vector<std::vector<std::pair<int, double> > > anglePerm1(num_pts_dgm);
-//      std::vector<std::vector<std::pair<int, double> > > anglePerm2(num_pts_dgm);
-//
-//      int m1 = angles1.size();
-//      for (int i = 0; i < m1; i++) {
-//        double theta = angles1[i].first;
-//        int p = angles1[i].second.first;
-//        int q = angles1[i].second.second;
-//        anglePerm1[order1[p]].emplace_back(p, theta);
-//        anglePerm1[order1[q]].emplace_back(q, theta);
-//        int a = order1[p];
-//        int b = order1[q];
-//        order1[p] = b;
-//        order1[q] = a;
-//      }
-//
-//      int m2 = angles2.size();
-//      for (int i = 0; i < m2; i++) {
-//        double theta = angles2[i].first;
-//        int p = angles2[i].second.first;
-//        int q = angles2[i].second.second;
-//        anglePerm2[order2[p]].emplace_back(p, theta);
-//        anglePerm2[order2[q]].emplace_back(q, theta);
-//        int a = order2[p];
-//        int b = order2[q];
-//        order2[p] = b;
-//        order2[q] = a;
-//      }
-//
-//      for (int i = 0; i < num_pts_dgm; i++) {
-//        anglePerm1[order1[i]].emplace_back(i, pi / 2);
-//        anglePerm2[order2[i]].emplace_back(i, pi / 2);
-//      }
-//
-//      // Compute the SW distance with the list of inversions.
-//      for (int i = 0; i < num_pts_dgm; i++) {
-//        std::vector<std::pair<int, double> > u, v;
-//        u = anglePerm1[i];
-//        v = anglePerm2[i];
-//        double theta1, theta2;
-//        theta1 = -pi / 2;
-//        unsigned int ku, kv;
-//        ku = 0;
-//        kv = 0;
-//        theta2 = std::min(u[ku].second, v[kv].second);
-//        while (theta1 != pi / 2) {
-//          if (diagram1[u[ku].first].first != diagram2[v[kv].first].first ||
-//              diagram1[u[ku].first].second != diagram2[v[kv].first].second)
-//            if (theta1 != theta2) sw += compute_int(theta1, theta2, u[ku].first, v[kv].first, diagram1, diagram2);
-//          theta1 = theta2;
-//          if ((theta2 == u[ku].second) && ku < u.size() - 1) ku++;
-//          if ((theta2 == v[kv].second) && kv < v.size() - 1) kv++;
-//          theta2 = std::min(u[ku].second, v[kv].second);
-//        }
-//      }
+      // Last integral between last angle and pi / 2
+      theta2 = pi / 2;
+      double integral_value = compute_integral(theta1, theta2, orderp1, orderp2, angles12, diagram1, diagram2); 
+      sw += integral_value;
+
+//      std::cout << theta1 << " " << theta2 << std::endl;
+//      std::cout << "orderp1 = [ ";
+//      for (int i = 0; i < orderp1.size(); i++)  std::cout << orderp1[i] << " ";
+//      std::cout << "]" << std::endl;
+//      std::cout << "orderp2 = [ ";
+//      for (int i = 0; i < orderp2.size(); i++)  std::cout << orderp2[i] << " ";
+//      std::cout << "]" << std::endl;
+//      std::cout << "int = " << integral_value << std::endl;
 
     } else {
       double step = pi / this->approx;
@@ -550,8 +408,8 @@ class Sliced_Wasserstein {
    *                      directions are stored in memory to reduce computation time.
    *
    */
-  Sliced_Wasserstein(const Persistence_diagram& _diagram, double _sigma = 1.0, int _approx = 10)
-      : diagram(_diagram), approx(_approx), sigma(_sigma) {
+  Sliced_Wasserstein(const Persistence_diagram& _diagram, double _sigma = 1.0, int _approx = 10, double _genericity_factor=10)
+      : diagram(_diagram), approx(_approx), sigma(_sigma), genericity_factor(_genericity_factor) {
     build_rep();
   }
 
@@ -583,7 +441,7 @@ class Sliced_Wasserstein {
   }
 
   double sw_distance(const Sliced_Wasserstein& second) const {
-    return compute_sliced_wasserstein_distance(second);
+    return this->compute_sliced_wasserstein_distance(second);
   }
 
 };  // class Sliced_Wasserstein
