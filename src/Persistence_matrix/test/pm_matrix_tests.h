@@ -1745,82 +1745,97 @@ void test_base_swaps(){
 	test_content_equality(columns, m);
 
 	m.swap_columns(3,5);
-	m.swap_columns(5,1);
+	if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+		m.swap_columns(3,1);
+	} else {
+		m.swap_columns(5,1);
+		columns[3].swap(columns[5]);
+		columns[5].swap(columns[1]);
+	}
 
-	columns[3].swap(columns[5]);
-	columns[5].swap(columns[1]);
 	test_content_equality(columns, m);
 
 	m.swap_rows(3,5);
 	m.swap_rows(5,1);
 
 	if constexpr (Matrix::Option_list::is_z2){
-		columns[1] = {0,5};
 		columns[4] = {2,5};
 		columns[6] = {1,3,4};
+		if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+			columns[3] = {0,5};
+			columns[5] = {0,2};
+		} else {
+			columns[1] = {0,5};
+		}
 	} else {
-		columns[1] = {{0,1},{5,4}};
 		columns[4] = {{2,4},{5,1}};
 		columns[6] = {{1,1},{3,4},{4,1}};
-	}
-	test_content_equality(columns, m);
-}
-
-	// //base
-	// //boundary: does not update barcode
-	// //id to pos
-	// void swap_at_indices(index index1, index index2);
-	// //*******************
-
-template<class Matrix>
-void test_base_index_swaps(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns, 5);
-
-	test_content_equality(columns, m);
-
-	m.swap_at_indices(3,5);
-	m.swap_at_indices(5,1);
-
-	columns[3].swap(columns[5]);
-	columns[5].swap(columns[1]);
-	if constexpr (Matrix::Option_list::is_z2){
-		columns[1] = {0,5};
-		columns[4] = {2,5};
-		columns[6] = {1,3,4};
-	} else {
-		columns[1] = {{0,1},{5,4}};
-		columns[4] = {{2,4},{5,1}};
-		columns[6] = {{1,1},{3,4},{4,1}};
+		if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+			columns[3] = {{0,1},{5,4}};
+			columns[5] = {{0,1},{2,4}};
+		} else {
+			columns[1] = {{0,1},{5,4}};
+		}
 	}
 
 	test_content_equality(columns, m);
 }
 
-template<class Matrix>
-void test_base_indexed_by_id_index_swaps(){
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns, 5);
+// 	// //base
+// 	// //boundary: does not update barcode
+// 	// //id to pos
+// 	// void swap_at_indices(index index1, index index2);
+// 	// //*******************
 
-	test_content_equality(columns, m);
+// template<class Matrix>
+// void test_base_index_swaps(){
+// 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+// 	Matrix m(columns, 5);
 
-	m.swap_at_indices(3,5);
-	m.swap_at_indices(3,1);
+// 	test_content_equality(columns, m);
 
-	if constexpr (Matrix::Option_list::is_z2){
-		columns[3] = {0,5};
-		columns[4] = {2,5};
-		columns[5] = {0,2};
-		columns[6] = {1,3,4};
-	} else {
-		columns[3] = {{0,1},{5,4}};
-		columns[4] = {{2,4},{5,1}};
-		columns[5] = {{0,1},{2,4}};
-		columns[6] = {{1,1},{3,4},{4,1}};
-	}
+// 	m.swap_at_indices(3,5);
+// 	m.swap_at_indices(5,1);
 
-	test_content_equality(columns, m);
-}
+// 	columns[3].swap(columns[5]);
+// 	columns[5].swap(columns[1]);
+// 	if constexpr (Matrix::Option_list::is_z2){
+// 		columns[1] = {0,5};
+// 		columns[4] = {2,5};
+// 		columns[6] = {1,3,4};
+// 	} else {
+// 		columns[1] = {{0,1},{5,4}};
+// 		columns[4] = {{2,4},{5,1}};
+// 		columns[6] = {{1,1},{3,4},{4,1}};
+// 	}
+
+// 	test_content_equality(columns, m);
+// }
+
+// template<class Matrix>
+// void test_base_indexed_by_id_index_swaps(){
+// 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+// 	Matrix m(columns, 5);
+
+// 	test_content_equality(columns, m);
+
+// 	m.swap_at_indices(3,5);
+// 	m.swap_at_indices(3,1);
+
+// 	if constexpr (Matrix::Option_list::is_z2){
+// 		columns[3] = {0,5};
+// 		columns[4] = {2,5};
+// 		columns[5] = {0,2};
+// 		columns[6] = {1,3,4};
+// 	} else {
+// 		columns[3] = {{0,1},{5,4}};
+// 		columns[4] = {{2,4},{5,1}};
+// 		columns[5] = {{0,1},{2,4}};
+// 		columns[6] = {{1,1},{3,4},{4,1}};
+// 	}
+
+// 	test_content_equality(columns, m);
+// }
 
 	// //ru: returns true if barcode was changed
 	// //pos to id

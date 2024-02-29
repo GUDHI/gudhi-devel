@@ -76,16 +76,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_z2_barcode, Matrix, barcode_matric
 	test_barcode<Matrix>();
 }
 
-#ifdef PM_TEST_ID_IDX
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_z2_swaps, Matrix, swap_matrices) {
-	test_base_indexed_by_id_index_swaps<Matrix>();
-}
-#else
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_z2_swaps, Matrix, swap_matrices) {
 	test_base_swaps<Matrix>();
-	test_base_index_swaps<Matrix>();
 }
-#endif
 
 
 

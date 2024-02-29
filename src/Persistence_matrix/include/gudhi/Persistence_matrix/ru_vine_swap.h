@@ -14,6 +14,7 @@
 #include <utility>	//std::move
 #include <type_traits>	//std::conditional
 #include <cassert>
+#include <vector>
 
 #include "ru_pairing.h"
 
@@ -49,6 +50,7 @@ public:
 	// using dictionnary_type = typename Master_matrix::template dictionnary_type<int>;
 	using index = typename Master_matrix::index;
 	using pos_index = typename Master_matrix::pos_index;
+	using id_index = typename Master_matrix::id_index;
 
 	RU_vine_swap();
 	RU_vine_swap(const RU_vine_swap &matrixToCopy);
@@ -62,7 +64,14 @@ public:
 		if constexpr (Master_matrix::Option_list::has_column_pairings){
 			swap(static_cast<RU_pairing<Master_matrix>&>(swap1), static_cast<RU_pairing<Master_matrix>&>(swap2));
 		}
+		swap1.positionToRowIdx_.swap(swap2.positionToRowIdx_);
 	}
+
+protected:
+	//only usefull when simplex id does not corresponds to position, so feels kinda useless most of the time...
+	//TODO: as it takes up some non trivial memory, see if this should not be optional
+	//or only remember the positions with a difference. but then a map is needed, ie find instead of []. 
+	std::vector<id_index> positionToRowIdx_;
 
 private:
 	using RUP = typename std::conditional<
@@ -103,12 +112,12 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap()
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(
 		const RU_vine_swap &matrixToCopy)
-	: RUP(static_cast<const RUP&>(matrixToCopy))
+	: RUP(static_cast<const RUP&>(matrixToCopy)), positionToRowIdx_(matrixToCopy.positionToRowIdx_)
 {}
 
 template<class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix> &&other) noexcept
-	: RUP(std::move(static_cast<RUP&>(other)))
+	: RUP(std::move(static_cast<RUP&>(other))), positionToRowIdx_(std::move(other.positionToRowIdx_))
 {}
 
 template<class Master_matrix>
@@ -120,7 +129,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(pos_index in
 	bool iiIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index + 1);
 
 	if (iIsPositive && iiIsPositive) {
-		_matrix()->mirrorMatrixU_.zero_cell(index, index + 1);
+		_matrix()->mirrorMatrixU_.zero_cell(index, positionToRowIdx_[index + 1]);
 		return _positive_vine_swap(index);
 	} else if (!iIsPositive && !iiIsPositive)
 		return _negative_vine_swap(index);
@@ -144,26 +153,26 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(pos_index index)
 			_swap_at_index(index);
 			return true;
 		}
-		if (!_matrix()->mirrorMatrixU_.is_zero_cell(index, index + 1)){
-			_matrix()->mirrorMatrixU_.zero_cell(index, index + 1);
+		if (!_matrix()->mirrorMatrixU_.is_zero_cell(index, positionToRowIdx_[index + 1])){
+			_matrix()->mirrorMatrixU_.zero_cell(index, positionToRowIdx_[index + 1]);
 		}
 		return _positive_vine_swap(index);
 	} else if (!iIsPositive && !iiIsPositive) {
-		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, positionToRowIdx_[index + 1])){
 			_negative_transpose(index);
 			_swap_at_index(index);
 			return true;
 		}
 		return _negative_vine_swap(index);
 	} else if (iIsPositive && !iiIsPositive) {
-		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, positionToRowIdx_[index + 1])){
 			_positive_negative_transpose(index);
 			_swap_at_index(index);
 			return true;
 		}
 		return _positive_negative_vine_swap(index);
 	} else {
-		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, index + 1)){
+		if (_matrix()->reducedMatrixR_.get_column_dimension(index) != _matrix()->reducedMatrixR_.get_column_dimension(index + 1) || _matrix()->mirrorMatrixU_.is_zero_cell(index, positionToRowIdx_[index + 1])){
 			_negative_positive_transpose(index);
 			_swap_at_index(index);
 			return true;
@@ -177,6 +186,7 @@ inline RU_vine_swap<Master_matrix> &RU_vine_swap<Master_matrix>::operator=(
 		RU_vine_swap<Master_matrix> other)
 {
 	RUP::operator=(other);
+	positionToRowIdx_.swap(other.positionToRowIdx_);
 	return *this;
 }
 
@@ -213,8 +223,10 @@ inline bool RU_vine_swap<Master_matrix>::_is_paired(index index){
 
 template<class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_swap_at_index(index index){
-	_matrix()->reducedMatrixR_.swap_at_indices(index, index + 1);
-	_matrix()->mirrorMatrixU_.swap_at_indices(index, index + 1);
+	_matrix()->reducedMatrixR_.swap_columns(index, index + 1);
+	_matrix()->reducedMatrixR_.swap_rows(positionToRowIdx_[index], positionToRowIdx_[index + 1]);
+	_matrix()->mirrorMatrixU_.swap_columns(index, index + 1);
+	_matrix()->mirrorMatrixU_.swap_rows(positionToRowIdx_[index], positionToRowIdx_[index + 1]);
 }
 
 template<class Master_matrix>
@@ -307,7 +319,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 	const pos_index iDeath = _get_death(index);
 	const pos_index iiDeath = _get_death(index + 1);
 
-	if (iDeath != -1 && iiDeath != -1 && !(_matrix()->reducedMatrixR_.is_zero_cell(iiDeath, index)))
+	if (iDeath != static_cast<pos_index>(-1) && iiDeath != static_cast<pos_index>(-1) && !(_matrix()->reducedMatrixR_.is_zero_cell(iiDeath, positionToRowIdx_[index])))
 	{
 		if (iDeath < iiDeath) {
 			_swap_at_index(index);
@@ -323,7 +335,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(index index)
 
 	_swap_at_index(index);
 
-	if (iDeath != -1 || iiDeath == -1 || _matrix()->reducedMatrixR_.is_zero_cell(iiDeath, index + 1)) {
+	if (iDeath != static_cast<pos_index>(-1) || iiDeath == static_cast<pos_index>(-1) || _matrix()->reducedMatrixR_.is_zero_cell(iiDeath, positionToRowIdx_[index + 1])) {
 		_positive_transpose(index);
 		return true;
 	}
@@ -353,7 +365,7 @@ inline bool RU_vine_swap<Master_matrix>::_negative_vine_swap(index index)
 template<class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(index index)
 {
-	_matrix()->mirrorMatrixU_.zero_cell(index, index + 1);
+	_matrix()->mirrorMatrixU_.zero_cell(index, positionToRowIdx_[index + 1]);
 
 	_swap_at_index(index);
 	_positive_negative_transpose(index);

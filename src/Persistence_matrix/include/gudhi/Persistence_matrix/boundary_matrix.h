@@ -48,9 +48,9 @@ public:
 	template<class Boundary_type = boundary_type>
 	index insert_boundary(id_index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex);
-	Row_type& get_row(id_index rowIndex);
-	id_index remove_last();		//update barcode if already computed
-	void erase_row(id_index rowIndex);		//assumes the row is empty, just thought as index a cleanup
+	Row_type& get_row(index rowIndex);
+	index remove_last();				//update barcode if already computed
+	void erase_row(index rowIndex);		//assumes the row is empty, just thought as index a cleanup
 
 	index get_number_of_columns() const;
 
@@ -66,13 +66,13 @@ public:
 	// void add_to(const Column_type& sourceColumn, const Field_element_type& coefficient, index targetColumnIndex);
 	// void add_to(const Field_element_type& coefficient, const Column_type& sourceColumn, index targetColumnIndex);
 
-	void zero_cell(index columnIndex, id_index rowIndex);
+	void zero_cell(index columnIndex, index rowIndex);
 	void zero_column(index columnIndex);
 	//=================================================================
-	bool is_zero_cell(index columnIndex, id_index rowIndex) const;
+	bool is_zero_cell(index columnIndex, index rowIndex) const;
 	bool is_zero_column(index columnIndex);
 
-	id_index get_pivot(index columnIndex);
+	index get_pivot(index columnIndex);
 
 	void set_operators(Field_operators* operators){ 
 		operators_ = operators;
@@ -331,7 +331,7 @@ inline typename Boundary_matrix<Master_matrix>::Column_type &Boundary_matrix<Mas
 }
 
 template<class Master_matrix>
-inline typename Boundary_matrix<Master_matrix>::Row_type& Boundary_matrix<Master_matrix>::get_row(id_index rowIndex)
+inline typename Boundary_matrix<Master_matrix>::Row_type& Boundary_matrix<Master_matrix>::get_row(index rowIndex)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
@@ -344,7 +344,7 @@ inline typename Boundary_matrix<Master_matrix>::Row_type& Boundary_matrix<Master
 }
 
 template<class Master_matrix>
-inline typename Boundary_matrix<Master_matrix>::id_index Boundary_matrix<Master_matrix>::remove_last()
+inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::remove_last()
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'remove_last' is not implemented for the chosen options.");
@@ -359,9 +359,21 @@ inline typename Boundary_matrix<Master_matrix>::id_index Boundary_matrix<Master_
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		auto it = matrix_.find(nextInsertIndex_);
 		pivot = it->second.get_pivot();
+		if constexpr (activeSwapOption){
+			if (swap_opt::rowSwapped_ && pivot != -1){	//if the removed column is positive, the pivot won't change value
+				swap_opt::_orderRows();
+				pivot = it->second.get_pivot();
+			}
+		}
 		matrix_.erase(it);
 	} else {
 		pivot = matrix_[nextInsertIndex_].get_pivot();
+		if constexpr (activeSwapOption){
+			if (swap_opt::rowSwapped_ && pivot != -1){	//if the removed column is positive, the pivot won't change value
+				swap_opt::_orderRows();
+				pivot = matrix_[nextInsertIndex_].get_pivot();
+			}
+		}
 		if constexpr (Master_matrix::Option_list::has_row_access){
 			assert(nextInsertIndex_ == matrix_.size() - 1 && "Indexation problem.");
 			matrix_.pop_back();
@@ -380,7 +392,7 @@ inline typename Boundary_matrix<Master_matrix>::id_index Boundary_matrix<Master_
 }
 
 template<class Master_matrix>
-inline void Boundary_matrix<Master_matrix>::erase_row(id_index rowIndex)
+inline void Boundary_matrix<Master_matrix>::erase_row(index rowIndex)
 {
 	id_index rowID = rowIndex;
 	if constexpr (activeSwapOption){
@@ -511,7 +523,7 @@ inline void Boundary_matrix<Master_matrix>::multiply_source_and_add_to(const Fie
 // }
 
 template<class Master_matrix>
-inline void Boundary_matrix<Master_matrix>::zero_cell(index columnIndex, id_index rowIndex)
+inline void Boundary_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex)
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		if constexpr (activeSwapOption){
@@ -539,7 +551,7 @@ inline void Boundary_matrix<Master_matrix>::zero_column(index columnIndex)
 }
 
 template<class Master_matrix>
-inline bool Boundary_matrix<Master_matrix>::is_zero_cell(index columnIndex, id_index rowIndex) const
+inline bool Boundary_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		if constexpr (activeSwapOption){
@@ -567,7 +579,7 @@ inline bool Boundary_matrix<Master_matrix>::is_zero_column(index columnIndex)
 }
 
 template<class Master_matrix>
-inline typename Boundary_matrix<Master_matrix>::id_index Boundary_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	if constexpr (activeSwapOption){
 		if (swap_opt::rowSwapped_) swap_opt::_orderRows();

@@ -42,7 +42,6 @@ public:
 
 	void swap_columns(index columnIndex1, index columnIndex2);
 	void swap_rows(id_index rowIndex1, id_index rowIndex2);
-	void swap_at_indices(index index1, index index2);
 
 	Base_swap& operator=(Base_swap other);
 	friend void swap(Base_swap& base1, Base_swap& base2){
@@ -135,13 +134,6 @@ inline void Base_swap<Master_matrix,Base_matrix>::swap_rows(id_index rowIndex1, 
 		std::swap(rowToIndex_[indexToRow_[rowIndex1]], rowToIndex_[indexToRow_[rowIndex2]]);
 		std::swap(indexToRow_[rowIndex1], indexToRow_[rowIndex2]);
 	}
-}
-
-template<class Master_matrix, class Base_matrix>
-inline void Base_swap<Master_matrix,Base_matrix>::swap_at_indices(index index1, index index2)
-{
-	swap_columns(index1, index2);
-	swap_rows(index1, index2);
 }
 
 template<class Master_matrix, class Base_matrix>

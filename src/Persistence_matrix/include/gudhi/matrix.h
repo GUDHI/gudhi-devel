@@ -934,10 +934,6 @@ class Matrix {
   // base
   // boundary: does not update barcode
   void swap_rows(index rowIndex1, index rowIndex2);
-  // base
-  // boundary: does not update barcode
-  // id to pos: does not update barcode
-  void swap_at_indices(index index1, index index2);
   // ru: returns true if barcode was changed
   // pos to id
   bool vine_swap_with_z_eq_1_case(pos_index index);  // by column position with ordered column container
@@ -1435,7 +1431,7 @@ template <class Options>
 inline Matrix<Options>& Matrix<Options>::operator=(Matrix other) {
   swap(matrix_, other.matrix_);
   swap(operators_, other.operators_);
-  matrix_.set_operators(&operators_);
+  if constexpr (!Options::is_z2) matrix_.set_operators(&operators_);
 
   return *this;
 }
@@ -1467,7 +1463,6 @@ template <class Options>
 inline void Matrix<Options>::swap_columns(index columnIndex1, index columnIndex2) {
   static_assert((!isNonBasic && !Options::has_column_compression) ||
                     (isNonBasic && Options::is_of_boundary_type && 
-                     Options::column_indexation_type != Column_indexation_types::IDENTIFIER &&
                      !Options::has_vine_update && !Options::can_retrieve_representative_cycles),
                 "This method was not enabled.");
   return matrix_.swap_columns(columnIndex1, columnIndex2);
@@ -1477,19 +1472,9 @@ template <class Options>
 inline void Matrix<Options>::swap_rows(index rowIndex1, index rowIndex2) {
   static_assert((!isNonBasic && !Options::has_column_compression) ||
                     (isNonBasic && Options::is_of_boundary_type && 
-                     Options::column_indexation_type != Column_indexation_types::IDENTIFIER &&
                      !Options::has_vine_update && !Options::can_retrieve_representative_cycles),
                 "This method was not enabled.");
   return matrix_.swap_rows(rowIndex1, rowIndex2);
-}
-
-template <class Options>
-inline void Matrix<Options>::swap_at_indices(index index1, index index2) {
-  static_assert((!isNonBasic && !Options::has_column_compression) ||
-                    (isNonBasic && Options::is_of_boundary_type && !Options::has_vine_update &&
-                     !Options::can_retrieve_representative_cycles),
-                "This method was not enabled.");
-  return matrix_.swap_at_indices(index1, index2);
 }
 
 template <class Options>

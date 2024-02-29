@@ -43,7 +43,7 @@ public:
 		: pivot_(std::exchange(col.pivot_, -1)), pairedColumn_(std::exchange(col.pairedColumn_, -1)) {}
 
 	index get_paired_chain_index() const { return pairedColumn_; }
-	bool is_paired() const { return pairedColumn_ != -1; }
+	bool is_paired() const { return pairedColumn_ != static_cast<index>(-1); }
 	void assign_paired_chain(index other_col){ pairedColumn_ = other_col; }
 	void unassign_paired_chain() { pairedColumn_ = -1; };
 

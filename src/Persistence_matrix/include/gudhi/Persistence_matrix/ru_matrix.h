@@ -48,8 +48,8 @@ public:
 	void insert_boundary(id_index simplexIndex, const Boundary_type& boundary, dimension_type dim = -1);
 	Column_type& get_column(index columnIndex, bool inR = true);
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
-	Row_type& get_row(id_index rowIndex, bool inR = true);
-	void erase_row(id_index rowIndex);	//only erase row in R, as U will never have an empty row
+	Row_type& get_row(index rowIndex, bool inR = true);
+	void erase_row(index rowIndex);	//only erase row in R, as U will never have an empty row
 	void remove_maximal_face(index columnIndex);
 	void remove_last();
 
@@ -64,14 +64,14 @@ public:
 	void multiply_target_and_add_to(index sourceColumnIndex, const Field_element_type& coefficient, index targetColumnIndex);	//do not call with vine updates
 	void multiply_source_and_add_to(const Field_element_type& coefficient, index sourceColumnIndex, index targetColumnIndex);	//do not call with vine updates
 
-	void zero_cell(index columnIndex, id_index rowIndex, bool inR = true);
+	void zero_cell(index columnIndex, index rowIndex, bool inR = true);
 	void zero_column(index columnIndex, bool inR = true);
 	//=================================================================
-	bool is_zero_cell(index columnIndex, id_index rowIndex, bool inR = true) const;
+	bool is_zero_cell(index columnIndex, index rowIndex, bool inR = true) const;
 	bool is_zero_column(index columnIndex, bool inR = true);
 
-	index get_column_with_pivot(id_index simplexIndex) const;	//assumes that pivot exists
-	id_index get_pivot(index columnIndex);
+	index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
+	index get_pivot(index columnIndex);
 
 	void set_operators(Field_operators* operators){ 
 		operators_ = operators;
@@ -175,6 +175,9 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Field_o
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		_indexToBar().reserve(numberOfColumns);
 	}
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		swap_opt::positionToRowIdx_.reserve(numberOfColumns);
+	}
 }
 
 template<class Master_matrix>
@@ -205,12 +208,21 @@ template<class Master_matrix>
 template<class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type &boundary, dimension_type dim)
 {
-	_insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		auto id = reducedMatrixR_.insert_boundary(boundary, dim);
+		swap_opt::positionToRowIdx_.push_back(id);
+		_insert_boundary(id);
+	} else {
+		_insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
+	}
 }
 
 template<class Master_matrix>
 template<class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(id_index simplexIndex, const Boundary_type& boundary, dimension_type dim){
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		swap_opt::positionToRowIdx_.push_back(simplexIndex);
+	}
 	_insert_boundary(reducedMatrixR_.insert_boundary(simplexIndex, boundary, dim));
 }
 
@@ -226,7 +238,7 @@ RU_matrix<Master_matrix>::get_column(index columnIndex, bool inR)
 
 template<class Master_matrix>
 inline typename RU_matrix<Master_matrix>::Row_type&
-RU_matrix<Master_matrix>::get_row(id_index rowIndex, bool inR)
+RU_matrix<Master_matrix>::get_row(index rowIndex, bool inR)
 {
 	static_assert(Master_matrix::Option_list::has_row_access,
 			"'get_row' is not implemented for the chosen options.");
@@ -238,7 +250,7 @@ RU_matrix<Master_matrix>::get_row(id_index rowIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::erase_row(id_index rowIndex)
+inline void RU_matrix<Master_matrix>::erase_row(index rowIndex)
 {
 	reducedMatrixR_.erase_row(rowIndex);
 }
@@ -294,6 +306,10 @@ inline void RU_matrix<Master_matrix>::remove_last()
 		id_index lastPivot = reducedMatrixR_.remove_last();
 		if (lastPivot != -1) pivotToColumnIndex_[lastPivot] = -1;
 	}
+
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		swap_opt::positionToRowIdx_.pop_back();
+	}
 }
 
 template<class Master_matrix>
@@ -339,7 +355,7 @@ inline void RU_matrix<Master_matrix>::multiply_source_and_add_to(const Field_ele
 }
 
 template<class Master_matrix>
-inline void RU_matrix<Master_matrix>::zero_cell(index columnIndex, id_index rowIndex, bool inR)
+inline void RU_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex, bool inR)
 {
 	if (inR){
 		return reducedMatrixR_.zero_cell(columnIndex, rowIndex);
@@ -357,7 +373,7 @@ inline void RU_matrix<Master_matrix>::zero_column(index columnIndex, bool inR)
 }
 
 template<class Master_matrix>
-inline bool RU_matrix<Master_matrix>::is_zero_cell(index columnIndex, id_index rowIndex, bool inR) const
+inline bool RU_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex, bool inR) const
 {
 	if (inR){
 		return reducedMatrixR_.is_zero_cell(columnIndex, rowIndex);
@@ -375,7 +391,7 @@ inline bool RU_matrix<Master_matrix>::is_zero_column(index columnIndex, bool inR
 }
 
 template<class Master_matrix>
-inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_column_with_pivot(id_index simplexIndex) const
+inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_column_with_pivot(index simplexIndex) const
 {
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		return pivotToColumnIndex_.at(simplexIndex);
@@ -385,7 +401,7 @@ inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_co
 }
 
 template<class Master_matrix>
-inline typename RU_matrix<Master_matrix>::id_index RU_matrix<Master_matrix>::get_pivot(index columnIndex)
+inline typename RU_matrix<Master_matrix>::index RU_matrix<Master_matrix>::get_pivot(index columnIndex)
 {
 	return reducedMatrixR_.get_column(columnIndex).get_pivot();
 }
@@ -461,8 +477,14 @@ inline void RU_matrix<Master_matrix>::_reduce()
 	if constexpr (Master_matrix::Option_list::has_column_pairings){
 		_indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
 	}
+	if constexpr (Master_matrix::Option_list::has_vine_update){
+		swap_opt::positionToRowIdx_.reserve(reducedMatrixR_.get_number_of_columns());
+	}
 
 	for (index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++){
+		if constexpr (Master_matrix::Option_list::has_vine_update){
+			swap_opt::positionToRowIdx_.push_back(i);
+		}
 		if (!(reducedMatrixR_.is_zero_column(i)))
 		{
 			Column_type &curr = reducedMatrixR_.get_column(i);
@@ -510,7 +532,7 @@ template<class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 {
 	auto get_column_with_pivot_ = [&](id_index pivot)->index{
-		if (pivot == -1) return -1;
+		if (pivot == static_cast<id_index>(-1)) return -1;
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			auto it = pivotToColumnIndex_.find(pivot);
 			if (it == pivotToColumnIndex_.end()) return -1;
@@ -529,7 +551,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 	id_index pivot = curr.get_pivot();
 	index currIndex = get_column_with_pivot_(pivot);
 
-	while (pivot != -1 && currIndex != -1){
+	while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)){
 		if constexpr (Master_matrix::Option_list::is_z2){
 			curr += reducedMatrixR_.get_column(currIndex);
 			if constexpr (Master_matrix::Option_list::has_vine_update)
@@ -550,7 +572,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 		currIndex = get_column_with_pivot_(pivot);
 	}
 
-	if (pivot != -1){
+	if (pivot != static_cast<id_index>(-1)){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			pivotToColumnIndex_.try_emplace(pivot, lastIndex);
 		} else {

@@ -145,12 +145,10 @@ public:
 	//ru
 	//chain
 	const barcode_type& get_current_barcode();
-	// //boundary
-	// void swap_columns(id_index faceID1, id_index faceID2);	//to enable, row and column position have to be separated
-	// //boundary
-	// void swap_rows(id_index rowIndex1, id_index rowIndex2);	//to enable, row and column position have to be separated
 	//boundary
-	void swap_at_indices(id_index index1, id_index index2);
+	void swap_columns(id_index faceID1, id_index faceID2);
+	//boundary
+	void swap_rows(index rowIndex1, index rowIndex2);
 	//chain
 	//ru
 	void update_representative_cycles();
@@ -496,10 +494,16 @@ Id_to_index_overlay<Matrix_type,Master_matrix_type>::get_representative_cycle(co
 }
 
 template<class Matrix_type, class Master_matrix_type>
-inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::swap_at_indices(id_index faceID1, id_index faceID2)
+inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::swap_columns(id_index faceID1, id_index faceID2)
 {
+	matrix_.swap_columns(_id_to_index(faceID1), _id_to_index(faceID2));
 	std::swap(idToIndex_->at(faceID1), idToIndex_->at(faceID2));
-	return matrix_.swap_at_indices(_id_to_index(faceID1), _id_to_index(faceID2));
+}
+
+template<class Matrix_type, class Master_matrix_type>
+inline void Id_to_index_overlay<Matrix_type,Master_matrix_type>::swap_rows(index rowIndex1, index rowIndex2)
+{
+	matrix_.swap_rows(rowIndex1, rowIndex2);
 }
 
 template<class Matrix_type, class Master_matrix_type>

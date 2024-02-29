@@ -69,7 +69,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_zp_operation, Matrix, full_matrices) {
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_zp_swaps, Matrix, swap_matrices) {
 	test_base_swaps<Matrix>();
-	test_base_index_swaps<Matrix>();
 }
 
 // BOOST_AUTO_TEST_CASE(Base_matrix_insertion) {
