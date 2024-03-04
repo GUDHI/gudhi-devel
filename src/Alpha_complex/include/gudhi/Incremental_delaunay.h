@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Author(s)    : Marc Glisse
+// Author(s)    : Michael Kerber, Marc Glisse
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <iterator>
