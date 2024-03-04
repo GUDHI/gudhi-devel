@@ -35,12 +35,13 @@ public:
 	using Column_type = typename Master_matrix::Column_type;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using Row_type = typename Master_matrix::Row_type;
+	using Cell_constructor = typename Master_matrix::Cell_constructor;
 
-	Boundary_matrix(Field_operators* operators);
+	Boundary_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
 	template<class Boundary_type = boundary_type>
-	Boundary_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
-	Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators);
-	Boundary_matrix(const Boundary_matrix& matrixToCopy, Field_operators* operators = nullptr);
+	Boundary_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor);
+	Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+	Boundary_matrix(const Boundary_matrix& matrixToCopy, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
 	Boundary_matrix(Boundary_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -74,18 +75,25 @@ public:
 
 	index get_pivot(index columnIndex);
 
-	void set_operators(Field_operators* operators){ 
+	void reset(Field_operators* operators, Cell_constructor* cellConstructor){
+		matrix_.clear();
+		nextInsertIndex_ = 0;
 		operators_ = operators;
-		if constexpr (Master_matrix::Option_list::has_map_column_container){
-			for (auto& p : matrix_){
-				p.second.set_operators(operators);
-			}
-		} else {
-			for (auto& col : matrix_){
-				col.set_operators(operators);
-			}
-		}
+		cellPool_ = cellConstructor;
 	}
+
+	// void set_operators(Field_operators* operators){ 
+	// 	operators_ = operators;
+	// 	if constexpr (Master_matrix::Option_list::has_map_column_container){
+	// 		for (auto& p : matrix_){
+	// 			p.second.set_operators(operators);
+	// 		}
+	// 	} else {
+	// 		for (auto& col : matrix_){
+	// 			col.set_operators(operators);
+	// 		}
+	// 	}
+	// }
 
 	Boundary_matrix& operator=(const Boundary_matrix& other);
 	friend void swap(Boundary_matrix& matrix1, Boundary_matrix& matrix2){
@@ -97,25 +105,27 @@ public:
 			 static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
 		matrix1.matrix_.swap(matrix2.matrix_);
 		std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
+		std::swap(matrix1.operators_, matrix2.operators_);
+		std::swap(matrix1.cellPool_, matrix2.cellPool_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
 			swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
 				 static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
-			if constexpr (Master_matrix::Option_list::has_map_column_container){
-				for (auto& p : matrix1.matrix_){
-					p.second.set_rows(&matrix1.rows_);
-				}
-				for (auto& p : matrix2.matrix_){
-					p.second.set_rows(&matrix2.rows_);
-				}
-			} else {
-				for (auto& col : matrix1.matrix_){
-					col.set_rows(&matrix1.rows_);
-				}
-				for (auto& col : matrix2.matrix_){
-					col.set_rows(&matrix2.rows_);
-				}
-			}
+			// if constexpr (Master_matrix::Option_list::has_map_column_container){
+			// 	for (auto& p : matrix1.matrix_){
+			// 		p.second.set_rows(&matrix1.rows_);
+			// 	}
+			// 	for (auto& p : matrix2.matrix_){
+			// 		p.second.set_rows(&matrix2.rows_);
+			// 	}
+			// } else {
+			// 	for (auto& col : matrix1.matrix_){
+			// 		col.set_rows(&matrix1.rows_);
+			// 	}
+			// 	for (auto& col : matrix2.matrix_){
+			// 		col.set_rows(&matrix2.rows_);
+			// 	}
+			// }
 		}
 	}
 
@@ -134,6 +144,7 @@ private:
 	matrix_type matrix_;
 	index nextInsertIndex_;
 	Field_operators* operators_;
+	Cell_constructor* cellPool_;
 
 	static const bool activeDimOption = Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::dimensionIsNeeded;
 	static const bool activeSwapOption = Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update;
@@ -141,42 +152,44 @@ private:
 };
 
 template<class Master_matrix>
-inline Boundary_matrix<Master_matrix>::Boundary_matrix(Field_operators* operators)
+inline Boundary_matrix<Master_matrix>::Boundary_matrix(Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  swap_opt(),
 	  pair_opt(),
 	  ra_opt(),
 	  nextInsertIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators)
+inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  swap_opt(orderedBoundaries.size()),
 	  pair_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextInsertIndex_(orderedBoundaries.size()),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	matrix_.reserve(orderedBoundaries.size());
 
 	for (index i = 0; i < orderedBoundaries.size(); i++){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.try_emplace(i, Column_type(i, orderedBoundaries[i], ra_opt::rows_, operators_));
+				matrix_.try_emplace(i, Column_type(i, orderedBoundaries[i], ra_opt::rows_, operators_, cellPool_));
 			} else {
-				matrix_.try_emplace(i, Column_type(orderedBoundaries[i], operators_));
+				matrix_.try_emplace(i, Column_type(orderedBoundaries[i], operators_, cellPool_));
 			}
 			if constexpr (activeDimOption){
 				dim_opt::update_up(matrix_.at(i).get_dimension());
 			}
 		} else {
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_, operators_);
+				matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_, operators_, cellPool_);
 			} else {
-				matrix_.emplace_back(orderedBoundaries[i], operators_);
+				matrix_.emplace_back(orderedBoundaries[i], operators_, cellPool_);
 			}
 			if constexpr (activeDimOption){
 				dim_opt::update_up(matrix_[i].get_dimension());
@@ -186,44 +199,46 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 }
 
 template<class Master_matrix>
-inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators)
+inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  swap_opt(numberOfColumns),
 	  pair_opt(),
 	  ra_opt(numberOfColumns),
 	  matrix_(!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access ? 0 : numberOfColumns),
 	  nextInsertIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	if constexpr (!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access)
 		matrix_.reserve(numberOfColumns);
 }
 
 template<class Master_matrix>
-inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &matrixToCopy, Field_operators* operators)
+inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix &matrixToCopy, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
 	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
 	  pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
 	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  nextInsertIndex_(matrixToCopy.nextInsertIndex_),
-	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators),
+	  cellPool_(cellConstructor == nullptr ? matrixToCopy.cellPool_ : cellConstructor)
 {
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
 		for (const auto& p : matrixToCopy.matrix_){
 			const Column_type& col = p.second;
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
 			} else {
-				matrix_.try_emplace(p.first, Column_type(col, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
 			}
 		}
 	} else {
 		for (const auto& col : matrixToCopy.matrix_){
 			if constexpr (Master_matrix::Option_list::has_row_access){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
 			} else {
-				matrix_.emplace_back(col, operators_);
+				matrix_.emplace_back(col, operators_, cellPool_);
 			}
 		}
 	}
@@ -237,20 +252,21 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(Boundary_matrix &&other) 
 	  ra_opt(std::move(static_cast<ra_opt&>(other))),
 	  matrix_(std::move(other.matrix_)),
 	  nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
-	  operators_(std::exchange(other.operators_, nullptr))
+	  operators_(std::exchange(other.operators_, nullptr)),
+	  cellPool_(std::exchange(other.cellPool_, nullptr))
 {
-	//TODO: not sur this is necessary, as the address of rows_ should be moved too, no?
-	if constexpr (Master_matrix::Option_list::has_row_access){
-		if constexpr (Master_matrix::Option_list::has_map_column_container){
-			for (auto& p : matrix_){
-				p.second.set_rows(&this->rows_);
-			}
-		} else {
-			for (auto& col : matrix_){
-				col.set_rows(&this->rows_);
-			}
-		}
-	}
+	//TODO: not sur this is necessary, as the address of rows_ should not change from the move, no?
+	// if constexpr (Master_matrix::Option_list::has_row_access){
+	// 	if constexpr (Master_matrix::Option_list::has_map_column_container){
+	// 		for (auto& p : matrix_){
+	// 			p.second.set_rows(&this->rows_);
+	// 		}
+	// 	} else {
+	// 		for (auto& col : matrix_){
+	// 			col.set_rows(&this->rows_);
+	// 		}
+	// 	}
+	// }
 }
 
 template<class Master_matrix>
@@ -276,7 +292,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 		} else {
 			pivot = std::prev(boundary.end())->first;
 		}
-		if (ra_opt::rows_.size() <= pivot) ra_opt::rows_.resize(pivot + 1);
+		if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
 	}
 
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -286,9 +302,9 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 		}
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_));
+			matrix_.try_emplace(nextInsertIndex_, Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_));
 		} else {
-			matrix_.try_emplace(nextInsertIndex_, boundary, dim, operators_);
+			matrix_.try_emplace(nextInsertIndex_, boundary, dim, operators_, cellPool_);
 		}
 	} else {
 		if constexpr (activeSwapOption){
@@ -299,12 +315,12 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 		}
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_);
+			matrix_.emplace_back(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_);
 		} else {
 			if (matrix_.size() <= nextInsertIndex_) {
-				matrix_.emplace_back(boundary, dim, operators_);
+				matrix_.emplace_back(boundary, dim, operators_, cellPool_);
 			} else {
-				matrix_[nextInsertIndex_] = Column_type(boundary, dim, operators_);
+				matrix_[nextInsertIndex_] = Column_type(boundary, dim, operators_, cellPool_);
 			}
 		}
 	}
@@ -598,25 +614,31 @@ inline Boundary_matrix<Master_matrix> &Boundary_matrix<Master_matrix>::operator=
 	dim_opt::operator=(other);
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
+	ra_opt::operator=(other);
 
+	matrix_.clear();
 	nextInsertIndex_ = other.nextInsertIndex_;
 	operators_ = other.operators_;
+	cellPool_ = other.cellPool_;
 
-	if constexpr (Master_matrix::Option_list::has_row_access){
-		ra_opt::operator=(other);
-		matrix_.reserve(other.matrix_.size());
-		if constexpr (Master_matrix::Option_list::has_map_column_container){
-			for (const auto& p : other.matrix_){
-				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
-			}
-		} else {
-			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
+	matrix_.reserve(other.matrix_.size());
+	if constexpr (Master_matrix::Option_list::has_map_column_container){
+		for (const auto& p : other.matrix_){
+			const Column_type& col = p.second;
+			if constexpr (Master_matrix::Option_list::has_row_access){
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
+			} else {
+				matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
 			}
 		}
 	} else {
-		matrix_ = other.matrix_;
+		for (const auto& col : other.matrix_){
+			if constexpr (Master_matrix::Option_list::has_row_access){
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
+			} else {
+				matrix_.emplace_back(col, operators_, cellPool_);
+			}
+		}
 	}
 
 	return *this;

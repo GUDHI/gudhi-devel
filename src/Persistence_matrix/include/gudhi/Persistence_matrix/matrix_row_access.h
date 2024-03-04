@@ -27,55 +27,61 @@ template<typename Row_type, typename Row_container_type, bool has_removable_rows
 class Matrix_row_access
 {
 public:
-	Matrix_row_access(){};
-	Matrix_row_access(unsigned int numberOfColumns){
+	Matrix_row_access() : rows_(new Row_container_type()){};
+	Matrix_row_access(unsigned int numberOfColumns) : rows_(new Row_container_type())
+	{
 		if constexpr (!has_removable_rows){
-			rows_.resize(numberOfColumns);
+			rows_->resize(numberOfColumns);
 		}
 	}
-	Matrix_row_access(const Matrix_row_access& toCopy){
+	Matrix_row_access(const Matrix_row_access& toCopy) : rows_(new Row_container_type())	//as the matrix is rebuild, the rows should not be copied.
+	{
 		if constexpr (!has_removable_rows){
-			rows_.resize(toCopy.rows_.size());
+			rows_->resize(toCopy.rows_->size());
 		}
 	}
-	Matrix_row_access(Matrix_row_access&& other) noexcept : rows_(std::move(other.rows_)){}
+	Matrix_row_access(Matrix_row_access&& other) noexcept : rows_(std::exchange(other.rows_, nullptr)){}
+	~Matrix_row_access(){
+		delete rows_;
+	}
 
 	//get_row(rowIndex) --> simplex ID (=/= columnIndex)
 	Row_type& get_row(id_index rowIndex){
 		if constexpr (has_removable_rows) {
-			return rows_.at(rowIndex);
+			return rows_->at(rowIndex);
 		} else {
-			return rows_[rowIndex];
+			return rows_->operator[](rowIndex);
 		}
 	}
 	const Row_type& get_row(id_index rowIndex) const {
 		if constexpr (has_removable_rows) {
-			return rows_.at(rowIndex);
+			return rows_->at(rowIndex);
 		} else {
-			return rows_[rowIndex];
+			return rows_->operator[](rowIndex);
 		}
 	}
 	//assumes that row is empty.
 	void erase_row(id_index rowIndex){
 		static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");
 
-		auto it = rows_.find(rowIndex);
-		if (it != rows_.end() && it->second.empty()) rows_.erase(it);
+		auto it = rows_->find(rowIndex);
+		if (it != rows_->end() && it->second.empty()) rows_->erase(it);
 	}
 
 	Matrix_row_access& operator=(const Matrix_row_access& other){
 		if constexpr (has_removable_rows)
-			rows_.reserve(other.rows_.size());
+			rows_->reserve(other.rows_->size());
 		else 
-			rows_.resize(other.rows_.size());
+			rows_->resize(other.rows_->size());
 		return *this;
 	}
 	friend void swap(Matrix_row_access& matrix1, Matrix_row_access& matrix2){
-		matrix1.rows_.swap(matrix2.rows_);
+		std::swap(matrix1.rows_, matrix2.rows_);
 	}
 
 protected:
-	Row_container_type rows_;	//has to be destroyed after matrix_, therefore has to be inherited.
+	//A pointer to faciliate column swaps when two matrices are swapped.
+	Row_container_type *rows_;	//has to be destroyed after matrix_, therefore has to be inherited.
 };
 
 } //namespace persistence_matrix

@@ -46,6 +46,7 @@
 #include <gudhi/Persistence_matrix/ru_matrix.h>
 #include <gudhi/Persistence_matrix/chain_matrix.h>
 
+#include <gudhi/Persistence_matrix/columns/cell_constructors.h>
 #include <gudhi/Persistence_matrix/columns/cell_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
 
@@ -216,6 +217,8 @@ class Matrix {
    * @brief Type of a matrix cell. See @ref Cell for a more detailed description.
    */
   using Cell_type = Cell<Matrix<Options> >;
+  inline static New_cell_constructor<Cell_type> defaultCellConstructor;
+  using Cell_constructor = Pool_cell_constructor<Cell_type>;
 
   using cell_rep_type = typename std::conditional<Options::is_z2,
                                                   id_index,
@@ -296,14 +299,14 @@ class Matrix {
                                 Dummy_chain_properties
                                >::type;
 
-  using Heap_column_type = Heap_column<Matrix<Options> >;
-  using List_column_type = List_column<Matrix<Options> >;
-  using Vector_column_type = Vector_column<Matrix<Options> >;
-  using Naive_vector_column_type = Naive_vector_column<Matrix<Options> >;
-  using Set_column_type = Set_column<Matrix<Options> >;
-  using Unordered_set_column_type = Unordered_set_column<Matrix<Options> >;
-  using Intrusive_list_column_type = Intrusive_list_column<Matrix<Options> >;
-  using Intrusive_set_column_type = Intrusive_set_column<Matrix<Options> >;
+  using Heap_column_type = Heap_column<Matrix<Options>, Cell_constructor>;
+  using List_column_type = List_column<Matrix<Options>, Cell_constructor>;
+  using Vector_column_type = Vector_column<Matrix<Options>, Cell_constructor>;
+  using Naive_vector_column_type = Naive_vector_column<Matrix<Options>, Cell_constructor>;
+  using Set_column_type = Set_column<Matrix<Options>, Cell_constructor>;
+  using Unordered_set_column_type = Unordered_set_column<Matrix<Options>, Cell_constructor>;
+  using Intrusive_list_column_type = Intrusive_list_column<Matrix<Options>, Cell_constructor>;
+  using Intrusive_set_column_type = Intrusive_set_column<Matrix<Options>, Cell_constructor>;
 
   /**
    * @brief Type of the columns stored in the matrix. The type depends on the value of @ref column_type defined
@@ -585,6 +588,8 @@ class Matrix {
    * @param other Matrix to move.
    */
   Matrix(Matrix&& other) noexcept;
+
+  ~Matrix();
 
   //TODO: compatibily with multi fields:
   //  - set_characteristic(characteristic_type min, characteristic_type max)
@@ -906,9 +911,10 @@ class Matrix {
   Matrix& operator=(Matrix other);
   friend void swap(Matrix& matrix1, Matrix& matrix2) { 
     swap(matrix1.matrix_, matrix2.matrix_);
-    swap(matrix1.operators_, matrix2.operators_);
-    matrix1.matrix_.set_operators(&matrix1.operators_);
-    matrix2.matrix_.set_operators(&matrix2.operators_);
+    std::swap(matrix1.operators_, matrix2.operators_);
+    std::swap(matrix1.cellPool_, matrix2.cellPool_);
+    // matrix1.matrix_.set_operators(&matrix1.operators_);
+    // matrix2.matrix_.set_operators(&matrix2.operators_);
   }
 
   void print();  // for debug
@@ -998,14 +1004,15 @@ class Matrix {
         Base_matrix_type
     >::type;
 
-  Field_operators operators_;
+  Field_operators* operators_;
+  Cell_constructor* cellPool_;
   matrix_type matrix_;
 
   static constexpr void _assert_options();
 };
 
 template <class Options>
-inline Matrix<Options>::Matrix() : operators_(0), matrix_(&operators_)
+inline Matrix<Options>::Matrix() : operators_(new Field_operators()), cellPool_(new Cell_constructor()), matrix_(operators_, cellPool_)
 {
   static_assert(
       Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
@@ -1016,7 +1023,7 @@ inline Matrix<Options>::Matrix() : operators_(0), matrix_(&operators_)
 template <class Options>
 template <class Container_type>
 inline Matrix<Options>::Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic)
-    : operators_(characteristic), matrix_(columns, &operators_)
+    : operators_(new Field_operators(characteristic)), cellPool_(new Cell_constructor()), matrix_(columns, operators_, cellPool_)
 {
   static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
                 "When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns "
@@ -1026,7 +1033,7 @@ inline Matrix<Options>::Matrix(const std::vector<Container_type>& columns, chara
 
 template <class Options>
 inline Matrix<Options>::Matrix(int numberOfColumns, characteristic_type characteristic)
-    : operators_(characteristic), matrix_(numberOfColumns, &operators_)
+    : operators_(new Field_operators(characteristic)), cellPool_(new Cell_constructor()), matrix_(numberOfColumns, operators_, cellPool_)
 {
   static_assert(Options::is_of_boundary_type || !Options::has_vine_update || Options::has_column_pairings,
                 "When no barcode is recorded with vine swaps for chain matrices, comparaison functions for the columns "
@@ -1038,7 +1045,7 @@ template <class Options>
 template <typename EventComparatorFunction>
 inline Matrix<Options>::Matrix(EventComparatorFunction&& birthComparator, 
                                EventComparatorFunction&& deathComparator)
-    : operators_(0), matrix_(&operators_, birthComparator, deathComparator)
+    : operators_(new Field_operators()), cellPool_(new Cell_constructor()), matrix_(operators_, cellPool_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
@@ -1052,7 +1059,7 @@ inline Matrix<Options>::Matrix(const std::vector<Boundary_type>& orderedBoundari
                                EventComparatorFunction&& birthComparator, 
                                EventComparatorFunction&& deathComparator, 
                                characteristic_type characteristic)
-    : operators_(characteristic), matrix_(orderedBoundaries, &operators_, birthComparator, deathComparator)
+    : operators_(new Field_operators(characteristic)), cellPool_(new Cell_constructor()), matrix_(orderedBoundaries, operators_, cellPool_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
@@ -1066,7 +1073,7 @@ inline Matrix<Options>::Matrix(unsigned int numberOfColumns,
                                EventComparatorFunction&& birthComparator,
                                EventComparatorFunction&& deathComparator,
                                characteristic_type characteristic)
-    : operators_(characteristic), matrix_(numberOfColumns, &operators_, birthComparator, deathComparator)
+    : operators_(new Field_operators(characteristic)), cellPool_(new Cell_constructor()), matrix_(numberOfColumns, operators_, cellPool_, birthComparator, deathComparator)
 {
   static_assert(
       !Options::is_of_boundary_type && Options::has_vine_update && !Options::has_column_pairings,
@@ -1076,14 +1083,14 @@ inline Matrix<Options>::Matrix(unsigned int numberOfColumns,
 
 template <class Options>
 inline Matrix<Options>::Matrix(const Matrix& matrixToCopy) 
-    : operators_(matrixToCopy.operators_), matrix_(matrixToCopy.matrix_, &operators_)
+    : operators_(new Field_operators(matrixToCopy.operators_->get_characteristic())), cellPool_(new Cell_constructor()), matrix_(matrixToCopy.matrix_, operators_, cellPool_)
 {
   _assert_options();
 }
 
 template <class Options>
 inline Matrix<Options>::Matrix(Matrix&& other) noexcept 
-    : operators_(std::move(other.operators_)), matrix_(std::move(other.matrix_))
+    : operators_(std::exchange(other.operators_, nullptr)), cellPool_(std::exchange(other.cellPool_, nullptr)), matrix_(std::move(other.matrix_))
 {
   //TODO: verify that the address of operators_ == address of other.operators_ after move
   //and that therefore the addresses stored in matrix_ are correct.
@@ -1091,21 +1098,28 @@ inline Matrix<Options>::Matrix(Matrix&& other) noexcept
 }
 
 template <class Options>
+inline Matrix<Options>::~Matrix(){
+  matrix_.reset(operators_, cellPool_);
+  delete cellPool_;
+  delete operators_;
+}
+
+template <class Options>
 inline void Matrix<Options>::set_characteristic(characteristic_type characteristic){
   static_assert(!Options::is_z2, "The characteristic is definitely set to 2.");
 
-  if (operators_.get_characteristic() != 0) {
+  if (operators_->get_characteristic() != 0) {
     std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
                  "as the modulo was already applied to values in existing columns.";
   }
 
-  operators_.set_characteristic(characteristic);
+  operators_->set_characteristic(characteristic);
 }
 
 template <class Options>
 template <class Container_type>
 inline void Matrix<Options>::insert_column(const Container_type& column) {
-  assert(operators_.get_characteristic() != 0 &&
+  assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(
       !isNonBasic,
@@ -1116,7 +1130,7 @@ inline void Matrix<Options>::insert_column(const Container_type& column) {
 template <class Options>
 template <class Container_type>
 inline void Matrix<Options>::insert_column(const Container_type& column, index columnIndex) {
- assert(operators_.get_characteristic() != 0 &&
+ assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(!isNonBasic && !Options::has_column_compression,
                 "'insert_column' with those parameters is not available for the chosen options.");
@@ -1127,7 +1141,7 @@ template <class Options>
 template <class Boundary_type>
 inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(const Boundary_type& boundary,
                                                                                         dimension_type dim) {
-  assert(operators_.get_characteristic() != 0 &&
+  assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   if constexpr (isNonBasic && !Options::is_of_boundary_type) return matrix_.insert_boundary(boundary, dim);
   else matrix_.insert_boundary(boundary, dim);
@@ -1138,7 +1152,7 @@ template <class Boundary_type>
 inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_boundary(id_index faceIndex,
                                                                                         const Boundary_type& boundary,
                                                                                         dimension_type dim) {
-  assert(operators_.get_characteristic() != 0 &&
+  assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(isNonBasic, "Only enabled for non-basic matrices.");
   if constexpr (!Options::is_of_boundary_type) return matrix_.insert_boundary(faceIndex, boundary, dim);
@@ -1289,7 +1303,7 @@ inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::multipl
   if constexpr (Options::is_z2){
     return matrix_.multiply_target_and_add_to(sourceColumnIndex, coefficient % 2, targetColumnIndex); //will be converted to bool
   } else {
-    return matrix_.multiply_target_and_add_to(sourceColumnIndex, operators_.get_value(coefficient), targetColumnIndex);
+    return matrix_.multiply_target_and_add_to(sourceColumnIndex, operators_->get_value(coefficient), targetColumnIndex);
   }
 }
 
@@ -1306,7 +1320,7 @@ inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::multip
     //coef will be converted to bool, because of element_type
     return matrix_.multiply_target_and_add_to(sourceColumn, coefficient % 2, targetColumnIndex);
   } else {
-    return matrix_.multiply_target_and_add_to(sourceColumn, operators_.get_value(coefficient), targetColumnIndex);
+    return matrix_.multiply_target_and_add_to(sourceColumn, operators_->get_value(coefficient), targetColumnIndex);
   }
 }
 
@@ -1319,7 +1333,7 @@ inline std::enable_if_t<std::is_integral_v<Index_type>> Matrix<Options>::multipl
     //coef will be converted to bool, because of element_type
     return matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumnIndex, targetColumnIndex);
   } else {
-    return matrix_.multiply_source_and_add_to(operators_.get_value(coefficient), sourceColumnIndex, targetColumnIndex);
+    return matrix_.multiply_source_and_add_to(operators_->get_value(coefficient), sourceColumnIndex, targetColumnIndex);
   }
 }
 
@@ -1336,7 +1350,7 @@ inline std::enable_if_t<!std::is_integral_v<Cell_range>> Matrix<Options>::multip
     //coef will be converted to bool, because of element_type
     return matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumn, targetColumnIndex);
   } else {
-    return matrix_.multiply_source_and_add_to(operators_.get_value(coefficient), sourceColumn, targetColumnIndex);
+    return matrix_.multiply_source_and_add_to(operators_->get_value(coefficient), sourceColumn, targetColumnIndex);
   }
 }
 
@@ -1430,8 +1444,9 @@ inline typename Matrix<Options>::id_index Matrix<Options>::get_pivot(index colum
 template <class Options>
 inline Matrix<Options>& Matrix<Options>::operator=(Matrix other) {
   swap(matrix_, other.matrix_);
-  swap(operators_, other.operators_);
-  if constexpr (!Options::is_z2) matrix_.set_operators(&operators_);
+  std::swap(operators_, other.operators_);
+  std::swap(cellPool_, other.cellPool_);
+//   if constexpr (!Options::is_z2) matrix_.set_operators(&operators_);
 
   return *this;
 }

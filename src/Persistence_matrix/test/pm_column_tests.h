@@ -19,6 +19,9 @@
 #include "pm_test_utilities.h"
 #include "pm_column_tests_mastermatrix.h"
 
+template<class Column>
+using pool_type = Gudhi::persistence_matrix::New_cell_constructor<typename Column::Cell>;
+
 //assumes column was not modified since construction, ie no duplicated / erased values in heap or vector column
 template<class Column>
 std::vector<column_content<Column> > get_ordered_column_contents(std::vector<Column>& matrix)
@@ -64,24 +67,24 @@ std::vector<column_content<Column> > get_ordered_rows(std::vector<Column>& matri
 }
 
 template<class Column>
-std::vector<Column> build_column_matrix(){
+std::vector<Column> build_column_matrix(pool_type<Column>* pool){
 	std::vector<Column> matrix;
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr);
-		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr);
-		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr);
-		matrix.emplace_back(cont{}, 4, nullptr);
-		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr);
+		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr, pool);
+		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr, pool);
+		matrix.emplace_back(cont{0,1,2,5,6}, 4, nullptr, pool);
+		matrix.emplace_back(cont{}, 4, nullptr, pool);
+		matrix.emplace_back(cont{0,1,3,5}, 4, nullptr, pool);
 		matrix.emplace_back(matrix[1]);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators);
-		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, &_g_operators);
-		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, &_g_operators);
-		matrix.emplace_back(cont{}, 4, &_g_operators);
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, &_g_operators, pool);
+		matrix.emplace_back(cont{}, 4, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, 4, &_g_operators, pool);
 		matrix.emplace_back(matrix[1]);
 	}
 
@@ -89,74 +92,74 @@ std::vector<Column> build_column_matrix(){
 }
 
 template<class Column, class Rows>
-std::vector<Column> build_column_matrix(Rows &rows){
+std::vector<Column> build_column_matrix(Rows &rows, pool_type<Column>* pool){
 	std::vector<Column> matrix;
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(0, cont{0,1,3,5}, 4, rows, nullptr);
-		matrix.emplace_back(1, cont{0,1,2,5,6}, 4, rows, nullptr);
-		matrix.emplace_back(2, cont{0,1,2,5,6}, 4, rows, nullptr);
-		matrix.emplace_back(3, cont{}, 4, rows, nullptr);
-		matrix.emplace_back(4, cont{0,1,3,5}, 4, rows, nullptr);
-		matrix.emplace_back(matrix[1], 5, rows);
+		matrix.emplace_back(0, cont{0,1,3,5}, 4, &rows, nullptr, pool);
+		matrix.emplace_back(1, cont{0,1,2,5,6}, 4, &rows, nullptr, pool);
+		matrix.emplace_back(2, cont{0,1,2,5,6}, 4, &rows, nullptr, pool);
+		matrix.emplace_back(3, cont{}, 4, &rows, nullptr, pool);
+		matrix.emplace_back(4, cont{0,1,3,5}, 4, &rows, nullptr, pool);
+		matrix.emplace_back(matrix[1], 5, &rows);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows, &_g_operators);
-		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, rows, &_g_operators);
-		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, rows, &_g_operators);
-		matrix.emplace_back(3, cont{}, 4, rows, &_g_operators);
-		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, 4, rows, &_g_operators);
-		matrix.emplace_back(matrix[1], 5, rows);
+		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, 4, &rows, &_g_operators, pool);
+		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, 4, &rows, &_g_operators, pool);
+		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, 4, &rows, &_g_operators, pool);
+		matrix.emplace_back(3, cont{}, 4, &rows, &_g_operators, pool);
+		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, 4, &rows, &_g_operators, pool);
+		matrix.emplace_back(matrix[1], 5, &rows);
 	}
 
 	return matrix;
 }
 
 template<class Column, class Rows>
-std::vector<Column> build_base_boundary_column_matrix(Rows &rows){
+std::vector<Column> build_base_boundary_column_matrix(Rows &rows, pool_type<Column>* pool){
 	std::vector<Column> matrix;
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(0, cont{0,1,3,5}, rows, nullptr);
-		matrix.emplace_back(1, cont{0,1,2,5,6}, rows, nullptr);
-		matrix.emplace_back(2, cont{0,1,2,5,6}, rows, nullptr);
-		matrix.emplace_back(3, cont{}, rows, nullptr);
-		matrix.emplace_back(4, cont{0,1,3,5}, rows, nullptr);
-		matrix.emplace_back(matrix[1], 5, rows);
+		matrix.emplace_back(0, cont{0,1,3,5}, &rows, nullptr, pool);
+		matrix.emplace_back(1, cont{0,1,2,5,6}, &rows, nullptr, pool);
+		matrix.emplace_back(2, cont{0,1,2,5,6}, &rows, nullptr, pool);
+		matrix.emplace_back(3, cont{}, &rows, nullptr, pool);
+		matrix.emplace_back(4, cont{0,1,3,5}, &rows, nullptr, pool);
+		matrix.emplace_back(matrix[1], 5, &rows);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, rows, &_g_operators);
-		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, rows, &_g_operators);
-		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, rows, &_g_operators);
-		matrix.emplace_back(3, cont{}, rows, &_g_operators);
-		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, rows, &_g_operators);
-		matrix.emplace_back(matrix[1], 5, rows);
+		matrix.emplace_back(0, cont{{0,1},{1,2},{3,3},{5,4}}, &rows, &_g_operators, pool);
+		matrix.emplace_back(1, cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &rows, &_g_operators, pool);
+		matrix.emplace_back(2, cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &rows, &_g_operators, pool);
+		matrix.emplace_back(3, cont{}, &rows, &_g_operators, pool);
+		matrix.emplace_back(4, cont{{0,1},{1,2},{3,3},{5,4}}, &rows, &_g_operators, pool);
+		matrix.emplace_back(matrix[1], 5, &rows);
 	}
 
 	return matrix;
 }
 
 template<class Column>
-std::vector<Column> build_base_boundary_column_matrix(){
+std::vector<Column> build_base_boundary_column_matrix(pool_type<Column>* pool){
 	std::vector<Column> matrix;
 
 	if constexpr (is_z2<Column>()){
 		using cont = std::vector<unsigned int>;
-		matrix.emplace_back(cont{0,1,3,5}, nullptr);
-		matrix.emplace_back(cont{0,1,2,5,6}, nullptr);
-		matrix.emplace_back(cont{0,1,2,5,6}, nullptr);
-		matrix.emplace_back(cont{}, nullptr);
-		matrix.emplace_back(cont{0,1,3,5}, nullptr);
+		matrix.emplace_back(cont{0,1,3,5}, nullptr, pool);
+		matrix.emplace_back(cont{0,1,2,5,6}, nullptr, pool);
+		matrix.emplace_back(cont{0,1,2,5,6}, nullptr, pool);
+		matrix.emplace_back(cont{}, nullptr, pool);
+		matrix.emplace_back(cont{0,1,3,5}, nullptr, pool);
 		matrix.emplace_back(matrix[1]);
 	} else {
 		using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators);
-		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
-		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators);
-		matrix.emplace_back(cont{}, &_g_operators);
-		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators, pool);
+		matrix.emplace_back(cont{}, &_g_operators, pool);
+		matrix.emplace_back(cont{{0,1},{1,2},{3,3},{5,4}}, &_g_operators, pool);
 		matrix.emplace_back(matrix[1]);
 	}
 
@@ -261,6 +264,7 @@ void column_test_common_constructors(){
 
 	container_type cont1, cont2;
 	typename Column::Field_operators *op = nullptr;
+	pool_type<Column> pool;
 	if constexpr (!is_z2<Column>()) op = &_g_operators;
 
 	if constexpr (is_z2<Column>()){
@@ -271,20 +275,20 @@ void column_test_common_constructors(){
 		cont2 = {{0, 1u},{5, 2u},{6, 3u}};
 	}
 
-	Column emptyCol(op);
+	Column emptyCol(op, &pool);
 	BOOST_CHECK_EQUAL(emptyCol.size(), 0);
 
-	Column col(cont1, 2, op);
+	Column col(cont1, 2, op, &pool);
 	BOOST_CHECK_EQUAL(col.size(), 3);
 
 	std::vector<int> rows;	//type doesn't matter, as the row option is not enabled.
-	Column rowCol(2, cont2, 2, rows, op);
+	Column rowCol(2, cont2, 2, &rows, op, &pool);
 	BOOST_CHECK_EQUAL(rowCol.size(), 3);
 
 	Column copyCol(col);
 	BOOST_CHECK_EQUAL(copyCol.size(), 3);
 
-	Column rowCopyCol(rowCol, 4, rows);
+	Column rowCopyCol(rowCol, 4, &rows);
 	BOOST_CHECK_EQUAL(rowCopyCol.size(), 3);
 
 	Column moveCol(std::move(col));
@@ -548,7 +552,7 @@ void column_test_row_access_constructors(std::vector<Column>& matrix, row_contai
 	test_matrix_equality<Column>(build_rows<Column>(), get_ordered_rows(matrix));
 	test_matrix_equality<Column>(build_column_values<Column>(), get_ordered_column_contents(matrix));
 
-	Column col(matrix[0], 6, rows);
+	Column col(matrix[0], 6, &rows);
 	for (auto& r : rows){
 		if constexpr (Column::Master::Option_list::has_removable_rows){
 			if (!r.second.empty()){
@@ -630,6 +634,7 @@ void column_test_base_boundary_constructors(){
 
 	typename Column::Field_operators *op = nullptr;
 	if constexpr (!is_z2<Column>()) op = &_g_operators;
+	pool_type<Column> pool;
 
 	container_type cont1, cont2;
 
@@ -641,11 +646,11 @@ void column_test_base_boundary_constructors(){
 		cont2 = {{0, 1u},{5, 2u},{6, 3u}};
 	}
 
-	Column col(cont1, op);
+	Column col(cont1, op, &pool);
 	BOOST_CHECK_EQUAL(col.size(), 3);
 
 	std::vector<int> rows;	//type doesn't matter, as the row option is not enabled.
-	Column rowCol(2, cont2, rows, op);
+	Column rowCol(2, cont2, &rows, op, &pool);
 	BOOST_CHECK_EQUAL(rowCol.size(), 3);
 
 	BOOST_CHECK(!(col == rowCol));
@@ -662,8 +667,9 @@ void column_test_base_boundary_constructors(){
 template<class Column>
 void column_test_base_boundary_z5_methods(){
 	std::vector<typename Column::Field_element_type> veccont;
+	pool_type<Column> pool;
 
-	Column col(std::vector<std::pair<unsigned int,typename Column::Field_element_type> >{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
+	Column col(std::vector<std::pair<unsigned int,typename Column::Field_element_type> >{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators, &pool);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(col.get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(col.size(), 5);
@@ -689,8 +695,9 @@ void column_test_base_boundary_z5_methods(){
 template<class Column>
 void column_test_base_boundary_z2_methods(){
 	std::vector<typename Column::Field_element_type> veccont;
+	pool_type<Column> pool;
 
-	Column col(std::vector<unsigned int>{0,1,2,5,6}, nullptr);
+	Column col(std::vector<unsigned int>{0,1,2,5,6}, nullptr, &pool);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(col.get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(col.size(), 5);
@@ -974,8 +981,9 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 	using cont = std::vector<std::pair<unsigned int,typename Column::Field_element_type> >;
 
 	std::vector<typename Column::Field_element_type> veccont;
+	pool_type<Column> pool;
 
-	const Column col0(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators);
+	const Column col0(cont{{0,4},{1,2},{2,1},{5,1},{6,1}}, &_g_operators, &pool);
 	matrix[0] += col0;
 
 	veccont = {0, 4, 1, 3, 0, 0, 1};
@@ -984,7 +992,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[0].size(), 4);
 	}
 
-	const Column col1(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators);
+	const Column col1(cont{{0,1},{1,3},{2,4},{5,4},{6,4}}, &_g_operators, &pool);
 	matrix[1] += col1;
 
 	veccont = {};
@@ -1001,13 +1009,13 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[4].size(), 4);
 	}
 	//this = this + column * v
-	const Column col2(cont{}, &_g_operators);
+	const Column col2(cont{}, &_g_operators, &pool);
 	matrix[5].multiply_and_add(col2, 3);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	//this = this + column * v
-	const Column col3(cont{{0,3},{2,1},{3,2},{5,2},{6,1}}, &_g_operators);
+	const Column col3(cont{{0,3},{2,1},{3,2},{5,2},{6,1}}, &_g_operators, &pool);
 	matrix[5].multiply_and_add(col3, 3);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1015,7 +1023,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 6);
 	}
 	//this = v * this + column
-	const Column col4(cont{{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}}, &_g_operators);
+	const Column col4(cont{{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}}, &_g_operators, &pool);
 	matrix[3].multiply_and_add(4, col4);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -1030,8 +1038,9 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 	using cont = std::vector<unsigned int>;
 
 	std::vector<bool> veccont;
+	pool_type<Column> pool;
 
-	const Column col0(cont{0,1,2,5,6}, nullptr);
+	const Column col0(cont{0,1,2,5,6}, nullptr, &pool);
 	matrix[0] += col0;
 
 	veccont = {0, 0, 1, 1, 0, 0, 1};
@@ -1040,7 +1049,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[0].size(), 3);
 	}
 
-	const Column col1(cont{0,1,2,5,6}, nullptr);
+	const Column col1(cont{0,1,2,5,6}, nullptr, &pool);
 	matrix[1] += col1;
 
 	veccont = {};
@@ -1057,7 +1066,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[4].size(), 3);
 	}
 	//this = this + column * v
-	const Column col2(cont{}, nullptr);
+	const Column col2(cont{}, nullptr, &pool);
 	matrix[5].multiply_and_add(col2, 3);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1065,7 +1074,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	}
 	//this = this + column * v
-	const Column col3(cont{2,3,6}, nullptr);
+	const Column col3(cont{2,3,6}, nullptr, &pool);
 	matrix[5].multiply_and_add(col3, 3);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -1073,7 +1082,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 		BOOST_CHECK_EQUAL(matrix[5].size(), 4);
 	}
 	//this = v * this + column
-	const Column col4(cont{0,1,3,5}, nullptr);
+	const Column col4(cont{0,1,3,5}, nullptr, &pool);
 	matrix[3].multiply_and_add(4, col4);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -1105,8 +1114,9 @@ template<class Column>
 void column_test_chain_methods(){
 	typename Column::Field_operators *op = nullptr;
 	if constexpr (!is_z2<Column>()) op = &_g_operators;
+	pool_type<Column> pool;
 
-	Column col(op);
+	Column col(op, &pool);
 
 	BOOST_CHECK(!col.is_paired());
 	BOOST_CHECK(col.get_paired_chain_index() == -1);

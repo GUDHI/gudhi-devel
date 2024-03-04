@@ -23,6 +23,7 @@
 #include <gudhi/Persistence_matrix/columns/chain_column_extra_properties.h>
 #include <gudhi/Persistence_matrix/columns/cell_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
+#include <gudhi/Persistence_matrix/columns/cell_constructors.h>
 #include <gudhi/Fields/Z2_field_operators.h>
 #include <gudhi/Fields/Zp_field_operators.h>
 
@@ -38,6 +39,8 @@ using Gudhi::persistence_matrix::Cell_field_element;
 using Gudhi::persistence_matrix::Dummy_cell_field_element_mixin;
 using Gudhi::persistence_matrix::Row_access;
 using Gudhi::persistence_matrix::Dummy_row_access;
+using Gudhi::persistence_matrix::Pool_cell_constructor;
+using Gudhi::persistence_matrix::New_cell_constructor;
 
 using Zp = Gudhi::persistence_matrix::Zp_field_operators<>;
 using Z2 = Gudhi::persistence_matrix::Z2_field_operators;
@@ -97,6 +100,8 @@ struct Column_mini_matrix
 										Cell_field_element<element_type>
 									>::type;
 	using Cell_type = Cell<Column_mini_matrix<Options> >;
+
+	inline static New_cell_constructor<Cell_type> defaultCellConstructor;
 
 	template<class Cell_type>
 	struct RowCellComp {

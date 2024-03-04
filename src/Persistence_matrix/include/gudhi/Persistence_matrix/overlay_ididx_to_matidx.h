@@ -34,12 +34,13 @@ public:
 	using bar_type = typename Master_matrix_type::Bar;
 	using barcode_type = typename Master_matrix_type::barcode_type;
 	using cycle_type = typename Master_matrix_type::cycle_type;
+	using Cell_constructor = typename Master_matrix_type::Cell_constructor;
 
-	Id_to_index_overlay(Field_operators* operators);
+	Id_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor);
 	template<class Boundary_type = boundary_type>
-	Id_to_index_overlay(const std::vector<Boundary_type>& boundaries, Field_operators* operators);
-	Id_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators);
-	Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy, Field_operators* operators = nullptr);
+	Id_to_index_overlay(const std::vector<Boundary_type>& boundaries, Field_operators* operators, Cell_constructor* cellConstructor);
+	Id_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+	Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
 	Id_to_index_overlay(Id_to_index_overlay&& other) noexcept;
 	~Id_to_index_overlay();
 
@@ -124,9 +125,14 @@ public:
 	//chain
 	id_index get_pivot(id_index faceID);
 
-	void set_operators(Field_operators* operators){ 
-		matrix_.set_operators(operators);
+	void reset(Field_operators* operators, Cell_constructor* cellConstructor){
+		matrix_.reset(operators, cellConstructor);
+		nextIndex_ = 0;
 	}
+
+	// void set_operators(Field_operators* operators){ 
+	// 	matrix_.set_operators(operators);
+	// }
 
 	Id_to_index_overlay& operator=(const Id_to_index_overlay& other);
 	friend void swap(Id_to_index_overlay& matrix1,
@@ -175,8 +181,8 @@ private:
 };
 
 template<class Matrix_type, class Master_matrix_type>
-inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(Field_operators* operators)
-	: matrix_(operators), idToIndex_(nullptr), nextIndex_(0)
+inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor)
+	: matrix_(operators, cellConstructor), idToIndex_(nullptr), nextIndex_(0)
 {
 	_initialize_map(0);
 }
@@ -184,8 +190,8 @@ inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
 template<class Matrix_type, class Master_matrix_type>
 template<class Boundary_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		const std::vector<Boundary_type> &boundaries, Field_operators* operators)
-	: matrix_(boundaries, operators),
+		const std::vector<Boundary_type> &boundaries, Field_operators* operators, Cell_constructor* cellConstructor)
+	: matrix_(boundaries, operators, cellConstructor),
 	  idToIndex_(nullptr),
 	  nextIndex_(boundaries.size())
 {
@@ -199,16 +205,16 @@ inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
 
 template<class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		unsigned int numberOfColumns, Field_operators* operators)
-	: matrix_(numberOfColumns, operators), idToIndex_(nullptr), nextIndex_(0)
+		unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
+	: matrix_(numberOfColumns, operators, cellConstructor), idToIndex_(nullptr), nextIndex_(0)
 {
 	_initialize_map(numberOfColumns);
 }
 
 template<class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type,Master_matrix_type>::Id_to_index_overlay(
-		const Id_to_index_overlay &matrixToCopy, Field_operators* operators)
-	: matrix_(matrixToCopy.matrix_, operators),
+		const Id_to_index_overlay &matrixToCopy, Field_operators* operators, Cell_constructor* cellConstructor)
+	: matrix_(matrixToCopy.matrix_, operators, cellConstructor),
 	  idToIndex_(nullptr),
 	  nextIndex_(matrixToCopy.nextIndex_)
 {

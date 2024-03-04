@@ -29,17 +29,18 @@ public:
 	using Field_element_type = typename Master_matrix::element_type;
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
+	using Cell_constructor = typename Master_matrix::Cell_constructor;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using index = typename Master_matrix::index;
 	using id_index = typename Master_matrix::id_index;
 	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
-	RU_matrix(Field_operators* operators);
+	RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
 	template<class Boundary_type = boundary_type>
-	RU_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
-	RU_matrix(unsigned int numberOfColumns, Field_operators* operators);
-	RU_matrix(const RU_matrix& matrixToCopy, Field_operators* operators = nullptr);
+	RU_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor);
+	RU_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+	RU_matrix(const RU_matrix& matrixToCopy, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
 	RU_matrix(RU_matrix&& other) noexcept;
 
 	template<class Boundary_type = boundary_type>
@@ -73,11 +74,19 @@ public:
 	index get_column_with_pivot(index simplexIndex) const;	//assumes that pivot exists
 	index get_pivot(index columnIndex);
 
-	void set_operators(Field_operators* operators){ 
+	void reset(Field_operators* operators, Cell_constructor* cellConstructor){
+		reducedMatrixR_.reset(operators, cellConstructor);
+		mirrorMatrixU_.reset(operators, cellConstructor);
+		pivotToColumnIndex_.clear();
+		nextEventIndex_ = 0;
 		operators_ = operators;
-		reducedMatrixR_.set_operators(operators);
-		mirrorMatrixU_.set_operators(operators);
 	}
+
+	// void set_operators(Field_operators* operators){ 
+	// 	operators_ = operators;
+	// 	reducedMatrixR_.set_operators(operators);
+	// 	mirrorMatrixU_.set_operators(operators);
+	// }
 
 	RU_matrix& operator=(const RU_matrix& other);
 	friend void swap(RU_matrix& matrix1, RU_matrix& matrix2){
@@ -91,6 +100,7 @@ public:
 		swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
 		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
 		std::swap(matrix1.nextEventIndex_, matrix2.nextEventIndex_);
+		std::swap(matrix1.operators_, matrix2.operators_);
 	}
 
 	void print();  //for debug
@@ -126,24 +136,24 @@ private:
 };
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(Field_operators* operators)
+inline RU_matrix<Master_matrix>::RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  reducedMatrixR_(operators),
-	  mirrorMatrixU_(operators),
+	  reducedMatrixR_(operators, cellConstructor),
+	  mirrorMatrixU_(operators, cellConstructor),
 	  nextEventIndex_(0),
 	  operators_(operators)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators)
+inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  reducedMatrixR_(orderedBoundaries, operators),
-	  mirrorMatrixU_(orderedBoundaries.size(), operators),
+	  reducedMatrixR_(orderedBoundaries, operators, cellConstructor),
+	  mirrorMatrixU_(orderedBoundaries.size(), operators, cellConstructor),
 	  nextEventIndex_(orderedBoundaries.size()),
 	  operators_(operators)
 {
@@ -158,12 +168,12 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type> &ord
 }
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Field_operators* operators)
+inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
 	: pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
-	  reducedMatrixR_(numberOfColumns, operators),
-	  mirrorMatrixU_(numberOfColumns, operators),
+	  reducedMatrixR_(numberOfColumns, operators, cellConstructor),
+	  mirrorMatrixU_(numberOfColumns, operators, cellConstructor),
 	  nextEventIndex_(0),
 	  operators_(operators)
 {
@@ -181,12 +191,12 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Field_o
 }
 
 template<class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy, Field_operators* operators)
+inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix &matrixToCopy, Field_operators* operators, Cell_constructor* cellConstructor)
 	: pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
 	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
 	  rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
-	  reducedMatrixR_(matrixToCopy.reducedMatrixR_, operators),
-	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, operators),
+	  reducedMatrixR_(matrixToCopy.reducedMatrixR_, operators, cellConstructor),
+	  mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, operators, cellConstructor),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextEventIndex_(matrixToCopy.nextEventIndex_),
 	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)

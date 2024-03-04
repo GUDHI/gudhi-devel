@@ -17,7 +17,7 @@
 
 #include "pm_matrix_tests.h"
 #include "pm_matrix_tests_boost_type_lists.h"
-// #include "matrix_tests_options.h"
+// #include "pm_matrix_tests_options.h"
 
 using full_matrices = matrices_list<opt_base_z2>;
 using row_access_matrices = matrices_list<opt_base_z2_ra>;
@@ -25,16 +25,21 @@ using removable_rows_matrices = matrices_list<opt_base_z2_ra_r>;
 using removable_columns_matrices = matrices_list<opt_base_z2_r>;
 using swap_matrices = matrices_list<opt_base_z2_swap>;
 
-// using opt = Base_options<false,Column_types::INTRUSIVE_LIST,true,true>;
+// using opt = Base_options_with_row_access<true,Column_types::INTRUSIVE_LIST,false,false,true,true>;
 // using mat = Matrix<opt>;
-// typedef boost::mpl::list<mat> test;
+// using opt2 = Base_options<true,Column_types::INTRUSIVE_LIST,false,false>;
+// using mat2 = Matrix<opt2>;
+// using opt3 = Base_options<true,Column_types::INTRUSIVE_LIST,true,true>;
+// using mat3 = Matrix<opt3>;
+// typedef boost::mpl::list<mat,mat3> test;
+// typedef boost::mpl::list<mat,mat2> test;
 
 // std::set<std::string> test;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_z2_constructors, Matrix, full_matrices) {
 	// test.insert(typeid(Matrix()).name());
 	// std::cout << test.size() << "\n";
-	std::cout << typeid(Matrix()).name() << "\n";
+	// std::cout << typeid(Matrix()).name() << "\n";
 	test_constructors<Matrix>();
 }
 

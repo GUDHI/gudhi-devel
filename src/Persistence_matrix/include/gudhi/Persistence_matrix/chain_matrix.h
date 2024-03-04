@@ -36,6 +36,7 @@ public:
 	using Column_type = typename Master_matrix::Column_type;
 	using Row_type = typename Master_matrix::Row_type;
 	using Cell = typename Master_matrix::Cell_type;
+	using Cell_constructor = typename Master_matrix::Cell_constructor;
 	using boundary_type = typename Master_matrix::boundary_type;
 	using cell_rep_type = typename Master_matrix::cell_rep_type;
 	using index = typename Master_matrix::index;
@@ -43,28 +44,28 @@ public:
 	using pos_index = typename Master_matrix::pos_index;
 	using dimension_type = typename Master_matrix::dimension_type;
 
-	Chain_matrix(Field_operators* operators);
+	Chain_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
 	template<class Boundary_type = boundary_type>
-	Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators);
-	Chain_matrix(unsigned int numberOfColumns, Field_operators* operators);
+	Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor);
+	Chain_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
 	template<typename EventComparatorFunction>
 	Chain_matrix(
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator);
 	template<typename EventComparatorFunction, class Boundary_type = boundary_type>
 	Chain_matrix(
 		const std::vector<Boundary_type>& orderedBoundaries, 
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator);
 	template<typename EventComparatorFunction>
 	Chain_matrix(
 		unsigned int numberOfColumns, 
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator);
-	Chain_matrix(const Chain_matrix& matrixToCopy, Field_operators* operators = nullptr);
+	Chain_matrix(const Chain_matrix& matrixToCopy, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
 	Chain_matrix(Chain_matrix&& other) noexcept;
 
 	//new simplex = new ID even if the same simplex was already inserted and then removed, ie., an ID cannot come back.
@@ -95,18 +96,26 @@ public:
 	index get_column_with_pivot(id_index faceID) const;
 	id_index get_pivot(index columnIndex);
 
-	void set_operators(Field_operators* operators){ 
+	void reset(Field_operators* operators, Cell_constructor* cellConstructor){
+		matrix_.clear();
+		pivotToColumnIndex_.clear();
+		nextIndex_ = 0;
 		operators_ = operators;
-		if constexpr (Master_matrix::Option_list::has_map_column_container){
-			for (auto& p : matrix_){
-				p.second.set_operators(operators);
-			}
-		} else {
-			for (auto& col : matrix_){
-				col.set_operators(operators);
-			}
-		}
+		cellPool_ = cellConstructor;
 	}
+
+	// void set_operators(Field_operators* operators){ 
+	// 	operators_ = operators;
+	// 	if constexpr (Master_matrix::Option_list::has_map_column_container){
+	// 		for (auto& p : matrix_){
+	// 			p.second.set_operators(operators);
+	// 		}
+	// 	} else {
+	// 		for (auto& col : matrix_){
+	// 			col.set_operators(operators);
+	// 		}
+	// 	}
+	// }
 
 	Chain_matrix& operator=(const Chain_matrix& other);
 	friend void swap(Chain_matrix& matrix1,
@@ -122,25 +131,27 @@ public:
 		matrix1.matrix_.swap(matrix2.matrix_);
 		matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
 		std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
+		std::swap(matrix1.operators_, matrix2.operators_);
+		std::swap(matrix1.cellPool_, matrix2.cellPool_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
 			swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
 				 static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
-			if constexpr (Master_matrix::Option_list::has_map_column_container){
-				for (auto& p : matrix1.matrix_){
-					p.second.set_rows(&matrix1.rows_);
-				}
-				for (auto& p : matrix2.matrix_){
-					p.second.set_rows(&matrix2.rows_);
-				}
-			} else {
-				for (auto& col : matrix1.matrix_){
-					col.set_rows(&matrix1.rows_);
-				}
-				for (auto& col : matrix2.matrix_){
-					col.set_rows(&matrix2.rows_);
-				}
-			}
+			// if constexpr (Master_matrix::Option_list::has_map_column_container){
+			// 	for (auto& p : matrix1.matrix_){
+			// 		p.second.set_rows(&matrix1.rows_);
+			// 	}
+			// 	for (auto& p : matrix2.matrix_){
+			// 		p.second.set_rows(&matrix2.rows_);
+			// 	}
+			// } else {
+			// 	for (auto& col : matrix1.matrix_){
+			// 		col.set_rows(&matrix1.rows_);
+			// 	}
+			// 	for (auto& col : matrix2.matrix_){
+			// 		col.set_rows(&matrix2.rows_);
+			// 	}
+			// }
 		}
 	}
 
@@ -168,6 +179,7 @@ private:
 	dictionnary_type pivotToColumnIndex_;
 	index nextIndex_;
 	Field_operators* operators_;
+	Cell_constructor* cellPool_;
 
 	template<class Boundary_type>
 	std::vector<cell_rep_type> _reduce_boundary(id_index faceID, const Boundary_type& boundary, dimension_type dim);
@@ -196,26 +208,28 @@ private:
 };
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(Field_operators* operators)
+inline Chain_matrix<Master_matrix>::Chain_matrix(Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {}
 
 template<class Master_matrix>
 template<class Boundary_type>
-inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators)
+inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type> &orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	matrix_.reserve(orderedBoundaries.size());
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -230,14 +244,15 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type
 }
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, Field_operators* operators)
+inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(-1),
 	  pair_opt(),
 	  swap_opt(),
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	matrix_.reserve(numberOfColumns);
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -250,7 +265,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, F
 template<class Master_matrix>
 template<typename EventComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
@@ -259,14 +274,15 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  rep_opt(),
 	  ra_opt(),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {}
 
 template<class Master_matrix>
 template<typename EventComparatorFunction, class Boundary_type>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
 		const std::vector<Boundary_type> &orderedBoundaries, 
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
@@ -275,7 +291,8 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  rep_opt(),
 	  ra_opt(orderedBoundaries.size()),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	matrix_.reserve(orderedBoundaries.size());
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -292,7 +309,7 @@ template<class Master_matrix>
 template<typename EventComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(
 		unsigned int numberOfColumns, 
-		Field_operators* operators,
+		Field_operators* operators, Cell_constructor* cellConstructor,
 		EventComparatorFunction&& birthComparator, 
 		EventComparatorFunction&& deathComparator)
 	: dim_opt(-1),
@@ -301,7 +318,8 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  rep_opt(),
 	  ra_opt(numberOfColumns),
 	  nextIndex_(0),
-	  operators_(operators)
+	  operators_(operators),
+	  cellPool_(cellConstructor)
 {
 	matrix_.reserve(numberOfColumns);
 	if constexpr (Master_matrix::Option_list::has_map_column_container){
@@ -312,7 +330,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 }
 
 template<class Master_matrix>
-inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy, Field_operators* operators)
+inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCopy, Field_operators* operators, Cell_constructor* cellConstructor)
 	: dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
 	  pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
 	  swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
@@ -320,29 +338,30 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix &matrixToCop
 	  ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
 	  pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
 	  nextIndex_(matrixToCopy.nextIndex_),
-	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators)
+	  operators_(operators == nullptr ? matrixToCopy.operators_ : operators),
+	  cellPool_(cellConstructor == nullptr ? matrixToCopy.cellPool_ : cellConstructor)
 {
 	matrix_.reserve(matrixToCopy.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : matrixToCopy.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
 			}
 		} else {
 			for (const auto& col : matrixToCopy.matrix_){
-				matrix_.emplace_back(col, operators_);
+				matrix_.emplace_back(col, operators_, cellPool_);
 			}
 		}
 	}
@@ -359,22 +378,23 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(
 	  matrix_(std::move(other.matrix_)),
 	  pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
 	  nextIndex_(std::exchange(other.nextIndex_, 0)),
-	  operators_(std::exchange(other.operators_, nullptr))
+	  operators_(std::exchange(other.operators_, nullptr)),
+	  cellPool_(std::exchange(other.cellPool_, nullptr))
 {
-	//TODO: not sur this is necessary, as the address of rows_ should be moved too, no?
-	if constexpr (Master_matrix::Option_list::has_map_column_container){
-		for (auto& p : matrix_){
-			if constexpr (Master_matrix::Option_list::has_row_access){
-				p.second.set_rows(&this->rows_);
-			}
-		}
-	} else {
-		for (auto& col : matrix_){
-			if constexpr (Master_matrix::Option_list::has_row_access){
-				col.set_rows(&this->rows_);
-			}
-		}
-	}
+	//TODO: not sur this is necessary, as the address of rows_ should not change from the move, no?
+	// if constexpr (Master_matrix::Option_list::has_map_column_container){
+	// 	for (auto& p : matrix_){
+	// 		if constexpr (Master_matrix::Option_list::has_row_access){
+	// 			p.second.set_rows(&this->rows_);
+	// 		}
+	// 	}
+	// } else {
+	// 	for (auto& col : matrix_){
+	// 		if constexpr (Master_matrix::Option_list::has_row_access){
+	// 			col.set_rows(&this->rows_);
+	// 		}
+	// 	}
+	// }
 }
 
 template<class Master_matrix>
@@ -627,9 +647,11 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 	swap_opt::operator=(other);
 	pair_opt::operator=(other);
 	rep_opt::operator=(other);
+	matrix_.clear();
 	pivotToColumnIndex_ = other.pivotToColumnIndex_;
 	nextIndex_ = other.nextIndex_;
 	operators_ = other.operators_;
+	cellPool_ = other.cellPool_;
 
 	matrix_.reserve(other.matrix_.size());
 	if constexpr (Master_matrix::Option_list::has_row_access){
@@ -637,22 +659,22 @@ inline Chain_matrix<Master_matrix> &Chain_matrix<Master_matrix>::operator=(
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_);
+				matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
 			}
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_map_column_container){
 			for (const auto& p : other.matrix_){
 				const Column_type& col = p.second;
-				matrix_.try_emplace(p.first, Column_type(col, operators_));
+				matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
 			}
 		} else {
 			for (const auto& col : other.matrix_){
-				matrix_.emplace_back(col, operators_);
+				matrix_.emplace_back(col, operators_, cellPool_);
 			}
 		}
 	}
@@ -875,15 +897,15 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_, cellPool_));
 		} else {
-			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_));
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_, cellPool_));
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_, cellPool_);
 		} else {
-			matrix_.emplace_back(column, dimension, operators_);
+			matrix_.emplace_back(column, dimension, operators_, cellPool_);
 		}
 		
 		pivotToColumnIndex_[pivot] = nextIndex_;
@@ -913,9 +935,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		pivotToColumnIndex_.try_emplace(pivot, nextIndex_);
 
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_));
+			matrix_.try_emplace(nextIndex_, Column_type(nextIndex_, column, dimension, ra_opt::rows_, operators_, cellPool_));
 		} else {
-			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_));
+			matrix_.try_emplace(nextIndex_, Column_type(column, dimension, operators_, cellPool_));
 		}
 
 		matrix_.at(nextIndex_).assign_paired_chain(pair);
@@ -927,9 +949,9 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(
 		}
 	} else {
 		if constexpr (Master_matrix::Option_list::has_row_access){
-			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_);
+			matrix_.emplace_back(nextIndex_, column, dimension, ra_opt::rows_, operators_, cellPool_);
 		} else {
-			matrix_.emplace_back(column, dimension, operators_);
+			matrix_.emplace_back(column, dimension, operators_, cellPool_);
 		}
 
 		matrix_[nextIndex_].assign_paired_chain(pair);
