@@ -43,37 +43,37 @@ public:
 	public:
 		using Base = typename Master_matrix::Column_type;
 
-		Column_type(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
-			: Base(operators, cellConstructor)
-		{}
-		template<class Container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Column_type> > >
-		Column_type(const Container_type& nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor)
-			: Base(nonZeroRowIndices, operators, cellConstructor)
-		{}
-		template<class Container_type, class Row_container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Column_type> > >
-		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer, Field_operators* operators, Cell_constructor* cellConstructor )
-			: Base(columnIndex, nonZeroRowIndices, rowContainer, operators, cellConstructor)
-		{}
-		template<class Container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Column_type> > >
-		Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension, Field_operators* operators, Cell_constructor* cellConstructor)
-			: Base(nonZeroRowIndices, dimension, operators, cellConstructor)
-		{}
-		template<class Container_type, class Row_container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Column_type> > >
-		Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer, Field_operators* operators, Cell_constructor* cellConstructor)
-			: Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, operators, cellConstructor)
-		{}
-		Column_type(const Column_type& column, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
-			: Base(static_cast<const Base&>(column), operators, cellConstructor)
-		{}
-		template<class Row_container_type>
-		Column_type(const Column_type& column, index columnIndex, Row_container_type &rowContainer, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
-			: Base(static_cast<const Base&>(column), columnIndex, rowContainer, operators, cellConstructor)
-		{}
-		Column_type(Column_type&& column) noexcept
-			: Base(std::move(static_cast<Base&>(column)))
-		{}
-		// template<class...U>
-		// Column_type(U&&...u) : Base(std::forward<U>(u)...) {}
+		// Column_type(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
+		// 	: Base(operators, cellConstructor)
+		// {}
+		// template<class Container_type>
+		// Column_type(const Container_type& nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor)
+		// 	: Base(nonZeroRowIndices, operators, cellConstructor)
+		// {}
+		// template<class Container_type, class Row_container_type>
+		// Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type &rowContainer, Field_operators* operators, Cell_constructor* cellConstructor )
+		// 	: Base(columnIndex, nonZeroRowIndices, rowContainer, operators, cellConstructor)
+		// {}
+		// template<class Container_type>
+		// Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension, Field_operators* operators, Cell_constructor* cellConstructor)
+		// 	: Base(nonZeroRowIndices, dimension, operators, cellConstructor)
+		// {}
+		// template<class Container_type, class Row_container_type>
+		// Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension, Row_container_type &rowContainer, Field_operators* operators, Cell_constructor* cellConstructor)
+		// 	: Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, operators, cellConstructor)
+		// {}
+		// Column_type(const Column_type& column, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
+		// 	: Base(static_cast<const Base&>(column), operators, cellConstructor)
+		// {}
+		// template<class Row_container_type>
+		// Column_type(const Column_type& column, index columnIndex, Row_container_type &rowContainer, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
+		// 	: Base(static_cast<const Base&>(column), columnIndex, rowContainer, operators, cellConstructor)
+		// {}
+		// Column_type(Column_type&& column) noexcept
+		// 	: Base(std::move(static_cast<Base&>(column)))
+		// {}
+		template<class...U>
+		Column_type(U&&...u) : Base(std::forward<U>(u)...) {}
 
 		index get_rep() const{
 			return rep_;

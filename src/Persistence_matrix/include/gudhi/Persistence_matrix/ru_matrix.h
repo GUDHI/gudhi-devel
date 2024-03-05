@@ -533,7 +533,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
 				_add_bar(get_column_dimension(i), i);
 			}
 		} else {
-			_add_bar(0, i);
+			_add_bar(get_column_dimension(i), i);
 		}
 	}
 }
@@ -554,7 +554,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
 
 	Column_type &curr = reducedMatrixR_.get_column(lastIndex);
 	if (curr.is_empty()) {
-		_add_bar(0, nextEventIndex_);
+		_add_bar(get_column_dimension(lastIndex), nextEventIndex_);
 		return;
 	}
 

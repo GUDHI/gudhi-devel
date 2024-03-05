@@ -48,13 +48,13 @@ public:
 	using const_reverse_iterator = typename Column_type::const_reverse_iterator;
 
 	Intrusive_list_column(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
-	template<class Container_type = typename Master_matrix::boundary_type, class = std::enable_if_t<!std::is_same_v<Container_type,Intrusive_list_column> > >
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Intrusive_list_column(const Container_type& nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Intrusive_list_column> > >
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Intrusive_list_column(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type *rowContainer, Field_operators* operators, Cell_constructor* cellConstructor);	//has to be a boundary for boundary, has no sense for chain if dimension is needed
-	template<class Container_type = typename Master_matrix::boundary_type, class = std::enable_if_t<!std::is_same_v<Container_type,Intrusive_list_column> > >
+	template<class Container_type = typename Master_matrix::boundary_type>
 	Intrusive_list_column(const Container_type& nonZeroChainRowIndices, dimension_type dimension, Field_operators* operators, Cell_constructor* cellConstructor);	//dimension gets ignored for base
-	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type, class = std::enable_if_t<!std::is_same_v<Container_type,Intrusive_list_column> > >
+	template<class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
 	Intrusive_list_column(index columnIndex, const Container_type& nonZeroChainRowIndices, dimension_type dimension, Row_container_type *rowContainer, Field_operators* operators, Cell_constructor* cellConstructor);	//dimension gets ignored for base
 	Intrusive_list_column(const Intrusive_list_column& column, Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
 	template<class Row_container_type>
@@ -229,7 +229,7 @@ inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_col
 }
 
 template<class Master_matrix, class Cell_constructor>
-template<class Container_type, class>
+template<class Container_type>
 inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_column(const Container_type &nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor)
 	: ra_opt(), 
 	  dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1), 
@@ -255,7 +255,7 @@ inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_col
 }
 
 template<class Master_matrix, class Cell_constructor>
-template<class Container_type, class Row_container_type, class>
+template<class Container_type, class Row_container_type>
 inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_column(
 	index columnIndex, const Container_type &nonZeroRowIndices, Row_container_type *rowContainer, Field_operators* operators, Cell_constructor* cellConstructor) 
 	: ra_opt(columnIndex, rowContainer), 
@@ -288,7 +288,7 @@ inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_col
 }
 
 template<class Master_matrix, class Cell_constructor>
-template<class Container_type, class>
+template<class Container_type>
 inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_column(
 	const Container_type &nonZeroRowIndices, dimension_type dimension, Field_operators* operators, Cell_constructor* cellConstructor) 
 	: ra_opt(), 
@@ -318,7 +318,7 @@ inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_col
 }
 
 template<class Master_matrix, class Cell_constructor>
-template<class Container_type, class Row_container_type, class>
+template<class Container_type, class Row_container_type>
 inline Intrusive_list_column<Master_matrix,Cell_constructor>::Intrusive_list_column(
 	index columnIndex, const Container_type &nonZeroRowIndices, dimension_type dimension, Row_container_type *rowContainer, Field_operators* operators, Cell_constructor* cellConstructor) 
 	: ra_opt(columnIndex, rowContainer), 

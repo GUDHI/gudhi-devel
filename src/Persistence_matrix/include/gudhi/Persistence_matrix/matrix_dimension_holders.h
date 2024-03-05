@@ -48,7 +48,7 @@ protected:
 	dimension_type maxDim_;
 
 	void update_up(dimension_type dimension){
-		if (maxDim_ < dimension) maxDim_ = dimension;
+		if (maxDim_ == -1 || maxDim_ < dimension) maxDim_ = dimension;
 	};
 };
 
@@ -56,7 +56,12 @@ template<typename dimension_type>
 class Matrix_all_dimension_holder
 {
 public:
-	Matrix_all_dimension_holder(dimension_type maximalDimension = -1) : maxDim_(maximalDimension){};
+	Matrix_all_dimension_holder(dimension_type maximalDimension = -1) 
+		: dimensions_(maximalDimension < 0 ? 0 : maximalDimension + 1, 0), 
+		  maxDim_(maximalDimension)
+	{
+		if (maxDim_ != -1) dimensions_[maxDim_] = 1;
+	};
 	Matrix_all_dimension_holder(const Matrix_all_dimension_holder& toCopy) 
 		: dimensions_(toCopy.dimensions_), maxDim_(toCopy.maxDim_){};
 	Matrix_all_dimension_holder(Matrix_all_dimension_holder&& other) noexcept 
@@ -87,7 +92,7 @@ protected:
 
 	void update_down(unsigned int dimension){
 		--(dimensions_[dimension]);		//assumes dimension already exists and is not 0
-		while (dimensions_.back() == 0)	//assumes that there is always at least one cell in the complex
+		while (!dimensions_.empty() && dimensions_.back() == 0)
 			dimensions_.pop_back();
 		maxDim_ = dimensions_.size() - 1;
 	};

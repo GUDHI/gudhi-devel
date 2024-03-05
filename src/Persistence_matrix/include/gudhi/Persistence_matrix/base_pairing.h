@@ -14,6 +14,7 @@
 #include <utility>	//std::swap & std::move
 #include <unordered_map>
 #include <algorithm>
+#include <vector>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -99,50 +100,61 @@ inline void Base_pairing<Master_matrix>::_reduce()
 	using id_index = typename Master_matrix::index;
 	std::unordered_map<id_index, index> pivotsToColumn;
 
-	for (int d = _matrix()->get_max_dimension(); d > 0; d--){
-		for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
-			auto& curr = _matrix()->get_column(i);
-			if (!(curr.is_empty()) && curr.get_dimension() == d)
-			{
-				id_index pivot = curr.get_pivot();
+	auto dim = _matrix()->get_max_dimension();
+	std::vector<std::vector<index> > columnsByDim(dim + 1);
+	for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
+		columnsByDim[dim - _matrix()->get_column_dimension(i)].push_back(i);
+	}
 
-				while (pivot != static_cast<id_index>(-1) && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
-					if constexpr (Master_matrix::Option_list::is_z2){
-						curr += _matrix()->get_column(pivotsToColumn.at(pivot));
-					} else {
-						auto &toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
-						typename Master_matrix::element_type coef = curr.get_pivot_value();
-						coef = _matrix()->operators_->get_inverse(coef);
-						coef = _matrix()->operators_->multiply(coef, _matrix()->operators_->get_characteristic() - toadd.get_pivot_value());
-						curr.multiply_and_add(coef, toadd);
+	for (auto cols : columnsByDim){
+		for (auto i : cols){
+			auto& curr = _matrix()->get_column(i);
+			if (dim == 0){
+				if (pivotsToColumn.find(i) == pivotsToColumn.end()){
+					barcode_.emplace_back(0, i, -1);
+				}
+			} else {
+				if (!(curr.is_empty()))
+				{
+					id_index pivot = curr.get_pivot();
+
+					while (pivot != static_cast<id_index>(-1) && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
+						if constexpr (Master_matrix::Option_list::is_z2){
+							curr += _matrix()->get_column(pivotsToColumn.at(pivot));
+						} else {
+							auto &toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
+							typename Master_matrix::element_type coef = curr.get_pivot_value();
+							coef = _matrix()->operators_->get_inverse(coef);
+							coef = _matrix()->operators_->multiply(coef, _matrix()->operators_->get_characteristic() - toadd.get_pivot_value());
+							curr.multiply_and_add(coef, toadd);
+						}
+
+						pivot = curr.get_pivot();
 					}
 
-					pivot = curr.get_pivot();
-				}
-
-				if (pivot != static_cast<id_index>(-1)){
-					pivotsToColumn.emplace(pivot, i);
-					_matrix()->get_column(pivot).clear();
-					barcode_.emplace_back(d - 1, pivot, i);
-				} else {
-					curr.clear();
-					barcode_.emplace_back(d, i, -1);
+					if (pivot != static_cast<id_index>(-1)){
+						pivotsToColumn.emplace(pivot, i);
+						_matrix()->get_column(pivot).clear();
+						barcode_.emplace_back(dim - 1, pivot, i);
+					} else {
+						curr.clear();
+						barcode_.emplace_back(dim, i, -1);
+					}
 				}
 			}
 		}
+		--dim;
 	}
-	for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++){
-		if (_matrix()->get_column(i).get_dimension() == 0 && pivotsToColumn.find(i) == pivotsToColumn.end()){
-			barcode_.emplace_back(0, i, -1);
-		}
-	}
-	//sort barcode by birth such that a removal is trivial
-	std::sort(barcode_.begin(), barcode_.end(), [](const Bar& b1, const Bar& b2){ return b1.birth < b2.birth; });
-	//map can only be constructed once barcode is sorted
-	for (index i = 0; i < barcode_.size(); ++i){
-		auto d = barcode_[i].death;
-		if (d != static_cast<pos_index>(-1)){
-			deathToBar_.emplace(d, i);
+
+	if constexpr (Master_matrix::Option_list::has_removable_columns){
+		//sort barcode by birth such that a removal is trivial
+		std::sort(barcode_.begin(), barcode_.end(), [](const Bar& b1, const Bar& b2){ return b1.birth < b2.birth; });
+		//map can only be constructed once barcode is sorted
+		for (index i = 0; i < barcode_.size(); ++i){
+			auto d = barcode_[i].death;
+			if (d != static_cast<pos_index>(-1)){
+				deathToBar_.emplace(d, i);
+			}
 		}
 	}
 
@@ -151,6 +163,8 @@ inline void Base_pairing<Master_matrix>::_reduce()
 
 template<class Master_matrix>
 inline void Base_pairing<Master_matrix>::_remove_last(pos_index columnIndex){
+	static_assert(Master_matrix::Option_list::has_removable_columns, "remove_last not available.");
+
 	if (isReduced_){
 		auto it = deathToBar_.find(columnIndex);
 
