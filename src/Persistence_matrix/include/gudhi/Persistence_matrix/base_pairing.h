@@ -98,7 +98,7 @@ template<class Master_matrix>
 inline void Base_pairing<Master_matrix>::_reduce()
 {
 	using id_index = typename Master_matrix::index;
-	std::unordered_map<id_index, index> pivotsToColumn;
+	std::unordered_map<id_index, index> pivotsToColumn(_matrix()->get_number_of_columns());
 
 	auto dim = _matrix()->get_max_dimension();
 	std::vector<std::vector<index> > columnsByDim(dim + 1);
@@ -109,37 +109,34 @@ inline void Base_pairing<Master_matrix>::_reduce()
 	for (auto cols : columnsByDim){
 		for (auto i : cols){
 			auto& curr = _matrix()->get_column(i);
-			if (dim == 0){
+			if (curr.is_empty()){
 				if (pivotsToColumn.find(i) == pivotsToColumn.end()){
-					barcode_.emplace_back(0, i, -1);
+					barcode_.emplace_back(dim, i, -1);
 				}
 			} else {
-				if (!(curr.is_empty()))
-				{
-					id_index pivot = curr.get_pivot();
+				id_index pivot = curr.get_pivot();
 
-					while (pivot != static_cast<id_index>(-1) && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
-						if constexpr (Master_matrix::Option_list::is_z2){
-							curr += _matrix()->get_column(pivotsToColumn.at(pivot));
-						} else {
-							auto &toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
-							typename Master_matrix::element_type coef = curr.get_pivot_value();
-							coef = _matrix()->operators_->get_inverse(coef);
-							coef = _matrix()->operators_->multiply(coef, _matrix()->operators_->get_characteristic() - toadd.get_pivot_value());
-							curr.multiply_and_add(coef, toadd);
-						}
-
-						pivot = curr.get_pivot();
-					}
-
-					if (pivot != static_cast<id_index>(-1)){
-						pivotsToColumn.emplace(pivot, i);
-						_matrix()->get_column(pivot).clear();
-						barcode_.emplace_back(dim - 1, pivot, i);
+				while (pivot != static_cast<id_index>(-1) && pivotsToColumn.find(pivot) != pivotsToColumn.end()){
+					if constexpr (Master_matrix::Option_list::is_z2){
+						curr += _matrix()->get_column(pivotsToColumn.at(pivot));
 					} else {
-						curr.clear();
-						barcode_.emplace_back(dim, i, -1);
+						auto &toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
+						typename Master_matrix::element_type coef = curr.get_pivot_value();
+						coef = _matrix()->operators_->get_inverse(coef);
+						coef = _matrix()->operators_->multiply(coef, _matrix()->operators_->get_characteristic() - toadd.get_pivot_value());
+						curr.multiply_and_add(coef, toadd);
 					}
+
+					pivot = curr.get_pivot();
+				}
+
+				if (pivot != static_cast<id_index>(-1)){
+					pivotsToColumn.emplace(pivot, i);
+					_matrix()->get_column(pivot).clear();
+					barcode_.emplace_back(dim - 1, pivot, i);
+				} else {
+					curr.clear();
+					barcode_.emplace_back(dim, i, -1);
 				}
 			}
 		}
