@@ -76,7 +76,7 @@ public:
 	Column_type& get_column(index columnIndex);
 	const Column_type& get_column(index columnIndex) const;
 	void remove_maximal_face(id_index faceID);
-	void remove_maximal_face(id_index faceID, const std::vector<index>& columnsToSwap);
+	void remove_maximal_face(id_index faceID, const std::vector<id_index>& columnsToSwap);
 	void remove_last();
 
 	index get_number_of_columns() const;
@@ -495,7 +495,7 @@ inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID)
 }
 
 template<class Master_matrix>
-inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID, const std::vector<index>& columnsToSwap)
+inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID, const std::vector<id_index>& columnsToSwap)
 {
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'remove_maximal_face' is not implemented for the chosen options.");
@@ -507,8 +507,8 @@ inline void Chain_matrix<Master_matrix>::remove_maximal_face(id_index faceID, co
 
 	index startIndex = pivotToColumnIndex_.at(faceID);
 
-	for (index i : columnsToSwap){
-		startIndex = swap_opt::vine_swap(startIndex, i);
+	for (id_index i : columnsToSwap){
+		startIndex = swap_opt::vine_swap(startIndex, pivotToColumnIndex_.at(i));
 	}
 
 	_remove_last(startIndex);

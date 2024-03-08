@@ -146,7 +146,7 @@ private:
 	Field_operators* operators_;
 	Cell_constructor* cellPool_;
 
-	static const bool activeDimOption = Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::dimensionIsNeeded;
+	static const bool activeDimOption = Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::maxDimensionIsNeeded;
 	static const bool activeSwapOption = Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update;
 	static const bool activePairingOption = Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update && !Master_matrix::Option_list::can_retrieve_representative_cycles;
 };

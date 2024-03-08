@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022 Inria
+ *    Copyright (C) 2022-24 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -78,13 +78,12 @@ namespace persistence_matrix {
  *   at least one of the following options: @ref has_column_pairings, @ref has_vine_update and 
  *   @ref can_retrieve_representative_cycles. If only @ref has_column_pairings is true, then only @f$ R @f$ is stored,
  *   but if either @ref has_vine_update or @ref can_retrieve_representative_cycles is true, then @f$ U @f$ also needs 
- *   to be stored. Note that the option @ref is_indexed_by_position will produce a small overhead when set to **false**.
+ *   to be stored. Note that the option @ref column_indexation_type will produce a small overhead when set to @ref Column_indexation_types::IDENTIFIER.
  * - a chain complex matrix representing a `compatible base` of a filtered chain complex (see TODO: cite Clément's zigzag paper here).
  *   This matrix is deduced from the boundary matrix and therefore encodes more or less the same information 
  *   but differently and can therefore be better suited for certain applications. This type can be used the same way 
- *   than the precedent type, only the option @ref is_of_boundary_type has to be set to false. So it is easy to switch
- *   from one representation to the other if one wants to test both. Just note that the option 
- *   @ref is_indexed_by_position will produce a small overhead when set to **true**.
+ *   than the precedent type, only the option @ref is_of_boundary_type has to be set to false. Note that the option 
+ *   @ref column_indexation_type will produce a small overhead when set to  @ref Column_indexation_types::POSITION or  @ref Column_indexation_types::IDENTIFIER.
  *
  * __Indexation scheme:__
  *
@@ -105,11 +104,16 @@ namespace persistence_matrix {
  * - IDIdx: This will correspond to the ID of c in the complex used to identify it in the boundaries.
  *   If at the insertion of c, its ID was not specified and it was the nth insertion, it is assumed that the ID is n
  *   (which means that IDIdx and PosIdx will only start to differ when swaps or removals are performed).
+ *   If an ID is specified at the insertion of c, the ID is stored as the IDIdx of c. IDs can be freely choosed with 
+ *   the only restriction that they have to be strictly increasing in the order of the filtration.
  *
  * In conclusion, with default values, if no vine swaps or removals occurs, all three indexing schemes are the same.
- * 
- * Different from columns, rows are always indexed by ID, i.e., the values used in column/boundary for insertions.
- * So, for row access, it is usualy necessary to remember the indexing scheme used.
+ *
+ * Let r be a row. Rows are indexed in two ways depending only if the matrix is a chain matrix or not.
+ * If the matrix is a chain matrix, r is always indexed by its ID, so it correspond to the IDIdx indexing scheme. 
+ * If the matrix is not a chain matrix, r will originaly also be indexed by the ID, but when a swap occurs,
+ * the rows also swap IDs and the new ID has to be used to access r. This means that when the default IDIdx scheme 
+ * is used, the indexation of the rows correspond to PosIdx.
  * 
  * @tparam Options Structure encoding all the options of the matrix. 
  * See description of @ref Default_options for more details.
@@ -119,7 +123,7 @@ class Matrix {
  public:
   using Option_list = Options;	//to make it accessible from the other classes
   using index = typename Options::index_type;                 /**< Type of MatIdx index. */
-  using id_index = typename Options::id_type;                 /**< Type of IDIdx index or row index. */
+  using id_index = typename Options::id_type;                 /**< Type of IDIdx index. */
   using pos_index = typename Options::pos_type;               /**< Type of PosIdx index. */
   using dimension_type = typename Options::dimension_type;    /**< Type for dimension. */
 
@@ -217,9 +221,26 @@ class Matrix {
    * @brief Type of a matrix cell. See @ref Cell for a more detailed description.
    */
   using Cell_type = Cell<Matrix<Options> >;
+
+  /**
+   * @brief Default cell constructor/destructor, using classic new and delete.
+   * For now, only used as default value for columns constructed independently outside of the matrix by the user.
+   * Could be used in the futur when parallel options are implemented, as usual pools are not thread safe.
+   */
   inline static New_cell_constructor<Cell_type> defaultCellConstructor;
+  /**
+   * @brief Cell constructor/destructor used by the matrix. Uses a pool of cells to accelerate memory management,
+   * as cells are constructed and destroyed a lot during reduction, swaps or additions.
+   */
   using Cell_constructor = Pool_cell_constructor<Cell_type>;
 
+  /**
+   * @brief Type used to identify a cell, for exemple when inserting a boundary. If @ref is_z2 is true, the type is
+   * an IDIdx and corresponds to the row index of the cell (the cell value is assumed to be 1). 
+   * If @ref is_z2 is false, the type is a pair whose first element is the row index of the cell and 
+   * the second element is the value of the cell (which again is assumed to be non-zero). The column index of the row
+   * is always deduced from the context in which the type is used.
+   */
   using cell_rep_type = typename std::conditional<Options::is_z2,
                                                   id_index,
                                                   std::pair<id_index, element_type>
@@ -246,7 +267,7 @@ class Matrix {
   };
 
   /**
-   * @brief Type of the rows storted in the matrix. Is either an intrsuive list of @ref Cell_type (not ordered) if 
+   * @brief Type of the rows storted in the matrix. Is either an intrusive list of @ref Cell_type (not ordered) if 
    * @ref has_intrusive_rows is true, or a set of @ref Cell_type (ordered by @ref get_column_index) otherwise.
    */
   using Row_type =
@@ -379,11 +400,13 @@ class Matrix {
                                                   std::initializer_list<std::pair<id_index, element_type> >
                                                  >::type;
 
-  static const bool dimensionIsNeeded = Options::has_column_pairings && Options::is_of_boundary_type &&
-                                        !Options::has_vine_update && !Options::can_retrieve_representative_cycles;
+  //i.e. is simple boundary matrix. Also, only needed because of the reduction algorithm. 
+  //TODO: remove the necessity and recalculate when needed or keep it like that?
+  static const bool maxDimensionIsNeeded = Options::has_column_pairings && Options::is_of_boundary_type &&
+                                           !Options::has_vine_update && !Options::can_retrieve_representative_cycles;
 
   using Matrix_dimension_option = typename std::conditional<
-      Options::has_matrix_maximal_dimension_access || dimensionIsNeeded,
+      Options::has_matrix_maximal_dimension_access || maxDimensionIsNeeded,
       typename std::conditional<Options::has_removable_columns, 
                                 Matrix_all_dimension_holder<dimension_type>,
                                 Matrix_max_dimension_holder<dimension_type>
@@ -441,8 +464,7 @@ class Matrix {
                                >::type;
 
   /**
-   * @brief Type of a representative cycle. Vector of PosIdx indices for boundary matrices and vector of IDIdx
-   * indices for chain matrices.
+   * @brief Type of a representative cycle. Vector of row indices, see [TODO: index paragraph].
    */
   using cycle_type = std::vector<id_index>;	//TODO: add coefficients
 
@@ -469,17 +491,18 @@ class Matrix {
                                >::type;
 
   /**
-   * @brief Default constructor.
+   * @brief Default constructor. Initializes an empty matrix.
    */
   Matrix();
   /**
-   * @brief Constructs a new matrix from the given matrix. 
-   * If the columns are representing a boundary matrix, the indices of the simplices are assumed to be 
-   * consecutifs and starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
+   * If the columns are representing a boundary matrix, the IDs of the simplices are also assumed to be 
+   * consecutifs, ordered by filtration value, starting with 0. 
    *
    * See options descriptions for futher details on how the given matrix is handled.
    * 
-   * @tparam Container_type Range type for a column. Assumed to have a begin(), end() and size() method.
+   * @tparam Container_type Range type for @ref cell_rep_type ranges. Assumed to have a begin(), end() and size() method.
    * @param columns For a general/base matrix, the columns are copied as is. 
    * If options related to homology are activated, @p columns is interpreted as a boundary matrix of a 
    * **simplicial** complex. 
@@ -493,6 +516,8 @@ class Matrix {
    * If the persistence barcode has to be computed from this matrix, the simplices are also assumed to be ordered by 
    * appearance order in the filtration. Also, depending of the options, the matrix is eventually reduced on the fly 
    * or converted into a chain complex base, so the new matrix is not always identical to the old one.
+   * @param characteristic Characteristic of the coefficient field. Has to be specified if @ref is_z2 is false.
+   * Default value is 11. Ignored if @ref is_z2 is true.
    */
   template <class Container_type = boundary_type>
   Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic = 11);
@@ -500,6 +525,9 @@ class Matrix {
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
+   * @param characteristic Characteristic of the coefficient field. If not specified and @ref is_z2 is false,
+   * the characteristic has to be set later with the use of `set_characteristic()` before calling for the first time
+   * a method needing it. Ignored if @ref is_z2 is true.
    */
   Matrix(int numberOfColumns, characteristic_type characteristic = 0);
   /**
@@ -515,18 +543,17 @@ class Matrix {
    * outside of the matrix about the barcode to provide a better suited comparator adapted to the situation 
    * (as in the implementation of the Zigzag algorithm for example TODO: ref to zigzag module.)
    * 
-   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
-   * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @param birthComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
-   * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @param deathComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
    */
   template <typename EventComparatorFunction>
   Matrix(EventComparatorFunction&& birthComparator, 
          EventComparatorFunction&& deathComparator);
   /**
-   * @brief Constructs a new matrix from the given matrix with the given comparator functions. 
+   * @brief Constructs a new matrix from the given ranges with the given comparator functions. 
    * Only available when those comparators are necessary, i.e., when **all** following options have following values:
    *   - @ref is_of_boundary_type = false
    *   - @ref has_vine_update = true
@@ -537,14 +564,15 @@ class Matrix {
    * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator) 
    * for more information about the comparators.
    * 
-   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam Boundary_type Range type for a column. Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continously starting at 0.
-   * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @param birthComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
-   * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @param deathComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
+   * @param characteristic Characteristic of the coefficient field. Has to be specified if @ref is_z2 is false.
+   * Default value is 11. Ignored if @ref is_z2 is true.
    */
   template <typename EventComparatorFunction, class Boundary_type = boundary_type>
   Matrix(const std::vector<Boundary_type>& orderedBoundaries, 
@@ -562,13 +590,15 @@ class Matrix {
    * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator) 
    * for more information about the comparators.
    * 
-   * @tparam EventComparatorFunction Type of the birth comparator: (unsigned int, unsigned int) -> bool
-   * @tparam EventComparatorFunction Type of the death comparator: (unsigned int, unsigned int) -> bool
+   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param birthComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @param birthComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
-   * @param deathComparator Method taking two IDIdx indices as parameter and returns true if and only if the first 
+   * @param deathComparator Method taking two PosIdx indices as parameter and returns true if and only if the first 
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
+   * @param characteristic Characteristic of the coefficient field. If not specified and @ref is_z2 is false,
+   * the characteristic has to be set later with the use of `set_characteristic()` before calling for the first time
+   * a method needing it. Ignored if @ref is_z2 is true.
    */
   template <typename EventComparatorFunction>
   Matrix(unsigned int numberOfColumns, 
@@ -594,48 +624,55 @@ class Matrix {
   //TODO: compatibily with multi fields:
   //  - set_characteristic(characteristic_type min, characteristic_type max)
   //  - readapt reduction?
+  /**
+   * @brief Sets the characteristic of the coefficient field if @ref is_z2 is false, does nothing otherwise.
+   * Should be used if no characteristic could be specified at the creation of the empty matrix.
+   * Do not change the value of the characteristic once used.
+   *
+   * @warning The coefficient values stored in the matrix are stored after computing the corresponding modulo.
+   * Therefore, changing the characteristic after is very likely to invalidate all cell values.
+   * 
+   * @param characteristic The characteristic to set.
+   */
   void set_characteristic(characteristic_type characteristic);
 
   // (TODO: if there is no row access and the column type corresponds to the internal column type of the matrix, 
   // moving the column instead of copying it should be possible. Is it worth implementing it?)
   /**
-   * @brief Inserts a new ordered column at the end of the matrix by copying the given column. 
-   * Only available when **all** of the following options are **false**:
-   *   - @ref has_column_pairings
-   *   - @ref has_vine_update
-   *   - @ref can_retrieve_representative_cycles
+   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of @ref cell_rep_type.
+   * The content of the range is assumed to be sorted by increasing ID value. 
    *
+   * Only available for base matrices, see [TODO: description].
    * Otherwise use @ref insert_boundary which will deduce a new column from the boundary given.
    * 
-   * @tparam Container_type Range type for a column. Assumed to have a begin(), end() and size() method.
+   * @tparam Container_type Range of @ref cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    */
   template <class Container_type>
   void insert_column(const Container_type& column);
   /**
-   * @brief Inserts a new ordered column at the given index by copying the given column.
+   * @brief Inserts a new ordered column at the given index by copying the given range of @ref cell_rep_type.
    * There should not be any other column inserted at that index which was not explicitely removed before.
-   * Only available if @ref has_map_column_container is true and **all** of the following options are **false**:
-   *   - @ref has_column_pairings
-   *   - @ref has_vine_update
-   *   - @ref can_retrieve_representative_cycles
-   *   - @ref has_column_compression
+   * The content of the range is assumed to be sorted by increasing ID value. 
+   *
+   * Only available for base matrices without column compression, see [TODO: description and Options].
    * 
-   * @tparam Container_type Range type for a column. Assumed to have a begin(), end() and size() method.
+   * @tparam Container_type Range of @ref cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    * @param columnIndex MatIdx index to which the column has to be inserted.
    */
   template <class Container_type>
   void insert_column(const Container_type& column, index columnIndex);
+  //TODO: for simple boundary matrices, add an index pointing to the first column inserted after the last call of 
+  //get_current_barcode to enable several calls to get_current_barcode
   /**
    * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary. 
-   * This means that we assume that the boundaries are inserted in the order of the filtration. 
-   * For chain matrices or ID indexed matrices, we also assume that the faces in the given boundary are identified by
-   * their position in the filtration (not counting removals in the case of zigzag), starting at 0. If it is not the
-   * case, use the other `insert_boundary` instead by indicating the face ID used in the boundaries when the face is
-   * inserted.
-   * The content of the new column will vary depending on the underlying type of the matrix.
+   * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
+   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
+   * starting at 0. If it is not the case, use the other `insert_boundary` instead by indicating the face ID
+   * used in the boundaries when the face is inserted.
    *
+   * The content of the new column will vary depending on the underlying type of the matrix (see [TODO: description]):
    * - If it is a basic matrix type, the boundary is copied as it is, i.e., the method is equivalent to 
    *   @ref insert_column.
    * - If it is a boundary type matrix and only R is stored, the boundary is also just copied. The column will only be 
@@ -647,8 +684,8 @@ class Matrix {
    *   `IDIdx + linear combination of older column IDIdxs`, where the combination is deduced while reducing the 
    *   given boundary. If the barcode is stored, it will also be updated.
    * 
-   * @tparam Boundary_type Range type for a column. Assumed to have a begin(), end() and size() method.
-   * @param boundary Boundary generating the new column.
+   * @tparam Boundary_type Range of @ref cell_rep_type. Assumed to have a begin(), end() and size() method.
+   * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a chain matrix, the method returns the MatIdx indices of the unpaired chains used to reduce
@@ -666,10 +703,11 @@ class Matrix {
    * for non basic matrices, the faces are inserted by order of filtration), it is sufficient to indicate the ID
    * of the face being inserted.
    * 
-   * @tparam Boundary_type Range type for a column. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_type Range of @ref cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param faceIndex IDIdx index to be used to indentify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
-   * @p faceIndex values of precedent calls of the method for the corresponding faces.
+   * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
+   * increasing order.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a chain matrix, the method returns the MatIdx indices of the unpaired chains used to reduce the boundary.
@@ -693,8 +731,10 @@ class Matrix {
    * @return Const reference to the column.
    */
   const Column_type& get_column(index columnIndex) const;
+  //TODO: there is no particular reason that this method is not available for identifier indexing,
+  // just has to be added to the interface...
   /**
-   * @brief Only available for RU matrices with position indexing. 
+   * @brief Only available for RU matrices without @ref Column_indexation_types::IDENTIFIER indexing. 
    * Returns the column at the given MatIdx index in R if @p inR is true and in U if @p inR is false.
    * 
    * @param columnIndex MatIdx index of the column to return.
@@ -705,35 +745,40 @@ class Matrix {
 
   //TODO: update column indices when reordering rows (after lazy swap) such that always MatIdx are returned.
   /**
-   * @brief Only available if @ref has_row_access is true. Returns the row at the given IDIdx index.
+   * @brief Only available if @ref has_row_access is true. Returns the row at the given row index, see [TODO: description].
    * For RU matrices, is equivalent to `get_row(columnIndex, true)`.
    *
-   * @warning The @ref get_column_index method of the row cells returns IDIdx indices for boundary matrices and
-   * MatIdx indices for chain matrices.
+   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
+   * for boundary matrices and MatIdx indices for chain matrices.
    * 
-   * @param rowIndex IDIdx index of the row to return.
+   * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
+   * if swaps occured, see [TODO: description].
    * @return Reference to the row. Is `const` if the matrix has column compression.
    */
   returned_row_type& get_row(id_index rowIndex);
   /**
    * @brief Only available for chain matrices and matrices with column compression.
-   * Returns the row at the given IDIdx index.
+   * Returns the row at the given row index, see [TODO: description].
    *
-   * @warning The @ref get_column_index method of the row cells returns IDIdx indices for boundary matrices and
-   * MatIdx indices for chain matrices.
+   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
+   * for boundary matrices and MatIdx indices for chain matrices.
    * 
-   * @param rowIndex IDIdx index of the row to return.
+   * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
+   * if swaps occured, see [TODO: description].
    * @return Const reference to the row.
    */
   const Row_type& get_row(id_index rowIndex) const;
+  //TODO: there is no particular reason that this method is not available for identifier indexing,
+  // just has to be added to the interface...
   /**
-   * @brief Only available for RU matrices with position indexing. 
-   * Returns the row at the given IDIdx index in R if @p inR is true and in U if @p inR is false.
+   * @brief Only available for RU matrices without @ref Column_indexation_types::IDENTIFIER indexing. 
+   * Returns the row at the given row index (see [TODO: description]) in R if @p inR is true and in U if @p inR is false.
    *
-   * @warning The @ref get_column_index method of the row cells returns IDIdx indices for boundary matrices and
-   * MatIdx indices for chain matrices.
+   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
+   * for boundary matrices and MatIdx indices for chain matrices.
    * 
-   * @param rowIndex IDIdx index of the row to return.
+   * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
+   * if swaps occured, see [TODO: description].
    * @param inR If true, returns the row in R, if false, returns the row in U.
    * @return Const reference to the row.
    */
@@ -741,7 +786,7 @@ class Matrix {
 
   /**
    * @brief Only available for base matrices and if @ref has_map_column_container is true.
-   * For other matrices, see @ref remove_maximal_face.
+   * Otherwise, see @ref remove_maximal_face.
    * Erases the given column from the matrix.
    * If @ref has_row_access is also true, the deleted column cells are also automatically removed from their 
    * respective rows.
@@ -766,190 +811,411 @@ class Matrix {
    * `erase_row` method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * The emptiness of a row is therefore not tested at each column cell removal. 
    * 
-   * @param rowIndex IDIdx index of the row to remove.
+   * @param rowIndex Row index of the row to remove, see [TODO: description].
    */
   void erase_row(id_index rowIndex);
-  // boundary: update barcode if already computed, does not verify if it really was maximal
-  // ru
-  // chain
-  // id to pos
-  // pos to id
   //TODO: for chain matrices, replace IDIdx input with MatIdx input to homogenise.
   /**
-   * @brief Only available for boundary and chain matrices and if @ref has_map_column_container is true.
-   * For base matrices, see @ref remove_column.
-   * Assumes that the face is maximal in the current complex and removes it. The maximality of the face is not verified.
+   * @brief Only available for RU and chain matrices and if @ref has_removable_columns and @ref has_vine_update are true.
+   * For chain matrices, @ref has_map_column_container and @ref has_column_pairings also need to be true.
+   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * (i.e., RU is still an upper triangular decomposition of the boundary matrix and chain is still a compatible
+   * bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
+   * The maximality of the face is not verified.
    * Also updates the barcode if it was computed.
+   *
+   * For chain matrices, using the other version of the method could perform better depending on how the data is 
+   * maintained on the side of the user. Then, @ref has_column_pairings also do not need to be true.
+   *
+   * See also @ref remove_last and @ref remove_column.
    * 
    * @param columnIndex If boundary matrix, MatIdx index of the face to remove, otherwise the IDIdx index.
    */
   void remove_maximal_face(index columnIndex);
-  void remove_maximal_face(id_index faceIndex, const std::vector<index>& columnsToSwap);
+  //TODO: See if it would be better to use something more general than a vector for columnsToSwap, such that
+  // the user do not have to construct the vector from scratch. Like passing iterators instead. But it would be nice,
+  // to still be able to do (face, {})...
+  /**
+   * @brief Only available for chain matrices and if @ref has_removable_columns, @ref has_vine_update 
+   * and @ref has_map_column_container are true.
+   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * (i.e., it is still a compatible bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
+   * The maximality of the face is not verified.
+   * Also updates the barcode if it was computed.
+   *
+   * To maintain the compatibility, vine swaps are done to move the face up to the end of the filtration. Once at 
+   * the end, the removal is trivial. But for chain matrices, swaps do not actually swap the position of the column
+   * every time, so the faces appearing after @p faceIndex in the filtration have to be searched first within the matrix.
+   * If the user has an easy access to the IDIdx of the faces in the order of filtration, passing them by argument with
+   * @p columnsToSwap allows to skip a linear search process. Typically, if the user knows that the face he wants to
+   * remove is already the last face of the filtration, calling `remove_maximal_face(faceIndex, {})` will be faster
+   * than `remove_last()`.
+   *
+   * See also @ref remove_last.
+   * 
+   * @param faceIndex IDIdx index of the face to remove
+   * @param columnsToSwap Vector of IDIdx indices of the faces coming after @p faceIndex in the filtration.
+   */
+  void remove_maximal_face(id_index faceIndex, const std::vector<id_index>& columnsToSwap);
+  /**
+   * @brief Removes the last inserted column/face from the matrix.
+   * If the matrix is non basic, @ref has_removable_columns has to be true for the method to be available.
+   * Additionnaly, if the matrix is a chain matrix, either @ref has_map_column_container has to be true or
+   * @ref has_vine_update has to be false.
+   *
+   * See also @ref remove_maximal_face and @ref remove_column.
+   *
+   * For chain matrices, if @ref has_vine_update is true, the last face does not have to be at the end of the matrix
+   * and therefore has to be searched first. In this case, if the user already knows the IDIdx of the last face,
+   * calling `remove_maximal_face(faceID, {})` instead allows to skip the search.
+   */
   void remove_last();
 
-  // boundary: indirect
-  // ru
-  // chain: indirect
-  // id to pos
-  // pos to id
+  /**
+   * @brief Returns the maximal dimension of a face stored in the matrix. Only available for non basic matrices and
+   * if @ref has_matrix_maximal_dimension_access is true.
+   * 
+   * @return The maximal dimension.
+   */
   dimension_type get_max_dimension() const;
-  // base
-  // base comp
-  // boundary
-  // ru
-  // chain
-  // id to pos
-  // pos to id
+  /**
+   * @brief Returns the current number of columns in the matrix.
+   * 
+   * @return The number of columns.
+   */
   index get_number_of_columns() const;
-  // boundary
-  // ru
-  // chain
-  // id to pos
-  // pos to id
+  /**
+   * @brief Returns the dimension of the given face. Only available for non basic matrices.
+   * 
+   * @param columnIndex MatIdx index of the column representing the face.
+   * @return Dimension of the face.
+   */
   dimension_type get_column_dimension(index columnIndex) const;
 
-  //*** targetColumn += sourceColumn
-  // base
-  // base comp: modifies all similar columns to target together, not only target
-  // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-  // ru: avoid calling with specialized options or make it such that it makes sense for persistence
-  // chain: avoid calling with specialized options or make it such that it makes sense for persistence
-  // id to pos
-  // pos to id
+  /**
+   * @brief Adds column at @p sourceColumnIndex onto the column at @p targetColumnIndex in the matrix. Is available
+   * for every matrix type, but should be used with care with non basic matrices, as they will be no verification
+   * to ensure that the additions makes sense for the meaning of the underlying object. For example, a right-to-left 
+   * addition could corrupt the computation of the barcode or the representative cycles if done blindly.
+   *
+   * For basic matrices with column compression, the representatives are summed together, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Index_type Any signed or unsigned integer type.
+   * @param sourceColumnIndex MatIdx index of the column to add.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
   template <typename Index_type>
-  std::enable_if_t<std::is_integral_v<Index_type>> add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
-  // base
-  // base comp
+  std::enable_if_t<std::is_integral_v<Index_type> > add_to(Index_type sourceColumnIndex, Index_type targetColumnIndex);
+  /**
+   * @brief Adds the given range of @ref Cell onto the column at @p targetColumnIndex in the matrix. Only available 
+   * for basic matrices.
+   *
+   * For basic matrices with column compression, the range is summed onto the representative, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
+   * stored in the cells, even if @ref has_row_access is true.
+   * @param sourceColumn Source cell range.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
   template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range>> add_to(const Cell_range& sourceColumn, index targetColumnIndex);
+  std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, index targetColumnIndex);
 
-  //*** targetColumn = (targetColumn * coefficient) + sourceColumn
-  // base
-  // base comp: modifies all similar columns to target together, not only target
-  // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-  // ru: avoid calling with specialized options or make it such that it makes sense for persistence
-  // chain: avoid calling with specialized options or make it such that it makes sense for persistence
-  // id to pos
-  // pos to id
+  /**
+   * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
+   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * Is available for every matrix type, but should be used with care with non basic matrices, as they will be no
+   * verification to ensure that the additions makes sense for the meaning of the underlying object.
+   * For example, a right-to-left addition could corrupt the computation of the barcode or the representative cycles
+   * if done blindly.
+   *
+   * For basic matrices with column compression, the representatives are summed together, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Index_type Any signed or unsigned integer type.
+   * @param sourceColumnIndex MatIdx index of the column to add.
+   * @param coefficient Value to multiply.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
   template <typename Index_type>
-  std::enable_if_t<std::is_integral_v<Index_type>> multiply_target_and_add_to(Index_type sourceColumnIndex,
-                                                                              int coefficient,
-                                                                              Index_type targetColumnIndex);
-  // base
-  // base comp
-  template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range>> multiply_target_and_add_to(const Cell_range& sourceColumn,
+  std::enable_if_t<std::is_integral_v<Index_type> > multiply_target_and_add_to(Index_type sourceColumnIndex,
                                                                                int coefficient,
-                                                                               index targetColumnIndex);
+                                                                               Index_type targetColumnIndex);
+  /**
+   * @brief Multiplies the target column with the coefficiant and then adds the given range of @ref Cell to it.
+   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn. Only available for basic matrices.
+   *
+   * For basic matrices with column compression, the range is summed onto the representative, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
+   * stored in the cells, even if @ref has_row_access is true.
+   * @param sourceColumn Source cell range.
+   * @param coefficient Value to multiply.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
+  template <class Cell_range>
+  std::enable_if_t<!std::is_integral_v<Cell_range> > multiply_target_and_add_to(const Cell_range& sourceColumn,
+                                                                                int coefficient,
+                                                                                index targetColumnIndex);
 
-  //*** targetColumn += (coefficient * sourceColumn)
-  // base
-  // base comp: modifies all similar columns to target together, not only target
-  // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-  // ru: avoid calling with specialized options or make it such that it makes sense for persistence
-  // chain: avoid calling with specialized options or make it such that it makes sense for persistence
-  // id to pos
-  // pos to id
+  /**
+   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * Is available for every matrix type, but should be used with care with non basic matrices, as they will be no
+   * verification to ensure that the additions makes sense for the meaning of the underlying object.
+   * For example, a right-to-left addition could corrupt the computation of the barcode or the representative cycles
+   * if done blindly.
+   *
+   * For basic matrices with column compression, the representatives are summed together, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Index_type Any signed or unsigned integer type.
+   * @param coefficient Value to multiply.
+   * @param sourceColumnIndex MatIdx index of the column to add.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
   template <typename Index_type>
   std::enable_if_t<std::is_integral_v<Index_type>> multiply_source_and_add_to(int coefficient,
                                                                               Index_type sourceColumnIndex,
                                                                               Index_type targetColumnIndex);
-  // base
-  // base comp
+  /**
+   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * Only available for basic matrices.
+   *
+   * For basic matrices with column compression, the range is summed onto the representative, which means that
+   * all column compressed together with the target column are affected by the change, not only the target.
+   * 
+   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
+   * stored in the cells, even if @ref has_row_access is true.
+   * @param coefficient Value to multiply.
+   * @param sourceColumn Source cell range.
+   * @param targetColumnIndex MatIdx index of the target column.
+   */
   template <class Cell_range>
   std::enable_if_t<!std::is_integral_v<Cell_range>> multiply_source_and_add_to(int coefficient,
                                                                                const Cell_range& sourceColumn,
                                                                                index targetColumnIndex);
 
-  // base
-  // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-  // ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
-  // id to pos
+  /**
+   * @brief Zeroes the cell at the given coordinates. Not available for chain matrices and for base matrices with 
+   * column compression. In general, should be used with care with non basic matrices to not destroy the validity 
+   * of the persistence related properties of the matrix.
+   *
+   * For RU matrices, equivalent to `zero_cell(columnIndex, rowIndex, true)`.
+   * 
+   * @param columnIndex MatIdx index of the column of the cell.
+   * @param rowIndex Row index of the row of the cell.
+   */
   void zero_cell(index columnIndex, id_index rowIndex);
-  // ru
+  /**
+   * @brief Only available for RU matrices. Zeroes the cell at the given coordinates in R if @p inR is true or in
+   * U if @p inR is false. Should be used with care to not destroy the validity of the persistence related properties
+   * of the matrix.
+   * 
+   * @param columnIndex MatIdx index of the column of the cell.
+   * @param rowIndex Row index of the row of the cell.
+   * @param inR Boolean indicating in which matrix to zero: if true in R and if false in U.
+   */
   void zero_cell(index columnIndex, id_index rowIndex, bool inR);
-  // base
-  // boundary: avoid calling with pairing option or make it such that it makes sense for persistence
-  // ru: inR = true forced, avoid calling with specialized options or make it such that it makes sense for persistence
-  // id to pos
+  /**
+   * @brief Zeroes the column at the given index. Not available for chain matrices and for base matrices with 
+   * column compression. In general, should be used with care with non basic matrices to not destroy the validity 
+   * of the persistence related properties of the matrix.
+   *
+   * For RU matrices, equivalent to `zero_column(columnIndex, true)`.
+   * 
+   * @param columnIndex MatIdx index of the column to zero.
+   */
   void zero_column(index columnIndex);
-  // ru
+  /**
+   * @brief Only available for RU matrices. Zeroes the column at the given index in R if @p inR is true or in
+   * U if @p inR is false. Should be used with care to not destroy the validity of the persistence related properties
+   * of the matrix.
+   * 
+   * @param columnIndex MatIdx index of the column to zero.
+   * @param inR Boolean indicating in which matrix to zero: if true in R and if false in U.
+   */
   void zero_column(index columnIndex, bool inR);
-  // base
-  // base comp
-  // boundary
-  // ru: inR = true forced
-  // chain
-  // id to pos
-  // pos to id
+  /**
+   * @brief Indicates if the cell at given coordinates has value zero.
+   *
+   * For RU matrices, equivalent to `is_zero_cell(columnIndex, rowIndex, true)`.
+   * 
+   * @param columnIndex MatIdx index of the column of the cell.
+   * @param rowIndex Row index of the row of the cell.
+   * @return true If the cell has value zero.
+   * @return false Otherwise.
+   */
   bool is_zero_cell(index columnIndex, id_index rowIndex);
-  // ru
+  /**
+   * @brief Only available for RU matrices. Indicates if the cell at given coordinates has value zero in R if
+   * @p inR is true or in U if @p inR is false.
+   * 
+   * @param columnIndex MatIdx index of the column of the cell.
+   * @param rowIndex Row index of the row of the cell.
+   * @param inR Boolean indicating in which matrix to look: if true in R and if false in U.
+   * @return true If the cell has value zero.
+   * @return false Otherwise.
+   */
   bool is_zero_cell(index columnIndex, id_index rowIndex, bool inR) const;
-  // base
-  // base comp
-  // boundary
-  // ru: inR = true forced
-  // chain: just for sanity checks as a valid chain matrix never has an empty column.
-  // id to pos
-  // pos to id
+  /**
+   * @brief Indicates if the column at given index has value zero.
+   *
+   * For RU matrices, equivalent to `is_zero_column(columnIndex, true)`.
+   *
+   * Note that for chain matrices, this method should always return false, as a valid chain matrix never has
+   * empty columns.
+   * 
+   * @param columnIndex MatIdx index of the column.
+   * @return true If the column has value zero.
+   * @return false Otherwise.
+   */
   bool is_zero_column(index columnIndex);
-  // ru
+  /**
+   * @brief Only available for RU matrices. Indicates if the column at given index has value zero in R if
+   * @p inR is true or in U if @p inR is false.
+   *
+   * Note that if @p inR is false, this method should usually return false.
+   * 
+   * @param columnIndex MatIdx index of the column.
+   * @param inR Boolean indicating in which matrix to look: if true in R and if false in U.
+   * @return true If the column has value zero.
+   * @return false Otherwise.
+   */
   bool is_zero_column(index columnIndex, bool inR);
 
-  // ru: assumes that pivot exists
-  // chain: assumes that pivot exists
-  // id to pos
-  // pos to id
+  /**
+   * @brief Returns the MatIdx index of the column which has the given row index as pivot. Only available for 
+   * RU and chain matrices. Assumes that the pivot exists. For RU matrices, the column is returned from R.
+   *
+   * Recall that the row indices for chain matrices correspond to the IDIdx indices and that the row indices
+   * for a RU matrix correspond to the updated IDIdx indices which got potentially swapped by a vine swap.
+   * 
+   * @param faceIndex Row index of the pivot.
+   * @return MatIdx index of the column with the given pivot.
+   */
   index get_column_with_pivot(id_index faceIndex) const;
-  // boundary
-  // ru: only in R
-  // chain
-  // id to pos
-  // pos to id
+  /**
+   * @brief Returns the row index of the pivot of the given column. Only available for non basic matrices.
+   * 
+   * @param columnIndex MatIdx index of the column
+   * @return The row index of the pivot.
+   */
   id_index get_pivot(index columnIndex);
 
+  /**
+   * @brief Assign operator.
+   * 
+   * @param other Matrix to copy
+   * @return Reference to this object.
+   */
   Matrix& operator=(Matrix other);
+  /**
+   * @brief Swap operator for two matrices.
+   * 
+   * @param matrix1 First matrix to swap.
+   * @param matrix2 Second matrix to swap.
+   */
   friend void swap(Matrix& matrix1, Matrix& matrix2) { 
     swap(matrix1.matrix_, matrix2.matrix_);
     std::swap(matrix1.operators_, matrix2.operators_);
     std::swap(matrix1.cellPool_, matrix2.cellPool_);
-    // matrix1.matrix_.set_operators(&matrix1.operators_);
-    // matrix2.matrix_.set_operators(&matrix2.operators_);
   }
 
   void print();  // for debug
 
-  //***** access to optionnal methods
-
-  //*** Persistence diagram
-  // boundary
-  // ru: indirect through const version
-  // chain: indirect through const version
-  // id to pos
-  // pos to id: indirect
+  //TODO: change the behaviour for boundary matrices.
+  /**
+   * @brief Returns the current barcode of the matrix. Available only if @ref has_column_pairings is true.
+   *
+   * Recall that we assume that the boundaries were inserted in the order of filtration for the barcode to be valid.
+   *
+   * @warning For simple boundary matrices (only storing R), we assume that `get_current_barcode` is only called 
+   * once, when the matrix is completed.
+   * 
+   * @return A reference to the barcode. The barcode is a vector of @ref Bar. A bar stores three informations:
+   * the PosIdx birth index, the PosIdx death index and the dimension of the bar.
+   */
   const barcode_type& get_current_barcode();
-  // chain
-  // ru
-  // pos to id
+  /**
+   * @brief Returns the current barcode of the matrix. Available only if @ref has_column_pairings is true.
+   *
+   * Recall that we assume that the boundaries were inserted in the order of filtration for the barcode to be valid.
+   *
+   * @warning For simple boundary matrices (only storing R), we assume that `get_current_barcode` is only called 
+   * once, when the matrix is completed.
+   * 
+   * @return A reference to the barcode. The barcode is a vector of @ref Bar. A bar stores three informations:
+   * the PosIdx birth index, the PosIdx death index and the dimension of the bar.
+   */
   const barcode_type& get_current_barcode() const;
 
-  //*** swap/vine
-  // base
-  // boundary: does not update barcode
+  /**
+   * @brief Only available for base matrices without column compression and simple boundary matrices (only storing R)
+   * and if @ref has_column_and_row_swaps is true.
+   * Swaps the two given columns. Note for boundary matrices, that it really just swaps two columns and do not updates
+   * anything else, nor performs additions to maintain some properties on the matrix.
+   * 
+   * @param columnIndex1 First column MatIdx index to swap.
+   * @param columnIndex2 Second column MatIdx index to swap.
+   */
   void swap_columns(index columnIndex1, index columnIndex2);
-  // base
-  // boundary: does not update barcode
+  /**
+   * @brief Only available for base matrices without column compression and simple boundary matrices (only storing R)
+   * and if @ref has_column_and_row_swaps is true.
+   * Swaps the two given rows. Note for boundary matrices, that it really just swaps two rows and do not updates
+   * anything else, nor performs additions to maintain some properties on the matrix.
+   * 
+   * @param rowIndex1 First row index to swap.
+   * @param rowIndex2 Second row index to swap.
+   */
   void swap_rows(index rowIndex1, index rowIndex2);
+  //TODO: find better name. And benchmark also to verify if it is really worth it to have this extra version in addition
+  //to vine_swap.
+  /**
+   * @brief Only available if @ref has_vine_update is true and if it is either a bounary matrix or
+   * @ref column_indexation_type is set to @ref Column_indexation_types::POSITION.
+   * Does the same than @ref vine_swap, but assumes that the swap is non trivial and
+   * therefore skips a part of the case study.
+   * 
+   * @param index PosIdx index of the first face to swap. The second one has to be at (@p index + 1). Recall that
+   * for boundary matrices, PosIdx == MatIdx.
+   * @return true If the barcode changed from the swap.
+   * @return false Otherwise.
+   */
+  bool vine_swap_with_z_eq_1_case(pos_index index);
+  /**
+   * @brief Only available if @ref has_vine_update is true and if it is either a chain matrix or
+   * @ref column_indexation_type is set to @ref Column_indexation_types::IDENTIFIER.
+   * Does the same than @ref vine_swap, but assumes that the swap is non trivial and
+   * therefore skips a part of the case study.
+   * 
+   * @param columnIndex1 MatIdx index of the first face.
+   * @param columnIndex2 MatIdx index of the second face. It is assumed that the PosIdx of both only differs by one.
+   * @return Let pos1 be the PosIdx index of @p columnIndex1 and pos2 be the PosIdx index of @p columnIndex2.
+   * The method returns the MatIdx of the column which has now, after the swap, the PosIdx max(pos1, pos2).
+   */
+  index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);
   // ru: returns true if barcode was changed
   // pos to id
-  bool vine_swap_with_z_eq_1_case(pos_index index);  // by column position with ordered column container
-  // chain: returns index which was not modified, ie new i+1
-  // id to pos
-  index vine_swap_with_z_eq_1_case(index columnIndex1,
-                                   index columnIndex2);  // by column id with potentielly unordered column container
-  // ru: returns true if barcode was changed
-  // pos to id
-  bool vine_swap(pos_index index);  // by column position with ordered column container
+  /**
+   * @brief Only available if @ref has_vine_update is true and if it is either a bounary matrix or
+   * @ref column_indexation_type is set to @ref Column_indexation_types::POSITION.
+   * Does a vine swap between two faces which are consecutives in the filtration. Roughly, if F is the current
+   * filtration represented by the matrix, the method modifies the matrix such that the new state corresponds to 
+   * a valid state for the filtration F' equal to F but with the two faces at position @p index and @p index + 1
+   * swapped. Of course, the two faces should not have a face/coface relation which each other ; F' has to be a
+   * valid filtration.
+   * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
+   * 
+   * @param index 
+   * @return true 
+   * @return false 
+   */
+  bool vine_swap(pos_index index);
   // chain: returns index which was not modified, ie new i+1
   // id to pos
   index vine_swap(index columnIndex1, index columnIndex2);  // by column id with potentielly unordered column container
@@ -1106,14 +1372,14 @@ inline Matrix<Options>::~Matrix(){
 
 template <class Options>
 inline void Matrix<Options>::set_characteristic(characteristic_type characteristic){
-  static_assert(!Options::is_z2, "The characteristic is definitely set to 2.");
+  if constexpr (!Options::is_z2){
+    if (operators_->get_characteristic() != 0) {
+      std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
+                  "as the modulo was already applied to values in existing columns.";
+    }
 
-  if (operators_->get_characteristic() != 0) {
-    std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
-                 "as the modulo was already applied to values in existing columns.";
+    operators_->set_characteristic(characteristic);
   }
-
-  operators_->set_characteristic(characteristic);
 }
 
 template <class Options>
@@ -1235,7 +1501,7 @@ inline void Matrix<Options>::remove_maximal_face(index columnIndex) {
 }
 
 template <class Options>
-inline void Matrix<Options>::remove_maximal_face(id_index faceIndex, const std::vector<index>& columnsToSwap) {
+inline void Matrix<Options>::remove_maximal_face(id_index faceIndex, const std::vector<id_index>& columnsToSwap) {
   static_assert(Options::has_removable_columns, 
                 "'remove_maximal_face(id_index,const std::vector<index>&)' is not available for the chosen options.");
   static_assert(isNonBasic && !Options::is_of_boundary_type, 
@@ -1252,8 +1518,9 @@ inline void Matrix<Options>::remove_last() {
                 "'remove_last' is not available for the chosen options.");
   static_assert(!Options::has_column_compression || isNonBasic,
                 "'remove_last' is not available for the chosen options.");
-  static_assert(Options::is_of_boundary_type || Options::has_map_column_container || !Options::has_vine_update,
-                "'remove_last' is not available for the chosen options.");
+  static_assert(
+      !isNonBasic || Options::is_of_boundary_type || Options::has_map_column_container || !Options::has_vine_update,
+      "'remove_last' is not available for the chosen options.");
 
   matrix_.remove_last();
 }
