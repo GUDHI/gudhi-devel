@@ -11,10 +11,14 @@
 #ifndef RANDOM_GRAPH_GENERATORS_H_
 #define RANDOM_GRAPH_GENERATORS_H_
 
+#include <gudhi/Simplex_tree.h>
+
+
 #include <algorithm>  // for std::prev_permutation
 #include <vector>
-#include <utility>  // for std::pair
+#include <array>
 #include <random>
+#include <numeric>  // for std::iota
 #ifdef DEBUG_TRACES
 #include <iostream>
 #endif  // DEBUG_TRACES
@@ -24,8 +28,8 @@ std::random_device rd;
 namespace Gudhi {
 
 template <typename Vertex_handle>
-std::vector<std::pair<Vertex_handle, Vertex_handle>> random_edges(Vertex_handle nb_vertices, double density = 0.15) {
-  std::vector<std::pair<Vertex_handle, Vertex_handle>> permutations;
+std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices, double density = 0.15) {
+  std::vector<std::array<Vertex_handle, 2>> permutations;
   if (nb_vertices < 2)
     return permutations;
 
@@ -40,13 +44,13 @@ std::vector<std::pair<Vertex_handle, Vertex_handle>> random_edges(Vertex_handle 
     if (unif(rand_engine) > density)
       continue;
 
-    std::pair<Vertex_handle, Vertex_handle> permutation = {-1, -1};
+    std::array<Vertex_handle, 2> permutation = {-1, -1};
     for (Vertex_handle idx = 0; idx < nb_vertices; ++idx) {
       if (to_permute[idx]) {
-        if (permutation.first == -1) {
-          permutation.first = idx;
+        if (permutation[0] == -1) {
+          permutation[0] = idx;
         } else {
-          permutation.second = idx;
+          permutation[1] = idx;
           // No need to go further, only 2 'true' values
           break;
         }
@@ -60,6 +64,25 @@ std::vector<std::pair<Vertex_handle, Vertex_handle>> random_edges(Vertex_handle 
   } while (std::prev_permutation(to_permute.begin(), to_permute.end()));
 
   return permutations;
+}
+
+template<typename Simplex_tree>
+void simplex_tree_random_flag_complex(
+    Simplex_tree& st,
+    typename Simplex_tree::Vertex_handle nb_vertices,
+    double density = 0.15) {
+  using Vertex_handle = typename Simplex_tree::Vertex_handle;
+  std::vector<Vertex_handle> vertices(nb_vertices);
+  std::iota(vertices.begin(), vertices.end(), 0); // vertices is { 0, 1, 2, ..., 99 } when nb_vertices is 100
+  st.insert_batch_vertices(vertices);
+
+  std::uniform_real_distribution<double> unif(0., 1.);
+  std::mt19937 rand_engine(rd());
+
+  for (auto edge : random_edges(nb_vertices, density)) {
+    st.insert_simplex(edge, unif(rand_engine));
+  }
+
 }
 
 }  // namespace Gudhi
