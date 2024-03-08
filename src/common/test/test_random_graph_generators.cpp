@@ -70,18 +70,20 @@ BOOST_AUTO_TEST_CASE( simplex_tree_random_flag_complex_test ) {
   // Insert 100% of the possible edges, with 10 vertices
   simplex_tree_random_flag_complex(stree, 10, 1.);
 
-  std::cout << "Random flag complex with " << stree.num_vertices() << " vertices and " << stree.num_simplices() << std::endl;
+  std::cout << "Random flag complex with " << stree.num_vertices() << " vertices and " << stree.num_simplices() <<
+               " simplices" << std::endl;
   BOOST_CHECK(stree.num_vertices() == 10);
   BOOST_CHECK(stree.num_simplices() == 55);
 }
 
-BOOST_AUTO_TEST_CASE( pouet ) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( pouet )" << std::endl;
+BOOST_AUTO_TEST_CASE( simplex_tree_random_flag_complex_test_1000 ) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( simplex_tree_random_flag_complex_test_1000 )" << std::endl;
   Gudhi::Simplex_tree<> stree;
-  // Insert 100% of the possible edges, with 10 vertices
+  // Insert 15% of the possible edges, with 1000 vertices
   simplex_tree_random_flag_complex(stree, 1000);
 
-  std::cout << "Random flag complex with " << stree.num_vertices() << " vertices and " << stree.num_simplices() << std::endl;
+  std::cout << "Random flag complex with " << stree.num_vertices() << " vertices and " << stree.num_simplices() <<
+               " simplices" << std::endl;
 
   // 15 % of 499500 = 74925
   // 74925 +/- 5% = [71178.75, 78671.25]
