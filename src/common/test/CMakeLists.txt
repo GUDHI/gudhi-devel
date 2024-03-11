@@ -6,6 +6,9 @@ add_executable ( Common_test_points_off_reader test_points_off_reader.cpp )
 add_executable ( Common_test_distance_matrix_reader test_distance_matrix_reader.cpp )
 add_executable ( Common_test_persistence_intervals_reader test_persistence_intervals_reader.cpp )
 add_executable ( Common_test_random_test_generators test_random_graph_generators.cpp )
+if(TARGET TBB::tbb)
+  target_link_libraries(Common_test_random_test_generators TBB::tbb)
+endif()
 
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
