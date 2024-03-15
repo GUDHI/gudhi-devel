@@ -7,6 +7,9 @@ Below is a list of changes made since GUDHI 3.9.0:
 - [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
      - Rips complex persistence scikit-learn like interface
 
+- Installation
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
+
 - [Module](link)
      - **...**
 
