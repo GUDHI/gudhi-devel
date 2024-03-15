@@ -118,13 +118,13 @@ def test_atol_doc():
     b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     c = np.array([[3, 2, -1], [1, 2, -1]])
 
-    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init=10))
     # Atol will do
     # X = np.concatenate([a,b,c])
-    # kmeans = KMeans(n_clusters=2, random_state=202006).fit(X) 
+    # kmeans = KMeans(n_clusters=2, random_state=202006, n_init=10).fit(X)
     # kmeans.labels_ will be : array([1, 0, 1, 0, 0, 1, 0, 0])
     first_cluster = np.asarray([a[0], a[2], b[2]])
-    second_cluster = np.asarray([a[1], b[0], b[2], c[0], c[1]])
+    second_cluster = np.asarray([a[1], b[0], b[1], c[0], c[1]])
 
     # Check the center of the first_cluster and second_cluster are in Atol centers
     centers = atol_vectoriser.fit(X=[a, b, c]).centers
@@ -132,9 +132,9 @@ def test_atol_doc():
     np.isclose(centers, second_cluster.mean(axis=0)).all(1).any() 
 
     vectorization = atol_vectoriser.transform(X=[a, b, c])
-    assert np.allclose(vectorization[0], atol_vectoriser(a))
-    assert np.allclose(vectorization[1], atol_vectoriser(b))
-    assert np.allclose(vectorization[2], atol_vectoriser(c))
+    assert np.allclose(vectorization[0], atol_vectoriser._transform(a))
+    assert np.allclose(vectorization[1], atol_vectoriser._transform(b))
+    assert np.allclose(vectorization[2], atol_vectoriser._transform(c))
 
 
 def test_dummy_atol():
@@ -145,12 +145,12 @@ def test_dummy_atol():
     for weighting_method in ["cloud", "iidproba"]:
         for contrast in ["gaussian", "laplacian", "indicator"]:
             atol_vectoriser = Atol(
-                quantiser=KMeans(n_clusters=1, random_state=202006),
+                quantiser=KMeans(n_clusters=1, random_state=202006, n_init=10),
                 weighting_method=weighting_method,
                 contrast=contrast,
             )
             atol_vectoriser.fit([a, b, c])
-            atol_vectoriser(a)
+            atol_vectoriser._transform(a)
             atol_vectoriser.transform(X=[a, b, c])
 
 

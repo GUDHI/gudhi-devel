@@ -15,6 +15,8 @@ from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.metrics       import pairwise
+from sklearn.cluster import KMeans
+
 try:
     # New location since 1.0
     from sklearn.metrics     import DistanceMetric
@@ -719,13 +721,13 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
     >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     >>> c = np.array([[3, 2, -1], [1, 2, -1]])
-    >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init=10))
     >>> atol_vectoriser.fit(X=[a, b, c]).centers
     array([[ 2.6       ,  2.8       , -0.4       ],
            [ 2.        ,  0.66666667,  3.33333333]])
-    >>> atol_vectoriser(a)
+    >>> atol_vectoriser._transform(a)
     array([0.42375966, 1.18168665])
-    >>> atol_vectoriser(c)
+    >>> atol_vectoriser._transform(c)
     array([1.25157463, 0.02062512])
     >>> atol_vectoriser.transform(X=[a, b, c])
     array([[0.42375966, 1.18168665],
@@ -733,7 +735,12 @@ class Atol(BaseEstimator, TransformerMixin):
            [1.25157463, 0.02062512]])
     """
     # Note the example above must be up to date with the one in tests called test_atol_doc
-    def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
+    def __init__(
+            self,
+            quantiser=KMeans(n_clusters=2, random_state=202312, n_init=10),
+            weighting_method="cloud",
+            contrast="gaussian"
+    ):
         """
         Constructor for the Atol measure vectorisation class.
 
@@ -751,6 +758,7 @@ class Atol(BaseEstimator, TransformerMixin):
         self.quantiser = quantiser
         self.contrast = contrast
         self.weighting_method = weighting_method
+        self._running_transform_names = ""
 
     def get_contrast(self):
         return {
@@ -790,7 +798,9 @@ class Atol(BaseEstimator, TransformerMixin):
 
         measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
+
         self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
+
         self.centers = self.quantiser.cluster_centers_
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
@@ -805,7 +815,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.min(dist_centers, axis=0)/2
         return self
 
-    def __call__(self, measure, sample_weight=None):
+    def _transform(self, measure, sample_weight=None):
         """
         Apply measure vectorisation on a single measure. Only available after `fit` has been called.
 
@@ -834,4 +844,8 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
-        return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+        self._running_transform_names = [f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)]
+        return np.stack([self._transform(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+
+    def get_feature_names_out(self):
+        return self._running_transform_names
