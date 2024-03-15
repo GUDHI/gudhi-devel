@@ -11,6 +11,12 @@ if(TARGET TBB::tbb)
 endif()
 gudhi_add_boost_test(Simplex_tree_test_unit)
 
+add_executable ( Simplex_tree_multi_test_unit simplex_tree_multi_unit_test.cpp )
+if(TARGET TBB::tbb)
+  target_link_libraries(Simplex_tree_multi_test_unit TBB::tbb)
+endif()
+gudhi_add_boost_test(Simplex_tree_multi_test_unit)
+
 add_executable ( Simplex_tree_remove_test_unit simplex_tree_remove_unit_test.cpp )
 if(TARGET TBB::tbb)
   target_link_libraries(Simplex_tree_remove_test_unit TBB::tbb)
