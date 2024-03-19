@@ -104,7 +104,7 @@ class Exact_delaunay_complex_dD final : public Abstract_delaunay_complex {
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value, bool assign_meb_filtration) override {
-    if ((assign_meb_filtration == false) || (default_filtration_value == false)) {
+    if (assign_meb_filtration == false) {
       // return the Alpha complex, also a shortcut for the Delaunay complex
       return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square,
                                               exact_version_, default_filtration_value);
@@ -113,11 +113,12 @@ class Exact_delaunay_complex_dD final : public Abstract_delaunay_complex {
       bool result = delaunay_complex_.create_complex(*simplex_tree,
                                        std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
                                        exact_version_,
-                                       false);
-      if (result == true)
+                                       true);
+      if ((result == true) && (default_filtration_value == false)) {
         // Construct the Delaunay-Cech complex by assigning filtration values with MEB
         Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
                                                    delaunay_complex_.get_point_cloud());
+      }
       return result;
     }
   }
@@ -154,7 +155,7 @@ class Inexact_delaunay_complex_dD final : public Abstract_delaunay_complex {
   }
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    bool default_filtration_value, bool assign_meb_filtration) override {
-    if ((assign_meb_filtration == false) || (default_filtration_value == false)) {
+    if (assign_meb_filtration == false) {
       // return the Alpha complex, also a shortcut for the Delaunay complex
       return delaunay_complex_.create_complex(*simplex_tree, max_alpha_square,
                                               false, default_filtration_value);
@@ -162,8 +163,8 @@ class Inexact_delaunay_complex_dD final : public Abstract_delaunay_complex {
       // Construct the Delaunay complex
       bool result = delaunay_complex_.create_complex(*simplex_tree,
                                        std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
-                                       false, false);
-      if (result == true) {
+                                       false, true);
+      if ((result == true) && (default_filtration_value == false)) {
         if constexpr(Weighted) {
           // Construct the Delaunay-Cech complex by assigning filtration values with MEB
           Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
