@@ -61,13 +61,13 @@ cdef class DelaunayCechComplex:
         :param points: A list of points in d-Dimension.
         :type points: Iterable[Iterable[float]]
 
-        :param precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :param precision: Delaunay Cech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         :type precision: string
         """
 
     # The real cython constructor
     def __cinit__(self, points = [], precision = 'safe'):
-        assert precision in ['fast', 'safe', 'exact'], "Alpha complex precision can only be 'fast', 'safe' or 'exact'"
+        assert precision in ['fast', 'safe', 'exact'], "Delaunay Cech complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 

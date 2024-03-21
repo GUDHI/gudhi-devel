@@ -5,6 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2024/03 Vincent Rouvreau: Renamed Alpha_complex_interface as Delaunay_complex_interface for DelaunayCechComplex.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -17,9 +18,7 @@
 
 #include "Simplex_tree_interface.h"
 
-#include <iostream>
 #include <vector>
-#include <string>
 #include <memory>  // for std::unique_ptr
 
 namespace Gudhi {
