@@ -70,12 +70,12 @@ void construct_incremental_delaunay(K const&k, SimplicialComplex& complex, Point
       if(tri.current_dimension() == 1) {
 	if(lt == Triangulation::OUTSIDE_CONVEX_HULL) {
 	  // only an infinite face disappears
-	  /* tri.insert_outside_convex_hull_1(p, s)->data() = idx; */ // undocumented
-          tri.insert(p, lt, f, ft, s)->data() = idx;
 	} else {
 	  complex.insert_simplex_and_subfaces({s->vertex(0)->data(), s->vertex(1)->data(), idx});
-          tri.insert_in_full_cell(p, s)->data() = idx;
-	}
+        }
+        typename Triangulation::Vertex_handle v = tri.tds().insert_in_full_cell(s);
+        v->set_point(p);
+        v->data() = idx;
       } else { // main case
         // Adapted from Delaunay_triangulation::insert_in_conflicting_cell(Point,Full_cell_handle)
 	/* Full_cell_h_vector cs; */ cs.clear();
