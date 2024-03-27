@@ -51,8 +51,8 @@ struct Column_mini_matrix
 	using Option_list = Options;
 	using Field_operators = typename Options::field_coeff_operators;
 	using index = typename Options::index_type;
-	using id_index = typename Options::id_type;
-	using pos_index = typename Options::pos_type;
+	using id_index = typename Options::index_type;
+	using pos_index = typename Options::index_type;
 	using dimension_type = typename Options::dimension_type;
 	using element_type = typename std::conditional<Options::is_z2, bool, typename Field_operators::element_type>::type;
 
@@ -153,9 +153,7 @@ struct Column_mini_matrix
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Base_col_options{
 	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = true;	//exists just for the tests
@@ -172,9 +170,7 @@ struct Base_col_options{
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Boundary_col_options{
 	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = false;	//exists just for the tests
@@ -191,9 +187,7 @@ struct Boundary_col_options{
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Chain_col_options{
 	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_basic = false;	//exists just for the tests

@@ -24,9 +24,7 @@ using Zp = Gudhi::persistence_matrix::Zp_field_operators<> ;
 template<bool is_z2_only, Column_types col_type, bool rem_col, bool swaps>
 struct Base_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -53,9 +51,7 @@ struct Base_options{
 template<bool is_z2_only, Column_types col_type, bool rem_row, bool intr_row, bool rem_col, bool swaps>
 struct Base_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -82,9 +78,7 @@ struct Base_options_with_row_access{
 template<bool is_z2_only, Column_types col_type>
 struct Column_compression_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -111,9 +105,7 @@ struct Column_compression_options{
 template<bool is_z2_only, Column_types col_type, bool rem_row, bool intr_row>
 struct Column_compression_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -139,9 +131,7 @@ struct Column_compression_options_with_row_access{
 template<bool is_z2_only, Column_types col_type, bool rem_col, bool swaps, bool pos_idx>
 struct Boundary_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -168,9 +158,7 @@ struct Boundary_options{
 template<bool is_z2_only, Column_types col_type, bool rem_row, bool intr_row, bool rem_col, bool swaps, bool pos_idx>
 struct Boundary_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -197,9 +185,7 @@ struct Boundary_options_with_row_access{
 template<Column_types col_type, bool rep, bool rem_col, bool pos_idx, bool dim, bool barcode>
 struct RU_vine_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = true;
@@ -228,9 +214,7 @@ struct RU_vine_options{
 template<bool is_z2_only, Column_types col_type, bool rem_col, bool pos_idx, bool dim, bool barcode>
 struct RU_rep_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -259,9 +243,7 @@ struct RU_rep_options{
 template<Column_types col_type, bool rep, bool rem_row, bool intr_row, bool rem_col, bool pos_idx, bool dim, bool barcode>
 struct RU_vine_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = true;
@@ -290,9 +272,7 @@ struct RU_vine_options_with_row_access{
 template<bool is_z2_only, Column_types col_type, bool rem_row, bool intr_row, bool rem_col, bool pos_idx, bool dim, bool barcode>
 struct RU_rep_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -321,9 +301,7 @@ struct RU_rep_options_with_row_access{
 template<bool is_z2_only, Column_types col_type, bool rem_col, bool pos_idx, bool dim>
 struct Chain_barcode_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -352,9 +330,7 @@ struct Chain_barcode_options{
 template<Column_types col_type, bool rep, bool barcode, bool rem_col, bool pos_idx, bool dim>
 struct Chain_vine_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = true;
@@ -383,9 +359,7 @@ struct Chain_vine_options{
 template<bool is_z2_only, Column_types col_type, bool barcode, bool rem_col, bool pos_idx, bool dim>
 struct Chain_rep_options{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -414,9 +388,7 @@ struct Chain_rep_options{
 template<bool is_z2_only, Column_types col_type, bool rem_row, bool intr_row, bool rem_col, bool pos_idx, bool dim>
 struct Chain_barcode_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
@@ -445,9 +417,7 @@ struct Chain_barcode_options_with_row_access{
 template<Column_types col_type, bool rep, bool barcode, bool rem_row, bool intr_row, bool rem_col, bool pos_idx, bool dim>
 struct Chain_vine_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = true;
@@ -476,9 +446,7 @@ struct Chain_vine_options_with_row_access{
 template<bool is_z2_only, Column_types col_type, bool barcode, bool rem_row, bool intr_row, bool rem_col, bool pos_idx, bool dim>
 struct Chain_rep_options_with_row_access{
 	using field_coeff_operators = Zp;
-	using id_type = unsigned int;
-	using index_type = id_type;
-	using pos_type = id_type;
+	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
 	static const bool is_z2 = is_z2_only;
