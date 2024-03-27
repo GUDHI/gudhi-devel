@@ -450,7 +450,7 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(index currentIndex)
 
 	if constexpr (!Master_matrix::Option_list::has_map_column_container){
 		while (pivotToColumnIndex_.size() <= currentIndex)
-			pivotToColumnIndex_.resize(pivotToColumnIndex_.size()*2, -1);
+			pivotToColumnIndex_.resize((pivotToColumnIndex_.size() + 1) * 2, -1);
 	}
 	
 	_reduce_last_column(currentIndex);
