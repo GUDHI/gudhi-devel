@@ -8,6 +8,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+/**
+ * @file PersistenceMatrixOptions.h
+ * @author Hannah Schreiber
+ * @brief Contains the concept for the matrix options.
+ */
+
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -22,7 +28,7 @@ struct PersistenceMatrixOptions {
    * @brief Field operators. Has to follow the @ref [TODO: concept] concept.
    * The type will not be used if @ref is_z2 is set to true, so it can be set to anything.
    */
-  using field_coeff_operators = unspecified;
+  using Field_coeff_operators = unspecified;
   /**
    * @brief Type for the dimension. Has to be an integer type.
    * If unsigned, the maximal value of the type should not be attained during a run.
@@ -38,7 +44,7 @@ struct PersistenceMatrixOptions {
   /**
    * @brief If true, indicates that the values contained in the matrix are in \f$ Z_2 \f$ and can therefore
    * be treated like booleans. If set to false, the values are assumed to be in the field \f$ Z_p \f$ for
-   * some prime \f$ p \f$ given by @ref field_coeff_operators. It is highly recommended to set the variable to true,
+   * some prime \f$ p \f$ given by @ref Field_coeff_operators. It is highly recommended to set the variable to true,
    * if \f$ p = 2 \f$.
    */
   static const bool is_z2;
@@ -98,8 +104,8 @@ struct PersistenceMatrixOptions {
   static const bool has_row_access;
   /**
    * @brief Only enabled if @ref has_row_access is true, ignored otherwise.
-   * If set to true, the underlying container representing a row is an boost::intrusive::list.
-   * If set to false, the container is a std::set. It is usually recommended to set it to true.
+   * If set to true, the underlying container representing a row is an boost::intrusive::list<Cell>.
+   * If set to false, the container is a std::set<Cell>. It is usually recommended to set it to true.
    */
   static const bool has_intrusive_rows;
   /**

@@ -57,6 +57,9 @@ public:
 	index get_column_index() const{
 		return columnIndex_;
 	};
+	void set_column_index(index columnIndex){
+		columnIndex_ = columnIndex;
+	}
 
 	Cell_column_index& operator=(Cell_column_index other){
 		std::swap(columnIndex_, other.columnIndex_);

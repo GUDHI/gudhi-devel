@@ -286,6 +286,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
 	static_assert(Master_matrix::Option_list::has_removable_columns,
 			"'remove_last' is not implemented for the chosen options.");
 
+	if (nextEventIndex_ == 0) return;	//empty matrix
 	--nextEventIndex_;
 
 	//assumes PosIdx == MatIdx for boundary matrices.

@@ -71,7 +71,7 @@ public:
 	//****************
 	//only for base and boundary
 	template<class Map_type>
-	void reorder(const Map_type& valueMap);	//used for lazy row swaps
+	void reorder(const Map_type& valueMap, [[maybe_unused]] index columnIndex = -1);	//used for lazy row swaps
 	void clear();
 	void clear(id_index rowIndex);
 	//****************
@@ -429,7 +429,7 @@ inline std::size_t Intrusive_set_column<Master_matrix,Cell_constructor>::size() 
 
 template<class Master_matrix, class Cell_constructor>
 template<class Map_type>
-inline void Intrusive_set_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap)
+inline void Intrusive_set_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap, [[maybe_unused]] index columnIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");
@@ -438,7 +438,7 @@ inline void Intrusive_set_column<Master_matrix,Cell_constructor>::reorder(const 
 
 	if constexpr (Master_matrix::Option_list::has_row_access) {
 		for (auto it = column_.begin(); it != column_.end(); ) {
-			Cell *new_cell = cellPool_->construct(ra_opt::columnIndex_, valueMap.at(it->get_row_index()));
+			Cell *new_cell = cellPool_->construct(columnIndex == static_cast<index>(-1) ? ra_opt::columnIndex_ : columnIndex, valueMap.at(it->get_row_index()));
 			if constexpr (!Master_matrix::Option_list::is_z2){
 				new_cell->set_element(it->get_element());
 			}

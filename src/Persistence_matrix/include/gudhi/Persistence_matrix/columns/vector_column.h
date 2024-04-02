@@ -68,7 +68,7 @@ public:
 	//****************
 	//only for base and boundary
 	template<class Map_type>
-	void reorder(const Map_type& valueMap);	//used for lazy row swaps
+	void reorder(const Map_type& valueMap, [[maybe_unused]] index columnIndex = -1);	//used for lazy row swaps
 	void clear();
 	void clear(id_index rowIndex);				//do not clear a cell to 0 if the cell was already 0, otherwise size/is_empty will be wrong.
 	//****************
@@ -464,14 +464,17 @@ inline std::size_t Vector_column<Master_matrix,Cell_constructor>::size() const{
 
 template<class Master_matrix, class Cell_constructor>
 template<class Map_type>
-inline void Vector_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap)
+inline void Vector_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap, [[maybe_unused]] index columnIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");
 
 	if (erasedValues_.empty()){		//to avoid useless push_backs.
 		for (Cell* cell : column_) {
-			if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(cell);
+			if constexpr (Master_matrix::Option_list::has_row_access) {
+				ra_opt::unlink(cell);
+				if (columnIndex != static_cast<index>(-1)) cell->set_column_index(columnIndex);
+			}
 			cell->set_row_index(valueMap.at(cell->get_row_index()));
 			if constexpr (Master_matrix::Option_list::has_intrusive_rows && Master_matrix::Option_list::has_row_access) 
 				ra_opt::insert_cell(cell->get_row_index(), cell);
@@ -489,7 +492,10 @@ inline void Vector_column<Master_matrix,Cell_constructor>::reorder(const Map_typ
 		Column_type newColumn;
 		for (Cell* cell : column_) {
 			if (erasedValues_.find(cell->get_row_index()) == erasedValues_.end()){
-				if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(cell);
+				if constexpr (Master_matrix::Option_list::has_row_access) {
+					ra_opt::unlink(cell);
+					if (columnIndex != static_cast<index>(-1)) cell->set_column_index(columnIndex);
+				}
 				cell->set_row_index(valueMap.at(cell->get_row_index()));
 				newColumn.push_back(cell);
 				if constexpr (Master_matrix::Option_list::has_intrusive_rows && Master_matrix::Option_list::has_row_access) 

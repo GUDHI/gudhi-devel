@@ -1047,9 +1047,11 @@ void test_column_removal(){
 		test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++)));
 	}
 
-	m.insert_column(witness_content<typename Matrix::Column_type>{}, 2);
-	BOOST_CHECK_NO_THROW(m.get_column(2));
-	BOOST_CHECK_THROW(m.get_column(4), std::logic_error);
+	if constexpr (!Matrix::Option_list::has_row_access){
+		m.insert_column(witness_content<typename Matrix::Column_type>{}, 2);
+		BOOST_CHECK_NO_THROW(m.get_column(2));
+		BOOST_CHECK_THROW(m.get_column(4), std::logic_error);
+	}
 }
 
 	// //boundary: update barcode if already computed, does not verify if it really was maximal

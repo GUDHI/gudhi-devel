@@ -69,7 +69,7 @@ public:
 	//****************
 	//only for base and boundary
 	template<class Map_type>
-	void reorder(const Map_type& valueMap);	//used for lazy row swaps
+	void reorder(const Map_type& valueMap, [[maybe_unused]] index columnIndex = -1);	//used for lazy row swaps
 	void clear();
 	void clear(id_index rowIndex);
 	//****************
@@ -441,7 +441,7 @@ inline std::size_t Heap_column<Master_matrix,Cell_constructor>::size() const {
 
 template<class Master_matrix, class Cell_constructor>
 template<class Map_type>
-inline void Heap_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap)
+inline void Heap_column<Master_matrix,Cell_constructor>::reorder(const Map_type &valueMap, [[maybe_unused]] index columnIndex)
 {
 	static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type, 
 						"Method not available for chain columns.");

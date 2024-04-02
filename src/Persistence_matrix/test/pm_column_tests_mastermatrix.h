@@ -49,7 +49,7 @@ template<class Options>
 struct Column_mini_matrix
 {
 	using Option_list = Options;
-	using Field_operators = typename Options::field_coeff_operators;
+	using Field_operators = typename Options::Field_coeff_operators;
 	using index = typename Options::index_type;
 	using id_index = typename Options::index_type;
 	using pos_index = typename Options::index_type;
@@ -152,7 +152,7 @@ struct Column_mini_matrix
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Base_col_options{
-	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
+	using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
@@ -169,7 +169,7 @@ struct Base_col_options{
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Boundary_col_options{
-	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
+	using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
@@ -186,7 +186,7 @@ struct Boundary_col_options{
 
 template<bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Chain_col_options{
-	using field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
+	using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
 	using index_type = unsigned int;
 	using dimension_type = int;	//needs to be signed.
 
