@@ -18,8 +18,12 @@
 
 #include "Simplex_tree_interface.h"
 
+#include <CGAL/Epeck_d.h>
+#include <CGAL/Epick_d.h>
+
 #include <vector>
 #include <memory>  // for std::unique_ptr
+#include <cstddef>  // for std::size_t
 
 namespace Gudhi {
 
@@ -31,17 +35,43 @@ class Delaunay_complex_interface {
                              const std::vector<double>& weights,
                              bool fast_version, bool exact_version) {
     const bool weighted = (weights.size() > 0);
+    // Specific cases for dimensions 2 and 3
+    const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
     if (fast_version) {
       if (weighted) {
-        delaunay_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<true>>(points, weights);
+        if (dimension == 2) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, true>>(points, weights, exact_version);
+        } else if (dimension == 3) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, true>>(points, weights, exact_version);
+        } else {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, true>>(points, weights, exact_version);
+        }
       } else {
-        delaunay_ptr_ = std::make_unique<Inexact_delaunay_complex_dD<false>>(points);
+        if (dimension == 2) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
+        } else if (dimension == 3) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
+        } else {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, false>>(points, exact_version);
+        }
       }
     } else {
       if (weighted) {
-        delaunay_ptr_ = std::make_unique<Exact_delaunay_complex_dD<true>>(points, weights, exact_version);
+        if (dimension == 2) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, true>>(points, weights, exact_version);
+        } else if (dimension == 3) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, true>>(points, weights, exact_version);
+        } else {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, true>>(points, weights, exact_version);
+        }
       } else {
-        delaunay_ptr_ = std::make_unique<Exact_delaunay_complex_dD<false>>(points, exact_version);
+        if (dimension == 2) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
+        } else if (dimension == 3) {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
+        } else {
+          delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, false>>(points, exact_version);
+        }
       }
     }
   }
@@ -58,12 +88,12 @@ class Delaunay_complex_interface {
   }
 
   static void set_float_relative_precision(double precision) {
-    // cf. Exact_delaunay_complex_dD kernel type in Alpha_complex_factory.h
+    // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
     CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::set_relative_precision_of_to_double(precision);
   }
 
   static double get_float_relative_precision() {
-    // cf. Exact_delaunay_complex_dD kernel type in Alpha_complex_factory.h
+    // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
     return CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::get_relative_precision_of_to_double();
   }
 
