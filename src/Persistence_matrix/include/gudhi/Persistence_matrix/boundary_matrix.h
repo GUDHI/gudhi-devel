@@ -49,7 +49,7 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   using Field_operators = typename Master_matrix::Field_operators;
   using Field_element_type = typename Master_matrix::element_type;    /**< Type of an field element. */
   using Column_type = typename Master_matrix::Column_type;            /**< Column type. */
-  using boundary_type = typename Master_matrix::boundary_type;        /**< Type of the column container. */
+  using boundary_type = typename Master_matrix::boundary_type;        /**< Type of an input column. */
   using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
                                                                            only necessary with row access option. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */

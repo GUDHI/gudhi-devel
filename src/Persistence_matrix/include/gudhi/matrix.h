@@ -501,8 +501,10 @@ class Matrix {
   //If the matrix is a chain matrix, the insertion method returns the pivots of its unpaired columns used to reduce
   //the inserted boundary. Otherwise, void.
   using insertion_return_type =
-      typename std::conditional<PersistenceMatrixOptions::is_of_boundary_type || !isNonBasic,
-                                void,
+      typename std::conditional<PersistenceMatrixOptions::is_of_boundary_type || !isNonBasic ||
+                                    PersistenceMatrixOptions::column_indexation_type ==
+                                        Column_indexation_types::POSITION,
+                                void, 
                                 std::vector<cell_rep_type>
                                >::type;
 
@@ -688,6 +690,9 @@ class Matrix {
    * starting at 0. If it is not the case, use the other `insert_boundary` instead by indicating the face ID
    * used in the boundaries when the face is inserted.
    *
+   * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
+   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   *
    * The content of the new column will vary depending on the underlying type of the matrix (see [TODO: description]):
    * - If it is a basic matrix type, the boundary is copied as it is, i.e., the method is equivalent to 
    *   @ref insert_column.
@@ -735,6 +740,7 @@ class Matrix {
   /**
    * @brief Returns the column at the given MatIdx index. 
    * For RU matrices, is equivalent to `get_column(columnIndex, true)`.
+   * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
    * @param columnIndex MatIdx index of the column to return.
    * @return Reference to the column. Is `const` if the matrix has column compression.
@@ -742,6 +748,7 @@ class Matrix {
   returned_column_type& get_column(index columnIndex);
   /**
    * @brief Only available for chain matrices. Returns the column at the given MatIdx index.
+   * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
    * @param columnIndex MatIdx index of the column to return.
    * @return Const reference to the column.
@@ -752,6 +759,7 @@ class Matrix {
   /**
    * @brief Only available for RU matrices without @ref Column_indexation_types::IDENTIFIER indexing. 
    * Returns the column at the given MatIdx index in R if @p inR is true and in U if @p inR is false.
+   * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
    * @param columnIndex MatIdx index of the column to return.
    * @param inR If true, returns the column in R, if false, returns the column in U.
@@ -764,9 +772,6 @@ class Matrix {
    * @brief Only available if @ref has_row_access is true. Returns the row at the given row index, see [TODO: description].
    * For RU matrices, is equivalent to `get_row(columnIndex, true)`.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
-   * for boundary matrices and MatIdx indices for chain matrices.
    * 
    * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
    * if swaps occured, see [TODO: description].
@@ -777,9 +782,6 @@ class Matrix {
    * @brief Only available for chain matrices and matrices with column compression.
    * Returns the row at the given row index, see [TODO: description].
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
-   * for boundary matrices and MatIdx indices for chain matrices.
    * 
    * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
    * if swaps occured, see [TODO: description].
@@ -792,9 +794,6 @@ class Matrix {
    * @brief Only available for RU matrices without @ref Column_indexation_types::IDENTIFIER indexing. 
    * Returns the row at the given row index (see [TODO: description]) in R if @p inR is true and in U if @p inR is false.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
-   * for boundary matrices and MatIdx indices for chain matrices.
    * 
    * @param rowIndex Row index of the row to return: updated IDIdx if swaps occured, see [TODO: description].
    * @param inR If true, returns the row in R, if false, returns the row in U.
@@ -1470,7 +1469,8 @@ inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_b
 {
   assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
-  if constexpr (isNonBasic && !Options::is_of_boundary_type)
+  if constexpr (isNonBasic && !Options::is_of_boundary_type &&
+                Options::column_indexation_type == Column_indexation_types::CONTAINER)
     return matrix_.insert_boundary(boundary, dim);
   else
     matrix_.insert_boundary(boundary, dim);
@@ -1485,7 +1485,8 @@ inline typename Matrix<Options>::insertion_return_type Matrix<Options>::insert_b
   assert(operators_->get_characteristic() != 0 &&
          "Columns cannot be initialized if the coefficient field characteristic is not specified.");
   static_assert(isNonBasic, "Only enabled for non-basic matrices.");
-  if constexpr (!Options::is_of_boundary_type)
+  if constexpr (!Options::is_of_boundary_type &&
+                Options::column_indexation_type == Column_indexation_types::CONTAINER)
     return matrix_.insert_boundary(faceIndex, boundary, dim);
   else
     matrix_.insert_boundary(faceIndex, boundary, dim);

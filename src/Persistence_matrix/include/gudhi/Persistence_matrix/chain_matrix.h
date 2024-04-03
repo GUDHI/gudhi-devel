@@ -54,7 +54,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                                                            only necessary with row access option. */
   using Cell = typename Master_matrix::Cell_type;                     /**< Matrix cell type. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
-  using boundary_type = typename Master_matrix::boundary_type;        /**< Type of the column container. */
+  using boundary_type = typename Master_matrix::boundary_type;        /**< Type of an input column. */
   using cell_rep_type = typename Master_matrix::cell_rep_type;        /**< Cell content representative. */
   using index = typename Master_matrix::index;                        /**< MatIdx index type. */
   using id_index = typename Master_matrix::id_index;                  /**< IDIdx index type. */
