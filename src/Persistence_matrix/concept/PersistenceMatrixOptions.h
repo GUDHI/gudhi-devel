@@ -23,7 +23,8 @@ namespace persistence_matrix {
  * If you want to provide your own, it is recommended that you derive from it and override some parts instead of
  * writing a class from scratch.
  */
-struct PersistenceMatrixOptions {
+struct PersistenceMatrixOptions 
+{
   /**
    * @brief Field operators. Has to follow the @ref [TODO: concept] concept.
    * The type will not be used if @ref is_z2 is set to true, so it can be set to anything.

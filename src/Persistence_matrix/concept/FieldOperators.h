@@ -22,7 +22,8 @@ namespace persistence_matrix {
  * Implementations of this concept are @ref Zp_field_operators, @ref Z2_field_operators,
  * @ref Multi_field_operators and @ref Multi_field_small_operators.
  */
-struct FieldOperators {
+class FieldOperators 
+{
  public:
   using element_type = unspecified;         /**< Type for the elements in the field. */
   using characteristic_type = unspecified;  /**< Type for the field characteristic. */

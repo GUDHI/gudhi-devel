@@ -126,7 +126,7 @@ class Matrix {
   using index = typename PersistenceMatrixOptions::index_type;                 /**< Type of MatIdx index. */
   using id_index = typename PersistenceMatrixOptions::index_type;              /**< Type of IDIdx index. */
   using pos_index = typename PersistenceMatrixOptions::index_type;             /**< Type of PosIdx index. */
-  using dimension_type = typename PersistenceMatrixOptions::dimension_type;    /**< Type for dimension. */
+  using dimension_type = typename PersistenceMatrixOptions::dimension_type;    /**< Type for dimension value. */
 
   struct Dummy_field_operators{
     using element_type = unsigned int;
@@ -338,7 +338,8 @@ class Matrix {
 
   /**
    * @brief Type of the columns stored in the matrix. The type depends on the value of @ref column_type defined
-   * in the given options. See @ref Column_types for a more detailed description.
+   * in the given options. See @ref Column_types for a more detailed description. All columns follow the
+   * @ref PersistenceMatrixColumn concept.
    */
   using Column_type = typename std::conditional<
         PersistenceMatrixOptions::column_type == Column_types::HEAP, 
