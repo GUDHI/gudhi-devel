@@ -248,6 +248,9 @@ class PersistenceMatrixColumn :
    * @brief Zeros the cell at given row index.
    * 
    * Only useful for base and boundary matrices. Used in `zero_cell` and during vine swaps.
+   *
+   * @warning For @ref Vector_column, do not clear a cell that was already at zero or the results of @ref size and
+   * @ref is_empty will be wrong.
    * 
    * @param rowIndex Row index of the cell to zero.
    */
