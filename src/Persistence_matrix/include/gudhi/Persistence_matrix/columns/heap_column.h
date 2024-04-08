@@ -954,7 +954,10 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_add(const Cell_range&
 
   if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
 
-  return pivotVal == Field_operators::get_additive_identity();
+  if constexpr (Master_matrix::Option_list::is_z2)
+    return !pivotVal;
+  else 
+    return pivotVal == Field_operators::get_additive_identity();
 }
 
 template <class Master_matrix, class Cell_constructor>
@@ -1002,7 +1005,10 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
 
   if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
 
-  return pivotVal == Field_operators::get_additive_identity();
+  if constexpr (Master_matrix::Option_list::is_z2)
+    return !pivotVal;
+  else 
+    return pivotVal == Field_operators::get_additive_identity();
 }
 
 template <class Master_matrix, class Cell_constructor>
