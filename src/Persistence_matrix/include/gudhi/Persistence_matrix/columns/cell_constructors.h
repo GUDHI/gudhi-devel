@@ -66,7 +66,8 @@ struct New_cell_constructor
 /**
  * @ingroup persistence_matrix
  *
- * @brief @ref Cell factory. Uses @ref Simple_object_pool to construct and destroy cell pointer.
+ * @brief @ref Cell factory. Uses @ref Gudhi::Simple_object_pool, which is based on boost::object_pool,
+ * to construct and destroy cell pointer.
  * 
  * @tparam Cell @ref Cell with the right templates.
  */

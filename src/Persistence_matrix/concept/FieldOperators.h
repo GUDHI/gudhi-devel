@@ -22,8 +22,10 @@ namespace persistence_matrix {
  *
  * @brief Concept of the field operator classes needed for the class @ref Matrix.
  *
- * Implementations of this concept are @ref Gudhi::persistence_fields::Zp_field_operators, @ref Gudhi::persistence_fields::Z2_field_operators,
- * @ref Gudhi::persistence_fields::Multi_field_operators and @ref Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics.
+ * Implementations of this concept are @ref Gudhi::persistence_fields::Zp_field_operators,
+ * @ref Gudhi::persistence_fields::Z2_field_operators,
+ * @ref Gudhi::persistence_fields::Multi_field_operators and
+ * @ref Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics.
  */
 class FieldOperators 
 {
@@ -68,7 +70,7 @@ class FieldOperators
    * 
    * @param e1 First element.
    * @param e2 Second element.
-   * @return ( @p e1 + @p e2 ) % characteristic, such that the result is positive.
+   * @return `(e1 + e2) % characteristic`, such that the result is positive.
    */
   element_type add(element_type e1, element_type e2) const;
 
@@ -77,7 +79,7 @@ class FieldOperators
    * 
    * @param e1 First element.
    * @param e2 Second element.
-   * @return ( @p e1 - @p e2 ) % characteristic, such that the result is positive.
+   * @return `(e1 - e2) % characteristic`, such that the result is positive.
    */
   element_type substract(element_type e1, element_type e2) const;
 
@@ -86,7 +88,7 @@ class FieldOperators
    * 
    * @param e1 First element.
    * @param e2 Second element.
-   * @return ( @p e1 * @p e2 ) % characteristic, such that the result is positive.
+   * @return `(e1 * e2) % characteristic`, such that the result is positive.
    */
   element_type multiply(element_type e1, element_type e2) const;
 
@@ -96,7 +98,7 @@ class FieldOperators
    * @param e First element.
    * @param m Second element.
    * @param a Third element.
-   * @return ( @p e * @p m + @p a ) % characteristic, such that the result is positive.
+   * @return `(e * m + a) % characteristic`, such that the result is positive.
    */
   element_type multiply_and_add(element_type e, element_type m, element_type a) const;
 
@@ -107,7 +109,7 @@ class FieldOperators
    * @param e First element.
    * @param m Second element.
    * @param a Third element.
-   * @return ( ( @p e + @p a ) * @p m ) % characteristic, such that the result is positive.
+   * @return `((e + a) * m) % characteristic`, such that the result is positive.
    */
   element_type add_and_multiply(element_type e, element_type a, element_type m) const;
 
@@ -116,7 +118,7 @@ class FieldOperators
    * 
    * @param e1 First element to compare.
    * @param e2 Second element to compare.
-   * @return true If @p e1 % characteristic == @p e2 % characteristic.
+   * @return true If `e1 % characteristic == e2 % characteristic`.
    * @return false Otherwise.
    */
   bool are_equal(element_type e1, element_type e2) const;
@@ -125,13 +127,13 @@ class FieldOperators
    * @brief Returns the inverse of the given element in the field.
    * 
    * @param e Element to get the inverse from.
-   * @return Inverse in the current field of @p e % characteristic.
+   * @return Inverse in the current field of `e % characteristic`.
    */
   element_type get_inverse(element_type e) const;
   /**
    * @brief In the case the field is a multi-field, returns the inverse of the given element in the fields
    * corresponding to the given sub-product of the product of all characteristics in the multi-field.
-   * See [TODO: cite multi field paper] for more details.
+   * See @cite boissonnat:hal-00922572 for more details.
    * If the field is a usual field, simply returns the inverse in the field.
    * 
    * @param e Element to get the inverse from.
@@ -156,7 +158,7 @@ class FieldOperators
   static constexpr element_type get_multiplicative_identity();
   /**
    * @brief For multi-fields, returns the partial multiplicative identity of the field from the given product.
-   * See [TODO: cite multi field paper] for more details.
+   * See @cite boissonnat:hal-00922572 for more details.
    * Otherwise, simply returns the multiplicative identity of the field.
    *  
    * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.

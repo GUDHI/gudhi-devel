@@ -31,7 +31,7 @@ namespace persistence_matrix {
 struct PersistenceMatrixOptions 
 {
   /**
-   * @brief Field operators. Has to follow the @ref [TODO: concept] concept.
+   * @brief Field operators. Has to follow the @ref FieldOperators concept.
    * The type will not be used if @ref is_z2 is set to true, so it can be set to anything.
    */
   using Field_coeff_operators = unspecified;
@@ -60,30 +60,30 @@ struct PersistenceMatrixOptions
   static const Column_types column_type;
   /**
    * @brief Specifies the desired indexation scheme to access the methods of the matrix.
-   * See [TODO: ref to introduction] and @ref Column_indexation_types for more details about the meaning
+   * See @ref mp_indexation "matrix description" and @ref Column_indexation_types for more details about the meaning
    * of the indexation types.
    */
   static const Column_indexation_types column_indexation_type;
 
   /**
-   * @brief Only enabled for @ref basematrix "base matrices" (i.e., none of the following is true: @ref has_column_pairings,
-   * @ref has_vine_update, @ref can_retrieve_representative_cycles), is ignored otherwise.
+   * @brief Only enabled for @ref basematrix "base matrices" (i.e., none of the following is true:
+   * @ref has_column_pairings, @ref has_vine_update, @ref can_retrieve_representative_cycles), is ignored otherwise.
    * If set to true, two identical columns in the matrix are not explicitely stored separately but are represented 
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column ( const Container_type& column, index columnIndex ),
-   * - @ref Matrix::zero_column ( index columnIndex ),
-   * - @ref Matrix::zero_cell ( index columnIndex, id_index rowIndex ),
-   * - @ref Matrix::swap_columns ( index columnIndex1, index columnIndex2 ),
-   * - @ref Matrix::swap_rows ( index rowIndex1, index rowIndex2 ),
-   * - @ref Matrix::remove_column ( index columnIndex ),
-   * - @ref Matrix::remove_last ( ).
+   * - @ref Matrix::insert_column "insert_column(const Container_type&, index)", <-- TODO: wasn't able to make the link work for Matrix::insert_column(const Container_type&, index), so it points to the wrong one...
+   * - @ref Matrix::zero_column "zero_column(index)",
+   * - @ref Matrix::zero_cell "zero_cell(index, id_index)",
+   * - @ref Matrix::swap_columns "swap_columns(index, index)",
+   * - @ref Matrix::swap_rows "swap_rows(index, index)",
+   * - @ref Matrix::remove_column "remove_column(index)",
+   * - @ref Matrix::remove_last "remove_last()".
    */
   static const bool has_column_compression;
   /**
-   * @brief Only enabled for @ref basematrix "base matrices" or simple @ref boundarymatrix "boundary matrices", i.e., when both
-   * @ref has_vine_update and @ref can_retrieve_representative_cycles are false.
+   * @brief Only enabled for @ref basematrix "base matrices" or simple @ref boundarymatrix "boundary matrices", i.e.,
+   * when both @ref has_vine_update and @ref can_retrieve_representative_cycles are false.
    * If set to true, the methods @ref Matrix::swap_columns and @ref Matrix::swap_rows are enabled.
    */
   static const bool has_column_and_row_swaps;
@@ -92,11 +92,11 @@ struct PersistenceMatrixOptions
    * @brief If set to true, the underlying container containing the matrix columns is an std::unordered_map. 
    * If set to false, the container is a std::vector. By default, it is recommended to set it to false, but some 
    * methods require it to be true to be enabled: 
-   * - @ref Matrix::remove_column ( index columnIndex ) for @ref basematrix "base matrices",
-   * - @ref Matrix::remove_maximal_face ( index columnIndex ) for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_maximal_face ( id_index faceIndex, const std::vector<id_index>& columnsToSwap )
+   * - @ref Matrix::remove_column "remove_column(index)" for @ref basematrix "base matrices",
+   * - @ref Matrix::remove_maximal_face "remove_maximal_face(index)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_face "remove_maximal_face(id_index, const std::vector<id_index>&)"
    * for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_last ( ) for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
+   * - @ref Matrix::remove_last "remove_last()" for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
    */
   static const bool has_map_column_container;
   /**
@@ -106,7 +106,7 @@ struct PersistenceMatrixOptions
   static const bool has_removable_columns;
 
   /**
-   * @brief If set to true, enables the method @ref get_row.
+   * @brief If set to true, enables the method @ref Matrix::get_row.
    */
   static const bool has_row_access;
   /**
@@ -117,31 +117,33 @@ struct PersistenceMatrixOptions
   static const bool has_intrusive_rows;
   /**
    * @brief Only enabled if @ref has_row_access is true, ignored otherwise.
-   * If set to true, the underlying container containing the rows is an std::map and for @ref chainmatrix "chain matrices",
-   * enables the method @ref Matrix::erase_row (always enabled for other matrix types).
-   * If set to false, the container is a std::vector.
+   * If set to true, the underlying container containing the rows is an std::map and for
+   * @ref chainmatrix "chain matrices", enables the method @ref Matrix::erase_row (always enabled for other
+   * matrix types). If set to false, the container is a std::vector.
    */
   static const bool has_removable_rows;
 
   /**
-   * @brief Only enabled for boundary and @ref chainmatrix "chain matrices", i.e., when at least one of the following is true:
+   * @brief Only used, when at least one of the following is true:
    * @ref has_column_pairings, @ref has_vine_update or @ref can_retrieve_representative_cycles. Is ignored otherwise.
-   * If set to true, the matrix is a @ref boundarymatrix "boundary matrix". If set to false, the matrix is a @ref chainmatrix "chain matrix".
+   * If set to true, the matrix is a @ref boundarymatrix "boundary matrix". If set to false, the matrix is a
+   * @ref chainmatrix "chain matrix".
    */
   static const bool is_of_boundary_type;
 
   /**
-   * @brief Only enabled for boundary and @ref chainmatrix "chain matrices", i.e., when at least one of the following is true:
-   * @ref has_column_pairings, @ref has_vine_update or @ref can_retrieve_representative_cycles. Is ignored otherwise
-   * (the notion of dimension makes generally no sense then).
-   * If set to true, enables the method @ref Matrix::get_max_dimension. If set to false, the method is disabled except
-   * when @ref has_column_pairings is true and @ref has_vine_update and @ref can_retrieve_representative_cycles are both
-   * false. In this case, the method is always available.
+   * @brief Only enabled for @ref boundarymatrix "boundary" and @ref chainmatrix "chain matrices", i.e., when at least
+   * one of the following is true: @ref has_column_pairings, @ref has_vine_update or
+   * @ref can_retrieve_representative_cycles. Is ignored otherwise (the notion of dimension makes generally no
+   * sense then). If set to true, enables the method @ref Matrix::get_max_dimension. If set to false, the method is
+   * disabled except when @ref has_column_pairings is true and @ref has_vine_update and
+   * @ref can_retrieve_representative_cycles are both false. In this case, the method is always available.
    */
   static const bool has_matrix_maximal_dimension_access;
   /**
    * @brief If set to true, enables the method @ref Matrix::get_current_barcode. The matrix will then either be a
-   * @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true), or a @ref chainmatrix "chain matrix" (if @ref is_of_boundary_type is false).
+   * @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true), or a @ref chainmatrix "chain matrix"
+   * (if @ref is_of_boundary_type is false).
    */
   static const bool has_column_pairings;
   /**
@@ -160,8 +162,9 @@ struct PersistenceMatrixOptions
 
   // not implemented yet
   // /**
-  //  * @brief Only enabled for boundary and @ref chainmatrix "chain matrices", i.e., when at least one of the following is true:
-  //  * @ref has_column_pairings, @ref has_vine_update or @ref can_retrieve_representative_cycles.
+  //  * @brief Only enabled for boundary and @ref chainmatrix "chain matrices", i.e., when at least one of
+  //  * the following is true: @ref has_column_pairings, @ref has_vine_update or
+  //  * @ref can_retrieve_representative_cycles.
   //  * Is ignored otherwise
   //  * If set to true, the matrix is decomposed in several submatrices containing each all the
   //  * columns of same dimension.
