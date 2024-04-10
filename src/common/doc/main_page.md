@@ -153,9 +153,9 @@
     For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
     </td>
     <td width="15%">
-      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Author:</b> Vincent Rouvreau, Michael Kerber, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/), GPL v3 (only for incremental Delaunay)<br>
       <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
     </td>
  </tr>

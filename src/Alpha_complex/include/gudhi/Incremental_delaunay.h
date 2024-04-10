@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// As an exception, if you have a commercial license for the CGAL package Triangulation,
+// you may use this file under the same conditions.
+//
 // Author(s)    : Michael Kerber, Marc Glisse
 
 #include <CGAL/Delaunay_triangulation.h>
