@@ -23,7 +23,7 @@
 using Gudhi::persistence_matrix::Heap_column;
 using Gudhi::persistence_matrix::Matrix;
 using Gudhi::persistence_matrix::Column_indexation_types;
-using Zp = Gudhi::persistence_matrix::Zp_field_operators<> ;
+using Zp = Gudhi::persistence_fields::Zp_field_operators<> ;
 
 inline Zp _g_operators = Zp(5);
 

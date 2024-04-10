@@ -17,8 +17,14 @@
 #include <stdexcept>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Shared_Zp_field_element {
 public:
 	using element_type = unsigned int;
@@ -329,7 +335,7 @@ inline unsigned int Shared_Zp_field_element::_multiply(unsigned int element, uns
 	return element;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_ZP_VAR_H_

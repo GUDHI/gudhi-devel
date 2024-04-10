@@ -161,7 +161,7 @@ using all_ra_values_list = boost::mp11::mp_list<ra_value<false,false,false>,ra_v
 using ra_values_list = boost::mp11::mp_list<ra_value<true,false,false>,ra_value<true,true,true>,ra_value<true,true,false>,ra_value<true,false,true> >;
 using ra_r_values_list = boost::mp11::mp_list<ra_value<true,true,true>,ra_value<true,true,false> >;
 
-// Base matrices
+// @ref basematrix "base matrices"
 
 template<typename bool_is_z2, typename has_row_t, typename bool_rem_col, typename bool_swap>
 using base_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_base_options>, bool_is_z2, col_type_list, has_row_t, bool_rem_col, bool_swap> >, matrix_non_validity>;
@@ -191,7 +191,7 @@ using opt_col_comp_zp = compression_option_template<false_value_list, all_ra_val
 using opt_col_comp_zp_ra = compression_option_template<false_value_list, ra_values_list>;
 using opt_col_comp_zp_ra_r = compression_option_template<false_value_list, ra_r_values_list>;
 
-// Boundary matrices
+// @ref boundarymatrix "boundary matrices"
 
 template<typename bool_is_z2, typename has_row_t, typename bool_rem_col, typename bool_swap, typename bool_pos_idx>
 using boundary_option_template = boost::mp11::mp_remove_if<boost::mp11::mp_transform<get_type, boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<m_boundary_options>, bool_is_z2, col_type_list, has_row_t, bool_rem_col, bool_swap, bool_pos_idx> >, matrix_non_validity>;
@@ -265,7 +265,7 @@ using opt_ru_rep_zp_ra_r = ru_option_template<zp_ru_rep_values_list, ra_r_values
 template<typename bool_pos_idx, typename bool_barcode, typename bool_dim>
 using opt_ru_rep_zp_r = ru_option_template<zp_ru_rep_values_list, all_ra_values_list, true_value_list, bool_pos_idx, bool_dim, bool_barcode>;
 
-// Chain matrices
+// @ref chainmatrix "chain matrices"
 
 using z2_chain_vine_rep_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, true_value_list, true_value_list, true_value_list>;
 using z2_chain_vine_rep_no_barcode_values_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, mp_list_q<chain_opt_values>, true_value_list, false_value_list, true_value_list, true_value_list>;

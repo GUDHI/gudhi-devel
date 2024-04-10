@@ -32,6 +32,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class List_column list_column.h gudhi/Persistence_matrix/columns/list_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on a list structure. The cells are always ordered by row index and only non-zero values
@@ -1082,6 +1085,8 @@ inline bool List_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::List_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::List_column.

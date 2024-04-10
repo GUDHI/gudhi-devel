@@ -25,6 +25,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Chain_representative_cycles, when the computation of the representative cycles
  * were not enabled.
@@ -40,6 +42,9 @@ struct Dummy_chain_representative_cycles {
 
 // TODO: add coefficients ? Only Z2 token into account for now.
 /**
+ * @class Chain_representative_cycles chain_rep_cycles.h gudhi/Persistence_matrix/chain_rep_cycles.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the representative cycles for @ref Chain_matrix if the option was enabled.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -137,8 +142,8 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
   birthToCycle_.resize(_matrix()->get_number_of_columns(), -1);
   representativeCycles_.clear();
 
-  // for birthToCycle_, assumes that PosIdx == IDIdx, ie pivot == birth index... which is not true with vineyards
-  // TODO: with vineyard, there is a IDIdx --> PosIdx map stored. somehow get access to it here
+  // for birthToCycle_, assumes that @ref PosIdx == @ref IDIdx, ie pivot == birth index... which is not true with vineyards
+  // TODO: with vineyard, there is a @ref IDIdx --> @ref PosIdx map stored. somehow get access to it here
   for (typename Master_matrix::id_index i = 0; i < _matrix()->get_number_of_columns(); i++) {
     auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
     if (!col.is_paired() || i < col.get_paired_chain_index()) {

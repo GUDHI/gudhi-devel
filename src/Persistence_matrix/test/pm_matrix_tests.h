@@ -325,47 +325,47 @@ void test_constructors(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
 
 	//default constructor
-	// Matrix m;
-	// BOOST_CHECK_EQUAL(m.get_number_of_columns(), 0);
-	// test_content_equality(empty, m);
+	Matrix m;
+	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 0);
+	test_content_equality(empty, m);
 
 	//constructor from given boundary matrix
 	Matrix mb(columns, 5);
-	// if constexpr (is_RU<Matrix>()){
-	// 	columns[5].clear();
-	// } else if constexpr (is_Chain<Matrix>()){
-	// 	columns = build_simple_chain_matrix<typename Matrix::Column_type>();
-	// }
+	if constexpr (is_RU<Matrix>()){
+		columns[5].clear();
+	} else if constexpr (is_Chain<Matrix>()){
+		columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+	}
 
-	// BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
-	// test_content_equality(columns, mb);
+	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
+	test_content_equality(columns, mb);
 
-	// //constructor reserving column space
-	// Matrix mr(5);
-	// BOOST_CHECK_EQUAL(mr.get_number_of_columns(), 0);
-	// test_content_equality(empty, mr);
+	//constructor reserving column space
+	Matrix mr(5);
+	BOOST_CHECK_EQUAL(mr.get_number_of_columns(), 0);
+	test_content_equality(empty, mr);
 
-	// //copy constructor
-	// Matrix mc1(mb);
-	// Matrix mc2 = mb;
-	// BOOST_CHECK_EQUAL(mc1.get_number_of_columns(), 7);
-	// BOOST_CHECK_EQUAL(mc2.get_number_of_columns(), 7);
-	// test_content_equality(columns, mc1);
-	// test_content_equality(columns, mc2);
+	//copy constructor
+	Matrix mc1(mb);
+	Matrix mc2 = mb;
+	BOOST_CHECK_EQUAL(mc1.get_number_of_columns(), 7);
+	BOOST_CHECK_EQUAL(mc2.get_number_of_columns(), 7);
+	test_content_equality(columns, mc1);
+	test_content_equality(columns, mc2);
 
-	// //move constructor
-	// Matrix mm(std::move(mb));
-	// BOOST_CHECK_EQUAL(mm.get_number_of_columns(), 7);
-	// BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 0);
-	// test_content_equality(columns, mm);
-	// test_content_equality(empty, mb);
+	//move constructor
+	Matrix mm(std::move(mb));
+	BOOST_CHECK_EQUAL(mm.get_number_of_columns(), 7);
+	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 0);
+	test_content_equality(columns, mm);
+	test_content_equality(empty, mb);
 
-	// //swap
-	// swap(mm, mb);
-	// BOOST_CHECK_EQUAL(mm.get_number_of_columns(), 0);
-	// BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
-	// test_content_equality(empty, mm);
-	// test_content_equality(columns, mb);
+	//swap
+	swap(mm, mb);
+	BOOST_CHECK_EQUAL(mm.get_number_of_columns(), 0);
+	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
+	test_content_equality(empty, mm);
+	test_content_equality(columns, mb);
 }
 
 inline bool birth_comp(unsigned int columnIndex1, unsigned int columnIndex2){ return false; };
@@ -379,7 +379,7 @@ void test_chain_constructors(){
 	Matrix m(birth_comp, death_comp);
 	BOOST_CHECK_EQUAL(m.get_number_of_columns(), 0);
 
-	//constructor from given boundary matrix
+	//constructor from given @ref boundarymatrix "boundary matrix"
 	Matrix mb(ordered_boundaries, birth_comp, death_comp, 5);
 	BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
 	BOOST_CHECK_EQUAL(mb.get_column_dimension(2), 0);
@@ -443,7 +443,7 @@ void test_chain_constructors(){
 // 	//base comp
 // 	//boundary
 // 	//ru: inR = true forced
-// 	//chain: just for sanity checks as a valid chain matrix never has an empty column.
+// 	//chain: just for sanity checks as a valid @ref chainmatrix "chain matrix" never has an empty column.
 // 	//id to pos
 // 	//pos to id
 // 	bool is_zero_column(index columnIndex);
@@ -997,7 +997,7 @@ void test_ru_u_row_access(){
 template<class Matrix>
 void test_row_removal(){
 	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	columns[6].pop_back();	//empties row 5. Not a legit boundary matrix anymore, but for the test, should be fine, except for chain.
+	columns[6].pop_back();	//empties row 5. Not a legit @ref boundarymatrix "boundary matrix" anymore, but for the test, should be fine, except for chain.
 
 	Matrix m(columns, 5);
 

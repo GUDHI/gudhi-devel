@@ -33,6 +33,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Vector_column vector_column.h gudhi/Persistence_matrix/columns/vector_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on a vector structure. The cells are always ordered by row index, but cells are removed by 
@@ -1326,6 +1329,8 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Vector_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Vector_column.

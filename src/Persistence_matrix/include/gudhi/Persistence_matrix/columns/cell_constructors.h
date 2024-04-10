@@ -25,6 +25,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief @ref Cell factory. Constructs and destroyes cell pointers with new and delete.
  * 
  * @tparam Cell @ref Cell with the right templates.
@@ -62,6 +64,8 @@ struct New_cell_constructor
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief @ref Cell factory. Uses @ref Simple_object_pool to construct and destroy cell pointer.
  * 
  * @tparam Cell @ref Cell with the right templates.

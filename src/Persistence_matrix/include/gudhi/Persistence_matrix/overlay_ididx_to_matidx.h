@@ -9,7 +9,7 @@
  */
 
 /**
- * @file overlay_ididx_to_matidx.h
+ * @file overlay_@ref IDIdx_to_@ref MatIdx.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Id_to_index_overlay class.
  */
@@ -26,8 +26,11 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @brief Overlay for non basic matrices replacing all input and output MatIdx indices of the original methods
- * with IDIdx indices.
+ * @class Id_to_index_overlay overlay_ididx_to_matidx.h gudhi/Persistence_matrix/overlay_ididx_to_matidx.h
+ * @ingroup persistence_matrix
+ *
+ * @brief Overlay for non @ref basematrix "basic matrices" replacing all input and output @ref MatIdx indices of the original methods
+ * with @ref IDIdx indices.
  * 
  * @tparam Matrix_type Matrix type taking the overlay.
  * @tparam Master_matrix_type An instanciation of @ref Matrix from which all types and options are deduced.
@@ -36,8 +39,8 @@ template <class Matrix_type, class Master_matrix_type>
 class Id_to_index_overlay 
 {
  public:
-  using index = typename Master_matrix_type::index;                       /**< MatIdx index type. */
-  using id_index = typename Master_matrix_type::id_index;                 /**< IDIdx index type. */
+  using index = typename Master_matrix_type::index;                       /**< @ref MatIdx index type. */
+  using id_index = typename Master_matrix_type::id_index;                 /**< @ref IDIdx index type. */
   using dimension_type = typename Master_matrix_type::dimension_type;     /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
@@ -67,7 +70,7 @@ class Id_to_index_overlay
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
@@ -92,7 +95,7 @@ class Id_to_index_overlay
    */
   Id_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Only available for chain matrices. Constructs an empty matrix and stores the given comparators.
+   * @brief Only available for @ref chainmatrix "chain matrices". Constructs an empty matrix and stores the given comparators.
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -102,11 +105,11 @@ class Id_to_index_overlay
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -117,7 +120,7 @@ class Id_to_index_overlay
                       EventComparatorFunction&& birthComparator, 
                       EventComparatorFunction&& deathComparator);
   /**
-   * @brief Only available for chain matrices. 
+   * @brief Only available for @ref chainmatrix "chain matrices". 
    * Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
@@ -130,7 +133,7 @@ class Id_to_index_overlay
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
@@ -141,11 +144,11 @@ class Id_to_index_overlay
    * the matrix with the `Matrix(int numberOfColumns)` constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -157,7 +160,7 @@ class Id_to_index_overlay
                       EventComparatorFunction&& birthComparator,
                       EventComparatorFunction&& deathComparator);
   /**
-   * @brief Only available for chain matrices.
+   * @brief Only available for @ref chainmatrix "chain matrices".
    * Constructs a new empty matrix and reserves space for the given number of columns.
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
@@ -169,11 +172,11 @@ class Id_to_index_overlay
    * @param numberOfColumns Number of columns to reserve space for.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -225,7 +228,7 @@ class Id_to_index_overlay
    * - If it is a boundary type matrix and both \f$ R \f$ and \f$ U \f$ are stored, the new boundary is stored in its
    *   reduced form and the barcode, if active, is also updated.
    * - If it is a chain type matrix, the new column is of the form 
-   *   `IDIdx + linear combination of older column IDIdxs`, where the combination is deduced while reducing the 
+   *   `@ref IDIdx + linear combination of older column @ref IDIdxs`, where the combination is deduced while reducing the 
    *   given boundary. If the barcode is stored, it will also be updated.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
@@ -244,7 +247,7 @@ class Id_to_index_overlay
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex IDIdx index to use to indentify the new face.
+   * @param faceIndex @ref IDIdx index to use to indentify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
    * increasing order.
@@ -254,11 +257,11 @@ class Id_to_index_overlay
   template <class Boundary_type = boundary_type>
   void insert_boundary(id_index faceIndex, const Boundary_type& boundary, dimension_type dim = -1);
   /**
-   * @brief Returns the column at the given IDIdx index. 
+   * @brief Returns the column at the given @ref IDIdx index. 
    * For RU matrices, the returned column is from \f$ R \f$.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
-   * @param faceID IDIdx index of the column to return.
+   * @param faceID @ref IDIdx index of the column to return.
    * @return Reference to the column.
    */
   Column_type& get_column(id_index faceID);
@@ -267,26 +270,26 @@ class Id_to_index_overlay
    * For RU matrices, the returned row is from \f$ R \f$.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * @warning The @ref get_column_index method of the row cells returns the original PosIdx indices (before any swaps)
-   * for boundary matrices and MatIdx indices for chain matrices.
+   * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
+   * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return: IDIdx for chain matrices or updated IDIdx for boundary matrices
+   * @param rowIndex Row index of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
    * if swaps occured, see [TODO: description].
    * @return Reference to the row.
    */
   Row_type& get_row(id_index rowIndex);
   /**
    * @brief The effect varies depending on the matrices and the options:
-   * - Boundary matrix with only \f$ R \f$ stored:
+   * - @ref boundarymatrix "boundary matrix" with only \f$ R \f$ stored:
    *    - @ref PersistenceMatrixOptions::has_map_column_container and
    *      @ref PersistenceMatrixOptions::has_column_and_row_swaps are true:
    *      cleans up maps used for the lazy row swaps.
    *    - @ref PersistenceMatrixOptions::has_row_access and @ref PersistenceMatrixOptions::has_removable_rows are true:
    *      assumes that the row is empty and removes it. 
    *    - Otherwise, does nothing.
-   * - Boundary matrix with \f$ U \f$ stored: only \f$ R \f$ is affected by the above.
+   * - @ref boundarymatrix "boundary matrix" with \f$ U \f$ stored: only \f$ R \f$ is affected by the above.
    *   If properly used, \f$ U \f$ will never have empty rows.
-   * - Chain matrix: only available if @ref PersistenceMatrixOptions::has_row_access and
+   * - @ref chainmatrix "chain matrix": only available if @ref PersistenceMatrixOptions::has_row_access and
    *   @ref PersistenceMatrixOptions::has_removable_rows are true.
    *   Assumes that the row is empty and removes it. 
    *
@@ -300,26 +303,26 @@ class Id_to_index_overlay
    */
   void erase_row(id_index rowIndex);
   /**
-   * @brief Only available for RU and chain matrices and if @ref PersistenceMatrixOptions::has_removable_columns and
+   * @brief Only available for RU and @ref chainmatrix "chain matrices" and if @ref PersistenceMatrixOptions::has_removable_columns and
    * @ref PersistenceMatrixOptions::has_vine_update are true.
-   * For chain matrices, @ref PersistenceMatrixOptions::has_map_column_container and
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
    * @ref PersistenceMatrixOptions::has_column_pairings also need to be true.
    * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
-   * (i.e., RU is still an upper triangular decomposition of the boundary matrix and chain is still a compatible
+   * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix" and chain is still a compatible
    * bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
    * The maximality of the face is not verified.
    * Also updates the barcode if it was computed.
    *
-   * For chain matrices, using the other version of the method could perform better depending on how the data is 
+   * For @ref chainmatrix "chain matrices", using the other version of the method could perform better depending on how the data is 
    * maintained on the side of the user. Then, @ref has_column_pairings also do not need to be true.
    *
    * See also @ref remove_last.
    * 
-   * @param faceID IDIdx index of the face to remove.
+   * @param faceID @ref IDIdx index of the face to remove.
    */
   void remove_maximal_face(id_index faceID);
   /**
-   * @brief Only available for chain matrices and if @ref has_removable_columns, @ref has_vine_update 
+   * @brief Only available for @ref chainmatrix "chain matrices" and if @ref has_removable_columns, @ref has_vine_update 
    * and @ref has_map_column_container are true.
    * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., it is still a compatible bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
@@ -327,29 +330,29 @@ class Id_to_index_overlay
    * Also updates the barcode if it was computed.
    *
    * To maintain the compatibility, vine swaps are done to move the face up to the end of the filtration. Once at 
-   * the end, the removal is trivial. But for chain matrices, swaps do not actually swap the position of the column
+   * the end, the removal is trivial. But for @ref chainmatrix "chain matrices", swaps do not actually swap the position of the column
    * every time, so the faces appearing after @p faceIndex in the filtration have to be searched first within the
-   * matrix. If the user has an easy access to the IDIdx of the faces in the order of filtration, passing them by
+   * matrix. If the user has an easy access to the @ref IDIdx of the faces in the order of filtration, passing them by
    * argument with @p columnsToSwap allows to skip a linear search process. Typically, if the user knows that the
    * face he wants to remove is already the last face of the filtration, calling `remove_maximal_face(faceIndex, {})`
    * will be faster than `remove_last()`.
    *
    * See also @ref remove_last.
    * 
-   * @param faceID IDIdx index of the face to remove.
-   * @param columnsToSwap Vector of IDIdx indices of the faces coming after @p faceID in the filtration.
+   * @param faceID @ref IDIdx index of the face to remove.
+   * @param columnsToSwap Vector of @ref IDIdx indices of the faces coming after @p faceID in the filtration.
    */
   void remove_maximal_face(id_index faceID, const std::vector<id_index>& columnsToSwap);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true. Additionnaly, if the
-   * matrix is a chain matrix, either @ref PersistenceMatrixOptions::has_map_column_container has to be true or
+   * matrix is a @ref chainmatrix "chain matrix", either @ref PersistenceMatrixOptions::has_map_column_container has to be true or
    * @ref PersistenceMatrixOptions::has_vine_update has to be false.
    * Removes the last face in the filtration from the matrix and updates the barcode if it is stored.
    * 
    * See also @ref remove_maximal_face.
    *
-   * For chain matrices, if @ref has_vine_update is true, the last face does not have to be at the end of the matrix
-   * and therefore has to be searched first. In this case, if the user already knows the IDIdx of the last face,
+   * For @ref chainmatrix "chain matrices", if @ref has_vine_update is true, the last face does not have to be at the end of the matrix
+   * and therefore has to be searched first. In this case, if the user already knows the @ref IDIdx of the last face,
    * calling `remove_maximal_face(faceID, {})` instead allows to skip the search.
    */
   void remove_last();
@@ -368,9 +371,9 @@ class Id_to_index_overlay
    */
   index get_number_of_columns() const;
   /**
-   * @brief Returns the dimension of the given face. Only available for non basic matrices.
+   * @brief Returns the dimension of the given face. Only available for non @ref basematrix "basic matrices".
    * 
-   * @param faceID IDIdx index of the face.
+   * @param faceID @ref IDIdx index of the face.
    * @return Dimension of the face.
    */
   dimension_type get_column_dimension(id_index faceID) const;
@@ -379,11 +382,11 @@ class Id_to_index_overlay
    * @brief Adds column corresponding to @p sourceFaceID onto the column corresponding to @p targetFaceID.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
-   * @param sourceFaceID IDIdx index of the source column.
-   * @param targetFaceID IDIdx index of the target column.
+   * @param sourceFaceID @ref IDIdx index of the source column.
+   * @param targetFaceID @ref IDIdx index of the target column.
    */
   void add_to(id_index sourceFaceID, id_index targetFaceID);
   /**
@@ -391,12 +394,12 @@ class Id_to_index_overlay
    * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
-   * @param sourceFaceID IDIdx index of the source column.
+   * @param sourceFaceID @ref IDIdx index of the source column.
    * @param coefficient Value to multiply.
-   * @param targetFaceID IDIdx index of the target column.
+   * @param targetFaceID @ref IDIdx index of the target column.
    */
   void multiply_target_and_add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID);
   /**
@@ -404,34 +407,34 @@ class Id_to_index_overlay
    * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
    * @param coefficient Value to multiply.
-   * @param sourceFaceID IDIdx index of the source column.
-   * @param targetFaceID IDIdx index of the target column.
+   * @param sourceFaceID @ref IDIdx index of the source column.
+   * @param targetFaceID @ref IDIdx index of the target column.
    */
   void multiply_source_and_add_to(const Field_element_type& coefficient, id_index sourceFaceID, id_index targetFaceID);
 
   /**
-   * @brief Zeroes the cell at the given coordinates. Not available for chain matrices.
+   * @brief Zeroes the cell at the given coordinates. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
    * of the persistence related properties of the matrix.
    *
    * For RU matrices, zeros only the cell in \f$ R \f$.
    * 
-   * @param faceID IDIdx index of the face corresponding to the column of the cell.
+   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
    * @param rowIndex Row index of the row of the cell.
    */
   void zero_cell(id_index faceID, id_index rowIndex);
   /**
-   * @brief Zeroes the column at the given index. Not available for chain matrices.
+   * @brief Zeroes the column at the given index. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
    * of the persistence related properties of the matrix.
    *
    * For RU matrices, zeros only the column in \f$ R \f$.
    * 
-   * @param faceID IDIdx index of the face corresponding to the column.
+   * @param faceID @ref IDIdx index of the face corresponding to the column.
    */
   void zero_column(id_index faceID);
   /**
@@ -439,7 +442,7 @@ class Id_to_index_overlay
    *
    * For RU matrices, looks into \f$ R \f$.
    * 
-   * @param faceID IDIdx index of the face corresponding to the column of the cell.
+   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
    * @param rowIndex Row index of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
@@ -450,30 +453,30 @@ class Id_to_index_overlay
    *
    * For RU matrices, looks into \f$ R \f$.
    *
-   * Note that for chain matrices, this method should always return false, as a valid chain matrix never has
+   * Note that for @ref chainmatrix "chain matrices", this method should always return false, as a valid @ref chainmatrix "chain matrix" never has
    * empty columns.
    * 
-   * @param faceID IDIdx index of the face corresponding to the column.
+   * @param faceID @ref IDIdx index of the face corresponding to the column.
    * @return true If the column has value zero.
    * @return false Otherwise.
    */
   bool is_zero_column(id_index faceID);
 
   /**
-   * @brief Returns the IDIdx index of the column which has the given row index as pivot.
+   * @brief Returns the @ref IDIdx index of the column which has the given row index as pivot.
    * Assumes that the pivot exists. For RU matrices, the column is returned from \f$ R \f$.
    *
-   * Recall that the row indices for chain matrices correspond to the IDIdx indices and that the row indices
-   * for a RU matrix correspond to the updated IDIdx indices which got potentially swapped by a vine swap.
+   * Recall that the row indices for @ref chainmatrix "chain matrices" correspond to the @ref IDIdx indices and that the row indices
+   * for a RU matrix correspond to the updated @ref IDIdx indices which got potentially swapped by a vine swap.
    * 
    * @param faceIndex Row index of the pivot.
-   * @return IDIdx index of the column with the given pivot.
+   * @return @ref IDIdx index of the column with the given pivot.
    */
   id_index get_column_with_pivot(id_index faceIndex) const;
   /**
    * @brief Returns the row index of the pivot of the given column.
    * 
-   * @param faceID IDIdx index of the face corresponding to the column.
+   * @param faceID @ref IDIdx index of the face corresponding to the column.
    * @return The row index of the pivot.
    */
   id_index get_pivot(id_index faceID);
@@ -514,26 +517,26 @@ class Id_to_index_overlay
    *
    * Recall that we assume that the boundaries were inserted in the order of filtration for the barcode to be valid.
    *
-   * @warning For simple boundary matrices (only storing \f$ R \f$), we assume that `get_current_barcode` is only
+   * @warning For simple @ref boundarymatrix "boundary matrices" (only storing \f$ R \f$), we assume that `get_current_barcode` is only
    * called once, when the matrix is completed.
    * 
    * @return A reference to the barcode. The barcode is a vector of @ref Bar. A bar stores three informations:
-   * the PosIdx birth index, the PosIdx death index and the dimension of the bar.
+   * the @ref PosIdx birth index, the @ref PosIdx death index and the dimension of the bar.
    */
   const barcode_type& get_current_barcode();
   
   /**
-   * @brief Only available for simple boundary matrices (only storing \f$ R \f$) and if
+   * @brief Only available for simple @ref boundarymatrix "boundary matrices" (only storing \f$ R \f$) and if
    * @ref PersistenceMatrixOptions::has_column_and_row_swaps is true.
    * Swaps the two given columns. Note that it really just swaps two columns and do not updates
    * anything else, nor performs additions to maintain some properties on the matrix.
    * 
-   * @param faceID1 First column IDIdx index to swap.
-   * @param faceID2 Second column IDIdx index to swap.
+   * @param faceID1 First column @ref IDIdx index to swap.
+   * @param faceID2 Second column @ref IDIdx index to swap.
    */
   void swap_columns(id_index faceID1, id_index faceID2);
   /**
-   * @brief Only available for simple boundary matrices (only storing R)
+   * @brief Only available for simple @ref boundarymatrix "boundary matrices" (only storing R)
    * and if @ref PersistenceMatrixOptions::has_column_and_row_swaps is true.
    * Swaps the two given rows. Note that it really just swaps two rows and do not updates
    * anything else, nor performs additions to maintain some properties on the matrix.
@@ -547,10 +550,10 @@ class Id_to_index_overlay
    * Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param faceID1 IDIdx index of the first face.
-   * @param faceID2 IDIdx index of the second face. It is assumed that the PosIdx of both only differs by one.
-   * @return Let pos1 be the PosIdx index of @p faceID1 and pos2 be the PosIdx index of @p faceID2.
-   * The method returns the IDIdx of the column which has now, after the swap, the PosIdx max(pos1, pos2).
+   * @param faceID1 @ref IDIdx index of the first face.
+   * @param faceID2 @ref IDIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @return Let pos1 be the @ref PosIdx index of @p faceID1 and pos2 be the @ref PosIdx index of @p faceID2.
+   * The method returns the @ref IDIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
    */
   id_index vine_swap_with_z_eq_1_case(id_index faceID1, id_index faceID2);
   /**
@@ -562,10 +565,10 @@ class Id_to_index_overlay
    * \f$ F' \f$ has to be a valid filtration.
    * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
    * 
-   * @param faceID1 IDIdx index of the first face.
-   * @param faceID2 IDIdx index of the second face. It is assumed that the PosIdx of both only differs by one.
-   * @return Let pos1 be the PosIdx index of @p faceID1 and pos2 be the PosIdx index of @p faceID2.
-   * The method returns the IDIdx of the column which has now, after the swap, the PosIdx max(pos1, pos2).
+   * @param faceID1 @ref IDIdx index of the first face.
+   * @param faceID2 @ref IDIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @return Let pos1 be the @ref PosIdx index of @p faceID1 and pos2 be the @ref PosIdx index of @p faceID2.
+   * The method returns the @ref IDIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
    */
   id_index vine_swap(id_index faceID1, id_index faceID2);
   
@@ -597,7 +600,7 @@ class Id_to_index_overlay
   using dictionnary_type = typename Master_matrix_type::template dictionnary_type<index>;
 
   Matrix_type matrix_;          /**< Interfaced matrix. */
-  dictionnary_type* idToIndex_; /**< Map from IDIdx index to MatIdx index. */
+  dictionnary_type* idToIndex_; /**< Map from @ref IDIdx index to @ref MatIdx index. */
   index nextIndex_;             /**< Next unused index. */
 
   void _initialize_map(unsigned int size);

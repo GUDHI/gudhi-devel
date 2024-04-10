@@ -25,6 +25,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref RU_representative_cycles, when the computation of the representative cycles
  * were not enabled.
@@ -40,14 +42,18 @@ struct Dummy_ru_representative_cycles {
 
 // TODO: add coefficients ? Only Z2 token into account for now.
 /**
+ * @class RU_representative_cycles ru_rep_cycles.h gudhi/Persistence_matrix/ru_rep_cycles.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the representative cycles for @ref RU_matrix if the option was enabled.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class RU_representative_cycles {
+class RU_representative_cycles 
+{
  public:
-  using index = typename Master_matrix::index;            /**< MatIdx index type. */
+  using index = typename Master_matrix::index;            /**< @ref MatIdx index type. */
   using Bar = typename Master_matrix::Bar;                /**< Bar type. */
   using cycle_type = typename Master_matrix::cycle_type;  /**< Cycle type. */
 

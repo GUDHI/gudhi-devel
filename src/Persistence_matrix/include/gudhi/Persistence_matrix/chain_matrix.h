@@ -29,6 +29,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Chain_matrix chain_matrix.h gudhi/Persistence_matrix/chain_matrix.h
+ * @ingroup persistence_matrix
+ *
  * @brief Matrix structure storing a compatible base of a filtered chain complex. See [TODO: cite zigzag paper].
  * The base is constructed from the boundaries of the faces in the complex. Allows the persistent homology to be
  * computed, as well as representative cycles. Supports vineyards (see [TODO: cite vineyard paper]) and the removal 
@@ -56,9 +59,9 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
   using boundary_type = typename Master_matrix::boundary_type;        /**< Type of an input column. */
   using cell_rep_type = typename Master_matrix::cell_rep_type;        /**< Cell content representative. */
-  using index = typename Master_matrix::index;                        /**< MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;                  /**< IDIdx index type. */
-  using pos_index = typename Master_matrix::pos_index;                /**< PosIdx index type. */
+  using index = typename Master_matrix::index;                        /**< @ref MatIdx index type. */
+  using id_index = typename Master_matrix::id_index;                  /**< @ref IDIdx index type. */
+  using pos_index = typename Master_matrix::pos_index;                /**< @ref PosIdx index type. */
   using dimension_type = typename Master_matrix::dimension_type;      /**< Dimension value type. */
 
   /**
@@ -80,7 +83,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
@@ -117,11 +120,11 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -144,7 +147,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
@@ -155,11 +158,11 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the matrix with the `Matrix(int numberOfColumns)` constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -182,11 +185,11 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @param numberOfColumns Number of columns to reserve space for.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
@@ -228,13 +231,13 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * a more general cell complex. This includes cubical complexes or Morse complexes for example.
    *
    * When inserted, the given boundary is reduced and from the reduction process, the column is deduced in the form of:
-   * `IDIdx + linear combination of older column IDIdxs`. If the barcode is stored, it will be updated.
+   * `@ref IDIdx + linear combination of older column @ref IDIdxs`. If the barcode is stored, it will be updated.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The MatIdx indices of the unpaired chains used to reduce the boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_type = boundary_type>
   std::vector<cell_rep_type> insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
@@ -247,29 +250,29 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param faceID IDIdx index to use to indentify the new face.
+   * @param faceID @ref IDIdx index to use to indentify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceID values of precedent calls of the method for the corresponding faces and should be ordered in 
    * increasing order.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The MatIdx index of the inserted boundary.
+   * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_type = boundary_type>
   std::vector<cell_rep_type> insert_boundary(id_index faceID, const Boundary_type& boundary, dimension_type dim = -1);
   /**
-   * @brief Returns the column at the given MatIdx index.
+   * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
-   * @param columnIndex MatIdx index of the column to return.
+   * @param columnIndex @ref MatIdx index of the column to return.
    * @return Reference to the column.
    */
   Column_type& get_column(index columnIndex);
   /**
-   * @brief Returns the column at the given MatIdx index.
+   * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
-   * @param columnIndex MatIdx index of the column to return.
+   * @param columnIndex @ref MatIdx index of the column to return.
    * @return Const reference to the column.
    */
   const Column_type& get_column(index columnIndex) const;
@@ -287,7 +290,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    *
    * See also @ref remove_last.
    * 
-   * @param faceID IDIdx index of the face to remove
+   * @param faceID @ref IDIdx index of the face to remove
    */
   void remove_maximal_face(id_index faceID);
   /**
@@ -300,17 +303,17 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * Also updates the barcode if it is stored.
    *
    * To maintain the compatibility, vine swaps are done to move the face up to the end of the filtration. Once at 
-   * the end, the removal is trivial. But for chain matrices, swaps do not actually swap the position of the column
+   * the end, the removal is trivial. But for @ref chainmatrix "chain matrices", swaps do not actually swap the position of the column
    * every time, so the faces appearing after @p faceID in the filtration have to be searched first within the matrix.
-   * If the user has an easy access to the IDIdx of the faces in the order of filtration, passing them by argument with
+   * If the user has an easy access to the @ref IDIdx of the faces in the order of filtration, passing them by argument with
    * @p columnsToSwap allows to skip a linear search process. Typically, if the user knows that the face he wants to
    * remove is already the last face of the filtration, calling `remove_maximal_face(faceIndex, {})` will be faster
    * than `remove_last()`.
    *
    * See also @ref remove_last.
    * 
-   * @param faceID IDIdx index of the face to remove
-   * @param columnsToSwap Vector of IDIdx indices of the faces coming after @p faceID in the filtration.
+   * @param faceID @ref IDIdx index of the face to remove
+   * @param columnsToSwap Vector of @ref IDIdx indices of the faces coming after @p faceID in the filtration.
    */
   void remove_maximal_face(id_index faceID, const std::vector<id_index>& columnsToSwap);
   /**
@@ -323,7 +326,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is true, the last face does not have to
    * be at the end of the matrix container and therefore has to be searched first. In this case, if the user
-   * already knows the IDIdx of the last face, calling `remove_maximal_face(faceID, {})` instead allows
+   * already knows the @ref IDIdx of the last face, calling `remove_maximal_face(faceID, {})` instead allows
    * to skip the search.
    */
   void remove_last();
@@ -338,7 +341,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Returns the dimension of the given column.
    * 
-   * @param columnIndex MatIdx index of the column representing the face.
+   * @param columnIndex @ref MatIdx index of the column representing the face.
    * @return Dimension of the face.
    */
   dimension_type get_column_dimension(index columnIndex) const;
@@ -347,11 +350,11 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @brief Adds column at @p sourceColumnIndex onto the column at @p targetColumnIndex in the matrix.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
-   * @param sourceColumnIndex MatIdx index of the source column.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param sourceColumnIndex @ref MatIdx index of the source column.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   void add_to(index sourceColumnIndex, index targetColumnIndex);
   /**
@@ -359,12 +362,12 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
-   * @param sourceColumnIndex MatIdx index of the source column.
+   * @param sourceColumnIndex @ref MatIdx index of the source column.
    * @param coefficient Value to multiply.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   void multiply_target_and_add_to(index sourceColumnIndex, 
                                   const Field_element_type& coefficient,
@@ -374,12 +377,12 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * chain matrix. For example, a right-to-left addition could corrupt the computation
+   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
    * @param coefficient Value to multiply.
-   * @param sourceColumnIndex MatIdx index of the source column.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param sourceColumnIndex @ref MatIdx index of the source column.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   void multiply_source_and_add_to(const Field_element_type& coefficient, 
                                   index sourceColumnIndex,
@@ -388,8 +391,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
-   * @param columnIndex MatIdx index of the column of the cell.
-   * @param rowIndex IDIdx row index of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the cell.
+   * @param rowIndex @ref IDIdx row index of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */
@@ -398,7 +401,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @brief Indicates if the column at given index has value zero. Note that if the matrix is valid, this method
    * should always return false.
    * 
-   * @param columnIndex MatIdx index of the column.
+   * @param columnIndex @ref MatIdx index of the column.
    * @return true If the column has value zero.
    * @return false Otherwise.
    */
@@ -407,15 +410,15 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Returns the column with given row index as pivot. Assumes that the pivot exists.
    * 
-   * @param faceID IDIdx row index of the pivot.
-   * @return MatIdx index of the column with the given pivot.
+   * @param faceID @ref IDIdx row index of the pivot.
+   * @return @ref MatIdx index of the column with the given pivot.
    */
   index get_column_with_pivot(id_index faceID) const;
   /**
    * @brief Returns the row index of the pivot of the given column.
    * 
-   * @param columnIndex  MatIdx index of the column
-   * @return The IDIdx row index of the pivot.
+   * @param columnIndex  @ref MatIdx index of the column
+   * @return The @ref IDIdx row index of the pivot.
    */
   id_index get_pivot(index columnIndex);
 
@@ -510,7 +513,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
     >::type;
 
   matrix_type matrix_;                  /**< Column container. */
-  dictionnary_type pivotToColumnIndex_; /**< Map from IDIdx to MatIdx index. */
+  dictionnary_type pivotToColumnIndex_; /**< Map from @ref IDIdx to @ref MatIdx index. */
   index nextIndex_;                     /**< Next unused column index. */
   Field_operators* operators_;          /**< Field operators,
                                              can be nullptr if @ref PersistenceMatrixOptions::is_z2 is true. */
@@ -856,8 +859,8 @@ inline void Chain_matrix<Master_matrix>::remove_last()
   if (nextIndex_ == 0 || matrix_.empty()) return;  // empty matrix
 
   if constexpr (Master_matrix::Option_list::has_vine_update) {
-    // carefull: linear because of the search of the last index. It is better to keep track of the IDIdx index
-    // of the last column while performing swaps (or the MatIdx with the return values of `vine_swap` + get_pivot)
+    // carefull: linear because of the search of the last index. It is better to keep track of the @ref IDIdx index
+    // of the last column while performing swaps (or the @ref MatIdx with the return values of `vine_swap` + get_pivot)
     // and then call `remove_maximal_face` with it and an empty `columnsToSwap`.
 
     id_index pivot = 0;
@@ -1244,7 +1247,7 @@ inline void Chain_matrix<Master_matrix>::_insert_chain(const tmp_column_type& co
                                                        index pair) 
 {
   // true when no vine updates and if nextIndex_ is updated in remove_last for special case of no vines
-  // because then PosIdx == MatIdx
+  // because then @ref PosIdx == @ref MatIdx
   pos_index pairPos = pair;
 
   id_index pivot;

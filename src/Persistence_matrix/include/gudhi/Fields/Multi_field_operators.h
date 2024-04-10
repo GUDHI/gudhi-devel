@@ -17,8 +17,14 @@
 #include <stdexcept>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Multi_field_operators {
 public:
 	using element_type = mpz_class;
@@ -227,7 +233,7 @@ private:
 	}
 };
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_MULTI_OPERATORS_H_

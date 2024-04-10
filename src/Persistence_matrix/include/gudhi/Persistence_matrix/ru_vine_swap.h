@@ -29,6 +29,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref RU_vine_swap, when vine swappes are not enabled.
  */
@@ -41,6 +43,8 @@ struct Dummy_ru_vine_swap {
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref RU_pairing, when the barcode is not stored.
  */
@@ -53,6 +57,9 @@ struct Dummy_ru_vine_pairing {
 };
 
 /**
+ * @class RU_vine_swap ru_vine_swap.h gudhi/Persistence_matrix/ru_vine_swap.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the vine swaps for @ref RU_matrix.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -64,9 +71,9 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
                                             >::type 
 {
  public:
-  using index = typename Master_matrix::index;          /**< MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;    /**< IDIdx index type. */
-  using pos_index = typename Master_matrix::pos_index;  /**< PosIdx index type. */
+  using index = typename Master_matrix::index;          /**< @ref MatIdx index type. */
+  using id_index = typename Master_matrix::id_index;    /**< @ref IDIdx index type. */
+  using pos_index = typename Master_matrix::pos_index;  /**< @ref PosIdx index type. */
 
   /**
    * @brief Default constructor.
@@ -89,7 +96,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param position PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -102,7 +109,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
    * 
-   * @param position PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -126,7 +133,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   // only usefull when simplex id does not corresponds to position, so feels kinda useless most of the time...
   // TODO: as it takes up some non trivial memory, see if this should not be optional
   // or only remember the positions with a difference. but then a map is needed, ie find instead of [].
-  std::vector<id_index> positionToRowIdx_;  /**< Map from PosIdx index to row index. */
+  std::vector<id_index> positionToRowIdx_;  /**< Map from @ref PosIdx index to row index. */
 
  private:
   using RUP = typename std::conditional<Master_matrix::Option_list::has_column_pairings, 

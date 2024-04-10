@@ -33,6 +33,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Unordered_set_column unordered_set_column.h gudhi/Persistence_matrix/columns/unordered_set_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on an unordered set structure. The cells are not ordered, but only non-zero values
@@ -981,6 +984,8 @@ inline bool Unordered_set_column<Master_matrix, Cell_constructor>::_multiply_and
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Unordered_set_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Unordered_set_column.

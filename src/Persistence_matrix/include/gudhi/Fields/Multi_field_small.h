@@ -18,9 +18,15 @@
 #include <numeric>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
 //productOfAllCharacteristics_ has to fit in an unsigned int, ie, productOfAllCharacteristics_ < 4294967295
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 template<unsigned int minimum, unsigned int maximum>
 class Multi_field_element_with_small_characteristics {
 public:
@@ -490,7 +496,7 @@ inline constexpr bool Multi_field_element_with_small_characteristics<minimum,max
 	return true;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_MULTI_SMALL_H_

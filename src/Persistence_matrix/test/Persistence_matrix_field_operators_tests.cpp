@@ -17,10 +17,10 @@
 #include "gudhi/Fields/Multi_field_operators.h"
 #include "gudhi/Fields/Multi_field_small_operators.h"
 
-using Gudhi::persistence_matrix::Z2_field_operators;
-using Gudhi::persistence_matrix::Zp_field_operators;
-using Gudhi::persistence_matrix::Multi_field_operators;
-using Gudhi::persistence_matrix::Multi_field_operators_with_small_characteristics;
+using Gudhi::persistence_fields::Z2_field_operators;
+using Gudhi::persistence_fields::Zp_field_operators;
+using Gudhi::persistence_fields::Multi_field_operators;
+using Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics;
 
 template<class Z2>
 void test_z2_standart_field_operators(Z2& op)

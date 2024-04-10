@@ -17,8 +17,14 @@
 #include <limits.h>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 template<typename Unsigned_integer_type = unsigned int, class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Zp_field_operators {
 public:
@@ -176,7 +182,7 @@ private:
 	}
 };
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_ZP_OPERATOR_H_

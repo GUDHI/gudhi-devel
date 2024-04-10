@@ -32,6 +32,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Naive_vector_column naive_vector_column.h gudhi/Persistence_matrix/columns/naive_vector_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on a vector structure. The cells are always ordered by row index and only non-zero values
@@ -1123,6 +1126,8 @@ inline bool Naive_vector_column<Master_matrix, Cell_constructor>::_multiply_and_
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Naive_vector_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Naive_vector_column.

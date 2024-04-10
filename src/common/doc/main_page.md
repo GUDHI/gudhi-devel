@@ -383,6 +383,31 @@
  </tr>
 </table>
 
+### Persistence Matrix
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "3DTorus_poch.png"
+    </td>
+    <td width="50%">
+    Matrix structure for filtered complexes with multiple functionnalities related to persistence homology,
+    such as representative cycles computation or vineyards.
+    TODO: picture
+    </td>
+    <td width="15%">
+      <b>Author:</b> Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref persistence_matrix
+    </td>
+ </tr>
+</table>
+
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
 
 ### Bottleneck distance

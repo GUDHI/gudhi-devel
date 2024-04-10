@@ -19,7 +19,7 @@ using Gudhi::persistence_matrix::Column_types;
 using Gudhi::persistence_matrix::Matrix;
 using Gudhi::persistence_matrix::Column_indexation_types;
 
-using Zp = Gudhi::persistence_matrix::Zp_field_operators<> ;
+using Zp = Gudhi::persistence_fields::Zp_field_operators<> ;
 
 template<bool is_z2_only, Column_types col_type, bool rem_col, bool swaps>
 struct Base_options{

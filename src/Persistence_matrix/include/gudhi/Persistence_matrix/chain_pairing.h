@@ -23,6 +23,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Chain_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
@@ -34,6 +36,9 @@ struct Dummy_chain_pairing {
 };
 
 /**
+ * @class Chain_pairing chain_pairing.h gudhi/Persistence_matrix/chain_pairing.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the barcode for @ref Chain_matrix if the option was enabled.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -87,7 +92,7 @@ class Chain_pairing
   using pos_index = typename Master_matrix::pos_index;
 
   barcode_type barcode_;        /**< Bar container. */
-  dictionnary_type indexToBar_; /**< Map from MatIdx index to bar index. */
+  dictionnary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
   pos_index nextPosition_;      /**< Next relative position in the filtration. */
 };
 

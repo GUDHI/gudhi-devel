@@ -25,7 +25,10 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @brief A basic matrix structure allowing to easily manipulate and access entire columns and rows,
+ * @class Base_matrix base_matrix.h gudhi/Persistence_matrix/base_matrix.h
+ * @ingroup persistence_matrix
+ *
+ * @brief A @ref basematrix "basic matrix" structure allowing to easily manipulate and access entire columns and rows,
  * but not individual cells.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -116,7 +119,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param column Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value. 
-   * @param columnIndex MatIdx index to which the column has to be inserted.
+   * @param columnIndex @ref MatIdx index to which the column has to be inserted.
    */
   template <class Container_type = container_type>
   void insert_column(const Container_type& column, index columnIndex);
@@ -131,14 +134,14 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   template <class Boundary_type>
   void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
   /**
-   * @brief Returns the column at the given MatIdx index.
+   * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    *
    * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling `get_column` between column or row swaps, otherwise the benefits
    * of the the lazyness is lost.
    * 
-   * @param columnIndex MatIdx index of the column to return.
+   * @param columnIndex @ref MatIdx index of the column to return.
    * @return Reference to the column.
    */
   Column_type& get_column(index columnIndex);
@@ -165,7 +168,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * If @ref has_row_access is also true, the deleted column cells are also automatically removed from their 
    * respective rows.
    * 
-   * @param columnIndex MatIdx index of the column to remove.
+   * @param columnIndex @ref MatIdx index of the column to remove.
    */
   void remove_column(index columnIndex);
   /**
@@ -208,8 +211,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
-   * @param sourceColumn Either a cell range or the MatIdx index of the column to add.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param sourceColumn Either a cell range or the @ref MatIdx index of the column to add.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
   void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
@@ -219,9 +222,9 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
-   * @param sourceColumn Either a cell range or the MatIdx index of the column to add.
+   * @param sourceColumn Either a cell range or the @ref MatIdx index of the column to add.
    * @param coefficient Value to multiply.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
   void multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, 
@@ -237,8 +240,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
    * @param coefficient Value to multiply.
-   * @param sourceColumn Either a cell range or the MatIdx index of the column to add.
-   * @param targetColumnIndex MatIdx index of the target column.
+   * @param sourceColumn Either a cell range or the @ref MatIdx index of the column to add.
+   * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
   void multiply_source_and_add_to(const Field_element_type& coefficient, 
@@ -248,20 +251,20 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   /**
    * @brief Zeroes the cell at the given coordinates.
    * 
-   * @param columnIndex MatIdx index of the column of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the cell.
    * @param rowIndex Row index of the row of the cell, see [TODO: description].
    */
   void zero_cell(index columnIndex, index rowIndex);
   /**
    * @brief Zeroes the column at the given index.
    * 
-   * @param columnIndex MatIdx index of the column to zero.
+   * @param columnIndex @ref MatIdx index of the column to zero.
    */
   void zero_column(index columnIndex);
   /**
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
-   * @param columnIndex MatIdx index of the column of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the cell.
    * @param rowIndex Row index of the row of the cell, see [TODO: description].
    * @return true If the cell has value zero.
    * @return false Otherwise.
@@ -270,7 +273,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   /**
    * @brief Indicates if the column at given index has value zero.
    * 
-   * @param columnIndex MatIdx index of the column.
+   * @param columnIndex @ref MatIdx index of the column.
    * @return true If the column has value zero.
    * @return false Otherwise.
    */

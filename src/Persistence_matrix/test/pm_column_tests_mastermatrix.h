@@ -42,8 +42,8 @@ using Gudhi::persistence_matrix::Dummy_row_access;
 using Gudhi::persistence_matrix::Pool_cell_constructor;
 using Gudhi::persistence_matrix::New_cell_constructor;
 
-using Zp = Gudhi::persistence_matrix::Zp_field_operators<>;
-using Z2 = Gudhi::persistence_matrix::Z2_field_operators;
+using Zp = Gudhi::persistence_fields::Zp_field_operators<>;
+using Z2 = Gudhi::persistence_fields::Z2_field_operators;
 
 template<class Options>
 struct Column_mini_matrix

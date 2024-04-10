@@ -14,8 +14,14 @@
 #include <utility>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Z2_field_element {
 public:
 	using element_type = unsigned int;
@@ -212,7 +218,7 @@ inline unsigned int Z2_field_element::get_value() const
 	return element_;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_Z2_H_

@@ -23,6 +23,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Row_access, if the row access is not enabled.
  */
@@ -37,6 +39,9 @@ struct Dummy_row_access
 };
 
 /**
+ * @class Row_access row_access.h gudhi/Persistence_matrix/columns/row_access.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the row access for the columns.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -45,8 +50,8 @@ template <class Master_matrix>
 class Row_access 
 {
  public:
-  using index = typename Master_matrix::index;                            /**< MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;                      /**< IDIdx index type. */
+  using index = typename Master_matrix::index;                            /**< @ref MatIdx index type. */
+  using id_index = typename Master_matrix::id_index;                      /**< @ref IDIdx index type. */
   using Cell_type = typename Master_matrix::Cell_type;                    /**< @ref Cell. */
   using Row_container_type = typename Master_matrix::row_container_type;  /**< Type of the row container. */
 
@@ -93,9 +98,9 @@ class Row_access
    */
   void update_cell(const Cell_type& cell);
   /**
-   * @brief Returns the MatIdx column index.
+   * @brief Returns the @ref MatIdx column index.
    * 
-   * @return The MatIdx column index.
+   * @return The @ref MatIdx column index.
    */
   index get_column_index() const;
 

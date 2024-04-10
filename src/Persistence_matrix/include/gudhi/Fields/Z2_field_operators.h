@@ -14,8 +14,14 @@
 #include <utility>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Z2_field_operators {
 public:
 	using element_type = bool;
@@ -121,7 +127,7 @@ public:
 	}
 };
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_Z2_OPERATORS_H_

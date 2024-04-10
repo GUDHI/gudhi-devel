@@ -16,8 +16,14 @@
 #include <limits.h>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 template<unsigned int characteristic>
 class Zp_field_element {
 public:
@@ -372,7 +378,7 @@ inline constexpr bool Zp_field_element<characteristic>::_is_prime()
 	return true;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_ZP_H_

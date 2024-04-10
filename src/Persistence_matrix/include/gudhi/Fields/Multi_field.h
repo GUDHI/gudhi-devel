@@ -17,8 +17,14 @@
 #include <stdexcept>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 template<unsigned int minimum, unsigned int maximum>
 class Multi_field_element {
 public:
@@ -416,7 +422,7 @@ inline constexpr bool Multi_field_element<minimum,maximum>::_is_prime(const int 
 	return true;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_MULTI_H_

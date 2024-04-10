@@ -17,8 +17,14 @@
 #include <stdexcept>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Shared_multi_field_element {
 public:
 	using element_type = mpz_class;
@@ -381,7 +387,7 @@ inline constexpr bool Shared_multi_field_element::_is_prime(const int p)
 	return true;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_MULTI_SHARED_H_

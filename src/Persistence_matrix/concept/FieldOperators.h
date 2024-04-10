@@ -17,10 +17,13 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-/** @brief Concept of the field operator classes needed for the class @ref Matrix.
+/** 
+ * @ingroup persistence_matrix
  *
- * Implementations of this concept are @ref Zp_field_operators, @ref Z2_field_operators,
- * @ref Multi_field_operators and @ref Multi_field_small_operators.
+ * @brief Concept of the field operator classes needed for the class @ref Matrix.
+ *
+ * Implementations of this concept are @ref Gudhi::persistence_fields::Zp_field_operators, @ref Gudhi::persistence_fields::Z2_field_operators,
+ * @ref Gudhi::persistence_fields::Multi_field_operators and @ref Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics.
  */
 class FieldOperators 
 {

@@ -24,6 +24,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Base_swap, when the column and row swaps are not enabled.
  */
@@ -38,6 +40,9 @@ struct Dummy_base_swap {
 };
 
 /**
+ * @class Base_swap base_swap.h gudhi/Persistence_matrix/base_swap.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the column and row swaps in @ref Base_matrix and @ref Boundary_matrix.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -48,7 +53,7 @@ class Base_swap {
  public:
   using matrix_type = typename Master_matrix::column_container_type;  /**< Column container type. */
   using index = typename Master_matrix::index;                        /**< Container index type. */
-  using id_index = typename Master_matrix::id_index;                  /**< IDIdx index type. */
+  using id_index = typename Master_matrix::id_index;                  /**< @ref IDIdx index type. */
 
   /**
    * @brief Default constructor.
@@ -77,8 +82,8 @@ class Base_swap {
    * @brief Swaps the two columns at given indices in the column container. Does not updates the column index value,
    * potentially stored in the cells. This will be done when calling `_orderRows()`.
    * 
-   * @param columnIndex1 First MatIdx column index.
-   * @param columnIndex2 Second MatIdx column index.
+   * @param columnIndex1 First @ref MatIdx column index.
+   * @param columnIndex2 Second @ref MatIdx column index.
    */
   void swap_columns(index columnIndex1, index columnIndex2);
   /**

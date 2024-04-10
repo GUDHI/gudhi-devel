@@ -20,13 +20,13 @@
 #include "gudhi/Fields/Multi_field_shared.h"
 #include "gudhi/Fields/Multi_field_small_shared.h"
 
-using Gudhi::persistence_matrix::Z2_field_element;
-using Gudhi::persistence_matrix::Zp_field_element;
-using Gudhi::persistence_matrix::Shared_Zp_field_element;
-using Gudhi::persistence_matrix::Multi_field_element;
-using Gudhi::persistence_matrix::Multi_field_element_with_small_characteristics;
-using Gudhi::persistence_matrix::Shared_multi_field_element;
-using Gudhi::persistence_matrix::Shared_multi_field_element_with_small_characteristics;
+using Gudhi::persistence_fields::Z2_field_element;
+using Gudhi::persistence_fields::Zp_field_element;
+using Gudhi::persistence_fields::Shared_Zp_field_element;
+using Gudhi::persistence_fields::Multi_field_element;
+using Gudhi::persistence_fields::Multi_field_element_with_small_characteristics;
+using Gudhi::persistence_fields::Shared_multi_field_element;
+using Gudhi::persistence_fields::Shared_multi_field_element_with_small_characteristics;
 
 template<class Z2>
 void test_z2_standart_field_constructors(){

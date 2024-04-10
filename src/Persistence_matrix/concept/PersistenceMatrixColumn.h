@@ -17,7 +17,10 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-/** @brief Concept of the column classes used by the @ref Matrix class.
+/** 
+ * @ingroup persistence_matrix
+ *
+ * @brief Concept of the column classes used by the @ref Matrix class.
  *
  * Implementations of this concept are @ref Heap_column, @ref List_column, @ref Vector_column, @ref Naive_vector_column
  * @ref Set_column, @ref Unordered_set_column, @ref PersistenceMatrixColumn and @ref Intrusive_set_column.
@@ -52,8 +55,8 @@ class PersistenceMatrixColumn :
   using Cell_constructor = unspecified;       /**< @ref Cell factory. */
   using Field_operators = unspecified;        /**< Follows the @ref FieldOperators concept. */
   using Field_element_type = unspecified;     /**< Type of a field element. */
-  using index = unspecified;                  /**< Type of MatIdx index. */
-  using id_index = unspecified;               /**< Type of IDIdx index. */
+  using index = unspecified;                  /**< Type of @ref MatIdx index. */
+  using id_index = unspecified;               /**< Type of @ref IDIdx index. */
   using dimension_type = unspecified;         /**< Type for dimension value. */
   using Cell = unspecified;                   /**< @ref Cell. */
   using Column_type = unspecified;            /**< Type of cell container. */
@@ -94,7 +97,7 @@ class PersistenceMatrixColumn :
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @tparam Row_container_type Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row_type>.
-   * @param columnIndex MatIdx column index that should be specified to the cells.
+   * @param columnIndex @ref MatIdx column index that should be specified to the cells.
    * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
    * @param operators Pointer to the field operators.
@@ -129,7 +132,7 @@ class PersistenceMatrixColumn :
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @tparam Row_container_type Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row_type>.
-   * @param columnIndex MatIdx column index that should be specified to the cells.
+   * @param columnIndex @ref MatIdx column index that should be specified to the cells.
    * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
@@ -164,7 +167,7 @@ class PersistenceMatrixColumn :
    * @tparam Row_container_type  Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row_type>.
    * @param column Column to copy.
-   * @param columnIndex MatIdx column index of the new column once copied.
+   * @param columnIndex @ref MatIdx column index of the new column once copied.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access.
    * @param operators  Pointer to the field operators.
    * If null pointer, the pointer in @p column is choosen instead.
@@ -227,12 +230,12 @@ class PersistenceMatrixColumn :
    * @brief Reorders the column with the given map of row indices. Also changes the column index stored in the
    * cells if row access is enabled and @p columnIndex is not -1.
    *
-   * Only useful for base and boundary matrices using lazy swaps.
+   * Only useful for base and @ref boundarymatrix "boundary matrices" using lazy swaps.
    * 
    * @tparam Map_type Map with an `at` method.
    * @param valueMap Map such that `valueMap.at(i)` indicates the new row index of the cell
    * at current row index `i`.
-   * @param columnIndex New MatIdx column index of the column. If -1, the index does not change. Ignored if
+   * @param columnIndex New @ref MatIdx column index of the column. If -1, the index does not change. Ignored if
    * the row access is not enabled. Default value: -1.
    */
   template <class Map_type>
@@ -240,14 +243,14 @@ class PersistenceMatrixColumn :
   /**
    * @brief Zeros/empties the column.
    * 
-   * Only useful for base and boundary matrices. Used in `zero_column` and in the reduction algorithm
+   * Only useful for base and @ref boundarymatrix "boundary matrices". Used in `zero_column` and in the reduction algorithm
    * for the persistence barcode.
    */
   void clear();
   /**
    * @brief Zeros the cell at given row index.
    * 
-   * Only useful for base and boundary matrices. Used in `zero_cell` and during vine swaps.
+   * Only useful for base and @ref boundarymatrix "boundary matrices". Used in `zero_cell` and during vine swaps.
    *
    * @warning For @ref Vector_column, do not clear a cell that was already at zero or the results of @ref size and
    * @ref is_empty will be wrong.
@@ -259,7 +262,7 @@ class PersistenceMatrixColumn :
   /**
    * @brief Returns the row index of the pivot. If the column does not have a pivot, returns -1.
    *
-   * Only useful for boundary and chain matrices.
+   * Only useful for boundary and @ref chainmatrix "chain matrices".
    * 
    * @return Row index of the pivot or -1.
    */
@@ -269,7 +272,7 @@ class PersistenceMatrixColumn :
    *
    * Has to have value 1 if \f$ Z_2 \f$ coefficients are used.
    *
-   * Only useful for boundary and chain matrices.
+   * Only useful for boundary and @ref chainmatrix "chain matrices".
    * 
    * @return The value of the pivot or 0.
    */

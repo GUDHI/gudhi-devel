@@ -27,6 +27,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Default death comparator. Simply assumes that two positive paired columns are never swapped. Which is true
  * for the use case in zigzag persistence for example.
  * 
@@ -34,13 +36,15 @@ namespace persistence_matrix {
  * @param columnIndex2 Second column index.
  * @return false 
  */
-static constexpr bool _no_G_death_comparator([[maybe_unused]] unsigned int columnIndex1,
-                                             [[maybe_unused]] unsigned int columnIndex2) 
+constexpr bool _no_G_death_comparator([[maybe_unused]] unsigned int columnIndex1,
+                                      [[maybe_unused]] unsigned int columnIndex2) 
 {
   return false;
 }
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Chain_vine_swap, when vine swappes are not enabled.
  */
@@ -56,6 +60,8 @@ struct Dummy_chain_vine_swap {
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Chain_barcode_swap, when the barcode is not stored.
  */
@@ -66,6 +72,8 @@ struct Dummy_chain_vine_pairing {
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the barcode for @ref Chain_vine_swap.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -74,8 +82,8 @@ template <typename Master_matrix>
 class Chain_barcode_swap : public Chain_pairing<Master_matrix> 
 {
  public:
-  using id_index = typename Master_matrix::id_index;    /**< IDIdx index type. */
-  using pos_index = typename Master_matrix::pos_index;  /**< PosIdx index type. */
+  using id_index = typename Master_matrix::id_index;    /**< @ref IDIdx index type. */
+  using pos_index = typename Master_matrix::pos_index;  /**< @ref PosIdx index type. */
   using CP = Chain_pairing<Master_matrix>;
 
   /**
@@ -214,6 +222,9 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
 };
 
 /**
+ * @class Chain_vine_swap chain_vine_swap.h gudhi/Persistence_matrix/chain_vine_swap.h
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the vine swaps for @ref Chain_matrix.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -225,9 +236,9 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
                                                >::type 
 {
  public:
-  using index = typename Master_matrix::index;                        /**< MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;                  /**< IDIdx index type. */
-  using pos_index = typename Master_matrix::pos_index;                /**< PosIdx index type. */
+  using index = typename Master_matrix::index;                        /**< @ref MatIdx index type. */
+  using id_index = typename Master_matrix::id_index;                  /**< @ref IDIdx index type. */
+  using pos_index = typename Master_matrix::pos_index;                /**< @ref PosIdx index type. */
   using matrix_type = typename Master_matrix::column_container_type;  /**< Column container type. */
   using Column_type = typename Master_matrix::Column_type;            /**< Column type. */
   typedef bool (*EventCompFuncPointer)(pos_index, pos_index);         /**< Pointer type for birth/death comparators. */
@@ -240,11 +251,11 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * @brief Constructor storing the given comparators.
    * 
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
-   * @param birthComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
    * two negative columns.
-   * @param deathComparator Method taking two PosIdx indices as input and returning true if and only if
+   * @param deathComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the death associated to the first position is strictly less than death associated to
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns. Default value: @ref _no_G_death_comparator.
@@ -269,10 +280,10 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param columnIndex1 MatIdx index of the first face.
-   * @param columnIndex2 MatIdx index of the second face. It is assumed that the PosIdx of both only differs by one.
-   * @return Let pos1 be the PosIdx index of @p columnIndex1 and pos2 be the PosIdx index of @p columnIndex2.
-   * The method returns the MatIdx of the column which has now, after the swap, the PosIdx max(pos1, pos2).
+   * @param columnIndex1 @ref MatIdx index of the first face.
+   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @return Let pos1 be the @ref PosIdx index of @p columnIndex1 and pos2 be the @ref PosIdx index of @p columnIndex2.
+   * The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
    */
   index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);
   /**
@@ -283,10 +294,10 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * \f$ F' \f$ has to be a valid filtration.
    * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
    * 
-   * @param columnIndex1 MatIdx index of the first face.
-   * @param columnIndex2 MatIdx index of the second face. It is assumed that the PosIdx of both only differs by one.
-   * @return Let pos1 be the PosIdx index of @p columnIndex1 and pos2 be the PosIdx index of @p columnIndex2.
-   * The method returns the MatIdx of the column which has now, after the swap, the PosIdx max(pos1, pos2).
+   * @param columnIndex1 @ref MatIdx index of the first face.
+   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @return Let pos1 be the @ref PosIdx index of @p columnIndex1 and pos2 be the @ref PosIdx index of @p columnIndex2.
+   * The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
    */
   index vine_swap(index columnIndex1, index columnIndex2);
 

@@ -32,6 +32,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Set_column set_column.h gudhi/Persistence_matrix/columns/set_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on a set structure. The cells are always ordered by row index and only non-zero values
@@ -994,6 +997,8 @@ inline bool Set_column<Master_matrix, Cell_constructor>::_multiply_and_add(const
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Set_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Set_column.

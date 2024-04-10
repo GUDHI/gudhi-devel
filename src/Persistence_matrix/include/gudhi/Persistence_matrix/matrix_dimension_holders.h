@@ -25,6 +25,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Matrix_max_dimension_holder or @ref Matrix_all_dimension_holder, when the maximal
  * dimension of a matrix is not stored.
@@ -38,6 +40,8 @@ struct Dummy_matrix_dimension_holder {
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
  * face removal is not enabled.
  * 
@@ -98,6 +102,8 @@ class Matrix_max_dimension_holder
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
  * face removal is enabled.
  * 

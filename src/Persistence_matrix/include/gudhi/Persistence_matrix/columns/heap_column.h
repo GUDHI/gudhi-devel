@@ -31,6 +31,9 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Heap_column heap_column.h gudhi/Persistence_matrix/columns/heap_column.h
+ * @ingroup persistence_matrix
+ *
  * @brief Column class following the @ref PersistenceMatrixColumn concept. Not compatible with row access.
  *
  * Column based on a heap structure. The heap is represented as a vector sorted as a heap. The top of the heap is
@@ -1055,6 +1058,8 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Heap_column.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Heap_column.

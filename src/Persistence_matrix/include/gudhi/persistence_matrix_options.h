@@ -23,34 +23,41 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief List of column types.
  */
 enum Column_types { 
-  LIST,           /**< Underlying container is a std::list<Cell>. */
-  SET,            /**< Underlying container is a std::set<Cell>. */
-  HEAP,           /**< Underlying container is a std::vector<Cell> ordered as a heap.
-                       Is not compatible with row access and column compression */
-  VECTOR,         /**< Underlying container is a std::vector<Cell> with a lazy removal method. */
-  NAIVE_VECTOR,   /**< Underlying container is a std::vector<Cell>. */
-  UNORDERED_SET,  /**< Underlying container is a std::unordered_set<Cell>. */
-  INTRUSIVE_LIST, /**< Underlying container is a boost::intrusive::list<Cell>. */
-  INTRUSIVE_SET   /**< Underlying container is a boost::intrusive::set<Cell>. */
+  LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Cell>. */
+  SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Cell>. */
+  HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Cell> ordered as a heap.
+                       Is not compatible with row access and column compression. */
+  VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Cell> with a lazy removal method. */
+  NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Cell>. */
+  UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Cell>. */
+  INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Cell>. */
+  INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Cell>. */
 };
 
 /**
- * @brief List if indexation schemes. See [TODO: ref to introduction] for more details about the meaning
+ * @ingroup persistence_matrix
+ *
+ * @brief List if indexation schemes. See @ref mp_indexation "description of indexation schemes" for more details about the meaning
  * of the indexation types.
  */
 enum Column_indexation_types { 
-  CONTAINER,  /**< Default use of MatIdx indices. */
-  POSITION,   /**< All input and output MatIdx indices are replaced with PosIdx indices. */
-  IDENTIFIER  /**< All input and output MatIdx indices are replaced with IDIdx indices. */
+  CONTAINER,  /**< Default use of @ref MatIdx indices. */
+  POSITION,   /**< All input and output @ref MatIdx indices are replaced with @ref PosIdx indices. */
+  IDENTIFIER  /**< All input and output @ref MatIdx indices are replaced with @ref IDIdx indices. */
 };
 
 /**
+ * @struct Default_options persistence_matrix_options.h gudhi/persistence_matrix_options.h
+ * @ingroup persistence_matrix
+ *
  * @brief Default option structure for @ref Matrix class.
- * See [TODO: concept] for a more detailed description of the fields.
- * Produces a base matrix with no enabled option.
+ * See the @ref PersistenceMatrixOptions concept for a more detailed description of the fields.
+ * Produces a @ref basematrix "base matrix" with no enabled option.
  *
  * To create other matrix types, the easiest is to simply inherit from this structure and overwrite only the options
  * one is interested in.
@@ -63,7 +70,7 @@ enum Column_indexation_types {
  */
 template <Column_types col_type = Column_types::INTRUSIVE_SET, 
           bool is_z2_only = true,
-          class FieldOperators = Zp_field_operators<> >
+          class FieldOperators = persistence_fields::Zp_field_operators<> >
 struct Default_options 
 {
   using Field_coeff_operators = FieldOperators;
@@ -145,7 +152,7 @@ struct Multi_persistence_options : Default_options<column_type, true>
  */
 template <Column_types column_type = Column_types::INTRUSIVE_LIST, 
           bool is_z2_only = true,
-          class FieldOperators = Zp_field_operators<> >
+          class FieldOperators = persistence_fields::Zp_field_operators<> >
 struct Cohomology_persistence_options : Default_options<column_type, is_z2_only, FieldOperators> 
 {
   static const bool has_row_access = true;

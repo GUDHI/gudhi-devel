@@ -26,6 +26,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Cell_column_index, when the row access is disabled.
  */
@@ -43,6 +45,8 @@ struct Dummy_cell_column_index_mixin
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Empty structure.
  * Inheritated instead of @ref Cell_field_element, when @ref PersistenceMatrixOptions::is_z2 is true.
  */
@@ -60,9 +64,11 @@ struct Dummy_cell_field_element_mixin
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the column index access of a cell.
  * 
- * @tparam index MatIdx index type.
+ * @tparam index @ref MatIdx index type.
  */
 template <typename index>
 class Cell_column_index 
@@ -92,7 +98,7 @@ class Cell_column_index
   Cell_column_index(Cell_column_index&& cell) noexcept : columnIndex_(std::exchange(cell.columnIndex_, 0)){};
 
   /**
-   * @brief Returns the MatIdx column index stored in the cell.
+   * @brief Returns the @ref MatIdx column index stored in the cell.
    * 
    * @return Column index of the cell.
    */
@@ -117,6 +123,8 @@ class Cell_column_index
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Class managing the value access of a cell.
  * 
  * @tparam Field_element_type Type of a cell value.
@@ -180,6 +188,9 @@ class Cell_field_element
 };
 
 /**
+ * @class Cell cell_types.h gudhi/Persistence_matrix/columns/cell_types.h
+ * @ingroup persistence_matrix
+ *
  * @brief Matrix cell class. Stores by default only the row index it belongs to, but can also store its
  * column index when the row access is enabled, as well as its value when they are different from only 0 and 1.
  * Zero-valued cells are never explicited in the matrix.
@@ -306,6 +317,8 @@ class Cell : public Master_matrix::Cell_column_index_option,
 }  // namespace Gudhi
 
 /**
+ * @ingroup persistence_matrix
+ *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Cell.
  *
  * The cells are differentiated by their row indices only. For exemple, two cells with the same row index

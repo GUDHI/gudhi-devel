@@ -18,9 +18,15 @@
 #include <numeric>
 
 namespace Gudhi {
-namespace persistence_matrix {
+namespace persistence_fields {
 
 //productOfAllCharacteristics_ ^ 2 has to fit in an unsigned int
+/**
+ * @ingroup persistence_fields
+ *
+ * @brief TODO:
+ * 
+ */
 class Shared_multi_field_element_with_small_characteristics {
 public:
 	using element_type = unsigned int;
@@ -448,7 +454,7 @@ inline constexpr bool Shared_multi_field_element_with_small_characteristics::_is
 	return true;
 }
 
-} //namespace persistence_matrix
+} //namespace persistence_fields
 } //namespace Gudhi
 
 #endif  // MATRIX_FIELD_MULTI_SMALL_SHARED_H_
